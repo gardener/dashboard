@@ -42,12 +42,12 @@ const props = defineProps({
 
 const binding = toRef(props, 'binding')
 
-const credentialName = computed(() =>
-  bindingCredentialName(binding.value),
-)
+const credentialName = computed(() => {
+  return bindingCredentialName(binding.value)
+})
 
-const credentialKind = computed(() =>
-  bindingCredentialKind(binding.value),
-)
+const credentialKind = computed(() => {
+  return bindingCredentialKind(binding.value)
+})
 
 </script>

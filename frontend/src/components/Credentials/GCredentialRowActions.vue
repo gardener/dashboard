@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
       @click="onDelete"
     >
       <template #tooltip>
-        <span v-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
-        <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
+        <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
+        <span v-else-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
         <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
         <span v-else>Delete Secret</span>
       </template>

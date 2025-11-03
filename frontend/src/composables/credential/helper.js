@@ -18,17 +18,14 @@ export function isWorkloadIdentity (credential) {
 }
 
 export function credentialProviderType (credential) {
+  // TODO check for provider.extensions.gardener.cloud once wlids are supported
+  const PREFIX = 'provider.shoot.gardener.cloud/'
   const labels = credential?.metadata?.labels || {}
   for (const [key, value] of Object.entries(labels)) {
-    if (value !== 'true') {
-      continue
-    }
-    const [, type] = /^provider\.shoot\.gardener\.cloud\/(.+)$/.exec(key) || []
-    if (type) {
-      return type
+    if (value === 'true' && key.startsWith(PREFIX)) {
+      return key.slice(PREFIX.length)
     }
   }
-  return undefined
 }
 
 export function isDNSCredential ({ credential, dnsProviderTypes }) {

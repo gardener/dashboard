@@ -45,6 +45,7 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   })
 
   const credentialUsageCount = computed(() => {
+    // TODO: Add count for wlid once supported
     const name = credentialName.value
     const kind = credentialKind.value || 'Secret'
     const byProvider = providers => some(providers, ['secretName', name])

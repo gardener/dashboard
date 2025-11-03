@@ -113,7 +113,7 @@ function createProviderCredentials (type, options = {}) {
   if (typeWorkloadIdentity && secretNamepace === bindingNamespace) {
     // no workloadidenetity if referenced in other namespace
     const labels = {
-      [`provider.shoot.gardener.cloud/${type}`]: 'true',
+      [`provider.extensions.gardener.cloud/${type}`]: 'true',
     }
     workloadIdentity = {
       metadata: {

@@ -109,7 +109,7 @@ export const useCredentialStore = defineStore('credential', () => {
 
   async function createDnsCredential ({ secret }) {
     const { data } = await api.createDnsProviderCredential({ secret })
-    _updateCloudProviderCredential({ secret: data })
+    _updateCloudProviderCredential({ secret: data.secret })
     const name = data.secret.metadata.name
     appStore.setSuccess(`DNS Provider credential ${name} created`)
   }
@@ -148,20 +148,22 @@ export const useCredentialStore = defineStore('credential', () => {
   })
 
   const dnsCredentialList = computed(() => {
-    return [
+    const credentials = [
       ...Object.values(state.secrets),
       ...Object.values(state.workloadIdentities),
-    ].filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }),
-    ).filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
+    ]
+    return credentials
+      .filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }))
+      .filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
   })
 
-  const secretBindingList = computed(() =>
-    Object.values(state.secretBindings),
-  )
+  const secretBindingList = computed(() => {
+    return Object.values(state.secretBindings)
+  })
 
-  const credentialsBindingList = computed(() =>
-    Object.values(state.credentialsBindings),
-  )
+  const credentialsBindingList = computed(() => {
+    return Object.values(state.credentialsBindings)
+  })
 
   function getSecret ({ namespace, name }) {
     return get(state.secrets, [namespaceNameKey({ namespace, name })])

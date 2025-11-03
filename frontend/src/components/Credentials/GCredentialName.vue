@@ -77,7 +77,7 @@ const resourceHash = computed(() => {
   return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
 })
 
-const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceName.value)
+const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid.value)
 
 </script>
 

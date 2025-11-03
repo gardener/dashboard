@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     ref="container"
     fluid
     class="container-size"
-    @click="highlightedUid = null"
+    @click="resetHighlighted"
   >
     <v-card class="ma-3">
       <g-toolbar
@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-binding-row-infra
             :ref="itemRef"
             :item="item"
-            :highlighted="isHighlighted(item.binding)"
+            :highlighted="isHighlightedBinding(item.binding)"
             :headers="infraCredentialTableHeaders"
             @update-infra-binding="onUpdateInfraBinding"
             @delete-infra-binding="onDeleteInfraBinding"
@@ -231,7 +231,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-credential-row-dns
             :ref="itemRef"
             :item="item"
-            :highlighted="isHighlighted(item.credential)"
+            :highlighted="isHighlightedCredential(item.credential)"
             :headers="dnsCredentialTableHeaders"
             @update-dns-credential="onUpdateDnsCredential"
             @delete-dns-credential="onDeleteDnsCredential"
@@ -318,7 +318,8 @@ export default {
   inject: ['mergeProps'],
   setup () {
     const hashParams = useUrlSearchParams('hash-params')
-    const highlightedUid = toRef(hashParams, 'credential-uid')
+    const highlightedCredentialUid = toRef(hashParams, 'credential-uid')
+    const highlightedBindingUid = toRef(hashParams, 'binding-uid')
 
     const credentialStore = useCredentialStore()
     const {
@@ -340,7 +341,8 @@ export default {
     })
 
     return {
-      highlightedUid,
+      highlightedCredentialUid,
+      highlightedBindingUid,
       infrastructureBindingList,
       dnsCredentialList,
       itemHeight,
@@ -498,22 +500,20 @@ export default {
     namespace () {
       this.reset()
     },
-    highlightedUid: {
+    highlightedCredentialUid: {
       handler (value) {
         setTimeout(() => {
           // Cannot start scrolling before the table is rendered
-          const scrollToItem = (items, tableRef) => {
-            const itemIndex = findIndex(items, item => {
-              const uid = item.binding?.metadata.uid ?? item.credential?.metadata.uid
-              return uid === value
-            })
-            if (itemIndex !== -1) {
-              tableRef.scrollToIndex(itemIndex)
-            }
-          }
-
-          scrollToItem(this.infrastructureCredentialSortedItems, this.$refs.infraCredentialTableRef)
-          scrollToItem(this.dnsCredentialSortedItems, this.$refs.dnsCredentialTableRef)
+          this.scrollToItem(value, this.dnsCredentialSortedItems, this.$refs.dnsCredentialTableRef)
+        }, 100)
+      },
+      immediate: true,
+    },
+    highlightedBindingUid: {
+      handler (value) {
+        setTimeout(() => {
+          // Cannot start scrolling before the table is rendered
+          this.scrollToItem(value, this.infrastructureCredentialSortedItems, this.$refs.infraCredentialTableRef)
         }, 100)
       },
       immediate: true,
@@ -536,6 +536,7 @@ export default {
         credential,
         credentialDetails,
         credentialKind,
+        providerType,
       } = composable
 
       return {
@@ -546,7 +547,8 @@ export default {
         isOrphanedBinding: unref(isOrphanedBinding),
         credentialNamespace: unref(credentialNamespace),
         credentialDetails: unref(credentialDetails),
-        credentialKind,
+        credentialKind: unref(credentialKind),
+        providerType: unref(providerType),
       }
     },
     onAddInfraBinding (providerType) {
@@ -626,9 +628,9 @@ export default {
         case 'name':
           return (binding ?? credential).metadata.name
         case 'infrastructure':
-          return bindingProviderType(binding)
+          return item.providerType
         case 'dnsProvider':
-          return credentialProviderType(credential)
+          return item.providerType
         case 'kind':
           return `${credential.kind} (${credentialKind.value})`
         case 'credentialUsageCount':
@@ -640,21 +642,24 @@ export default {
       const tableKeys = mapKeys(sortableTableHeaders, ({ key }) => key)
       return mapValues(tableKeys, () => () => 0)
     },
-    isHighlighted (credential) {
-      return this.highlightedUid && this.highlightedUid === credential.metadata.uid
+    isHighlightedCredential (credential) {
+      return this.highlightedCredentialUid && this.highlightedCredentialUid === credential.metadata.uid
+    },
+    isHighlightedBinding (binding) {
+      return this.highlightedBindingUid && this.highlightedBindingUid === binding.metadata.uid
     },
     customFilter (_, query, item) {
       const {
         credentialDetails,
         credential,
         binding,
+        providerType,
       } = item.raw
 
       const detailValues = map(credentialDetails, 'value')
-
       const values = [
         (binding ?? credential).metadata.name,
-        credentialProviderType(credential),
+        providerType,
         credential?.kind,
         binding?.kind,
         ...detailValues,
@@ -668,7 +673,22 @@ export default {
       })
     },
     getItemKey (item, fallback) {
-      return item.raw?.binding?.metadata.uid ?? item.raw?.credential?.metadata.uid ?? fallback
+      const bindingUid = item.raw?.binding?.metadata?.uid
+      const credentialUid = item.raw?.credential?.metadata?.uid
+      return bindingUid ?? credentialUid ?? fallback
+    },
+    resetHighlighted () {
+      this.highlightedCredentialUid = null
+      this.highlightedBindingUid = null
+    },
+    scrollToItem (itemUid, items, tableRef) {
+      const itemIndex = findIndex(items, item => {
+        const uid = item.binding?.metadata.uid ?? item.credential?.metadata.uid
+        return uid === itemUid
+      })
+      if (itemIndex !== -1) {
+        tableRef.scrollToIndex(itemIndex)
+      }
     },
   },
 }

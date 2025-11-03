@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
-        :provider-type="credentialProviderType(item.credential)"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         class="py-1"
         :credential="item.credential"
         :shared="item.isSharedBinding"
-        :provider-type="credentialProviderType(item.credential)"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -56,8 +56,6 @@ import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialD
 import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
-
-import { credentialProviderType } from '@/composables/credential/helper'
 
 import { mapTableHeader } from '@/utils'
 

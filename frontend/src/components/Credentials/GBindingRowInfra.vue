@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="item.isSharedBinding"
           :namespace="item.credentialNamespace"
         />
-        <g-orphaned-credential-icon
+        <g-orphaned-binding-icon
           v-if="item.isOrphanedBinding"
           :binding="item.binding"
         />
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
         extended
-        :provider-type="bindingProviderType(item.binding)"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         class="py-1"
         :credential="item.credential"
         :shared="item.isSharedBinding"
-        :provider-type="bindingProviderType(item.binding)"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -67,9 +67,7 @@ import GBindingRowActions from '@/components/Credentials/GBindingRowActions'
 import GBindingIcon from '@/components/Credentials/GBindingIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
-import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
-
-import { bindingProviderType } from '@/composables/credential/helper'
+import GOrphanedBindingIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -96,9 +94,9 @@ const {
 
 const emit = defineEmits(['updateInfraBinding', 'deleteInfraBinding'])
 
-const selectedHeaders = computed(() =>
-  mapTableHeader(headers.value, 'selected'),
-)
+const selectedHeaders = computed(() => {
+  return mapTableHeader(headers.value, 'selected')
+})
 
 function onUpdate (value) {
   emit('updateInfraBinding', value)

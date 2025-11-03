@@ -432,11 +432,11 @@ export default {
       if (this.isCreateMode) {
         this.createSecretManifest()
 
-        if (!this.isDnsProvider) {
+        if (this.isDnsProvider) {
+          this.secretProviderType = this.providerType
+        } else {
           this.createBindingManifest()
           this.bindingProviderType = this.providerType
-        } else {
-          this.secretProviderType = this.providerType
         }
 
         this.name = `my-${this.providerType}-secret`

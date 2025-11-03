@@ -45,45 +45,45 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
 
   // Resource
-  const resourceName = computed(() =>
-    get(binding.value, ['metadata', 'name']),
-  )
-  const resourceNamespace = computed(() =>
-    get(binding.value, ['metadata', 'namespace']),
-  )
-  const resourceUid = computed(() =>
-    get(binding.value, ['metadata', 'uid']),
-  )
-  const resourceKind = computed(() =>
-    get(binding.value, ['kind']),
-  )
+  const resourceName = computed(() => {
+    return get(binding.value, ['metadata', 'name'])
+  })
+  const resourceNamespace = computed(() => {
+    return get(binding.value, ['metadata', 'namespace'])
+  })
+  const resourceUid = computed(() => {
+    return get(binding.value, ['metadata', 'uid'])
+  })
+  const resourceKind = computed(() => {
+    return get(binding.value, ['kind'])
+  })
 
   // Classification Flags
-  const isSharedBinding = computed(() =>
-    _isSharedBinding(binding.value),
-  )
-  const isSecretBinding = computed(() =>
-    _isSecretBinding(binding.value),
-  )
-  const isCredentialsBinding = computed(() =>
-    _isCredentialsBinding(binding.value),
-  )
-  const hasSecret = computed(() =>
-    isSecretBinding.value ||
-    (isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'Secret'),
-  )
-  const hasWorkloadIdentity = computed(() =>
-    isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'WorkloadIdentity',
-  )
-  const isInfrastructureBinding = computed(() =>
-    _isInfrastructureBinding({ binding: binding.value, infraProviderTypes: sortedProviderTypeList.value }),
-  )
-  const isMarkedForDeletion = computed(() =>
-    Boolean(binding.value?.metadata.deletionTimestamp),
-  )
-  const providerType = computed(() =>
-    _bindingProviderType(binding.value),
-  )
+  const isSharedBinding = computed(() => {
+    return _isSharedBinding(binding.value)
+  })
+  const isSecretBinding = computed(() => {
+    return _isSecretBinding(binding.value)
+  })
+  const isCredentialsBinding = computed(() => {
+    return _isCredentialsBinding(binding.value)
+  })
+  const hasSecret = computed(() => {
+    return isSecretBinding.value ||
+      (isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'Secret')
+  })
+  const hasWorkloadIdentity = computed(() => {
+    return isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'WorkloadIdentity'
+  })
+  const isInfrastructureBinding = computed(() => {
+    return _isInfrastructureBinding({ binding: binding.value, infraProviderTypes: sortedProviderTypeList.value })
+  })
+  const isMarkedForDeletion = computed(() => {
+    return Boolean(binding.value?.metadata.deletionTimestamp)
+  })
+  const providerType = computed(() => {
+    return _bindingProviderType(binding.value)
+  })
 
   // Credential References
   const bindingCredentialRef = computed(() => {
@@ -92,16 +92,16 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     }
     return undefined
   })
-  const credentialNamespace = computed(() =>
-    _credentialNamespace(binding.value),
-  )
-  const credentialName = computed(() =>
-    _credentialName(binding.value),
-  )
+  const credentialNamespace = computed(() => {
+    return _credentialNamespace(binding.value)
+  })
+  const credentialName = computed(() => {
+    return _credentialName(binding.value)
+  })
 
-  const credentialKind = computed(() =>
-    _credentialKind(binding.value),
-  )
+  const credentialKind = computed(() => {
+    return _credentialKind(binding.value)
+  })
 
   // Resolved Credential Object
   const credential = computed(() => {
@@ -122,63 +122,77 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   })
 
   // Usage & Orphan Detection
-  const hasOwnSecret = computed(() =>
-    hasSecret.value && credential.value !== undefined,
-  )
-  const hasOwnWorkloadIdentity = computed(() =>
-    hasWorkloadIdentity.value && credential.value !== undefined,
-  )
-  const isOrphanedBinding = computed(() =>
-    !isSharedBinding.value &&
-    !hasOwnSecret.value &&
-    !hasOwnWorkloadIdentity.value,
-  )
+  const hasOwnSecret = computed(() => {
+    return hasSecret.value && credential.value !== undefined
+  })
+  const hasOwnWorkloadIdentity = computed(() => {
+    return hasWorkloadIdentity.value && credential.value !== undefined
+  })
+  const isOrphanedBinding = computed(() => {
+    return !isSharedBinding.value &&
+      !hasOwnSecret.value &&
+      !hasOwnWorkloadIdentity.value
+  })
 
   const credentialUsageCount = computed(() => {
-    // count shoots referencing this binding by type
     if (!isInfrastructureBinding.value) {
       return 0
     }
     const name = binding.value?.metadata.name
-    const shoots = filter(shootList.value, ({ spec }) =>
-      isSecretBinding.value
-        ? spec.secretBindingName === name
-        : isCredentialsBinding.value
-          ? spec.credentialsBindingName === name
-          : false,
+
+    let bindingNameKey
+    if (isSecretBinding.value) {
+      bindingNameKey = 'secretBindingName'
+    } else if (isCredentialsBinding.value) {
+      bindingNameKey = 'credentialsBindingName'
+    } else {
+      return 0
+    }
+
+    const shoots = filter(
+      shootList.value,
+      ({ spec }) => get(spec, [bindingNameKey]) === name,
     )
     return shoots.length
   })
 
-  const bindingsWithSameCredential = computed(() =>
-    filter(
-      infrastructureBindingList.value,
-      other => {
-        if (other.metadata.uid === binding.value?.metadata.uid) {
-          return false
-        }
-        if (!_isSecretBinding(other) && !_isCredentialsBinding(other)) {
-          return false
-        }
-        const otherRef = _bindingCredentialRef(other)
-        return otherRef.namespace === bindingCredentialRef.value.namespace &&
-        otherRef.name === bindingCredentialRef.value.name &&
-        (otherRef.kind ?? 'Secret') === credentialKind.value
-      },
-    ),
-  )
+  const bindingsWithSameCredential = computed(() => {
+    const currentUid = binding.value?.metadata.uid
+    const currentRef = bindingCredentialRef.value
+    const currentKind = credentialKind.value
+
+    if (!currentRef) {
+      return []
+    }
+
+    return filter(infrastructureBindingList.value, other => {
+      if (other.metadata.uid === currentUid) {
+        return false
+      }
+      if (!_isSecretBinding(other) && !_isCredentialsBinding(other)) {
+        return false
+      }
+      const otherRef = _bindingCredentialRef(other)
+      const otherKind = otherRef.kind ?? 'Secret'
+      const selectedKind = currentKind ?? 'Secret'
+
+      return otherRef.namespace === currentRef.namespace &&
+        otherRef.name === currentRef.name &&
+        otherKind === selectedKind
+    })
+  })
 
   // Quotas & Lifecycles
-  const quotas = computed(() =>
-    (binding.value?.quotas || [])
+  const quotas = computed(() => {
+    return (binding.value?.quotas || [])
       .map(credentialStore.getQuota)
-      .filter(Boolean),
-  )
+      .filter(Boolean)
+  })
 
   const selfTerminationDays = computed(() => {
-    const findScope = scope =>
-      get(find(quotas.value, scope), ['spec', 'clusterLifetimeDays'])
-
+    const findScope = scope => {
+      return get(find(quotas.value, scope), ['spec', 'clusterLifetimeDays'])
+    }
     return (
       findScope({ spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } }) ||
       findScope({ spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })

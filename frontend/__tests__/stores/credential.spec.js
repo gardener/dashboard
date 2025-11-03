@@ -22,6 +22,7 @@ import find from 'lodash/find'
 const testNamespace = 'garden-test'
 const awsSecretBindingName = 'aws-secretbinding'
 const awsCredentialsBindingName = 'aws-credentialsbinding'
+const awsWlidCredentialsBindingName = 'aws-wlid-credentialsbinding'
 const newSecret = {
   apiVersion: 'v1',
   kind: 'Secret',
@@ -63,7 +64,14 @@ describe('stores', () => {
           },
         }
       })
-      vi.spyOn(api, 'createCloudProviderCredential').mockImplementation(({ binding, secret }) => {
+      vi.spyOn(api, 'createDnsProviderCredential').mockImplementation(({ secret }) => {
+        return {
+          data: {
+            secret,
+          },
+        }
+      })
+      vi.spyOn(api, 'createInfraProviderCredential').mockImplementation(({ binding, secret }) => {
         return {
           data: {
             binding,
@@ -71,7 +79,8 @@ describe('stores', () => {
           },
         }
       })
-      vi.spyOn(api, 'deleteCloudProviderCredential').mockReturnValue()
+      vi.spyOn(api, 'deleteDnsProviderCredential').mockReturnValue()
+      vi.spyOn(api, 'deleteInfraProviderCredential').mockReturnValue()
       appStore = useAppStore()
       vi.spyOn(appStore, 'setSuccess')
       authzStore = useAuthzStore()
@@ -87,9 +96,11 @@ describe('stores', () => {
     afterEach(() => {
       appStore.setSuccess.mockClear()
       api.getCloudProviderCredentials.mockClear()
-      api.createCloudProviderCredential.mockClear()
+      api.createDnsProviderCredential.mockClear()
+      api.createInfraProviderCredential.mockClear()
       api.updateCloudProviderCredential.mockClear()
-      api.deleteCloudProviderCredential.mockClear()
+      api.deleteDnsProviderCredential.mockClear()
+      api.deleteInfraProviderCredential.mockClear()
     })
 
     it('should create a new credential store', () => {
@@ -179,10 +190,10 @@ describe('stores', () => {
         },
       }
 
-      await credentialStore.createCredential({ binding, secret })
+      await credentialStore.createInfraCredential({ binding, secret })
 
-      expect(api.createCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.createCloudProviderCredential).toBeCalledWith({ binding, secret })
+      expect(api.createInfraProviderCredential).toBeCalledTimes(1)
+      expect(api.createInfraProviderCredential).toBeCalledWith({ binding, secret })
 
       const newCredentialsBinding = find(credentialStore.infrastructureBindingList, { kind: 'CredentialsBinding', metadata: binding.metadata })
       expect(newCredentialsBinding.metadata.namespace).toEqual(testNamespace)
@@ -201,44 +212,44 @@ describe('stores', () => {
         },
       }
 
-      await credentialStore.createCredential({ secret })
+      await credentialStore.createDnsCredential({ secret })
 
-      expect(api.createCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.createCloudProviderCredential).toBeCalledWith({ secret })
+      expect(api.createDnsProviderCredential).toBeCalledTimes(1)
+      expect(api.createDnsProviderCredential).toBeCalledWith({ secret })
 
       const newDnsCredential = find(credentialStore.dnsCredentialList, { metadata: { name: 'my-new-dns-secret' } })
       expect(newDnsCredential.metadata.labels['provider.shoot.gardener.cloud/aws-route53']).toBe('true')
     })
 
     it('should delete credential (secretbinding)', async () => {
-      await credentialStore.deleteCredential({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
+      await credentialStore.deleteInfraCredential({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
 
-      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
+      expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
-    it('should delete credential (credentialsbinding)', async () => {
-      await credentialStore.deleteCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
+    it('should delete credential (credentialsbinding/secret)', async () => {
+      await credentialStore.deleteInfraCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
 
-      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
+      expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
+      expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
+    })
+
+    it('should delete credential (credentialsbinding/workloadidentity)', async () => {
+      await credentialStore.deleteInfraCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsWlidCredentialsBindingName })
+
+      expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsWlidCredentialsBindingName })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
     it('should delete credential (dns secret)', async () => {
-      await credentialStore.deleteCredential({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
+      await credentialStore.deleteDnsCredential({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
 
-      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
-      expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
-    })
-
-    it('should delete credential (workloadidentity)', async () => {
-      await credentialStore.deleteCredential({ credentialKind: 'WorkloadIdentity', credentialNamespace: testNamespace, credentialName: 'aws-wlid-workloadidentity' })
-
-      expect(api.deleteCloudProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteCloudProviderCredential).toBeCalledWith({ credentialKind: 'WorkloadIdentity', credentialNamespace: testNamespace, credentialName: 'aws-wlid-workloadidentity' })
+      expect(api.deleteDnsProviderCredential).toBeCalledTimes(1)
+      expect(api.deleteDnsProviderCredential).toBeCalledWith({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 

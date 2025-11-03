@@ -26,15 +26,22 @@ export async function list ({ user, params }) {
     client['security.gardener.cloud'].workloadidentities.list(namespace),
   ])
 
-  const hasProviderLabel = item => {
+  const hasShootProviderLabel = item => {
     const labels = item.metadata?.labels || {}
-    return Object.entries(labels).some(([key, value]) =>
-      key.startsWith('provider.shoot.gardener.cloud/') && value === 'true',
-    )
+    return Object.entries(labels).some(([key, value]) => {
+      return key.startsWith('provider.shoot.gardener.cloud/') && value === 'true'
+    })
   }
 
-  const providerSecrets = secrets.filter(hasProviderLabel)
-  const providerWorkloadIdentities = workloadIdentities.filter(hasProviderLabel)
+  const hasExtensionProviderLabel = item => {
+    const labels = item.metadata?.labels || {}
+    return Object.entries(labels).some(([key, value]) => {
+      return key.startsWith('provider.extensions.gardener.cloud/') && value === 'true'
+    })
+  }
+
+  const providerSecrets = secrets.filter(hasShootProviderLabel)
+  const providerWorkloadIdentities = workloadIdentities.filter(hasExtensionProviderLabel)
 
   const quotas = _
     .chain([
