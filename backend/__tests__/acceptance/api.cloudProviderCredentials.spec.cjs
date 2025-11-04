@@ -66,8 +66,9 @@ describe('api', function () {
       expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
-      expect(res.body.secrets).toHaveLength(1)
-      expect(res.body.secrets[0].metadata.name).toBe('dns-secret')
+      expect(res.body.secrets).toHaveLength(2)
+      expect(res.body.secrets[0].metadata.name).toBe('secret3')
+      expect(res.body.secrets[1].metadata.name).toBe('dns-secret')
       expect(Array.isArray(res.body.workloadIdentities)).toBe(true)
       expect(res.body.secretBindings).toHaveLength(3)
       expect(res.body).toMatchSnapshot()
@@ -165,7 +166,7 @@ describe('api', function () {
           name: 'new-dns-secret',
           namespace,
           labels: {
-            'provider.shoot.gardener.cloud/aws-route53': 'true',
+            'dashboard.gardener.cloud/dnsProviderType': 'aws-route53',
           },
         },
         data: {

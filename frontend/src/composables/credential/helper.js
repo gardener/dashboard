@@ -19,13 +19,24 @@ export function isWorkloadIdentity (credential) {
 
 export function credentialProviderType (credential) {
   // TODO check for provider.extensions.gardener.cloud once wlids are supported
-  const PREFIX = 'provider.shoot.gardener.cloud/'
-  const labels = credential?.metadata?.labels || {}
-  for (const [key, value] of Object.entries(labels)) {
-    if (value === 'true' && key.startsWith(PREFIX)) {
-      return key.slice(PREFIX.length)
-    }
+  const labels = credential?.metadata?.labels
+  if (!labels) {
+    return undefined
   }
+
+  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
+  const PREFIX = 'provider.shoot.gardener.cloud/'
+
+  // for DNS credentials: prefer the dashboard-specific label
+  if (DASHBOARD in labels) {
+    return get(labels, [DASHBOARD])
+  }
+  // Or find the first shoot provider label set to "true"
+  const key = Object.keys(labels).find(k => {
+    return k.startsWith(PREFIX) && get(labels, [k]) === 'true'
+  })
+
+  return key ? key.slice(PREFIX.length) : undefined
 }
 
 export function isDNSCredential ({ credential, dnsProviderTypes }) {

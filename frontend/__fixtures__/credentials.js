@@ -12,8 +12,9 @@ function createProviderCredentials (type, options = {}) {
     quotas = [],
     typeWorkloadIdentity = false,
     typeSecret = !typeWorkloadIdentity,
-    createSecretBinding = typeSecret,
-    createCredentialsBinding = true,
+    dnsSecret = false,
+    createSecretBinding = typeSecret && !dnsSecret,
+    createCredentialsBinding = !dnsSecret,
   } = options
   const secretBindingName = `${name}-secretbinding`
   const credentialsBindingName = `${name}-credentialsbinding`
@@ -93,8 +94,15 @@ function createProviderCredentials (type, options = {}) {
   let secret
   if (typeSecret && secretNamepace === bindingNamespace) {
     // no secret if referenced in other namespace
-    const labels = {
-      [`provider.shoot.gardener.cloud/${type}`]: 'true',
+    let labels
+    if (dnsSecret) {
+      labels = {
+        'dashboard.gardener.cloud/dnsProviderType': type,
+      }
+    } else {
+      labels = {
+        [`provider.shoot.gardener.cloud/${type}`]: 'true',
+      }
     }
     secret = {
       metadata: {
@@ -161,8 +169,8 @@ const credentials = [
   createProviderCredentials('ironcore'),
 
   // DNS - no bindings
-  createProviderCredentials('aws-route53', { createSecretBinding: false, createCredentialsBinding: false }),
-  createProviderCredentials('azure-dns', { createSecretBinding: false, createCredentialsBinding: false }),
+  createProviderCredentials('aws-route53', { dnsSecret: true }),
+  createProviderCredentials('azure-dns', { dnsSecret: true }),
 ]
 
 const secretBindings = credentials.map(item => item.secretBinding).filter(Boolean)

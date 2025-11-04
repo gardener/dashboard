@@ -128,33 +128,35 @@ describe('composables', () => {
       })
     })
 
-    describe('secretProviderType', () => {
-      it('should get and set provider type correctly', () => {
+    describe('dnsSecretProviderType', () => {
+      it('should get and set dns provider type correctly', () => {
         secretContext.setSecretManifest({
           metadata: {
             name: 'my-secret',
             namespace: testNamespace,
             labels: {
               'other.label1': 'true',
-              'provider.shoot.gardener.cloud/aws': 'true',
+              'provider.shoot.gardener.cloud/aws-route53': 'true',
               'other.label2': 'true',
+              'provider.shoot.gardener.cloud/google-clouddns': 'true',
             },
           },
           data: {},
         })
 
-        // Test getter - should extract provider type from label key
-        expect(secretContext.secretProviderType).toBe('aws')
+        // Test getter - should extract first provider type from provider shoot label (fallback)
+        expect(secretContext.dnsSecretProviderType).toBe('aws-route53')
 
-        // Test setter - should set new provider type
-        secretContext.secretProviderType = 'gcp'
+        // Test setter - should set dashboard specific label
+        secretContext.dnsSecretProviderType = 'azure-dns'
         expect(secretContext.secretManifest.metadata.labels).toEqual({
           'other.label1': 'true',
-          'provider.shoot.gardener.cloud/aws': 'true',
+          'provider.shoot.gardener.cloud/aws-route53': 'true',
           'other.label2': 'true',
-          'provider.shoot.gardener.cloud/gcp': 'true',
+          'provider.shoot.gardener.cloud/google-clouddns': 'true',
+          'dashboard.gardener.cloud/dnsProviderType': 'azure-dns',
         })
-        expect(secretContext.secretProviderType).toBe('aws') // Should return first match
+        expect(secretContext.dnsSecretProviderType).toBe('azure-dns') // Should prefer dashboard specific label
       })
 
       it('should return undefined when no provider label exists', () => {
@@ -169,7 +171,7 @@ describe('composables', () => {
           data: {},
         })
 
-        expect(secretContext.secretProviderType).toBeUndefined()
+        expect(secretContext.dnsSecretProviderType).toBeUndefined()
       })
     })
   })

@@ -88,13 +88,13 @@ export function createSecretContextComposable (options = {}) {
     namespace: secretNamespace,
   } = useObjectMetadata(manifest)
 
-  const secretProviderType = computed({
+  const dnsSecretProviderType = computed({
     get () {
       return credentialProviderType(manifest.value)
     },
     set (value) {
-      const labelKey = `provider.shoot.gardener.cloud/${value}`
-      set(manifest.value, ['metadata', 'labels', labelKey], 'true')
+      const labelKey = 'dashboard.gardener.cloud/dnsProviderType'
+      set(manifest.value, ['metadata', 'labels', labelKey], value)
     },
   })
 
@@ -171,7 +171,7 @@ export function createSecretContextComposable (options = {}) {
     secretData,
     secretStringData,
     secretStringDataRefs,
-    secretProviderType,
+    dnsSecretProviderType,
   }
 }
 

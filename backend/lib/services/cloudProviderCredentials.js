@@ -26,10 +26,18 @@ export async function list ({ user, params }) {
     client['security.gardener.cloud'].workloadidentities.list(namespace),
   ])
 
-  const hasShootProviderLabel = item => {
+  const hasProviderLabel = item => {
     const labels = item.metadata?.labels || {}
     return Object.entries(labels).some(([key, value]) => {
-      return key.startsWith('provider.shoot.gardener.cloud/') && value === 'true'
+      if (key.startsWith('provider.shoot.gardener.cloud/') && value === 'true') {
+        // The label results of the binding created together with the secret and is set by Gardener
+        // used by infra credentials and old dns credentials that used to be created with bindings (before introduction of dnsProviderType label)
+        return true
+      }
+      if (key === 'dashboard.gardener.cloud/dnsProviderType') {
+        return true
+      }
+      return false
     })
   }
 
@@ -40,7 +48,7 @@ export async function list ({ user, params }) {
     })
   }
 
-  const providerSecrets = secrets.filter(hasShootProviderLabel)
+  const providerSecrets = secrets.filter(hasProviderLabel)
   const providerWorkloadIdentities = workloadIdentities.filter(hasExtensionProviderLabel)
 
   const quotas = _

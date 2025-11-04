@@ -265,7 +265,7 @@ export default {
       setSecretManifest,
       secretManifest,
       secretName,
-      secretProviderType,
+      dnsSecretProviderType,
     } = useSecretContext()
 
     return {
@@ -274,7 +274,7 @@ export default {
       bindingManifest,
       bindingName,
       bindingProviderType,
-      secretProviderType,
+      dnsSecretProviderType,
       bindingRef,
       createSecretManifest,
       setSecretManifest,
@@ -434,7 +434,7 @@ export default {
         this.createSecretManifest()
 
         if (this.isDnsProvider) {
-          this.secretProviderType = this.providerType
+          this.dnsSecretProviderType = this.providerType
         } else {
           this.createBindingManifest()
           this.bindingProviderType = this.providerType
@@ -448,6 +448,11 @@ export default {
           this.setBindingManifest(this.binding)
         }
         this.setSecretManifest(this.credentialResource)
+
+        if (this.isDnsProvider) {
+          // Always set providertype, this ensures label is also set when updating old secrets without dashboard specific label
+          this.dnsSecretProviderType = this.providerType
+        }
       }
 
       this.errorMessage = undefined
