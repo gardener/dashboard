@@ -14,16 +14,13 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
-import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
 
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
 import map from 'lodash/map'
-import get from 'lodash/get'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
-import includes from 'lodash/includes'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
@@ -83,67 +80,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     return find(list.value, ['metadata.name', cloudProfileRef?.name])
   }
 
-  function minimumVolumeSizeByMachineTypeAndVolumeType ({ machineType, volumeType }) {
-    if (volumeType?.name) {
-      return volumeType.minSize ?? '0Gi'
-    }
-
-    if (machineType?.storage) {
-      return machineType.storage.minSize ?? '0Gi'
-    }
-
-    return '0Gi'
-  }
-
-  function machineTypesOrVolumeTypesByCloudProfileRefAndRegion ({ type, cloudProfileRef, region }) {
-    const machineAndVolumeTypePredicate = unavailableItems => {
-      return item => {
-        if (item.usable === false) {
-          return false
-        }
-        return !includes(unavailableItems, item.name)
-      }
-    }
-
-    if (!cloudProfileRef) {
-      return []
-    }
-    const cloudProfile = cloudProfileByRef(cloudProfileRef)
-    if (!cloudProfile) {
-      return []
-    }
-    const items = get(cloudProfile.spec, [type])
-    if (!region) {
-      return items
-    }
-    const cloudProfileValue = computed(() => cloudProfile)
-    const regionRef = computed(() => region)
-    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
-    const zones = zonesByRegion(regionRef).value
-
-    const regionObject = find(cloudProfile.spec.regions, { name: region })
-    let regionZones = get(regionObject, ['zones'], [])
-    regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
-    const unavailableItems = map(regionZones, zone => {
-      if (type === 'machineTypes') {
-        return zone.unavailableMachineTypes
-      } else if (type === 'volumeTypes') {
-        return zone.unavailableVolumeTypes
-      }
-    })
-    const unavailableItemsInAllZones = intersection(...unavailableItems)
-
-    return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
-  }
-
-  function volumeTypesByCloudProfileRefAndRegion ({ cloudProfileRef, region }) {
-    return machineTypesOrVolumeTypesByCloudProfileRefAndRegion({ type: 'volumeTypes', cloudProfileRef, region })
-  }
-
-  function volumeTypesByCloudProfileRef (cloudProfileRef) {
-    return volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region: undefined })
-  }
-
   return {
     list,
     isInitial,
@@ -153,10 +89,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     cloudProfilesByProviderType,
     sortedProviderTypeList,
     cloudProfileByRef,
-    // Volume Stuff
-    volumeTypesByCloudProfileRefAndRegion,
-    volumeTypesByCloudProfileRef,
-    minimumVolumeSizeByMachineTypeAndVolumeType,
   }
 })
 

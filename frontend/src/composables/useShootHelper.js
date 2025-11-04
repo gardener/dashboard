@@ -26,6 +26,7 @@ import { useCloudProfileForDefaultNodesCIDR } from '@/composables/useCloudProfil
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
 import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
 import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
+import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -141,6 +142,11 @@ export function createShootHelperComposable (shootItem, options = {}) {
     firewallSizesByRegion,
   } = useCloudProfileForMetalConstraints(cloudProfile, zonesByRegion)
 
+  const {
+    volumeTypes: allVolumeTypesFromComposable,
+    volumeTypesByRegion: volumeTypesByRegionFn,
+  } = useCloudProfileForVolumeTypes(cloudProfile)
+
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
   })
@@ -208,16 +214,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const machineArchitectures = machineArchitecturesByRegion(region)
 
-  const allVolumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const allVolumeTypes = allVolumeTypesFromComposable
 
-  const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const volumeTypes = volumeTypesByRegionFn(region)
 
   const machineImages = machineImagesFromComposable
 
