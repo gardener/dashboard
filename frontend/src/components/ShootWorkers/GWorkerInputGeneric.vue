@@ -150,7 +150,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue'
-import { mapActions } from 'pinia'
 import {
   required,
   maxLength,
@@ -158,8 +157,6 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
@@ -171,6 +168,7 @@ import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
+import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes.js'
 
 import {
   withFieldName,
@@ -228,7 +226,6 @@ export default {
       isZonedCluster,
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
-      volumeTypes,
       providerWorkers,
     } = useShootContext()
 
@@ -236,6 +233,7 @@ export default {
     const cloudProfileValue = computed(() => cloudProfile.value)
     const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
     const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
+    const { minimumVolumeSize: minimumVolumeSizeByMachineTypeAndVolumeType, volumeTypes } = useCloudProfileForVolumeTypes(cloudProfileValue)
 
     return {
       v$: useVuelidate(),
@@ -255,6 +253,7 @@ export default {
       machineImages,
       defaultMachineImageForMachineType,
       machineTypesByRegionAndArchitecture,
+      minimumVolumeSizeByMachineTypeAndVolumeType,
     }
   },
   data () {
@@ -351,19 +350,20 @@ export default {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     minimumVolumeSize () {
-      const minimumVolumeSize = convertToGi(this.minimumVolumeSizeByMachineTypeAndVolumeType({
-        machineType: this.selectedMachineType,
-        volumeType: this.selectedVolumeType,
-      }))
+      const minimumVolumeSize = this.minimumVolumeSizeByMachineTypeAndVolumeType(
+        computed(() => this.selectedMachineType),
+        computed(() => this.selectedVolumeType),
+      ).value
+      const minimumVolumeSizeInGi = convertToGi(minimumVolumeSize)
       let defaultSize = get(this.selectedMachineType, ['storage.size'])
       if (defaultSize) {
         defaultSize = convertToGi(defaultSize)
       }
-      if (defaultSize > 0 && defaultSize < minimumVolumeSize) {
+      if (defaultSize > 0 && defaultSize < minimumVolumeSizeInGi) {
         return defaultSize
       }
 
-      return minimumVolumeSize
+      return minimumVolumeSizeInGi
     },
     innerMin: {
       get () {
@@ -493,9 +493,6 @@ export default {
     this.onInputVolumeSize()
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'minimumVolumeSizeByMachineTypeAndVolumeType',
-    ]),
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
         set(this.worker, ['volume', 'size'], this.volumeSize)

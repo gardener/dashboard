@@ -375,7 +375,6 @@ import {
   computed,
   ref,
 } from 'vue'
-import { mapActions } from 'pinia'
 import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -386,6 +385,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
 import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -414,6 +414,7 @@ export default {
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
     const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
     const { machineTypes } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+    const { volumeTypes } = useCloudProfileForVolumeTypes(cloudProfile)
 
     const tab = ref('overview')
 
@@ -423,6 +424,7 @@ export default {
       shootCloudProfileRef,
       machineImages,
       machineTypes,
+      volumeTypes,
     }
   },
   data () {
@@ -447,9 +449,8 @@ export default {
       return find(this.machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['volume', 'type'])
-      return find(volumeTypes, ['name', type])
+      return find(this.volumeTypes.value, ['name', type])
     },
     volumeCardData () {
       const storage = get(this.machineType, ['storage'], {})
@@ -508,9 +509,6 @@ export default {
     this.updateWorkerGroupYaml(this.workerGroup)
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'volumeTypesByCloudProfileRef',
-    ]),
     updateWorkerGroupYaml (value) {
       this.workerGroupYaml = yaml.dump(value)
     },

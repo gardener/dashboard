@@ -34,6 +34,7 @@ import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/us
 import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages.js'
 import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions.js'
 import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
+import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -1126,14 +1127,18 @@ function generateWorker (availableZones, cloudProfileRef, region, kubernetesVers
   const architectureRef = computed(() => architecture)
   const machineTypesForZone = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
   const machineType = head(machineTypesForZone) || {}
-  const volumeTypesForZone = cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({ cloudProfileRef, region })
+
+  // Get volume types
+  const { volumeTypesByRegion, minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfileValue)
+  const volumeTypesForZone = volumeTypesByRegion(regionRef).value
   const volumeType = head(volumeTypesForZone) || {}
 
   // Get machine image
   const machineTypeRef = computed(() => machineType)
   const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
 
-  const minVolumeSize = cloudProfileStore.minimumVolumeSizeByMachineTypeAndVolumeType({ machineType, volumeType })
+  const volumeTypeRef = computed(() => volumeType)
+  const minVolumeSize = minimumVolumeSize(machineTypeRef, volumeTypeRef).value
   const criNames = map(machineImage?.cri, 'name')
   const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
 
