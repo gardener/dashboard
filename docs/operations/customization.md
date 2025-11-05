@@ -53,7 +53,9 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 It is also possible to exchange the Dashboard logo and icons. You can either replace the complete asset bundle or configure dedicated overrides for the logo and favicons.
 
-### Replace the complete assets folder (legacy)
+### Replace the complete assets folder (depreacted)
+
+[!WARNING] If you use the `frontendConfig.assets` map to provide custom assets please migrate to the new `frontendConfig.customAssets` map. The legacy method of providing static assets is deprecated and will be removed in the next release
 
 You can replace the [assets](../../frontend/public/static/assets) folder when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.assets` map.
 

@@ -211,6 +211,7 @@ export const useConfigStore = defineStore('config', () => {
 
   const branding = computed(() => {
     const brandingConfig = state.value?.branding ?? {}
+    // TODO Lukas Duplicate createBrandingAssetUrls, also in setConfiguration?
     const assetUrls = brandingConfig.assetUrls ?? createBrandingAssetUrls(brandingConfig.assets)
 
     return {
