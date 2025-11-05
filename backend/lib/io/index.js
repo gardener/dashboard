@@ -9,11 +9,43 @@ import logger from '../logger/index.js'
 import helper from './helper.js'
 import dispatcher from './dispatcher.js'
 import _ from 'lodash-es'
+import config from '../config/index.js'
 
 function init (httpServer, cache) {
+  const allowedOrigins = config.websocketAllowedOrigins
+  if (!allowedOrigins?.length) {
+    throw new Error('WebSocket allowed origins configuration is required')
+  } else {
+    logger.info('WebSocket allowed origins: %s', allowedOrigins.join(', '))
+  }
+
+  const allowAll = allowedOrigins.includes('*')
+  if (allowAll) {
+    const msg = config.isProd
+      ? 'WebSocket allowing all origins (*) — this is unsafe in production. Restrict allowedOrigins.'
+      : 'WebSocket allowing all origins (*) — OK for local/dev, but do not use in production.'
+    logger.warn(msg)
+  }
+
   const io = new Server(httpServer, {
     path: '/api/events',
     serveClient: false,
+    transports: ['websocket'],
+    allowRequest: (req, callback) => {
+      if (allowAll) {
+        return callback(null, true)
+      }
+      const { origin } = req.headers
+      if (!origin) {
+        logger.warn('Socket connection rejected - request contains no origin')
+        return callback(null, false)
+      }
+      const isAllowed = allowedOrigins.includes(origin)
+      if (!isAllowed) {
+        logger.warn('Socket connection from disallowed origin %s rejected', origin)
+      }
+      callback(null, isAllowed)
+    },
   })
 
   // middleware

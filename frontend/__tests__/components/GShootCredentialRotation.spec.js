@@ -70,7 +70,7 @@ describe('components', () => {
             workers: [
               {},
             ],
-            workerSettings: {
+            workersSettings: {
               sshAccess: {
                 enabled: true,
               },
@@ -129,7 +129,7 @@ describe('components', () => {
 
     describe('Credential tiles', () => {
       it('should not include SSH key rotation when SSH access is disabled', () => {
-        shootItem.spec.provider.workerSettings.sshAccess.enabled = false
+        shootItem.spec.provider.workersSettings.sshAccess.enabled = false
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
 
@@ -139,7 +139,7 @@ describe('components', () => {
       })
 
       it('should include SSH key rotation when SSH access is enabled', () => {
-        shootItem.spec.provider.workerSettings.sshAccess.enabled = true
+        shootItem.spec.provider.workersSettings.sshAccess.enabled = true
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
 
