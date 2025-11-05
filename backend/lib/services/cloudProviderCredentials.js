@@ -159,9 +159,6 @@ export async function removeDns ({ user, params }) {
   const client = user.client
   const { credentialKind, credentialNamespace, credentialName } = params
 
-  if (!credentialNamespace || !credentialName) {
-    throw createError(422, 'credentialNamespace and credentialName are required')
-  }
   try {
     switch (credentialKind) {
       case 'Secret':

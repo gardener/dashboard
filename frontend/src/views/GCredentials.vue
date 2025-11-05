@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="infraCredentialSortBy"
         :headers="visibleInfraCredentialTableHeaders"
         :items="infrastructureCredentialSortedItems"
-        :item-key="getItemKey"
+        :item-key="getBindingItemKey"
         :custom-key-sort="disableCustomKeySort(visibleInfraCredentialTableHeaders)"
         must-sort
         hover
@@ -216,7 +216,7 @@ SPDX-License-Identifier: Apache-2.0
         v-model:sort-by="dnsCredentialSortBy"
         :headers="visibleDnsCredentialTableHeaders"
         :items="dnsCredentialSortedItems"
-        :item-key="getItemKey"
+        :item-key="getCredentialItemKey"
         :custom-key-sort="disableCustomKeySort(visibleDnsCredentialTableHeaders)"
         must-sort
         hover
@@ -672,10 +672,13 @@ export default {
         return false
       })
     },
-    getItemKey (item, fallback) {
+    getBindingItemKey (item, fallback) {
       const bindingUid = item.raw?.binding?.metadata?.uid
+      return bindingUid ?? fallback
+    },
+    getCredentialItemKey (item, fallback) {
       const credentialUid = item.raw?.credential?.metadata?.uid
-      return bindingUid ?? credentialUid ?? fallback
+      return credentialUid ?? fallback
     },
     resetHighlighted () {
       this.highlightedCredentialUid = null
