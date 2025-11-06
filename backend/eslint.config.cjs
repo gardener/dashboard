@@ -29,6 +29,11 @@ const importNewlinesConfig = {
 module.exports = [
   ...neostandard({}),
   {
+    languageOptions: {
+      ecmaVersion: 2025,
+    },
+  },
+  {
     rules: {
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       'no-console': 'error',

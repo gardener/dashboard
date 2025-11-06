@@ -51,12 +51,6 @@ cd dashboard
 yarn
 ```
 
-And build all project internal dependencies.
-```sh
-yarn workspace gardener-dashboard packages-build-all
-```
-
-
 ### 3. Configuration
 Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 
@@ -68,6 +62,8 @@ logLevel: debug
 logFormat: text
 apiServerUrl: https://my-local-cluster # garden cluster kube-apiserver url - kubectl config view --minify -ojsonpath='{.clusters[].cluster.server}'
 sessionSecret: c2VjcmV0                # symmetric key used for encryption
+websocketAllowedOrigins:
+- https://localhost:8443
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
@@ -79,6 +75,8 @@ frontend:
       end: 00 08 * * 1,2,3,4,5
     production: ~
 ```
+
+The `websocketAllowedOrigins` list restricts which origins may establish socket.io connections. This setting is required; use `"*"` to allow all origins (not recommended for production).
 
 ### 4. Run it locally
 The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.

@@ -10,13 +10,16 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative"
+      class="position-relative project-cell"
     >
       <template v-if="cell.header.key === 'project'">
-        <g-text-router-link
-          :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
-          :text="shootProjectName"
-        />
+        <g-project-tooltip :project="project">
+          <g-text-router-link
+            :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
+            :text="shootProjectName"
+          />
+          <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
+        </g-project-tooltip>
       </template>
       <template v-if="cell.header.key === 'name'">
         <v-row
@@ -259,12 +262,14 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
+import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
 import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -326,6 +331,8 @@ const {
   cloudProfileStore,
   projectStore,
 })
+const project = computed(() => projectStore.projectByNamespace(shootNamespace.value))
+const { projectTitle } = useProjectMetadata(project)
 
 useProvideShootHelper(shootItem, {
   cloudProfileStore,
@@ -456,6 +463,11 @@ const hasShootWorkerGroupWarning = computed(() => {
     left: 0;
     position: absolute;
     pointer-events: none;
+  }
+
+  .project-cell {
+    max-width: 200px;
+    overflow: hidden;
   }
 
   .v-theme--light .stale .stale-overlay {

@@ -25,7 +25,7 @@ export function createSeedHelperComposable (seedItem, options = {}) {
   } = options
 
   const isSeedUnreachable = computed(() => {
-    const matchLabels = configStore.unreachableSeeds.value?.matchLabels
+    const matchLabels = configStore.unreachableSeeds?.matchLabels
     if (!matchLabels) {
       return false
     }

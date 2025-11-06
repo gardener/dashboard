@@ -68,15 +68,24 @@
       ],
     },
     {
-      groupName: 'Node.js',
+      groupName: 'Node.js Version',
+      groupSlug: 'node-version',
       matchPackageNames: [
         'node',
       ],
       matchManagers: [
         'github-actions',
         'npm',
+        'nvm',
+        'nodenv',
         'regex',
       ],
+      matchDatasources: [
+        'node',
+        'node-version',
+      ],
+      prTitle: 'chore(node): upgrade Node to {{newVersion}} everywhere',
+      separateMinorPatch: false,
     },
   ],
 }

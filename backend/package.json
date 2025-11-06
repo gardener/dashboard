@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.82.0-dev",
+  "version": "1.83.0-dev",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -26,6 +26,7 @@
     "serve": "cross-env NODE_ENV=development node server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
+    "build-packages-for-test-target": "yarn workspaces foreach --all --topological --no-private --include 'packages/*' run build",
     "build-test-target": "rollup -c rollup.config.js",
     "test": "NODE_PATH=./dist cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage"
@@ -102,5 +103,5 @@
   "engines": {
     "node": "22.18.0"
   },
-  "stableVersion": "1.81.0"
+  "stableVersion": "1.82.0"
 }
