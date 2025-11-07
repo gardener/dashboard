@@ -109,14 +109,14 @@ export function createSecretContextComposable (options = {}) {
 
   const secretStringData = computed({
     get () {
-      return mapValues(secretData.value, value => {
-        return value ? decodeBase64(value) : undefined
+      return mapValues(secretData.value, v => {
+        return v ? decodeBase64(v) : undefined
       })
     },
     set (value) {
-      secretData.value = value
-        ? mapValues(value, value => {
-          return value ? encodeBase64(value) : undefined
+      secretData.value = value && typeof value === 'object'
+        ? mapValues(value, v => {
+          return v ? encodeBase64(v) : undefined
         })
         : undefined
     },
