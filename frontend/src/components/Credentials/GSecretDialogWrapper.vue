@@ -62,6 +62,7 @@ export default {
         case 'google-clouddns': return GcpDialog
         case 'openstack-designate': return OpenstackDialog
         case 'alicloud-dns': return AlicloudDialog
+        case 'cloudflare-dns': return CloudflareDialog
         case 'infoblox-dns': return InfobloxDialog
         case 'netlify-dns': return NetlifyDialog
         case 'rfc2136': return DDnsDialog
