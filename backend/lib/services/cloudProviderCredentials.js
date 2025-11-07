@@ -187,14 +187,12 @@ async function removeOldDnsBindingIfExists (client, namespace, secretName) {
     client['security.gardener.cloud'].credentialsbindings.list(namespace),
   ])
 
-  // Check and delete matching SecretBindings
   for (const binding of secretBindings) {
     if (binding.secretRef?.namespace === namespace && binding.secretRef?.name === secretName) {
       await client['core.gardener.cloud'].secretbindings.delete(binding.metadata.namespace, binding.metadata.name)
     }
   }
 
-  // Check and delete matching CredentialsBindings
   for (const binding of credentialsBindings) {
     if (binding.credentialsRef?.namespace === namespace && binding.credentialsRef?.name === secretName) {
       await client['security.gardener.cloud'].credentialsbindings.delete(binding.metadata.namespace, binding.metadata.name)
