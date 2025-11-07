@@ -163,6 +163,7 @@ export async function removeDns ({ user, params }) {
     switch (credentialKind) {
       case 'Secret':
         await client.core.secrets.delete(credentialNamespace, credentialName)
+        removeOldDnsBindingIfExists(client, credentialNamespace, credentialName)
         break
       case 'WorkloadIdentity':
         await client['security.gardener.cloud'].workloadidentities.delete(credentialNamespace, credentialName)
@@ -173,6 +174,30 @@ export async function removeDns ({ user, params }) {
   } catch (err) {
     if (!isHttpError(err, 404)) {
       throw err
+    }
+  }
+}
+
+async function removeOldDnsBindingIfExists (client, namespace, secretName) {
+  const [
+    { items: secretBindings },
+    { items: credentialsBindings },
+  ] = await Promise.all([
+    client['core.gardener.cloud'].secretbindings.list(namespace),
+    client['security.gardener.cloud'].credentialsbindings.list(namespace),
+  ])
+
+  // Check and delete matching SecretBindings
+  for (const binding of secretBindings) {
+    if (binding.secretRef?.namespace === namespace && binding.secretRef?.name === secretName) {
+      await client['core.gardener.cloud'].secretbindings.delete(binding.metadata.namespace, binding.metadata.name)
+    }
+  }
+
+  // Check and delete matching CredentialsBindings
+  for (const binding of credentialsBindings) {
+    if (binding.credentialsRef?.namespace === namespace && binding.credentialsRef?.name === secretName) {
+      await client['security.gardener.cloud'].credentialsbindings.delete(binding.metadata.namespace, binding.metadata.name)
     }
   }
 }

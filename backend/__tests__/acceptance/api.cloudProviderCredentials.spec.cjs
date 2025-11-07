@@ -311,14 +311,15 @@ describe('api', function () {
         credentialName: 'dns-secret',
       }
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
         .send({ method: 'removeDns', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledTimes(3)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
@@ -339,6 +340,30 @@ describe('api', function () {
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a cloudProvider DNS credential (secret) and remove old DNS bindings', async function () {
+      const params = {
+        credentialKind: 'Secret',
+        credentialNamespace: namespace,
+        credentialName: 'secret1',
+      }
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
