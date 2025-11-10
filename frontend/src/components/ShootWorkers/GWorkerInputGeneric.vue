@@ -418,9 +418,9 @@ export default {
       return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
-      const allAvailable = every(this.allZones, zone =>
-        includes(this.availableZones, zone),
-      )
+      const allAvailable = every(this.allZones, zone => {
+        return includes(this.availableZones, zone)
+      })
       if (allAvailable) {
         return ''
       }

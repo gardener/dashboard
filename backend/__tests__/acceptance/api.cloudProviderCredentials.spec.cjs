@@ -50,11 +50,10 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.list())
 
       const params = {
-        bindingNamespace: namespace,
+        namespace,
       }
 
       const res = await agent
@@ -64,9 +63,14 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(5)
+      expect(mockRequest).toHaveBeenCalledTimes(4)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
+      expect(res.body.secrets).toHaveLength(2)
+      expect(res.body.secrets[0].metadata.name).toBe('secret3')
+      expect(res.body.secrets[1].metadata.name).toBe('dns-secret')
+      expect(Array.isArray(res.body.workloadIdentities)).toBe(true)
+      expect(res.body.secretBindings).toHaveLength(3)
       expect(res.body).toMatchSnapshot()
     })
 
@@ -74,12 +78,11 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.list())
       mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.list())
 
       const namespace = 'garden-baz'
       const params = {
-        bindingNamespace: namespace,
+        namespace,
       }
 
       const res = await agent
@@ -89,10 +92,14 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(5)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(res.body).toEqual({
+        credentialsBindings: [],
+        quotas: [],
+        secretBindings: [],
+        secrets: [],
+        workloadIdentities: [],
+      })
     })
 
     it('should create a cloudProvider credentialsbinding and secret', async function () {
@@ -138,17 +145,56 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'create', params })
+        .send({ method: 'createInfra', params })
         .expect('content-type', /json/)
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(2)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
+      expect(res.body.binding.metadata.name).toBe(`new-${infraName}-credentialsbinding`)
+      expect(res.body.secret.metadata.name).toBe(`new-${infraName}-secret`)
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should patch an own cloudProvider credential (secret)', async function () {
+    it('should create a cloudProvider dns secret (no binding)', async function () {
+      const newSecret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        type: 'Opaque',
+        metadata: {
+          name: 'new-dns-secret',
+          namespace,
+          labels: {
+            'dashboard.gardener.cloud/dnsProviderType': 'aws-route53',
+          },
+        },
+        data: {
+          key: 'bmV3LWRhdGE=',
+        },
+      }
+
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.create())
+
+      const params = {
+        secret: newSecret,
+      }
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'createDns', params })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body.secret.metadata.name).toBe('new-dns-secret')
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should patch an own dns secret', async function () {
       const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
       const params = {
         secret,
@@ -159,7 +205,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
+        .send({ method: 'patchDns', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -169,7 +215,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should re-create an own cloudProvider credential (secret) when patching an orphaned binding', async function () {
+    it('should re-create an own infra credential (secret) when patching an orphaned binding', async function () {
       const secret = _.find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
       secret.metadata.name = 'secret4' // not existing secret
       const params = {
@@ -182,7 +228,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'patch', params })
+        .send({ method: 'patchInfra', params })
         .expect('content-type', /json/)
         .expect(200)
 
@@ -205,7 +251,7 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'removeInfra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
@@ -214,7 +260,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should delete an own cloudProvider credential (credentialsbinding)', async function () {
+    it('should delete an own cloudProvider credential (secret / credentialsbinding)', async function () {
       const params = {
         bindingKind: 'CredentialsBinding',
         bindingNamespace: 'garden-foo',
@@ -227,10 +273,97 @@ describe('api', function () {
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'remove', params })
+        .send({ method: 'removeInfra', params })
         .expect(200)
 
       expect(mockRequest).toHaveBeenCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete an own cloudProvider credential (workloadidentity / credentialsbinding)', async function () {
+      const params = {
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: 'garden-foo',
+        bindingName: 'foo-wlid1',
+      }
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
+      mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeInfra', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a cloudProvider DNS credential (secret / no binding)', async function () {
+      const params = {
+        credentialKind: 'Secret',
+        credentialNamespace: namespace,
+        credentialName: 'dns-secret',
+      }
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(3)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a cloudProvider DNS credential (workloadidentity / no binding)', async function () {
+      const params = {
+        credentialKind: 'WorkloadIdentity',
+        credentialNamespace: namespace,
+        credentialName: 'dns-wlid',
+      }
+      mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should delete a cloudProvider DNS credential (secret) and remove old DNS bindings', async function () {
+      const params = {
+        credentialKind: 'Secret',
+        credentialNamespace: namespace,
+        credentialName: 'secret1',
+      }
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params })
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(5)
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()

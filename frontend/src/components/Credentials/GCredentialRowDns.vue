@@ -10,33 +10,23 @@ SPDX-License-Identifier: Apache-2.0
     :class="{ 'highlighted': highlighted }"
   >
     <td v-if="selectedHeaders.name">
-      <div class="d-flex">
-        {{ item.binding.metadata.name }}
-        <g-shared-credential-icon
-          v-if="item.isSharedCredential"
-          :namespace="item.credentialNamespace"
-        />
-        <g-orphaned-credential-icon
-          v-if="item.isOrphanedCredential"
-          :binding="item.binding"
-        />
-      </div>
+      {{ item.credential.metadata.name }}
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-credential-icon :binding="item.binding" />
+      <g-credential-icon :credential="item.credential" />
     </td>
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
-        :provider-type="item.binding.provider.type"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
         :credential="item.credential"
-        :shared="item.isSharedCredential"
-        :provider-type="item.binding.provider.type"
+        :shared="item.isSharedBinding"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -47,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
       class="text-action-button"
     >
       <g-credential-row-actions
-        :binding="item.binding"
+        :credential="item.credential"
         @update="onUpdate"
         @delete="onDelete"
       />
@@ -66,8 +56,6 @@ import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialD
 import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
-import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
-import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -92,16 +80,16 @@ const {
   headers,
 } = toRefs(props)
 
-const emit = defineEmits(['update', 'delete'])
+const emit = defineEmits(['updateDnsCredential', 'deleteDnsCredential'])
 
 const selectedHeaders = computed(() => mapTableHeader(headers.value, 'selected'))
 
 function onUpdate (value) {
-  emit('update', value)
+  emit('updateDnsCredential', value)
 }
 
 function onDelete (value) {
-  emit('delete', value)
+  emit('deleteDnsCredential', value)
 }
 </script>
 

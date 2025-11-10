@@ -13,30 +13,30 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex">
         {{ item.binding.metadata.name }}
         <g-shared-credential-icon
-          v-if="item.isSharedCredential"
+          v-if="item.isSharedBinding"
           :namespace="item.credentialNamespace"
         />
-        <g-orphaned-credential-icon
-          v-if="item.isOrphanedCredential"
+        <g-orphaned-binding-icon
+          v-if="item.isOrphanedBinding"
           :binding="item.binding"
         />
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-credential-icon :binding="item.binding" />
+      <g-binding-icon :binding="item.binding" />
     </td>
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
         extended
-        :provider-type="item.binding.provider.type"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.details">
       <g-credential-details-item-content
         class="py-1"
         :credential="item.credential"
-        :shared="item.isSharedCredential"
-        :provider-type="item.binding.provider.type"
+        :shared="item.isSharedBinding"
+        :provider-type="item.providerType"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
       v-if="selectedHeaders.actions"
       class="text-action-button"
     >
-      <g-credential-row-actions
+      <g-binding-row-actions
         :binding="item.binding"
         @update="onUpdate"
         @delete="onDelete"
@@ -63,11 +63,11 @@ import {
 
 import GVendor from '@/components/GVendor'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
-import GCredentialRowActions from '@/components/Credentials/GCredentialRowActions'
-import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
+import GBindingRowActions from '@/components/Credentials/GBindingRowActions'
+import GBindingIcon from '@/components/Credentials/GBindingIcon'
 import GCredentialUsedByLabel from '@/components/Credentials/GCredentialUsedByLabel'
 import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
-import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedCredentialIcon.vue'
+import GOrphanedBindingIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -92,18 +92,18 @@ const {
   headers,
 } = toRefs(props)
 
-const emit = defineEmits(['update', 'delete'])
+const emit = defineEmits(['updateInfraBinding', 'deleteInfraBinding'])
 
-const selectedHeaders = computed(() =>
-  mapTableHeader(headers.value, 'selected'),
-)
+const selectedHeaders = computed(() => {
+  return mapTableHeader(headers.value, 'selected')
+})
 
 function onUpdate (value) {
-  emit('update', value)
+  emit('updateInfraBinding', value)
 }
 
 function onDelete (value) {
-  emit('delete', value)
+  emit('deleteInfraBinding', value)
 }
 
 </script>

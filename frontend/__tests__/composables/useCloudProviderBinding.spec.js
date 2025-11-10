@@ -77,7 +77,7 @@ describe('useCloudProviderBinding composable', () => {
   function findBindingRef (name) {
     return ref(
       find(
-        [...global.fixtures.credentials.secretBindings, ...global.fixtures.credentials.credentialsBindings],
+        credentialStore.infrastructureBindingList,
         b => b.metadata.name === name,
       ),
     )
@@ -102,14 +102,14 @@ describe('useCloudProviderBinding composable', () => {
   it('identifies shared vs own credentials', () => {
     const sharedBindingRef = findBindingRef('aws-trial-secretbinding')
     const bindingComposable = useCloudProviderBinding(sharedBindingRef)
-    expect(bindingComposable.isSharedCredential.value).toBe(true)
-    expect(bindingComposable.isOrphanedCredential.value).toBe(false)
+    expect(bindingComposable.isSharedBinding.value).toBe(true)
+    expect(bindingComposable.isOrphanedBinding.value).toBe(false)
   })
 
-  it('resolves secretbinding credentialRef/name/namespace', () => {
+  it('resolves secretbinding bindingCredentialRef/name/namespace', () => {
     const secretBindingRef = findBindingRef('aws-secretbinding')
     const bindingComposable = useCloudProviderBinding(secretBindingRef)
-    expect(bindingComposable.credentialRef.value).toEqual({
+    expect(bindingComposable.bindingCredentialRef.value).toEqual({
       namespace: secretBindingRef.value.secretRef.namespace,
       name: secretBindingRef.value.secretRef.name,
     })
@@ -118,10 +118,10 @@ describe('useCloudProviderBinding composable', () => {
     expect(bindingComposable.credentialKind.value).toBe('Secret')
   })
 
-  it('resolves credentialsbinding credentialRef/name/namespace', () => {
+  it('resolves credentialsbinding bindingCredentialRef/name/namespace', () => {
     const credentialsBindingRef = findBindingRef('aws-credentialsbinding')
     const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
-    expect(bindingComposable.credentialRef.value).toEqual({
+    expect(bindingComposable.bindingCredentialRef.value).toEqual({
       namespace: credentialsBindingRef.value.credentialsRef.namespace,
       name: credentialsBindingRef.value.credentialsRef.name,
       kind: credentialsBindingRef.value.credentialsRef.kind,
@@ -149,13 +149,6 @@ describe('useCloudProviderBinding composable', () => {
     const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
     expect(bindingComposable.isInfrastructureBinding.value).toBe(true)
     expect(bindingComposable.credentialUsageCount.value).toBe(1)
-  })
-
-  it('counts shoots referencing dns credentialsbinding', () => {
-    const credentialsBindingRef = findBindingRef('aws-route53-credentialsbinding')
-    const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
-    expect(bindingComposable.isDnsBinding.value).toBe(true)
-    expect(bindingComposable.credentialUsageCount.value).toBe(2)
   })
 
   it('finds other bindings with same secret', () => {

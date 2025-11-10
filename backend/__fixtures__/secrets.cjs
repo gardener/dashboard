@@ -57,6 +57,16 @@ const cloudProviderSecretList = [
   getCloudProviderSecret({
     namespace: 'garden-foo',
     name: 'secret3',
+    labels: { 'provider.shoot.gardener.cloud/aws': 'true' }, // will appear in list
+    data: {
+      key: 'fooKey',
+      secret: 'fooSecret',
+    },
+  }),
+  getCloudProviderSecret({
+    namespace: 'garden-foo',
+    name: 'dns-secret',
+    labels: { 'dashboard.gardener.cloud/dnsProviderType': 'aws-route53' }, // will appear in list
     data: {
       key: 'fooKey',
       secret: 'fooSecret',
