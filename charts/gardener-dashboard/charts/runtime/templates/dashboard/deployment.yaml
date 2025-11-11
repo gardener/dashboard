@@ -204,7 +204,7 @@ spec:
             readOnly: true
           {{- if .Values.global.dashboard.frontendConfig.assets }}
           - name: assets
-            mountPath: /app/public/static/assets
+            mountPath: /app/public/static/custom-assets
           {{- end }}
           {{- if .Values.global.dashboard.serviceAccountTokenVolumeProjection.enabled }}
           - name: service-account-token

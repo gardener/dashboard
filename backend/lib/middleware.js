@@ -40,18 +40,20 @@ morgan.token('url', (req, res) => {
 
 const requestLogger = morgan('common', logger)
 
-function noCache (staticPaths = []) {
-  const isStatic = path => {
-    for (const staticPath of staticPaths) {
-      if (path.startsWith(staticPath)) {
-        return true
-      }
+function noCache ({ excludePaths = [], includePaths = [] } = {}) {
+  const shouldNoCache = (path) => {
+    if (includePaths.length > 0) {
+      return includePaths.some((p) => path.startsWith(p))
     }
-    return false
+    return !excludePaths.some((p) => path.startsWith(p))
   }
+
   return (req, res, next) => {
-    if (!isStatic(req.path)) {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    if (shouldNoCache(req.path)) {
+      res.set(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, proxy-revalidate',
+      )
     }
     next()
   }

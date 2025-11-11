@@ -14,6 +14,7 @@ import {
   dirname,
 } from 'path'
 import { fileURLToPath } from 'url'
+import { existsSync } from 'fs'
 import logger from './logger/index.js'
 import {
   notFound,
@@ -44,6 +45,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
+const STATIC_ASSETS_PATH = '/static/assets'
+const CUSTOM_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets')
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
@@ -64,7 +67,7 @@ app.set('port', port)
 app.set('metricsPort', metricsPort)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
-app.set('periodSeconds ', periodSeconds)
+app.set('periodSeconds', periodSeconds)
 app.set('hooks', apiHooks)
 app.set('trust proxy', 1)
 app.set('etag', false)
@@ -76,7 +79,7 @@ app.use(helmet.xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
-app.use(noCache(STATIC_PATHS))
+app.use(noCache({ excludePaths: STATIC_PATHS, includePaths: [STATIC_ASSETS_PATH] }))
 app.use('/auth', authRouter)
 app.use('/webhook', githubWebhookRouter)
 app.use('/api', apiRouter)
@@ -96,6 +99,16 @@ app.use(helmet.contentSecurityPolicy({
 app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
+
+if (existsSync(CUSTOM_ASSETS_DIRNAME)) {
+  app.use(STATIC_ASSETS_PATH, expressStaticGzip(CUSTOM_ASSETS_DIRNAME, {
+    enableBrotli: true,
+    orderPreference: ['br'],
+    serveStatic: {
+      fallthrough: true,
+    },
+  }))
+}
 
 app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   enableBrotli: true,

@@ -50,33 +50,48 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 ## Logos and Icons
 
-It is also possible to exchange the Dashboard logo and icons. You can replace the [assets](../../frontend/public/static/assets) folder when using the [helm chart](../../charts/gardener-dashboard) in the `frontendConfig.assets` map.
+You can customize the Dashboard logo and icons by creating a **ConfigMap** with the filenames as keys and the **base64-encoded image data** as values.
 
-Attention: You need to set values for all files as mapping the volume will overwrite all files. It is not possible to exchange single files.
+### Replace Assets
 
-The files have to be encoded as base64 for the chart - to generate the encoded files for the `values.yaml` of the helm chart, you can use the following shorthand with `bash` or `zsh` on Linux systems. If you use macOS, install coreutils with brew (`brew install coreutils`) or remove the `-w0` parameter.
+You can replace individual icons in the [`assets`](../../frontend/public/static/assets) folder when using the [Helm chart](../../charts/gardener-dashboard) by configuring the `frontendConfig.assets` map.
+
+The Dashboard backend will serve these custom asset files when available and fall back to the built-in ones otherwise.
+
+> [!TIP]
+> It is **no longer required** to provide all asset files.
+> You can overwrite individual icons as needed.
+>
+> In Dashboard versions **prior to 1.83**, all files had to be specified, since mapping the volume would overwrite every file.
+
+### Encoding Assets
+
+The files must be **base64-encoded** before being added to your Helm chart’s `values.yaml`.
+You can generate the encoded content using the following command on **Linux** (works in `bash` or `zsh`):
+
+> If you use macOS, install **coreutils** with Homebrew (`brew install coreutils`) or remove the `-w0` parameter from the `base64` command.
 
 ```bash
 cat << EOF
-  ###
-  ### COPY EVERYTHING BELOW THIS LINE
-  ###
+###
+### COPY EVERYTHING BELOW THIS LINE
+###
 
-  assets:
-    favicon-16x16.png: |
-      $(cat frontend/public/static/assets/favicon-16x16.png | base64 -w0)
-    favicon-32x32.png: |
-      $(cat frontend/public/static/assets/favicon-32x32.png | base64 -w0)
-    favicon-96x96.png: |
-      $(cat frontend/public/static/assets/favicon-96x96.png | base64 -w0)
-    favicon.ico: |
-      $(cat frontend/public/static/assets/favicon.ico | base64 -w0)
-    logo.svg: |
-      $(cat frontend/public/static/assets/logo.svg | base64 -w0)
+assets:
+  favicon-16x16.png: |
+    $(cat frontend/public/static/assets/favicon-16x16.png | base64 -w0)
+  favicon-32x32.png: |
+    $(cat frontend/public/static/assets/favicon-32x32.png | base64 -w0)
+  favicon-96x96.png: |
+    $(cat frontend/public/static/assets/favicon-96x96.png | base64 -w0)
+  favicon.ico: |
+    $(cat frontend/public/static/assets/favicon.ico | base64 -w0)
+  logo.svg: |
+    $(cat frontend/public/static/assets/logo.svg | base64 -w0)
 EOF
 ```
 
-Then, swap in the base64 encoded version of your files where needed.
+After generating the output, copy the base64-encoded strings into your `values.yaml` file where needed.
 
 ## Customization Example
 
