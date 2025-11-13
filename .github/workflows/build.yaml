@@ -37,8 +37,10 @@ jobs:
         args:
           - name: gardener-dashboard
             target: dashboard
-            # special-handling: push to different repository for `openmpf`-branch
-            oci-repository: gardener/dashboard${{ github.ref_name == 'openmfp' && '-openmpf' || '' }}
+            # special-handling: push to different repository for `openmfp`-branch
+            # head_ref = source branch (PRs), ref_name = push target (direct pushes)
+            oci-repository: gardener/dashboard${{ (github.head_ref || github.ref_name) == 'openmfp' && '-openmfp' || '' }}
+            oci-registry: ${{ (github.head_ref || github.ref_name) == 'openmfp' && 'europe-docker.pkg.dev/gardener-project/releases' || '' }}
             ocm-labels:
               name: gardener.cloud/cve-categorisation
               value:
@@ -52,7 +54,7 @@ jobs:
       name: ${{ matrix.args.name }}
       version: ${{ needs.prepare.outputs.version }}
       target: ${{ matrix.args.target }}
-      oci-registry: ${{ needs.prepare.outputs.oci-registry }}
+      oci-registry: ${{ matrix.args.oci-registry || needs.prepare.outputs.oci-registry }}
       oci-repository: ${{ matrix.args.oci-repository }}
       oci-platforms: linux/amd64,linux/arm64
       ocm-labels: ${{ toJSON(matrix.args.ocm-labels) }}
