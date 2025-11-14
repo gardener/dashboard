@@ -20,7 +20,6 @@ import {
   notFound,
   renderError,
   historyFallback,
-  noCache,
 } from './middleware.js'
 import helmet from 'helmet'
 import {
@@ -44,9 +43,10 @@ for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
-const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
-const STATIC_ASSETS_PATH = '/static/assets'
-const CUSTOM_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets')
+const ASSETS_PATH = '/assets' // compiled static files with hash in filename
+const ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'assets') // assets provided by confguration (configmap volume mount)
+const DYNAMIC_ASSETS_PATH = '/static/assets' // content can be overwritten by configuration - so actually dynamic, keep old path for compatibility reasons
+const DYNAMIC_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets') // assets provided by confguration (configmap volume mount)
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
@@ -79,7 +79,6 @@ app.use(helmet.xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
-app.use(noCache({ excludePaths: STATIC_PATHS, includePaths: [STATIC_ASSETS_PATH] }))
 app.use('/auth', authRouter)
 app.use('/webhook', githubWebhookRouter)
 app.use('/api', apiRouter)
@@ -100,25 +99,38 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
 
-if (existsSync(CUSTOM_ASSETS_DIRNAME)) {
-  app.use(STATIC_ASSETS_PATH, expressStaticGzip(CUSTOM_ASSETS_DIRNAME, {
+if (existsSync(DYNAMIC_ASSETS_DIRNAME)) {
+  logger.debug(`Serving dynamic assets from ${DYNAMIC_ASSETS_DIRNAME}`)
+  app.use(DYNAMIC_ASSETS_PATH, expressStaticGzip(DYNAMIC_ASSETS_DIRNAME, {
     enableBrotli: true,
     orderPreference: ['br'],
     serveStatic: {
-      fallthrough: true,
+      etag: true,
+      immutable: false,
     },
   }))
 }
 
-app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+app.use(ASSETS_PATH, expressStaticGzip(ASSETS_DIRNAME, {
   enableBrotli: true,
   orderPreference: ['br'],
   serveStatic: {
     immutable: true,
     maxAge: '1 Week',
+    etag: true,
   },
 }))
-app.use(STATIC_PATHS, notFound)
+
+app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+  enableBrotli: true,
+  orderPreference: ['br'],
+  serveStatic: {
+    etag: true,
+    immutable: false,
+  },
+}))
+
+app.use([ASSETS_PATH, DYNAMIC_ASSETS_PATH], notFound)
 
 app.use(helmet.xFrameOptions({
   action: 'deny',

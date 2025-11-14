@@ -40,25 +40,6 @@ morgan.token('url', (req, res) => {
 
 const requestLogger = morgan('common', logger)
 
-function noCache ({ excludePaths = [], includePaths = [] } = {}) {
-  const shouldNoCache = (path) => {
-    if (includePaths.length > 0) {
-      return includePaths.some((p) => path.startsWith(p))
-    }
-    return !excludePaths.some((p) => path.startsWith(p))
-  }
-
-  return (req, res, next) => {
-    if (shouldNoCache(req.path)) {
-      res.set(
-        'Cache-Control',
-        'no-store, no-cache, must-revalidate, proxy-revalidate',
-      )
-    }
-    next()
-  }
-}
-
 function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
@@ -149,7 +130,6 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 export {
-  noCache,
   historyFallback,
   requestLogger,
   notFound,

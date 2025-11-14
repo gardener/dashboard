@@ -50,23 +50,27 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 ## Logos and Icons
 
-You can customize the Dashboard logo and icons by creating a **ConfigMap** with the filenames as keys and the **base64-encoded image data** as values.
+You can customize the Dashboard logo and icons by creating a `ConfigMap` with the filenames as keys and the base64-encoded image data as values. This allows you to override any file that exists under public/static/assets by specifying the filename as the key.
 
 ### Replace Assets
 
-You can replace individual icons in the [`assets`](../../frontend/public/static/assets) folder when using the [Helm chart](../../charts/gardener-dashboard) by configuring the `frontendConfig.assets` map.
+You can replace individual icons in the [`assets`](../../frontend/public/static/assets) folder when deploying the Dashboard via the Helm chart by configuring the frontendConfig.assets map.
+
+When you deploy the dashboard using the Gadener Operator, you need to reference the `ConfigMap` containing the assets in the `Garden` resource:
+```yaml
+  gardenerDashboard:
+    assetsConfigMapRef:
+      name: gardener-dashboard-custom-assets
+```
 
 The Dashboard backend will serve these custom asset files when available and fall back to the built-in ones otherwise.
 
 > [!TIP]
-> It is **no longer required** to provide all asset files.
-> You can overwrite individual icons as needed.
->
-> In Dashboard versions **prior to 1.83**, all files had to be specified, since mapping the volume would overwrite every file.
+> As `ConfigMap` size is limited, you can use brotli compressed files, e.g. `logo.svg.br`. Consider using Brotli compression for highly compressible formats such as `SVG`.
 
 ### Encoding Assets
 
-The files must be **base64-encoded** before being added to your Helm chart’s `values.yaml`.
+The files must be base64-encoded before being added to your Helm chart’s `values.yaml`.
 You can generate the encoded content using the following command on **Linux** (works in `bash` or `zsh`):
 
 > If you use macOS, install **coreutils** with Homebrew (`brew install coreutils`) or remove the `-w0` parameter from the `base64` command.
