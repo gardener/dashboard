@@ -41,12 +41,14 @@ for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
 
 // resolve pathnames
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
-const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
-const ASSETS_PATH = '/assets' // compiled static files with hash in filename
-const ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'assets') // assets provided by confguration (configmap volume mount)
-const DYNAMIC_ASSETS_PATH = '/static/assets' // content can be overwritten by configuration - so actually dynamic, keep old path for compatibility reasons
-const CUSTOM_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets') // assets provided by confguration (configmap volume mount)
+const PUBLIC_FS_PATH = resolve(join(__dirname, '..', 'public'))
+const INDEX_FILENAME = join(PUBLIC_FS_PATH, 'index.html')
+// hashed frontend build assets (cacheable/immutable)
+const BUILD_ASSETS_URL_PATH = '/assets'
+const BUILD_ASSETS_FS_PATH = join(PUBLIC_FS_PATH, 'assets')
+// non-hashed static/branding assets (logo, favicon, etc.)
+const STATIC_ASSETS_URL_PATH = '/static/assets'
+const STATIC_ASSETS_OVERRIDE_FS_PATH = join(PUBLIC_FS_PATH, 'static', 'custom-assets') // custom assets override from ConfigMap
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
@@ -99,9 +101,9 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
 
-if (existsSync(CUSTOM_ASSETS_DIRNAME)) {
-  logger.debug(`Serving custom assets from ${CUSTOM_ASSETS_DIRNAME}`)
-  app.use(DYNAMIC_ASSETS_PATH, expressStaticGzip(CUSTOM_ASSETS_DIRNAME, {
+if (existsSync(STATIC_ASSETS_OVERRIDE_FS_PATH)) {
+  logger.debug(`Serving static asset overrides from ${STATIC_ASSETS_OVERRIDE_FS_PATH}`)
+  app.use(STATIC_ASSETS_URL_PATH, expressStaticGzip(STATIC_ASSETS_OVERRIDE_FS_PATH, {
     enableBrotli: true,
     orderPreference: ['br'],
     serveStatic: {
@@ -111,7 +113,7 @@ if (existsSync(CUSTOM_ASSETS_DIRNAME)) {
   }))
 }
 
-app.use(ASSETS_PATH, expressStaticGzip(ASSETS_DIRNAME, {
+app.use(BUILD_ASSETS_URL_PATH, expressStaticGzip(BUILD_ASSETS_FS_PATH, {
   enableBrotli: true,
   orderPreference: ['br'],
   serveStatic: {
@@ -121,7 +123,7 @@ app.use(ASSETS_PATH, expressStaticGzip(ASSETS_DIRNAME, {
   },
 }))
 
-app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+app.use(expressStaticGzip(PUBLIC_FS_PATH, {
   enableBrotli: true,
   orderPreference: ['br'],
   serveStatic: {
@@ -130,7 +132,7 @@ app.use(expressStaticGzip(PUBLIC_DIRNAME, {
   },
 }))
 
-app.use([ASSETS_PATH, DYNAMIC_ASSETS_PATH], notFound)
+app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
 app.use(helmet.xFrameOptions({
   action: 'deny',
