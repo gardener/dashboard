@@ -46,7 +46,7 @@ const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const ASSETS_PATH = '/assets' // compiled static files with hash in filename
 const ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'assets') // assets provided by confguration (configmap volume mount)
 const DYNAMIC_ASSETS_PATH = '/static/assets' // content can be overwritten by configuration - so actually dynamic, keep old path for compatibility reasons
-const DYNAMIC_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets') // assets provided by confguration (configmap volume mount)
+const CUSTOM_ASSETS_DIRNAME = join(PUBLIC_DIRNAME, 'static', 'custom-assets') // assets provided by confguration (configmap volume mount)
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
@@ -99,9 +99,9 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
 
-if (existsSync(DYNAMIC_ASSETS_DIRNAME)) {
-  logger.debug(`Serving dynamic assets from ${DYNAMIC_ASSETS_DIRNAME}`)
-  app.use(DYNAMIC_ASSETS_PATH, expressStaticGzip(DYNAMIC_ASSETS_DIRNAME, {
+if (existsSync(CUSTOM_ASSETS_DIRNAME)) {
+  logger.debug(`Serving custom assets from ${CUSTOM_ASSETS_DIRNAME}`)
+  app.use(DYNAMIC_ASSETS_PATH, expressStaticGzip(CUSTOM_ASSETS_DIRNAME, {
     enableBrotli: true,
     orderPreference: ['br'],
     serveStatic: {
@@ -115,9 +115,9 @@ app.use(ASSETS_PATH, expressStaticGzip(ASSETS_DIRNAME, {
   enableBrotli: true,
   orderPreference: ['br'],
   serveStatic: {
+    etag: true,
     immutable: true,
     maxAge: '1 Week',
-    etag: true,
   },
 }))
 

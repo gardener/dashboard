@@ -56,12 +56,7 @@ You can customize the Dashboard logo and icons by creating a `ConfigMap` with th
 
 You can replace individual icons in the [`assets`](../../frontend/public/static/assets) folder when deploying the Dashboard via the Helm chart by configuring the frontendConfig.assets map.
 
-When you deploy the dashboard using the Gadener Operator, you need to reference the `ConfigMap` containing the assets in the `Garden` resource:
-```yaml
-  gardenerDashboard:
-    assetsConfigMapRef:
-      name: gardener-dashboard-custom-assets
-```
+When you deploy the dashboard using the Gardener Operator, you can reference the `ConfigMap` using `.spec.virtualCluster.gardener.gardenerDashboard.assetsConfigMapRef` within the `Garden` resource
 
 The Dashboard backend will serve these custom asset files when available and fall back to the built-in ones otherwise.
 
