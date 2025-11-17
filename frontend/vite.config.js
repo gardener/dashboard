@@ -245,14 +245,10 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'build') {
     config.plugins.push(
       compression({
-        algorithm: 'gzip',
-        threshold: 8 * KiB,
-      }),
-      compression({
         algorithm: 'brotliCompress',
         threshold: 8 * KiB,
         compressionOptions: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+          [zlib.constants.BROTLI_PARAM_QUALITY]: 8,
         },
       }),
       visualizer({
