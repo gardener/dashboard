@@ -383,9 +383,9 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
-import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -412,9 +412,9 @@ export default {
 
     const cloudProfileStore = useCloudProfileStore()
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-    const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
-    const { machineTypes } = useCloudProfileForMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
-    const { volumeTypes } = useCloudProfileForVolumeTypes(cloudProfile)
+    const { machineImages } = useMachineImages(cloudProfile)
+    const { machineTypes } = useMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+    const { volumeTypes } = useVolumeTypes(cloudProfile)
 
     const tab = ref('overview')
 

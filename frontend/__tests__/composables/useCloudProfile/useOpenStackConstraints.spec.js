@@ -6,10 +6,10 @@
 
 import { ref } from 'vue'
 
-import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
+import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 
 describe('composables', () => {
-  describe('useCloudProfileForOpenStackConstraints', () => {
+  describe('useOpenStackConstraints', () => {
     const floatingPools = [
       {
         name: 'global FP',
@@ -98,75 +98,75 @@ describe('composables', () => {
       })
     })
 
-    describe('#floatingPoolNamesByRegionAndDomain', () => {
+    describe('#useFloatingPoolNamesByRegionAndDomain', () => {
       it('should return floating pool names by region and domain from cloud profile', () => {
-        const { floatingPoolNamesByRegionAndDomain } = useCloudProfileForOpenStackConstraints(cloudProfile)
+        const { useFloatingPoolNamesByRegionAndDomain } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
         const secretDomain = ref('fooDomain')
-        let dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        let dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('global FP')
 
         region.value = 'region1'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('regional FP')
 
         region.value = 'region2'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('regional non constraining FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain1'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('domain specific FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain2'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific non constraining FP')
 
         region.value = 'region3'
         secretDomain.value = 'domain3'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('domain specific, regional FP')
         expect(dashboardFloatingPools[1]).toBe('additional domain specific, regional FP')
 
         region.value = 'region4'
         secretDomain.value = 'domain4'
-        dashboardFloatingPools = floatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific, regional non constraining FP')
       })
     })
 
-    describe('#loadBalancerProviderNamesByRegion', () => {
+    describe('#useLoadBalancerProviderNamesByRegion', () => {
       it('should return load balancer provider names by region from cloud profile', () => {
-        const { loadBalancerProviderNamesByRegion } = useCloudProfileForOpenStackConstraints(cloudProfile)
+        const { useLoadBalancerProviderNamesByRegion } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
-        let dashboardLoadBalancerProviderNames = loadBalancerProviderNamesByRegion(region).value
+        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('global LB')
 
         region.value = 'region1'
-        dashboardLoadBalancerProviderNames = loadBalancerProviderNamesByRegion(region).value
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(2)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('regional LB')
         expect(dashboardLoadBalancerProviderNames[1]).toBe('additional regional LB')
 
         region.value = 'region2'
-        dashboardLoadBalancerProviderNames = loadBalancerProviderNamesByRegion(region).value
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
       })
@@ -174,7 +174,7 @@ describe('composables', () => {
 
     describe('#loadBalancerClassNames', () => {
       it('should return load balancer class names from cloud profile', () => {
-        const { loadBalancerClassNames } = useCloudProfileForOpenStackConstraints(cloudProfile)
+        const { loadBalancerClassNames } = useOpenStackConstraints(cloudProfile)
 
         expect(loadBalancerClassNames.value).toHaveLength(2)
         expect(loadBalancerClassNames.value[0]).toBe('class1')
@@ -184,7 +184,7 @@ describe('composables', () => {
 
     describe('#loadBalancerClasses', () => {
       it('should return load balancer classes from cloud profile', () => {
-        const { loadBalancerClasses } = useCloudProfileForOpenStackConstraints(cloudProfile)
+        const { loadBalancerClasses } = useOpenStackConstraints(cloudProfile)
 
         expect(loadBalancerClasses.value).toHaveLength(2)
         expect(loadBalancerClasses.value[0]).toEqual({ name: 'class1' })

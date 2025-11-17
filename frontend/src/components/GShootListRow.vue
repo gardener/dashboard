@@ -270,7 +270,7 @@ import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -347,7 +347,7 @@ const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
 useProvideSeedItem(seedItem)
 
 const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
+const { machineImages } = useMachineImages(cloudProfile)
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource

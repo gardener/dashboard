@@ -12,12 +12,12 @@ import {
 
 import { useConfigStore } from '@/store/config'
 
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 
 import find from 'lodash/find'
 
 describe('composables', () => {
-  describe('useCloudProfileForMachineImages', () => {
+  describe('useMachineImages', () => {
     let cloudProfile
     let configStore
 
@@ -104,7 +104,7 @@ describe('composables', () => {
 
     describe('#machineImages', () => {
       it('should transform machine images from cloud profile', () => {
-        const { machineImages: decoratedAndSortedMachineImages } = useCloudProfileForMachineImages(cloudProfile)
+        const { machineImages: decoratedAndSortedMachineImages } = useMachineImages(cloudProfile)
         expect(decoratedAndSortedMachineImages.value).toHaveLength(8)
 
         const expiredImage = find(decoratedAndSortedMachineImages.value, { name: 'gardenlinux', version: '1.1.2' })

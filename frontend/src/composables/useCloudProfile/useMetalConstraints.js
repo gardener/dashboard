@@ -9,7 +9,7 @@ import {
   isRef,
 } from 'vue'
 
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes'
 
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -24,12 +24,12 @@ import toPairs from 'lodash/toPairs'
  * @param {Function} zonesByCloudProfileAndRegion - Function to get zones by cloud profile and region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useCloudProfileForMetalConstraints (cloudProfile, zonesByCloudProfileAndRegion) {
+export function useMetalConstraints (cloudProfile, zonesByCloudProfileAndRegion) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+  const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
 
   /**
    * Returns partition IDs for a given region.
@@ -39,19 +39,18 @@ export function useCloudProfileForMetalConstraints (cloudProfile, zonesByCloudPr
    * @returns {ComputedRef<Array<string>|undefined>} Computed ref with partition IDs, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function partitionIDsByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+  function usePartitionIDsByRegion (region) {
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
 
-      if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-        return
-      }
-      const partitionIDs = zonesByCloudProfileAndRegion({ cloudProfile: cloudProfile.value, region: region.value })
-      return partitionIDs
-    })
+    if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
+      return undefinedComputed
+    }
+    return zonesByCloudProfileAndRegion(region)
   }
+
+  const undefinedComputed = computed(() => undefined)
 
   /**
    * Returns firewall sizes for a given region.
@@ -61,19 +60,16 @@ export function useCloudProfileForMetalConstraints (cloudProfile, zonesByCloudPr
    * @returns {ComputedRef<Array|undefined>} Computed ref with firewall sizes, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function firewallSizesByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+  function useFirewallSizesByRegion (region) {
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
 
-      if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-        return
-      }
-      const architectureRef = computed(() => undefined)
-      const firewallSizes = machineTypesByRegionAndArchitecture(region, architectureRef).value
-      return firewallSizes
-    })
+    if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
+      return undefinedComputed
+    }
+
+    return useMachineTypesByRegionAndArchitecture(region, undefinedComputed)
   }
 
   const firewallImages = computed(() => {
@@ -87,7 +83,7 @@ export function useCloudProfileForMetalConstraints (cloudProfile, zonesByCloudPr
    * @returns {ComputedRef<Array>} Computed ref with firewall networks formatted as objects with key, value, and text properties
    * @throws {Error} If partitionID is not a ref
    */
-  function firewallNetworksByPartitionId (partitionID) {
+  function useFirewallNetworksByPartitionId (partitionID) {
     return computed(() => {
       if (!isRef(partitionID)) {
         throw new Error('partitionID must be a ref!')
@@ -105,9 +101,9 @@ export function useCloudProfileForMetalConstraints (cloudProfile, zonesByCloudPr
   }
 
   return {
-    partitionIDsByRegion,
-    firewallSizesByRegion,
+    usePartitionIDsByRegion,
+    useFirewallSizesByRegion,
     firewallImages,
-    firewallNetworksByPartitionId,
+    useFirewallNetworksByPartitionId,
   }
 }

@@ -25,7 +25,7 @@ import template from 'lodash/template'
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useCloudProfileForAccessRestrictions (cloudProfile) {
+export function useAccessRestrictions (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
@@ -37,26 +37,20 @@ export function useCloudProfileForAccessRestrictions (cloudProfile) {
    * Reads from the cloud profile's regions configuration to find region-specific
    * access restrictions.
    *
-   * @param {Ref<string>} region - A Vue ref containing the region name
-   * @returns {ComputedRef<Array>} Computed ref with array of access restrictions, or empty array if none found
+   * @returns Array Computed ref with array of access restrictions, or empty array if none found
    * @throws {Error} If region is not a ref
+   * @param region
    */
   function accessRestrictionsByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+    if (!cloudProfile.value) {
+      return []
+    }
 
-      if (!cloudProfile.value) {
-        return []
-      }
-
-      const regionData = find(cloudProfile.value?.spec.regions, ['name', region.value])
-      if (!regionData) {
-        return []
-      }
-      return get(regionData, ['accessRestrictions'], [])
-    })
+    const regionData = find(cloudProfile.value?.spec.regions, ['name', region])
+    if (!regionData) {
+      return []
+    }
+    return get(regionData, ['accessRestrictions'], [])
   }
 
   /**
@@ -67,7 +61,7 @@ export function useCloudProfileForAccessRestrictions (cloudProfile) {
    * @returns {ComputedRef<Array>} Computed ref with array of access restriction definitions, or empty array if none
    * @throws {Error} If region is not a ref
    */
-  function accessRestrictionDefinitionsByRegion (region) {
+  function useAccessRestrictionDefinitionsByRegion (region) {
     return computed(() => {
       if (!isRef(region)) {
         throw new Error('region must be a ref!')
@@ -77,7 +71,7 @@ export function useCloudProfileForAccessRestrictions (cloudProfile) {
         return []
       }
 
-      const allowedAccessRestrictions = accessRestrictionsByRegion(region).value
+      const allowedAccessRestrictions = accessRestrictionsByRegion(region.value)
       if (isEmpty(allowedAccessRestrictions)) {
         return []
       }
@@ -99,7 +93,7 @@ export function useCloudProfileForAccessRestrictions (cloudProfile) {
    * @returns {ComputedRef<string>} Computed ref with the no-items text message
    * @throws {Error} If region is not a ref
    */
-  function accessRestrictionNoItemsTextByRegion (region) {
+  function useAccessRestrictionNoItemsTextByRegion (region) {
     return computed(() => {
       if (!isRef(region)) {
         throw new Error('region must be a ref!')
@@ -118,8 +112,7 @@ export function useCloudProfileForAccessRestrictions (cloudProfile) {
   }
 
   return {
-    accessRestrictionsByRegion,
-    accessRestrictionDefinitionsByRegion,
-    accessRestrictionNoItemsTextByRegion,
+    useAccessRestrictionDefinitionsByRegion,
+    useAccessRestrictionNoItemsTextByRegion,
   }
 }

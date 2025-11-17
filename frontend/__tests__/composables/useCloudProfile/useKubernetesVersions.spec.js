@@ -6,12 +6,12 @@
 
 import { ref } from 'vue'
 
-import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions'
+import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
 
 import find from 'lodash/find'
 
 describe('composables', () => {
-  describe('useCloudProfileForKubeVersions', () => {
+  describe('useKubernetesVersions', () => {
     const preview22Version = {
       classification: 'preview',
       version: '2.2.0',
@@ -124,7 +124,7 @@ describe('composables', () => {
 
     describe('#sortedKubernetesVersions', () => {
       it('should filter and sort kubernetes versions from cloud profile', () => {
-        const { sortedKubernetesVersions } = useCloudProfileForKubeVersions(cloudProfile)
+        const { sortedKubernetesVersions } = useKubernetesVersions(cloudProfile)
         const decoratedAndSortedVersions = sortedKubernetesVersions.value
         expect(decoratedAndSortedVersions).toHaveLength(kubernetesVersions.length - 1)
 
@@ -159,7 +159,7 @@ describe('composables', () => {
     describe('#useAvailableKubernetesUpdatesForShoot', () => {
       it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
         const shootVersion = ref(deprecatedOldest16Version.version)
-        const { useAvailableKubernetesUpdatesForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useAvailableKubernetesUpdatesForShoot } = useKubernetesVersions(cloudProfile)
         const availableK8sUpdates = useAvailableKubernetesUpdatesForShoot(shootVersion)
         expect(availableK8sUpdates.value.patch.length).toBe(5)
         expect(availableK8sUpdates.value.minor.length).toBe(3)
@@ -167,7 +167,7 @@ describe('composables', () => {
       })
 
       it('should return available K8sUpdates for given version', () => {
-        const { useAvailableKubernetesUpdatesForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useAvailableKubernetesUpdatesForShoot } = useKubernetesVersions(cloudProfile)
         const shootVersion = ref(unclassified164VersionWithExpiration.version)
         const availableK8sUpdates = useAvailableKubernetesUpdatesForShoot(shootVersion)
         expect(availableK8sUpdates.value.patch[0]).toEqual(expect.objectContaining(supported165VersionWithExpiration))
@@ -178,14 +178,14 @@ describe('composables', () => {
 
     describe('#useKubernetesVersionIsNotLatestPatch', () => {
       it('selected kubernetes version should be latest (one minor, one major, one preview patch update available)', () => {
-        const { useKubernetesVersionIsNotLatestPatch } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionIsNotLatestPatch } = useKubernetesVersions(cloudProfile)
         const kubernetesVersion = ref(supported165VersionWithExpiration.version)
         const result = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
         expect(result.value).toBe(false)
       })
 
       it('selected kubernetes version should not be latest', () => {
-        const { useKubernetesVersionIsNotLatestPatch } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionIsNotLatestPatch } = useKubernetesVersions(cloudProfile)
         const kubernetesVersion = ref(supported162VersionWithExpirationWarning.version)
         const result = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
         expect(result.value).toBe(true)
@@ -194,7 +194,7 @@ describe('composables', () => {
 
     describe('#useKubernetesVersionExpirationForShoot', () => {
       it('should be info level (patch available, auto update enabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(true)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -207,7 +207,7 @@ describe('composables', () => {
       })
 
       it('should be warning level (patch available, auto update enabled, expiration warning))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(supported162VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(true)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -220,7 +220,7 @@ describe('composables', () => {
       })
 
       it('should be warning level (patch available, auto update disabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(supported162VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(false)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -233,7 +233,7 @@ describe('composables', () => {
       })
 
       it('should be warning level (update available, auto update enabled / disabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(supported17VersionWithExpirationWarning.version)
         let k8sAutoPatch = ref(true)
         let versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -255,7 +255,7 @@ describe('composables', () => {
       })
 
       it('should be error level (only deprecated newer version available))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(supported18VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(false)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -268,7 +268,7 @@ describe('composables', () => {
       })
 
       it('should not have warning (version not expired))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(false)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -276,7 +276,7 @@ describe('composables', () => {
       })
 
       it('should have info (auto update)', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(true)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -289,7 +289,7 @@ describe('composables', () => {
       })
 
       it('should not have warning (deprecated version has no expiration))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(deprecatedOldest16Version.version)
         const k8sAutoPatch = ref(false)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -297,7 +297,7 @@ describe('composables', () => {
       })
 
       it('should not have error when no immediate supported minor version update exists', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(deprecated14Version.version)
         const k8sAutoPatch = ref(true)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
@@ -310,7 +310,7 @@ describe('composables', () => {
       })
 
       it('should have warning when version is expired', () => {
-        const { useKubernetesVersionExpirationForShoot } = useCloudProfileForKubeVersions(cloudProfile)
+        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
         const shootK8sVersion = ref(expiredVersion.version)
         const k8sAutoPatch = ref(false)
         const versionExpirationWarning = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)

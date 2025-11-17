@@ -9,7 +9,7 @@ import {
   isRef,
 } from 'vue'
 
-import { useCloudProfileForRegions } from './useCloudProfileForRegions'
+import { useRegions } from './useRegions.js'
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
@@ -23,12 +23,12 @@ import intersection from 'lodash/intersection'
  * @param {Ref<CloudProfile>} cloudProfile - Vue ref containing the cloud profile object
  * @returns {Object} Object containing computed properties and functions for volume types
  */
-export function useCloudProfileForVolumeTypes (cloudProfile) {
+export function useVolumeTypes (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
+  const { useZonesByRegion } = useRegions(cloudProfile)
 
   /**
    * Get all volume types from cloud profile
@@ -42,29 +42,28 @@ export function useCloudProfileForVolumeTypes (cloudProfile) {
    * @param {Ref<String>} region - Vue ref containing the region name
    * @returns {ComputedRef<Array>} Computed ref of available volume types
    */
-  function volumeTypesByRegion (region) {
+  function useVolumeTypesByRegion (region) {
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
+
+    if (!cloudProfile.value) {
+      return computed(() => [])
+    }
+    const zones = useZonesByRegion(region)
+
     return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
-
-      if (!cloudProfile.value) {
-        return []
-      }
-
       const items = volumeTypes.value
       if (!region.value) {
         return items
       }
-
-      const zones = zonesByRegion(region).value
 
       const regionObject = find(
         get(cloudProfile.value, ['spec', 'regions'], []),
         { name: region.value },
       )
       let regionZones = get(regionObject, ['zones'], [])
-      regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
+      regionZones = filter(regionZones, regionZone => includes(zones.value, regionZone.name))
       const unavailableVolumeTypes = map(regionZones, zone => zone.unavailableVolumeTypes)
       const unavailableVolumeTypesInAllZones = intersection(...unavailableVolumeTypes)
 
@@ -86,7 +85,7 @@ export function useCloudProfileForVolumeTypes (cloudProfile) {
    * @param {Ref<Object>} volumeType - Vue ref containing volume type object
    * @returns {ComputedRef<String>} Computed ref of minimum size (e.g. "20Gi")
    */
-  function minimumVolumeSize (machineType, volumeType) {
+  function useMinimumVolumeSize (machineType, volumeType) {
     return computed(() => {
       if (!isRef(machineType)) {
         throw new Error('machineType must be a ref!')
@@ -109,7 +108,7 @@ export function useCloudProfileForVolumeTypes (cloudProfile) {
 
   return {
     volumeTypes,
-    volumeTypesByRegion,
-    minimumVolumeSize,
+    useVolumeTypesByRegion,
+    useMinimumVolumeSize,
   }
 }

@@ -24,35 +24,27 @@ import some from 'lodash/some'
  * @param {Ref<CloudProfile>} cloudProfile - Vue ref containing the cloud profile object
  * @returns {Object} Object containing computed properties and functions for regions/zones
  */
-export function useCloudProfileForRegions (cloudProfile) {
+export function useRegions (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const seedStore = useSeedStore()
-
   /**
    * Check if region is valid for the cloud profile
-   * @param {Ref<String>} region - Vue ref containing the region name
-   * @returns {ComputedRef<Boolean>} Computed ref indicating if region is valid
+   * @returns Boolean Computed ref indicating if region is valid
+   * @param region
    */
   function isValidRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+    const providerType = get(cloudProfile.value, ['spec', 'type'])
 
-      const providerType = get(cloudProfile.value, ['spec', 'type'])
+    if (providerType === 'azure') {
+      // Azure regions may not be zoned, need to filter these out for the dashboard
+      const zones = zonesByRegion(region)
+      return !!zones.length
+    }
 
-      if (providerType === 'azure') {
-        // Azure regions may not be zoned, need to filter these out for the dashboard
-        const zones = zonesByRegion(region).value
-        return !!zones.length
-      }
-
-      // Filter regions that are not defined in cloud profile
-      return some(get(cloudProfile.value, ['spec', 'regions'], []), ['name', region.value])
-    })
+    // Filter regions that are not defined in cloud profile
+    return some(get(cloudProfile.value, ['spec', 'regions'], []), ['name', region])
   }
 
   /**
@@ -60,30 +52,35 @@ export function useCloudProfileForRegions (cloudProfile) {
    * @param {Ref<String>} region - Vue ref containing the region name
    * @returns {ComputedRef<Array<String>>} Computed ref of zone names
    */
-  function zonesByRegion (region) {
+  function useZonesByRegion (region) {
     return computed(() => {
       if (!isRef(region)) {
         throw new Error('region must be a ref!')
       }
 
-      if (!cloudProfile.value) {
-        return []
-      }
-
-      const regionObj = find(
-        get(cloudProfile.value, ['spec', 'regions'], []),
-        { name: region.value },
-      )
-      return map(get(regionObj, ['zones'], []), 'name')
+      return zonesByRegion(region.value)
     })
   }
 
+  function zonesByRegion (region) {
+    if (!cloudProfile.value) {
+      return []
+    }
+
+    const regionObj = find(
+      get(cloudProfile.value, ['spec', 'regions'], []),
+      { name: region },
+    )
+    return map(get(regionObj, ['zones'], []), 'name')
+  }
   /**
    * Get regions that have seed availability
    * @param {Ref<Object>} project - Vue ref containing the project object
    * @returns {ComputedRef<Array<String>>} Computed ref of region names with seeds
    */
-  function regionsWithSeed (project) {
+  function useRegionsWithSeed (project) {
+    const seedStore = useSeedStore()
+
     return computed(() => {
       if (!isRef(project)) {
         throw new Error('project must be a ref!')
@@ -98,8 +95,7 @@ export function useCloudProfileForRegions (cloudProfile) {
       // need to use get as map does not support array paths
       const uniqueSeedRegions = uniq(map(seeds, seed => get(seed, ['spec', 'provider', 'region'])))
       const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, regionName => {
-        const regionRef = computed(() => regionName)
-        return isValidRegion(regionRef).value
+        return isValidRegion(regionName)
       })
       return uniqueSeedRegionsWithZones
     })
@@ -110,7 +106,7 @@ export function useCloudProfileForRegions (cloudProfile) {
    * @param {Ref<Object>} project - Vue ref containing the project object
    * @returns {ComputedRef<Array<String>>} Computed ref of region names without seeds
    */
-  function regionsWithoutSeed (project) {
+  function useRegionsWithoutSeed (project) {
     return computed(() => {
       if (!isRef(project)) {
         throw new Error('project must be a ref!')
@@ -120,21 +116,20 @@ export function useCloudProfileForRegions (cloudProfile) {
         return []
       }
 
-      const regionsWithSeedList = regionsWithSeed(project).value
+      const useRegionsWithSeedList = useRegionsWithSeed(project).value
       const regionsInCloudProfile = map(get(cloudProfile.value, ['spec', 'regions'], []), 'name')
       const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, regionName => {
         const regionRef = computed(() => regionName)
-        return isValidRegion(regionRef).value
+        return isValidRegion(regionRef.value)
       })
-      const regionsWithoutSeedList = difference(regionsInCloudProfileWithZones, regionsWithSeedList)
-      return regionsWithoutSeedList
+      const useRegionsWithoutSeedList = difference(regionsInCloudProfileWithZones, useRegionsWithSeedList)
+      return useRegionsWithoutSeedList
     })
   }
 
   return {
-    isValidRegion,
-    zonesByRegion,
-    regionsWithSeed,
-    regionsWithoutSeed,
+    useZonesByRegion,
+    useRegionsWithSeed,
+    useRegionsWithoutSeed,
   }
 }

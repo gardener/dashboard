@@ -19,14 +19,14 @@ import { useProjectStore } from '@/store/project'
 
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
-import { useCloudProfileForDefaultNodesCIDR } from '@/composables/useCloudProfile/useCloudProfileForDefaultNodesCIDR'
-import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
-import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
-import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
-import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes'
+import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useDefaultNodesCIDR } from '@/composables/useCloudProfile/useDefaultNodesCIDR.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
+import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -113,39 +113,39 @@ export function createShootHelperComposable (shootItem, options = {}) {
   const {
     sortedKubernetesVersions,
     useKubernetesVersionIsNotLatestPatch,
-  } = useCloudProfileForKubeVersions(cloudProfile)
+  } = useKubernetesVersions(cloudProfile)
 
   const {
     machineImages: machineImagesFromComposable,
-  } = useCloudProfileForMachineImages(cloudProfile)
+  } = useMachineImages(cloudProfile)
 
   const {
-    zonesByRegion,
-    regionsWithSeed: regionsWithSeedFn,
-    regionsWithoutSeed: regionsWithoutSeedFn,
-  } = useCloudProfileForRegions(cloudProfile)
+    useZonesByRegion,
+    useRegionsWithSeed,
+    useRegionsWithoutSeed,
+  } = useRegions(cloudProfile)
 
   const {
     machineTypes: allMachineTypesFromComposable,
-    machineArchitecturesByRegion,
-  } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
+    useMachineArchitecturesByRegion,
+  } = useMachineTypes(cloudProfile, useZonesByRegion)
 
   const {
-    floatingPoolNamesByRegionAndDomain,
-    loadBalancerProviderNamesByRegion,
+    useFloatingPoolNamesByRegionAndDomain,
+    useLoadBalancerProviderNamesByRegion,
     loadBalancerClassNames,
-  } = useCloudProfileForOpenStackConstraints(cloudProfile)
+  } = useOpenStackConstraints(cloudProfile)
 
   const {
-    partitionIDsByRegion,
+    usePartitionIDsByRegion,
     firewallImages: firewallImagesFromComposable,
-    firewallSizesByRegion,
-  } = useCloudProfileForMetalConstraints(cloudProfile, zonesByRegion)
+    useFirewallSizesByRegion,
+  } = useMetalConstraints(cloudProfile, useZonesByRegion)
 
   const {
     volumeTypes: allVolumeTypesFromComposable,
-    volumeTypesByRegion: volumeTypesByRegionFn,
-  } = useCloudProfileForVolumeTypes(cloudProfile)
+    useVolumeTypesByRegion,
+  } = useVolumeTypes(cloudProfile)
 
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
@@ -170,17 +170,17 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allZones = zonesByRegion(region)
+  const allZones = useZonesByRegion(region)
 
-  const regionsWithSeed = regionsWithSeedFn(project)
+  const regionsWithSeed = useRegionsWithSeed(project)
 
-  const regionsWithoutSeed = regionsWithoutSeedFn(project)
+  const regionsWithoutSeed = useRegionsWithoutSeed(project)
 
-  const { defaultNodesCIDR } = useCloudProfileForDefaultNodesCIDR(cloudProfile)
+  const { defaultNodesCIDR } = useDefaultNodesCIDR(cloudProfile)
 
   const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
-  const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion).value
+  const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 
   const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 
@@ -195,28 +195,28 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const secretDomain = computed(() => get(infrastructureBinding.value, ['data', 'domainName']))
 
-  const allLoadBalancerProviderNames = loadBalancerProviderNamesByRegion(region)
+  const allLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region)
 
   const allLoadBalancerClassNames = loadBalancerClassNames
 
-  const partitionIDs = partitionIDsByRegion(region)
+  const partitionIDs = usePartitionIDsByRegion(region)
 
   const firewallImages = firewallImagesFromComposable
 
+  const sizes = useFirewallSizesByRegion(region)
   const firewallSizes = computed(() => {
-    const sizes = firewallSizesByRegion(region).value
-    return map(sizes, 'name')
+    return map(sizes.value, 'name')
   })
 
-  const allFloatingPoolNames = floatingPoolNamesByRegionAndDomain(region, secretDomain)
+  const allFloatingPoolNames = useFloatingPoolNamesByRegionAndDomain(region, secretDomain)
 
   const allMachineTypes = allMachineTypesFromComposable
 
-  const machineArchitectures = machineArchitecturesByRegion(region)
+  const machineArchitectures = useMachineArchitecturesByRegion(region)
 
   const allVolumeTypes = allVolumeTypesFromComposable
 
-  const volumeTypes = volumeTypesByRegionFn(region)
+  const volumeTypes = useVolumeTypesByRegion(region)
 
   const machineImages = machineImagesFromComposable
 
