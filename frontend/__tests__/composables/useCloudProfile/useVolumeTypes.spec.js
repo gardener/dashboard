@@ -8,12 +8,12 @@ import { ref } from 'vue'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 
-import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
 import find from 'lodash/find'
 
 describe('composables', () => {
-  describe('useCloudProfileForVolumeTypes', () => {
+  describe('useVolumeTypes', () => {
     beforeEach(() => {
       const pinia = createTestingPinia()
       setActivePinia(pinia)
@@ -113,7 +113,7 @@ describe('composables', () => {
 
     describe('#volumeTypes', () => {
       it('should return all volume types from cloud profile', () => {
-        const { volumeTypes } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { volumeTypes } = useVolumeTypes(cloudProfile)
         expect(volumeTypes.value).toHaveLength(4)
         expect(volumeTypes.value).toEqual([
           {
@@ -141,18 +141,18 @@ describe('composables', () => {
       })
     })
 
-    describe('#volumeTypesByRegion', () => {
+    describe('#useVolumeTypesByRegion', () => {
       it('should return all volume types when no region specified', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref(undefined)
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         expect(volumeTypes.value).toHaveLength(4)
       })
 
       it('should return volume types available in all zones of a region', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         expect(volumeTypes.value).toHaveLength(2)
         const gp2 = find(volumeTypes.value, { name: 'gp2' })
         const io1 = find(volumeTypes.value, { name: 'io1' })
@@ -161,17 +161,17 @@ describe('composables', () => {
       })
 
       it('should filter out volume types unavailable in all zones', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         const gp3 = find(volumeTypes.value, { name: 'gp3' })
         expect(gp3).toBeUndefined()
       })
 
       it('should include volume types unavailable in some zones but available in others', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref('eu-west-1')
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         expect(volumeTypes.value).toHaveLength(3)
         const gp3 = find(volumeTypes.value, { name: 'gp3' })
         const gp2 = find(volumeTypes.value, { name: 'gp2' })
@@ -182,9 +182,9 @@ describe('composables', () => {
       })
 
       it('should filter out volume types marked as not usable', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref('us-east-1')
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         expect(volumeTypes.value).toHaveLength(3)
         const sc1 = find(volumeTypes.value, { name: 'sc1' })
         expect(sc1).toBeUndefined()
@@ -192,79 +192,79 @@ describe('composables', () => {
 
       it('should return empty array when cloud profile is null', () => {
         cloudProfile.value = null
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = volumeTypesByRegion(region)
+        const volumeTypes = useVolumeTypesByRegion(region)
         expect(volumeTypes.value).toEqual([])
       })
 
       it('should throw error when region is not a ref', () => {
-        const { volumeTypesByRegion } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
         const region = 'eu-central-1'
         expect(() => {
-          const volumeTypes = volumeTypesByRegion(region)
+          const volumeTypes = useVolumeTypesByRegion(region)
           // Access the computed value to trigger validation
           volumeTypes.value // eslint-disable-line no-unused-expressions
         }).toThrow('region must be a ref!')
       })
     })
 
-    describe('#minimumVolumeSize', () => {
+    describe('#useMinimumVolumeSize', () => {
       it('should return minSize from volume type when volume type has name', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({})
         const volumeType = ref({
           name: 'io1',
           minSize: '4Gi',
         })
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('4Gi')
       })
 
       it('should return 0Gi when volume type has name but no minSize', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({})
         const volumeType = ref({
           name: 'gp2',
         })
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('0Gi')
       })
 
       it('should return minSize from machine type storage when volume type has no name', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({
           storage: {
             minSize: '64Gi',
           },
         })
         const volumeType = ref({})
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('64Gi')
       })
 
       it('should return 0Gi when neither volume type nor machine type have minSize', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({})
         const volumeType = ref({})
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('0Gi')
       })
 
       it('should return 0Gi when machine type has storage but no minSize', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({
           storage: {
             type: 'default',
           },
         })
         const volumeType = ref({})
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('0Gi')
       })
 
       it('should prioritize volume type minSize over machine type storage', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({
           storage: {
             minSize: '64Gi',
@@ -274,27 +274,27 @@ describe('composables', () => {
           name: 'io1',
           minSize: '4Gi',
         })
-        const minSize = minimumVolumeSize(machineType, volumeType)
+        const minSize = useMinimumVolumeSize(machineType, volumeType)
         expect(minSize.value).toBe('4Gi')
       })
 
       it('should throw error when machineType is not a ref', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = {}
         const volumeType = ref({})
         expect(() => {
-          const minSize = minimumVolumeSize(machineType, volumeType)
+          const minSize = useMinimumVolumeSize(machineType, volumeType)
           // Access the computed value to trigger validation
           minSize.value // eslint-disable-line no-unused-expressions
         }).toThrow('machineType must be a ref!')
       })
 
       it('should throw error when volumeType is not a ref', () => {
-        const { minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfile)
+        const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
         const machineType = ref({})
         const volumeType = {}
         expect(() => {
-          const minSize = minimumVolumeSize(machineType, volumeType)
+          const minSize = useMinimumVolumeSize(machineType, volumeType)
           // Access the computed value to trigger validation
           minSize.value // eslint-disable-line no-unused-expressions
         }).toThrow('volumeType must be a ref!')
@@ -306,7 +306,7 @@ describe('composables', () => {
         metadata: { name: 'test' },
       }
       expect(() => {
-        useCloudProfileForVolumeTypes(cloudProfileValue)
+        useVolumeTypes(cloudProfileValue)
       }).toThrow('cloudProfile must be a ref!')
     })
   })

@@ -9,7 +9,7 @@ import {
   isRef,
 } from 'vue'
 
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages'
 
 import {
   isValidTerminationDate,
@@ -54,7 +54,7 @@ export function useShootMessages (cloudProfile) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { machineImages } = useCloudProfileForMachineImages(cloudProfile)
+  const { machineImages } = useMachineImages(cloudProfile)
 
   /**
    * Get expiring worker groups for shoot

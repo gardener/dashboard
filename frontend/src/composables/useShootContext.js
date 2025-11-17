@@ -29,12 +29,12 @@ import { useLogger } from '@/composables/useLogger'
 import { createShootHelperComposable } from '@/composables/useShootHelper'
 import { useShootMetadata } from '@/composables/useShootMetadata'
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
-import { useCloudProfileForKubeVersions } from '@/composables/useCloudProfile/useCloudProfileForKubeVersions.js'
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes.js'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages.js'
-import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions.js'
-import { useCloudProfileForMetalConstraints } from '@/composables/useCloudProfile/useCloudProfileForMetalConstraints'
-import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes.js'
+import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -945,12 +945,12 @@ export function createShootContextComposable (options = {}) {
 
   const {
     defaultKubernetesVersion,
-  } = useCloudProfileForKubeVersions(cloudProfile)
+  } = useKubernetesVersions(cloudProfile)
 
-  const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-  const { firewallNetworksByPartitionId } = useCloudProfileForMetalConstraints(cloudProfile, zonesByRegion)
+  const { useZonesByRegion } = useRegions(cloudProfile)
+  const { useFirewallNetworksByPartitionId } = useMetalConstraints(cloudProfile, useZonesByRegion)
 
-  const allFirewallNetworks = firewallNetworksByPartitionId(computed(() => providerInfrastructureConfigPartitionID.value))
+  const allFirewallNetworks = useFirewallNetworksByPartitionId(providerInfrastructureConfigPartitionID)
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
@@ -1117,32 +1117,33 @@ function generateWorker (availableZones, cloudProfileRef, region, kubernetesVers
   // Get cloud profile and setup composables
   const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef)
   const cloudProfileValue = computed(() => cloudProfile)
-  const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
-  const { machineArchitecturesByRegion, machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfileValue, zonesByRegion)
-  const { defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfileValue)
+  const { useZonesByRegion } = useRegions(cloudProfileValue)
+  const { useMachineArchitecturesByRegion, useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfileValue, useZonesByRegion)
+  const { useDefaultMachineImageForMachineType } = useMachineImages(cloudProfileValue)
 
   // Get machine architecture and types
   const regionRef = computed(() => region)
-  const architecture = head(machineArchitecturesByRegion(regionRef).value)
+  const machineArchitecture = useMachineArchitecturesByRegion(regionRef)
+  const architecture = head(machineArchitecture.value)
   const architectureRef = computed(() => architecture)
-  const machineTypesForZone = machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
-  const machineType = head(machineTypesForZone) || {}
+  const machineTypesForZone = useMachineTypesByRegionAndArchitecture(regionRef, architectureRef)
+  const machineType = head(machineTypesForZone.value) || {}
 
   // Get volume types
-  const { volumeTypesByRegion, minimumVolumeSize } = useCloudProfileForVolumeTypes(cloudProfileValue)
-  const volumeTypesForZone = volumeTypesByRegion(regionRef).value
-  const volumeType = head(volumeTypesForZone) || {}
+  const { useVolumeTypesByRegion, useMinimumVolumeSize } = useVolumeTypes(cloudProfileValue)
+  const volumeTypesForZone = useVolumeTypesByRegion(regionRef)
+  const volumeType = head(volumeTypesForZone.value) || {}
 
   // Get machine image
   const machineTypeRef = computed(() => machineType)
-  const machineImage = defaultMachineImageForMachineType(machineTypeRef).value
+  const machineImage = useDefaultMachineImageForMachineType(machineTypeRef)
 
   const volumeTypeRef = computed(() => volumeType)
-  const minVolumeSize = minimumVolumeSize(machineTypeRef, volumeTypeRef).value
-  const criNames = map(machineImage?.cri, 'name')
+  const minVolumeSize = useMinimumVolumeSize(machineTypeRef, volumeTypeRef)
+  const criNames = map(machineImage.value?.cri, 'name')
   const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
 
-  const defaultVolumeSize = convertToGi(minVolumeSize) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize
+  const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
   const worker = {
     id,
     name,
@@ -1151,7 +1152,7 @@ function generateWorker (availableZones, cloudProfileRef, region, kubernetesVers
     maxSurge: 1,
     machine: {
       type: machineType.name,
-      image: pick(machineImage, ['name', 'version']),
+      image: pick(machineImage.value, ['name', 'version']),
       architecture,
     },
     zones,

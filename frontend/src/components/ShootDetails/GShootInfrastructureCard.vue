@@ -267,7 +267,7 @@ import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialD
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProfileForOpenStackConstraints } from '@/composables/useCloudProfile/useCloudProfileForOpenStackConstraints'
+import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 
 import {
   wildcardObjectsFromStrings,
@@ -325,10 +325,10 @@ export default {
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-    const { floatingPoolsByRegionAndDomain } = useCloudProfileForOpenStackConstraints(cloudProfile)
+    const { useFloatingPoolsByRegionAndDomain } = useOpenStackConstraints(cloudProfile)
 
     const secretDomain = computed(() => get(shootCloudProviderBinding.value, ['data', 'domainName']))
-    const availableFloatingPools = floatingPoolsByRegionAndDomain(shootRegion, secretDomain)
+    const availableFloatingPools = useFloatingPoolsByRegionAndDomain(shootRegion, secretDomain)
 
     return {
       shootItem,

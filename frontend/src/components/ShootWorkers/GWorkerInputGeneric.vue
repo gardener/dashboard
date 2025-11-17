@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-volume-size-input
           v-model="volumeSize"
           v-model:has-custom-storage-size="hasCustomStorageSize"
-          :min="minimumVolumeSize"
+          :min="useMinimumVolumeSize"
           :default-storage-size="defaultStorageSize"
           :has-volume-types="volumeInCloudProfile"
           color="primary"
@@ -165,10 +165,10 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useCloudProfileForMachineImages } from '@/composables/useCloudProfile/useCloudProfileForMachineImages'
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
-import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
-import { useCloudProfileForVolumeTypes } from '@/composables/useCloudProfile/useCloudProfileForVolumeTypes.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
 import {
   withFieldName,
@@ -212,7 +212,7 @@ export default {
       required: true,
     },
   },
-  setup () {
+  setup (props) {
     const {
       isNewCluster,
       cloudProfileRef,
@@ -229,11 +229,36 @@ export default {
       providerWorkers,
     } = useShootContext()
 
-    const { machineImages, defaultMachineImageForMachineType } = useCloudProfileForMachineImages(cloudProfile)
-    const cloudProfileValue = computed(() => cloudProfile.value)
-    const { zonesByRegion } = useCloudProfileForRegions(cloudProfileValue)
-    const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByRegion)
-    const { minimumVolumeSize: minimumVolumeSizeByMachineTypeAndVolumeType, volumeTypes } = useCloudProfileForVolumeTypes(cloudProfileValue)
+    const { machineImages, useDefaultMachineImageForMachineType } = useMachineImages(cloudProfile)
+    const { useZonesByRegion } = useRegions(cloudProfile)
+    const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
+    const { useMinimumVolumeSize: useMinimumVolumeSizeByMachineTypeAndVolumeType, volumeTypes } = useVolumeTypes(cloudProfile)
+
+    function resetWorkerMachine () {
+      props.worker.machine.type = get(defaultMachineType, ['name'])
+      props.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
+    }
+
+    const machineArchitecture = computed({
+      get () {
+        return props.worker.machine.architecture
+      },
+      set (architecture) {
+        props.worker.machine.architecture = architecture
+
+        // Reset machine type and image to default as they won't be supported by new architecture
+        resetWorkerMachine()
+      },
+    })
+
+    const machineTypes = useMachineTypesByRegionAndArchitecture(
+      region,
+      machineArchitecture,
+    )
+
+    const defaultMachineType = computed(() => head(machineTypes.value))
+
+    const defaultMachineImage = useDefaultMachineImageForMachineType(defaultMachineType)
 
     return {
       v$: useVuelidate(),
@@ -251,9 +276,10 @@ export default {
       volumeTypes,
       providerWorkers,
       machineImages,
-      defaultMachineImageForMachineType,
-      machineTypesByRegionAndArchitecture,
-      minimumVolumeSizeByMachineTypeAndVolumeType,
+      machineArchitecture,
+      machineTypes,
+      useMachineTypesByRegionAndArchitecture,
+      useMinimumVolumeSizeByMachineTypeAndVolumeType,
     }
   },
   data () {
@@ -308,14 +334,14 @@ export default {
     })
 
     const volumeSizeRules = {
-      minVolumeSize: withMessage(() => `Minimum size is ${this.minimumVolumeSize}`, value => {
+      minVolumeSize: withMessage(() => `Minimum size is ${this.useMinimumVolumeSize}`, value => {
         if (!this.hasVolumeSize) {
           return true
         }
         if (!value) {
           return false
         }
-        return this.minimumVolumeSize <= convertToGi(value)
+        return this.useMinimumVolumeSize <= convertToGi(value)
       }),
     }
     rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
@@ -332,11 +358,6 @@ export default {
         ? []
         : this.initialZones
     },
-    machineTypes () {
-      const regionRef = computed(() => this.region)
-      const architectureRef = computed(() => this.machineArchitecture)
-      return this.machineTypesByRegionAndArchitecture(regionRef, architectureRef).value
-    },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
     },
@@ -349,21 +370,21 @@ export default {
     filteredMachineImages () {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
-    minimumVolumeSize () {
-      const minimumVolumeSize = this.minimumVolumeSizeByMachineTypeAndVolumeType(
+    useMinimumVolumeSize () {
+      const useMinimumVolumeSize = this.useMinimumVolumeSizeByMachineTypeAndVolumeType(
         computed(() => this.selectedMachineType),
         computed(() => this.selectedVolumeType),
       ).value
-      const minimumVolumeSizeInGi = convertToGi(minimumVolumeSize)
+      const useMinimumVolumeSizeInGi = convertToGi(useMinimumVolumeSize)
       let defaultSize = get(this.selectedMachineType, ['storage.size'])
       if (defaultSize) {
         defaultSize = convertToGi(defaultSize)
       }
-      if (defaultSize > 0 && defaultSize < minimumVolumeSizeInGi) {
+      if (defaultSize > 0 && defaultSize < useMinimumVolumeSizeInGi) {
         return defaultSize
       }
 
-      return minimumVolumeSizeInGi
+      return useMinimumVolumeSizeInGi
     },
     innerMin: {
       get () {
@@ -454,17 +475,6 @@ export default {
     machineImageCri () {
       return get(this.selectedMachineImage, ['cri'])
     },
-    machineArchitecture: {
-      get () {
-        return this.worker.machine.architecture
-      },
-      set (architecture) {
-        this.worker.machine.architecture = architecture
-
-        // Reset machine type and image to default as they won't be supported by new architecture
-        this.resetWorkerMachine()
-      },
-    },
     machineTypeValue: {
       get () {
         return this.worker.machine.type
@@ -505,13 +515,6 @@ export default {
     onInputZones () {
       this.v$.selectedZones.$touch()
       this.v$.worker.maximum.$touch()
-    },
-    resetWorkerMachine () {
-      const defaultMachineType = head(this.machineTypes)
-      this.worker.machine.type = get(defaultMachineType, ['name'])
-      const machineTypeRef = computed(() => defaultMachineType)
-      const defaultMachineImage = this.defaultMachineImageForMachineType(machineTypeRef).value
-      this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
     },
     ensureValidAutoscalerMin () {
       this.v$.worker.minimum.$touch()

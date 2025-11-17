@@ -39,13 +39,12 @@ import find from 'lodash/find'
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useCloudProfileForKubeVersions (cloudProfile) {
+export function useKubernetesVersions (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
   const logger = useLogger()
-  const availableKubernetesUpdatesCache = new Map()
 
   const kubernetesVersions = computed(() => {
     const allVersions = get(cloudProfile.value, ['spec', 'kubernetes', 'versions'], [])
@@ -82,14 +81,10 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
   function useAvailableKubernetesUpdatesForShoot (shootVersion) {
     return computed(() => {
       if (!isRef(shootVersion)) {
-        throw Error('shootversion must be a ref!')
+        throw Error('shootVersion must be a ref!')
       }
-      const key = `${shootVersion.value}_${cloudProfile.value?.kind}_${cloudProfile.value?.name}`
-      let newerVersions = availableKubernetesUpdatesCache.get(key)
-      if (newerVersions !== undefined) {
-        return newerVersions
-      }
-      newerVersions = {}
+
+      let newerVersions = {}
       const allVersions = kubernetesVersions.value
 
       const validVersions = filter(allVersions, ({ isExpired }) => !isExpired)
@@ -104,7 +99,6 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
         /* eslint-enable security/detect-object-injection */
       }
       newerVersions = newerVersionsForShoot.length ? newerVersions : null
-      availableKubernetesUpdatesCache.set(key, newerVersions)
 
       return newerVersions
     })
@@ -140,6 +134,12 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
    * @throws {Error} If shootK8sVersion or k8sAutoPatch are not refs
    */
   function useKubernetesVersionExpirationForShoot (shootK8sVersion, k8sAutoPatch) {
+    if (!isRef(shootK8sVersion) && !isRef(k8sAutoPatch)) {
+      throw Error('shootK8sVersion and k8sAutoPatch must be a ref!')
+    }
+
+    const patchAvailable = useKubernetesVersionIsNotLatestPatch(shootK8sVersion)
+
     function getVersionExpirationWarningSeverity (options) {
       const {
         isExpirationWarning,
@@ -159,7 +159,7 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
       return 'warning'
     }
     function kubernetesVersionUpdatePathAvailable () {
-      if (useKubernetesVersionIsNotLatestPatch(shootK8sVersion).value) {
+      if (patchAvailable.value) {
         return true
       }
 
@@ -185,9 +185,6 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
       return hasNextMinorVersion && hasNewerSupportedMinorVersion
     }
 
-    if (!isRef(shootK8sVersion) && !isRef(k8sAutoPatch)) {
-      throw Error('shootK8sVersion and k8sAutoPatch must be a ref!')
-    }
     return computed(() => {
       const allVersions = kubernetesVersions.value
       const version = find(allVersions, { version: shootK8sVersion.value })
@@ -200,7 +197,6 @@ export function useCloudProfileForKubeVersions (cloudProfile) {
         }
       }
 
-      const patchAvailable = useKubernetesVersionIsNotLatestPatch(shootK8sVersion)
       const updatePathAvailable = kubernetesVersionUpdatePathAvailable()
 
       const severity = getVersionExpirationWarningSeverity({

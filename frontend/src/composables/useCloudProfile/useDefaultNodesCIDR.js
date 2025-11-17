@@ -18,7 +18,7 @@ import get from 'lodash/get'
  * @param {Ref<CloudProfile>} cloudProfile - Vue ref containing the cloud profile object
  * @returns {Object} Object containing computed property for default nodes CIDR
  */
-export function useCloudProfileForDefaultNodesCIDR (cloudProfile) {
+export function useDefaultNodesCIDR (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }

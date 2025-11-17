@@ -12,10 +12,10 @@ import { ref } from 'vue'
 
 import { useSeedStore } from '@/store/seed'
 
-import { useCloudProfileForRegions } from '@/composables/useCloudProfile/useCloudProfileForRegions'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 
 describe('composables', () => {
-  describe('useCloudProfileForRegions', () => {
+  describe('useRegions', () => {
     let seedStore
 
     const awsCloudProfile = {
@@ -153,83 +153,43 @@ describe('composables', () => {
       seedStore.list = seeds
     })
 
-    describe('#isValidRegion', () => {
-      it('should return true for valid AWS region', () => {
-        const cloudProfile = ref(awsCloudProfile)
-        const region = ref('eu-central-1')
-        const { isValidRegion } = useCloudProfileForRegions(cloudProfile)
-        const result = isValidRegion(region)
-        expect(result.value).toBe(true)
-      })
-
-      it('should return false for invalid AWS region', () => {
-        const cloudProfile = ref(awsCloudProfile)
-        const region = ref('invalid-region')
-        const { isValidRegion } = useCloudProfileForRegions(cloudProfile)
-        const result = isValidRegion(region)
-        expect(result.value).toBe(false)
-      })
-
-      it('should return true for Azure region with zones', () => {
-        const cloudProfile = ref(azureCloudProfile)
-        const region = ref('westeurope')
-        const { isValidRegion } = useCloudProfileForRegions(cloudProfile)
-        const result = isValidRegion(region)
-        expect(result.value).toBe(true)
-      })
-
-      it('should return false for Azure region without zones', () => {
-        const cloudProfile = ref(azureCloudProfile)
-        const region = ref('eastus')
-        const { isValidRegion } = useCloudProfileForRegions(cloudProfile)
-        const result = isValidRegion(region)
-        expect(result.value).toBe(false)
-      })
-
-      it('should throw error if region is not a ref', () => {
-        const cloudProfile = ref(awsCloudProfile)
-        const { isValidRegion } = useCloudProfileForRegions(cloudProfile)
-        expect(() => isValidRegion('eu-central-1').value).toThrow('region must be a ref!')
-      })
-    })
-
-    describe('#zonesByRegion', () => {
+    describe('#useZonesByRegion', () => {
       it('should return zones for valid AWS region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('eu-central-1')
-        const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-        const zones = zonesByRegion(region)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const zones = useZonesByRegion(region)
         expect(zones.value).toEqual(['eu-central-1a', 'eu-central-1b', 'eu-central-1c'])
       })
 
       it('should return zones for another AWS region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('us-east-1')
-        const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-        const zones = zonesByRegion(region)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const zones = useZonesByRegion(region)
         expect(zones.value).toEqual(['us-east-1a', 'us-east-1b'])
       })
 
       it('should return empty array for invalid region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('invalid-region')
-        const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-        const zones = zonesByRegion(region)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const zones = useZonesByRegion(region)
         expect(zones.value).toEqual([])
       })
 
       it('should return empty array when cloud profile is null', () => {
         const cloudProfile = ref(null)
         const region = ref('eu-central-1')
-        const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-        const zones = zonesByRegion(region)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const zones = useZonesByRegion(region)
         expect(zones.value).toEqual([])
       })
 
       it('should throw error if region is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
-        const { zonesByRegion } = useCloudProfileForRegions(cloudProfile)
-        expect(() => zonesByRegion('eu-central-1').value).toThrow('region must be a ref!')
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        expect(() => useZonesByRegion('eu-central-1').value).toThrow('region must be a ref!')
       })
     })
 
@@ -237,24 +197,24 @@ describe('composables', () => {
       it('should return AWS regions that have seeds', () => {
         const cloudProfile = ref(awsCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithSeed(projectRef)
+        const { useRegionsWithSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithSeed(projectRef)
         expect(regions.value).toEqual(['eu-central-1', 'us-east-1'])
       })
 
       it('should return Azure regions that have seeds (excluding regions without zones)', () => {
         const cloudProfile = ref(azureCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithSeed(projectRef)
+        const { useRegionsWithSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithSeed(projectRef)
         expect(regions.value).toEqual(['westeurope'])
       })
 
       it('should return empty array when cloud profile is null', () => {
         const cloudProfile = ref(null)
         const projectRef = ref(project)
-        const { regionsWithSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithSeed(projectRef)
+        const { useRegionsWithSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithSeed(projectRef)
         expect(regions.value).toEqual([])
       })
 
@@ -262,15 +222,15 @@ describe('composables', () => {
         seedStore.list = []
         const cloudProfile = ref(awsCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithSeed(projectRef)
+        const { useRegionsWithSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithSeed(projectRef)
         expect(regions.value).toEqual([])
       })
 
       it('should throw error if project is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
-        const { regionsWithSeed } = useCloudProfileForRegions(cloudProfile)
-        expect(() => regionsWithSeed(project).value).toThrow('project must be a ref!')
+        const { useRegionsWithSeed } = useRegions(cloudProfile)
+        expect(() => useRegionsWithSeed(project).value).toThrow('project must be a ref!')
       })
     })
 
@@ -280,16 +240,16 @@ describe('composables', () => {
         seedStore.list = seeds.filter(seed => seed.spec.provider.region !== 'us-east-1')
         const cloudProfile = ref(awsCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithoutSeed(projectRef)
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithoutSeed(projectRef)
         expect(regions.value).toEqual(['us-east-1'])
       })
 
       it('should return empty array when all regions have seeds', () => {
         const cloudProfile = ref(awsCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithoutSeed(projectRef)
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithoutSeed(projectRef)
         expect(regions.value).toEqual([])
       })
 
@@ -297,8 +257,8 @@ describe('composables', () => {
         seedStore.list = []
         const cloudProfile = ref(awsCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithoutSeed(projectRef)
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithoutSeed(projectRef)
         expect(regions.value).toEqual(['eu-central-1', 'us-east-1'])
       })
 
@@ -306,8 +266,8 @@ describe('composables', () => {
         seedStore.list = []
         const cloudProfile = ref(azureCloudProfile)
         const projectRef = ref(project)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithoutSeed(projectRef)
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithoutSeed(projectRef)
         // eastus has no zones, so it should be excluded
         expect(regions.value).toEqual(['westeurope'])
       })
@@ -315,21 +275,21 @@ describe('composables', () => {
       it('should return empty array when cloud profile is null', () => {
         const cloudProfile = ref(null)
         const projectRef = ref(project)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        const regions = regionsWithoutSeed(projectRef)
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        const regions = useRegionsWithoutSeed(projectRef)
         expect(regions.value).toEqual([])
       })
 
       it('should throw error if project is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
-        const { regionsWithoutSeed } = useCloudProfileForRegions(cloudProfile)
-        expect(() => regionsWithoutSeed(project).value).toThrow('project must be a ref!')
+        const { useRegionsWithoutSeed } = useRegions(cloudProfile)
+        expect(() => useRegionsWithoutSeed(project).value).toThrow('project must be a ref!')
       })
     })
 
     describe('error handling', () => {
       it('should throw error if cloudProfile is not a ref', () => {
-        expect(() => useCloudProfileForRegions(awsCloudProfile)).toThrow('cloudProfile must be a ref!')
+        expect(() => useRegions(awsCloudProfile)).toThrow('cloudProfile must be a ref!')
       })
     })
   })

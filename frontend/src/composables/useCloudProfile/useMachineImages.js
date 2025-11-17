@@ -42,7 +42,7 @@ import includes from 'lodash/includes'
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useCloudProfileForMachineImages (cloudProfile) {
+export function useMachineImages (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
@@ -121,7 +121,7 @@ export function useCloudProfileForMachineImages (cloudProfile) {
    * @returns {ComputedRef<object|undefined>} Computed ref with the default machine image or undefined
    * @throws {Error} If machineType is not a ref
    */
-  function defaultMachineImageForMachineType (machineType) {
+  function useDefaultMachineImageForMachineType (machineType) {
     return computed(() => {
       if (!isRef(machineType)) {
         throw new Error('machineType must be a ref!')
@@ -137,6 +137,6 @@ export function useCloudProfileForMachineImages (cloudProfile) {
 
   return {
     machineImages,
-    defaultMachineImageForMachineType,
+    useDefaultMachineImageForMachineType,
   }
 }

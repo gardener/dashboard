@@ -6,14 +6,14 @@
 
 import { ref } from 'vue'
 
-import { useCloudProfileForMachineTypes } from '@/composables/useCloudProfile/useCloudProfileForMachineTypes'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
 import some from 'lodash/some'
 
 describe('composables', () => {
-  describe('useCloudProfileForMachineTypes', () => {
+  describe('useMachineTypes', () => {
     let cloudProfile
 
     const machineTypes = [
@@ -101,37 +101,37 @@ describe('composables', () => {
 
     describe('#machineTypes', () => {
       it('should return all machine types from cloud profile', () => {
-        const { machineTypes: allTypes } = useCloudProfileForMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
-        expect(allTypes.value).toHaveLength(4)
-        expect(allTypes.value[0].name).toBe('machineType1')
-        expect(allTypes.value[3].name).toBe('machineType4')
+        const { machineTypes } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        expect(machineTypes.value).toHaveLength(4)
+        expect(machineTypes.value[0].name).toBe('machineType1')
+        expect(machineTypes.value[3].name).toBe('machineType4')
       })
     })
 
-    describe('#machineTypesByRegionAndArchitecture', () => {
+    describe('#useMachineTypesByRegionAndArchitecture', () => {
       it('should return machineTypes by region and zones from cloud profile', () => {
-        const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
 
         const region = ref('region1')
         const architecture = ref('amd64')
-        let dashboardMachineTypes = machineTypesByRegionAndArchitecture(region, architecture)
+        let dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
         expect(dashboardMachineTypes.value).toHaveLength(2)
         expect(dashboardMachineTypes.value[0].name).toBe('machineType1')
         expect(dashboardMachineTypes.value[1].name).toBe('machineType3')
 
         region.value = 'region2'
         architecture.value = 'arm64'
-        dashboardMachineTypes = machineTypesByRegionAndArchitecture(region, architecture)
+        dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
         expect(dashboardMachineTypes.value).toHaveLength(1)
         expect(dashboardMachineTypes.value[0].name).toBe('machineType4')
       })
 
       it('should default architecture to amd64 if not specified', () => {
-        const { machineTypesByRegionAndArchitecture } = useCloudProfileForMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
 
         const region = ref('region2')
         const architecture = ref(undefined)
-        const dashboardMachineTypes = machineTypesByRegionAndArchitecture(region, architecture)
+        const dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
 
         // machineType2 and machineType3 should have amd64 as default
         const type2 = find(dashboardMachineTypes.value, { name: 'machineType2' })
@@ -141,12 +141,12 @@ describe('composables', () => {
       })
     })
 
-    describe('#machineArchitecturesByRegion', () => {
+    describe('#useMachineArchitecturesByRegion', () => {
       it('should return available architectures for a region', () => {
-        const { machineArchitecturesByRegion } = useCloudProfileForMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useMachineArchitecturesByRegion } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
 
         const region = ref('region2')
-        const architectures = machineArchitecturesByRegion(region)
+        const architectures = useMachineArchitecturesByRegion(region)
 
         expect(architectures.value).toContain('amd64')
         expect(architectures.value).toContain('arm64')
