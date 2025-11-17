@@ -29,14 +29,23 @@ router.route('/')
         case 'list':
           credentialOperation = cloudProviderCredentials.list
           break
-        case 'create':
-          credentialOperation = cloudProviderCredentials.create
+        case 'createDns':
+          credentialOperation = cloudProviderCredentials.createDns
           break
-        case 'patch':
-          credentialOperation = cloudProviderCredentials.patch
+        case 'createInfra':
+          credentialOperation = cloudProviderCredentials.createInfra
           break
-        case 'remove':
-          credentialOperation = cloudProviderCredentials.remove
+        case 'patchDns':
+          credentialOperation = cloudProviderCredentials.patchDns
+          break
+        case 'patchInfra':
+          credentialOperation = cloudProviderCredentials.patchInfra
+          break
+        case 'removeDns':
+          credentialOperation = cloudProviderCredentials.removeDns
+          break
+        case 'removeInfra':
+          credentialOperation = cloudProviderCredentials.removeInfra
           break
         default:
           throw new UnprocessableEntity(`${method} not allowed for cloud provider credentials`)

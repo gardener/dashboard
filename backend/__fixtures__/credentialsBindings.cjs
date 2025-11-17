@@ -52,7 +52,7 @@ const cloudProviderBindingList = [
     name: 'foo-wlid1',
     provider: 'infra1',
     credentialsRef: {
-      kind: 'WorkloadIndentity',
+      kind: 'WorkloadIdentity',
       namespace: 'garden-foo',
       name: 'wl-foo-infra1',
     },

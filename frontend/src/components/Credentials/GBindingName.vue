@@ -6,8 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <span v-if="resourceHash">
-    <g-credential-icon
-      :credential="credential"
+    <g-binding-icon
+      :binding="binding"
     />
     <v-tooltip
       class="credentials-details-tooltip"
@@ -30,10 +30,19 @@ SPDX-License-Identifier: Apache-2.0
         <g-credential-details-item-content
           class="ma-1"
           :credential="credential"
+          :shared="isSharedBinding"
           :provider-type="providerType"
         />
       </v-card>
     </v-tooltip>
+    <g-shared-credential-icon
+      v-if="isSharedBinding"
+      :namespace="credentialNamespace"
+    />
+    <g-orphaned-credential-icon
+      v-if="isOrphanedBinding"
+      :binding="binding"
+    />
   </span>
   <span v-else>
     <span>Unknown credential</span>
@@ -51,30 +60,36 @@ import { useAuthzStore } from '@/store/authz'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
-import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
+import GBindingIcon from '@/components/Credentials/GBindingIcon'
+import GOrphanedCredentialIcon from '@/components/Credentials/GOrphanedBindingIcon.vue'
+import GSharedCredentialIcon from '@/components/Credentials/GSharedCredentialIcon.vue'
 
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 const props = defineProps({
-  credential: Object,
+  binding: Object,
   renderLink: Boolean,
 })
 
-const credential = toRef(props, 'credential')
+const binding = toRef(props, 'binding')
 
 const authzStore = useAuthzStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
 const {
+  isSharedBinding,
+  credentialNamespace,
+  isOrphanedBinding,
   providerType,
   resourceName,
   resourceNamespace,
   resourceUid,
-} = useCloudProviderCredential(credential)
+  credential,
+} = useCloudProviderBinding(binding)
 
 const resourceHash = computed(() => {
   const uid = resourceUid.value
-  return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
+  return uid ? `#binding-uid=${encodeURIComponent(uid)}` : ''
 })
 
 const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid.value)

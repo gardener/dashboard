@@ -40,23 +40,6 @@ morgan.token('url', (req, res) => {
 
 const requestLogger = morgan('common', logger)
 
-function noCache (staticPaths = []) {
-  const isStatic = path => {
-    for (const staticPath of staticPaths) {
-      if (path.startsWith(staticPath)) {
-        return true
-      }
-    }
-    return false
-  }
-  return (req, res, next) => {
-    if (!isStatic(req.path)) {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-    }
-    next()
-  }
-}
-
 function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
@@ -147,7 +130,6 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 export {
-  noCache,
   historyFallback,
   requestLogger,
   notFound,

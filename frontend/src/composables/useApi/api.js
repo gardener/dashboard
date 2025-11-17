@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
 import { useAppStore } from '@/store/app'
 
 import { fetchWrapper } from './fetch'
@@ -57,19 +56,31 @@ export function invokeCloudProviderCredentialMethod (method, params) {
 }
 
 export function getCloudProviderCredentials (namespace) {
-  return invokeCloudProviderCredentialMethod('list', { bindingNamespace: namespace })
+  return invokeCloudProviderCredentialMethod('list', { namespace })
 }
 
-export function createCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('create', params)
+export function createDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('createDns', params)
 }
 
-export function updateCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('patch', params)
+export function createInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('createInfra', params)
 }
 
-export function deleteCloudProviderCredential (params) {
-  return invokeCloudProviderCredentialMethod('remove', params)
+export function updateDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patchDns', params)
+}
+
+export function updateInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('patchInfra', params)
+}
+
+export function deleteDnsProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('removeDns', params)
+}
+
+export function deleteInfraProviderCredential (params) {
+  return invokeCloudProviderCredentialMethod('removeInfra', params)
 }
 
 /* Tickets */
@@ -399,9 +410,12 @@ export function getResourceQuotas ({ namespace }) {
 export default {
   getConfiguration,
   getCloudProviderCredentials,
-  createCloudProviderCredential,
-  updateCloudProviderCredential,
-  deleteCloudProviderCredential,
+  createDnsProviderCredential,
+  createInfraProviderCredential,
+  updateDnsProviderCredential,
+  updateInfraProviderCredential,
+  deleteDnsProviderCredential,
+  deleteInfraProviderCredential,
   getIssues,
   getIssuesAndComments,
   getShoots,
