@@ -17,8 +17,11 @@ SPDX-License-Identifier: Apache-2.0
     </v-main>
     <template v-else>
       <g-loading />
-      <g-main-navigation />
-      <g-main-toolbar />
+      <template v-if="!isInIframe">
+        <g-main-navigation />
+        <g-main-toolbar />
+      </template>
+      <g-breadcrumbs v-else />
       <g-main-content ref="mainContent" />
       <g-notify />
     </template>
@@ -42,12 +45,15 @@ import GMainNavigation from '@/components/GMainNavigation.vue'
 import GMainToolbar from '@/components/GMainToolbar.vue'
 import GMainContent from '@/components/GMainContent.vue'
 import GNotify from '@/components/GNotify.vue'
+import GBreadcrumbs from '@/components/GBreadcrumbs.vue'
 
 import { useLogger } from '@/composables/useLogger'
+import { useIsInIframe } from '@/composables/useIsInIframe'
 
 import get from 'lodash/get'
 
 const logger = useLogger()
+const isInIframe = useIsInIframe()
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
 
