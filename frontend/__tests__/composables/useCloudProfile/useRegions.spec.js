@@ -189,7 +189,7 @@ describe('composables', () => {
       it('should throw error if region is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
         const { useZones } = useRegions(cloudProfile)
-        expect(() => useZones('eu-central-1').value).toThrow('region must be a ref!')
+        expect(() => useZones('eu-central-1')).toThrow('region must be a ref!')
       })
     })
 
@@ -230,7 +230,7 @@ describe('composables', () => {
       it('should throw error if project is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
         const { useRegionsWithSeed } = useRegions(cloudProfile)
-        expect(() => useRegionsWithSeed(project).value).toThrow('project must be a ref!')
+        expect(() => useRegionsWithSeed(project)).toThrow('project must be a ref!')
       })
     })
 
@@ -283,7 +283,7 @@ describe('composables', () => {
       it('should throw error if project is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
         const { useRegionsWithoutSeed } = useRegions(cloudProfile)
-        expect(() => useRegionsWithoutSeed(project).value).toThrow('project must be a ref!')
+        expect(() => useRegionsWithoutSeed(project)).toThrow('project must be a ref!')
       })
     })
 
