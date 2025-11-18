@@ -36,14 +36,9 @@ export function useMachineTypes (cloudProfile, useZones) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  /**
-   * Internal function to filter machine types by region and zone availability.
-   * Filters out machine types that are unavailable in all zones of a region.
-   *
-   * @returns array - Array Computed ref with filtered machine types
-   * @param region
-   */
-  function machineTypes (region = undefined) {
+  const machineTypes = computed(() => get(cloudProfile.value, ['spec', 'machineTypes'], []))
+
+  function filterMachineTypes (region, zones) {
     const machineAndVolumeTypePredicate = unavailableItems => {
       return item => {
         if (item.usable === false) {
@@ -56,25 +51,19 @@ export function useMachineTypes (cloudProfile, useZones) {
       }
     }
 
-    const items = get(cloudProfile.value, ['spec', 'machineTypes'], [])
-    if (!region?.value) {
+    const items = machineTypes.value
+    if (!region) {
       return items
     }
 
-    const zones = useZones(region)
-    const regionObject = find(cloudProfile.value?.spec.regions, { name: region.value })
+    const regionObject = find(cloudProfile.value?.spec.regions, { name: region })
     let regionZones = get(regionObject, ['zones'], [])
-    regionZones = filter(regionZones, regionZone => includes(zones.value, regionZone.name))
+    regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
     const unavailableItems = map(regionZones, zone => zone.unavailableMachineTypes)
     const unavailableItemsInAllZones = intersection(...unavailableItems)
 
     return filter(items, machineAndVolumeTypePredicate(unavailableItemsInAllZones))
   }
-
-  /**
-   * Returns all machine types from the cloud profile.
-   */
-  const defaulTypes = computed(() => machineTypes())
 
   /**
    * Returns machine types filtered by region and architecture.
@@ -90,8 +79,10 @@ export function useMachineTypes (cloudProfile, useZones) {
       throw new Error('region and architecture must be refs!')
     }
 
+    const zones = useZones(region)
+
     return computed(() => {
-      let types = machineTypes(region)
+      let types = filterMachineTypes(region.value, zones.value)
       types = map(types, item => {
         const machineType = { ...item }
         machineType.architecture ??= 'amd64' // default if not maintained
@@ -119,8 +110,10 @@ export function useMachineTypes (cloudProfile, useZones) {
       throw new Error('region must be a ref!')
     }
 
+    const zones = useZones(region)
+
     return computed(() => {
-      const types = machineTypes(region)
+      const types = filterMachineTypes(region.value, zones.value)
 
       const architectures = uniq(map(types, 'architecture'))
       return architectures.sort()
@@ -128,7 +121,7 @@ export function useMachineTypes (cloudProfile, useZones) {
   }
 
   return {
-    machineTypes: defaulTypes,
+    machineTypes,
     useFilteredMachineTypes,
     useMachineArchitectures,
   }
