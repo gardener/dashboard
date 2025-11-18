@@ -21,15 +21,15 @@ import toPairs from 'lodash/toPairs'
  * and firewall networks specific to Metal infrastructure.
  *
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
- * @param {Function} useZonesByRegion - Function to get zones by cloud profile and region
+ * @param {Function} useZones - Function to get zones by cloud profile and region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useMetalConstraints (cloudProfile, useZonesByRegion) {
+export function useMetalConstraints (cloudProfile, useZones) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
+  const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
 
   /**
    * Returns partition IDs for a given region.
@@ -39,7 +39,7 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
    * @returns {ComputedRef<Array<string>|undefined>} Computed ref with partition IDs, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function usePartitionIDsByRegion (region) {
+  function usePartitionIDs (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -47,7 +47,7 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
     if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
       return undefinedComputed
     }
-    return useZonesByRegion(region)
+    return useZones(region)
   }
 
   const undefinedComputed = computed(() => undefined)
@@ -60,7 +60,7 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
    * @returns {ComputedRef<Array|undefined>} Computed ref with firewall sizes, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function useFirewallSizesByRegion (region) {
+  function useFirewallSizes (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -69,7 +69,7 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
       return undefinedComputed
     }
 
-    return useMachineTypesByRegionAndArchitecture(region, undefinedComputed)
+    return useFilteredMachineTypes(region, undefinedComputed)
   }
 
   const firewallImages = computed(() => {
@@ -83,7 +83,7 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
    * @returns {ComputedRef<Array>} Computed ref with firewall networks formatted as objects with key, value, and text properties
    * @throws {Error} If partitionID is not a ref
    */
-  function useFirewallNetworksByPartitionId (partitionID) {
+  function useFirewallNetworks (partitionID) {
     if (!isRef(partitionID)) {
       throw new Error('partitionID must be a ref!')
     }
@@ -101,9 +101,9 @@ export function useMetalConstraints (cloudProfile, useZonesByRegion) {
   }
 
   return {
-    usePartitionIDsByRegion,
-    useFirewallSizesByRegion,
+    usePartitionIDs,
+    useFirewallSizes,
     firewallImages,
-    useFirewallNetworksByPartitionId,
+    useFirewallNetworks,
   }
 }

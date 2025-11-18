@@ -141,18 +141,18 @@ describe('composables', () => {
       })
     })
 
-    describe('#useVolumeTypesByRegion', () => {
+    describe('#useFilteredVolumeTypes', () => {
       it('should return all volume types when no region specified', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref(undefined)
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         expect(volumeTypes.value).toHaveLength(4)
       })
 
       it('should return volume types available in all zones of a region', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         expect(volumeTypes.value).toHaveLength(2)
         const gp2 = find(volumeTypes.value, { name: 'gp2' })
         const io1 = find(volumeTypes.value, { name: 'io1' })
@@ -161,17 +161,17 @@ describe('composables', () => {
       })
 
       it('should filter out volume types unavailable in all zones', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         const gp3 = find(volumeTypes.value, { name: 'gp3' })
         expect(gp3).toBeUndefined()
       })
 
       it('should include volume types unavailable in some zones but available in others', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref('eu-west-1')
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         expect(volumeTypes.value).toHaveLength(3)
         const gp3 = find(volumeTypes.value, { name: 'gp3' })
         const gp2 = find(volumeTypes.value, { name: 'gp2' })
@@ -182,9 +182,9 @@ describe('composables', () => {
       })
 
       it('should filter out volume types marked as not usable', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref('us-east-1')
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         expect(volumeTypes.value).toHaveLength(3)
         const sc1 = find(volumeTypes.value, { name: 'sc1' })
         expect(sc1).toBeUndefined()
@@ -192,17 +192,17 @@ describe('composables', () => {
 
       it('should return empty array when cloud profile is null', () => {
         cloudProfile.value = null
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref('eu-central-1')
-        const volumeTypes = useVolumeTypesByRegion(region)
+        const volumeTypes = useFilteredVolumeTypes(region)
         expect(volumeTypes.value).toEqual([])
       })
 
       it('should throw error when region is not a ref', () => {
-        const { useVolumeTypesByRegion } = useVolumeTypes(cloudProfile)
+        const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = 'eu-central-1'
         expect(() => {
-          const volumeTypes = useVolumeTypesByRegion(region)
+          const volumeTypes = useFilteredVolumeTypes(region)
           // Access the computed value to trigger validation
           volumeTypes.value // eslint-disable-line no-unused-expressions
         }).toThrow('region must be a ref!')

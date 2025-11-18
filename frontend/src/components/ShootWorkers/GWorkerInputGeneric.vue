@@ -229,9 +229,9 @@ export default {
       providerWorkers,
     } = useShootContext()
 
-    const { machineImages, useDefaultMachineImageForMachineType } = useMachineImages(cloudProfile)
-    const { useZonesByRegion } = useRegions(cloudProfile)
-    const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
+    const { machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+    const { useZones } = useRegions(cloudProfile)
+    const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize: useMinimumVolumeSizeByMachineTypeAndVolumeType, volumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
@@ -251,14 +251,14 @@ export default {
       },
     })
 
-    const machineTypes = useMachineTypesByRegionAndArchitecture(
+    const machineTypes = useFilteredMachineTypes(
       region,
       machineArchitecture,
     )
 
     const defaultMachineType = computed(() => head(machineTypes.value))
 
-    const defaultMachineImage = useDefaultMachineImageForMachineType(defaultMachineType)
+    const defaultMachineImage = useDefaultMachineImage(defaultMachineType)
 
     const selectedMachineType = computed(() => find(machineTypes, ['name', props.worker.machine.type]))
     const selectedVolumeType = computed(() => find(volumeTypes, ['name', props.worker.volume?.type]))
@@ -289,7 +289,7 @@ export default {
       selectedMachineType,
       selectedVolumeType,
       minimumVolumeSize,
-      useMachineTypesByRegionAndArchitecture,
+      useFilteredMachineTypes,
       useMinimumVolumeSizeByMachineTypeAndVolumeType,
     }
   },

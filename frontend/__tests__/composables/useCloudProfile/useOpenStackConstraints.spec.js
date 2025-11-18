@@ -98,75 +98,75 @@ describe('composables', () => {
       })
     })
 
-    describe('#useFloatingPoolNamesByRegionAndDomain', () => {
+    describe('#useFloatingPoolNames', () => {
       it('should return floating pool names by region and domain from cloud profile', () => {
-        const { useFloatingPoolNamesByRegionAndDomain } = useOpenStackConstraints(cloudProfile)
+        const { useFloatingPoolNames } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
         const secretDomain = ref('fooDomain')
-        let dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        let dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('global FP')
 
         region.value = 'region1'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('regional FP')
 
         region.value = 'region2'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('regional non constraining FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain1'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(1)
         expect(dashboardFloatingPools[0]).toBe('domain specific FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain2'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific non constraining FP')
 
         region.value = 'region3'
         secretDomain.value = 'domain3'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('domain specific, regional FP')
         expect(dashboardFloatingPools[1]).toBe('additional domain specific, regional FP')
 
         region.value = 'region4'
         secretDomain.value = 'domain4'
-        dashboardFloatingPools = useFloatingPoolNamesByRegionAndDomain(region, secretDomain).value
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
         expect(dashboardFloatingPools).toHaveLength(2)
         expect(dashboardFloatingPools[0]).toBe('global FP')
         expect(dashboardFloatingPools[1]).toBe('domain specific, regional non constraining FP')
       })
     })
 
-    describe('#useLoadBalancerProviderNamesByRegion', () => {
+    describe('#useLoadBalancerProviderNames', () => {
       it('should return load balancer provider names by region from cloud profile', () => {
-        const { useLoadBalancerProviderNamesByRegion } = useOpenStackConstraints(cloudProfile)
+        const { useLoadBalancerProviderNames } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
-        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
+        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('global LB')
 
         region.value = 'region1'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(2)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('regional LB')
         expect(dashboardLoadBalancerProviderNames[1]).toBe('additional regional LB')
 
         region.value = 'region2'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region).value
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
         expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
       })

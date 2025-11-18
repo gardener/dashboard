@@ -192,9 +192,9 @@ const shootMessages = computed(() => {
 
 const k8sAutoPatch = computed(() => get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false))
 const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
-const k8sExpiration = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
-const { useExpiringWorkerGroupsForShoot } = useShootMessages(cloudProfile)
+const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
+const k8sExpiration = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
+const { useExpiringWorkerGroups } = useShootMessages(cloudProfile)
 
 const k8sMessage = computed(() => {
   if (!filterMatches('k8s')) {
@@ -233,7 +233,7 @@ const machineImageMessages = computed(() => {
 
   const shootWorkerGroupsRef = computed(() => shootWorkerGroups.value)
   const imageAutoPatchRef = computed(() => imageAutoPatch)
-  const expiredWorkerGroups = useExpiringWorkerGroupsForShoot(shootWorkerGroupsRef, imageAutoPatchRef)
+  const expiredWorkerGroups = useExpiringWorkerGroups(shootWorkerGroupsRef, imageAutoPatchRef)
   return map(expiredWorkerGroups.value, workerGroup => {
     const {
       expirationDate,

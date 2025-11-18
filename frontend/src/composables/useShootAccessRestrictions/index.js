@@ -37,13 +37,13 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
 
   const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(cloudProfileRef.value))
   const {
-    useAccessRestrictionDefinitionsByRegion,
-    useAccessRestrictionNoItemsTextByRegion,
+    useAccessRestrictionDefinitions,
+    useAccessRestrictionNoItemsText,
   } = useAccessRestrictions(cloudProfile)
 
-  const accessRestrictionDefinitionList = useAccessRestrictionDefinitionsByRegion(region)
+  const accessRestrictionDefinitionList = useAccessRestrictionDefinitions(region)
 
-  const accessRestrictionNoItemsText = useAccessRestrictionNoItemsTextByRegion(region)
+  const accessRestrictionNoItemsText = useAccessRestrictionNoItemsText(region)
 
   const accessRestrictionDefinitions = computed(() => {
     const accessRestrictionDefinitions = {}
