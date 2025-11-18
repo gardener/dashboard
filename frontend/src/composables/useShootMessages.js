@@ -62,7 +62,7 @@ export function useShootMessages (cloudProfile) {
    * @param {Ref<Boolean>} imageAutoPatch - Vue ref indicating if auto-patch is enabled
    * @returns {ComputedRef<Array>} Computed ref of expiring worker groups
    */
-  function expiringWorkerGroupsForShoot (shootWorkerGroups, imageAutoPatch) {
+  function useExpiringWorkerGroupsForShoot (shootWorkerGroups, imageAutoPatch) {
     return computed(() => {
       if (!isRef(shootWorkerGroups)) {
         throw new Error('shootWorkerGroups must be a ref!')
@@ -112,6 +112,6 @@ export function useShootMessages (cloudProfile) {
   }
 
   return {
-    expiringWorkerGroupsForShoot,
+    useExpiringWorkerGroupsForShoot,
   }
 }

@@ -386,6 +386,7 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -413,7 +414,8 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
     const { machineImages } = useMachineImages(cloudProfile)
-    const { machineTypes } = useMachineTypes(cloudProfile, cloudProfileStore.zonesByCloudProfileAndRegion)
+    const { useZonesByRegion } = useRegions(cloudProfile)
+    const { machineTypes } = useMachineTypes(cloudProfile, useZonesByRegion)
     const { volumeTypes } = useVolumeTypes(cloudProfile)
 
     const tab = ref('overview')
@@ -450,7 +452,7 @@ export default {
     },
     volumeType () {
       const type = get(this.workerGroup, ['volume', 'type'])
-      return find(this.volumeTypes.value, ['name', type])
+      return find(this.volumeTypes, ['name', type])
     },
     volumeCardData () {
       const storage = get(this.machineType, ['storage'], {})

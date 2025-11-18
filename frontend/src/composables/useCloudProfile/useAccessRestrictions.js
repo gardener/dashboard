@@ -62,11 +62,11 @@ export function useAccessRestrictions (cloudProfile) {
    * @throws {Error} If region is not a ref
    */
   function useAccessRestrictionDefinitionsByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
 
+    return computed(() => {
       if (!region.value) {
         return []
       }
@@ -94,11 +94,11 @@ export function useAccessRestrictions (cloudProfile) {
    * @throws {Error} If region is not a ref
    */
   function useAccessRestrictionNoItemsTextByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
 
+    return computed(() => {
       const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
       const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
 

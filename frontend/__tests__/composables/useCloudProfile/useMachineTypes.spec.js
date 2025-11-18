@@ -7,10 +7,9 @@
 import { ref } from 'vue'
 
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 
 import find from 'lodash/find'
-import get from 'lodash/get'
-import some from 'lodash/some'
 
 describe('composables', () => {
   describe('useMachineTypes', () => {
@@ -67,23 +66,6 @@ describe('composables', () => {
       },
     ]
 
-    // Simplified version of zonesByCloudProfileAndRegion for testing
-    function zonesByCloudProfileAndRegion ({ cloudProfile: cp, region }) {
-      const providerType = cp.spec.type
-      const regionObj = find(cp.spec.regions, { name: region })
-      const zones = get(regionObj, ['zones'], [])
-
-      if (providerType === 'azure') {
-        return zones.filter(zone => zone.name).map(zone => zone.name)
-      }
-
-      if (!some(cp.spec.regions, ['name', region])) {
-        return []
-      }
-
-      return zones.map(zone => zone.name)
-    }
-
     beforeEach(() => {
       cloudProfile = ref({
         metadata: {
@@ -101,7 +83,8 @@ describe('composables', () => {
 
     describe('#machineTypes', () => {
       it('should return all machine types from cloud profile', () => {
-        const { machineTypes } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const { machineTypes } = useMachineTypes(cloudProfile, useZonesByRegion)
         expect(machineTypes.value).toHaveLength(4)
         expect(machineTypes.value[0].name).toBe('machineType1')
         expect(machineTypes.value[3].name).toBe('machineType4')
@@ -110,7 +93,8 @@ describe('composables', () => {
 
     describe('#useMachineTypesByRegionAndArchitecture', () => {
       it('should return machineTypes by region and zones from cloud profile', () => {
-        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
 
         const region = ref('region1')
         const architecture = ref('amd64')
@@ -127,7 +111,8 @@ describe('composables', () => {
       })
 
       it('should default architecture to amd64 if not specified', () => {
-        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
 
         const region = ref('region2')
         const architecture = ref(undefined)
@@ -143,7 +128,8 @@ describe('composables', () => {
 
     describe('#useMachineArchitecturesByRegion', () => {
       it('should return available architectures for a region', () => {
-        const { useMachineArchitecturesByRegion } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+        const { useZonesByRegion } = useRegions(cloudProfile)
+        const { useMachineArchitecturesByRegion } = useMachineTypes(cloudProfile, useZonesByRegion)
 
         const region = ref('region2')
         const architectures = useMachineArchitecturesByRegion(region)

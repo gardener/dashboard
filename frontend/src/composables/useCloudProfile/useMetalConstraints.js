@@ -21,15 +21,15 @@ import toPairs from 'lodash/toPairs'
  * and firewall networks specific to Metal infrastructure.
  *
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
- * @param {Function} zonesByCloudProfileAndRegion - Function to get zones by cloud profile and region
+ * @param {Function} useZonesByRegion - Function to get zones by cloud profile and region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useMetalConstraints (cloudProfile, zonesByCloudProfileAndRegion) {
+export function useMetalConstraints (cloudProfile, useZonesByRegion) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, zonesByCloudProfileAndRegion)
+  const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
 
   /**
    * Returns partition IDs for a given region.
@@ -47,7 +47,7 @@ export function useMetalConstraints (cloudProfile, zonesByCloudProfileAndRegion)
     if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
       return undefinedComputed
     }
-    return zonesByCloudProfileAndRegion(region)
+    return useZonesByRegion(region)
   }
 
   const undefinedComputed = computed(() => undefined)
@@ -84,11 +84,11 @@ export function useMetalConstraints (cloudProfile, zonesByCloudProfileAndRegion)
    * @throws {Error} If partitionID is not a ref
    */
   function useFirewallNetworksByPartitionId (partitionID) {
-    return computed(() => {
-      if (!isRef(partitionID)) {
-        throw new Error('partitionID must be a ref!')
-      }
+    if (!isRef(partitionID)) {
+      throw new Error('partitionID must be a ref!')
+    }
 
+    return computed(() => {
       const networks = get(cloudProfile.value, ['spec', 'providerConfig', 'firewallNetworks', partitionID.value])
       return map(toPairs(networks), ([key, value]) => {
         return {

@@ -122,11 +122,11 @@ export function useMachineImages (cloudProfile) {
    * @throws {Error} If machineType is not a ref
    */
   function useDefaultMachineImageForMachineType (machineType) {
-    return computed(() => {
-      if (!isRef(machineType)) {
-        throw new Error('machineType must be a ref!')
-      }
+    if (!isRef(machineType)) {
+      throw new Error('machineType must be a ref!')
+    }
 
+    return computed(() => {
       const allMachineImages = machineImages.value
       const machineImagesForArchitecture = filter(allMachineImages, ({ architectures }) =>
         includes(architectures, machineType.value?.architecture),
