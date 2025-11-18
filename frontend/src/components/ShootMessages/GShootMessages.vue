@@ -130,7 +130,7 @@ const {
   shootName,
   shootMetadata,
   shootPurpose,
-  shootK8sVersion,
+  k8sVersion,
   shootCloudProfileRef,
   shootWorkerGroups,
   canForceDeleteShoot,
@@ -193,7 +193,7 @@ const shootMessages = computed(() => {
 const k8sAutoPatch = computed(() => get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], false))
 const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
 const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
-const k8sExpiration = useKubernetesVersionExpirationForShoot(shootK8sVersion, k8sAutoPatch)
+const k8sExpiration = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
 const { useExpiringWorkerGroupsForShoot } = useShootMessages(cloudProfile)
 
 const k8sMessage = computed(() => {

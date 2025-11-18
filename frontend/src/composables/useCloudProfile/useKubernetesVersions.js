@@ -129,17 +129,17 @@ export function useKubernetesVersions (cloudProfile) {
    * Calculates the expiration information and severity for a shoot's Kubernetes version.
    * Takes into account the version's expiration date, auto-patch settings, and available updates.
    *
-   * @param {Ref<string>} shootK8sVersion - A Vue ref containing the shoot's Kubernetes version
+   * @param {Ref<string>} k8sVersion - A Vue ref containing the shoot's Kubernetes version
    * @param {Ref<boolean>} k8sAutoPatch - A Vue ref indicating if auto-patching is enabled
    * @returns {ComputedRef<object|undefined>} Computed ref with expiration info, or undefined if no warning needed
-   * @throws {Error} If shootK8sVersion or k8sAutoPatch are not refs
+   * @throws {Error} If k8sVersion or k8sAutoPatch are not refs
    */
-  function useKubernetesVersionExpirationForShoot (shootK8sVersion, k8sAutoPatch) {
-    if (!isRef(shootK8sVersion) && !isRef(k8sAutoPatch)) {
-      throw Error('shootK8sVersion and k8sAutoPatch must be a ref!')
+  function useKubernetesVersionExpirationForShoot (k8sVersion, k8sAutoPatch) {
+    if (!isRef(k8sVersion) && !isRef(k8sAutoPatch)) {
+      throw Error('k8sVersion and k8sAutoPatch must be a ref!')
     }
 
-    const patchAvailable = useKubernetesVersionIsNotLatestPatch(shootK8sVersion)
+    const patchAvailable = useKubernetesVersionIsNotLatestPatch(k8sVersion)
 
     function getVersionExpirationWarningSeverity (options) {
       const {
@@ -164,7 +164,7 @@ export function useKubernetesVersions (cloudProfile) {
         return true
       }
 
-      const nextMinorVersion = semver.minor(shootK8sVersion.value) + 1
+      const nextMinorVersion = semver.minor(k8sVersion.value) + 1
       let hasNextMinorVersion = false
       let hasNewerSupportedMinorVersion = false
 
@@ -188,10 +188,10 @@ export function useKubernetesVersions (cloudProfile) {
 
     return computed(() => {
       const allVersions = kubernetesVersions.value
-      const version = find(allVersions, { version: shootK8sVersion.value })
+      const version = find(allVersions, { version: k8sVersion.value })
       if (!version) {
         return {
-          version: shootK8sVersion.value,
+          version: k8sVersion.value,
           expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
           isValidTerminationDate: false,
           severity: 'warning',
