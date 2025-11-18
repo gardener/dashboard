@@ -260,6 +260,14 @@ export default {
 
     const defaultMachineImage = useDefaultMachineImageForMachineType(defaultMachineType)
 
+    const selectedMachineType = computed(() => find(machineTypes, ['name', props.worker.machine.type]))
+    const selectedVolumeType = computed(() => find(volumeTypes, ['name', props.worker.volume?.type]))
+
+    const minimumVolumeSize = useMinimumVolumeSizeByMachineTypeAndVolumeType(
+      selectedMachineType,
+      selectedVolumeType,
+    )
+
     return {
       v$: useVuelidate(),
       isNewCluster,
@@ -278,6 +286,9 @@ export default {
       machineImages,
       machineArchitecture,
       machineTypes,
+      selectedMachineType,
+      selectedVolumeType,
+      minimumVolumeSize,
       useMachineTypesByRegionAndArchitecture,
       useMinimumVolumeSizeByMachineTypeAndVolumeType,
     }
@@ -361,21 +372,11 @@ export default {
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
     },
-    selectedMachineType () {
-      return find(this.machineTypes, ['name', this.worker.machine.type])
-    },
-    selectedVolumeType () {
-      return find(this.volumeTypes, ['name', this.worker.volume?.type])
-    },
     filteredMachineImages () {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     useMinimumVolumeSize () {
-      const useMinimumVolumeSize = this.useMinimumVolumeSizeByMachineTypeAndVolumeType(
-        computed(() => this.selectedMachineType),
-        computed(() => this.selectedVolumeType),
-      ).value
-      const useMinimumVolumeSizeInGi = convertToGi(useMinimumVolumeSize)
+      const useMinimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
       let defaultSize = get(this.selectedMachineType, ['storage.size'])
       if (defaultSize) {
         defaultSize = convertToGi(defaultSize)

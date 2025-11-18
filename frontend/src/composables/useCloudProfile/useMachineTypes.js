@@ -28,10 +28,10 @@ import uniq from 'lodash/uniq'
  * and architecture.
  *
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
- * @param {Function} zonesByCloudProfileAndRegion - Function to get zones for a region
+ * @param {Function} useZonesByRegion - Function to get zones for a region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useMachineTypes (cloudProfile, zonesByCloudProfileAndRegion) {
+export function useMachineTypes (cloudProfile, useZonesByRegion) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
@@ -61,10 +61,10 @@ export function useMachineTypes (cloudProfile, zonesByCloudProfileAndRegion) {
       return items
     }
 
-    const zones = zonesByCloudProfileAndRegion({ cloudProfile: cloudProfile.value, region: region.value })
+    const zones = useZonesByRegion(region)
     const regionObject = find(cloudProfile.value?.spec.regions, { name: region.value })
     let regionZones = get(regionObject, ['zones'], [])
-    regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
+    regionZones = filter(regionZones, regionZone => includes(zones.value, regionZone.name))
     const unavailableItems = map(regionZones, zone => zone.unavailableMachineTypes)
     const unavailableItemsInAllZones = intersection(...unavailableItems)
 
@@ -86,11 +86,11 @@ export function useMachineTypes (cloudProfile, zonesByCloudProfileAndRegion) {
    * @throws {Error} If region or architecture are not refs
    */
   function useMachineTypesByRegionAndArchitecture (region, architecture) {
-    return computed(() => {
-      if (!isRef(region) || !isRef(architecture)) {
-        throw new Error('region and architecture must be refs!')
-      }
+    if (!isRef(region) || !isRef(architecture)) {
+      throw new Error('region and architecture must be refs!')
+    }
 
+    return computed(() => {
       let types = machineTypesByRegion(region)
       types = map(types, item => {
         const machineType = { ...item }
@@ -115,10 +115,11 @@ export function useMachineTypes (cloudProfile, zonesByCloudProfileAndRegion) {
    * @throws {Error} If region is not a ref
    */
   function useMachineArchitecturesByRegion (region) {
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
+
     return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
       const types = machineTypesByRegion(region)
 
       const architectures = uniq(map(types, 'architecture'))

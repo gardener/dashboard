@@ -53,11 +53,10 @@ export function useRegions (cloudProfile) {
    * @returns {ComputedRef<Array<String>>} Computed ref of zone names
    */
   function useZonesByRegion (region) {
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
     return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
-
       return zonesByRegion(region.value)
     })
   }
@@ -80,12 +79,11 @@ export function useRegions (cloudProfile) {
    */
   function useRegionsWithSeed (project) {
     const seedStore = useSeedStore()
+    if (!isRef(project)) {
+      throw new Error('project must be a ref!')
+    }
 
     return computed(() => {
-      if (!isRef(project)) {
-        throw new Error('project must be a ref!')
-      }
-
       if (!cloudProfile.value) {
         return []
       }
@@ -107,23 +105,22 @@ export function useRegions (cloudProfile) {
    * @returns {ComputedRef<Array<String>>} Computed ref of region names without seeds
    */
   function useRegionsWithoutSeed (project) {
-    return computed(() => {
-      if (!isRef(project)) {
-        throw new Error('project must be a ref!')
-      }
+    if (!isRef(project)) {
+      throw new Error('project must be a ref!')
+    }
 
+    const useRegionsWithSeedList = useRegionsWithSeed(project)
+    return computed(() => {
       if (!cloudProfile.value) {
         return []
       }
 
-      const useRegionsWithSeedList = useRegionsWithSeed(project).value
       const regionsInCloudProfile = map(get(cloudProfile.value, ['spec', 'regions'], []), 'name')
       const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, regionName => {
-        const regionRef = computed(() => regionName)
-        return isValidRegion(regionRef.value)
+        return isValidRegion(regionName)
       })
-      const useRegionsWithoutSeedList = difference(regionsInCloudProfileWithZones, useRegionsWithSeedList)
-      return useRegionsWithoutSeedList
+      const regionsWithoutSeedList = difference(regionsInCloudProfileWithZones, useRegionsWithSeedList.value)
+      return regionsWithoutSeedList
     })
   }
 

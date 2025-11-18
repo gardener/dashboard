@@ -40,14 +40,14 @@ export function useOpenStackConstraints (cloudProfile) {
    * @throws {Error} If region or secretDomain are not refs
    */
   function useFloatingPoolsByRegionAndDomain (region, secretDomain) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
-      if (!isRef(secretDomain)) {
-        throw new Error('secretDomain must be a ref!')
-      }
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
+    if (!isRef(secretDomain)) {
+      throw new Error('secretDomain must be a ref!')
+    }
 
+    return computed(() => {
       const floatingPools = get(cloudProfile.value, ['spec', 'providerConfig', 'constraints', 'floatingPools'])
       let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region.value))
       availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain.value))
@@ -96,11 +96,11 @@ export function useOpenStackConstraints (cloudProfile) {
    * @throws {Error} If region is not a ref
    */
   function useLoadBalancerProviderNamesByRegion (region) {
-    return computed(() => {
-      if (!isRef(region)) {
-        throw new Error('region must be a ref!')
-      }
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
 
+    return computed(() => {
       const loadBalancerProviders = get(cloudProfile.value, ['spec', 'providerConfig', 'constraints', 'loadBalancerProviders'])
       let availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region.value))
       const hasRegionSpecificLoadBalancerProvider = find(availableLoadBalancerProviders, lb => !!lb.region)

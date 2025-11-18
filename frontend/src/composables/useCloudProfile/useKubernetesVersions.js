@@ -79,11 +79,11 @@ export function useKubernetesVersions (cloudProfile) {
    * @throws {Error} If shootVersion is not a ref
    */
   function useAvailableKubernetesUpdatesForShoot (shootVersion) {
-    return computed(() => {
-      if (!isRef(shootVersion)) {
-        throw Error('shootVersion must be a ref!')
-      }
+    if (!isRef(shootVersion)) {
+      throw Error('shootVersion must be a ref!')
+    }
 
+    return computed(() => {
       let newerVersions = {}
       const allVersions = kubernetesVersions.value
 
@@ -113,10 +113,11 @@ export function useKubernetesVersions (cloudProfile) {
    * @throws {Error} If kubernetesVersion is not a ref
    */
   function useKubernetesVersionIsNotLatestPatch (kubernetesVersion) {
+    if (!isRef(kubernetesVersion)) {
+      throw Error('kubernetesVersion must be a ref!')
+    }
+
     return computed(() => {
-      if (!isRef(kubernetesVersion)) {
-        throw Error('kubernetesVersion must be a ref!')
-      }
       const allVersions = kubernetesVersions.value
       return some(allVersions, ({ version, isSupported }) => {
         return semver.diff(version, kubernetesVersion.value) === 'patch' && semver.gt(version, kubernetesVersion.value) && isSupported

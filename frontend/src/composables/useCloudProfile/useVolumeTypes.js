@@ -46,13 +46,13 @@ export function useVolumeTypes (cloudProfile) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
-
-    if (!cloudProfile.value) {
-      return computed(() => [])
-    }
     const zones = useZonesByRegion(region)
 
     return computed(() => {
+      if (!cloudProfile.value) {
+        return []
+      }
+
       const items = volumeTypes.value
       if (!region.value) {
         return items
@@ -86,14 +86,14 @@ export function useVolumeTypes (cloudProfile) {
    * @returns {ComputedRef<String>} Computed ref of minimum size (e.g. "20Gi")
    */
   function useMinimumVolumeSize (machineType, volumeType) {
-    return computed(() => {
-      if (!isRef(machineType)) {
-        throw new Error('machineType must be a ref!')
-      }
-      if (!isRef(volumeType)) {
-        throw new Error('volumeType must be a ref!')
-      }
+    if (!isRef(machineType)) {
+      throw new Error('machineType must be a ref!')
+    }
+    if (!isRef(volumeType)) {
+      throw new Error('volumeType must be a ref!')
+    }
 
+    return computed(() => {
       if (volumeType.value?.name) {
         return volumeType.value.minSize ?? '0Gi'
       }
