@@ -39,7 +39,7 @@ export function useOpenStackConstraints (cloudProfile) {
    * @returns {ComputedRef<Array>} Computed ref with available floating pools
    * @throws {Error} If region or secretDomain are not refs
    */
-  function useFloatingPoolsByRegionAndDomain (region, secretDomain) {
+  function useFloatingPools (region, secretDomain) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -73,7 +73,7 @@ export function useOpenStackConstraints (cloudProfile) {
    * @returns {ComputedRef<Array<string>>} Computed ref with unique floating pool names
    * @throws {Error} If region or secretDomain are not refs
    */
-  function useFloatingPoolNamesByRegionAndDomain (region, secretDomain) {
+  function useFloatingPoolNames (region, secretDomain) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -81,7 +81,7 @@ export function useOpenStackConstraints (cloudProfile) {
       throw new Error('secretDomain must be a ref!')
     }
 
-    const floatingPools = useFloatingPoolsByRegionAndDomain(region, secretDomain)
+    const floatingPools = useFloatingPools(region, secretDomain)
 
     return computed(() => {
       return uniq(map(floatingPools.value, 'name'))
@@ -95,7 +95,7 @@ export function useOpenStackConstraints (cloudProfile) {
    * @returns {ComputedRef<Array<string>>} Computed ref with unique load balancer provider names
    * @throws {Error} If region is not a ref
    */
-  function useLoadBalancerProviderNamesByRegion (region) {
+  function useLoadBalancerProviderNames (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -120,9 +120,9 @@ export function useOpenStackConstraints (cloudProfile) {
   })
 
   return {
-    useFloatingPoolsByRegionAndDomain,
-    useFloatingPoolNamesByRegionAndDomain,
-    useLoadBalancerProviderNamesByRegion,
+    useFloatingPools,
+    useFloatingPoolNames,
+    useLoadBalancerProviderNames,
     loadBalancerClasses,
     loadBalancerClassNames,
   }

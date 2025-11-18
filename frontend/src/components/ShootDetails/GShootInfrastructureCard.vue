@@ -325,10 +325,10 @@ export default {
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-    const { useFloatingPoolsByRegionAndDomain } = useOpenStackConstraints(cloudProfile)
+    const { useFloatingPools } = useOpenStackConstraints(cloudProfile)
 
     const secretDomain = computed(() => get(shootCloudProviderBinding.value, ['data', 'domainName']))
-    const availableFloatingPools = useFloatingPoolsByRegionAndDomain(shootRegion, secretDomain)
+    const availableFloatingPools = useFloatingPools(shootRegion, secretDomain)
 
     return {
       shootItem,

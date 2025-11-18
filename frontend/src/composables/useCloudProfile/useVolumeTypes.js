@@ -28,7 +28,7 @@ export function useVolumeTypes (cloudProfile) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { useZonesByRegion } = useRegions(cloudProfile)
+  const { useZones } = useRegions(cloudProfile)
 
   /**
    * Get all volume types from cloud profile
@@ -42,11 +42,11 @@ export function useVolumeTypes (cloudProfile) {
    * @param {Ref<String>} region - Vue ref containing the region name
    * @returns {ComputedRef<Array>} Computed ref of available volume types
    */
-  function useVolumeTypesByRegion (region) {
+  function useFilteredVolumeTypes (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
-    const zones = useZonesByRegion(region)
+    const zones = useZones(region)
 
     return computed(() => {
       if (!cloudProfile.value) {
@@ -108,7 +108,7 @@ export function useVolumeTypes (cloudProfile) {
 
   return {
     volumeTypes,
-    useVolumeTypesByRegion,
+    useFilteredVolumeTypes,
     useMinimumVolumeSize,
   }
 }

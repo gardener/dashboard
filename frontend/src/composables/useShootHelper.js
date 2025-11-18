@@ -120,31 +120,31 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = useMachineImages(cloudProfile)
 
   const {
-    useZonesByRegion,
+    useZones,
     useRegionsWithSeed,
     useRegionsWithoutSeed,
   } = useRegions(cloudProfile)
 
   const {
     machineTypes: allMachineTypesFromComposable,
-    useMachineArchitecturesByRegion,
-  } = useMachineTypes(cloudProfile, useZonesByRegion)
+    useMachineArchitectures,
+  } = useMachineTypes(cloudProfile, useZones)
 
   const {
-    useFloatingPoolNamesByRegionAndDomain,
-    useLoadBalancerProviderNamesByRegion,
+    useFloatingPoolNames,
+    useLoadBalancerProviderNames,
     loadBalancerClassNames,
   } = useOpenStackConstraints(cloudProfile)
 
   const {
-    usePartitionIDsByRegion,
+    usePartitionIDs,
     firewallImages: firewallImagesFromComposable,
-    useFirewallSizesByRegion,
-  } = useMetalConstraints(cloudProfile, useZonesByRegion)
+    useFirewallSizes,
+  } = useMetalConstraints(cloudProfile, useZones)
 
   const {
     volumeTypes: allVolumeTypesFromComposable,
-    useVolumeTypesByRegion,
+    useFilteredVolumeTypes,
   } = useVolumeTypes(cloudProfile)
 
   const seed = computed(() => {
@@ -170,7 +170,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allZones = useZonesByRegion(region)
+  const allZones = useZones(region)
 
   const regionsWithSeed = useRegionsWithSeed(project)
 
@@ -195,28 +195,28 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const secretDomain = computed(() => get(infrastructureBinding.value, ['data', 'domainName']))
 
-  const allLoadBalancerProviderNames = useLoadBalancerProviderNamesByRegion(region)
+  const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
 
   const allLoadBalancerClassNames = loadBalancerClassNames
 
-  const partitionIDs = usePartitionIDsByRegion(region)
+  const partitionIDs = usePartitionIDs(region)
 
   const firewallImages = firewallImagesFromComposable
 
-  const sizes = useFirewallSizesByRegion(region)
+  const sizes = useFirewallSizes(region)
   const firewallSizes = computed(() => {
     return map(sizes.value, 'name')
   })
 
-  const allFloatingPoolNames = useFloatingPoolNamesByRegionAndDomain(region, secretDomain)
+  const allFloatingPoolNames = useFloatingPoolNames(region, secretDomain)
 
   const allMachineTypes = allMachineTypesFromComposable
 
-  const machineArchitectures = useMachineArchitecturesByRegion(region)
+  const machineArchitectures = useMachineArchitectures(region)
 
   const allVolumeTypes = allVolumeTypesFromComposable
 
-  const volumeTypes = useVolumeTypesByRegion(region)
+  const volumeTypes = useFilteredVolumeTypes(region)
 
   const machineImages = machineImagesFromComposable
 

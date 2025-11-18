@@ -947,10 +947,10 @@ export function createShootContextComposable (options = {}) {
     defaultKubernetesVersion,
   } = useKubernetesVersions(cloudProfile)
 
-  const { useZonesByRegion } = useRegions(cloudProfile)
-  const { useFirewallNetworksByPartitionId } = useMetalConstraints(cloudProfile, useZonesByRegion)
+  const { useZones } = useRegions(cloudProfile)
+  const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
 
-  const allFirewallNetworks = useFirewallNetworksByPartitionId(providerInfrastructureConfigPartitionID)
+  const allFirewallNetworks = useFirewallNetworks(providerInfrastructureConfigPartitionID)
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
@@ -1117,26 +1117,26 @@ function generateWorker (availableZones, cloudProfileRef, region, kubernetesVers
   // Get cloud profile and setup composables
   const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef)
   const cloudProfileValue = computed(() => cloudProfile)
-  const { useZonesByRegion } = useRegions(cloudProfileValue)
-  const { useMachineArchitecturesByRegion, useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfileValue, useZonesByRegion)
-  const { useDefaultMachineImageForMachineType } = useMachineImages(cloudProfileValue)
+  const { useZones } = useRegions(cloudProfileValue)
+  const { useMachineArchitectures, useFilteredMachineTypes } = useMachineTypes(cloudProfileValue, useZones)
+  const { useDefaultMachineImage } = useMachineImages(cloudProfileValue)
 
   // Get machine architecture and types
   const regionRef = computed(() => region)
-  const machineArchitecture = useMachineArchitecturesByRegion(regionRef)
+  const machineArchitecture = useMachineArchitectures(regionRef)
   const architecture = head(machineArchitecture.value)
   const architectureRef = computed(() => architecture)
-  const machineTypesForZone = useMachineTypesByRegionAndArchitecture(regionRef, architectureRef)
+  const machineTypesForZone = useFilteredMachineTypes(regionRef, architectureRef)
   const machineType = head(machineTypesForZone.value) || {}
 
   // Get volume types
-  const { useVolumeTypesByRegion, useMinimumVolumeSize } = useVolumeTypes(cloudProfileValue)
-  const volumeTypesForZone = useVolumeTypesByRegion(regionRef)
+  const { useFilteredVolumeTypes, useMinimumVolumeSize } = useVolumeTypes(cloudProfileValue)
+  const volumeTypesForZone = useFilteredVolumeTypes(regionRef)
   const volumeType = head(volumeTypesForZone.value) || {}
 
   // Get machine image
   const machineTypeRef = computed(() => machineType)
-  const machineImage = useDefaultMachineImageForMachineType(machineTypeRef)
+  const machineImage = useDefaultMachineImage(machineTypeRef)
 
   const volumeTypeRef = computed(() => volumeType)
   const minVolumeSize = useMinimumVolumeSize(machineTypeRef, volumeTypeRef)

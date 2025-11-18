@@ -153,43 +153,43 @@ describe('composables', () => {
       seedStore.list = seeds
     })
 
-    describe('#useZonesByRegion', () => {
+    describe('#useZones', () => {
       it('should return zones for valid AWS region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('eu-central-1')
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const zones = useZonesByRegion(region)
+        const { useZones } = useRegions(cloudProfile)
+        const zones = useZones(region)
         expect(zones.value).toEqual(['eu-central-1a', 'eu-central-1b', 'eu-central-1c'])
       })
 
       it('should return zones for another AWS region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('us-east-1')
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const zones = useZonesByRegion(region)
+        const { useZones } = useRegions(cloudProfile)
+        const zones = useZones(region)
         expect(zones.value).toEqual(['us-east-1a', 'us-east-1b'])
       })
 
       it('should return empty array for invalid region', () => {
         const cloudProfile = ref(awsCloudProfile)
         const region = ref('invalid-region')
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const zones = useZonesByRegion(region)
+        const { useZones } = useRegions(cloudProfile)
+        const zones = useZones(region)
         expect(zones.value).toEqual([])
       })
 
       it('should return empty array when cloud profile is null', () => {
         const cloudProfile = ref(null)
         const region = ref('eu-central-1')
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const zones = useZonesByRegion(region)
+        const { useZones } = useRegions(cloudProfile)
+        const zones = useZones(region)
         expect(zones.value).toEqual([])
       })
 
       it('should throw error if region is not a ref', () => {
         const cloudProfile = ref(awsCloudProfile)
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        expect(() => useZonesByRegion('eu-central-1').value).toThrow('region must be a ref!')
+        const { useZones } = useRegions(cloudProfile)
+        expect(() => useZones('eu-central-1').value).toThrow('region must be a ref!')
       })
     })
 

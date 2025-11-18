@@ -156,20 +156,20 @@ describe('composables', () => {
       })
     })
 
-    describe('#useAvailableKubernetesUpdatesForShoot', () => {
+    describe('#useAvailableKubernetesUpdates', () => {
       it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', () => {
         const shootVersion = ref(deprecatedOldest16Version.version)
-        const { useAvailableKubernetesUpdatesForShoot } = useKubernetesVersions(cloudProfile)
-        const availableK8sUpdates = useAvailableKubernetesUpdatesForShoot(shootVersion)
+        const { useAvailableKubernetesUpdates } = useKubernetesVersions(cloudProfile)
+        const availableK8sUpdates = useAvailableKubernetesUpdates(shootVersion)
         expect(availableK8sUpdates.value.patch.length).toBe(5)
         expect(availableK8sUpdates.value.minor.length).toBe(3)
         expect(availableK8sUpdates.value.major.length).toBe(2)
       })
 
       it('should return available K8sUpdates for given version', () => {
-        const { useAvailableKubernetesUpdatesForShoot } = useKubernetesVersions(cloudProfile)
+        const { useAvailableKubernetesUpdates } = useKubernetesVersions(cloudProfile)
         const shootVersion = ref(unclassified164VersionWithExpiration.version)
-        const availableK8sUpdates = useAvailableKubernetesUpdatesForShoot(shootVersion)
+        const availableK8sUpdates = useAvailableKubernetesUpdates(shootVersion)
         expect(availableK8sUpdates.value.patch[0]).toEqual(expect.objectContaining(supported165VersionWithExpiration))
         expect(availableK8sUpdates.value.minor[0]).toEqual(expect.objectContaining(supported18VersionWithExpirationWarning))
         expect(availableK8sUpdates.value.major[0]).toEqual(expect.objectContaining(preview22Version))
@@ -192,12 +192,12 @@ describe('composables', () => {
       })
     })
 
-    describe('#useKubernetesVersionExpirationForShoot', () => {
+    describe('#useKubernetesVersionExpiration', () => {
       it('should be info level (patch available, auto update enabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(true)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: unclassified164VersionWithExpiration.expirationDate,
           isExpired: false,
@@ -207,10 +207,10 @@ describe('composables', () => {
       })
 
       it('should be warning level (patch available, auto update enabled, expiration warning))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(supported162VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(true)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: supported162VersionWithExpirationWarning.expirationDate,
           isExpired: false,
@@ -220,10 +220,10 @@ describe('composables', () => {
       })
 
       it('should be warning level (patch available, auto update disabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(supported162VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(false)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: supported162VersionWithExpirationWarning.expirationDate,
           isExpired: false,
@@ -233,10 +233,10 @@ describe('composables', () => {
       })
 
       it('should be warning level (update available, auto update enabled / disabled))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(supported17VersionWithExpirationWarning.version)
         let k8sAutoPatch = ref(true)
-        let versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        let versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: supported17VersionWithExpirationWarning.expirationDate,
           isExpired: false,
@@ -245,7 +245,7 @@ describe('composables', () => {
         })
 
         k8sAutoPatch = ref(false)
-        versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: supported17VersionWithExpirationWarning.expirationDate,
           isExpired: false,
@@ -255,10 +255,10 @@ describe('composables', () => {
       })
 
       it('should be error level (only deprecated newer version available))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(supported18VersionWithExpirationWarning.version)
         const k8sAutoPatch = ref(false)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: supported18VersionWithExpirationWarning.expirationDate,
           isExpired: false,
@@ -268,18 +268,18 @@ describe('composables', () => {
       })
 
       it('should not have warning (version not expired))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(false)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toBeUndefined()
       })
 
       it('should have info (auto update)', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(unclassified164VersionWithExpiration.version)
         const k8sAutoPatch = ref(true)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: unclassified164VersionWithExpiration.expirationDate,
           isExpired: false,
@@ -289,18 +289,18 @@ describe('composables', () => {
       })
 
       it('should not have warning (deprecated version has no expiration))', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(deprecatedOldest16Version.version)
         const k8sAutoPatch = ref(false)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toBeUndefined()
       })
 
       it('should not have error when no immediate supported minor version update exists', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(deprecated14Version.version)
         const k8sAutoPatch = ref(true)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: deprecated14Version.expirationDate,
           isExpired: false,
@@ -310,10 +310,10 @@ describe('composables', () => {
       })
 
       it('should have warning when version is expired', () => {
-        const { useKubernetesVersionExpirationForShoot } = useKubernetesVersions(cloudProfile)
+        const { useKubernetesVersionExpiration } = useKubernetesVersions(cloudProfile)
         const k8sVersion = ref(expiredVersion.version)
         const k8sAutoPatch = ref(false)
-        const versionExpirationWarning = useKubernetesVersionExpirationForShoot(k8sVersion, k8sAutoPatch)
+        const versionExpirationWarning = useKubernetesVersionExpiration(k8sVersion, k8sAutoPatch)
         expect(versionExpirationWarning.value).toEqual({
           expirationDate: expiredVersion.expirationDate,
           isExpired: true,

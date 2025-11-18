@@ -83,40 +83,40 @@ describe('composables', () => {
 
     describe('#machineTypes', () => {
       it('should return all machine types from cloud profile', () => {
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const { machineTypes } = useMachineTypes(cloudProfile, useZonesByRegion)
+        const { useZones } = useRegions(cloudProfile)
+        const { machineTypes } = useMachineTypes(cloudProfile, useZones)
         expect(machineTypes.value).toHaveLength(4)
         expect(machineTypes.value[0].name).toBe('machineType1')
         expect(machineTypes.value[3].name).toBe('machineType4')
       })
     })
 
-    describe('#useMachineTypesByRegionAndArchitecture', () => {
+    describe('#useFilteredMachineTypes', () => {
       it('should return machineTypes by region and zones from cloud profile', () => {
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
+        const { useZones } = useRegions(cloudProfile)
+        const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
 
         const region = ref('region1')
         const architecture = ref('amd64')
-        let dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
+        let dashboardMachineTypes = useFilteredMachineTypes(region, architecture)
         expect(dashboardMachineTypes.value).toHaveLength(2)
         expect(dashboardMachineTypes.value[0].name).toBe('machineType1')
         expect(dashboardMachineTypes.value[1].name).toBe('machineType3')
 
         region.value = 'region2'
         architecture.value = 'arm64'
-        dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
+        dashboardMachineTypes = useFilteredMachineTypes(region, architecture)
         expect(dashboardMachineTypes.value).toHaveLength(1)
         expect(dashboardMachineTypes.value[0].name).toBe('machineType4')
       })
 
       it('should default architecture to amd64 if not specified', () => {
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const { useMachineTypesByRegionAndArchitecture } = useMachineTypes(cloudProfile, useZonesByRegion)
+        const { useZones } = useRegions(cloudProfile)
+        const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
 
         const region = ref('region2')
         const architecture = ref(undefined)
-        const dashboardMachineTypes = useMachineTypesByRegionAndArchitecture(region, architecture)
+        const dashboardMachineTypes = useFilteredMachineTypes(region, architecture)
 
         // machineType2 and machineType3 should have amd64 as default
         const type2 = find(dashboardMachineTypes.value, { name: 'machineType2' })
@@ -126,13 +126,13 @@ describe('composables', () => {
       })
     })
 
-    describe('#useMachineArchitecturesByRegion', () => {
+    describe('#useMachineArchitectures', () => {
       it('should return available architectures for a region', () => {
-        const { useZonesByRegion } = useRegions(cloudProfile)
-        const { useMachineArchitecturesByRegion } = useMachineTypes(cloudProfile, useZonesByRegion)
+        const { useZones } = useRegions(cloudProfile)
+        const { useMachineArchitectures } = useMachineTypes(cloudProfile, useZones)
 
         const region = ref('region2')
-        const architectures = useMachineArchitecturesByRegion(region)
+        const architectures = useMachineArchitectures(region)
 
         expect(architectures.value).toContain('amd64')
         expect(architectures.value).toContain('arm64')

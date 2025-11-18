@@ -41,7 +41,7 @@ export function useAccessRestrictions (cloudProfile) {
    * @throws {Error} If region is not a ref
    * @param region
    */
-  function accessRestrictionsByRegion (region) {
+  function accessRestrictions (region) {
     if (!cloudProfile.value) {
       return []
     }
@@ -61,7 +61,7 @@ export function useAccessRestrictions (cloudProfile) {
    * @returns {ComputedRef<Array>} Computed ref with array of access restriction definitions, or empty array if none
    * @throws {Error} If region is not a ref
    */
-  function useAccessRestrictionDefinitionsByRegion (region) {
+  function useAccessRestrictionDefinitions (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -71,7 +71,7 @@ export function useAccessRestrictions (cloudProfile) {
         return []
       }
 
-      const allowedAccessRestrictions = accessRestrictionsByRegion(region.value)
+      const allowedAccessRestrictions = accessRestrictions(region.value)
       if (isEmpty(allowedAccessRestrictions)) {
         return []
       }
@@ -93,7 +93,7 @@ export function useAccessRestrictions (cloudProfile) {
    * @returns {ComputedRef<string>} Computed ref with the no-items text message
    * @throws {Error} If region is not a ref
    */
-  function useAccessRestrictionNoItemsTextByRegion (region) {
+  function useAccessRestrictionNoItemsText (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -112,7 +112,7 @@ export function useAccessRestrictions (cloudProfile) {
   }
 
   return {
-    useAccessRestrictionDefinitionsByRegion,
-    useAccessRestrictionNoItemsTextByRegion,
+    useAccessRestrictionDefinitions,
+    useAccessRestrictionNoItemsText,
   }
 }

@@ -121,7 +121,7 @@ export function useMachineImages (cloudProfile) {
    * @returns {ComputedRef<object|undefined>} Computed ref with the default machine image or undefined
    * @throws {Error} If machineType is not a ref
    */
-  function useDefaultMachineImageForMachineType (machineType) {
+  function useDefaultMachineImage (machineType) {
     if (!isRef(machineType)) {
       throw new Error('machineType must be a ref!')
     }
@@ -137,6 +137,6 @@ export function useMachineImages (cloudProfile) {
 
   return {
     machineImages,
-    useDefaultMachineImageForMachineType,
+    useDefaultMachineImage,
   }
 }

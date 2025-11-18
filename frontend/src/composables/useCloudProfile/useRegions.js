@@ -39,7 +39,7 @@ export function useRegions (cloudProfile) {
 
     if (providerType === 'azure') {
       // Azure regions may not be zoned, need to filter these out for the dashboard
-      const zones = zonesByRegion(region)
+      const zones = getZones(region)
       return !!zones.length
     }
 
@@ -52,16 +52,16 @@ export function useRegions (cloudProfile) {
    * @param {Ref<String>} region - Vue ref containing the region name
    * @returns {ComputedRef<Array<String>>} Computed ref of zone names
    */
-  function useZonesByRegion (region) {
+  function useZones (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
     return computed(() => {
-      return zonesByRegion(region.value)
+      return getZones(region.value)
     })
   }
 
-  function zonesByRegion (region) {
+  function getZones (region) {
     if (!cloudProfile.value) {
       return []
     }
@@ -125,7 +125,7 @@ export function useRegions (cloudProfile) {
   }
 
   return {
-    useZonesByRegion,
+    useZones,
     useRegionsWithSeed,
     useRegionsWithoutSeed,
   }

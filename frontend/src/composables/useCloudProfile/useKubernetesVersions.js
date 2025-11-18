@@ -78,7 +78,7 @@ export function useKubernetesVersions (cloudProfile) {
    * @returns {ComputedRef<object|null>} Computed ref with available updates grouped by diff type (patch/minor/major), or null if no updates
    * @throws {Error} If shootVersion is not a ref
    */
-  function useAvailableKubernetesUpdatesForShoot (shootVersion) {
+  function useAvailableKubernetesUpdates (shootVersion) {
     if (!isRef(shootVersion)) {
       throw Error('shootVersion must be a ref!')
     }
@@ -134,7 +134,7 @@ export function useKubernetesVersions (cloudProfile) {
    * @returns {ComputedRef<object|undefined>} Computed ref with expiration info, or undefined if no warning needed
    * @throws {Error} If k8sVersion or k8sAutoPatch are not refs
    */
-  function useKubernetesVersionExpirationForShoot (k8sVersion, k8sAutoPatch) {
+  function useKubernetesVersionExpiration (k8sVersion, k8sAutoPatch) {
     if (!isRef(k8sVersion) && !isRef(k8sAutoPatch)) {
       throw Error('k8sVersion and k8sAutoPatch must be a ref!')
     }
@@ -224,8 +224,8 @@ export function useKubernetesVersions (cloudProfile) {
     kubernetesVersions,
     sortedKubernetesVersions,
     defaultKubernetesVersion,
-    useAvailableKubernetesUpdatesForShoot,
+    useAvailableKubernetesUpdates,
     useKubernetesVersionIsNotLatestPatch,
-    useKubernetesVersionExpirationForShoot,
+    useKubernetesVersionExpiration,
   }
 }

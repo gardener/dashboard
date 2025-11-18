@@ -96,73 +96,73 @@ describe('composables', () => {
       })
     })
 
-    describe('#useAccessRestrictionDefinitionsByRegion', () => {
+    describe('#useAccessRestrictionDefinitions', () => {
       it('should return access restriction definitions for region1', () => {
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('region1')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(2)
         expect(definitions.value[0].key).toBe('eu-access-only')
         expect(definitions.value[1].key).toBe('private-access')
       })
 
       it('should return only matching definitions for region2', () => {
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('region2')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(1)
         expect(definitions.value[0].key).toBe('eu-access-only')
       })
 
       it('should return empty array when no restrictions are configured', () => {
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('region3')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(0)
       })
 
       it('should return empty array when region does not exist', () => {
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('non-existent-region')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(0)
       })
 
       it('should return empty array when no config items are available', () => {
         configStore.setConfiguration({ accessRestriction: { items: [] } })
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('region1')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(0)
       })
 
       it('should return empty array when cloud profile is null', () => {
         cloudProfile.value = null
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
         const region = ref('region1')
-        const definitions = useAccessRestrictionDefinitionsByRegion(region)
+        const definitions = useAccessRestrictionDefinitions(region)
         expect(definitions.value).toHaveLength(0)
       })
 
       it('should throw error if region is not a ref', () => {
-        const { useAccessRestrictionDefinitionsByRegion } = useAccessRestrictions(cloudProfile)
-        expect(() => useAccessRestrictionDefinitionsByRegion('region1').value).toThrow('region must be a ref!')
+        const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
+        expect(() => useAccessRestrictionDefinitions('region1').value).toThrow('region must be a ref!')
       })
     })
 
-    describe('#useAccessRestrictionNoItemsTextByRegion', () => {
+    describe('#useAccessRestrictionNoItemsText', () => {
       it('should return formatted text with region placeholder', () => {
-        const { useAccessRestrictionNoItemsTextByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionNoItemsText } = useAccessRestrictions(cloudProfile)
         const region = ref('us-east-1')
-        const text = useAccessRestrictionNoItemsTextByRegion(region)
+        const text = useAccessRestrictionNoItemsText(region)
         expect(text.value).toBe('No access restriction options available for region us-east-1')
       })
 
       it('should use default text when config is not set', () => {
         configStore.setConfiguration({})
-        const { useAccessRestrictionNoItemsTextByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionNoItemsText } = useAccessRestrictions(cloudProfile)
         const region = ref('eu-central-1')
-        const text = useAccessRestrictionNoItemsTextByRegion(region)
+        const text = useAccessRestrictionNoItemsText(region)
         expect(text.value).toBe('No access restriction options available for region eu-central-1')
       })
 
@@ -172,15 +172,15 @@ describe('composables', () => {
             noItemsText: 'No restrictions for ${cloudProfileName} in ${region}', // eslint-disable-line no-template-curly-in-string
           },
         })
-        const { useAccessRestrictionNoItemsTextByRegion } = useAccessRestrictions(cloudProfile)
+        const { useAccessRestrictionNoItemsText } = useAccessRestrictions(cloudProfile)
         const region = ref('region1')
-        const text = useAccessRestrictionNoItemsTextByRegion(region)
+        const text = useAccessRestrictionNoItemsText(region)
         expect(text.value).toBe('No restrictions for foo in region1')
       })
 
       it('should throw error if region is not a ref', () => {
-        const { useAccessRestrictionNoItemsTextByRegion } = useAccessRestrictions(cloudProfile)
-        expect(() => useAccessRestrictionNoItemsTextByRegion('region1').value).toThrow('region must be a ref!')
+        const { useAccessRestrictionNoItemsText } = useAccessRestrictions(cloudProfile)
+        expect(() => useAccessRestrictionNoItemsText('region1').value).toThrow('region must be a ref!')
       })
     })
 

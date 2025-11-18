@@ -77,9 +77,9 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-  const { useAvailableKubernetesUpdatesForShoot, kubernetesVersions } = useKubernetesVersions(cloudProfile)
+  const { useAvailableKubernetesUpdates, kubernetesVersions } = useKubernetesVersions(cloudProfile)
 
-  const shootAvailableK8sUpdates = useAvailableKubernetesUpdatesForShoot(k8sVersion)
+  const shootAvailableK8sUpdates = useAvailableKubernetesUpdates(k8sVersion)
 
   const shootSupportedPatchAvailable = computed(() => {
     return !!find(shootAvailableK8sUpdates.value?.patch, 'isSupported')

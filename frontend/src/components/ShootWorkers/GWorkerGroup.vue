@@ -414,8 +414,8 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
     const { machineImages } = useMachineImages(cloudProfile)
-    const { useZonesByRegion } = useRegions(cloudProfile)
-    const { machineTypes } = useMachineTypes(cloudProfile, useZonesByRegion)
+    const { useZones } = useRegions(cloudProfile)
+    const { machineTypes } = useMachineTypes(cloudProfile, useZones)
     const { volumeTypes } = useVolumeTypes(cloudProfile)
 
     const tab = ref('overview')
