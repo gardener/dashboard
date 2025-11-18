@@ -81,15 +81,15 @@ describe('composables', () => {
         const { usePartitionIDs } = useMetalConstraints(cloudProfile, useZones)
 
         const region = ref('region1')
-        let partitionIDs = usePartitionIDs(region).value
-        expect(partitionIDs).toHaveLength(2)
-        expect(partitionIDs[0]).toBe('partition1')
-        expect(partitionIDs[1]).toBe('partition2')
+        let partitionIDs = usePartitionIDs(region)
+        expect(partitionIDs.value).toHaveLength(2)
+        expect(partitionIDs.value[0]).toBe('partition1')
+        expect(partitionIDs.value[1]).toBe('partition2')
 
         region.value = 'region2'
-        partitionIDs = usePartitionIDs(region).value
-        expect(partitionIDs).toHaveLength(1)
-        expect(partitionIDs[0]).toBe('partition3')
+        partitionIDs = usePartitionIDs(region)
+        expect(partitionIDs.value).toHaveLength(1)
+        expect(partitionIDs.value[0]).toBe('partition3')
       })
 
       it('should return undefined for non-metal cloud profile', () => {
@@ -98,8 +98,8 @@ describe('composables', () => {
         const { usePartitionIDs } = useMetalConstraints(cloudProfile, useZones)
 
         const region = ref('region1')
-        const partitionIDs = usePartitionIDs(region).value
-        expect(partitionIDs).toBeUndefined()
+        const partitionIDs = usePartitionIDs(region)
+        expect(partitionIDs.value).toBeUndefined()
       })
     })
 
@@ -109,10 +109,10 @@ describe('composables', () => {
         const { useFirewallSizes } = useMetalConstraints(cloudProfile, useZones)
 
         const region = ref('region1')
-        const firewallSizes = useFirewallSizes(region).value
-        expect(firewallSizes).toHaveLength(2)
-        expect(firewallSizes[0].name).toBe('machineType1')
-        expect(firewallSizes[1].name).toBe('machineType2')
+        const firewallSizes = useFirewallSizes(region)
+        expect(firewallSizes.value).toHaveLength(2)
+        expect(firewallSizes.value[0].name).toBe('machineType1')
+        expect(firewallSizes.value[1].name).toBe('machineType2')
       })
 
       it('should return undefined for non-metal cloud profile', () => {
@@ -121,8 +121,8 @@ describe('composables', () => {
         const { useFirewallSizes } = useMetalConstraints(cloudProfile, useZones)
 
         const region = ref('region1')
-        const firewallSizes = useFirewallSizes(region).value
-        expect(firewallSizes).toBeUndefined()
+        const firewallSizes = useFirewallSizes(region)
+        expect(firewallSizes.value).toBeUndefined()
       })
     })
 
@@ -143,15 +143,15 @@ describe('composables', () => {
         const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
 
         const partitionID = ref('partition1')
-        let networks = useFirewallNetworks(partitionID).value
-        expect(networks).toHaveLength(2)
-        expect(networks[0]).toEqual({ key: 'network1', value: '10.0.0.0/8', text: 'network1 [10.0.0.0/8]' })
-        expect(networks[1]).toEqual({ key: 'network2', value: '192.168.0.0/16', text: 'network2 [192.168.0.0/16]' })
+        let networks = useFirewallNetworks(partitionID)
+        expect(networks.value).toHaveLength(2)
+        expect(networks.value[0]).toEqual({ key: 'network1', value: '10.0.0.0/8', text: 'network1 [10.0.0.0/8]' })
+        expect(networks.value[1]).toEqual({ key: 'network2', value: '192.168.0.0/16', text: 'network2 [192.168.0.0/16]' })
 
         partitionID.value = 'partition2'
-        networks = useFirewallNetworks(partitionID).value
-        expect(networks).toHaveLength(1)
-        expect(networks[0]).toEqual({ key: 'network3', value: '172.16.0.0/12', text: 'network3 [172.16.0.0/12]' })
+        networks = useFirewallNetworks(partitionID)
+        expect(networks.value).toHaveLength(1)
+        expect(networks.value[0]).toEqual({ key: 'network3', value: '172.16.0.0/12', text: 'network3 [172.16.0.0/12]' })
       })
     })
   })

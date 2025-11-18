@@ -104,49 +104,49 @@ describe('composables', () => {
 
         const region = ref('fooRegion')
         const secretDomain = ref('fooDomain')
-        let dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(1)
-        expect(dashboardFloatingPools[0]).toBe('global FP')
+        let dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(1)
+        expect(dashboardFloatingPools.value[0]).toBe('global FP')
 
         region.value = 'region1'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(1)
-        expect(dashboardFloatingPools[0]).toBe('regional FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(1)
+        expect(dashboardFloatingPools.value[0]).toBe('regional FP')
 
         region.value = 'region2'
         secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(2)
-        expect(dashboardFloatingPools[0]).toBe('global FP')
-        expect(dashboardFloatingPools[1]).toBe('regional non constraining FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(2)
+        expect(dashboardFloatingPools.value[0]).toBe('global FP')
+        expect(dashboardFloatingPools.value[1]).toBe('regional non constraining FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain1'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(1)
-        expect(dashboardFloatingPools[0]).toBe('domain specific FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(1)
+        expect(dashboardFloatingPools.value[0]).toBe('domain specific FP')
 
         region.value = 'fooRegion'
         secretDomain.value = 'domain2'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(2)
-        expect(dashboardFloatingPools[0]).toBe('global FP')
-        expect(dashboardFloatingPools[1]).toBe('domain specific non constraining FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(2)
+        expect(dashboardFloatingPools.value[0]).toBe('global FP')
+        expect(dashboardFloatingPools.value[1]).toBe('domain specific non constraining FP')
 
         region.value = 'region3'
         secretDomain.value = 'domain3'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(2)
-        expect(dashboardFloatingPools[0]).toBe('domain specific, regional FP')
-        expect(dashboardFloatingPools[1]).toBe('additional domain specific, regional FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(2)
+        expect(dashboardFloatingPools.value[0]).toBe('domain specific, regional FP')
+        expect(dashboardFloatingPools.value[1]).toBe('additional domain specific, regional FP')
 
         region.value = 'region4'
         secretDomain.value = 'domain4'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain).value
-        expect(dashboardFloatingPools).toHaveLength(2)
-        expect(dashboardFloatingPools[0]).toBe('global FP')
-        expect(dashboardFloatingPools[1]).toBe('domain specific, regional non constraining FP')
+        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        expect(dashboardFloatingPools.value).toHaveLength(2)
+        expect(dashboardFloatingPools.value[0]).toBe('global FP')
+        expect(dashboardFloatingPools.value[1]).toBe('domain specific, regional non constraining FP')
       })
     })
 
@@ -155,20 +155,20 @@ describe('composables', () => {
         const { useLoadBalancerProviderNames } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
-        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
-        expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
-        expect(dashboardLoadBalancerProviderNames[0]).toBe('global LB')
+        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        expect(dashboardLoadBalancerProviderNames.value).toHaveLength(1)
+        expect(dashboardLoadBalancerProviderNames.value[0]).toBe('global LB')
 
         region.value = 'region1'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
-        expect(dashboardLoadBalancerProviderNames).toHaveLength(2)
-        expect(dashboardLoadBalancerProviderNames[0]).toBe('regional LB')
-        expect(dashboardLoadBalancerProviderNames[1]).toBe('additional regional LB')
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        expect(dashboardLoadBalancerProviderNames.value).toHaveLength(2)
+        expect(dashboardLoadBalancerProviderNames.value[0]).toBe('regional LB')
+        expect(dashboardLoadBalancerProviderNames.value[1]).toBe('additional regional LB')
 
         region.value = 'region2'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region).value
-        expect(dashboardLoadBalancerProviderNames).toHaveLength(1)
-        expect(dashboardLoadBalancerProviderNames[0]).toBe('other regional LB')
+        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        expect(dashboardLoadBalancerProviderNames.value).toHaveLength(1)
+        expect(dashboardLoadBalancerProviderNames.value[0]).toBe('other regional LB')
       })
     })
 

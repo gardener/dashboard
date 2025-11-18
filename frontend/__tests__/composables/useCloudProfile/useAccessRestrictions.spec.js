@@ -146,7 +146,7 @@ describe('composables', () => {
 
       it('should throw error if region is not a ref', () => {
         const { useAccessRestrictionDefinitions } = useAccessRestrictions(cloudProfile)
-        expect(() => useAccessRestrictionDefinitions('region1').value).toThrow('region must be a ref!')
+        expect(() => useAccessRestrictionDefinitions('region1')).toThrow('region must be a ref!')
       })
     })
 
@@ -180,7 +180,7 @@ describe('composables', () => {
 
       it('should throw error if region is not a ref', () => {
         const { useAccessRestrictionNoItemsText } = useAccessRestrictions(cloudProfile)
-        expect(() => useAccessRestrictionNoItemsText('region1').value).toThrow('region must be a ref!')
+        expect(() => useAccessRestrictionNoItemsText('region1')).toThrow('region must be a ref!')
       })
     })
 
