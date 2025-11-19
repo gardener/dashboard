@@ -24,6 +24,7 @@ export default [
       format: 'cjs',
       preserveModules: true,
       entryFileNames: '[name].cjs',
+      sourcemap: true,
       paths: {
         'lodash-es': 'lodash',
       },
