@@ -536,6 +536,7 @@ import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConf
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
 import { useLogger } from '@/composables/useLogger'
@@ -549,10 +550,12 @@ import {
 import { errorDetailsFromError } from '@/utils/error'
 import { annotations } from '@/utils/annotations.js'
 
-import includes from 'lodash/includes'
+import get from 'lodash/get'
 import set from 'lodash/set'
+import includes from 'lodash/includes'
 
 const logger = useLogger()
+const openMFP = useOpenMFP()
 const appStore = useAppStore()
 const configStore = useConfigStore()
 const quotaStore = useQuotaStore()
@@ -565,7 +568,12 @@ const kubeconfigStore = useKubeconfigStore()
 const route = useRoute()
 const router = useRouter()
 
-useProvideProjectContext()
+useProvideProjectContext({
+  openMFP,
+  configStore,
+})
+
+const { accountId } = openMFP
 
 const color = ref('primary')
 const errorMessage = ref(undefined)
@@ -670,6 +678,10 @@ async function updateProperty (path, value, options = {}) {
     const mergePatchDocument = {
       metadata: { name },
       spec: { namespace },
+    }
+    if (accountId.value && !get(projectStore.project, ['metadata', 'annotations', 'openmfp.org/account-id'])) {
+      set(mergePatchDocument, ['metadata', 'labels', 'openmfp.org/managed-by'], 'true')
+      set(mergePatchDocument, ['metadata', 'annotations', 'openmfp.org/account-id'], accountId.value)
     }
     set(mergePatchDocument, path, value)
     await projectStore.patchProject(mergePatchDocument)

@@ -995,6 +995,7 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     morgan: "npm:^1.10.0"
     neostandard: "npm:^0.12.0"
+    node-fetch-commonjs: "npm:^3.3.2"
     object-hash: "npm:^3.0.0"
     openapi-types: "npm:^12.1.3"
     openid-client: "npm:^6.1.7"
@@ -1046,8 +1047,9 @@ __metadata:
     "@codemirror/theme-one-dark": "npm:^6.1.2"
     "@codemirror/view": "npm:^6.35.3"
     "@fontsource/roboto": "npm:^5.0.12"
-    "@kyvg/vue3-notification": "npm:^3.2.1"
+    "@kyvg/vue3-notification": "npm:^3.4.1"
     "@lezer/common": "npm:^1.2.1"
+    "@luigi-project/client": "npm:^2.9.0"
     "@mdi/font": "npm:7.4.47"
     "@mdi/svg": "npm:7.4.47"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
@@ -1749,7 +1751,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kyvg/vue3-notification@npm:^3.2.1":
+"@kyvg/vue3-notification@npm:^3.4.1":
   version: 3.4.1
   resolution: "@kyvg/vue3-notification@npm:3.4.1"
   peerDependencies:
@@ -1791,6 +1793,13 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.4.0"
   checksum: 10c0/cef3d0c0a2c48a7e0f36ccc0af948da9394d17b164dcbaf0187d9b472fd4f628b3107d7a4041045181488f1966a94ae65640c932fc8d3bf8c3597813cfb86ae0
+  languageName: node
+  linkType: hard
+
+"@luigi-project/client@npm:^2.9.0":
+  version: 2.24.0
+  resolution: "@luigi-project/client@npm:2.24.0"
+  checksum: 10c0/2d57bfa736a79d749baa5f908ed6ca42ffb243de753b4ba4607a24113f29d460d5d48c4b1dc3ba93c768b29e42dffe4a4f4cb9bf3b5fb769ae482629fa5ec8ec
   languageName: node
   linkType: hard
 
@@ -8953,6 +8962,16 @@ __metadata:
   version: 1.0.0
   resolution: "node-domexception@npm:1.0.0"
   checksum: 10c0/5e5d63cda29856402df9472335af4bb13875e1927ad3be861dc5ebde38917aecbf9ae337923777af52a48c426b70148815e890a5d72760f1b4d758cc671b1a2b
+  languageName: node
+  linkType: hard
+
+"node-fetch-commonjs@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "node-fetch-commonjs@npm:3.3.2"
+  dependencies:
+    node-domexception: "npm:^1.0.0"
+    web-streams-polyfill: "npm:^3.0.3"
+  checksum: 10c0/87d36ed3e6dcb9dea96783700bc0becf0fdbcdc26c975e16b01a0d3a6e2f420c7e589e765bbfad461ae5377d4c5bd5f6937969a9dd34a0d736a81ac898f5c26a
   languageName: node
   linkType: hard
 
