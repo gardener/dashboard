@@ -8,6 +8,8 @@ import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
+import { useAccessRestrictions } from '@/composables/useCloudProfile/useAccessRestrictions'
+
 import { NAND } from './helper'
 
 import get from 'lodash/get'
@@ -33,19 +35,15 @@ export const useShootAccessRestrictions = (shootItem, options = {}) => {
     return computed(() => get(shootItem.value, path))
   })
 
-  const accessRestrictionDefinitionList = computed(() => {
-    return cloudProfileStore.accessRestrictionDefinitionsByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(cloudProfileRef.value))
+  const {
+    useAccessRestrictionDefinitions,
+    useAccessRestrictionNoItemsText,
+  } = useAccessRestrictions(cloudProfile)
 
-  const accessRestrictionNoItemsText = computed(() => {
-    return cloudProfileStore.accessRestrictionNoItemsTextForCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const accessRestrictionDefinitionList = useAccessRestrictionDefinitions(region)
+
+  const accessRestrictionNoItemsText = useAccessRestrictionNoItemsText(region)
 
   const accessRestrictionDefinitions = computed(() => {
     const accessRestrictionDefinitions = {}
