@@ -1,0 +1,22 @@
+name: Cherry Pick Action
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: none  # we rely on the GitHub App token instead
+
+jobs:
+  cherry-pick:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/cherry-pick ') &&
+      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER') &&
+      github.event.comment.user.type == 'User'
+    uses: gardener/dashboard/.github/workflows/cherry-pick-reusable.yaml@master
+    with:
+      pr-number: ${{ github.event.issue.number }}
+      comment-body: ${{ github.event.comment.body }}
+    secrets:
+      GARDENER_GITHUB_ACTIONS_PRIVATE_KEY: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}

@@ -10,12 +10,10 @@ import fsp from 'fs/promises'
 import path from 'path'
 import os from 'os'
 import yaml from 'js-yaml'
-import gtoken from 'gtoken'
 import { cloneDeep } from 'lodash-es'
 import Config from '../lib/Config.js'
 import config from '../lib/index.js'
-
-const { mockGetToken } = gtoken
+const { mockGetToken } = await import('gtoken')
 
 const {
   load,
@@ -472,7 +470,7 @@ describe('kube-config', () => {
     it('should refresh an existing auth-provider token', async () => {
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.name).toBe('gcp')
@@ -484,7 +482,7 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider'].config
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
@@ -498,7 +496,7 @@ describe('kube-config', () => {
       }
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(1)
+      expect(mockGetToken).toHaveBeenCalledTimes(1)
       expect(kubeconfig.users).toHaveLength(1)
       const authProvider = kubeconfig.currentUser['auth-provider']
       expect(authProvider.config['access-token']).toBe('valid-access-token')
@@ -508,7 +506,7 @@ describe('kube-config', () => {
       delete input.users[0].user['auth-provider']
       const kubeconfig = parseKubeconfig(input)
       await kubeconfig.refreshAuthProviderConfig(credentials)
-      expect(mockGetToken).toBeCalledTimes(0)
+      expect(mockGetToken).toHaveBeenCalledTimes(0)
       expect(kubeconfig.toJSON()).toMatchObject(input)
     })
   })

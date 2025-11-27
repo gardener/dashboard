@@ -132,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0
     class="ma-3"
     type="warning"
   >
-    There must be at least one cloud profile supported by the dashboard as well as a seed that matches it's requirements.
+    There must be at least one cloud profile that is supported by the dashboard and visible.
   </v-alert>
 </template>
 

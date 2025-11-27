@@ -53,9 +53,10 @@ const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
-    theme.global.name.value = value === 'auto'
+    const themeValue = value === 'auto'
       ? system.value
       : value
+    theme.change(themeValue)
   },
 })
 
@@ -85,12 +86,12 @@ const documentTitle = computed(() => {
   }
 
   if (route.meta.namespaced !== false) {
-    const projectName = projectStore.projectName
+    const projectNameAndTitle = projectStore.projectNameAndTitle
     const routeParamName = route.params.name
     if (routeParamName) {
-      titleItems.push([projectName, routeParamName].join('/'))
-    } else if (projectName) {
-      titleItems.push(projectName)
+      titleItems.push([projectNameAndTitle, routeParamName].join('/'))
+    } else if (projectNameAndTitle) {
+      titleItems.push(projectNameAndTitle)
     }
   }
   if (titleItems.length) {

@@ -12,6 +12,27 @@ Develop new feature and fix bug on the Gardener Dashboard.
 - Yarn. For the required version, refer to `.engines.yarn` in [package.json](../../package.json).
 - Node.js. For the required version, refer to `.engines.node` in [package.json](../../package.json).
 
+## Git Hooks with Husky
+
+This repository uses a custom [Husky](https://typicode.github.io/husky/) setup to centrally manage Git hooks and ensure a consistent development workflow. Our Husky configuration is user-configurable and designed to help you by checking code quality and performing security checks before you commit or push changes.
+
+### How Our Husky Setup Works
+- When you install dependencies with `yarn`, Husky is set up automatically, but the actual hooks are only activated after your first commit attempt.
+- On your first commit, a `.husky/user-config` file is automatically created for you if it does not exist. This file lets you opt in or out of optional checks, such as:
+  - **ggshield**: Secret scanning (requires a GitGuardian account)
+  - **REUSE**: License compliance (requires `pipx` and the `reuse` tool)
+  - **verify_on_push**: Run the full verification script on every push (lint, tests, dependency checks)
+- By default, Husky managed hooks are enabled, but optional checks are disabled. You can edit `.husky/user-config` at any time to change your preferences.
+- The actual hook logic is implemented in the `.husky/pre-commit` and `.husky/pre-push` scripts.
+
+### Disabling Husky Managed Hooks
+If you want to disable Husky managed hooks and reset your Git hooks path to the default location, run:
+```sh
+echo managed_hooks=false > .husky/user-config && git config --local --unset core.hooksPath
+```
+
+For more information, see the [Husky documentation](https://typicode.github.io/husky/) and our `.husky/` directory for custom logic.
+
 ## Steps
 
 ### 1. Clone repository
@@ -30,12 +51,6 @@ cd dashboard
 yarn
 ```
 
-And build all project internal dependencies.
-```sh
-yarn workspace gardener-dashboard packages-build-all
-```
-
-
 ### 3. Configuration
 Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 
@@ -47,6 +62,8 @@ logLevel: debug
 logFormat: text
 apiServerUrl: https://my-local-cluster # garden cluster kube-apiserver url - kubectl config view --minify -ojsonpath='{.clusters[].cluster.server}'
 sessionSecret: c2VjcmV0                # symmetric key used for encryption
+websocketAllowedOrigins:
+- https://localhost:8443
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
@@ -58,6 +75,8 @@ frontend:
       end: 00 08 * * 1,2,3,4,5
     production: ~
 ```
+
+The `websocketAllowedOrigins` list restricts which origins may establish socket.io connections. This setting is required; use `"*"` to allow all origins (not recommended for production).
 
 ### 4. Run it locally
 The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.

@@ -495,9 +495,9 @@ export class EditorCompletions {
 
       return value.every(item => {
         const keys = Object.keys(item)
-        return validKeyCombinations.some(combination =>
-          combination.length === keys.length && combination.every(key => keys.includes(key)),
-        )
+        return validKeyCombinations.some(combination => {
+          return combination.length === keys.length && combination.every(key => keys.includes(key))
+        })
       })
     }
     let foundDiscriminators = false

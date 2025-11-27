@@ -7,12 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-select
     v-model="selectedValue"
+    v-messages-color="{ color: 'warning' }"
     :items="selectItems"
     label="Cloud Profile"
     item-color="primary"
     :error-messages="getErrorMessages(v$.selectedValue)"
     :item-title="title"
     variant="underlined"
+    :hint="hint"
+    persistent-hint
     @blur="v$.selectedValue.$touch()"
   />
 </template>
@@ -20,17 +23,27 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  toRef,
   ref,
   watch,
 } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import { getErrorMessages } from '@/utils'
+import { useCloudProfileStore } from '@/store/cloudProfile/index'
+import { useProjectStore } from '@/store/project.js'
+
+import {
+  getErrorMessages,
+  cloudProfileDisplayName,
+} from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
+import find from 'lodash/find'
+
 const props = defineProps({
-  modelValue: { // cloudProfileRef
+  modelValue: {
     type: Object,
     default: null,
   },
@@ -45,6 +58,19 @@ const props = defineProps({
   },
 })
 
+const cloudProfileRef = toRef(props, 'modelValue')
+const cloudProfiles = toRef(props, 'cloudProfiles')
+const namespacedCloudProfiles = toRef(props, 'namespacedCloudProfiles')
+
+const cloudProfileStore = useCloudProfileStore()
+const { seedsByCloudProfileRef } = cloudProfileStore
+const projectStore = useProjectStore()
+const { project } = storeToRefs(projectStore)
+
+const seeds = computed(() => {
+  return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
+})
+
 const emit = defineEmits([
   'update:modelValue',
 ])
@@ -52,31 +78,31 @@ const emit = defineEmits([
 const selectItems = computed(() => {
   const items = []
 
-  if (props.namespacedCloudProfiles.length > 0) {
+  if (namespacedCloudProfiles.value.length > 0) {
     items.push(
-      ...props.namespacedCloudProfiles.map(profile => {
-        const cloudProfileRef = {
+      ...namespacedCloudProfiles.value.map(profile => {
+        const namespacedCloudProfileRef = {
           name: profile.metadata.name,
           kind: 'NamespacedCloudProfile',
         }
         return {
-          value: cloudProfileRef,
-          title: `${profile.metadata.displayName} (Namespaced)`,
+          value: namespacedCloudProfileRef,
+          title: `${cloudProfileDisplayName(profile)} (Namespaced)`,
         }
       }),
     )
   }
 
-  if (props.cloudProfiles.length > 0) {
+  if (cloudProfiles.value.length > 0) {
     items.push(
-      ...props.cloudProfiles.map(profile => {
+      ...cloudProfiles.value.map(profile => {
         const cloudProfileRef = {
           name: profile.metadata.name,
           kind: 'CloudProfile',
         }
         return {
           value: cloudProfileRef,
-          title: profile.metadata.displayName,
+          title: cloudProfileDisplayName(profile),
         }
       }),
     )
@@ -87,7 +113,7 @@ const selectItems = computed(() => {
 
 const selectedValue = ref(null)
 
-watch(() => props.modelValue, newValue => {
+watch(() => cloudProfileRef.value, newValue => {
   selectedValue.value = newValue
 }, { deep: true, immediate: true })
 
@@ -108,5 +134,23 @@ const rules = {
     required,
   }),
 }
+
+const selectedCloudProfile = computed(() => {
+  if (cloudProfileRef.value?.kind === 'CloudProfile') {
+    return find(cloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
+  }
+  if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
+    return find(namespacedCloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
+  }
+  return undefined
+})
+
+const hint = computed(() => {
+  if (selectedCloudProfile.value && !seeds.value.length) {
+    return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
+  }
+  return ''
+})
+
 const v$ = useVuelidate(rules, { selectedValue })
 </script>

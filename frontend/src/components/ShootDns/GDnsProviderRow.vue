@@ -36,19 +36,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regular-input">
         <g-select-credential
-          v-if="dnsServiceExtensionProviderSecretBinding || !dnsProvider.secretName"
-          v-model="dnsServiceExtensionProviderSecretBinding"
+          v-model="dnsServiceExtensionProviderSecret"
           :provider-type="dnsProviderType"
           :not-allowed-secret-names="usedSecretNames"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
-        />
-        <v-text-field
-          v-else
-          :value="dnsProvider.secretName"
-          disabled
-          variant="underlined"
-          persistent-hint
-          hint="Secret Binding for secret not found in project namespace. Use YAML view to edit secret"
         />
       </div>
       <div class="large-input">
@@ -106,13 +97,14 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
-import { credentialName } from '@/composables/credential/helper'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
+import { credentialProviderType } from '@/composables/credential/helper'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -145,9 +137,10 @@ export default {
 
     const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
+    const cloudProfileStore = useCloudProfileStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsCloudProviderBindings = useCloudProviderBindingList(dnsProviderType, { credentialStore, gardenerExtensionStore })
+    const dnsCloudProviderCredentials = useCloudProviderEntityList(dnsProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
       v$: useVuelidate(),
@@ -157,7 +150,7 @@ export default {
       setResource,
       deleteResource,
       getResourceRefName,
-      dnsCloudProviderBindings,
+      dnsCloudProviderCredentials,
     }
   },
   validations () {
@@ -177,31 +170,31 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const allowedCloudProviderBindings = this.dnsCloudProviderBindings.filter(binding => {
-          const secretName = credentialName(binding)
-          return binding.provider.type === value && !this.usedSecretNames.includes(secretName)
+        const allowedCloudProviderCredentials = this.dnsCloudProviderCredentials.filter(credential => {
+          const secretName = credential?.metadata?.name
+          return credentialProviderType(credential) === value && !this.usedSecretNames.includes(secretName)
         })
 
-        const defaultDnsSecret = head(allowedCloudProviderBindings)
-        this.dnsServiceExtensionProviderSecretBinding = defaultDnsSecret
+        const defaultDnsSecret = head(allowedCloudProviderCredentials)
+        this.dnsServiceExtensionProviderSecret = defaultDnsSecret
       },
     },
-    dnsServiceExtensionProviderSecretBinding: {
+    dnsServiceExtensionProviderSecret: {
       get () {
         const resourceName = this.dnsProvider.secretName
         const secretName = this.getResourceRefName(resourceName)
 
-        return find(this.dnsCloudProviderBindings, binding => {
-          return credentialName(binding) === secretName
+        return find(this.dnsCloudProviderCredentials, credential => {
+          return credential?.metadata?.name === secretName
         })
       },
-      set (binding) {
-        if (!binding) {
+      set (secret) {
+        if (!secret) {
           this.dnsProvider.secretName = undefined
           return
         }
         this.deleteResource(this.dnsProvider.secretName)
-        const secretName = credentialName(binding)
+        const secretName = secret?.metadata?.name
         const resourceName = this.getDnsServiceExtensionResourceName(secretName)
         this.dnsProvider.secretName = resourceName
         this.setResource({

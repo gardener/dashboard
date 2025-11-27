@@ -22,6 +22,7 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { mdiMeta } from './vite/g-mdi-meta.js'
 
 const proxyTarget = 'http://localhost:3030'
 
@@ -105,6 +106,7 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [
       htmlPlugin(process.env),
+      mdiMeta(),
       vue({
         template: {
           transformAssetUrls,
@@ -243,14 +245,10 @@ export default defineConfig(({ command, mode }) => {
   if (command === 'build') {
     config.plugins.push(
       compression({
-        algorithm: 'gzip',
-        threshold: 8 * KiB,
-      }),
-      compression({
         algorithm: 'brotliCompress',
         threshold: 8 * KiB,
         compressionOptions: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+          [zlib.constants.BROTLI_PARAM_QUALITY]: 8,
         },
       }),
       visualizer({

@@ -160,7 +160,7 @@ describe('kube-client', () => {
       jest.resetModules()
       const { default: kubeConfig } = await import('@gardener-dashboard/kube-config')
       const { default: kubeClient } = await import('../lib/index.js')
-      expect(kubeConfig.load).toBeCalledTimes(1)
+      expect(kubeConfig.load).toHaveBeenCalledTimes(1)
       const firstCall = kubeConfig.load.mock.calls[0]
       expect(firstCall).toHaveLength(2)
       const { signal } = firstCall[1]

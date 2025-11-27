@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
           label="Autoscaler Min."
           variant="underlined"
           @input="v$.worker.minimum.$touch()"
-          @blur="v$.worker.minimum.$touch()"
+          @blur="ensureValidAutoscalerMin()"
         />
       </div>
       <div class="small-input">
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           variant="underlined"
           :error-messages="getErrorMessages(v$.worker.maximum)"
           @input="v$.worker.maximum.$touch()"
-          @blur="v$.worker.maximum.$touch()"
+          @blur="ensureValidAutoscalerMax()"
         />
       </div>
       <div class="small-input">
@@ -361,9 +361,6 @@ export default {
       },
       set (value) {
         this.worker.minimum = Math.max(0, parseInt(value))
-        if (this.innerMax < this.worker.minimum) {
-          this.worker.maximum = this.worker.minimum
-        }
       },
     },
     innerMax: {
@@ -372,9 +369,6 @@ export default {
       },
       set: function (value) {
         this.worker.maximum = Math.max(0, parseInt(value))
-        if (this.innerMin > this.worker.maximum) {
-          this.worker.minimum = this.worker.maximum
-        }
       },
     },
     maxSurge: {
@@ -424,9 +418,9 @@ export default {
       return sortBy(concat(this.selectedZones, this.unselectedZones), 'text')
     },
     zoneHint () {
-      const allAvailable = every(this.allZones, zone =>
-        includes(this.availableZones, zone),
-      )
+      const allAvailable = every(this.allZones, zone => {
+        return includes(this.availableZones, zone)
+      })
       if (allAvailable) {
         return ''
       }
@@ -513,6 +507,20 @@ export default {
       this.worker.machine.type = get(defaultMachineType, ['name'])
       const defaultMachineImage = this.defaultMachineImageForCloudProfileRefAndMachineType(this.cloudProfileRef, defaultMachineType)
       this.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
+    },
+    ensureValidAutoscalerMin () {
+      this.v$.worker.minimum.$touch()
+      // Ensure maximum is not less than minimum
+      if (this.innerMax < this.worker.minimum) {
+        this.worker.maximum = this.worker.minimum
+      }
+    },
+    ensureValidAutoscalerMax () {
+      this.v$.worker.maximum.$touch()
+      // Ensure minimum is not greater than maximum
+      if (this.innerMin > this.worker.maximum) {
+        this.worker.minimum = this.worker.maximum
+      }
     },
     getErrorMessages,
   },

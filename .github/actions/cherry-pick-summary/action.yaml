@@ -1,0 +1,40 @@
+name: 'Cherry-Pick Summary'
+description: 'Posts a summary comment after cherry-pick operations'
+inputs:
+  github-token:
+    description: 'GitHub token with repo permissions'
+    required: true
+  pr-number:
+    description: 'The PR number to comment on'
+    required: true
+  cherry-pick-result:
+    description: 'The result of the cherry-pick job (success, failure, etc.)'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Post completion summary
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        CHERRY_PICK_RESULT: ${{ inputs.cherry-pick-result }}
+      run: |
+        if [ "$CHERRY_PICK_RESULT" = "success" ]; then
+          SUMMARY="✅ **All cherry-pick operations completed successfully!**"
+        elif [ "$CHERRY_PICK_RESULT" = "failure" ]; then
+          SUMMARY="⚠️ **Some cherry-pick operations failed.** Check individual status comments above for details."
+        else
+          SUMMARY="ℹ️ **Cherry-pick operations completed with mixed results.** Check individual status comments above for details."
+        fi
+
+        gh pr comment "$PR_NUMBER" \
+          --body "$SUMMARY" \
+          --repo ${{ github.repository }}
+
+        if [ "$CHERRY_PICK_RESULT" = "success" ]; then
+          # Remove the label if present; do not fail if it's missing
+          gh pr edit "$PR_NUMBER" \
+            --remove-label "needs/cherry-pick" \
+            --repo ${{ github.repository }} || true
+        fi

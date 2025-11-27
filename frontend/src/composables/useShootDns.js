@@ -11,11 +11,11 @@ import {
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useCloudProviderBindingList } from '@/composables/credential/useCloudProviderBindingList'
-import { credentialName } from '@/composables/credential/helper'
+import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -31,6 +31,7 @@ export const useShootDns = (manifest, options) => {
   const {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
+    cloudProfileStore = useCloudProfileStore(),
   } = options
 
   /* resources */
@@ -170,15 +171,15 @@ export const useShootDns = (manifest, options) => {
   }
 
   function getDefaultSecretName (type) {
-    const bindings = useCloudProviderBindingList(toRef(type), { credentialStore, gardenerExtensionStore })
+    const credentials = useCloudProviderEntityList(toRef(type), { credentialStore, gardenerExtensionStore, cloudProfileStore })
     // find unused secret
     const usedResourceNames = map(resources.value, 'name')
-    const binding = find(bindings.value, binding => {
-      const resourceName = getDnsServiceExtensionResourceName(credentialName(binding))
+    const credential = find(credentials.value, credential => {
+      const resourceName = getDnsServiceExtensionResourceName(credential?.metadata?.name)
       return !includes(usedResourceNames, resourceName)
     })
 
-    return credentialName(binding)
+    return credential ? credential?.metadata?.name : undefined
   }
 
   function addDnsServiceExtensionProvider (options = {}) {

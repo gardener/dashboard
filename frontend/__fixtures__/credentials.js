@@ -12,8 +12,9 @@ function createProviderCredentials (type, options = {}) {
     quotas = [],
     typeWorkloadIdentity = false,
     typeSecret = !typeWorkloadIdentity,
-    createSecretBinding = typeSecret,
-    createCredentialsBinding = true,
+    dnsSecret = false,
+    createSecretBinding = typeSecret && !dnsSecret,
+    createCredentialsBinding = !dnsSecret,
   } = options
   const secretBindingName = `${name}-secretbinding`
   const credentialsBindingName = `${name}-credentialsbinding`
@@ -93,11 +94,22 @@ function createProviderCredentials (type, options = {}) {
   let secret
   if (typeSecret && secretNamepace === bindingNamespace) {
     // no secret if referenced in other namespace
+    let labels
+    if (dnsSecret) {
+      labels = {
+        'dashboard.gardener.cloud/dnsProviderType': type,
+      }
+    } else {
+      labels = {
+        [`provider.shoot.gardener.cloud/${type}`]: 'true',
+      }
+    }
     secret = {
       metadata: {
         namespace: secretNamepace,
         name: secretName,
         uid: `secret-${name}-uid`,
+        labels,
       },
       data: {
         secret: 'cw==',
@@ -108,11 +120,15 @@ function createProviderCredentials (type, options = {}) {
   let workloadIdentity
   if (typeWorkloadIdentity && secretNamepace === bindingNamespace) {
     // no workloadidenetity if referenced in other namespace
+    const labels = {
+      [`provider.extensions.gardener.cloud/${type}`]: 'true',
+    }
     workloadIdentity = {
       metadata: {
         namespace: secretNamepace,
         name: workloadIdentityName,
         uid: `wlid-${name}-uid`,
+        labels,
       },
       spec: {
         targetSystem: {
@@ -132,6 +148,7 @@ function createProviderCredentials (type, options = {}) {
 }
 
 const credentials = [
+  // infra credentials
   createProviderCredentials('alicloud'),
   createProviderCredentials('aws'),
   createProviderCredentials('aws', { name: 'aws-wlid', typeWorkloadIdentity: true }),
@@ -150,8 +167,10 @@ const credentials = [
   createProviderCredentials('openstack'),
   createProviderCredentials('gcp'),
   createProviderCredentials('ironcore'),
-  createProviderCredentials('aws-route53'),
-  createProviderCredentials('azure-dns'),
+
+  // DNS - no bindings
+  createProviderCredentials('aws-route53', { dnsSecret: true }),
+  createProviderCredentials('azure-dns', { dnsSecret: true }),
 ]
 
 const secretBindings = credentials.map(item => item.secretBinding).filter(Boolean)

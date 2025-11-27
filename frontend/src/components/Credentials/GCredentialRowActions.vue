@@ -9,25 +9,23 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canPatchCredentials"
       icon="mdi-pencil"
-      :disabled="isSharedCredential || hasOwnWorkloadIdentity"
+      :disabled="hasOwnWorkloadIdentity"
       @click="onUpdate"
     >
       <template #tooltip>
-        <span v-if="isSharedCredential">You can only edit Secrets that are owned by you</span>
-        <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
+        <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
         <span v-else>Edit Secret</span>
       </template>
     </g-action-button>
     <g-action-button
       v-if="canDeleteCredentials"
       icon="mdi-delete"
-      :disabled="credentialUsageCount > 0 || isSharedCredential || hasOwnWorkloadIdentity || isMarkedForDeletion"
+      :disabled="credentialUsageCount > 0 || hasOwnWorkloadIdentity || isMarkedForDeletion"
       @click="onDelete"
     >
       <template #tooltip>
-        <span v-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
-        <span v-else-if="isSharedCredential">You can only delete Secrets that are owned by you</span>
-        <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
+        <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
+        <span v-else-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
         <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
         <span v-else>Delete Secret</span>
       </template>
@@ -43,15 +41,13 @@ import { useAuthzStore } from '@/store/authz'
 
 import GActionButton from '@/components/GActionButton.vue'
 
-import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
 const props = defineProps({
-  binding: {
-    type: Object,
-    required: true,
-  },
+  credential: Object,
+  binding: Object,
 })
-const binding = toRef(props, 'binding')
+const credential = toRef(props, 'credential')
 
 const emit = defineEmits(['update', 'delete'])
 
@@ -62,15 +58,14 @@ const {
   hasOwnWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
-  isSharedCredential,
-} = useCloudProviderBinding(binding)
+} = useCloudProviderCredential(credential)
 
 function onUpdate () {
-  emit('update', binding.value)
+  emit('update', credential.value)
 }
 
 function onDelete () {
-  emit('delete', binding.value)
+  emit('delete', credential.value)
 }
 
 </script>

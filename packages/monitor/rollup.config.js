@@ -24,20 +24,6 @@ export default [
       commonjs(),
     ],
   },
-  {
-    input: `${process.cwd()}/lib/index.js`,
-    cache: false,
-    output: {
-      file: `${process.cwd()}/dist/index.js`,
-      format: 'esm',
-    },
-    external: getPeerDependencies(),
-    plugins: [
-      nodeResolve(),
-      json(),
-      commonjs(),
-    ],
-  },
 ]
 
 function getPeerDependencies () {
