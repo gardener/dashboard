@@ -127,5 +127,52 @@ describe('composables', () => {
         token: undefined,
       })
     })
+
+    describe('dnsSecretProviderType', () => {
+      it('should get and set dns provider type correctly', () => {
+        secretContext.setSecretManifest({
+          metadata: {
+            name: 'my-secret',
+            namespace: testNamespace,
+            labels: {
+              'other.label1': 'true',
+              'provider.shoot.gardener.cloud/aws-route53': 'true',
+              'other.label2': 'true',
+              'provider.shoot.gardener.cloud/google-clouddns': 'true',
+            },
+          },
+          data: {},
+        })
+
+        // Test getter - should extract first provider type from provider shoot label (fallback)
+        expect(secretContext.dnsSecretProviderType).toBe('aws-route53')
+
+        // Test setter - should set dashboard specific label
+        secretContext.dnsSecretProviderType = 'azure-dns'
+        expect(secretContext.secretManifest.metadata.labels).toEqual({
+          'other.label1': 'true',
+          'provider.shoot.gardener.cloud/aws-route53': 'true',
+          'other.label2': 'true',
+          'provider.shoot.gardener.cloud/google-clouddns': 'true',
+          'dashboard.gardener.cloud/dnsProviderType': 'azure-dns',
+        })
+        expect(secretContext.dnsSecretProviderType).toBe('azure-dns') // Should prefer dashboard specific label
+      })
+
+      it('should return undefined when no provider label exists', () => {
+        secretContext.setSecretManifest({
+          metadata: {
+            name: 'my-secret',
+            namespace: testNamespace,
+            labels: {
+              'other.label': 'value',
+            },
+          },
+          data: {},
+        })
+
+        expect(secretContext.dnsSecretProviderType).toBeUndefined()
+      })
+    })
   })
 })

@@ -98,6 +98,21 @@ export function getProviderTemplate (providerType, defaultWorkerCIDR) {
           kind: 'ControlPlaneConfig',
         },
       }
+    case 'stackit':
+      return {
+        type: 'stackit',
+        infrastructureConfig: {
+          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR,
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
     case 'alicloud':
       return {
         type: 'alicloud',

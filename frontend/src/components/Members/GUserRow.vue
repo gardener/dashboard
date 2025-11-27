@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
     </td>
     <td v-if="selectedHeaders.roles">
       <div class="d-flex justify-end">
-        <g-account-roles :role-display-names="item.roleDisplayNames" />
+        <g-account-roles :role-descriptors="item.roleDescriptors" />
       </div>
     </td>
     <td v-if="selectedHeaders.actions">

@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
       min="100"
       label="IOPS"
       variant="underlined"
-      @input="onInputIops"
+      @update:model-value="onInputIops"
       @blur="v$.workerIops.$touch()"
     />
   </div>

@@ -23,25 +23,18 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item>
           <template #prepend>
             <v-icon
-              v-if="field.icon"
+              v-if="field.icon && isMdiIcon(field.icon)"
               color="primary"
             >
               {{ field.icon }}
             </v-icon>
           </template>
           <g-list-item-content :label="field.name">
-            <v-tooltip
+            <span
               v-if="field.tooltip"
-              location="top"
-            >
-              <template #activator="{ props }">
-                <span
-                  v-bind="props"
-                  :class="{'text-disabled' : !field.value}"
-                >{{ field.displayValue }}</span>
-              </template>
-              {{ field.tooltip }}
-            </v-tooltip>
+              v-tooltip:top="field.tooltip"
+              :class="{'text-disabled' : !field.value}"
+            >{{ field.displayValue }}</span>
             <span
               v-else-if="field.displayValue"
               :class="{'text-disabled' : !field.value}"
@@ -62,6 +55,8 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { useProjectItem } from '@/composables/useProjectItem'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
+
+import { isMdiIcon } from '@/utils/mdiIcons'
 
 import map from 'lodash/map'
 import get from 'lodash/get'

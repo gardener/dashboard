@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`services/projects #create should create a project and return it when ready 1`] = `
+{
+  "metadata": {
+    "name": "foo",
+  },
+  "spec": {
+    "namespace": "garden-foo",
+  },
+  "status": {
+    "phase": "Ready",
+  },
+}
+`;

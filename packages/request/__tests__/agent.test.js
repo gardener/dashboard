@@ -21,7 +21,7 @@ const sessionPoolInstanceMock = jest.fn().mockImplementation(() => {
   }
 })
 
-jest.unstable_mockModule('./lib/SessionPool.js', () => {
+jest.unstable_mockModule('../lib/SessionPool.js', () => {
   const SessionPoolClassMock = jest.fn(
     sessionPoolInstanceMock,
   )
@@ -97,7 +97,7 @@ describe('Agent', () => {
       expect(Array.from(agent.sessionPools.values())).toEqual(pools)
       agent.destroy()
       for (const pool of pools) {
-        expect(pool.destroy).toBeCalledTimes(1)
+        expect(pool.destroy).toHaveBeenCalledTimes(1)
       }
     })
   })
@@ -118,8 +118,8 @@ describe('Agent', () => {
 
       await agent.request(headers, requestOptions)
 
-      expect(agent.getSessionPool).toBeCalledTimes(1)
-      expect(agent.getSessionPool).toBeCalledWith(
+      expect(agent.getSessionPool).toHaveBeenCalledTimes(1)
+      expect(agent.getSessionPool).toHaveBeenCalledWith(
         expect.objectContaining({
           protocol: 'https:',
           host,
@@ -128,8 +128,8 @@ describe('Agent', () => {
         }),
       )
 
-      expect(mockRequest).toBeCalledTimes(1)
-      expect(mockRequest).toBeCalledWith(headers, {})
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledWith(headers, {})
     })
   })
 })

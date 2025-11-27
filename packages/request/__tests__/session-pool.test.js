@@ -177,7 +177,7 @@ describe('SessionPool', () => {
     it('should return a new session', () => {
       pool.createSession = jest.fn()
       pool.getSession()
-      expect(pool.createSession).toBeCalledTimes(1)
+      expect(pool.createSession).toHaveBeenCalledTimes(1)
     })
 
     it('should return an existing session', () => {
@@ -193,7 +193,7 @@ describe('SessionPool', () => {
       session.destroyed = true
       pool.createSession = jest.fn()
       pool.getSession()
-      expect(pool.createSession).toBeCalledTimes(1)
+      expect(pool.createSession).toHaveBeenCalledTimes(1)
     })
 
     it('should return the session with the highest load', async () => {
@@ -218,7 +218,7 @@ describe('SessionPool', () => {
       const session = pool.createSession()
 
       // create http2 session
-      expect(mockHttp2Connect).toBeCalledTimes(1)
+      expect(mockHttp2Connect).toHaveBeenCalledTimes(1)
       expect(mockHttp2Connect.mock.calls[0]).toEqual([
         sid.origin,
         expect.objectContaining({
@@ -233,7 +233,7 @@ describe('SessionPool', () => {
       const setMaxConcurrencySpy = jest.spyOn(semaphore, 'maxConcurrency', 'set')
 
       // connect timeout
-      expect(setTimeout).toBeCalledTimes(1)
+      expect(setTimeout).toHaveBeenCalledTimes(1)
       expect(setTimeout.mock.calls[0]).toEqual([
         expect.any(Function), options.connectTimeout,
       ])
@@ -241,7 +241,7 @@ describe('SessionPool', () => {
       setTimeout.mockClear()
 
       // listening once 'session' event
-      expect(socket.once).toBeCalledTimes(1)
+      expect(socket.once).toHaveBeenCalledTimes(1)
       expect(socket.once.mock.calls[0]).toEqual([
         'session', expect.any(Function),
       ])
@@ -250,7 +250,7 @@ describe('SessionPool', () => {
       socket.once.mockClear()
 
       // listening on the 'error' and 'connect' event
-      expect(session.once).toBeCalledTimes(2)
+      expect(session.once).toHaveBeenCalledTimes(2)
       expect(session.once.mock.calls).toEqual([
         ['error', expect.any(Function)],
         ['connect', expect.any(Function)],
@@ -261,21 +261,21 @@ describe('SessionPool', () => {
       session.emit('connect')
 
       // remove all listener
-      expect(session.removeAllListeners).toBeCalledTimes(1)
+      expect(session.removeAllListeners).toHaveBeenCalledTimes(1)
       expect(session.removeAllListeners.mock.calls[0]).toEqual([
         'error',
       ])
       session.removeAllListeners.mockClear()
 
       // clear connect timeout
-      expect(clearTimeout).toBeCalledTimes(1)
+      expect(clearTimeout).toHaveBeenCalledTimes(1)
       expect(clearTimeout.mock.calls[0]).toEqual([
         connectTimeoutId,
       ])
       clearTimeout.mockClear()
 
       // listening on 'remoteSettings' and 'error' events
-      expect(session.on).toBeCalledTimes(2)
+      expect(session.on).toHaveBeenCalledTimes(2)
       expect(session.on.mock.calls).toEqual([
         ['remoteSettings', expect.any(Function)],
         ['error', expect.any(Function)],
@@ -283,14 +283,14 @@ describe('SessionPool', () => {
       session.on.mockClear()
 
       // listening on the 'close' event
-      expect(session.once).toBeCalledTimes(1)
+      expect(session.once).toHaveBeenCalledTimes(1)
       expect(session.once.mock.calls).toEqual([
         ['close', expect.any(Function)],
       ])
       session.once.mockClear()
 
       // keep-alive timeout
-      expect(setTimeout).toBeCalledTimes(1)
+      expect(setTimeout).toHaveBeenCalledTimes(1)
       expect(setTimeout.mock.calls[0]).toEqual([
         expect.any(Function), options.keepAliveTimeout,
       ])
@@ -306,7 +306,7 @@ describe('SessionPool', () => {
       session.emit('remoteSettings', session.remoteSettings)
 
       // second update of maxConcurrency
-      expect(setMaxConcurrencySpy).toBeCalledTimes(1)
+      expect(setMaxConcurrencySpy).toHaveBeenCalledTimes(1)
       expect(setMaxConcurrencySpy.mock.calls[0]).toEqual([
         session.remoteSettings.maxConcurrentStreams,
       ])
@@ -318,14 +318,14 @@ describe('SessionPool', () => {
       expect(pool.sessions.size).toBe(0)
 
       // clear keep-alive timeout
-      expect(clearTimeout).toBeCalledTimes(1)
+      expect(clearTimeout).toHaveBeenCalledTimes(1)
       expect(clearTimeout.mock.calls[0]).toEqual([
         keepAliveTimeoutId,
       ])
       clearTimeout.mockClear()
 
       // session destroyed
-      expect(session.destroy).toBeCalledTimes(1)
+      expect(session.destroy).toHaveBeenCalledTimes(1)
       expect(session.destroy.mock.calls[0]).toEqual([])
     })
   })
@@ -339,7 +339,7 @@ describe('SessionPool', () => {
       pool.sessions.add(session)
       pool.setSessionHeartbeat(session)
       // heartbeat interval
-      expect(setInterval).toBeCalledTimes(1)
+      expect(setInterval).toHaveBeenCalledTimes(1)
       expect(setInterval.mock.calls[0]).toEqual([
         expect.any(Function), pool.pingInterval,
       ])
@@ -347,18 +347,18 @@ describe('SessionPool', () => {
       setInterval.mockClear()
 
       jest.advanceTimersByTime(2 * options.pingInterval + 10)
-      expect(session.ping).toBeCalledTimes(2)
-      expect(session.pong).toBeCalledTimes(2)
+      expect(session.ping).toHaveBeenCalledTimes(2)
+      expect(session.pong).toHaveBeenCalledTimes(2)
 
       // clear keep-alive timeout
-      expect(clearInterval).toBeCalledTimes(1)
+      expect(clearInterval).toHaveBeenCalledTimes(1)
       expect(clearInterval.mock.calls[0]).toEqual([
         intervalId,
       ])
       clearInterval.mockClear()
 
       expect(pool.sessions.size).toBe(0)
-      expect(session.destroy).toBeCalledTimes(1)
+      expect(session.destroy).toHaveBeenCalledTimes(1)
       expect(session.destroy.mock.calls[0]).toEqual([
         expect.objectContaining({
           message: 'pong error',

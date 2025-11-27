@@ -4,28 +4,29 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import pLimit from 'p-limit'
+import logger from '../logger/index.js'
+import config from '../config/index.js'
+import cache from '../cache/index.js'
+import * as tickets from '../services/tickets.js'
+import SyncManager from '../github/SyncManager.js'
 
-const pLimit = require('p-limit')
-const logger = require('../logger')
-const config = require('../config')
-const cache = require('../cache')
-const tickets = require('../services/tickets')
-const SyncManager = require('../github/SyncManager')
+// exported for testing
+export const test = {
+  loadOpenIssuesAndComments: async function (concurrency) {
+    const issues = await tickets.loadOpenIssues()
 
-async function loadOpenIssuesAndComments (concurrency) {
-  const issues = await tickets.loadOpenIssues()
+    const limit = pLimit(concurrency)
+    const input = issues.map((issue) => {
+      const { number } = issue.metadata
+      return limit(() => tickets.loadIssueComments({ number }))
+    })
 
-  const limit = pLimit(concurrency)
-  const input = issues.map((issue) => {
-    const { number } = issue.metadata
-    return limit(() => tickets.loadIssueComments({ number }))
-  })
-
-  await Promise.all(input)
+    await Promise.all(input)
+  },
 }
 
-module.exports = (io, informer, { signal }) => {
+export default (io, informer, { signal }) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for tickets feature')
     return
@@ -46,7 +47,7 @@ module.exports = (io, informer, { signal }) => {
 
   const { pollIntervalSeconds, syncThrottleSeconds, syncConcurrency } = config.gitHub
   const syncManager = new SyncManager(() => {
-    return loadOpenIssuesAndComments(syncConcurrency || 10)
+    return test.loadOpenIssuesAndComments(syncConcurrency || 10)
   }, {
     interval: pollIntervalSeconds * 1000 || 0,
     throttle: syncThrottleSeconds * 1000 || 0,
@@ -57,6 +58,3 @@ module.exports = (io, informer, { signal }) => {
   const handleEvent = event => syncManager.sync()
   informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
 }
-
-// exported for testing
-module.exports.test = { loadOpenIssuesAndComments }

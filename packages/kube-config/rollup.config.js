@@ -16,22 +16,9 @@ export default [
     output: {
       file: `${process.cwd()}/dist/index.cjs`,
       format: 'cjs',
+      inlineDynamicImports: true,
     },
     external: getPeerDependencies(readFileSync),
-    plugins: [
-      nodeResolve(),
-      json(),
-      commonjs(),
-    ],
-  },
-  {
-    input: `${process.cwd()}/lib/index.js`,
-    cache: false,
-    output: {
-      file: `${process.cwd()}/dist/index.js`,
-      format: 'esm',
-    },
-    external: getPeerDependencies(),
     plugins: [
       nodeResolve(),
       json(),

@@ -18,6 +18,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import { cleanup } from '@/composables/helper'
 import { useObjectMetadata } from '@/composables/useObjectMetadata'
+import { credentialProviderType } from '@/composables/credential/helper'
 
 import {
   decodeBase64,
@@ -87,6 +88,16 @@ export function createSecretContextComposable (options = {}) {
     namespace: secretNamespace,
   } = useObjectMetadata(manifest)
 
+  const dnsSecretProviderType = computed({
+    get () {
+      return credentialProviderType(manifest.value)
+    },
+    set (value) {
+      const labelKey = 'dashboard.gardener.cloud/dnsProviderType'
+      set(manifest.value, ['metadata', 'labels', labelKey], value)
+    },
+  })
+
   const secretData = computed({
     get () {
       return get(manifest.value, ['data'])
@@ -98,14 +109,14 @@ export function createSecretContextComposable (options = {}) {
 
   const secretStringData = computed({
     get () {
-      return mapValues(secretData.value, value => {
-        return value ? decodeBase64(value) : undefined
+      return mapValues(secretData.value, v => {
+        return v ? decodeBase64(v) : undefined
       })
     },
     set (value) {
-      secretData.value = value
-        ? mapValues(value, value => {
-          return value ? encodeBase64(value) : undefined
+      secretData.value = value && typeof value === 'object'
+        ? mapValues(value, v => {
+          return v ? encodeBase64(v) : undefined
         })
         : undefined
     },
@@ -160,6 +171,7 @@ export function createSecretContextComposable (options = {}) {
     secretData,
     secretStringData,
     secretStringDataRefs,
+    dnsSecretProviderType,
   }
 }
 

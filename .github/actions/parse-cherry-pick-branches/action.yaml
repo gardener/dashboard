@@ -1,0 +1,160 @@
+name: 'Parse Cherry-Pick Branches'
+description: 'Parses and validates target branches from a /cherry-pick comment in a PR'
+inputs:
+  github-token:
+    description: 'GitHub token with repo permissions'
+    required: true
+  pr-number:
+    description: 'The PR number'
+    required: true
+  comment-body:
+    description: 'The comment body containing cherry-pick commands'
+    required: true
+outputs:
+  branches:
+    description: 'JSON array of target branches'
+    value: ${{ steps.parse.outputs.branches }}
+  has-branches:
+    description: 'Whether valid branches were found'
+    value: ${{ steps.parse.outputs.has-branches }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Check if PR is merged
+      id: check_merged
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        STATE=$(gh pr view "$PR_NUMBER" --json state --jq '.state')
+        if [ "$STATE" = "MERGED" ]; then
+          MERGED="true"
+        else
+          MERGED="false"
+          echo "PR is not merged; current state: $STATE"
+        fi
+        echo "merged=$MERGED" >> $GITHUB_OUTPUT
+    - name: Comment if PR not merged
+      if: steps.check_merged.outputs.merged != 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        gh pr comment "$PR_NUMBER" \
+          --body "❌ Cherry-pick aborted: The PR must be merged before cherry-picking to other branches." \
+          --repo ${{ github.repository }}
+    - name: Fail if PR not merged
+      if: steps.check_merged.outputs.merged != 'true'
+      shell: bash
+      run: exit 1
+    - name: Parse branches
+      id: parse
+      shell: bash
+      env:
+        COMMENT_BODY: ${{ inputs.comment-body }}
+      run: |
+        # Extract all branches from /cherry-pick commands
+        # This handles both inline format: /cherry-pick branch1 /cherry-pick branch2
+        # and multiline format with separate /cherry-pick commands
+        # The 'sort -u' ensures branches are sorted and unique (duplicates removed)
+        BRANCHES=$(echo "$COMMENT_BODY" | grep -oE '/cherry-pick[[:space:]]+[^[:space:]]+' | sed 's|/cherry-pick[[:space:]]*||g' | sort -u)
+
+        if [ -z "$BRANCHES" ]; then
+          echo "No valid cherry-pick commands found"
+          echo "has-branches=false" >> $GITHUB_OUTPUT
+          echo "branches=[]" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # Validate branch names
+        # Branch names should only contain alphanumeric characters, dots, hyphens, underscores, and forward slashes
+        VALID_BRANCHES=""
+        for branch in $BRANCHES; do
+          if [[ "$branch" =~ ^[a-zA-Z0-9._/-]+$ ]]; then
+            if [ -z "$VALID_BRANCHES" ]; then
+              VALID_BRANCHES="$branch"
+            else
+              VALID_BRANCHES="$VALID_BRANCHES $branch"
+            fi
+          else
+            echo "Warning: Skipping invalid branch name: $branch"
+          fi
+        done
+
+        if [ -z "$VALID_BRANCHES" ]; then
+          echo "No valid branch names found after validation"
+          echo "has-branches=false" >> $GITHUB_OUTPUT
+          echo "branches=[]" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        # Convert to JSON array format for matrix
+        JSON_ARRAY="["
+        FIRST=true
+        for branch in $VALID_BRANCHES; do
+          if [ "$FIRST" = true ]; then
+            FIRST=false
+          else
+            JSON_ARRAY="$JSON_ARRAY,"
+          fi
+          JSON_ARRAY="$JSON_ARRAY\"$branch\""
+        done
+        JSON_ARRAY="$JSON_ARRAY]"
+
+        echo "Found valid branches: $VALID_BRANCHES"
+        echo "JSON array: $JSON_ARRAY"
+        echo "has-branches=true" >> $GITHUB_OUTPUT
+        echo "branches=$JSON_ARRAY" >> $GITHUB_OUTPUT
+    - name: Comment on no branches found
+      if: steps.parse.outputs.has-branches == 'false'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        gh pr comment "$PR_NUMBER" \
+          --body "❌ No valid cherry-pick commands found in the comment. Please use the format: \`/cherry-pick branch-name\`" \
+          --repo ${{ github.repository }}
+    - name: Comment on branches found
+      if: steps.parse.outputs.has-branches == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        # Debug: Show the raw branches JSON
+        echo "Raw branches JSON: ${{ steps.parse.outputs.branches }}"
+
+        # Create branches list with better error handling
+        BRANCHES_JSON='${{ steps.parse.outputs.branches }}'
+        echo "Processing JSON: $BRANCHES_JSON"
+
+        if [ "$BRANCHES_JSON" = "[]" ] || [ -z "$BRANCHES_JSON" ]; then
+          echo "Error: Empty or invalid branches JSON"
+          exit 1
+        fi
+
+        # Generate the branches list
+        BRANCHES_LIST=$(echo "$BRANCHES_JSON" | jq -r '.[]' | while read -r branch; do
+          echo "- \`$branch\`"
+        done)
+
+        echo "Generated branches list:"
+        echo "$BRANCHES_LIST"
+
+        cat << EOF > comment.md
+        🚀 **Cherry-pick initiated for the following branches:**
+
+        $BRANCHES_LIST
+
+        _Processing cherry-picks..._ [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        EOF
+
+        echo "Comment content:"
+        cat comment.md
+
+        gh pr comment "$PR_NUMBER" \
+          --body-file comment.md \
+          --repo ${{ github.repository }}

@@ -21,22 +21,15 @@ SPDX-License-Identifier: Apache-2.0
     <!-- Help -->
     <v-btn
       v-if="helpMenuItems.length"
+      v-tooltip:left="{
+        text: 'Info',
+        disabled: help
+      }"
       color="primary"
       icon
       class="mr-5"
     >
-      <v-tooltip
-        :disabled="help"
-        location="left"
-      >
-        <template #activator="{ props }">
-          <v-icon
-            v-bind="props"
-            icon="mdi-help-circle-outline"
-          />
-        </template>
-        Info
-      </v-tooltip>
+      <v-icon icon="mdi-help-circle-outline" />
 
       <v-menu
         v-model="help"
@@ -279,7 +272,6 @@ SPDX-License-Identifier: Apache-2.0
         </v-sheet>
       </v-menu>
     </v-btn>
-
     <!-- terminals -->
     <template
       v-if="tabs && tabs.length > 1"

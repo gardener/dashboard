@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const createError = require('http-errors')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const { isHttpError } = require('@gardener-dashboard/request')
+import createError from 'http-errors'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import requestModule from '@gardener-dashboard/request'
+const { dashboardClient } = kubeClientModule
+const { isHttpError } = requestModule
 
 function currentMicroDateStr () {
   const date = new Date().toISOString()
@@ -51,4 +51,4 @@ async function handleGithubEvent (name) {
   await updateLease()
 }
 
-module.exports = handleGithubEvent
+export default handleGithubEvent

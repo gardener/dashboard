@@ -4,20 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const assert = require('assert').strict
-const _ = require('lodash')
-
-const { format: fmt } = require('util')
-
-const {
+import assert from 'assert/strict'
+import _ from 'lodash-es'
+import { format as fmt } from 'util'
+import {
   getConfigValue,
   getSeedNameFromShoot,
   getSeedIngressDomain,
-} = require('../../utils')
+} from '../../utils/index.js'
+import cache from '../../cache/index.js'
 
-const { getSeed, findProjectByNamespace } = require('../../cache')
+const { getSeed, findProjectByNamespace } = cache
 
 const GardenTerminalHostRefType = {
   SEED_REF: 'seedRef',
@@ -127,7 +124,7 @@ function getShootRef (managedSeed) {
   }
 }
 
-module.exports = {
+export {
   getKubeApiServerHostForSeedOrManagedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterCredentials,

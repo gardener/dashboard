@@ -17,6 +17,10 @@ import {
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
+import {
+  formatProjectNameAndTitle,
+  getProjectTitle,
+} from '@/composables/useProjectMetadata/helper.js'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
@@ -58,6 +62,17 @@ export const useProjectStore = defineStore('project', () => {
     return projectNames
   })
 
+  const projectMap = computed(() => {
+    const projects = {}
+    if (Array.isArray(list.value)) {
+      for (const project of list.value) {
+        const { spec: { namespace } } = project
+        set(projects, [namespace], project)
+      }
+    }
+    return projects
+  })
+
   const defaultNamespace = computed(() => {
     if (namespaces.value) {
       return namespaces.value.includes('garden')
@@ -93,6 +108,14 @@ export const useProjectStore = defineStore('project', () => {
     return get(project.value, ['metadata', 'name'])
   })
 
+  const projectTitle = computed(() => {
+    return getProjectTitle(project.value)
+  })
+
+  const projectNameAndTitle = computed(() => {
+    return formatProjectNameAndTitle(projectName.value, projectTitle.value)
+  })
+
   const projectNames = computed(() => {
     return map(list.value, 'metadata.name')
   })
@@ -116,6 +139,13 @@ export const useProjectStore = defineStore('project', () => {
       ? metadata
       : metadata?.namespace
     return get(projectNameMap.value, [namespace], replace(namespace, /^garden-/, ''))
+  }
+
+  function projectByNamespace (metadata) {
+    const namespace = typeof metadata === 'string'
+      ? metadata
+      : metadata?.namespace
+    return get(projectMap.value, [namespace])
   }
 
   async function fetchProjects () {
@@ -174,6 +204,8 @@ export const useProjectStore = defineStore('project', () => {
     currentNamespaces,
     defaultNamespace,
     projectName,
+    projectTitle,
+    projectNameAndTitle,
     projectList,
     projectsNotMarkedForDeletion,
     project,
@@ -185,6 +217,7 @@ export const useProjectStore = defineStore('project', () => {
     updateProject,
     deleteProject,
     projectNameByNamespace,
+    projectByNamespace,
     handleEvent: socketEventHandler.listener,
     $reset,
   }

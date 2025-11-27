@@ -16,12 +16,9 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <g-list-item-content>
       <div class="d-flex align-center">
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <span v-bind="props">{{ title }}</span>
-          </template>
-          {{ titleTooltip }}
-        </v-tooltip>
+        <span
+          v-tooltip:top="titleTooltip"
+        >{{ title }}</span>
         <v-tooltip location="top">
           <template #activator="{ props }">
             <v-chip

@@ -34,7 +34,7 @@ COPY . .
 
 # validate zero-installs project and disable network
 RUN yarn config set enableNetwork false
-RUN yarn install --immutable --immutable-cache
+RUN YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache
 
 ############# node-scratch #############
 FROM scratch AS node-scratch
@@ -57,9 +57,6 @@ FROM builder AS dashboard-builder
 # bump version
 RUN yarn workspace @gardener-dashboard/backend version "$(cat VERSION)"
 RUN yarn workspace @gardener-dashboard/frontend version "$(cat VERSION)"
-
-# build packages
-RUN yarn packages-build-all
 
 # run frontend build
 RUN yarn workspace @gardener-dashboard/frontend run build

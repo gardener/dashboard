@@ -4,21 +4,27 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import zlib from 'zlib'
+import compression from 'compression'
+import config from './config/index.js'
+import routes from './routes/index.js'
+import createHooks from './hooks.js'
+import { authenticate } from './security/index.js'
+import {
+  notFound,
+  sendError,
+  requestLogger,
+} from './middleware.js'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import monitorModule from '@gardener-dashboard/monitor'
 
-const express = require('express')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const zlib = require('zlib')
-const compression = require('compression')
-const config = require('./config')
-const routes = require('./routes')
-const hooks = require('./hooks')()
-const { authenticate } = require('./security')
-const { createClient } = require('@gardener-dashboard/kube-client')
-const { notFound, sendError, requestLogger } = require('./middleware')
-const { monitorResponseTimes } = require('@gardener-dashboard/monitor')
-// configure router
+const { createClient } = kubeClientModule
+const { monitorResponseTimes } = monitorModule
+
+const hooks = createHooks()
 const router = express.Router()
 
 router.use(compression({
@@ -38,8 +44,4 @@ for (const [key, value] of Object.entries(routes)) {
 router.use(notFound)
 router.use(sendError)
 
-// exports
-module.exports = {
-  router,
-  hooks,
-}
+export { router, hooks }

@@ -8,14 +8,55 @@ import { decodeBase64 } from '@/utils'
 
 import get from 'lodash/get'
 
+// Credentials
+export function isSecret (credential) {
+  return credential?.kind === 'Secret'
+}
+
+export function isWorkloadIdentity (credential) {
+  return credential?.kind === 'WorkloadIdentity'
+}
+
+export function credentialProviderType (credential) {
+  // TODO check for provider.extensions.gardener.cloud once wlids are supported
+  const labels = credential?.metadata?.labels
+  if (!labels) {
+    return undefined
+  }
+
+  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
+  const PREFIX = 'provider.shoot.gardener.cloud/'
+
+  // for DNS credentials: prefer the dashboard-specific label
+  if (DASHBOARD in labels) {
+    return get(labels, [DASHBOARD])
+  }
+  // Or find the first shoot provider label set to "true"
+  const key = Object.keys(labels).find(k => {
+    return k.startsWith(PREFIX) && get(labels, [k]) === 'true'
+  })
+
+  return key ? key.slice(PREFIX.length) : undefined
+}
+
+export function isDNSCredential ({ credential, dnsProviderTypes }) {
+  return dnsProviderTypes.includes(credentialProviderType(credential))
+}
+
+// Bindings
 export function isSecretBinding (binding) {
   return binding?.kind === 'SecretBinding'
 }
+
 export function isCredentialsBinding (binding) {
   return binding?.kind === 'CredentialsBinding'
 }
 
-export function credentialRef (binding) {
+export function bindingProviderType (binding) {
+  return binding?.provider?.type
+}
+
+export function bindingCredentialRef (binding) {
   if (isSecretBinding(binding)) {
     return binding?.secretRef
   }
@@ -25,21 +66,15 @@ export function credentialRef (binding) {
   return undefined
 }
 
-export function credentialName (binding) {
-  return credentialRef(binding)?.name
+export function bindingCredentialName (binding) {
+  return bindingCredentialRef(binding)?.name
 }
 
-export function credentialNamespace (binding) {
-  return credentialRef(binding)?.namespace
+export function bindingCredentialNamespace (binding) {
+  return bindingCredentialRef(binding)?.namespace
 }
 
-export function isSharedCredential (binding) {
-  const bindingNamespace = binding?.metadata.namespace
-
-  return credentialNamespace(binding) !== bindingNamespace
-}
-
-export function credentialKind (binding) {
+export function bindingCredentialKind (binding) {
   if (isSecretBinding(binding)) {
     return 'Secret'
   }
@@ -49,14 +84,21 @@ export function credentialKind (binding) {
   return undefined
 }
 
-export function isInfrastructureBinding (binding, sortedProviderTypeList) {
-  return sortedProviderTypeList.includes(binding?.provider?.type)
-}
-export function isDnsBinding (binding, dnsProviderTypes) {
-  return dnsProviderTypes.includes(binding?.provider?.type)
+export function isSharedBinding (binding) {
+  const bindingNamespace = binding?.metadata?.namespace
+  const namespace = bindingCredentialNamespace(binding)
+  if (!bindingNamespace || !namespace) {
+    return false
+  }
+  return namespace !== bindingNamespace
 }
 
-export function secretDetails (secret, providerType) {
+export function isInfrastructureBinding ({ binding, infraProviderTypes }) {
+  return infraProviderTypes.includes(bindingProviderType(binding))
+}
+
+// Secret Details
+export function secretDetails ({ secret, providerType }) {
   const secretData = secret.data || {}
   const getGCPProjectId = () => {
     const serviceAccount = get(secretData, ['serviceaccount.json'])

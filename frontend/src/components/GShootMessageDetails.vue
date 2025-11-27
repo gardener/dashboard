@@ -82,18 +82,20 @@ SPDX-License-Identifier: Apache-2.0
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError"
               >
-                <h3 v-if="userError">
-                  Your Action is required
-                </h3>
-                <h4 class="wrap-text font-weight-bold">
-                  This error is flagged as user error which indicates that no Gardener operator action is required.
-                  Please read the error message carefully and take action.
-                </h4>
+                <template v-if="userError">
+                  <h3>
+                    Your Action is required
+                  </h3>
+                  <h4 class="wrap-text font-weight-bold">
+                    This is a user-resolvable error — no Gardener operations team intervention needed.
+                    Please read the error message carefully and take action.
+                  </h4>
+                </template>
                 <span class="wrap-text">
                   <span v-if="infraAccountError">
-                    There is a problem with your credential
-                    <code>
-                      <g-credential-name
+                    There is a problem with the credential
+                    <code v-if="shootBinding">
+                      <g-binding-name
                         :binding="shootBinding"
                         render-link
                       />
@@ -125,14 +127,14 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 
 import GAnsiText from '@/components/GAnsiText.vue'
-import GCredentialName from '@/components/Credentials/GCredentialName.vue'
+import GBindingName from '@/components/Credentials/GBindingName.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
     GAnsiText,
-    GCredentialName,
+    GBindingName,
   },
   props: {
     statusTitle: {
@@ -152,6 +154,7 @@ export default {
     },
     shootBinding: {
       type: Object,
+      default: null,
     },
   },
   computed: {

@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const logger = require('../logger')
+import logger from '../logger/index.js'
 
 class SyncManager {
   ready = false
@@ -82,4 +80,4 @@ class SyncManager {
   }
 }
 
-module.exports = SyncManager
+export default SyncManager

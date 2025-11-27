@@ -1,0 +1,39 @@
+name: Build
+on:
+  push:
+    branches:
+    - master
+    - hotfix-*
+  pull_request:
+    types:
+    - opened
+    - edited
+    - reopened
+    - synchronize
+  pull_request_target:
+    types:
+    - labeled
+  merge_group:
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == 'reviewed/ok-to-test') }}
+    uses: ./.github/workflows/build.yaml
+    with:
+      mode: snapshot
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      pull-requests: write
+
+  component-descriptor:
+    if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == 'reviewed/ok-to-test') }}
+    uses: gardener/cc-utils/.github/workflows/post-build.yaml@master
+    needs:
+      - build
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write

@@ -111,8 +111,6 @@ function commandGenerator (targets) {
       const args = [
         'depcruise',
         target,
-        '--highlight',
-        '\\.mjs$',
         '--include-only',
         `^${target}`,
         '--output-type',

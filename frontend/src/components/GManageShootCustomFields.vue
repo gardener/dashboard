@@ -25,20 +25,13 @@ SPDX-License-Identifier: Apache-2.0
       {{ item.showDetails ? 'Yes' : 'No' }}
     </template>
     <template #[`item.icon`]="{ item }">
-      <v-tooltip
-        v-if="item.icon"
-        location="top"
+      <v-icon
+        v-if="item.icon && isMdiIcon(item.icon)"
+        v-tooltip:top="item.icon"
+        color="primary"
       >
-        <template #activator="{ props }">
-          <v-icon
-            color="primary"
-            v-bind="props"
-          >
-            {{ item.icon }}
-          </v-icon>
-        </template>
-        <span>{{ item.icon }}</span>
-      </v-tooltip>
+        {{ item.icon }}
+      </v-icon>
       <template v-else>
         <span class="font-weight-light text-disabled">Not defined</span>
       </template>
@@ -153,20 +146,11 @@ SPDX-License-Identifier: Apache-2.0
               cols="12"
               sm="6"
             >
-              <v-text-field
+              <g-icon-picker
                 v-model="v$.icon.$model"
-                variant="underlined"
-                label="Icon"
                 :error-messages="getErrorMessages(v$.icon)"
                 hint="MDI icon for field, e.g., 'mdi-network'"
-                persistent-hint
-              >
-                <template #append>
-                  <v-icon color="primary">
-                    {{ editedField.icon }}
-                  </v-icon>
-                </template>
-              </v-text-field>
+              />
             </v-col>
           </v-row>
           <v-row>
@@ -250,24 +234,19 @@ SPDX-License-Identifier: Apache-2.0
               cols="12"
               sm="6"
             >
-              <v-tooltip
-                v-model="weightTooltip"
-                location="top"
-              >
-                <template #activator="{ props }">
-                  <v-text-field
-                    v-model="editedField.weight"
-                    variant="underlined"
-                    label="Weight"
-                    type="number"
-                    hint="Order of the column"
-                    persistent-hint
-                    v-bind="props"
-                    :disabled="!editedField.showColumn"
-                  />
-                </template>
-                <span>The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.)</span>
-              </v-tooltip>
+              <v-text-field
+                v-model="editedField.weight"
+                v-tooltip:top="{
+                  text: 'The built-in columns start with a weight of 100, increasing by 100 (200, 300, etc.)',
+                  model: weightTooltip
+                }"
+                variant="underlined"
+                label="Weight"
+                type="number"
+                hint="Order of the column"
+                persistent-hint
+                :disabled="!editedField.showColumn"
+              />
             </v-col>
           </v-row>
           <v-row>
@@ -408,6 +387,7 @@ import {
 import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
+import GIconPicker from '@/components/GIconPicker.vue'
 
 import { useProjectContext } from '@/composables/useProjectContext'
 import { useScrollBar } from '@/composables/useScrollBar'
@@ -419,6 +399,7 @@ import {
   setDelayedInputFocus,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { isMdiIcon } from '@/utils/mdiIcons'
 
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -484,7 +465,7 @@ function openAddDialog () {
   editedField.value = {
     name: '',
     path: '',
-    icon: 'mdi-',
+    icon: '',
     tooltip: '',
     defaultValue: '',
     showColumn: true,
@@ -578,9 +559,9 @@ const isUniqueName = helpers.withMessage(
   },
 )
 
-const startsWithMdiOrEmpty = helpers.withMessage(
-  'Icon must start with "mdi-" followed by at least one character or be empty',
-  value => !value || /^mdi-.+/.test(value),
+const isKnownIconOrEmpty = helpers.withMessage(
+  'Icon must be a valid MDI icon or be empty',
+  value => !value || isMdiIcon(value),
 )
 
 const eitherShowColumnOrDetails = helpers.withMessage(
@@ -591,7 +572,7 @@ const eitherShowColumnOrDetails = helpers.withMessage(
 const rules = {
   name: { required, isUniqueName },
   path: { required },
-  icon: { startsWithMdiOrEmpty },
+  icon: { isKnownIconOrEmpty },
   showColumn: { eitherShowColumnOrDetails },
   showDetails: { eitherShowColumnOrDetails },
 }

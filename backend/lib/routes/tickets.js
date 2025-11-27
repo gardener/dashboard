@@ -4,15 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import _ from 'lodash-es'
+import cache from '../cache/index.js'
+import * as tickets from '../services/tickets.js'
+import { metricsRoute } from '../middleware.js'
 
-const express = require('express')
-const _ = require('lodash')
-const cache = require('../cache')
-const tickets = require('../services/tickets')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -64,3 +62,5 @@ router.route('/:name')
       next(err)
     }
   })
+
+export default router

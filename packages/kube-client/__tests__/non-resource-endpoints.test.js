@@ -44,7 +44,7 @@ describe('kube-client', () => {
 
     it('should assign all non resource endpoints', () => {
       expect(Object.keys(endpoints)).toHaveLength(3)
-      expect(extendStub).toBeCalledTimes(3)
+      expect(extendStub).toHaveBeenCalledTimes(3)
       expect(endpoints.api).toBeInstanceOf(HttpClient)
       expect(endpoints.api[http.client].options).toEqual({
         url,

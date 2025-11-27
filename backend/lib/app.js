@@ -4,21 +4,31 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const express = require('express')
-const expressStaticGzip = require('express-static-gzip')
-const _ = require('lodash')
-const config = require('./config')
-const { resolve, join } = require('path')
-const logger = require('./logger')
-const { notFound, renderError, historyFallback, noCache } = require('./middleware')
-const helmet = require('helmet')
-const api = require('./api')
-const auth = require('./auth')
-const githubWebhook = require('./github/webhook')
-
-const { healthCheck } = require('./healthz')
+import express from 'express'
+import expressStaticGzip from 'express-static-gzip'
+import _ from 'lodash-es'
+import config from './config/index.js'
+import {
+  resolve,
+  join,
+  dirname,
+} from 'path'
+import { fileURLToPath } from 'url'
+import { existsSync } from 'fs'
+import logger from './logger/index.js'
+import {
+  notFound,
+  renderError,
+  historyFallback,
+} from './middleware.js'
+import helmet from 'helmet'
+import {
+  router as apiRouter,
+  hooks as apiHooks,
+} from './api.js'
+import { router as authRouter } from './auth.js'
+import { router as githubWebhookRouter } from './github/webhook/index.js'
+import { healthCheck } from './healthz/index.js'
 
 const { port, metricsPort } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
@@ -30,9 +40,15 @@ for (const ctor of [Object, Function, Array, String, Number, Boolean]) {
 }
 
 // resolve pathnames
-const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
-const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
-const STATIC_PATHS = ['/assets', '/static', '/js', '/css', '/fonts', '/img']
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PUBLIC_FS_PATH = resolve(join(__dirname, '..', 'public'))
+const INDEX_FILENAME = join(PUBLIC_FS_PATH, 'index.html')
+// hashed frontend build assets (cacheable/immutable)
+const BUILD_ASSETS_URL_PATH = '/assets'
+const BUILD_ASSETS_FS_PATH = join(PUBLIC_FS_PATH, 'assets')
+// non-hashed static/branding assets (logo, favicon, etc.)
+const STATIC_ASSETS_URL_PATH = '/static/assets'
+const STATIC_ASSETS_OVERRIDE_FS_PATH = join(PUBLIC_FS_PATH, 'static', 'custom-assets') // custom assets override from ConfigMap
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
@@ -53,8 +69,8 @@ app.set('port', port)
 app.set('metricsPort', metricsPort)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
-app.set('periodSeconds ', periodSeconds)
-app.set('hooks', api.hooks)
+app.set('periodSeconds', periodSeconds)
+app.set('hooks', apiHooks)
 app.set('trust proxy', 1)
 app.set('etag', false)
 app.set('x-powered-by', false)
@@ -65,10 +81,9 @@ app.use(helmet.xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
-app.use(noCache(STATIC_PATHS))
-app.use('/auth', auth.router)
-app.use('/webhook', githubWebhook.router)
-app.use('/api', api.router)
+app.use('/auth', authRouter)
+app.use('/webhook', githubWebhookRouter)
+app.use('/api', apiRouter)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
@@ -86,15 +101,38 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
 
-app.use(expressStaticGzip(PUBLIC_DIRNAME, {
+if (existsSync(STATIC_ASSETS_OVERRIDE_FS_PATH)) {
+  logger.debug(`Serving static asset overrides from ${STATIC_ASSETS_OVERRIDE_FS_PATH}`)
+  app.use(STATIC_ASSETS_URL_PATH, expressStaticGzip(STATIC_ASSETS_OVERRIDE_FS_PATH, {
+    enableBrotli: true,
+    orderPreference: ['br'],
+    serveStatic: {
+      etag: true,
+      immutable: false,
+    },
+  }))
+}
+
+app.use(BUILD_ASSETS_URL_PATH, expressStaticGzip(BUILD_ASSETS_FS_PATH, {
   enableBrotli: true,
   orderPreference: ['br'],
   serveStatic: {
+    etag: true,
     immutable: true,
     maxAge: '1 Week',
   },
 }))
-app.use(STATIC_PATHS, notFound)
+
+app.use(expressStaticGzip(PUBLIC_FS_PATH, {
+  enableBrotli: true,
+  orderPreference: ['br'],
+  serveStatic: {
+    etag: true,
+    immutable: false,
+  },
+}))
+
+app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
 app.use(helmet.xFrameOptions({
   action: 'deny',
@@ -103,4 +141,4 @@ app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
 
-module.exports = app
+export default app

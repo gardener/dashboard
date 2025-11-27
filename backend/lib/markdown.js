@@ -4,10 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { Converter } = require('showdown')
-const sanitizeHtml = require('sanitize-html')
+import showdown from 'showdown'
+import sanitizeHtml from 'sanitize-html'
+const { Converter } = showdown
 
 function createConverter (options) {
   const converter = new Converter({
@@ -33,6 +32,6 @@ function createConverter (options) {
   }
 }
 
-module.exports = {
+export {
   createConverter,
 }

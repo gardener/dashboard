@@ -7,14 +7,13 @@
 import { jest } from '@jest/globals'
 import _ from 'lodash-es'
 
-const mockGetToken = jest.fn().mockResolvedValue({
+export const mockGetToken = jest.fn().mockResolvedValue({
   access_token: 'valid-access-token',
   token_type: 'Bearer',
 })
 
-export default {
-  mockGetToken,
-  GoogleToken: jest.fn().mockImplementation((options = {}) => {
+export class GoogleToken {
+  constructor (options) {
     return {
       key: options.key,
       iss: options.email,
@@ -33,5 +32,11 @@ export default {
         return this.rawToken
       },
     }
-  }),
+  }
+
+  async getToken () {
+    return mockGetToken()
+  }
 }
+
+export default GoogleToken

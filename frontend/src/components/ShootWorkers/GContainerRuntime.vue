@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-row">
+  <div
+    class="d-flex flex-row"
+  >
     <v-select
       v-model="criName"
       v-messages-color="{ color: 'warning' }"
@@ -24,10 +26,11 @@ SPDX-License-Identifier: Apache-2.0
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
       class="ml-1"
+      style="flex: 0 0 125px"
       color="primary"
       item-color="primary"
       :items="criContainerRuntimeTypes"
-      label="Additional OCI Runtimes"
+      label="Add. OCI Runtimes"
       multiple
       chips
       closable-chips

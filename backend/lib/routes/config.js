@@ -4,17 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import _ from 'lodash-es'
+import logger from '../logger/index.js'
+import { createConverter } from '../markdown.js'
+import express from 'express'
+import kubeClientModule from '@gardener-dashboard/kube-client'
+import config from '../config/index.js'
+import { metricsRoute } from '../middleware.js'
 
-const _ = require('lodash')
-const logger = require('../logger')
-const markdown = require('../markdown')
-const express = require('express')
-const { dashboardClient } = require('@gardener-dashboard/kube-client')
-const config = require('../config')
-const { metricsRoute } = require('../middleware')
+const { dashboardClient } = kubeClientModule
 
-const router = module.exports = express.Router()
+const router = express.Router()
 
 const frontendConfig = sanitizeFrontendConfig(config.frontend)
 const metricsMiddleware = metricsRoute('config')
@@ -39,7 +39,7 @@ router.route('/')
   })
 
 function sanitizeFrontendConfig (frontendConfig) {
-  const converter = markdown.createConverter()
+  const converter = createConverter()
   const convertAndSanitize = (obj, key) => {
     const value = obj[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     if (value) {
@@ -94,3 +94,5 @@ function sanitizeFrontendConfig (frontendConfig) {
 
   return sanitizedFrontendConfig
 }
+
+export default router

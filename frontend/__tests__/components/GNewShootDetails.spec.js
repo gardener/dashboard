@@ -26,9 +26,10 @@ const { createVuetifyPlugin } = global.fixtures.helper
 describe('components', () => {
   describe('g-new-shoot-details', () => {
     let pinia
+    let wrapper
 
     function mountNewShootDetails (props) {
-      return mount(GNewShootDetails, {
+      wrapper = mount(GNewShootDetails, {
         global: {
           plugins: [
             createVuetifyPlugin(),
@@ -43,6 +44,7 @@ describe('components', () => {
         },
         props,
       })
+      return wrapper
     }
 
     beforeEach(() => {
@@ -68,6 +70,14 @@ describe('components', () => {
           },
         },
       ]
+    })
+
+    afterEach(() => {
+      // Clean up component to prevent "window is not defined" errors during test teardown.
+      if (wrapper) {
+        wrapper.unmount()
+        wrapper = null
+      }
     })
 
     it('maximum shoot name length should depend on project name', () => {

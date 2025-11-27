@@ -14,49 +14,21 @@ SPDX-License-Identifier: Apache-2.0
       @add-terminal-shortcut="onAddTerminalShortcut"
     >
       <template #icon>
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <span v-bind="props">
-              <v-badge
-                avatar
-                location="bottom right"
-                color="transparent"
-              >
-                <template #badge>
-                  <v-icon
-                    icon="mdi-grid-large"
-                    color="primary"
-                  />
-                </template>
-                <span>
-                  <g-icon-base
-                    width="24"
-                    height="23"
-                    icon-color="primary"
-                    view-box="-4 0 56 54"
-                    icon-name="terminal-shortcut"
-                  >
-                    <g-terminal-shortcut-icon />
-                  </g-icon-base>
-                </span>
-              </v-badge>
-            </span>
-          </template>
-          Project specific terminal shortcut
-        </v-tooltip>
-      </template>
-    </g-terminal-shortcut>
-    <g-terminal-shortcut
-      v-for="shortcut in shortcuts"
-      :key="`g-shortcut-${shortcut.id}`"
-      :shortcut="shortcut"
-      :popper-boundaries-selector="popperBoundariesSelector"
-      @add-terminal-shortcut="onAddTerminalShortcut"
-    >
-      <template #icon>
-        <v-tooltip location="top">
-          <template #activator="{ props }">
-            <span v-bind="props">
+        <span
+          v-tooltip:top="'Project specific terminal shortcut'"
+        >
+          <v-badge
+            avatar
+            location="bottom right"
+            color="transparent"
+          >
+            <template #badge>
+              <v-icon
+                icon="mdi-grid-large"
+                color="primary"
+              />
+            </template>
+            <span>
               <g-icon-base
                 width="24"
                 height="23"
@@ -67,9 +39,31 @@ SPDX-License-Identifier: Apache-2.0
                 <g-terminal-shortcut-icon />
               </g-icon-base>
             </span>
-          </template>
-          Default terminal shortcut
-        </v-tooltip>
+          </v-badge>
+        </span>
+      </template>
+    </g-terminal-shortcut>
+    <g-terminal-shortcut
+      v-for="shortcut in shortcuts"
+      :key="`g-shortcut-${shortcut.id}`"
+      :shortcut="shortcut"
+      :popper-boundaries-selector="popperBoundariesSelector"
+      @add-terminal-shortcut="onAddTerminalShortcut"
+    >
+      <template #icon>
+        <span
+          v-tooltip:top="'Default terminal shortcut'"
+        >
+          <g-icon-base
+            width="24"
+            height="23"
+            icon-color="primary"
+            view-box="-4 0 56 54"
+            icon-name="terminal-shortcut"
+          >
+            <g-terminal-shortcut-icon />
+          </g-icon-base>
+        </span>
       </template>
     </g-terminal-shortcut>
   </template>

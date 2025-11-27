@@ -84,6 +84,11 @@ global:
     # Example: nodeOptions: [--optimize-for-size, --max-old-space-size=920, --gc-interval=100]
     nodeOptions: [--max-old-space-size=920]
 
+    # list of allowed origins for the socket.io events endpoint
+    # use ["*"] to allow all origins - this is not recommended for production environments
+    websocketAllowedOrigins:
+    - "*"
+
     ingress:
       ingressClassName: nginx
       annotations:

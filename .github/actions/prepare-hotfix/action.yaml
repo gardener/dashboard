@@ -1,0 +1,20 @@
+name: Prepare Hotfix
+
+runs:
+  using: composite
+  steps:
+    - name: Add hotfix branch to .yarnrc.yml
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "Adding hotfix branch to .yarnrc.yml"
+        cat <<EOT >> .yarnrc.yml
+
+        changesetBaseRefs:
+          - "master"
+          - "origin/master"
+          - "$HOTFIX_BRANCH"
+          - "origin/$HOTFIX_BRANCH"
+        EOT
+        git add .yarnrc.yml
+        git commit -m "Add hotfix branch to changesetBaseRefs in .yarnrc.yml"

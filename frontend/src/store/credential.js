@@ -16,9 +16,9 @@ import {
 
 import { useApi } from '@/composables/useApi'
 import {
-  isDnsBinding,
   isInfrastructureBinding,
-  isSharedCredential,
+  isDNSCredential,
+  isSecret,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -26,7 +26,6 @@ import { useAppStore } from './app'
 import { useGardenerExtensionStore } from './gardenerExtension'
 import { useCloudProfileStore } from './cloudProfile'
 
-import filter from 'lodash/filter'
 import set from 'lodash/set'
 import get from 'lodash/get'
 
@@ -104,55 +103,74 @@ export const useCredentialStore = defineStore('credential', () => {
     })
   }
 
-  const cloudProviderBindingList = computed(() => {
-    const secretBindings = Object.values(state.secretBindings)
-    const credentialsBindings = Object.values(state.credentialsBindings)
-
-    return [...secretBindings, ...credentialsBindings]
-  })
-
   const quotaList = computed(() => {
     return Object.values(state.quotas)
   })
 
-  async function createCredential (params) {
-    const { data: { binding, secret } } = await api.createCloudProviderCredential({ binding: params.binding, secret: params.secret })
-    _updateCloudProviderCredential({ binding, secret })
-    appStore.setSuccess(`Cloud Provider credential ${binding.metadata.name} created`)
+  async function createDnsCredential ({ secret }) {
+    const { data } = await api.createDnsProviderCredential({ secret })
+    _updateDnsProviderCredential({ secret: data.secret })
+    const name = data.secret.metadata.name
+    appStore.setSuccess(`DNS Provider credential ${name} created`)
   }
 
-  async function updateCredential (params) {
-    const { data: { secret } } = await api.updateCloudProviderCredential({ secret: params.secret })
-    _updateCloudProviderCredential({ secret })
-    appStore.setSuccess(`Cloud Provider credential ${params.binding.metadata.name} updated`)
+  async function createInfraCredential ({ binding, secret }) {
+    const { data } = await api.createInfraProviderCredential({ binding, secret })
+    _updateInfraProviderCredential({ binding: data.binding, secret: data.secret })
+    const name = data.binding.metadata.name
+    appStore.setSuccess(`Infrastructure credential ${name} created`)
   }
 
-  async function deleteCredential ({ bindingKind, bindingNamespace, bindingName }) {
-    await api.deleteCloudProviderCredential({ bindingKind, bindingNamespace, bindingName })
+  async function updateDnsCredential ({ secret }) {
+    const { data } = await api.updateDnsProviderCredential({ secret })
+    _updateDnsProviderCredential({ secret: data.secret })
+    const name = secret.metadata.name
+    appStore.setSuccess(`DNS Provider credential ${name} updated`)
+  }
+
+  async function updateInfraCredential ({ secret, binding }) {
+    const { data } = await api.updateInfraProviderCredential({ secret })
+    _updateInfraProviderCredential({ binding, secret: data.secret })
+    const name = binding.metadata?.name
+    appStore.setSuccess(`Infrastructure Provider credential ${name} updated`)
+  }
+
+  async function deleteDnsCredential ({ credentialKind, credentialNamespace, credentialName }) {
+    await api.deleteDnsProviderCredential({ credentialKind, credentialNamespace, credentialName })
     await fetchCredentials()
-    appStore.setSuccess(`Cloud Provider credential ${bindingName} deleted`)
+    appStore.setSuccess(`DNS Provider credential ${credentialName} deleted`)
+  }
+
+  async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName }) {
+    await api.deleteInfraProviderCredential({ bindingKind, bindingNamespace, bindingName })
+    await fetchCredentials()
+    appStore.setSuccess(`Infrastructure credential ${bindingName} deleted`)
   }
 
   const infrastructureBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isInfrastructureBinding(binding, sortedProviderTypeList.value)
-    })
+    return [
+      ...secretBindingList.value,
+      ...credentialsBindingList.value,
+    ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedProviderTypeList.value }))
   })
 
-  const dnsBindingList = computed(() => {
-    return filter(cloudProviderBindingList.value, binding => {
-      return isDnsBinding(binding, dnsProviderTypes.value) &&
-        !isSharedCredential(binding)
-    })
+  const dnsCredentialList = computed(() => {
+    const credentials = [
+      ...Object.values(state.secrets),
+      ...Object.values(state.workloadIdentities),
+    ]
+    return credentials
+      .filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }))
+      .filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
   })
 
-  const secretBindingList = computed(() =>
-    Object.values(state.secretBindings),
-  )
+  const secretBindingList = computed(() => {
+    return Object.values(state.secretBindings)
+  })
 
-  const credentialsBindingList = computed(() =>
-    Object.values(state.credentialsBindings),
-  )
+  const credentialsBindingList = computed(() => {
+    return Object.values(state.credentialsBindings)
+  })
 
   function getSecret ({ namespace, name }) {
     return get(state.secrets, [namespaceNameKey({ namespace, name })])
@@ -166,35 +184,36 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.quotas, [namespaceNameKey({ namespace, name })])
   }
 
-  function _updateCloudProviderCredential ({ binding, secret }) {
-    if (binding) {
-      const key = namespaceNameKey(binding.metadata)
-      if (binding.kind === 'SecretBinding') {
-        set(state.secretBindings, [key], binding)
-      } else if (binding.kind === 'CredentialsBinding') {
-        set(state.credentialsBindings, [key], binding)
-      }
+  function _updateDnsProviderCredential ({ secret }) {
+    const key = namespaceNameKey(secret.metadata)
+    set(state.secrets, [key], secret)
+  }
+
+  function _updateInfraProviderCredential ({ binding, secret }) {
+    const bindingKey = namespaceNameKey(binding.metadata)
+    if (binding.kind === 'SecretBinding') {
+      set(state.secretBindings, [bindingKey], binding)
+    } else if (binding.kind === 'CredentialsBinding') {
+      set(state.credentialsBindings, [bindingKey], binding)
     }
 
-    if (secret) {
-      const key = namespaceNameKey(secret.metadata)
-      set(state.secrets, [key], secret)
-    }
-
-    // no update logic for quotas as they currently cannot be updated using the dashboard
+    const secretKey = namespaceNameKey(secret.metadata)
+    set(state.secrets, [secretKey], secret)
   }
 
   return {
     state,
-    cloudProviderBindingList,
     quotaList,
     fetchCredentials,
     _setCredentials,
-    updateCredential,
-    createCredential,
-    deleteCredential,
+    updateDnsCredential,
+    updateInfraCredential,
+    createDnsCredential,
+    createInfraCredential,
+    deleteDnsCredential,
+    deleteInfraCredential,
     infrastructureBindingList,
-    dnsBindingList,
+    dnsCredentialList,
     secretBindingList,
     credentialsBindingList,
     getSecret,

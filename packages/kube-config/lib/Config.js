@@ -5,10 +5,8 @@
 //
 
 import _ from 'lodash-es'
-import gtoken from 'gtoken'
+import { GoogleToken } from 'gtoken'
 import yaml from 'js-yaml'
-
-const { GoogleToken } = gtoken
 
 const PROPERTY_NAMES = ['apiVersion', 'kind', 'current-context', 'contexts', 'clusters', 'users']
 

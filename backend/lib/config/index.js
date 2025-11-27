@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import gardener from './gardener.js'
 
-const gardener = require('./gardener')
-
-module.exports = gardener.loadConfig(gardener.getFilename())
+export default gardener.loadConfig(gardener.getFilename())

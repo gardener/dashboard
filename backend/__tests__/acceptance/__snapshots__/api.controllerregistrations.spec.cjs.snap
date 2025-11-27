@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api controllerregistrations should return all gardener extensions (admin) 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "resource": "controllerregistrations",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api controllerregistrations should return all gardener extensions (admin) 2`] = `
+[
+  {
+    "name": "OS Registration",
+    "resources": [
+      {
+        "kind": "OperatingSystemConfig",
+        "type": "gardenlinux",
+      },
+    ],
+    "version": "v1.0.0",
+  },
+  {
+    "name": "Network Registration",
+    "resources": [
+      {
+        "kind": "Network",
+        "type": "gardium",
+      },
+    ],
+  },
+  {
+    "name": "Network Registration 2",
+    "resources": [
+      {
+        "kind": "Network",
+        "type": "foobium",
+      },
+      {
+        "kind": "Foo",
+        "type": "bar",
+      },
+    ],
+  },
+  {
+    "name": "Provider-Foo",
+    "resources": [
+      {
+        "kind": "DNSRecord",
+        "primary": true,
+        "type": "gardenland",
+      },
+    ],
+  },
+  {
+    "name": "extension-shoot-dns-service",
+    "resources": [
+      {
+        "kind": "Foo",
+        "type": "bar",
+      },
+    ],
+  },
+]
+`;
+
+exports[`api controllerregistrations should return only required registrations and information (admin) 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "resource": "controllerregistrations",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api controllerregistrations should return only required registrations and information (admin) 2`] = `
+[
+  {
+    "name": "Network Registration",
+    "resources": [
+      {
+        "kind": "Network",
+        "type": "gardium",
+      },
+    ],
+  },
+  {
+    "name": "Network Registration 2",
+    "resources": [
+      {
+        "kind": "Network",
+        "type": "foobium",
+      },
+    ],
+  },
+  {
+    "name": "Provider-Foo",
+    "resources": [
+      {
+        "kind": "DNSRecord",
+        "primary": true,
+        "type": "gardenland",
+      },
+    ],
+  },
+  {
+    "name": "extension-shoot-dns-service",
+    "resources": [],
+  },
+]
+`;

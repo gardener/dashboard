@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import express from 'express'
+import services from '../services/index.js'
+import httpErrors from 'http-errors'
+import { metricsRoute } from '../middleware.js'
+const { terminals, authorization } = services
+const { UnprocessableEntity } = httpErrors
 
-const express = require('express')
-const { terminals, authorization } = require('../services')
-const { UnprocessableEntity } = require('http-errors')
-const { metricsRoute } = require('../middleware')
-
-const router = module.exports = express.Router({
+const router = express.Router({
   mergeParams: true,
 })
 
@@ -20,11 +20,8 @@ const metricsMiddleware = metricsRoute('terminals')
 router.use(async (req, res, next) => {
   try {
     const user = req.user
-
     const { method, params: body } = req.body
-
     const isAdmin = req.user.isAdmin = await authorization.isAdmin(user)
-
     terminals.ensureTerminalAllowed({ method, isAdmin, body })
     next()
   } catch (err) {
@@ -71,3 +68,5 @@ router.route('/')
       next(err)
     }
   })
+
+export default router

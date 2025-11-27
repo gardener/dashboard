@@ -60,11 +60,11 @@ describe('kube-client', () => {
 
       it('should check that Version mixins do not occur in the inheritance hierarchy', () => {
         expect(new V1Object()).toHaveProperty('constructor.version', 'v1')
-        expect(() => new V1Object() instanceof V1).toThrowError(TypeError)
+        expect(() => new V1Object() instanceof V1).toThrow(TypeError)
         expect(new V1Alpha1Object()).toHaveProperty('constructor.version', 'v1alpha1')
-        expect(() => new V1Alpha1Object() instanceof V1Alpha1).toThrowError(TypeError)
+        expect(() => new V1Alpha1Object() instanceof V1Alpha1).toThrow(TypeError)
         expect(new V1Beta1Object()).toHaveProperty('constructor.version', 'v1beta1')
-        expect(() => new V1Beta1Object() instanceof V1Beta1).toThrowError(TypeError)
+        expect(() => new V1Beta1Object() instanceof V1Beta1).toThrow(TypeError)
       })
     })
 
@@ -73,8 +73,8 @@ describe('kube-client', () => {
       class NamedGroupObject extends NamedGroup(Object) {}
 
       it('should check that ApiGroup mixins do not occur in the inheritance hierarchy', () => {
-        expect(() => new CoreGroupObject() instanceof CoreGroup).toThrowError(TypeError)
-        expect(() => new NamedGroupObject() instanceof NamedGroup).toThrowError(TypeError)
+        expect(() => new CoreGroupObject() instanceof CoreGroup).toThrow(TypeError)
+        expect(() => new NamedGroupObject() instanceof NamedGroup).toThrow(TypeError)
       })
     })
 

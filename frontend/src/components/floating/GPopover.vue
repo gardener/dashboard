@@ -39,7 +39,9 @@ SPDX-License-Identifier: Apache-2.0
         >
           <template #title>
             <span class="text-subtitle-1 pr-6">
-              {{ toolbarTitle }}
+              <slot name="toolbar-title">
+                {{ toolbarTitle }}
+              </slot>
             </span>
           </template>
           <template #append>

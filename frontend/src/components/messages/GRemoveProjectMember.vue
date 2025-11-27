@@ -8,14 +8,14 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <template v-if="namespace && memberName">
       Do you want to remove the service account <em>{{ memberName }}</em> of namespace <em>{{ namespace }}</em>
-      from the project <em>{{ projectName }}</em>?
+      from the project <em>{{ projectNameAndTitle }}</em>?
     </template>
     <template v-else-if="memberName">
-      Do you want to remove the user <em>{{ memberName }}</em> from the project <em>{{ projectName }}</em>?
+      Do you want to remove the user <em>{{ memberName }}</em> from the project <em>{{ projectNameAndTitle }}</em>?
     </template>
     <template v-else>
       Do you want to remove <span class="text-error font-weight-bold">yourself</span>
-      from the project <em>{{ projectName }}</em>?
+      from the project <em>{{ projectNameAndTitle }}</em>?
     </template>
   </div>
 </template>
@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 export default {
   props: {
-    projectName: {
+    projectNameAndTitle: {
       type: String,
       required: true,
     },

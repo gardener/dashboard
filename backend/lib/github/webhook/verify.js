@@ -4,12 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { createHmac, timingSafeEqual } = require('crypto')
-const assert = require('assert')
-const createError = require('http-errors')
-const config = require('../../config')
+import {
+  createHmac,
+  timingSafeEqual,
+} from 'crypto'
+import assert from 'assert'
+import createError from 'http-errors'
+import config from '../../config/index.js'
 
 function digestsEqual (a, b) {
   if (a.length !== b.length) return false
@@ -33,4 +34,4 @@ function verify (req, res, body) {
   }
 }
 
-module.exports = verify
+export default verify

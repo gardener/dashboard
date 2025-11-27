@@ -8,7 +8,6 @@ import { computed } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useCredentialStore } from '@/store/credential'
-import { useSeedStore } from '@/store/seed'
 
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
@@ -20,7 +19,6 @@ import compact from 'lodash/compact'
 export function useShootSpec (shootItem, options = {}) {
   const {
     cloudProfileStore = useCloudProfileStore(),
-    seedStore = useSeedStore(),
     credentialStore = useCredentialStore(),
   } = options
 
@@ -110,7 +108,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const sshAccessEnabled = computed(() => {
-    return get(shootSpec.value, ['provider', 'workerSettings', 'sshAccess', 'enabled'], false)
+    return get(shootSpec.value, ['provider', 'workersSettings', 'sshAccess', 'enabled'], false)
   })
 
   const shootAddons = computed(() => {
@@ -170,10 +168,6 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootSpec.value, ['seedName'])
   })
 
-  const isSeedUnreachable = computed(() => {
-    return seedStore.isSeedUnreachableByName(shootSeedName.value)
-  })
-
   const shootResources = computed(() => {
     return get(shootSpec.value, ['resources'])
   })
@@ -211,7 +205,6 @@ export function useShootSpec (shootItem, options = {}) {
     shootMaintenance,
     shootControlPlaneHighAvailabilityFailureTolerance,
     shootSeedName,
-    isSeedUnreachable,
     shootResources,
   }
 }

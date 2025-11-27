@@ -4,14 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import { get } from 'lodash-es'
+import ioHelper from '../io/helper.js'
+import { isMemberOf } from '../utils/index.js'
 
-const { get } = require('lodash')
-
-const ioHelper = require('../io/helper')
-const { isMemberOf } = require('../utils')
-
-module.exports = (io, informer) => {
+export default (io, informer) => {
   const nsp = io.of('/')
 
   const handleEvent = async (type, newObject, oldObject) => {

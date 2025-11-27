@@ -1,0 +1,1441 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api terminals all should list terminal resources 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+]
+`;
+
+exports[`api terminals all should list terminal resources 2`] = `
+[
+  {
+    "metadata": {
+      "identifier": "1",
+      "name": "term-garden-00001",
+      "namespace": "garden-foo",
+    },
+  },
+  {
+    "metadata": {
+      "identifier": "2",
+      "name": "term-cp-00002",
+      "namespace": "garden-foo",
+    },
+  },
+  {
+    "metadata": {
+      "identifier": "3",
+      "name": "term-shoot-00003",
+      "namespace": "garden-foo",
+    },
+  },
+]
+`;
+
+exports[`api terminals cp should create a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D722a7be5c00be4e48b037831452206aa150b30a6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden/configmaps/infra1-seed.ca-cluster",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "dashboard.gardener.cloud/v1alpha1",
+      "kind": "Terminal",
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/identifier": "21",
+          "dashboard.gardener.cloud/preferredHost": "seed",
+        },
+        "generateName": "term-cp-",
+        "labels": {
+          "component": "dashboard-terminal",
+          "dashboard.gardener.cloud/created-by-hash": "162ad2ffec2aa3ae91a5b1011500707ff75cc8bf",
+          "dashboard.gardener.cloud/identifier-hash": "722a7be5c00be4e48b037831452206aa150b30a6",
+        },
+        "namespace": "garden-foo",
+        "ownerReferences": undefined,
+      },
+      "spec": {
+        "host": {
+          "credentials": {
+            "shootRef": {
+              "name": "infra1-seed",
+              "namespace": "garden",
+            },
+          },
+          "namespace": "shoot--foo--fooShoot",
+          "pod": {
+            "container": {
+              "args": undefined,
+              "command": undefined,
+              "image": "dummyImage:1.0.0",
+              "privileged": false,
+            },
+            "hostNetwork": false,
+            "hostPID": false,
+            "labels": {
+              "networking.gardener.cloud/to-dns": "allowed",
+              "networking.gardener.cloud/to-private-networks": "allowed",
+              "networking.gardener.cloud/to-public-networks": "allowed",
+              "networking.gardener.cloud/to-runtime-apiserver": "allowed",
+            },
+          },
+          "temporaryNamespace": false,
+        },
+        "target": {
+          "apiServer": {
+            "caData": "Y2EuY3J0",
+          },
+          "authorization": {
+            "projectMemberships": undefined,
+            "roleBindings": [
+              {
+                "bindingKind": "RoleBinding",
+                "roleRef": {
+                  "apiGroup": "rbac.authorization.k8s.io",
+                  "kind": "ClusterRole",
+                  "name": "cluster-admin",
+                },
+              },
+            ],
+          },
+          "cleanupProjectMembership": false,
+          "credentials": {
+            "shootRef": {
+              "name": "infra1-seed",
+              "namespace": "garden",
+            },
+          },
+          "kubeconfigContextNamespace": "shoot--foo--fooShoot",
+          "namespace": "shoot--foo--fooShoot",
+          "temporaryNamespace": false,
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals cp should create a terminal resource 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
+    "namespace": "shoot--foo--fooShoot",
+  },
+  "imageHelpText": "Dummy Image Description",
+  "metadata": {
+    "identifier": "21",
+    "name": "term-cp-00021",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals cp should keep a terminal resource alive 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-cp-00002",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-cp-00002",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/operation": "keepalive",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals cp should keep a terminal resource alive 2`] = `
+{
+  "ok": true,
+}
+`;
+
+exports[`api terminals cp should read the terminal config 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals cp should read the terminal config 2`] = `
+{
+  "container": {
+    "image": "dummyImage:1.0.0",
+  },
+}
+`;
+
+exports[`api terminals garden as enduser should create a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D7d13090703e44f7e8e6bd8b3c1a97863a0ac056b%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D722a7be5c00be4e48b037831452206aa150b30a6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/dashboard-webterminal",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+    {
+      "apiVersion": "dashboard.gardener.cloud/v1alpha1",
+      "kind": "Terminal",
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/identifier": "21",
+          "dashboard.gardener.cloud/preferredHost": "shoot",
+        },
+        "generateName": "term-garden-",
+        "labels": {
+          "component": "dashboard-terminal",
+          "dashboard.gardener.cloud/created-by-hash": "7d13090703e44f7e8e6bd8b3c1a97863a0ac056b",
+          "dashboard.gardener.cloud/identifier-hash": "722a7be5c00be4e48b037831452206aa150b30a6",
+        },
+        "namespace": "garden-foo",
+        "ownerReferences": undefined,
+      },
+      "spec": {
+        "host": {
+          "credentials": {
+            "shootRef": {
+              "name": "fooShoot",
+              "namespace": "garden-foo",
+            },
+          },
+          "namespace": undefined,
+          "pod": {
+            "container": {
+              "args": undefined,
+              "command": undefined,
+              "image": "dummyImage:1.0.0",
+              "privileged": false,
+            },
+            "hostNetwork": false,
+            "hostPID": false,
+            "labels": {},
+          },
+          "temporaryNamespace": true,
+        },
+        "target": {
+          "apiServer": {
+            "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
+            "server": "https://kubernetes.external.foo.bar",
+          },
+          "authorization": {
+            "projectMemberships": [
+              {
+                "projectName": "foo",
+                "roles": [
+                  "admin",
+                ],
+              },
+            ],
+            "roleBindings": undefined,
+          },
+          "cleanupProjectMembership": true,
+          "credentials": {
+            "serviceAccountRef": {
+              "name": "dashboard-webterminal",
+              "namespace": "garden-foo",
+            },
+          },
+          "kubeconfigContextNamespace": "garden-foo",
+          "namespace": "garden-foo",
+          "temporaryNamespace": false,
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/dashboard-webterminal",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/api/v1/namespaces/garden-foo/serviceaccounts/dashboard-webterminal",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "finalizers": [
+          "gardener.cloud/terminal",
+        ],
+        "labels": {
+          "reference.dashboard.gardener.cloud/terminal": "true",
+        },
+        "ownerReferences": [
+          {
+            "apiVersion": "dashboard.gardener.cloud/v1alpha1",
+            "blockOwnerDeletion": false,
+            "kind": "Terminal",
+            "name": "term-garden-00021",
+            "uid": undefined,
+          },
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden as enduser should create a terminal resource 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
+    "namespace": "term-host-21",
+  },
+  "imageHelpText": "Dummy Image Description",
+  "metadata": {
+    "identifier": "21",
+    "name": "term-garden-00021",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals garden should create a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D722a7be5c00be4e48b037831452206aa150b30a6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "dashboard.gardener.cloud/v1alpha1",
+      "kind": "Terminal",
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/identifier": "21",
+          "dashboard.gardener.cloud/preferredHost": "seed",
+        },
+        "generateName": "term-garden-",
+        "labels": {
+          "component": "dashboard-terminal",
+          "dashboard.gardener.cloud/created-by-hash": "162ad2ffec2aa3ae91a5b1011500707ff75cc8bf",
+          "dashboard.gardener.cloud/identifier-hash": "722a7be5c00be4e48b037831452206aa150b30a6",
+        },
+        "namespace": "garden-foo",
+        "ownerReferences": undefined,
+      },
+      "spec": {
+        "host": {
+          "credentials": {
+            "shootRef": {
+              "name": "infra1-seed",
+              "namespace": "garden",
+            },
+          },
+          "namespace": undefined,
+          "pod": {
+            "container": {
+              "args": undefined,
+              "command": undefined,
+              "image": "dummyImage:1.0.0",
+              "privileged": false,
+            },
+            "hostNetwork": false,
+            "hostPID": false,
+            "labels": {},
+          },
+          "temporaryNamespace": true,
+        },
+        "target": {
+          "apiServer": {
+            "caData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
+            "server": "https://kubernetes.external.foo.bar",
+          },
+          "authorization": {
+            "projectMemberships": undefined,
+            "roleBindings": [
+              {
+                "bindingKind": "ClusterRoleBinding",
+                "roleRef": {
+                  "apiGroup": "rbac.authorization.k8s.io",
+                  "kind": "ClusterRole",
+                  "name": "gardener.cloud:system:administrators",
+                },
+              },
+            ],
+          },
+          "cleanupProjectMembership": false,
+          "credentials": {
+            "serviceAccountRef": {
+              "name": "dashboard-terminal-admin",
+              "namespace": "garden",
+            },
+          },
+          "kubeconfigContextNamespace": "garden-foo",
+          "namespace": "garden",
+          "temporaryNamespace": false,
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should create a terminal resource 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
+    "namespace": "term-host-21",
+  },
+  "imageHelpText": "Dummy Image Description",
+  "metadata": {
+    "identifier": "21",
+    "name": "term-garden-00021",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals garden should delete a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "delete",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should delete a terminal resource 2`] = `
+{
+  "name": "term-garden-00001",
+  "namespace": "garden-foo",
+}
+`;
+
+exports[`api terminals garden should fetch a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?watch=true&fieldSelector=metadata.name%3Dterm-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/host/adminkubeconfig",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": {
+        "expirationSeconds": 600,
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "shootapiserverhostname:6443",
+      ":method": "post",
+      ":path": "/api/v1/namespaces/term-host-1/serviceaccounts/term-attach-1/token",
+      ":scheme": "https",
+    },
+    {
+      "apiVersion": "authentication.k8s.io/v1",
+      "kind": "TokenRequest",
+      "spec": {
+        "expirationSeconds": 43200,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should fetch a terminal resource 2`] = `
+{
+  "hostCluster": {
+    "pod": {
+      "container": "terminal",
+      "name": "term-1",
+    },
+    "token": "secret",
+  },
+  "metadata": {
+    "identifier": "1",
+    "name": "term-garden-00001",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals garden should keep a terminal resource alive 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/operation": "keepalive",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should keep a terminal resource alive 2`] = `
+{
+  "ok": true,
+}
+`;
+
+exports[`api terminals garden should read the terminal config 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should read the terminal config 2`] = `
+{
+  "container": {
+    "image": "dummyImage:1.0.0",
+  },
+}
+`;
+
+exports[`api terminals garden should reuse a terminal session 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D1aee48a1ce9885851ed10b486ed333ee181944db",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-garden-00001",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/operation": "keepalive",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals garden should reuse a terminal session 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-garden--infra1-seed.ingress.foo-east.infra1.example.org",
+    "namespace": "term-host-1",
+  },
+  "imageHelpText": "Foo Image Description",
+  "metadata": {
+    "identifier": "1",
+    "name": "term-garden-00001",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals shoot should create a terminal resource 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D722a7be5c00be4e48b037831452206aa150b30a6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/configmaps/fooShoot.ca-cluster",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "dashboard.gardener.cloud/v1alpha1",
+      "kind": "Terminal",
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/identifier": "21",
+          "dashboard.gardener.cloud/preferredHost": "shoot",
+        },
+        "generateName": "term-shoot-",
+        "labels": {
+          "component": "dashboard-terminal",
+          "dashboard.gardener.cloud/created-by-hash": "162ad2ffec2aa3ae91a5b1011500707ff75cc8bf",
+          "dashboard.gardener.cloud/identifier-hash": "722a7be5c00be4e48b037831452206aa150b30a6",
+        },
+        "namespace": "garden-foo",
+        "ownerReferences": undefined,
+      },
+      "spec": {
+        "host": {
+          "credentials": {
+            "shootRef": {
+              "name": "fooShoot",
+              "namespace": "garden-foo",
+            },
+          },
+          "namespace": undefined,
+          "pod": {
+            "container": {
+              "args": undefined,
+              "command": undefined,
+              "image": "dummyImage:1.0.0",
+              "privileged": false,
+            },
+            "hostNetwork": false,
+            "hostPID": false,
+            "labels": {
+              "networking.gardener.cloud/to-dns": "allowed",
+              "networking.gardener.cloud/to-private-networks": "allowed",
+              "networking.gardener.cloud/to-public-networks": "allowed",
+              "networking.gardener.cloud/to-shoot-networks": "allowed",
+              "networking.resources.gardener.cloud/to-kube-apiserver-tcp-443": "allowed",
+            },
+          },
+          "temporaryNamespace": true,
+        },
+        "target": {
+          "apiServer": {
+            "caData": "Y2EuY3J0",
+            "serviceRef": {
+              "name": "kubernetes",
+              "namespace": "default",
+            },
+          },
+          "authorization": {
+            "projectMemberships": undefined,
+            "roleBindings": [
+              {
+                "bindingKind": "ClusterRoleBinding",
+                "roleRef": {
+                  "apiGroup": "rbac.authorization.k8s.io",
+                  "kind": "ClusterRole",
+                  "name": "cluster-admin",
+                },
+              },
+            ],
+          },
+          "cleanupProjectMembership": false,
+          "credentials": {
+            "shootRef": {
+              "name": "fooShoot",
+              "namespace": "garden-foo",
+            },
+          },
+          "kubeconfigContextNamespace": "default",
+          "namespace": undefined,
+          "temporaryNamespace": true,
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals shoot should create a terminal resource 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
+    "namespace": "term-host-21",
+  },
+  "imageHelpText": "Dummy Image Description",
+  "metadata": {
+    "identifier": "21",
+    "name": "term-shoot-00021",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals shoot should read the terminal config 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot/adminkubeconfig",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authentication.gardener.cloud/v1alpha1",
+      "kind": "AdminKubeconfigRequest",
+      "spec": {
+        "expirationSeconds": 600,
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "shootapiserverhostname:6443",
+      ":method": "get",
+      ":path": "/api/v1/nodes",
+      ":scheme": "https",
+    },
+  ],
+]
+`;
+
+exports[`api terminals shoot should read the terminal config 2`] = `
+{
+  "container": {
+    "image": "dummyImage:1.0.0",
+  },
+  "nodes": [
+    {
+      "data": {
+        "kubernetesHostname": "host-1",
+        "readyStatus": "True",
+      },
+      "metadata": {
+        "creationTimestamp": "2020-01-01T00:00:00Z",
+        "name": "node-1",
+      },
+    },
+    {
+      "data": {
+        "kubernetesHostname": "host-2",
+        "readyStatus": "False",
+      },
+      "metadata": {
+        "creationTimestamp": "2020-01-01T00:00:00Z",
+        "name": "node-2",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api terminals shoot should reuse a terminal session 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals?labelSelector=dashboard.gardener.cloud%2Fcreated-by-hash%3D162ad2ffec2aa3ae91a5b1011500707ff75cc8bf%2Cdashboard.gardener.cloud%2Fidentifier-hash%3D3f15d445bee371828cd3f417b7577ad8a58d46c6",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/configmaps/fooShoot.ca-cluster",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/dashboard.gardener.cloud/v1alpha1/namespaces/garden-foo/terminals/term-shoot-00003",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "metadata": {
+        "annotations": {
+          "dashboard.gardener.cloud/operation": "keepalive",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api terminals shoot should reuse a terminal session 2`] = `
+{
+  "hostCluster": {
+    "kubeApiServer": "api-foo--fooShoot.ingress.foo-east.infra1.example.org",
+    "namespace": "term-host-3",
+  },
+  "imageHelpText": "Foo Image Description",
+  "metadata": {
+    "identifier": "3",
+    "name": "term-shoot-00003",
+    "namespace": "garden-foo",
+  },
+}
+`;
+
+exports[`api terminals shortcuts should list the project terminal shortcuts 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/terminal.shortcuts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+]
+`;
+
+exports[`api terminals shortcuts should list the project terminal shortcuts 2`] = `
+[
+  {
+    "container": {
+      "args": [
+        "a",
+        "b",
+      ],
+      "command": [
+        "cmd",
+      ],
+      "image": "image:latest",
+    },
+    "description": "description",
+    "target": "cp",
+    "title": "title",
+  },
+]
+`;
+
+exports[`api terminals shortcuts should return empty shortcut list for invalid shortcuts 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/terminal.shortcuts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+]
+`;
+
+exports[`api terminals shortcuts should return empty shortcut list for invalid shortcuts 2`] = `[]`;
+
+exports[`api terminals shortcuts should return empty shortcut list for non existing secret 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "",
+          "resource": "secrets",
+          "verb": "get",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "get",
+      ":path": "/api/v1/namespaces/garden-foo/secrets/terminal.shortcuts",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.PwFHRt9M8dJf8YcCVlbyH4xu2QpL3jBI1oEC_Zdmtzk",
+    },
+  ],
+]
+`;
+
+exports[`api terminals shortcuts should return empty shortcut list for non existing secret 2`] = `[]`;

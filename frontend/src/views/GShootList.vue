@@ -120,20 +120,13 @@ SPDX-License-Identifier: Apache-2.0
             </v-chip>
             <br>
           </v-tooltip>
-          <v-tooltip
+          <v-btn
             v-if="canCreateShoots && projectScope"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-plus"
-                color="toolbar-title"
-                :to="{ name: 'NewShoot', params: { namespace } }"
-              />
-            </template>
-            <span>Create Cluster</span>
-          </v-tooltip>
+            v-tooltip:top="'Create Cluster'"
+            icon="mdi-plus"
+            color="toolbar-title"
+            :to="{ name: 'NewShoot', params: { namespace } }"
+          />
           <g-table-column-selection
             :headers="selectableHeaders"
             :filters="selectableFilters"
@@ -152,7 +145,6 @@ SPDX-License-Identifier: Apache-2.0
         :custom-key-sort="customKeySort"
         density="compact"
         hover
-        item-height="37"
         :item-key="getItemKey"
         must-sort
         fixed-header
@@ -168,8 +160,9 @@ SPDX-License-Identifier: Apache-2.0
         <template #no-data>
           No clusters to show
         </template>
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-shoot-list-row
+            :ref="itemRef"
             :model-value="item"
             :visible-headers="visibleHeaders"
           />
@@ -443,14 +436,6 @@ export default {
           hidden: false,
         },
         {
-          title: 'SEED',
-          key: 'seed',
-          sortable: isSortable(true),
-          align: 'start',
-          defaultSelected: false,
-          hidden: false,
-        },
-        {
           title: 'TECHNICAL ID',
           key: 'technicalId',
           sortable: isSortable(true),
@@ -515,6 +500,23 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: false,
+          stalePointerEvents: true,
+        },
+        {
+          title: 'SEED',
+          key: 'seed',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: false,
+          hidden: false,
+        },
+        {
+          title: 'SEED READINESS',
+          key: 'seedReadiness',
+          sortable: isSortable(true),
+          align: 'start',
+          defaultSelected: true,
+          hidden: !this.isAdmin,
           stalePointerEvents: true,
         },
         {

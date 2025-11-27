@@ -86,24 +86,21 @@ SPDX-License-Identifier: Apache-2.0
         >
           {{ cancelButtonText }}
         </v-btn>
-        <v-tooltip
-          location="top"
-          :disabled="!notConfirmed"
+        <div
+          v-tooltip:top="{
+            text: 'You need to confirm your changes by typing this cluster\'s name',
+            disabled: !notConfirmed
+          }"
         >
-          <template #activator="{ props }">
-            <div v-bind="props">
-              <v-btn
-                variant="text"
-                class="text-toolbar-background"
-                :disabled="notConfirmed || !valid"
-                @click="resolveAction(true)"
-              >
-                {{ confirmButtonText }}
-              </v-btn>
-            </div>
-          </template>
-          You need to confirm your changes by typing this cluster's name
-        </v-tooltip>
+          <v-btn
+            variant="text"
+            class="text-toolbar-background"
+            :disabled="notConfirmed || !valid"
+            @click="resolveAction(true)"
+          >
+            {{ confirmButtonText }}
+          </v-btn>
+        </div>
       </v-card-actions>
     </v-card>
   </v-dialog>
