@@ -259,6 +259,7 @@ export const useConfigStore = defineStore('config', () => {
       'hcloud',
       'onmetal',
       'ironcore',
+      'stackit',
       'local',
     ]
   })
