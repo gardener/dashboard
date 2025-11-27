@@ -7,12 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="ml-3">
     <div
-      v-if="configStore.showAutoUpdate"
+      v-if="configStore.hideAutoUpdate"
       class="text-subtitle-1 pt-4"
     >
       {{ title }}
     </div>
-    <template v-if="!workerless && configStore.showAutoUpdate">
+    <template v-if="!workerless && configStore.hideAutoUpdate">
       <div
         v-if="!readonly || osUpdates"
         class="d-flex mt-4"
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </template>
     <div
-      v-if="(!readonly || k8sUpdates) && configStore.showAutoUpdate"
+      v-if="(!readonly || k8sUpdates) && configStore.hideAutoUpdate"
       class="d-flex mt-4"
     >
       <div class="d-flex align-center justify-center action-select">
