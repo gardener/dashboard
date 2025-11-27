@@ -37,6 +37,7 @@ data:
       #   - 'hcloud'
       #   - 'onmetal'
       #   - 'ironcore'
+      #   - 'stackit'
       #   - 'local'
       # purposes:
       #   - 'evaluation'
