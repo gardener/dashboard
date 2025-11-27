@@ -182,32 +182,32 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.knownConditions
   })
 
-  const showWorkerlessOption = computed(() => {
-    return state.value?.show?.workerlessOption ?? true
+  const hideWorkerlessOption = computed(() => {
+    return state.value?.hide?.workerlessOption ?? true
   })
 
-  const showAutoUpdate = computed(() => {
-    return state.value?.show?.autoUpdate ?? true
+  const hideAutoUpdate = computed(() => {
+    return state.value?.hide?.autoUpdate ?? true
   })
 
-  const showInfrastructure = computed(() => {
-    return state.value?.show?.infrastructure ?? true
+  const hideInfrastructure = computed(() => {
+    return state.value?.hide?.infrastructure ?? true
   })
 
-  const showControlPlaneHighAvailability = computed(() => {
-    return state.value?.show?.controlPlaneHighAvailability ?? true
+  const hideControlPlaneHighAvailability = computed(() => {
+    return state.value?.hide?.controlPlaneHighAvailability ?? true
   })
 
-  const showDNSConfiguration = computed(() => {
-    return state.value?.show?.DNSConfiguration ?? true
+  const hideDNSConfiguration = computed(() => {
+    return state.value?.hide?.DNSConfiguration ?? true
   })
 
-  const showAddons = computed(() => {
-    return state.value?.show?.addons ?? true
+  const hideAddons = computed(() => {
+    return state.value?.hide?.addons ?? true
   })
 
-  const showHibernation = computed(() => {
-    return state.value?.show?.hibernation ?? true
+  const hideHibernation = computed(() => {
+    return state.value?.hide?.hibernation ?? true
   })
 
   const allKnownConditions = computed(() => {
@@ -441,13 +441,13 @@ export const useConfigStore = defineStore('config', () => {
     vendorHints,
     helpMenuItems,
     externalTools,
-    showAddons,
-    showAutoUpdate,
-    showControlPlaneHighAvailability,
-    showDNSConfiguration,
-    showHibernation,
-    showInfrastructure,
-    showWorkerlessOption,
+    hideAddons,
+    hideAutoUpdate,
+    hideControlPlaneHighAvailability,
+    hideDNSConfiguration,
+    hideHibernation,
+    hideInfrastructure,
+    hideWorkerlessOption,
     defaultNodesCIDR,
     shootAdminKubeconfig,
     apiServerUrl,
