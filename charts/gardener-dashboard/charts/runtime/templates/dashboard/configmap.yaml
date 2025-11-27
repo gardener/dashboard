@@ -302,6 +302,8 @@ data:
         {{- if .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes}}
         autoUpdateKubernetes: {{ .Values.global.dashboard.frontendConfig.shootDefaults.autoUpdateKubernetes }}
         {{- end }}
+      {{- else }}
+      shootDefaults: {}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.shootAdminKubeconfig }}
       shootAdminKubeconfig:

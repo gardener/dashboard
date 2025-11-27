@@ -247,6 +247,7 @@ global:
       #   - 'hcloud'
       #   - 'onmetal'
       #   - 'ironcore'
+      #   - 'stackit'
       #   - 'local'
       # purposes:
       #   - 'evaluation'
