@@ -183,31 +183,31 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const hideWorkerlessOption = computed(() => {
-    return state.value?.hide?.workerlessOption ?? true
+    return state.value?.hide?.workerlessOption ?? false
   })
 
   const hideAutoUpdate = computed(() => {
-    return state.value?.hide?.autoUpdate ?? true
+    return state.value?.hide?.autoUpdate ?? false
   })
 
   const hideInfrastructure = computed(() => {
-    return state.value?.hide?.infrastructure ?? true
+    return state.value?.hide?.infrastructure ?? false
   })
 
   const hideControlPlaneHighAvailability = computed(() => {
-    return state.value?.hide?.controlPlaneHighAvailability ?? true
+    return state.value?.hide?.controlPlaneHighAvailability ?? false
   })
 
   const hideDNSConfiguration = computed(() => {
-    return state.value?.hide?.DNSConfiguration ?? true
+    return state.value?.hide?.DNSConfiguration ?? false
   })
 
   const hideAddons = computed(() => {
-    return state.value?.hide?.addons ?? true
+    return state.value?.hide?.addons ?? false
   })
 
   const hideHibernation = computed(() => {
-    return state.value?.hide?.hibernation ?? true
+    return state.value?.hide?.hibernation ?? false
   })
 
   const allKnownConditions = computed(() => {
