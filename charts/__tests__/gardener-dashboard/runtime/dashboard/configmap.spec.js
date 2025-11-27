@@ -804,11 +804,11 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-		shootDefaults: {
+                shootDefaults: {
                   controlPlaneHighAvailabilityHelp: {
                     text: '[foo](https://bar.baz)',
                   },
-		},
+                },
               },
             },
           },
