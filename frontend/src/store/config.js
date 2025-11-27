@@ -193,14 +193,6 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.resourceQuotaHelp
   })
 
-  const controlPlaneHighAvailabilityHelp = computed(() => {
-    return state.value?.controlPlaneHighAvailabilityHelp
-  })
-
-  const defaultHibernationSchedule = computed(() => {
-    return state.value?.defaultHibernationSchedule
-  })
-
   const themes = computed(() => {
     return state.value?.themes
   })
@@ -243,8 +235,93 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.externalTools ?? []
   })
 
+  const controlPlaneHighAvailabilityHelp = computed(() => {
+    return state.value?.shootDefaults.controlPlaneHighAvailabilityHelp ?? state.value?.controlPlaneHighAvailabilityHelp
+  })
+
+  const defaultHibernationSchedule = computed(() => {
+    return state.value?.shootDefaults.hibernationSchedule ?? state.value?.defaultHibernationSchedule
+  })
+
   const defaultNodesCIDR = computed(() => {
-    return state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+    return state.value?.shootDefaults.nodesCIDR ?? state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+  })
+
+  const defaultInfrastructures = computed(() => {
+    return state.value?.shootDefaults.infrastructures ?? [
+      'aws',
+      'azure',
+      'gcp',
+      'openstack',
+      'alicloud',
+      'metal',
+      'vsphere',
+      'hcloud',
+      'onmetal',
+      'ironcore',
+      'stackit',
+      'local',
+    ]
+  })
+
+  const defaultPurposes = computed(() => {
+    return state.value?.shootDefaults.purposes ?? ['evaluation', 'development', 'testing', 'production']
+  })
+
+  const defaultWorkerlessCluster = computed(() => {
+    return state.value?.shootDefaults.workerlessCluster ?? false
+  })
+
+  const defaultNetworkingType = computed(() => {
+    return state.value?.shootDefaults.networkingType
+  })
+
+  const defaultFloatingPool = computed(() => {
+    return state.value?.shootDefaults.floatingPool
+  })
+
+  const defaultLoadbalancerProvider = computed(() => {
+    return state.value?.shootDefaults.loadbalancerProvider
+  })
+
+  const defaultControlPlaneHighAvailability = computed(() => {
+    return state.value?.shootDefaults.controlPlaneHighAvailability ?? false
+  })
+
+  const defaultContainerRuntime = computed(() => {
+    return state.value?.shootDefaults.containerRuntime
+  })
+
+  const defaultAutoscalerMin = computed(() => {
+    return state.value?.shootDefaults.autoscalerMin ?? 1
+  })
+
+  const defaultAutoscalerMax = computed(() => {
+    return state.value?.shootDefaults.autoscalerMax ?? 2
+  })
+
+  const defaultMaxSurge = computed(() => {
+    return state.value?.shootDefaults.maxSurge ?? 1
+  })
+
+  const defaultZonesSelectAll = computed(() => {
+    return state.value?.shootDefaults.zonesSelectAll ?? false
+  })
+
+  const defaultMaintenanceHours = computed(() => {
+    return state.value?.shootDefaults.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+  })
+
+  const defaultMaintenanceWindowSizeMinutes = computed(() => {
+    return state.value?.shootDefaults.maintenanceWindowSizeMinutes ?? 60
+  })
+
+  const defaultAutoUpdateOS = computed(() => {
+    return state.value?.shootDefaults.autoUpdateOS ?? true
+  })
+
+  const defaultAutoUpdateKubernetes = computed(() => {
+    return state.value?.shootDefaults.autoUpdateKubernetes ?? true
   })
 
   const shootAdminKubeconfig = computed(() => {
@@ -413,7 +490,23 @@ export const useConfigStore = defineStore('config', () => {
     vendorHints,
     helpMenuItems,
     externalTools,
+    defaultAutoUpdateKubernetes,
+    defaultAutoUpdateOS,
+    defaultAutoscalerMax,
+    defaultAutoscalerMin,
+    defaultContainerRuntime,
+    defaultControlPlaneHighAvailability,
+    defaultFloatingPool,
+    defaultInfrastructures,
+    defaultLoadbalancerProvider,
+    defaultMaintenanceHours,
+    defaultMaintenanceWindowSizeMinutes,
+    defaultMaxSurge,
+    defaultNetworkingType,
     defaultNodesCIDR,
+    defaultPurposes,
+    defaultWorkerlessCluster,
+    defaultZonesSelectAll,
     shootAdminKubeconfig,
     apiServerUrl,
     clusterIdentity,
