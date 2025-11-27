@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       class="overflow-auto"
       fluid
     >
-      <v-card v-if="showInfrastructure">
+      <v-card v-if="hideInfrastructure">
         <g-toolbar title="Infrastructure" />
         <v-card-text class="py-1">
           <g-new-shoot-select-infrastructure />
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
-        v-if="showControlPlaneHighAvailability"
+        v-if="hideControlPlaneHighAvailability"
         class="mt-4"
       >
         <g-toolbar title="Control Plane High Availability" />
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
-        v-if="showDNSConfiguration"
+        v-if="hideDNSConfiguration"
         class="mt-4"
       >
         <g-toolbar title="DNS Configuration" />
@@ -73,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card
         v-show="!workerless"
-        v-if="showAddons"
+        v-if="hideAddons"
         class="mt-4"
       >
         <g-toolbar
@@ -95,7 +95,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-text>
       </v-card>
       <v-card
-        v-if="showHibernation"
+        v-if="hideHibernation"
         class="mt-4"
       >
         <g-toolbar title="Hibernation" />
@@ -241,11 +241,11 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'accessRestriction',
-      'showInfrastructure',
-      'showControlPlaneHighAvailability',
-      'showDNSConfiguration',
-      'showAddons',
-      'showHibernation',
+      'hideInfrastructure',
+      'hideControlPlaneHighAvailability',
+      'hideDNSConfiguration',
+      'hideAddons',
+      'hideHibernation',
     ]),
     ...mapState(useCloudProfileStore, [
       'sortedProviderTypeList',

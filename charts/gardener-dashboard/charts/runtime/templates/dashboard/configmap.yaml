@@ -38,28 +38,28 @@ data:
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
 
-    {{- if .Values.global.dashboard.show }}
-    show:
-      {{- if .Values.global.dashboard.show.DNSConfiguration }}
-      DNSConfiguration: {{ .Values.global.dashboard.show.DNSConfiguration }}
+    {{- if .Values.global.dashboard.hide }}
+    hide:
+      {{- if .Values.global.dashboard.hide.DNSConfiguration }}
+      DNSConfiguration: {{ .Values.global.dashboard.hide.DNSConfiguration }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.addons }}
-      addons: {{ .Values.global.dashboard.show.addons }}
+      {{- if .Values.global.dashboard.hide.addons }}
+      addons: {{ .Values.global.dashboard.hide.addons }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.autoUpdate }}
-      autoUpdate: {{ .Values.global.dashboard.show.autoUpdate }}
+      {{- if .Values.global.dashboard.hide.autoUpdate }}
+      autoUpdate: {{ .Values.global.dashboard.hide.autoUpdate }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.controlPlaneHighAvailability }}
-      controlPlaneHighAvailability: {{ .Values.global.dashboard.show.controlPlaneHighAvailability }}
+      {{- if .Values.global.dashboard.hide.controlPlaneHighAvailability }}
+      controlPlaneHighAvailability: {{ .Values.global.dashboard.hide.controlPlaneHighAvailability }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.hibernation }}
-      hibernation: {{ .Values.global.dashboard.show.hibernation }}
+      {{- if .Values.global.dashboard.hide.hibernation }}
+      hibernation: {{ .Values.global.dashboard.hide.hibernation }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.infrastructure }}
-      infrastructure: {{ .Values.global.dashboard.show.infrastructure }}
+      {{- if .Values.global.dashboard.hide.infrastructure }}
+      infrastructure: {{ .Values.global.dashboard.hide.infrastructure }}
       {{- end }}
-      {{- if .Values.global.dashboard.show.workerlessOption }}
-      workerlessOption: {{ .Values.global.dashboard.show.workerlessOption }}
+      {{- if .Values.global.dashboard.hide.workerlessOption }}
+      workerlessOption: {{ .Values.global.dashboard.hide.workerlessOption }}
       {{- end }}
     {{- end }}
     {{- if .Values.global.dashboard.gitHub }}
