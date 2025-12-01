@@ -60,7 +60,7 @@
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
-    "express": "^5.0.0",
+    "express": "^5.2.0",
     "jest": "^30.0.0",
     "neostandard": "^0.12.0",
     "rimraf": "^6.0.1",
