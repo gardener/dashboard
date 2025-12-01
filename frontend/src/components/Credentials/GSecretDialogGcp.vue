@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${name} Secret`"
-    :update-title="`Update ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -192,15 +190,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.providerType === 'gcp') {
-        return 'Google'
-      }
-      if (this.providerType === 'google-clouddns') {
-        return 'Google Cloud DNS'
-      }
-      return undefined
     },
   },
   watch: {

@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
       >
         <g-vendor-icon
-          :icon="providerType"
+          :name="providerType"
         />
         <span
           v-if="description"
@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0
               :icon="providerType"
               class="mr-2"
             />
-            {{ providerType }}
+            {{ vendorName }}
           </v-list-item-title>
         </v-list-item>
         <v-list-item v-if="shootCloudProfileRef">
@@ -58,6 +58,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
+
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
@@ -109,7 +113,7 @@ export default {
     description () {
       const description = []
       if (this.extended && this.providerType) {
-        description.push(this.providerType)
+        description.push(this.vendorName)
       }
       if (this.region) {
         description.push(this.region)
@@ -144,6 +148,12 @@ export default {
 
       return this.shootCloudProfileRef.name
     },
+    vendorName () {
+      return this.vendorDisplayName(this.providerType)
+    },
+  },
+  methods: {
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
   },
 }
 </script>

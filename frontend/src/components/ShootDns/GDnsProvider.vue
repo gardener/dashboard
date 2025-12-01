@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         class="cursor-pointer my-0 ml-0"
       >
         <g-vendor-icon
-          :icon="type"
+          :name="type"
           :size="14"
         />
         <span class="px-1">{{ secretName }}</span>

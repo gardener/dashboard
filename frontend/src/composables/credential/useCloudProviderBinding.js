@@ -42,7 +42,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   } = options
   const { shootList } = storeToRefs(shootStore)
   const { infrastructureBindingList } = storeToRefs(credentialStore)
-  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
 
   // Resource
   const resourceName = computed(() => {
@@ -76,7 +76,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     return isCredentialsBinding.value && binding.value?.credentialsRef?.kind === 'WorkloadIdentity'
   })
   const isInfrastructureBinding = computed(() => {
-    return _isInfrastructureBinding({ binding: binding.value, infraProviderTypes: sortedProviderTypeList.value })
+    return _isInfrastructureBinding({ binding: binding.value, infraProviderTypes: sortedInfraProviderTypeList.value })
   })
   const isMarkedForDeletion = computed(() => {
     return Boolean(binding.value?.metadata.deletionTimestamp)

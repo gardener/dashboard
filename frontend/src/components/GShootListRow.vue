@@ -435,7 +435,7 @@ const hasShootWorkerGroupWarning = computed(() => {
   return some(shootWorkerGroups.value, workerGroup => {
     const { name, version } = get(workerGroup, ['machine', 'image'], {})
     const machineImage = find(machineImages, { name, version })
-    return machineImage?.isDeprecated
+    return !machineImage || machineImage?.isDeprecated
   })
 })
 
