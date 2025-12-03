@@ -235,20 +235,24 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.externalTools ?? []
   })
 
+  const shootDefaults = computed(() => {
+    return state.value?.shootDefaults ?? {}
+  })
+
   const controlPlaneHighAvailabilityHelp = computed(() => {
-    return state.value?.shootDefaults.controlPlaneHighAvailabilityHelp ?? state.value?.controlPlaneHighAvailabilityHelp
+    return shootDefaults.value.controlPlaneHighAvailabilityHelp ?? state.value?.controlPlaneHighAvailabilityHelp
   })
 
   const defaultHibernationSchedule = computed(() => {
-    return state.value?.shootDefaults.hibernationSchedule ?? state.value?.defaultHibernationSchedule
+    return shootDefaults.value.hibernationSchedule ?? state.value?.defaultHibernationSchedule
   })
 
   const defaultNodesCIDR = computed(() => {
-    return state.value?.shootDefaults.nodesCIDR ?? state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+    return shootDefaults.value.nodesCIDR ?? state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
   })
 
   const defaultInfrastructures = computed(() => {
-    return state.value?.shootDefaults.infrastructures ?? [
+    return shootDefaults.value.infrastructures ?? [
       'aws',
       'azure',
       'gcp',
@@ -265,63 +269,63 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const defaultPurposes = computed(() => {
-    return state.value?.shootDefaults.purposes ?? ['evaluation', 'development', 'testing', 'production']
+    return shootDefaults.value.purposes ?? ['evaluation', 'development', 'testing', 'production']
   })
 
   const defaultWorkerlessCluster = computed(() => {
-    return state.value?.shootDefaults.workerlessCluster ?? false
+    return shootDefaults.value.workerlessCluster ?? false
   })
 
   const defaultNetworkingType = computed(() => {
-    return state.value?.shootDefaults.networkingType
+    return shootDefaults.value.networkingType
   })
 
   const defaultFloatingPool = computed(() => {
-    return state.value?.shootDefaults.floatingPool
+    return shootDefaults.value.floatingPool
   })
 
   const defaultLoadbalancerProvider = computed(() => {
-    return state.value?.shootDefaults.loadbalancerProvider
+    return shootDefaults.value.loadbalancerProvider
   })
 
   const defaultControlPlaneHighAvailability = computed(() => {
-    return state.value?.shootDefaults.controlPlaneHighAvailability ?? false
+    return shootDefaults.value.controlPlaneHighAvailability ?? false
   })
 
   const defaultContainerRuntime = computed(() => {
-    return state.value?.shootDefaults.containerRuntime
+    return shootDefaults.value.containerRuntime
   })
 
   const defaultAutoscalerMin = computed(() => {
-    return state.value?.shootDefaults.autoscalerMin ?? 1
+    return shootDefaults.value.autoscalerMin ?? 1
   })
 
   const defaultAutoscalerMax = computed(() => {
-    return state.value?.shootDefaults.autoscalerMax ?? 2
+    return shootDefaults.value.autoscalerMax ?? 2
   })
 
   const defaultMaxSurge = computed(() => {
-    return state.value?.shootDefaults.maxSurge ?? 1
+    return shootDefaults.value.maxSurge ?? 1
   })
 
   const defaultZonesSelectAll = computed(() => {
-    return state.value?.shootDefaults.zonesSelectAll ?? false
+    return shootDefaults.value.zonesSelectAll ?? false
   })
 
   const defaultMaintenanceHours = computed(() => {
-    return state.value?.shootDefaults.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+    return shootDefaults.value.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
   })
 
   const defaultMaintenanceWindowSizeMinutes = computed(() => {
-    return state.value?.shootDefaults.maintenanceWindowSizeMinutes ?? 60
+    return shootDefaults.value.maintenanceWindowSizeMinutes ?? 60
   })
 
   const defaultAutoUpdateOS = computed(() => {
-    return state.value?.shootDefaults.autoUpdateOS ?? true
+    return shootDefaults.value.autoUpdateOS ?? true
   })
 
   const defaultAutoUpdateKubernetes = computed(() => {
-    return state.value?.shootDefaults.autoUpdateKubernetes ?? true
+    return shootDefaults.value.autoUpdateKubernetes ?? true
   })
 
   const shootAdminKubeconfig = computed(() => {
