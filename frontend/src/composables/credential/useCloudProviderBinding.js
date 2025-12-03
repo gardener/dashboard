@@ -15,6 +15,8 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 
+import { decodeBase64 } from '@/utils'
+
 import {
   isSharedCredential as _isSharedCredential,
   isInfrastructureBinding as _isInfrastructureBinding,
@@ -185,6 +187,14 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     )
   })
 
+  const openStackDomainName = computed(() => {
+    if (binding.value?.provider?.type !== 'openstack' || !hasOwnSecret.value) {
+      return undefined
+    }
+    const domainName = get(credential.value, ['data', 'domainName'])
+    return domainName ? decodeBase64(domainName) : undefined
+  })
+
   return {
     // Classification
     isSharedCredential,
@@ -214,5 +224,8 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     // Quotas & lifecycle
     quotas,
     selfTerminationDays,
+
+    // Other
+    openStackDomainName,
   }
 }

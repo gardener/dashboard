@@ -153,7 +153,10 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
   })
 
-  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
+  const {
+    selfTerminationDays,
+    openStackDomainName,
+  } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
@@ -198,7 +201,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({
       cloudProfileRef: cloudProfileRef.value,
       region: region.value,
-      secretDomain: get(infrastructureBinding.value, ['data', 'domainName']),
+      secretDomain: openStackDomainName.value,
     })
   })
 
