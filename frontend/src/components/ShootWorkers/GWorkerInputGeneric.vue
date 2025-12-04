@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-volume-size-input
           v-model="volumeSize"
           v-model:has-custom-storage-size="hasCustomStorageSize"
-          :min="useMinimumVolumeSize"
+          :min="minVolumeSizeGi"
           :default-storage-size="defaultStorageSize"
           :has-volume-types="volumeInCloudProfile"
           color="primary"
@@ -232,7 +232,7 @@ export default {
     const { machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
-    const { useMinimumVolumeSize: useMinimumVolumeSizeByMachineTypeAndVolumeType, volumeTypes } = useVolumeTypes(cloudProfile)
+    const { useMinimumVolumeSize, volumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
       props.worker.machine.type = get(defaultMachineType, ['name'])
@@ -263,7 +263,7 @@ export default {
     const selectedMachineType = computed(() => find(machineTypes, ['name', props.worker.machine.type]))
     const selectedVolumeType = computed(() => find(volumeTypes, ['name', props.worker.volume?.type]))
 
-    const minimumVolumeSize = useMinimumVolumeSizeByMachineTypeAndVolumeType(
+    const minimumVolumeSize = useMinimumVolumeSize(
       selectedMachineType,
       selectedVolumeType,
     )
@@ -290,7 +290,6 @@ export default {
       selectedVolumeType,
       minimumVolumeSize,
       useFilteredMachineTypes,
-      useMinimumVolumeSizeByMachineTypeAndVolumeType,
     }
   },
   data () {
@@ -345,14 +344,14 @@ export default {
     })
 
     const volumeSizeRules = {
-      minVolumeSize: withMessage(() => `Minimum size is ${this.useMinimumVolumeSize}`, value => {
+      minVolumeSize: withMessage(() => `Minimum size is ${this.minVolumeSizeGi}`, value => {
         if (!this.hasVolumeSize) {
           return true
         }
         if (!value) {
           return false
         }
-        return this.useMinimumVolumeSize <= convertToGi(value)
+        return this.minVolumeSizeGi <= convertToGi(value)
       }),
     }
     rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
@@ -375,17 +374,17 @@ export default {
     filteredMachineImages () {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
-    useMinimumVolumeSize () {
-      const useMinimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
+    minVolumeSizeGi () {
+      const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
       let defaultSize = get(this.selectedMachineType, ['storage.size'])
       if (defaultSize) {
         defaultSize = convertToGi(defaultSize)
       }
-      if (defaultSize > 0 && defaultSize < useMinimumVolumeSizeInGi) {
+      if (defaultSize > 0 && defaultSize < minimumVolumeSizeInGi) {
         return defaultSize
       }
 
-      return useMinimumVolumeSizeInGi
+      return minimumVolumeSizeInGi
     },
     innerMin: {
       get () {

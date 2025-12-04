@@ -13,6 +13,7 @@ import isObject from 'lodash/isObject'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import map from 'lodash/map'
 import isEqual from 'lodash/isEqual'
 import includes from 'lodash/includes'
 import lowerCase from 'lodash/lowerCase'
@@ -176,4 +177,16 @@ export function firstItemMatchingVersionClassification (items) {
   }
 
   return head(items)
+}
+
+export function getZones (cloudProfile, region) {
+  if (!cloudProfile) {
+    return []
+  }
+
+  const regionObj = find(
+    get(cloudProfile, ['spec', 'regions'], []),
+    { name: region },
+  )
+  return map(get(regionObj, ['zones'], []), 'name')
 }

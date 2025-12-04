@@ -9,6 +9,8 @@ import {
   isRef,
 } from 'vue'
 
+import { getZones } from '@/composables/helper.js'
+
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -31,7 +33,7 @@ import uniq from 'lodash/uniq'
  * @param {Function} useZones - Function to get zones for a region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useMachineTypes (cloudProfile, useZones) {
+export function useMachineTypes (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
@@ -79,10 +81,10 @@ export function useMachineTypes (cloudProfile, useZones) {
       throw new Error('region and architecture must be refs!')
     }
 
-    const zones = useZones(region)
+    const zones = getZones(cloudProfile.value, region.value)
 
     return computed(() => {
-      let types = filterMachineTypes(region.value, zones.value)
+      let types = filterMachineTypes(region.value, zones)
       types = map(types, item => {
         const machineType = { ...item }
         machineType.architecture ??= 'amd64' // default if not maintained
@@ -110,10 +112,10 @@ export function useMachineTypes (cloudProfile, useZones) {
       throw new Error('region must be a ref!')
     }
 
-    const zones = useZones(region)
+    const zones = getZones(cloudProfile.value, region.value)
 
     return computed(() => {
-      const types = filterMachineTypes(region.value, zones.value)
+      const types = filterMachineTypes(region.value, zones)
 
       const architectures = uniq(map(types, 'architecture'))
       return architectures.sort()

@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
           icon="mdi-menu-up"
           size="small"
         />
-        {{ k8sVersion }}
+        {{ shootK8sVersion }}
       </v-chip>
     </template>
     <g-list style="min-width: 300px">
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <g-list-item-content label="Version">
-          {{ k8sVersion }}
+          {{ shootK8sVersion }}
         </g-list-item-content>
       </g-list-item>
       <v-divider inset />
@@ -127,7 +127,7 @@ export default {
   setup () {
     const {
       shootMetadata,
-      k8sVersion,
+      shootK8sVersion,
       shootSupportedPatchAvailable,
       shootSupportedUpgradeAvailable,
       shootAvailableK8sUpdates,
@@ -136,7 +136,7 @@ export default {
 
     return {
       shootMetadata,
-      k8sVersion,
+      shootK8sVersion,
       shootSupportedPatchAvailable,
       shootSupportedUpgradeAvailable,
       shootAvailableK8sUpdates,

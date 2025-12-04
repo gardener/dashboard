@@ -354,7 +354,6 @@ export default {
       credential,
       isSharedBinding,
       availableFloatingPools,
-      openStackDomainName,
     }
   },
   computed: {

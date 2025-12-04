@@ -10,6 +10,7 @@ import {
 } from 'vue'
 
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes'
+import { getZones } from '@/composables/helper.js'
 
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -24,12 +25,12 @@ import toPairs from 'lodash/toPairs'
  * @param {Function} useZones - Function to get zones by cloud profile and region
  * @throws {Error} If cloudProfile is not a ref
  */
-export function useMetalConstraints (cloudProfile, useZones) {
+export function useMetalConstraints (cloudProfile) {
   if (!isRef(cloudProfile)) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
+  const { useFilteredMachineTypes } = useMachineTypes(cloudProfile)
 
   /**
    * Returns partition IDs for a given region.
@@ -45,12 +46,10 @@ export function useMetalConstraints (cloudProfile, useZones) {
     }
 
     if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-      return undefinedComputed
+      return computed(() => undefined)
     }
-    return useZones(region)
+    return computed(() => getZones(cloudProfile.value, region.value))
   }
-
-  const undefinedComputed = computed(() => undefined)
 
   /**
    * Returns firewall sizes for a given region.
@@ -66,10 +65,10 @@ export function useMetalConstraints (cloudProfile, useZones) {
     }
 
     if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-      return undefinedComputed
+      return computed(() => undefined)
     }
 
-    return useFilteredMachineTypes(region, undefinedComputed)
+    return useFilteredMachineTypes(region, computed(() => undefined))
   }
 
   const firewallImages = computed(() => {

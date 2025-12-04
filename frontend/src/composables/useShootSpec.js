@@ -72,14 +72,14 @@ export function useShootSpec (shootItem, options = {}) {
     return undefined
   })
 
-  const k8sVersion = computed(() => {
+  const shootK8sVersion = computed(() => {
     return get(shootSpec.value, ['kubernetes', 'version'])
   })
 
   const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
   const { useAvailableKubernetesUpdates, kubernetesVersions } = useKubernetesVersions(cloudProfile)
 
-  const shootAvailableK8sUpdates = useAvailableKubernetesUpdates(k8sVersion)
+  const shootAvailableK8sUpdates = useAvailableKubernetesUpdates(shootK8sVersion)
 
   const shootSupportedPatchAvailable = computed(() => {
     return !!find(shootAvailableK8sUpdates.value?.patch, 'isSupported')
@@ -90,7 +90,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const shootKubernetesVersionObject = computed(() => {
-    return find(kubernetesVersions.value, ['version', k8sVersion.value]) ?? {}
+    return find(kubernetesVersions.value, ['version', shootK8sVersion.value]) ?? {}
   })
 
   const shootCloudProfileRef = computed(() => {
@@ -183,7 +183,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootSecretBindingName,
     shootCredentialsBindingName,
     shootCloudProviderBinding,
-    k8sVersion,
+    shootK8sVersion,
     shootAvailableK8sUpdates,
     shootKubernetesVersionObject,
     shootSupportedPatchAvailable,

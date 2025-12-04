@@ -11,9 +11,10 @@ import {
 
 import { useSeedStore } from '@/store/seed'
 
+import { getZones } from '@/composables/helper'
+
 import map from 'lodash/map'
 import filter from 'lodash/filter'
-import find from 'lodash/find'
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import difference from 'lodash/difference'
@@ -39,7 +40,7 @@ export function useRegions (cloudProfile) {
 
     if (providerType === 'azure') {
       // Azure regions may not be zoned, need to filter these out for the dashboard
-      const zones = getZones(region)
+      const zones = getZones(cloudProfile.value, region)
       return !!zones.length
     }
 
@@ -57,20 +58,8 @@ export function useRegions (cloudProfile) {
       throw new Error('region must be a ref!')
     }
     return computed(() => {
-      return getZones(region.value)
+      return getZones(cloudProfile.value, region.value)
     })
-  }
-
-  function getZones (region) {
-    if (!cloudProfile.value) {
-      return []
-    }
-
-    const regionObj = find(
-      get(cloudProfile.value, ['spec', 'regions'], []),
-      { name: region },
-    )
-    return map(get(regionObj, ['zones'], []), 'name')
   }
   /**
    * Get regions that have seed availability
