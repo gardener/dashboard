@@ -153,7 +153,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
 
   const knownProviderTypesList = ref(configStore.defaultInfrastructures)
 
-
   const providerTypesList = computed(() => {
     return uniq(map(list.value, 'spec.type'))
   })
