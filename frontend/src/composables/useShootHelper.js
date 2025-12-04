@@ -182,7 +182,10 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 
-  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
+  const {
+    selfTerminationDays,
+    openStackDomainName,
+  } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
@@ -192,8 +195,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
       ? ['evaluation']
       : ['evaluation', 'development', 'testing', 'production']
   })
-
-  const secretDomain = computed(() => get(infrastructureBinding.value, ['data', 'domainName']))
 
   const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
 
@@ -208,7 +209,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return map(sizes.value, 'name')
   })
 
-  const allFloatingPoolNames = useFloatingPoolNames(region, secretDomain)
+  const allFloatingPoolNames = useFloatingPoolNames(region, openStackDomainName)
 
   const allMachineTypes = allMachineTypesFromComposable
 
