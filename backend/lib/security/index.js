@@ -228,6 +228,7 @@ async function authorizationUrl (req, res) {
 }
 
 async function authorizeToken (req, res) {
+  csrfProtection(req, res)
   const idToken = chain(req.body)
     .get(['token'])
     .trim()
