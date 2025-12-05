@@ -321,6 +321,7 @@ export default {
     const {
       credential,
       isSharedCredential,
+      openStackDomainName,
     } = useCloudProviderBinding(shootCloudProviderBinding)
 
     return {
@@ -346,6 +347,7 @@ export default {
       getResourceRefName,
       credential,
       isSharedCredential,
+      openStackDomainName,
     }
   },
   computed: {
@@ -375,6 +377,7 @@ export default {
       const availableFloatingPools = this.floatingPoolsByCloudProfileRefAndRegionAndDomain({
         cloudProfileRef: this.shootCloudProfileRef,
         region: this.shootRegion,
+        secretDomain: this.openStackDomainName,
       })
       const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(availableFloatingPools, 'name'))
 
