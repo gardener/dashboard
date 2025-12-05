@@ -14,6 +14,8 @@ import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useCredentialStore } from '@/store/credential'
 
+import { decodeBase64 } from '@/utils'
+
 import {
   isSharedBinding as _isSharedBinding,
   isInfrastructureBinding as _isInfrastructureBinding,
@@ -199,6 +201,14 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     )
   })
 
+  const openStackDomainName = computed(() => {
+    if (providerType.value !== 'openstack' || !hasOwnSecret.value) {
+      return undefined
+    }
+    const domainName = get(credential.value, ['data', 'domainName'])
+    return domainName ? decodeBase64(domainName) : undefined
+  })
+
   return {
     // Resource
     resourceName,
@@ -232,5 +242,8 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     // Quotas & lifecycle
     quotas,
     selfTerminationDays,
+
+    // Other
+    openStackDomainName,
   }
 }
