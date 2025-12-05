@@ -10,6 +10,8 @@ import {
 } from 'pinia'
 import { shallowRef } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
 
 import find from 'lodash/find'
@@ -18,9 +20,10 @@ describe('composables', () => {
   describe('useShootAccessRestrictions', () => {
     let accessRestrictionDefinition
     let shootResource
+    let configStore
 
     const cloudProfileStore = {
-      accessRestrictionDefinitionsByCloudProfileRefAndRegion: vi.fn(),
+      cloudProfileByRef: vi.fn(),
     }
 
     beforeAll(() => {
@@ -28,6 +31,8 @@ describe('composables', () => {
     })
 
     beforeEach(() => {
+      configStore = useConfigStore()
+
       accessRestrictionDefinition = {
         key: 'foo',
         input: {
@@ -60,6 +65,12 @@ describe('composables', () => {
           },
         ],
       }
+
+      configStore.setConfiguration({
+        accessRestriction: {
+          items: [accessRestrictionDefinition],
+        },
+      })
       shootResource = shallowRef({
         metadata: {
         },
@@ -82,9 +93,23 @@ describe('composables', () => {
         },
       })
 
-      cloudProfileStore.accessRestrictionDefinitionsByCloudProfileRefAndRegion.mockReturnValue([
-        accessRestrictionDefinition,
-      ])
+      cloudProfileStore.cloudProfileByRef.mockReturnValue({
+        metadata: {
+          name: 'cloud-profile-name',
+        },
+        spec: {
+          regions: [
+            {
+              name: 'region',
+              accessRestrictions: [
+                {
+                  name: 'foo',
+                },
+              ],
+            },
+          ],
+        },
+      })
     })
 
     it('should map definition and shoot resources to access restriction data model', () => {
