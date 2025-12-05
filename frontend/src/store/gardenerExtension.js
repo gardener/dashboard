@@ -13,6 +13,8 @@ import {
   computed,
 } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import { useApi } from '@/composables/useApi'
 
 import map from 'lodash/map'
@@ -25,6 +27,7 @@ import sortBy from 'lodash/sortBy'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
+  const configStore = useConfigStore()
 
   const list = ref(null)
 
@@ -86,7 +89,14 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
   })
 
   const networkingTypeList = computed(() => {
-    return sortBy(networkingTypes.value)
+    const types = sortBy(networkingTypes.value)
+
+    if (types.includes(configStore.defaultNetworkingType)) {
+      const filtered = types.filter(type => type !== configStore.defaultNetworkingType)
+      return [configStore.defaultNetworkingType, ...filtered]
+    }
+
+    return types
   })
 
   return {
