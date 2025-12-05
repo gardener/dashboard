@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-chip>
       </template>
       <g-shoot-message-details
-        :status-title="chipStatus"
+        :status-title="chipStatusText"
         :last-message="nonErrorMessage"
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
@@ -143,22 +143,15 @@ export default {
       return this.condition.shortName || ''
     },
     chipStatus () {
-      if (this.isError) {
-        return 'Error'
-      }
-      if (this.isUnknown) {
-        return 'Unknown'
-      }
-      if (this.isProgressing) {
-        return 'Progressing'
-      }
-
-      return 'Healthy'
+      return get(this.condition.statusMappings, this.condition.status, this.condition.status)
+    },
+    chipStatusText () {
+      return get(this.condition.statusTextMappings, this.chipStatus, this.chipStatus)
     },
     chipTooltip () {
       return {
         title: this.condition.name,
-        status: this.chipStatus,
+        status: this.chipStatusText,
         description: this.condition.description,
         userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true }),
       }
@@ -173,29 +166,26 @@ export default {
       if (this.isUnknown) {
         return 'mdi-help-circle-outline'
       }
-      if (this.isProgressing && this.isAdmin) {
+      if (this.isDegraded && this.isAdmin) {
         return 'mdi-progress-alert'
+      }
+      if (this.isProgressing) {
+        return 'mdi-progress-clock'
       }
 
       return ''
     },
     isError () {
-      if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
-        return true
-      }
-      return false
+      return this.chipStatus === 'False' || !isEmpty(this.condition.codes)
     },
     isUnknown () {
-      if (this.condition.status === 'Unknown') {
-        return true
-      }
-      return false
+      return this.chipStatus === 'Unknown'
+    },
+    isDegraded () {
+      return this.chipStatus === 'Degraded'
     },
     isProgressing () {
-      if (this.condition.status === 'Progressing') {
-        return true
-      }
-      return false
+      return this.chipStatus === 'Progressing'
     },
     isUserError () {
       return isUserError(this.condition.codes)
@@ -227,7 +217,7 @@ export default {
       if (this.isError) {
         return 'error'
       }
-      if (this.isProgressing && this.isAdmin) {
+      if (this.isDegraded && this.isAdmin) {
         return 'info'
       }
       return 'primary'
