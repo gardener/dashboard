@@ -15,7 +15,7 @@ import { annotations } from '@/utils/annotations.js'
 
 import { useObjectMetadata } from '../useObjectMetadata.js'
 
-export const useProjectMetadata = (projectItem, options = {}) => {
+export const useProjectMetadata = projectItem => {
   const {
     name: projectName,
     creationTimestamp: projectCreationTimestamp,
