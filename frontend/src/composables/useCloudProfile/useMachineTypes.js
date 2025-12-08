@@ -72,13 +72,16 @@ export function useMachineTypes (cloudProfile) {
    * Adds default 'amd64' architecture if not specified in the machine type.
    *
    * @param {Ref<string>} region - A Vue ref containing the region name
-   * @param {Ref<string>} architecture - A Vue ref containing the architecture (e.g., 'amd64', 'arm64')
+   * @param {Ref<string>} [architecture] - Optional Vue ref containing the architecture (e.g., 'amd64', 'arm64')
    * @returns {ComputedRef<Array>} Computed ref with filtered and decorated machine types
-   * @throws {Error} If region or architecture are not refs
+   * @throws {Error} If region is not a ref or if architecture is provided but not a ref
    */
   function useFilteredMachineTypes (region, architecture) {
-    if (!isRef(region) || !isRef(architecture)) {
-      throw new Error('region and architecture must be refs!')
+    if (!isRef(region)) {
+      throw new Error('region must be a ref!')
+    }
+    if (architecture && !isRef(architecture)) {
+      throw new Error('architecture must be a ref if provided!')
     }
 
     return computed(() => {
@@ -90,7 +93,7 @@ export function useMachineTypes (cloudProfile) {
         return machineType
       })
 
-      if (architecture.value) {
+      if (architecture?.value) {
         return filter(types, { architecture: architecture.value })
       }
 

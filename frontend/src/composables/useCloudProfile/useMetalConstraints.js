@@ -32,6 +32,8 @@ export function useMetalConstraints (cloudProfile) {
 
   const { useFilteredMachineTypes } = useMachineTypes(cloudProfile)
 
+  const isMetal = computed(() => get(cloudProfile.value, ['spec', 'type']) === 'metal')
+
   /**
    * Returns partition IDs for a given region.
    * For Metal infrastructure, partition IDs equal zones.
@@ -46,7 +48,7 @@ export function useMetalConstraints (cloudProfile) {
     }
 
     return computed(() => {
-      if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
+      if (!isMetal.value) {
         return undefined
       }
       return getZones(cloudProfile.value, region.value)
@@ -65,12 +67,14 @@ export function useMetalConstraints (cloudProfile) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
+    const filteredMachineTypes = useFilteredMachineTypes(region)
 
-    if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-      return computed(() => undefined)
-    }
-
-    return useFilteredMachineTypes(region, computed(() => undefined))
+    return computed(() => {
+      if (!isMetal.value) {
+        return undefined
+      }
+      return filteredMachineTypes.value
+    })
   }
 
   const firewallImages = computed(() => {
