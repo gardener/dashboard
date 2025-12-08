@@ -58,10 +58,8 @@ export function useVolumeTypes (cloudProfile) {
         return items
       }
 
-      const regionObject = find(
-        get(cloudProfile.value, ['spec', 'regions'], []),
-        { name: region.value },
-      )
+      const regions = get(cloudProfile.value, ['spec', 'regions'], [])
+      const regionObject = find(regions, { name: region.value })
       let regionZones = get(regionObject, ['zones'], [])
       regionZones = filter(regionZones, regionZone => includes(zones.value, regionZone.name))
       const unavailableVolumeTypes = map(regionZones, zone => zone.unavailableVolumeTypes)

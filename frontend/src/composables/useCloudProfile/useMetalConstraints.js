@@ -45,10 +45,12 @@ export function useMetalConstraints (cloudProfile) {
       throw new Error('region must be a ref!')
     }
 
-    if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
-      return computed(() => undefined)
-    }
-    return computed(() => getZones(cloudProfile.value, region.value))
+    return computed(() => {
+      if (get(cloudProfile.value, ['spec', 'type']) !== 'metal') {
+        return undefined
+      }
+      return getZones(cloudProfile.value, region.value)
+    })
   }
 
   /**

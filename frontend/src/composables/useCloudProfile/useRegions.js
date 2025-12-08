@@ -45,7 +45,8 @@ export function useRegions (cloudProfile) {
     }
 
     // Filter regions that are not defined in cloud profile
-    return some(get(cloudProfile.value, ['spec', 'regions'], []), ['name', region])
+    const regions = get(cloudProfile.value, ['spec', 'regions'], [])
+    return some(regions, ['name', region])
   }
 
   /**
@@ -104,7 +105,8 @@ export function useRegions (cloudProfile) {
         return []
       }
 
-      const regionsInCloudProfile = map(get(cloudProfile.value, ['spec', 'regions'], []), 'name')
+      const regions = get(cloudProfile.value, ['spec', 'regions'], [])
+      const regionsInCloudProfile = map(regions, 'name')
       const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, regionName => {
         return isValidRegion(regionName)
       })

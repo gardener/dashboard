@@ -117,19 +117,19 @@ export function useMachineImages (cloudProfile) {
    * Returns the default machine image for a given machine type based on architecture.
    * Selects the first matching version classification (typically latest supported version).
    *
-   * @param {Ref<object>} machineType - A Vue ref containing the machine type object with architecture
+   * @param {Ref<object>} architecture - A Vue ref containing the architecture
    * @returns {ComputedRef<object|undefined>} Computed ref with the default machine image or undefined
    * @throws {Error} If machineType is not a ref
    */
-  function useDefaultMachineImage (machineType) {
-    if (!isRef(machineType)) {
+  function useDefaultMachineImage (architecture) {
+    if (!isRef(architecture)) {
       throw new Error('machineType must be a ref!')
     }
 
     return computed(() => {
       const allMachineImages = machineImages.value
       const machineImagesForArchitecture = filter(allMachineImages, ({ architectures }) =>
-        includes(architectures, machineType.value?.architecture),
+        includes(architectures, architecture.value),
       )
       return firstItemMatchingVersionClassification(machineImagesForArchitecture)
     })

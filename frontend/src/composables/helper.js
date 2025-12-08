@@ -184,9 +184,9 @@ export function getZones (cloudProfile, region) {
     return []
   }
 
-  const regionObj = find(
-    get(cloudProfile, ['spec', 'regions'], []),
-    { name: region },
-  )
-  return map(get(regionObj, ['zones'], []), 'name')
+  const regions = get(cloudProfile, ['spec', 'regions'], [])
+  const regionObj = find(regions, { name: region })
+
+  const zones = get(regionObj, ['zones'], [])
+  return map(zones, 'name')
 }

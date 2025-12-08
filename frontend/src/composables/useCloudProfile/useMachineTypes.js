@@ -81,9 +81,8 @@ export function useMachineTypes (cloudProfile) {
       throw new Error('region and architecture must be refs!')
     }
 
-    const zones = getZones(cloudProfile.value, region.value)
-
     return computed(() => {
+      const zones = getZones(cloudProfile.value, region.value)
       let types = filterMachineTypes(region.value, zones)
       types = map(types, item => {
         const machineType = { ...item }
@@ -112,9 +111,8 @@ export function useMachineTypes (cloudProfile) {
       throw new Error('region must be a ref!')
     }
 
-    const zones = getZones(cloudProfile.value, region.value)
-
     return computed(() => {
+      const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
 
       const architectures = uniq(map(types, 'architecture'))

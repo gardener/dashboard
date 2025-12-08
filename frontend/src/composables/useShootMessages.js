@@ -63,14 +63,13 @@ export function useShootMessages (cloudProfile) {
    * @returns {ComputedRef<Array>} Computed ref of expiring worker groups
    */
   function useExpiringWorkerGroups (shootWorkerGroups, imageAutoPatch) {
+    if (!isRef(shootWorkerGroups)) {
+      throw new Error('shootWorkerGroups must be a ref!')
+    }
+    if (!isRef(imageAutoPatch)) {
+      throw new Error('imageAutoPatch must be a ref!')
+    }
     return computed(() => {
-      if (!isRef(shootWorkerGroups)) {
-        throw new Error('shootWorkerGroups must be a ref!')
-      }
-      if (!isRef(imageAutoPatch)) {
-        throw new Error('imageAutoPatch must be a ref!')
-      }
-
       const allMachineImages = machineImages.value
 
       const workerGroups = map(shootWorkerGroups.value, worker => {

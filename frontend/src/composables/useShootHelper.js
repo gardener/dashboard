@@ -116,7 +116,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = useKubernetesVersions(cloudProfile)
 
   const {
-    machineImages: machineImagesFromComposable,
+    machineImages,
   } = useMachineImages(cloudProfile)
 
   const {
@@ -126,7 +126,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = useRegions(cloudProfile)
 
   const {
-    machineTypes: allMachineTypesFromComposable,
+    machineTypes,
     useMachineArchitectures,
   } = useMachineTypes(cloudProfile, useZones)
 
@@ -138,12 +138,12 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const {
     usePartitionIDs,
-    firewallImages: firewallImagesFromComposable,
+    firewallImages,
     useFirewallSizes,
   } = useMetalConstraints(cloudProfile, useZones)
 
   const {
-    volumeTypes: allVolumeTypesFromComposable,
+    volumeTypes: allVolumeTypes,
     useFilteredVolumeTypes,
   } = useVolumeTypes(cloudProfile)
 
@@ -198,11 +198,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
 
-  const allLoadBalancerClassNames = loadBalancerClassNames
-
   const partitionIDs = usePartitionIDs(region)
-
-  const firewallImages = firewallImagesFromComposable
 
   const sizes = useFirewallSizes(region)
   const firewallSizes = computed(() => {
@@ -211,15 +207,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const allFloatingPoolNames = useFloatingPoolNames(region, openStackDomainName)
 
-  const allMachineTypes = allMachineTypesFromComposable
-
   const machineArchitectures = useMachineArchitectures(region)
 
-  const allVolumeTypes = allVolumeTypesFromComposable
-
   const volumeTypes = useFilteredVolumeTypes(region)
-
-  const machineImages = machineImagesFromComposable
 
   const networkingTypes = computed(() => {
     return gardenerExtensionStore.networkingTypes
@@ -256,7 +246,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     regionsWithSeed,
     regionsWithoutSeed,
     allLoadBalancerProviderNames,
-    allLoadBalancerClassNames,
+    allLoadBalancerClassNames: loadBalancerClassNames,
     partitionIDs,
     firewallImages,
     firewallSizes,
@@ -265,7 +255,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     accessRestrictionDefinitions,
     accessRestrictionOptionDefinitions,
     accessRestrictionNoItemsText,
-    allMachineTypes,
+    allMachineTypes: machineTypes,
     machineArchitectures,
     allVolumeTypes,
     volumeTypes,

@@ -225,15 +225,15 @@ const k8sMessage = computed(() => {
   }]
 })
 
+const imageAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false)
+
+const imageAutoPatchRef = computed(() => imageAutoPatch)
+const expiredWorkerGroups = useExpiringWorkerGroups(shootWorkerGroups, imageAutoPatchRef)
+
 const machineImageMessages = computed(() => {
   if (!filterMatches('machine-image')) {
     return []
   }
-  const imageAutoPatch = get(shootItem.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], false)
-
-  const shootWorkerGroupsRef = computed(() => shootWorkerGroups.value)
-  const imageAutoPatchRef = computed(() => imageAutoPatch)
-  const expiredWorkerGroups = useExpiringWorkerGroups(shootWorkerGroupsRef, imageAutoPatchRef)
   return map(expiredWorkerGroups.value, workerGroup => {
     const {
       expirationDate,

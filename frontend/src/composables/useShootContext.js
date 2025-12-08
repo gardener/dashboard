@@ -969,6 +969,64 @@ export function createShootContextComposable (options = {}) {
     flush: 'sync',
   })
 
+  const { useMachineArchitectures, useFilteredMachineTypes } = useMachineTypes(cloudProfile)
+  const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+  const { useFilteredVolumeTypes, useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
+
+  function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
+    const id = uuidv4()
+    const name = `worker-${shortRandomString(5)}`
+    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+
+    // Get machine architecture and types
+    const regionRef = computed(() => region)
+    const machineArchitecture = useMachineArchitectures(regionRef)
+    const architecture = head(machineArchitecture.value)
+    const architectureRef = computed(() => architecture)
+    const machineTypesForZone = useFilteredMachineTypes(regionRef, architectureRef)
+    const machineType = head(machineTypesForZone.value) || {}
+
+    // Get volume types
+    const volumeTypesForZone = useFilteredVolumeTypes(regionRef)
+    const volumeType = head(volumeTypesForZone.value) || {}
+
+    // Get machine image
+    const machineTypeArchitecture = computed(() => get(machineType, ['architecture']))
+    const machineImage = useDefaultMachineImage(machineTypeArchitecture)
+
+    const volumeTypeRef = computed(() => volumeType)
+    const machineTypeRef = computed(() => machineType)
+    const minVolumeSize = useMinimumVolumeSize(machineTypeRef, volumeTypeRef)
+    const criNames = map(machineImage.value?.cri, 'name')
+    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
+
+    const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
+    const worker = {
+      id,
+      name,
+      minimum: 1,
+      maximum: 2,
+      maxSurge: 1,
+      machine: {
+        type: machineType.name,
+        image: pick(machineImage.value, ['name', 'version']),
+        architecture,
+      },
+      zones,
+      cri: {
+        name: criName,
+      },
+      isNew: true,
+    }
+    if (volumeType.name) {
+      worker.volume = {
+        type: volumeType.name,
+        size: defaultVolumeSize,
+      }
+    }
+    return worker
+  }
+
   return {
     /* manifest */
     shootManifest: normalizedManifest,
@@ -1105,67 +1163,4 @@ export function useProvideShootContext (options) {
   const composable = createShootContextComposable(options)
   provide('shoot-context', composable)
   return composable
-}
-
-function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
-  const cloudProfileStore = useCloudProfileStore()
-
-  const id = uuidv4()
-  const name = `worker-${shortRandomString(5)}`
-  const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-
-  // Get cloud profile and setup composables
-  const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef)
-  const cloudProfileValue = computed(() => cloudProfile)
-  const { useZones } = useRegions(cloudProfileValue)
-  const { useMachineArchitectures, useFilteredMachineTypes } = useMachineTypes(cloudProfileValue, useZones)
-  const { useDefaultMachineImage } = useMachineImages(cloudProfileValue)
-
-  // Get machine architecture and types
-  const regionRef = computed(() => region)
-  const machineArchitecture = useMachineArchitectures(regionRef)
-  const architecture = head(machineArchitecture.value)
-  const architectureRef = computed(() => architecture)
-  const machineTypesForZone = useFilteredMachineTypes(regionRef, architectureRef)
-  const machineType = head(machineTypesForZone.value) || {}
-
-  // Get volume types
-  const { useFilteredVolumeTypes, useMinimumVolumeSize } = useVolumeTypes(cloudProfileValue)
-  const volumeTypesForZone = useFilteredVolumeTypes(regionRef)
-  const volumeType = head(volumeTypesForZone.value) || {}
-
-  // Get machine image
-  const machineTypeRef = computed(() => machineType)
-  const machineImage = useDefaultMachineImage(machineTypeRef)
-
-  const volumeTypeRef = computed(() => volumeType)
-  const minVolumeSize = useMinimumVolumeSize(machineTypeRef, volumeTypeRef)
-  const criNames = map(machineImage.value?.cri, 'name')
-  const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
-
-  const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
-  const worker = {
-    id,
-    name,
-    minimum: 1,
-    maximum: 2,
-    maxSurge: 1,
-    machine: {
-      type: machineType.name,
-      image: pick(machineImage.value, ['name', 'version']),
-      architecture,
-    },
-    zones,
-    cri: {
-      name: criName,
-    },
-    isNew: true,
-  }
-  if (volumeType.name) {
-    worker.volume = {
-      type: volumeType.name,
-      size: defaultVolumeSize,
-    }
-  }
-  return worker
 }
