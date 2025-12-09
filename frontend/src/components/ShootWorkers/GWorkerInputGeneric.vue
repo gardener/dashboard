@@ -235,8 +235,8 @@ export default {
     const { useMinimumVolumeSize, volumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
-      props.worker.machine.type = get(defaultMachineType, ['name'])
-      props.worker.machine.image = pick(defaultMachineImage, ['name', 'version'])
+      props.worker.machine.type = get(defaultMachineType.value, ['name'])
+      props.worker.machine.image = pick(defaultMachineImage.value, ['name', 'version'])
     }
 
     const machineArchitecture = computed({
@@ -258,12 +258,12 @@ export default {
 
     const defaultMachineType = computed(() => head(machineTypes.value))
 
-    const defaultMachineTypeArchitecture = computed(() => get(defaultMachineType, ['architecture']))
+    const defaultMachineTypeArchitecture = computed(() => get(defaultMachineType.value, ['architecture']))
 
-    const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture)
+    const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture.value)
 
-    const selectedMachineType = computed(() => find(machineTypes, ['name', props.worker.machine.type]))
-    const selectedVolumeType = computed(() => find(volumeTypes, ['name', props.worker.volume?.type]))
+    const selectedMachineType = computed(() => find(machineTypes.value, ['name', props.worker.machine.type]))
+    const selectedVolumeType = computed(() => find(volumeTypes.value, ['name', props.worker.volume?.type]))
 
     const minimumVolumeSize = useMinimumVolumeSize(
       selectedMachineType,

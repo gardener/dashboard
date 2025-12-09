@@ -571,9 +571,6 @@ export function createShootContextComposable (options = {}) {
       !isEmpty(zones)
         ? zones
         : availableZones.value,
-      cloudProfileRef.value,
-      region.value,
-      kubernetesVersion.value,
     )
     Object.defineProperty(worker, 'isNew', { value: isNew })
     return worker
@@ -972,33 +969,23 @@ export function createShootContextComposable (options = {}) {
   const { useMachineArchitectures, useFilteredMachineTypes } = useMachineTypes(cloudProfile)
   const { useDefaultMachineImage } = useMachineImages(cloudProfile)
   const { useFilteredVolumeTypes, useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
+  const machineArchitecture = useMachineArchitectures(region)
+  const architecture = computed(() => head(machineArchitecture.value))
+  const machineTypesForZone = useFilteredMachineTypes(region, architecture)
+  const volumeTypesForZone = useFilteredVolumeTypes(region)
+  const machineType = computed(() => head(machineTypesForZone.value) || {})
+  const volumeType = computed(() => head(volumeTypesForZone.value) || {})
+  const minVolumeSize = useMinimumVolumeSize(machineType, volumeType)
+  const machineTypeArchitecture = computed(() => get(machineType.value, ['architecture']))
+  const machineImage = useDefaultMachineImage(machineTypeArchitecture)
 
-  function generateWorker (availableZones, cloudProfileRef, region, kubernetesVersion) {
+  function generateWorker (availableZones) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
-    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
-
-    // Get machine architecture and types
-    const regionRef = computed(() => region)
-    const machineArchitecture = useMachineArchitectures(regionRef)
-    const architecture = head(machineArchitecture.value)
-    const architectureRef = computed(() => architecture)
-    const machineTypesForZone = useFilteredMachineTypes(regionRef, architectureRef)
-    const machineType = head(machineTypesForZone.value) || {}
-
-    // Get volume types
-    const volumeTypesForZone = useFilteredVolumeTypes(regionRef)
-    const volumeType = head(volumeTypesForZone.value) || {}
-
-    // Get machine image
-    const machineTypeArchitecture = computed(() => get(machineType, ['architecture']))
-    const machineImage = useDefaultMachineImage(machineTypeArchitecture)
-
-    const volumeTypeRef = computed(() => volumeType)
-    const machineTypeRef = computed(() => machineType)
-    const minVolumeSize = useMinimumVolumeSize(machineTypeRef, volumeTypeRef)
     const criNames = map(machineImage.value?.cri, 'name')
-    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion)
+    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion.value)
+
+    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
 
     const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
     const worker = {
@@ -1008,7 +995,7 @@ export function createShootContextComposable (options = {}) {
       maximum: 2,
       maxSurge: 1,
       machine: {
-        type: machineType.name,
+        type: machineType.value.name,
         image: pick(machineImage.value, ['name', 'version']),
         architecture,
       },
@@ -1018,9 +1005,9 @@ export function createShootContextComposable (options = {}) {
       },
       isNew: true,
     }
-    if (volumeType.name) {
+    if (volumeType.value.name) {
       worker.volume = {
-        type: volumeType.name,
+        type: volumeType.value.name,
         size: defaultVolumeSize,
       }
     }
