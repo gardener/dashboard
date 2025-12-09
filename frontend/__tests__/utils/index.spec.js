@@ -5,6 +5,11 @@
 //
 
 import {
+  setActivePinia,
+  createPinia,
+} from 'pinia'
+
+import {
   canI,
   machineImageHasUpdate,
   isHtmlColorCode,
@@ -308,6 +313,7 @@ describe('utils', () => {
     let status
 
     beforeEach(() => {
+      setActivePinia(createPinia())
       status = {
         lastOperation: {
           state: 'False',
