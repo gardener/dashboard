@@ -33,9 +33,15 @@ import {
   toRef,
 } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import startsWith from 'lodash/startsWith'
 
 const props = defineProps({
+  name: {
+    type: String,
+    default: '',
+  },
   icon: {
     type: String,
     default: '',
@@ -52,67 +58,22 @@ const props = defineProps({
 
 const noBackground = toRef(props, 'noBackground')
 
-const iconSrc = computed(() => {
-  switch (props.icon) {
-    // infrastructures
-    case 'azure':
-      return new URL('/src/assets/azure.svg', import.meta.url)
-    case 'aws':
-      return new URL('/src/assets/aws.svg', import.meta.url)
-    case 'gcp':
-      return new URL('/src/assets/gcp.svg', import.meta.url)
-    case 'openstack':
-      return new URL('/src/assets/openstack.svg', import.meta.url)
-    case 'stackit':
-      return new URL('/src/assets/stackit.svg', import.meta.url)
-    case 'alicloud':
-      return new URL('/src/assets/alicloud.svg', import.meta.url)
-    case 'vsphere':
-      return new URL('/src/assets/vsphere.svg', import.meta.url)
-    case 'metal':
-      return new URL('/src/assets/metal.svg', import.meta.url)
-    case 'ironcore':
-      return new URL('/src/assets/ironcore.svg', import.meta.url)
-    case 'onmetal':
-      return new URL('/src/assets/onmetal.svg', import.meta.url)
-    // dns
-    case 'aws-route53':
-      return new URL('/src/assets/aws-route53.svg', import.meta.url)
-    case 'azure-dns':
-    case 'azure-private-dns':
-      return new URL('/src/assets/azure-dns.svg', import.meta.url)
-    case 'google-clouddns':
-      return new URL('/src/assets/google-clouddns.svg', import.meta.url)
-    case 'openstack-designate':
-      return new URL('/src/assets/openstack.svg', import.meta.url)
-    case 'alicloud-dns':
-      return new URL('/src/assets/alicloud-dns.png', import.meta.url)
-    case 'cloudflare-dns':
-      return new URL('/src/assets/cloudflare-dns.svg', import.meta.url)
-    case 'infoblox-dns':
-      return new URL('/src/assets/infoblox-dns.svg', import.meta.url)
-    case 'netlify-dns':
-      return new URL('/src/assets/netlify-dns.svg', import.meta.url)
-    case 'rfc2136':
-      return new URL('/src/assets/rfc2136.svg', import.meta.url)
-    case 'powerdns':
-      return new URL('/src/assets/powerdns.svg', import.meta.url)
+const configStore = useConfigStore()
 
-    // os
-    case 'coreos':
-      return new URL('/src/assets/coreos.svg', import.meta.url)
-    case 'suse-jeos':
-      return new URL('/src/assets/suse.svg', import.meta.url)
-    case 'suse-chost':
-      return new URL('/src/assets/suse.svg', import.meta.url)
-    case 'ubuntu':
-      return new URL('/src/assets/ubuntu.svg', import.meta.url)
-    case 'gardenlinux':
-      return new URL('/src/assets/gardenlinux.svg', import.meta.url)
-    case 'flatcar':
-      return new URL('/src/assets/flatcar.svg', import.meta.url)
-    case 'hcloud':
-      return new URL('/src/assets/hcloud.svg', import.meta.url)
+const iconName = computed(() => {
+  if (props.icon) {
+    return props.icon
+  }
+  const vendor = configStore.vendorDetails(props.name)
+  return vendor?.icon
+})
+
+const iconSrc = computed(() => {
+  if (iconName.value) {
+    if (startsWith(iconName, 'data:image/')) {
+      return iconName
+    }
+    return `/static/assets/${iconName.value}`
   }
 
   return undefined

@@ -19,13 +19,13 @@ SPDX-License-Identifier: Apache-2.0
         :color="chipColor"
       >
         <g-vendor-icon
-          :icon="machineImage.icon"
+          :icon="machineImage?.icon"
           :size="20"
         />
         <span
           v-tooltip:top="{
             text: 'Machine image version is deprecated',
-            disabled: !machineImage.isDeprecated
+            disabled: !machineImage?.isDeprecated
           }"
           class="pl-1"
         >{{ workerGroup.name }}</span>
@@ -201,7 +201,7 @@ SPDX-License-Identifier: Apache-2.0
                         <legend class="text-caption text-medium-emphasis">
                           Name
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.machine.image.name }}</span>
+                        <span class="text-body-2">{{ machineImage ? machineImage.displayName : workerGroup.machine.image.name }}</span>
                       </v-col>
                       <v-col>
                         <legend class="text-caption text-medium-emphasis">
@@ -209,19 +209,7 @@ SPDX-License-Identifier: Apache-2.0
                         </legend>
                         <span class="text-body-2">{{ workerGroup.machine.image.version }}</span>
                       </v-col>
-                      <v-col
-                        v-if="!machineImage"
-                        cols="12"
-                      >
-                        <v-icon
-                          size="small"
-                          class="mr-1"
-                          color="warning"
-                        >
-                          mdi-alert
-                        </v-icon>Image not found in cloud profile
-                      </v-col>
-                      <template v-else>
+                      <template v-if="machineImage">
                         <v-col
                           cols="12"
                         >
@@ -255,6 +243,18 @@ SPDX-License-Identifier: Apache-2.0
                           />
                         </v-col>
                       </template>
+                      <v-col
+                        v-else
+                        cols="12"
+                      >
+                        <v-icon
+                          size="small"
+                          class="mr-1"
+                          color="warning"
+                        >
+                          mdi-alert
+                        </v-icon>Image not found in cloud profile
+                      </v-col>
                     </v-row>
                   </v-card-text>
                 </v-card>
@@ -470,7 +470,7 @@ export default {
     machineImage () {
       const machineImages = this.machineImagesByCloudProfileRef(this.shootCloudProfileRef)
       const { name, version } = get(this.workerGroup, ['machine', 'image'], {})
-      return find(machineImages, { name, version }) ?? {}
+      return find(machineImages, { name, version })
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
@@ -491,7 +491,7 @@ export default {
       return 'mdi-information-outline'
     },
     chipColor () {
-      return this.machineImage.isDeprecated ? 'warning' : 'primary'
+      return !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
   created () {
