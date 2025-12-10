@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api namespaced cloudprofiles should return all namespaced cloudprofiles for a namespace 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "namespace": "garden-local",
+          "resource": "namespacedcloudprofiles",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api namespaced cloudprofiles should return all namespaced cloudprofiles for a namespace 2`] = `
+{
+  "code": 500,
+  "details": {
+    "name": "TypeError",
+    "stack": "TypeError: Cannot read properties of undefined (reading 'list')
+    at [object Object]
+    at [object Object]
+    at [object Object]
+    at [object Object]",
+  },
+  "message": "Cannot read properties of undefined (reading 'list')",
+  "reason": "Internal Server Error",
+  "status": "Failure",
+}
+`;

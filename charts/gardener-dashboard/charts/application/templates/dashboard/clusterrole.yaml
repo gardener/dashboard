@@ -51,6 +51,13 @@ rules:
   - list
   - watch
 - apiGroups:
+    - core.gardener.cloud
+  resources:
+    - namespacedcloudprofiles
+  verbs:
+    - list
+    - watch
+- apiGroups:
   - ""
   resources:
   - configmaps
