@@ -29,7 +29,10 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-function isMemberOf (project, user) {
+function isMemberOf (project, user, projectAllowList = []) {
+  if (projectAllowList.includes(project.metadata.name)) {
+    return true
+  }
   return _
     .chain(project)
     .get(['spec', 'members'])
@@ -56,7 +59,7 @@ function isMemberOf (project, user) {
     .value()
 }
 
-function projectFilter (user, canListProjects = false) {
+function projectFilter (user, canListProjects = false, projectAllowList = []) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
   }
@@ -65,7 +68,7 @@ function projectFilter (user, canListProjects = false) {
     if (isPending(project)) {
       return false
     }
-    return canListProjects || isMemberOf(project, user)
+    return canListProjects || isMemberOf(project, user, projectAllowList)
   }
 }
 

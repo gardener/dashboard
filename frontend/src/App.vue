@@ -13,6 +13,7 @@ import {
   inject,
   toRef,
   computed,
+  watch,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
@@ -21,6 +22,7 @@ import {
   useColorMode,
   useTitle,
 } from '@vueuse/core'
+import { useRouteQuery } from '@vueuse/router'
 import { useRoute } from 'vue-router'
 
 import { useConfigStore } from '@/store/config'
@@ -50,6 +52,8 @@ async function setCustomColors () {
 setCustomColors()
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
+const sapTheme = useRouteQuery('sap-theme')
+
 const { system } = useColorMode({
   storageRef: colorScheme,
   onChanged (value) {
@@ -69,6 +73,14 @@ const bus = useEventBus('esc-pressed')
 onKeyStroke('Escape', e => {
   bus.emit()
   e.preventDefault()
+})
+
+watch(sapTheme, value => {
+  if (value && typeof value === 'string') {
+    theme.global.name.value = colorScheme.value = value.endsWith('dark')
+      ? 'dark'
+      : 'light'
+  }
 })
 
 const documentTitle = computed(() => {
