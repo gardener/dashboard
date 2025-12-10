@@ -371,8 +371,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref } from 'vue'
-import { mapActions } from 'pinia'
+import {
+  computed,
+  ref,
+} from 'vue'
 import yaml from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -381,6 +383,10 @@ import GCodeBlock from '@/components/GCodeBlock'
 import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootItem } from '@/composables/useShootItem'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -405,12 +411,22 @@ export default {
       shootCloudProfileRef,
     } = useShootItem()
 
+    const cloudProfileStore = useCloudProfileStore()
+    const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+    const { machineImages } = useMachineImages(cloudProfile)
+    const { useZones } = useRegions(cloudProfile)
+    const { machineTypes } = useMachineTypes(cloudProfile, useZones)
+    const { volumeTypes } = useVolumeTypes(cloudProfile)
+
     const tab = ref('overview')
 
     return {
       tab,
       shootMetadata,
       shootCloudProfileRef,
+      machineImages,
+      machineTypes,
+      volumeTypes,
     }
   },
   data () {
@@ -431,14 +447,12 @@ export default {
       },
     },
     machineType () {
-      const machineTypes = this.machineTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['machine', 'type'])
-      return find(machineTypes, ['name', type])
+      return find(this.machineTypes, ['name', type])
     },
     volumeType () {
-      const volumeTypes = this.volumeTypesByCloudProfileRef(this.shootCloudProfileRef)
       const type = get(this.workerGroup, ['volume', 'type'])
-      return find(volumeTypes, ['name', type])
+      return find(this.volumeTypes, ['name', type])
     },
     volumeCardData () {
       const storage = get(this.machineType, ['storage'], {})
@@ -468,9 +482,8 @@ export default {
       return {}
     },
     machineImage () {
-      const machineImages = this.machineImagesByCloudProfileRef(this.shootCloudProfileRef)
       const { name, version } = get(this.workerGroup, ['machine', 'image'], {})
-      return find(machineImages, { name, version }) ?? {}
+      return find(this.machineImages, { name, version }) ?? {}
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
@@ -498,11 +511,6 @@ export default {
     this.updateWorkerGroupYaml(this.workerGroup)
   },
   methods: {
-    ...mapActions(useCloudProfileStore, [
-      'machineTypesByCloudProfileRef',
-      'volumeTypesByCloudProfileRef',
-      'machineImagesByCloudProfileRef',
-    ]),
     updateWorkerGroupYaml (value) {
       this.workerGroupYaml = yaml.dump(value)
     },

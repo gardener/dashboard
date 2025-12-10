@@ -33,6 +33,7 @@ import { required } from '@vuelidate/validators'
 
 import { useCloudProfileStore } from '@/store/cloudProfile/index'
 import { useProjectStore } from '@/store/project.js'
+import { useSeedStore } from '@/store/seed'
 
 import {
   getErrorMessages,
@@ -63,12 +64,13 @@ const cloudProfiles = toRef(props, 'cloudProfiles')
 const namespacedCloudProfiles = toRef(props, 'namespacedCloudProfiles')
 
 const cloudProfileStore = useCloudProfileStore()
-const { seedsByCloudProfileRef } = cloudProfileStore
 const projectStore = useProjectStore()
 const { project } = storeToRefs(projectStore)
+const seedStore = useSeedStore()
 
 const seeds = computed(() => {
-  return seedsByCloudProfileRef(cloudProfileRef.value, project.value)
+  const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
+  return seedStore.seedsForCloudProfileByProject(cloudProfile, project.value)
 })
 
 const emit = defineEmits([
