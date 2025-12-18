@@ -15,6 +15,7 @@ import {
 import { useBrowserLocation } from '@vueuse/core'
 
 import { useApi } from '@/composables/useApi'
+import { useLogger } from '@/composables/useLogger'
 
 import { hash } from '@/utils/crypto'
 
@@ -26,6 +27,9 @@ import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
+import head from 'lodash/head'
+
+const logger = useLogger()
 
 const wellKnownConditions = {
   APIServerAvailable: {
@@ -217,13 +221,11 @@ export const useConfigStore = defineStore('config', () => {
     return []
   })
 
-  const configVendors = computed(() => {
-    return [
-      ...configInfraVendors.value,
-      ...configDNSVendors.value,
-      ...configImageVendors.value,
-    ]
-  })
+  const configVendors = computed(() => ({
+    infra: configInfraVendors.value,
+    dns: configDNSVendors.value,
+    image: configImageVendors.value,
+  }))
 
   const resourceQuotaHelp = computed(() => {
     return state.value?.resourceQuotaHelp
@@ -617,28 +619,79 @@ export const useConfigStore = defineStore('config', () => {
     },
   ]
 
-  const knownVendors = [
-    ...knownInfraVendors,
-    ...knownDNSVendors,
-    ...knownImageVendors,
-  ]
+  const knownVendors = {
+    infra: knownInfraVendors,
+    dns: knownDNSVendors,
+    image: knownImageVendors,
+  }
 
-  const vendorDetails = function (kind) {
-    // if kind is not unique at some point in the future we could introduce
-    // a type param and access dedicated array directly
-    const configuredVendor = find(configVendors.value, ['name', kind])
-    const knownVendor = find(knownVendors, ['name', kind])
+  const vendorKey = (type, name) => `${type}::${name}`
+
+  const vendorTypes = computed(() => {
+    return new Set([
+      ...Object.keys(knownVendors),
+      ...Object.keys(configVendors.value),
+    ])
+  })
+
+  const vendorDetailsMap = computed(() => {
+    const detailsMap = new Map()
+
+    for (const type of vendorTypes.value) {
+      const knownArr = get(knownVendors, [type], [])
+      const confArr = get(configVendors.value, [type], [])
+
+      const names = new Set([
+        ...map(knownArr, 'name'),
+        ...map(confArr, 'name'),
+      ])
+
+      for (const name of names) {
+        const knownVendor = find(knownArr, ['name', name])
+        const configuredVendor = find(confArr, ['name', name])
+
+        detailsMap.set(vendorKey(type, name), {
+          type,
+          name,
+          weight: Number.MAX_SAFE_INTEGER,
+          ...knownVendor,
+          ...configuredVendor,
+        })
+      }
+    }
+
+    return detailsMap
+  })
+
+  function vendorDetails (name) {
+    const matches = []
+    for (const t of vendorTypes.value) {
+      const vendor = vendorDetailsMap.value.get(vendorKey(t, name))
+      if (vendor) {
+        matches.push(vendor)
+      }
+    }
+
+    if (matches.length === 1) {
+      return head(matches)
+    }
+
+    if (matches.length === 0) {
+      logger.warn(`VendorDetails: No vendor found for name='${name}'`)
+    }
+
+    if (matches.length > 1) {
+      logger.warn(`VendorDetails: Multiple vendors found for name='${name}'`)
+    }
 
     return {
-      name: kind,
+      name,
       weight: Number.MAX_SAFE_INTEGER,
-      ...knownVendor,
-      ...configuredVendor,
     }
   }
 
-  const vendorDisplayName = function (kind) {
-    return get(vendorDetails(kind), ['displayName'], kind)
+  function vendorDisplayName (name, type) {
+    return get(vendorDetails(name, type), ['displayName'], name)
   }
 
   const dnsProviderTypesList = computed(() => {

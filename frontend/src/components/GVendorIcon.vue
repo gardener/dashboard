@@ -69,14 +69,16 @@ const iconName = computed(() => {
 })
 
 const iconSrc = computed(() => {
-  if (iconName.value) {
-    if (startsWith(iconName, 'data:image/')) {
-      return iconName
-    }
-    return `/static/assets/${iconName.value}`
+  if (!iconName.value) {
+    return undefined
   }
 
-  return undefined
+  const safeIconNameRegex = /^[a-z0-9._-]+$/i
+  if (!safeIconNameRegex.test(iconName.value)) {
+    return undefined
+  }
+
+  return `/static/assets/${iconName.value}`
 })
 
 const mdiIcon = computed(() => {

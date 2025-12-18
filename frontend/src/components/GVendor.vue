@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-subtitle>Provider</v-list-item-subtitle>
           <v-list-item-title class="d-flex">
             <g-vendor-icon
-              :icon="providerType"
+              :name="providerType"
               class="mr-2"
             />
             {{ vendorName }}

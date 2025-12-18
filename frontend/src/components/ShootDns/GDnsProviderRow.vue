@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
           <template #selection="{ item }">
             <div class="d-flex">
               <g-vendor-icon
-                :icon="item.value"
+                :name="item.title"
                 class="mr-2"
               />
               {{ item.title }}
