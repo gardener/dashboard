@@ -70,12 +70,14 @@ describe('stores', () => {
           message: 'test',
           matchNames: ['gardenlinux'],
         }],
-        imageVendors: [{
-          name: 'foo',
-          displayName: 'Foo Inc.',
-          icon: 'foo-icon.svg',
-          weight: 1,
-        }],
+        branding: {
+          imageVendors: [{
+            name: 'foo',
+            displayName: 'Foo Inc.',
+            icon: 'foo-icon.svg',
+            weight: 1,
+          }],
+        },
       })
       cloudProfileStore = useCloudProfileStore()
       cloudProfileStore.setCloudProfiles([])

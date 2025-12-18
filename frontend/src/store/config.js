@@ -197,36 +197,6 @@ export const useConfigStore = defineStore('config', () => {
     }
   })
 
-  const configInfraVendors = computed(() => {
-    const vendors = state.value?.infraVendors
-    if (vendors && Array.isArray(vendors)) {
-      return vendors
-    }
-    return []
-  })
-
-  const configDNSVendors = computed(() => {
-    const vendors = state.value?.dnsVendors
-    if (vendors && Array.isArray(vendors)) {
-      return vendors
-    }
-    return []
-  })
-
-  const configImageVendors = computed(() => {
-    const vendors = state.value?.imageVendors
-    if (vendors && Array.isArray(vendors)) {
-      return vendors
-    }
-    return []
-  })
-
-  const configVendors = computed(() => ({
-    infra: configInfraVendors.value,
-    dns: configDNSVendors.value,
-    image: configImageVendors.value,
-  }))
-
   const resourceQuotaHelp = computed(() => {
     return state.value?.resourceQuotaHelp
   })
@@ -256,6 +226,36 @@ export const useConfigStore = defineStore('config', () => {
     }
     return branding
   })
+
+  const configInfraVendors = computed(() => {
+    const vendors = branding.value.infraVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const configDNSVendors = computed(() => {
+    const vendors = branding.value.dnsVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const configImageVendors = computed(() => {
+    const vendors = branding.value.imageVendors
+    if (vendors && Array.isArray(vendors)) {
+      return vendors
+    }
+    return []
+  })
+
+  const configVendors = computed(() => ({
+    infra: configInfraVendors.value,
+    dns: configDNSVendors.value,
+    image: configImageVendors.value,
+  }))
 
   const terminal = computed(() => {
     return state.value?.terminal

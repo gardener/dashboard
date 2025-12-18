@@ -29,7 +29,7 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 It is possible to customize the appearance of vendors shown in the dashboard. You can override the display name, icon, and sort order of *cloud provider vendors*, *DNS providers*, and *machine image vendors*.
 
 Vendor customization is configured in the arrays
-`frontendConfig.infraVendors`, `frontendConfig.dnsVendors`, and `frontendConfig.imageVendors`.
+`frontendConfig.branding.infraVendors`, `frontendConfig.branding.dnsVendors`, and `frontendConfig.branding.imageVendors`.
 Each entry must be an object with the following fields:
 
 | name          | usage|
@@ -37,7 +37,7 @@ Each entry must be an object with the following fields:
 | `name`        | Unique vendor identifier (required) |
 | `displayName` | Name displayed in the dashboard |
 | `weight`      | Sorting weight. Lower values appear first. See default weights in `frontend/src/store/config.js` |
-| `icon`        | ile name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
+| `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
 
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
