@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`createConverter().makeSanitizedHtml Details/Summary allowed through sanitizer + markdown inside 1`] = `
+"<p></p><details><br />
+<summary>More</summary><p></p>
+<p>Inside <strong>bold</strong> and a list:</p>
+<ul>
+<li>a</li>
+<li>b</li>
+</ul>
+<p></p></details><p></p>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Emoji (emoji) 1`] = `"<p>Ship it 🚀 and smile 😄</p>"`;
+
+exports[`createConverter().makeSanitizedHtml GFM tables (tables) 1`] = `
+"<table>
+<thead>
+<tr>
+<th>col A</th>
+<th>col B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>left</td>
+<td>123</td>
+</tr>
+<tr>
+<td>wow</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>"
+`;
+
+exports[`createConverter().makeSanitizedHtml GitHub-style fenced code blocks (ghCodeBlocks) 1`] = `
+"<pre><code>const x = 1
+console.log(x)
+</code></pre>
+<p>Indented code:</p>
+<pre><code>let y = 2
+</code></pre>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Heading IDs (ghCompatibleHeaderId) 1`] = `
+"<h1>Hello World</h1>
+<h2>Hello World</h2>
+<h3>Ümlaut &amp; Symbols!</h3>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Images with dimensions (parseImgDimensions) 1`] = `"<p><img src="https://example.com/a.png" alt="alt text" width="120" height="80" /></p>"`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization options can be overridden (example: allow only a subset) 1`] = `"<p>Hello bold html em</p>"`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: dangerous attributes removed (e.g. onerror) 1`] = `"<p><img src="https://example.com/x.png" /></p>"`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: disallowed tags dropped (e.g. iframe) 1`] = `""`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: scripts removed (not the main focus, but safety baseline) 1`] = `
+"<p>Hello</p>
+
+<p>Bye</p>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Task lists (tasklists) 1`] = `
+"<ul>
+<li> todo</li>
+<li> done</li>
+<li> nested</li>
+</ul>"
+`;
+
+exports[`createConverter().makeSanitizedHtml basic markdown: emphasis, strong, links, line breaks 1`] = `
+"<p>Hello <em>world</em> and <strong>friends</strong>.</p>
+<p>A link: <a href="https://example.com" target="_blank">https://example.com</a></p>
+<p>Line 1<br />
+Line 2 (should be a simple line break with <code>simpleLineBreaks</code>).</p>"
+`;
