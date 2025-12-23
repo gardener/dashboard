@@ -31,7 +31,7 @@ if (apiUrl) {
 
 export const converter = createConverter(options)
 
-export function fromIssue (issue) {
+export async function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
   const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
   return {
@@ -59,7 +59,7 @@ export function fromIssue (issue) {
         'comments',
       ])
       .assign({
-        body: converter.makeSanitizedHtml(issue.body),
+        body: await converter.makeSanitizedHtml(issue.body),
         labels,
         ticketTitle,
       })
@@ -67,7 +67,7 @@ export function fromIssue (issue) {
   }
 }
 
-export function fromComment (number, name, projectName, item) {
+export async function fromComment (number, name, projectName, item) {
   const metadata = _
     .chain(item)
     .pick([
@@ -89,7 +89,7 @@ export function fromComment (number, name, projectName, item) {
       'html_url',
     ])
     .assign({
-      body: converter.makeSanitizedHtml(item.body),
+      body: await converter.makeSanitizedHtml(item.body),
     })
     .value()
   return {
@@ -105,7 +105,7 @@ export async function getOpenIssues ({ name, projectName } = {}) {
     title = `[${projectName}/${name}]`
   }
   const githubIssues = await searchIssues({ state: 'open', title })
-  return _.map(githubIssues, fromIssue)
+  return Promise.all(_.map(githubIssues || [], fromIssue))
 }
 
 export async function loadOpenIssues (...args) {
@@ -129,7 +129,9 @@ export async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
   const { metadata: { name, projectName } } = ticketCache.getIssue(number)
   const githubComments = await getComments({ number })
-  return _.map(githubComments, githubComment => fromComment(number, name, projectName, githubComment))
+  return Promise.all(_.map(githubComments, githubComment =>
+    fromComment(number, name, projectName, githubComment),
+  ))
 }
 
 export async function loadIssueComments ({ number }) {

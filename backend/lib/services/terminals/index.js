@@ -84,11 +84,11 @@ function toTerminalMetadata (terminal) {
   return metadata
 }
 
-function imageHelpText (terminal) {
+async function imageHelpText (terminal) {
   const containerImage = _.get(terminal, ['spec', 'host', 'pod', 'container', 'image'])
   const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
   const containerImageDescription = findImageDescription(containerImage, containerImageDescriptions)
-  return converter.makeSanitizedHtml(containerImageDescription)
+  return await converter.makeSanitizedHtml(containerImageDescription)
 }
 
 export function findImageDescription (containerImage, containerImageDescriptions) {
@@ -589,7 +589,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
       kubeApiServer: hostCluster.kubeApiServer,
       namespace: terminal.spec.host.namespace,
     },
-    imageHelpText: imageHelpText(terminal),
+    imageHelpText: await imageHelpText(terminal),
   }
 }
 

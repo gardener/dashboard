@@ -15,14 +15,37 @@ import { metricsRoute } from '../middleware.js'
 const { dashboardClient } = kubeClientModule
 
 const router = express.Router()
-
-const frontendConfig = sanitizeFrontendConfig(config.frontend)
 const metricsMiddleware = metricsRoute('config')
+
+// cache sanitized config (value + in-flight promise)
+let cachedFrontendConfig
+let cachedFrontendConfigPromise
+
+async function getFrontendConfig () {
+  if (cachedFrontendConfig) {
+    return cachedFrontendConfig
+  }
+
+  if (!cachedFrontendConfigPromise) {
+    cachedFrontendConfigPromise = sanitizeFrontendConfig(config.frontend)
+      .then(cfg => {
+        cachedFrontendConfig = cfg
+        return cfg
+      })
+      .catch(err => {
+        cachedFrontendConfigPromise = undefined
+        throw err
+      })
+  }
+  return cachedFrontendConfigPromise
+}
 
 router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
+      const frontendConfig = await getFrontendConfig()
+
       if (!frontendConfig.clusterIdentity) {
         try {
           const { data } = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
@@ -38,12 +61,18 @@ router.route('/')
     }
   })
 
-function sanitizeFrontendConfig (frontendConfig) {
+async function sanitizeFrontendConfig (frontendConfig) {
   const converter = createConverter()
+  const tasks = []
+
   const convertAndSanitize = (obj, key) => {
-    const value = obj[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+    const value = obj?.[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     if (value) {
-      obj[key] = converter.makeSanitizedHtml(value) // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+      tasks.push(
+        converter.makeSanitizedHtml(value).then(html => {
+          obj[key] = html // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+        }),
+      )
     }
   }
 
@@ -57,14 +86,16 @@ function sanitizeFrontendConfig (frontendConfig) {
       items = [],
     } = {},
     vendorHints = [],
-    resourceQuotaHelp = '',
-    controlPlaneHighAvailabilityHelp = '',
+    resourceQuotaHelp = {},
+    controlPlaneHighAvailabilityHelp = {},
   } = sanitizedFrontendConfig
 
   convertAndSanitize(alert, 'message')
+
   for (const costObject of costObjects) {
     convertAndSanitize(costObject, 'description')
   }
+
   convertAndSanitize(sla, 'description')
   convertAndSanitize(addonDefinition, 'description')
   convertAndSanitize(resourceQuotaHelp, 'text')
@@ -92,6 +123,7 @@ function sanitizeFrontendConfig (frontendConfig) {
     convertAndSanitize(vendorHint, 'message')
   }
 
+  await Promise.all(tasks)
   return sanitizedFrontendConfig
 }
 
