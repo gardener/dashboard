@@ -37,4 +37,7 @@ module.exports = {
     '**/?(*.)+(spec|test).js',
     '**/?(*.)+(spec|test).cjs',
   ],
+  moduleNameMapper: {
+    '^\\.{2}/markdown(\\.cjs)?$': '<rootDir>/__mocks__/@gardener-dashboard/markdown.cjs',
+  },
 }
