@@ -9,11 +9,11 @@ SPDX-License-Identifier: Apache-2.0
     v-model="projectMenu"
     location="bottom"
     :attach="false"
-    :open-delay="100"
     open-on-click
     :close-on-content-click="false"
     :offset="[0]"
     content-class="project-menu"
+    transition="slide-y-transition"
   >
     <template #activator="{ props }">
       <v-btn
@@ -24,9 +24,6 @@ SPDX-License-Identifier: Apache-2.0
         elevation="4"
         variant="flat"
         class="project-selector text-main-navigation-title"
-        @keydown.down="highlightProjectWithKeys('down')"
-        @keydown.up="highlightProjectWithKeys('up')"
-        @keyup.enter="navigateToHighlightedProject"
       >
         <template #prepend>
           <v-icon
@@ -91,8 +88,8 @@ SPDX-License-Identifier: Apache-2.0
             @keyup.esc="projectFilter = ''"
             @keyup.enter="navigateToHighlightedProject"
             @update:model-value="onInputProjectFilter"
-            @keydown.down="highlightProjectWithKeys('down')"
-            @keydown.up="highlightProjectWithKeys('up')"
+            @keydown.down.prevent="highlightProjectWithKeys('down')"
+            @keydown.up.prevent="highlightProjectWithKeys('up')"
           >
             <template #prepend>
               <v-icon
@@ -105,52 +102,54 @@ SPDX-License-Identifier: Apache-2.0
         </v-card-title>
         <v-divider />
       </template>
-      <v-list
-        ref="refProjectList"
-        variant="flat"
-        class="project-list"
-        @scroll="handleProjectListScroll"
-      >
-        <v-list-item
-          v-for="project in visibleProjectList"
-          ref="refProjectListItems"
-          :key="project.metadata.name"
-          class="project-list-tile"
-          :class="{ 'highlighted-item': isHighlightedProject(project) }"
-          :data-g-project-name="project.metadata.name"
-          @click="onProjectClick($event, project)"
+      <v-list variant="flat">
+        <v-virtual-scroll
+          ref="refProjectVirtualScroll"
+          class="project-list"
+          :items="sortedAndFilteredProjectList"
+          :item-key="item => item.metadata.uid"
         >
-          <template #prepend>
-            <v-icon color="primary">
-              {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
-            </v-icon>
+          <template #default="{ item: project }">
+            <v-list-item
+              :key="project.metadata.name"
+              class="project-list-tile"
+              :class="{ 'highlighted-item': isHighlightedProject(project) }"
+              :data-g-project-name="project.metadata.name"
+              @click="onProjectClick($event, project)"
+            >
+              <template #prepend>
+                <v-icon color="primary">
+                  {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
+                </v-icon>
+              </template>
+              <g-project-tooltip
+                :open-delay="1000"
+                :project="project"
+                :open-on-hover="!isAllProjectsItem(project)"
+              >
+                <v-list-item-title class="project-name text-uppercase">
+                  {{ project.metadata.name }}
+                </v-list-item-title>
+                <v-list-item-title class="project-title">
+                  {{ getProjectTitle(project) }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="project-owner">
+                  {{ getProjectOwner(project) }}
+                </v-list-item-subtitle>
+              </g-project-tooltip>
+              <template #append>
+                <g-stale-project-warning
+                  :project="project"
+                  size="small"
+                />
+                <g-not-ready-project-warning
+                  :project="project"
+                  size="small"
+                />
+              </template>
+            </v-list-item>
           </template>
-          <g-project-tooltip
-            :open-delay="1000"
-            :project="project"
-            :open-on-hover="!isAllProjectsItem(project)"
-          >
-            <v-list-item-title class="project-name text-uppercase">
-              {{ project.metadata.name }}
-            </v-list-item-title>
-            <v-list-item-title class="project-title">
-              {{ getProjectTitle(project) }}
-            </v-list-item-title>
-            <v-list-item-subtitle class="project-owner">
-              {{ getProjectOwner(project) }}
-            </v-list-item-subtitle>
-          </g-project-tooltip>
-          <template #append>
-            <g-stale-project-warning
-              :project="project"
-              size="small"
-            />
-            <g-not-ready-project-warning
-              :project="project"
-              size="small"
-            />
-          </template>
-        </v-list-item>
+        </v-virtual-scroll>
       </v-list>
       <v-card-actions>
         <div
@@ -180,10 +179,10 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
-  nextTick,
   watch,
   toRef,
   onMounted,
+  useTemplateRef,
 } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -212,9 +211,6 @@ import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
-import slice from 'lodash/slice'
-import last from 'lodash/last'
-import isEmpty from 'lodash/isEmpty'
 
 const allProjectsItem = {
   metadata: {
@@ -227,7 +223,6 @@ const allProjectsItem = {
     phase: 'Ready',
   },
 }
-const initialVisibleProjects = 10
 
 const projectStore = useProjectStore()
 const appStore = useAppStore()
@@ -238,11 +233,9 @@ const projectDialog = ref(false)
 const projectFilter = ref('')
 const projectMenu = ref(false)
 const highlightedProjectName = ref()
-const numberOfVisibleProjects = ref(initialVisibleProjects)
 
-const refProjectFilter = ref(null)
-const refProjectList = ref(null)
-const refProjectListItems = ref(null)
+const refProjectFilter = useTemplateRef('refProjectFilter')
+const refProjectVirtualScroll = useTemplateRef('refProjectVirtualScroll')
 
 const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
@@ -292,12 +285,6 @@ const sortedAndFilteredProjectList = computed(() => {
   }
   const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, lowerTitleOrName])
   return sortedList
-})
-
-const visibleProjectList = computed(() => {
-  const projectList = sortedAndFilteredProjectList.value
-  const endIndex = numberOfVisibleProjects.value
-  return slice(projectList, 0, endIndex)
 })
 
 const projectNameThatMatchesFilter = computed(() => {
@@ -358,14 +345,12 @@ function openProjectDialog () {
 
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
-  numberOfVisibleProjects.value = initialVisibleProjects
 
   if (!projectNameThatMatchesFilter.value) {
     return
   }
 
   highlightedProjectName.value = projectNameThatMatchesFilter.value
-  nextTick(() => scrollProjectIntoView(highlightedProjectName.value))
 }
 
 function highlightProjectWithKeys (keyDirection) {
@@ -385,73 +370,7 @@ function highlightProjectWithKeys (keyDirection) {
   const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex] // eslint-disable-line security/detect-object-injection
   highlightedProjectName.value = newHighlightedProject.metadata.name
 
-  if (currentHighlightedIndex >= numberOfVisibleProjects.value - 1) {
-    numberOfVisibleProjects.value++
-  }
-
-  scrollProjectIntoView(highlightedProjectName.value)
-}
-
-function scrollProjectIntoView (projectName, allowRecursion = true) {
-  if (!refProjectListItems.value) {
-    return
-  }
-
-  const projectListItem = refProjectListItems.value.find(child => {
-    return child.$attrs['data-g-project-name'] === projectName
-  })
-
-  if (allowRecursion && !projectListItem) {
-    const index = findProjectIndexCaseInsensitive(projectName)
-    const desiredCount = index + 1
-    if (desiredCount > numberOfVisibleProjects.value) {
-      numberOfVisibleProjects.value = desiredCount
-
-      nextTick(() => {
-        const allowRecursion = false // avoid recursive calls, preventing potential endless loop
-        scrollProjectIntoView(projectName, allowRecursion)
-      })
-    }
-    return
-  }
-
-  if (!projectListItem) {
-    return
-  }
-
-  const projectListElement = projectListItem.$el
-  if (projectListElement) {
-    scrollIntoView(projectListElement, false)
-  }
-}
-
-function scrollIntoView (element, ...args) {
-  element.scrollIntoView(...args)
-}
-
-function handleProjectListScroll () {
-  const projectListElement = refProjectList.value?.$el
-  if (!projectListElement) {
-    return
-  }
-  const projectListBottomPosY = projectListElement.getBoundingClientRect().top + projectListElement.getBoundingClientRect().height
-  const projectListChildren = refProjectListItems.value
-  if (isEmpty(projectListChildren)) {
-    return
-  }
-  const lastProjectElement = last(projectListChildren).$el
-  if (!lastProjectElement) {
-    return
-  }
-
-  const lastProjectElementPosY = projectListBottomPosY - lastProjectElement.getBoundingClientRect().top
-  const scrolledToLastElement = lastProjectElementPosY > 0
-  if (scrolledToLastElement) {
-    // scrolled last element into view
-    if (numberOfVisibleProjects.value <= sortedAndFilteredProjectList.value.length) {
-      numberOfVisibleProjects.value++
-    }
-  }
+  scrollToActiveProject()
 }
 
 function isHighlightedProject (project) {
@@ -472,8 +391,8 @@ watch(projectMenu, value => {
   if (value) {
     requestAnimationFrame(() => {
       setDelayedInputFocus(refProjectFilter)
+      scrollToActiveProject()
     })
-    nextTick(() => scrollProjectIntoView(selectedProjectName.value))
   } else {
     // reset highlighted project name on close
     highlightedProjectName.value = undefined
@@ -494,6 +413,20 @@ watch(
   },
   { immediate: true },
 )
+
+async function scrollToActiveProject () {
+  const activeProjectName = highlightedProjectName.value ?? selectedProject.value?.metadata.name
+  if (!activeProjectName || !refProjectVirtualScroll.value) {
+    return
+  }
+
+  let index = findProjectIndexCaseInsensitive(activeProjectName)
+  index = index - 1 // padding
+  if (index < 0) {
+    return
+  }
+  refProjectVirtualScroll.value.scrollToIndex(index)
+}
 
 </script>
 
