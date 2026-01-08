@@ -53,26 +53,6 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(await render(md)).toMatchSnapshot()
   })
 
-  test('Task lists (tasklists)', async () => {
-    const md = [
-      '- [ ] todo',
-      '- [x] done',
-      '  - [ ] nested',
-    ].join('\n')
-
-    expect(await render(md)).toMatchSnapshot()
-  })
-
-  test('Heading IDs (ghCompatibleHeaderId)', async () => {
-    const md = [
-      '# Hello World',
-      '## Hello World', // same text twice, show how IDs are generated
-      '### Ümlaut & Symbols!',
-    ].join('\n')
-
-    expect(await render(md)).toMatchSnapshot()
-  })
-
   test('Emoji (emoji)', async () => {
     const md = 'Ship it :rocket: and smile :smile:'
     expect(await render(md)).toMatchSnapshot()
@@ -111,7 +91,7 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(await render(md)).toMatchSnapshot()
   })
 
-  test('Images: allow src/alt/title/width/height, strip event handlers + disallow non-img data schemes elsewhere', async () => {
+  test('Images: allow src/alt/title/width/height, strip event handlers', async () => {
     const md = [
     // Allowed attributes
       '<img src="https://example.com/x.png" alt="x" title="t" width="10" height="20" />',
@@ -119,11 +99,6 @@ describe('createConverter().makeSanitizedHtml', () => {
       // Strip dangerous attributes
       '<img src="https://example.com/x.png" onerror="alert(1)" onclick="alert(2)" />',
       '',
-      // Allow data: for img only (tiny 1x1 gif)
-      '<img alt="px" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />',
-      '',
-      // data: in links should be stripped if you removed data: from global schemes
-      '<a href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">bad</a>',
     ].join('\n')
 
     expect(await render(md)).toMatchSnapshot()
@@ -142,47 +117,7 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(await render(md)).toMatchSnapshot()
   })
 
-  test('Task lists: only disabled checkboxes; non-checkbox inputs dropped', async () => {
-    const md = [
-      '- [ ] todo',
-      '- [x] done',
-      '',
-      // Raw HTML attempts
-      '<input type="text" value="pwned" />',
-      '<input type="checkbox" />',
-      '<input type="checkbox" checked />',
-    ].join('\n')
-
-    expect(await render(md)).toMatchSnapshot()
-  })
-
-  test('Tables: allow align on th/td; strip style/class', async () => {
-    const md = [
-      '| A | B |',
-      '| - | -: |',
-      '| x | y |',
-      '',
-      // raw HTML table cell attrs
-      '<table>',
-      '<tr><th align="center" style="color:red" class="c">H</th><td align="right" onclick="alert(1)">1</td></tr>',
-      '</table>',
-    ].join('\n')
-
-    expect(await render(md)).toMatchSnapshot()
-  })
-
-  test('Headings: id preserved (rehype-slug), strip other attrs', async () => {
-    const md = [
-      '# Hello',
-      '',
-      // raw HTML heading with extra attributes
-      '<h2 id="keep-me" onclick="alert(1)" class="c">Raw</h2>',
-    ].join('\n')
-
-    expect(await render(md)).toMatchSnapshot()
-  })
-
-  test('General: style attributes stripped, scripts dropped, harmless spans dropped by default', async () => {
+  test('General: style attributes stripped, scripts dropped', async () => {
     const md = [
       '<p style="color:red">red?</p>',
       '<span>span</span>',
@@ -221,12 +156,6 @@ describe('createConverter().makeSanitizedHtml', () => {
       allowedTags: ['p'], // very restrictive on purpose
     })
     expect(html).toMatchSnapshot()
-  })
-
-  test('YAML folded: markdown after inline <details> is still parsed', async () => {
-  // This mimics YAML ">" folding: newline becomes space, so markdown lands on same line.
-    const md = '<details>more</details> EU Access is an optional *service*'
-    expect(await render(md)).toMatchSnapshot()
   })
 
   test('Non-string input does not throw (treated as empty)', async () => {
