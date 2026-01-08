@@ -84,7 +84,7 @@ function toTerminalMetadata (terminal) {
   return metadata
 }
 
-async function imageHelpText (terminal) {
+async function getImageHelpText (terminal) {
   const containerImage = _.get(terminal, ['spec', 'host', 'pod', 'container', 'image'])
   const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
   const containerImageDescription = findImageDescription(containerImage, containerImageDescriptions)
@@ -583,13 +583,15 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     await ensureServiceAccountCleanup(client, { terminal, namespace, name: DASHBOARD_WEBTERMINAL_NAME })
   }
 
+  const imageHelpText = await getImageHelpText(terminal)
+
   return {
     metadata: toTerminalMetadata(terminal),
     hostCluster: {
       kubeApiServer: hostCluster.kubeApiServer,
       namespace: terminal.spec.host.namespace,
     },
-    imageHelpText: await imageHelpText(terminal),
+    imageHelpText,
   }
 }
 
