@@ -4,15 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-let cachedModule
-let cachedConverter
+let enginePromise
 
 async function getConverter () {
-  if (!cachedConverter) {
-    if (!cachedModule) cachedModule = await import('./markdown.engine.mjs')
-    cachedConverter = cachedModule.createConverter()
+  if (!enginePromise) {
+    enginePromise = (async () => {
+      const module = await import('./markdown.engine.mjs')
+      return module.createConverter()
+    })()
   }
-  return cachedConverter
+  return enginePromise
 }
 
 export function createConverter () {

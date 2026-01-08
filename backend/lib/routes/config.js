@@ -27,15 +27,16 @@ async function getFrontendConfig () {
   }
 
   if (!cachedFrontendConfigPromise) {
-    cachedFrontendConfigPromise = sanitizeFrontendConfig(config.frontend)
-      .then(cfg => {
+    cachedFrontendConfigPromise = (async () => {
+      try {
+        const cfg = await sanitizeFrontendConfig(config.frontend)
         cachedFrontendConfig = cfg
         return cfg
-      })
-      .catch(err => {
+      } catch (err) {
         cachedFrontendConfigPromise = undefined
         throw err
-      })
+      }
+    })()
   }
   return cachedFrontendConfigPromise
 }
