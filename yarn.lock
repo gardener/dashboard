@@ -1008,6 +1008,7 @@ __metadata:
     remark-breaks: "npm:^4.0.0"
     remark-emoji: "npm:^5.0.2"
     remark-gfm: "npm:^4.0.1"
+    remark-github: "npm:^12.0.0"
     remark-parse: "npm:^11.0.0"
     remark-rehype: "npm:^11.1.2"
     rollup: "npm:^4.41.1"
@@ -10534,6 +10535,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"remark-github@npm:^12.0.0":
+  version: 12.0.0
+  resolution: "remark-github@npm:12.0.0"
+  dependencies:
+    "@types/mdast": "npm:^4.0.0"
+    mdast-util-find-and-replace: "npm:^3.0.0"
+    mdast-util-to-string: "npm:^4.0.0"
+    to-vfile: "npm:^8.0.0"
+    unist-util-visit: "npm:^5.0.0"
+    vfile: "npm:^6.0.0"
+  checksum: 10c0/8615fed0f9f7208ee35e40a06fee149d4133200e535291a22531739b026ae21cc2f1a629206ef1eda06e0008c76c31cb7252ded9c349f3920d32402562e9dae2
+  languageName: node
+  linkType: hard
+
 "remark-parse@npm:^11.0.0":
   version: 11.0.0
   resolution: "remark-parse@npm:11.0.0"
@@ -11807,6 +11822,15 @@ __metadata:
   dependencies:
     is-number: "npm:^7.0.0"
   checksum: 10c0/487988b0a19c654ff3e1961b87f471702e708fa8a8dd02a298ef16da7206692e8552a0250e8b3e8759270f62e9d8314616f6da274734d3b558b1fc7b7724e892
+  languageName: node
+  linkType: hard
+
+"to-vfile@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "to-vfile@npm:8.0.0"
+  dependencies:
+    vfile: "npm:^6.0.0"
+  checksum: 10c0/2547093592f752e204fc01292461dc851894df42ddbedcf9f291f1fc431d20287e0a730c1fe19e17a76ce6504f34ec27ec801003a4491fdc731db0c972e3fe35
   languageName: node
   linkType: hard
 

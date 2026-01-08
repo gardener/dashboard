@@ -7,6 +7,7 @@
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
+import remarkGithub from 'remark-github'
 import remarkBreaks from 'remark-breaks'
 import remarkEmoji from 'remark-emoji'
 import remarkRehype from 'remark-rehype'
@@ -21,6 +22,7 @@ const SANITIZE = {
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
+  .use(remarkGithub)   // ← add this
   .use(remarkBreaks)
   .use(remarkEmoji, { emoticon: false })
 

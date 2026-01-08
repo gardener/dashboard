@@ -1715,6 +1715,7 @@ const RAW_RUNTIME_STATE =
           ["remark-breaks", "npm:4.0.0"],\
           ["remark-emoji", "npm:5.0.2"],\
           ["remark-gfm", "npm:4.0.1"],\
+          ["remark-github", "npm:12.0.0"],\
           ["remark-parse", "npm:11.0.0"],\
           ["remark-rehype", "npm:11.1.2"],\
           ["rollup", "npm:4.50.0"],\
@@ -13431,6 +13432,21 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["remark-github", [\
+      ["npm:12.0.0", {\
+        "packageLocation": "./.yarn/cache/remark-github-npm-12.0.0-1bdc568717-8615fed0f9.zip/node_modules/remark-github/",\
+        "packageDependencies": [\
+          ["@types/mdast", "npm:4.0.4"],\
+          ["mdast-util-find-and-replace", "npm:3.0.2"],\
+          ["mdast-util-to-string", "npm:4.0.0"],\
+          ["remark-github", "npm:12.0.0"],\
+          ["to-vfile", "npm:8.0.0"],\
+          ["unist-util-visit", "npm:5.0.0"],\
+          ["vfile", "npm:6.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["remark-parse", [\
       ["npm:11.0.0", {\
         "packageLocation": "./.yarn/cache/remark-parse-npm-11.0.0-6484fba69e-6eed15ddb8.zip/node_modules/remark-parse/",\
@@ -14777,6 +14793,16 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["is-number", "npm:7.0.0"],\
           ["to-regex-range", "npm:5.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["to-vfile", [\
+      ["npm:8.0.0", {\
+        "packageLocation": "./.yarn/cache/to-vfile-npm-8.0.0-d5e2b0354d-2547093592.zip/node_modules/to-vfile/",\
+        "packageDependencies": [\
+          ["to-vfile", "npm:8.0.0"],\
+          ["vfile", "npm:6.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
