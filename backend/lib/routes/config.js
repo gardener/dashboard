@@ -66,14 +66,11 @@ async function sanitizeFrontendConfig (frontendConfig) {
   const converter = createConverter()
   const tasks = []
 
-  const convertAndSanitize = (obj, key) => {
+  const convertAndSanitize = async (obj, key) => {
     const value = obj?.[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     if (value) {
-      tasks.push(
-        converter.makeSanitizedHtml(value).then(html => {
-          obj[key] = html // eslint-disable-line security/detect-object-injection -- key is a local fixed string
-        }),
-      )
+      const html = await converter.makeSanitizedHtml(value)
+      obj[key] = html // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     }
   }
 
@@ -91,16 +88,16 @@ async function sanitizeFrontendConfig (frontendConfig) {
     controlPlaneHighAvailabilityHelp = {},
   } = sanitizedFrontendConfig
 
-  convertAndSanitize(alert, 'message')
+  tasks.push(convertAndSanitize(alert, 'message'))
 
   for (const costObject of costObjects) {
-    convertAndSanitize(costObject, 'description')
+    tasks.push(convertAndSanitize(costObject, 'description'))
   }
 
-  convertAndSanitize(sla, 'description')
-  convertAndSanitize(addonDefinition, 'description')
-  convertAndSanitize(resourceQuotaHelp, 'text')
-  convertAndSanitize(controlPlaneHighAvailabilityHelp, 'text')
+  tasks.push(convertAndSanitize(sla, 'description'))
+  tasks.push(convertAndSanitize(addonDefinition, 'description'))
+  tasks.push(convertAndSanitize(resourceQuotaHelp, 'text'))
+  tasks.push(convertAndSanitize(controlPlaneHighAvailabilityHelp, 'text'))
 
   for (const item of items) {
     const {
@@ -108,20 +105,20 @@ async function sanitizeFrontendConfig (frontendConfig) {
       input = {},
       options = [],
     } = item
-    convertAndSanitize(display, 'description')
-    convertAndSanitize(input, 'description')
+    tasks.push(convertAndSanitize(display, 'description'))
+    tasks.push(convertAndSanitize(input, 'description'))
     for (const option of options) {
       const {
         display = {},
         input = {},
       } = option
-      convertAndSanitize(display, 'description')
-      convertAndSanitize(input, 'description')
+      tasks.push(convertAndSanitize(display, 'description'))
+      tasks.push(convertAndSanitize(input, 'description'))
     }
   }
 
   for (const vendorHint of vendorHints) {
-    convertAndSanitize(vendorHint, 'message')
+    tasks.push(convertAndSanitize(vendorHint, 'message'))
   }
 
   await Promise.all(tasks)

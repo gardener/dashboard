@@ -34,6 +34,7 @@ export const converter = createConverter(options)
 export async function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
   const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
+  const body = await converter.makeSanitizedHtml(issue.body)
   return {
     kind: 'issue',
     metadata: _
@@ -59,7 +60,7 @@ export async function fromIssue (issue) {
         'comments',
       ])
       .assign({
-        body: await converter.makeSanitizedHtml(issue.body),
+        body,
         labels,
         ticketTitle,
       })
@@ -68,6 +69,7 @@ export async function fromIssue (issue) {
 }
 
 export async function fromComment (number, name, projectName, item) {
+  const body = await converter.makeSanitizedHtml(item.body)
   const metadata = _
     .chain(item)
     .pick([
@@ -89,7 +91,7 @@ export async function fromComment (number, name, projectName, item) {
       'html_url',
     ])
     .assign({
-      body: await converter.makeSanitizedHtml(item.body),
+      body,
     })
     .value()
   return {
