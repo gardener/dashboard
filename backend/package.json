@@ -71,6 +71,7 @@
     "remark-breaks": "^4.0.0",
     "remark-emoji": "^5.0.2",
     "remark-gfm": "^4.0.1",
+    "remark-github": "^12.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "sanitize-html": "^2.17.0",
