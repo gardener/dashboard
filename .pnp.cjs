@@ -1711,7 +1711,6 @@ const RAW_RUNTIME_STATE =
           ["p-timeout", "npm:4.1.0"],\
           ["path-to-regexp", "npm:8.2.0"],\
           ["rehype-external-links", "npm:3.0.0"],\
-          ["rehype-slug", "npm:6.0.0"],\
           ["rehype-stringify", "npm:10.0.1"],\
           ["remark-breaks", "npm:4.0.0"],\
           ["remark-emoji", "npm:5.0.2"],\
@@ -9145,15 +9144,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["github-slugger", [\
-      ["npm:2.0.0", {\
-        "packageLocation": "./.yarn/cache/github-slugger-npm-2.0.0-3afba76e6c-21b912b6b1.zip/node_modules/github-slugger/",\
-        "packageDependencies": [\
-          ["github-slugger", "npm:2.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["glob", [\
       ["npm:10.4.5", {\
         "packageLocation": "./.yarn/cache/glob-npm-10.4.5-8c63175f05-19a9759ea7.zip/node_modules/glob/",\
@@ -9380,16 +9370,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["hast-util-heading-rank", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/hast-util-heading-rank-npm-3.0.0-13dfda4ac8-1879c84f62.zip/node_modules/hast-util-heading-rank/",\
-        "packageDependencies": [\
-          ["@types/hast", "npm:3.0.4"],\
-          ["hast-util-heading-rank", "npm:3.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["hast-util-is-element", [\
       ["npm:3.0.0", {\
         "packageLocation": "./.yarn/cache/hast-util-is-element-npm-3.0.0-59c73c7f56-f5361e4c98.zip/node_modules/hast-util-is-element/",\
@@ -9416,16 +9396,6 @@ const RAW_RUNTIME_STATE =
           ["space-separated-tokens", "npm:2.0.2"],\
           ["stringify-entities", "npm:4.0.4"],\
           ["zwitch", "npm:2.0.4"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["hast-util-to-string", [\
-      ["npm:3.0.1", {\
-        "packageLocation": "./.yarn/cache/hast-util-to-string-npm-3.0.1-8d3f3baab6-b5fa1912a6.zip/node_modules/hast-util-to-string/",\
-        "packageDependencies": [\
-          ["@types/hast", "npm:3.0.4"],\
-          ["hast-util-to-string", "npm:3.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13393,20 +13363,6 @@ const RAW_RUNTIME_STATE =
           ["is-absolute-url", "npm:4.0.1"],\
           ["rehype-external-links", "npm:3.0.0"],\
           ["space-separated-tokens", "npm:2.0.2"],\
-          ["unist-util-visit", "npm:5.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["rehype-slug", [\
-      ["npm:6.0.0", {\
-        "packageLocation": "./.yarn/cache/rehype-slug-npm-6.0.0-110e571086-51303c33d0.zip/node_modules/rehype-slug/",\
-        "packageDependencies": [\
-          ["@types/hast", "npm:3.0.4"],\
-          ["github-slugger", "npm:2.0.0"],\
-          ["hast-util-heading-rank", "npm:3.0.0"],\
-          ["hast-util-to-string", "npm:3.0.1"],\
-          ["rehype-slug", "npm:6.0.0"],\
           ["unist-util-visit", "npm:5.0.0"]\
         ],\
         "linkType": "HARD"\

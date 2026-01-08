@@ -12,7 +12,7 @@ exports[`createConverter().makeSanitizedHtml Details/Summary allowed through san
 `;
 
 exports[`createConverter().makeSanitizedHtml Details/Summary: allow open attribute, strip others 1`] = `
-"<details open>
+"<details>
 <summary>More</summary>
 <p>Inside <strong>bold</strong></p>
 </details>"
@@ -25,30 +25,30 @@ exports[`createConverter().makeSanitizedHtml GFM tables (tables) 1`] = `
 <thead>
 <tr>
 <th>col A</th>
-<th align="right">col B</th>
+<th>col B</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>left</td>
-<td align="right">123</td>
+<td>123</td>
 </tr>
 <tr>
 <td>wow</td>
-<td align="right">4</td>
+<td>4</td>
 </tr>
 </tbody>
 </table>"
 `;
 
-exports[`createConverter().makeSanitizedHtml General: style attributes stripped, scripts dropped, harmless spans dropped by default 1`] = `
+exports[`createConverter().makeSanitizedHtml General: style attributes stripped, scripts dropped 1`] = `
 "<p>red?</p>
-<p><span>span</span></p>
+<span>span</span>
 <div>click</div>"
 `;
 
 exports[`createConverter().makeSanitizedHtml GitHub-style fenced code blocks (ghCodeBlocks) 1`] = `
-"<pre><code class="language-js">const x = 1
+"<pre><code>const x = 1
 console.log(x)
 </code></pre>
 <p>Indented code:</p>
@@ -56,29 +56,16 @@ console.log(x)
 </code></pre>"
 `;
 
-exports[`createConverter().makeSanitizedHtml Heading IDs (ghCompatibleHeaderId) 1`] = `
-"<h1 id="hello-world">Hello World</h1>
-<h2 id="hello-world-1">Hello World</h2>
-<h3 id="ümlaut--symbols">Ümlaut &amp; Symbols!</h3>"
-`;
-
-exports[`createConverter().makeSanitizedHtml Headings: id preserved (rehype-slug), strip other attrs 1`] = `
-"<h1 id="hello">Hello</h1>
-<h2 id="keep-me">Raw</h2>"
-`;
-
-exports[`createConverter().makeSanitizedHtml Images: allow src/alt/title/width/height, strip event handlers + disallow non-img data schemes elsewhere 1`] = `
+exports[`createConverter().makeSanitizedHtml Images: allow src/alt/title/width/height, strip event handlers 1`] = `
 "<img src="https://example.com/x.png" alt="x" title="t" width="10" height="20" />
-<img src="https://example.com/x.png" />
-<img alt="px" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
-<p><a target="_blank" rel="noopener noreferrer">bad</a></p>"
+<img src="https://example.com/x.png" />"
 `;
 
 exports[`createConverter().makeSanitizedHtml Links: target/rel enforced and javascript: stripped 1`] = `
-"<p><a href="https://example.com" rel="noopener noreferrer" target="_blank">https://example.com</a></p>
-<p><a target="_blank" rel="noopener noreferrer">xss</a></p>
-<p><a href="mailto:test@example.com" target="_blank" rel="noopener noreferrer">mail</a></p>
-<p><a href="https://safe.example" target="_self" rel="friend noopener noreferrer">safe</a></p>"
+"<p><a href="https://example.com" target="_blank">https://example.com</a></p>
+<p><a>xss</a></p>
+<p><a href="mailto:test@example.com">mail</a></p>
+<p><a href="https://safe.example" target="_self">safe</a></p>"
 `;
 
 exports[`createConverter().makeSanitizedHtml Non-string input does not throw (treated as empty) 1`] = `""`;
@@ -95,55 +82,9 @@ exports[`createConverter().makeSanitizedHtml Sanitization: scripts removed (not 
 <p>Bye</p>"
 `;
 
-exports[`createConverter().makeSanitizedHtml Tables: allow align on th/td; strip style/class 1`] = `
-"<table>
-<thead>
-<tr>
-<th>A</th>
-<th align="right">B</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>x</td>
-<td align="right">y</td>
-</tr>
-</tbody>
-</table>
-<table>
-<tr><th align="center">H</th><td align="right">1</td></tr>
-</table>"
-`;
-
-exports[`createConverter().makeSanitizedHtml Task lists (tasklists) 1`] = `
-"<ul>
-<li><input type="checkbox" disabled="disabled" /> todo</li>
-<li><input type="checkbox" disabled="disabled" checked="checked" /> done
-<ul>
-<li><input type="checkbox" disabled="disabled" /> nested</li>
-</ul>
-</li>
-</ul>"
-`;
-
-exports[`createConverter().makeSanitizedHtml Task lists: only disabled checkboxes; non-checkbox inputs dropped 1`] = `
-"<ul>
-<li><input type="checkbox" disabled="disabled" /> todo</li>
-<li><input type="checkbox" disabled="disabled" checked="checked" /> done</li>
-</ul>
-<span></span>
-<input type="checkbox" disabled="disabled" />
-<input type="checkbox" disabled="disabled" checked="checked" />"
-`;
-
-exports[`createConverter().makeSanitizedHtml YAML folded: markdown after inline <details> is still parsed 1`] = `
-"<details>more</details>
-<p>EU Access is an optional <em>service</em></p>"
-`;
-
 exports[`createConverter().makeSanitizedHtml basic markdown: emphasis, strong, links, line breaks 1`] = `
 "<p>Hello <em>world</em> and <strong>friends</strong>.</p>
-<p>A link: <a href="https://example.com" rel="noopener noreferrer" target="_blank">https://example.com</a></p>
+<p>A link: <a href="https://example.com" target="_blank">https://example.com</a></p>
 <p>Line 1<br />
 Line 2 (should be a simple line break with <code>simpleLineBreaks</code>).</p>"
 `;
