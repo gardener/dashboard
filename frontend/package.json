@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.83.0-dev",
+  "version": "1.84.0-dev",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "author": "Koser, Holger <holger.koser@sap.com>",
@@ -115,5 +115,5 @@
   "engines": {
     "node": "22.18.0"
   },
-  "stableVersion": "1.82.0"
+  "stableVersion": "1.83.0"
 }

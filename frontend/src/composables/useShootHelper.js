@@ -19,6 +19,14 @@ import { useProjectStore } from '@/store/project'
 
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useDefaultNodesCIDR } from '@/composables/useCloudProfile/useDefaultNodesCIDR.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
+import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -102,6 +110,43 @@ export function createShootHelperComposable (shootItem, options = {}) {
     return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
   })
 
+  const {
+    sortedKubernetesVersions,
+    useKubernetesVersionIsNotLatestPatch,
+  } = useKubernetesVersions(cloudProfile)
+
+  const {
+    machineImages,
+  } = useMachineImages(cloudProfile)
+
+  const {
+    useZones,
+    useRegionsWithSeed,
+    useRegionsWithoutSeed,
+  } = useRegions(cloudProfile)
+
+  const {
+    machineTypes,
+    useMachineArchitectures,
+  } = useMachineTypes(cloudProfile, useZones)
+
+  const {
+    useFloatingPoolNames,
+    useLoadBalancerProviderNames,
+    loadBalancerClassNames,
+  } = useOpenStackConstraints(cloudProfile)
+
+  const {
+    usePartitionIDs,
+    firewallImages,
+    useFirewallSizes,
+  } = useMetalConstraints(cloudProfile, useZones)
+
+  const {
+    volumeTypes: allVolumeTypes,
+    useFilteredVolumeTypes,
+  } = useVolumeTypes(cloudProfile)
+
   const seed = computed(() => {
     return seedStore.seedByName(seedName.value)
   })
@@ -111,7 +156,8 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const seeds = computed(() => {
-    return cloudProfileStore.seedsByCloudProfileRef(cloudProfileRef.value, project.value)
+    const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
+    return seedStore.seedsForCloudProfileByProject(cloudProfile, project.value)
   })
 
   const isFailureToleranceTypeZoneSupported = computed(() => {
@@ -124,36 +170,22 @@ export function createShootHelperComposable (shootItem, options = {}) {
     })
   })
 
-  const allZones = computed(() => {
-    return cloudProfileStore.zonesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const allZones = useZones(region)
 
-  const regionsWithSeed = computed(() => {
-    return cloudProfileStore.regionsWithSeedByCloudProfileRef(cloudProfileRef.value, project.value)
-  })
+  const regionsWithSeed = useRegionsWithSeed(project)
 
-  const regionsWithoutSeed = computed(() => {
-    return cloudProfileStore.regionsWithoutSeedByCloudProfileRef(cloudProfileRef.value, project.value)
-  })
+  const regionsWithoutSeed = useRegionsWithoutSeed(project)
 
-  const defaultNodesCIDR = computed(() => {
-    return cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef.value)
-  })
+  const { defaultNodesCIDR } = useDefaultNodesCIDR(cloudProfile)
 
   const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
-  const sortedKubernetesVersions = computed(() => {
-    return cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value)
-  })
+  const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 
-  const kubernetesVersionIsNotLatestPatch = computed(() => {
-    return cloudProfileStore.kubernetesVersionIsNotLatestPatch(kubernetesVersion.value, cloudProfileRef.value)
-  })
-
-  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
+  const {
+    selfTerminationDays,
+    openStackDomainName,
+  } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
@@ -164,69 +196,20 @@ export function createShootHelperComposable (shootItem, options = {}) {
       : ['evaluation', 'development', 'testing', 'production']
   })
 
-  const allLoadBalancerProviderNames = computed(() => {
-    return cloudProfileStore.loadBalancerProviderNamesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
+  const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
 
-  const allLoadBalancerClassNames = computed(() => {
-    return cloudProfileStore.loadBalancerClassNamesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const partitionIDs = usePartitionIDs(region)
 
-  const partitionIDs = computed(() => {
-    return cloudProfileStore.partitionIDsByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
-
-  const firewallImages = computed(() => {
-    return cloudProfileStore.firewallImagesByCloudProfileRef(cloudProfileRef.value)
-  })
-
+  const sizes = useFirewallSizes(region)
   const firewallSizes = computed(() => {
-    const firewallSizes = cloudProfileStore.firewallSizesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-    return map(firewallSizes, 'name')
+    return map(sizes.value, 'name')
   })
 
-  const allFloatingPoolNames = computed(() => {
-    return cloudProfileStore.floatingPoolNamesByCloudProfileRefAndRegionAndDomain({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-      secretDomain: get(infrastructureBinding.value, ['data', 'domainName']),
-    })
-  })
+  const allFloatingPoolNames = useFloatingPoolNames(region, openStackDomainName)
 
-  const allMachineTypes = computed(() => {
-    return cloudProfileStore.machineTypesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const machineArchitectures = useMachineArchitectures(region)
 
-  const machineArchitectures = computed(() => {
-    return cloudProfileStore.machineArchitecturesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
-
-  const allVolumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileRef(cloudProfileRef.value)
-  })
-
-  const volumeTypes = computed(() => {
-    return cloudProfileStore.volumeTypesByCloudProfileRefAndRegion({
-      cloudProfileRef: cloudProfileRef.value,
-      region: region.value,
-    })
-  })
-
-  const machineImages = computed(() => {
-    return cloudProfileStore.machineImagesByCloudProfileRef(cloudProfileRef.value)
-  })
+  const volumeTypes = useFilteredVolumeTypes(region)
 
   const networkingTypes = computed(() => {
     return gardenerExtensionStore.networkingTypes
@@ -263,7 +246,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     regionsWithSeed,
     regionsWithoutSeed,
     allLoadBalancerProviderNames,
-    allLoadBalancerClassNames,
+    allLoadBalancerClassNames: loadBalancerClassNames,
     partitionIDs,
     firewallImages,
     firewallSizes,
@@ -272,7 +255,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     accessRestrictionDefinitions,
     accessRestrictionOptionDefinitions,
     accessRestrictionNoItemsText,
-    allMachineTypes,
+    allMachineTypes: machineTypes,
     machineArchitectures,
     allVolumeTypes,
     volumeTypes,

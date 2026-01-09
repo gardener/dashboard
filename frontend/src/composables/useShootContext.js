@@ -29,6 +29,12 @@ import { useLogger } from '@/composables/useLogger'
 import { createShootHelperComposable } from '@/composables/useShootHelper'
 import { useShootMetadata } from '@/composables/useShootMetadata'
 import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrictions'
+import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
+import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
+import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
+import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
 import {
   scheduleEventsFromCrontabBlocks,
@@ -46,10 +52,14 @@ import {
   shootAddonList,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
+  convertToGi,
+  defaultCriNameByKubernetesVersion,
 } from '@/utils'
 
 import { useShootDns } from './useShootDns'
 
+import pick from 'lodash/pick'
+import sample from 'lodash/sample'
 import size from 'lodash/size'
 import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
@@ -188,9 +198,9 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetKubernetesVersion () {
-    const kubernetesVersions = map(cloudProfileStore.sortedKubernetesVersions(cloudProfileRef.value), 'version')
+    const kubernetesVersions = map(sortedKubernetesVersions.value, 'version')
     if (!kubernetesVersion.value || !includes(kubernetesVersions, kubernetesVersion.value)) {
-      const defaultKubernetesVersionDescriptor = cloudProfileStore.defaultKubernetesVersionForCloudProfileRef(cloudProfileRef.value)
+      const defaultKubernetesVersionDescriptor = defaultKubernetesVersion.value
       kubernetesVersion.value = get(defaultKubernetesVersionDescriptor, ['version'])
     }
   }
@@ -352,7 +362,7 @@ export function createShootContextComposable (options = {}) {
       kubernetes,
       networking,
       provider,
-    } = getSpecTemplate(providerType.value, cloudProfileStore.getDefaultNodesCIDR(cloudProfileRef))
+    } = getSpecTemplate(providerType.value, defaultNodesCIDR.value)
     set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
@@ -436,13 +446,6 @@ export function createShootContextComposable (options = {}) {
   function resetProviderInfrastructureConfigPartitionID () {
     providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
   }
-
-  const allFirewallNetworks = computed(() => {
-    return cloudProfileStore.firewallNetworksByCloudProfileRefAndPartitionId({
-      cloudProfileRef: cloudProfileRef.value,
-      partitionID: providerInfrastructureConfigPartitionID.value,
-    })
-  })
 
   const providerInfrastructureConfigProjectID = computed({
     get () {
@@ -564,13 +567,10 @@ export function createShootContextComposable (options = {}) {
   }
 
   function generateProviderWorker (zones) {
-    const { id, isNew, ...worker } = cloudProfileStore.generateWorker(
+    const { id, isNew, ...worker } = generateWorker(
       !isEmpty(zones)
         ? zones
         : availableZones.value,
-      cloudProfileRef.value,
-      region.value,
-      kubernetesVersion.value,
     )
     Object.defineProperty(worker, 'isNew', { value: isNew })
     return worker
@@ -940,6 +940,15 @@ export function createShootContextComposable (options = {}) {
     seedStore,
   })
 
+  const {
+    defaultKubernetesVersion,
+  } = useKubernetesVersions(cloudProfile)
+
+  const { useZones } = useRegions(cloudProfile)
+  const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
+
+  const allFirewallNetworks = useFirewallNetworks(providerInfrastructureConfigPartitionID)
+
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
     if (controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed.value) {
@@ -956,6 +965,54 @@ export function createShootContextComposable (options = {}) {
   }, {
     flush: 'sync',
   })
+
+  const { useMachineArchitectures, useFilteredMachineTypes } = useMachineTypes(cloudProfile)
+  const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+  const { useFilteredVolumeTypes, useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
+  const machineArchitecture = useMachineArchitectures(region)
+  const architecture = computed(() => head(machineArchitecture.value))
+  const machineTypesForZone = useFilteredMachineTypes(region, architecture)
+  const volumeTypesForZone = useFilteredVolumeTypes(region)
+  const machineType = computed(() => head(machineTypesForZone.value) || {})
+  const volumeType = computed(() => head(volumeTypesForZone.value) || {})
+  const minVolumeSize = useMinimumVolumeSize(machineType, volumeType)
+  const machineTypeArchitecture = computed(() => get(machineType.value, ['architecture']))
+  const machineImage = useDefaultMachineImage(machineTypeArchitecture)
+
+  function generateWorker (availableZones) {
+    const id = uuidv4()
+    const name = `worker-${shortRandomString(5)}`
+    const criNames = map(machineImage.value?.cri, 'name')
+    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion.value)
+
+    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+
+    const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
+    const worker = {
+      id,
+      name,
+      minimum: 1,
+      maximum: 2,
+      maxSurge: 1,
+      machine: {
+        type: machineType.value.name,
+        image: pick(machineImage.value, ['name', 'version']),
+        architecture,
+      },
+      zones,
+      cri: {
+        name: criName,
+      },
+      isNew: true,
+    }
+    if (volumeType.value.name) {
+      worker.volume = {
+        type: volumeType.value.name,
+        size: defaultVolumeSize,
+      }
+    }
+    return worker
+  }
 
   return {
     /* manifest */

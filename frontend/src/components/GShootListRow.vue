@@ -270,6 +270,7 @@ import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
 import { formatValue } from '@/composables/useProjectShootCustomFields/helper'
 import { useProjectMetadata } from '@/composables/useProjectMetadata/index.js'
+import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 
 import { getIssueSince } from '@/utils'
 
@@ -344,6 +345,9 @@ useProvideShootHelper(shootItem, {
 
 const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
 useProvideSeedItem(seedItem)
+
+const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
+const { machineImages } = useMachineImages(cloudProfile)
 
 const isInfoAvailable = computed(() => {
   // operator not yet updated shoot resource
@@ -431,10 +435,9 @@ const cells = computed(() => {
 })
 
 const hasShootWorkerGroupWarning = computed(() => {
-  const machineImages = cloudProfileStore.machineImagesByCloudProfileRef(shootCloudProfileRef.value)
   return some(shootWorkerGroups.value, workerGroup => {
     const { name, version } = get(workerGroup, ['machine', 'image'], {})
-    const machineImage = find(machineImages, { name, version })
+    const machineImage = find(machineImages.value, { name, version })
     return !machineImage || machineImage?.isDeprecated
   })
 })
