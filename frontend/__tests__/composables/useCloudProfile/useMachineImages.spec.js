@@ -89,7 +89,7 @@ describe('composables', () => {
           matchNames: ['gardenlinux'],
         }],
         branding: {
-          imageVendors: [{
+          machineImageVendors: [{
             name: 'foo',
             displayName: 'Foo Inc.',
             icon: 'foo-icon.svg',

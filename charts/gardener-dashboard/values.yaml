@@ -322,6 +322,11 @@ global:
       # branding:
       #   productName: Nucleus
       #   productDescription: Supercool Cluster Service
+      #   infraVendors:
+      #   - name: aws
+      #     displayName: Customized AWS
+      #     icon: aws-custom.svg
+      #     weight: 400
 
       # # themes - overwrite theme colors with custom colors, use html color codes or material design colors defined by vuetify in the javascript color pack: https://vuetifyjs.com/en/styles/colors/#javascript-color-pack
       # themes:

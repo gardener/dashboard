@@ -243,8 +243,8 @@ export const useConfigStore = defineStore('config', () => {
     return []
   })
 
-  const configImageVendors = computed(() => {
-    const vendors = branding.value.imageVendors
+  const configMachineImageVendors = computed(() => {
+    const vendors = branding.value.machineImageVendors
     if (vendors && Array.isArray(vendors)) {
       return vendors
     }
@@ -254,7 +254,7 @@ export const useConfigStore = defineStore('config', () => {
   const configVendors = computed(() => ({
     infra: configInfraVendors.value,
     dns: configDNSVendors.value,
-    image: configImageVendors.value,
+    machineImage: configMachineImageVendors.value,
   }))
 
   const terminal = computed(() => {
@@ -573,7 +573,7 @@ export const useConfigStore = defineStore('config', () => {
     },
   ]
 
-  const knownImageVendors = [
+  const knownMachineImageVendors = [
     // os
     {
       name: 'gardenlinux',
@@ -622,7 +622,7 @@ export const useConfigStore = defineStore('config', () => {
   const knownVendors = {
     infra: knownInfraVendors,
     dns: knownDNSVendors,
-    image: knownImageVendors,
+    machineImage: knownMachineImageVendors,
   }
 
   const vendorKey = (type, name) => `${type}::${name}`
@@ -690,8 +690,8 @@ export const useConfigStore = defineStore('config', () => {
     }
   }
 
-  function vendorDisplayName (name, type) {
-    return get(vendorDetails(name, type), ['displayName'], name)
+  function vendorDisplayName (name) {
+    return get(vendorDetails(name), ['displayName'], name)
   }
 
   const dnsProviderTypesList = computed(() => {
