@@ -68,8 +68,7 @@ export function useMachineImages (cloudProfile) {
         vendor,
       }
     })
-    const visibleMachineImagesWithVendors = filter(machineImagesWithVendors, ({ vendor }) => !vendor.hidden)
-    const sortedMachineImagesWithVendors = sortBy(visibleMachineImagesWithVendors, 'vendor.weight')
+    const sortedMachineImagesWithVendors = sortBy(machineImagesWithVendors, 'vendor.weight')
 
     return flatMap(sortedMachineImagesWithVendors, machineImage => {
       const { name, updateStrategy = 'major' } = machineImage

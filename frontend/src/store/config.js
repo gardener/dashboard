@@ -25,7 +25,6 @@ import isEmpty from 'lodash/isEmpty'
 import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
-import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 
@@ -703,8 +702,7 @@ export const useConfigStore = defineStore('config', () => {
 
   const sortedDnsProviderTypeList = computed(() => {
     const dnsProviderVendors = map(dnsProviderTypesList.value, vendorDetails)
-    const visibleDnsVendors = filter(dnsProviderVendors, ({ hidden }) => !hidden)
-    const sortedVisibleDnsVendors = sortBy(visibleDnsVendors, 'weight')
+    const sortedVisibleDnsVendors = sortBy(dnsProviderVendors, 'weight')
     return map(sortedVisibleDnsVendors, 'name')
   })
 
