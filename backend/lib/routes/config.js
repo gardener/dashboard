@@ -17,27 +17,19 @@ const { dashboardClient } = kubeClientModule
 const router = express.Router()
 const metricsMiddleware = metricsRoute('config')
 
-// cache sanitized config (value + in-flight promise)
-let cachedFrontendConfig
 let cachedFrontendConfigPromise
-
 async function getFrontendConfig () {
-  if (cachedFrontendConfig) {
-    return cachedFrontendConfig
+  if (cachedFrontendConfigPromise) {
+    return cachedFrontendConfigPromise
   }
-
-  if (!cachedFrontendConfigPromise) {
-    cachedFrontendConfigPromise = (async () => {
-      try {
-        const cfg = await sanitizeFrontendConfig(config.frontend)
-        cachedFrontendConfig = cfg
-        return cfg
-      } catch (err) {
-        cachedFrontendConfigPromise = undefined
-        throw err
-      }
-    })()
-  }
+  cachedFrontendConfigPromise = (async () => {
+    try {
+      return await sanitizeFrontendConfig(config.frontend)
+    } catch (err) {
+      cachedFrontendConfigPromise = undefined
+      throw err
+    }
+  })()
   return cachedFrontendConfigPromise
 }
 

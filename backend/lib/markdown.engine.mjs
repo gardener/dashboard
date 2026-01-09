@@ -22,11 +22,12 @@ const SANITIZE = {
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkGithub)   // ← add this
+  .use(remarkGithub)
   .use(remarkBreaks)
   .use(remarkEmoji, { emoticon: false })
 
-  // Keep raw HTML as raw nodes (do NOT parse it into the tree)
+  // Keep raw HTML as raw nodes, required too keep some tags like details/summary
+  // Unsafe HTML will be sanitized later
   .use(remarkRehype, { allowDangerousHtml: true })
 
   .use(rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] })
