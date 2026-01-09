@@ -88,7 +88,7 @@ async function getImageHelpText (terminal) {
   const containerImage = _.get(terminal, ['spec', 'host', 'pod', 'container', 'image'])
   const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
   const containerImageDescription = findImageDescription(containerImage, containerImageDescriptions)
-  return await converter.makeSanitizedHtml(containerImageDescription)
+  return converter.makeSanitizedHtml(containerImageDescription)
 }
 
 export function findImageDescription (containerImage, containerImageDescriptions) {
