@@ -260,7 +260,7 @@ export default {
 
     const defaultMachineTypeArchitecture = computed(() => get(defaultMachineType.value, ['architecture']))
 
-    const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture.value)
+    const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture)
 
     const selectedMachineType = computed(() => find(machineTypes.value, ['name', props.worker.machine.type]))
     const selectedVolumeType = computed(() => find(volumeTypes.value, ['name', props.worker.volume?.type]))
