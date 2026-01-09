@@ -123,7 +123,7 @@ export function useMachineImages (cloudProfile) {
    */
   function useDefaultMachineImage (architecture) {
     if (!isRef(architecture)) {
-      throw new Error('machineType must be a ref!')
+      throw new Error('architecture must be a ref!')
     }
 
     return computed(() => {
