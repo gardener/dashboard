@@ -262,7 +262,7 @@ import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
-import GProjectTooltip from '@/components/GProjectTooltip.vue'
+import GProjectTooltip from '@/components/GProjectInfo.vue'
 
 import { useProvideSeedItem } from '@/composables/useSeedItem'
 import { useShootAction } from '@/composables/useShootAction'

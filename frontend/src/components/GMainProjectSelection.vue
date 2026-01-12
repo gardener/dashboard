@@ -24,6 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         elevation="4"
         variant="flat"
         class="project-selector text-main-navigation-title"
+        v-on="bindTooltip(selectedProject, { key: selectedProject.metadata.uid })"
       >
         <template #prepend>
           <v-icon
@@ -35,20 +36,14 @@ SPDX-License-Identifier: Apache-2.0
           class="text-left"
           :class="{ placeholder: !selectedProject }"
         >
-          <div class="flex-align-center">
-            <g-project-tooltip
-              :open-delay="1000"
-              :project="selectedProject"
-              :open-on-hover="!isAllProjectsItem(selectedProject)"
+          <div class="flex-align-center flex-wrap">
+            <div>{{ selectedProjectName }}</div>
+            <div
+              v-if="!!selectedProjectTitle"
+              class="selected-project-title"
             >
-              <div>{{ selectedProjectName }}</div>
-              <div
-                v-if="!!selectedProjectTitle"
-                class="selected-project-title"
-              >
-                {{ selectedProjectTitle }}
-              </div>
-            </g-project-tooltip>
+              {{ selectedProjectTitle }}
+            </div>
 
             <template v-if="selectedProject">
               <g-stale-project-warning
@@ -116,27 +111,22 @@ SPDX-License-Identifier: Apache-2.0
               :class="{ 'highlighted-item': isHighlightedProject(project) }"
               :data-g-project-name="project.metadata.name"
               @click="onProjectClick($event, project)"
+              v-on="bindTooltip(project, { key: project.metadata.uid })"
             >
               <template #prepend>
                 <v-icon color="primary">
                   {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
                 </v-icon>
               </template>
-              <g-project-tooltip
-                :open-delay="1000"
-                :project="project"
-                :open-on-hover="!isAllProjectsItem(project)"
-              >
-                <v-list-item-title class="project-name text-uppercase">
-                  {{ project.metadata.name }}
-                </v-list-item-title>
-                <v-list-item-title class="project-title">
-                  {{ getProjectTitle(project) }}
-                </v-list-item-title>
-                <v-list-item-subtitle class="project-owner">
-                  {{ getProjectOwner(project) }}
-                </v-list-item-subtitle>
-              </g-project-tooltip>
+              <v-list-item-title class="project-name text-uppercase">
+                {{ project.metadata.name }}
+              </v-list-item-title>
+              <v-list-item-title class="project-title">
+                {{ getProjectTitle(project) }}
+              </v-list-item-title>
+              <v-list-item-subtitle class="project-owner">
+                {{ getProjectOwner(project) }}
+              </v-list-item-subtitle>
               <template #append>
                 <g-stale-project-warning
                   :project="project"
@@ -173,6 +163,14 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-actions>
     </v-card>
   </v-menu>
+  <g-programmatic-tooltip
+    :tooltip="tooltip"
+    :max-width="300"
+  >
+    <template #default="{ payload }">
+      <g-project-info :project="payload" />
+    </template>
+  </g-programmatic-tooltip>
 </template>
 
 <script setup>
@@ -192,10 +190,12 @@ import { useProjectStore } from '@/store/project'
 
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
-import GProjectTooltip from '@/components/GProjectTooltip.vue'
+import GProjectInfo from '@/components/GProjectInfo.vue'
+import GProgrammaticTooltip from '@/components/GProgrammaticTooltip.vue'
 
 import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
+import { useProgrammaticTooltip } from '@/composables/useProgrammaticTooltip'
 
 import {
   emailToDisplayName,
@@ -211,6 +211,15 @@ import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
+
+const {
+  tooltip,
+  bindTooltip,
+} = useProgrammaticTooltip({
+  openDelay: 1000,
+  location: 'right',
+  transparentBackground: true,
+})
 
 const allProjectsItem = {
   metadata: {
