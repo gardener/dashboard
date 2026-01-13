@@ -249,18 +249,18 @@ export const useConfigStore = defineStore('config', () => {
 
   const defaultInfrastructures = computed(() => {
     return state.value?.defaultInfrastructures ?? [
-    'aws',
-    'azure',
-    'gcp',
-    'openstack',
-    'alicloud',
-    'metal',
-    'vsphere',
-    'hcloud',
-    'onmetal',
-    'ironcore',
-    'local',
-  ]
+      'aws',
+      'azure',
+      'gcp',
+      'openstack',
+      'alicloud',
+      'metal',
+      'vsphere',
+      'hcloud',
+      'onmetal',
+      'ironcore',
+      'local',
+    ]
   })
 
   const defaultPurposes = computed(() => {

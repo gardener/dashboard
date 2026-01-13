@@ -13,11 +13,12 @@ import {
   computed,
 } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import { useApi } from '@/composables/useApi'
 
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
-import { useConfigStore } from '@/store/config'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import some from 'lodash/some'

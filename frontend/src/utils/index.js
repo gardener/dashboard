@@ -11,6 +11,8 @@ import {
   nextTick,
 } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import { useLogger } from '@/composables/useLogger'
 
 import moment from './moment'
@@ -19,7 +21,6 @@ import {
   hash,
 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
-import { useConfigStore } from '@/store/config'
 
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
@@ -525,7 +526,7 @@ export function randomMaintenanceBegin () {
 export function maintenanceWindowWithBeginAndTimezone (
   beginTime,
   beginTimezone,
-  windowSize = null
+  windowSize = null,
 ) {
   const configStore = useConfigStore()
   const effectiveWindowSize = windowSize ?? configStore.defaultMaintenanceWindowSizeMinutes
