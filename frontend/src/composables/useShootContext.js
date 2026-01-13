@@ -757,7 +757,7 @@ export function createShootContextComposable (options = {}) {
   /* maintenanceAutoUpdateKubernetesVersion */
   const maintenanceAutoUpdateKubernetesVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], configStore.defaultAutoUpdateKubernetes )
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], configStore.defaultAutoUpdateKubernetes)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], value)
@@ -877,10 +877,10 @@ export function createShootContextComposable (options = {}) {
       if (controlPlaneHighAvailabilityFailureToleranceType.value === undefined) {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'
-          : 'node';
-        return !!configStore.defaultControlPlaneHighAvailability;
+          : 'node'
+        return !!configStore.defaultControlPlaneHighAvailability
       } else {
-        return !!controlPlaneHighAvailabilityFailureToleranceType.value;
+        return !!controlPlaneHighAvailabilityFailureToleranceType.value
       }
     },
     set (value) {
