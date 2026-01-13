@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #!/usr/bin/env bash
+=======
+#!/bin/bash
+>>>>>>> 96e54bfb6 (also fix shell for verify script, cause pipefail is bash specific)
 
 # SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 #
