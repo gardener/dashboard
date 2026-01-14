@@ -251,23 +251,6 @@ export const useConfigStore = defineStore('config', () => {
     return shootDefaults.value.nodesCIDR ?? state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
   })
 
-  const defaultInfrastructures = computed(() => {
-    return shootDefaults.value.infrastructures ?? [
-      'aws',
-      'azure',
-      'gcp',
-      'openstack',
-      'alicloud',
-      'metal',
-      'vsphere',
-      'hcloud',
-      'onmetal',
-      'ironcore',
-      'stackit',
-      'local',
-    ]
-  })
-
   const defaultPurposes = computed(() => {
     return shootDefaults.value.purposes ?? ['evaluation', 'development', 'testing', 'production']
   })
@@ -501,7 +484,6 @@ export const useConfigStore = defineStore('config', () => {
     defaultContainerRuntime,
     defaultControlPlaneHighAvailability,
     defaultFloatingPool,
-    defaultInfrastructures,
     defaultLoadbalancerProvider,
     defaultMaintenanceHours,
     defaultMaintenanceWindowSizeMinutes,

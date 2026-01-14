@@ -46,7 +46,20 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list.value = cloudProfiles
   }
 
-  const knownProviderTypesList = ref(configStore.defaultInfrastructures)
+  const knownProviderTypesList = ref([
+    'aws',
+    'azure',
+    'gcp',
+    'openstack',
+    'alicloud',
+    'metal',
+    'vsphere',
+    'hcloud',
+    'onmetal',
+    'ironcore',
+    'stackit',
+    'local',
+  ])
 
   const providerTypesList = computed(() => {
     return uniq(map(list.value, 'spec.type'))

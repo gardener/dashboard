@@ -251,10 +251,6 @@ data:
         {{- if .Values.global.dashboard.frontendConfig.shootDefaults.nodesCIDR }}
         nodesCIDR: {{ .Values.global.dashboard.frontendConfig.shootDefaults.nodesCIDR }}
         {{- end }}
-        {{- if .Values.global.dashboard.frontendConfig.shootDefaults.infrastructures}}
-        infrastructures:
-{{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.infrastructures | trim | nindent 10 }}
-        {{- end }}
         {{- if .Values.global.dashboard.frontendConfig.shootDefaults.purposes}}
         purposes:
 {{ toYaml .Values.global.dashboard.frontendConfig.shootDefaults.purposes | trim | nindent 10 }}

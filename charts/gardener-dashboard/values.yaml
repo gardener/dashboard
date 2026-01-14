@@ -236,19 +236,6 @@ global:
       # # configure help text for control plane high availability, control plane pricing etc.
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
-      # infrastructures:
-      #   - 'aws'
-      #   - 'azure'
-      #   - 'gcp'
-      #   - 'openstack'
-      #   - 'alicloud'
-      #   - 'metal'
-      #   - 'vsphere'
-      #   - 'hcloud'
-      #   - 'onmetal'
-      #   - 'ironcore'
-      #   - 'stackit'
-      #   - 'local'
       # purposes:
       #   - 'evaluation'
       #   - 'development'
