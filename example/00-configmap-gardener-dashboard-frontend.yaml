@@ -13,7 +13,6 @@ metadata:
 data:
   frontend-config.yaml: |
     frontend:
-      # FIXME: I have no idea where the complete defaults can be obtained, my file got pierced together by documentation scraps within this repo. The following lists only the proposed extensions
       shootDefaults:
         hibernationSchedule:
           evaluation:
@@ -26,19 +25,6 @@ data:
       # # configure help text for control plane high availability, control plane pricing etc.
       # controlPlaneHighAvailabilityHelp:
       #   text: Help text
-      # infrastructures:
-      #   - 'aws'
-      #   - 'azure'
-      #   - 'gcp'
-      #   - 'openstack'
-      #   - 'alicloud'
-      #   - 'metal'
-      #   - 'vsphere'
-      #   - 'hcloud'
-      #   - 'onmetal'
-      #   - 'ironcore'
-      #   - 'stackit'
-      #   - 'local'
       # purposes:
       #   - 'evaluation'
       #   - 'development'
