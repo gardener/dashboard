@@ -14,6 +14,7 @@ import {
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
+import { useConfigStore } from '@/store/config'
 
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
@@ -23,6 +24,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
+  const configStore = useConfigStore()
   const api = useApi()
 
   const list = ref(null)

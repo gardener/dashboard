@@ -156,7 +156,7 @@ export function createShootContextComposable (options = {}) {
       },
     }
     hibernationSchedules.value = []
-    workerless.value = get(options, ['workerless'], false)
+    workerless.value = get(options, ['workerless'], configStore.defaultWorkerlessCluster)
     const defaultProviderType = head(cloudProfileStore.sortedProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
     resetMaintenanceAutoUpdate()
@@ -343,7 +343,7 @@ export function createShootContextComposable (options = {}) {
 
   /* provider */
   const providerState = reactive({
-    workerless: false,
+    workerless: configStore.defaultWorkerlessCluster,
   })
 
   const providerType = computed({
@@ -740,7 +740,7 @@ export function createShootContextComposable (options = {}) {
   /* maintenanceAutoUpdateKubernetesVersion */
   const maintenanceAutoUpdateKubernetesVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], configStore.defaultAutoUpdateKubernetes)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], value)
@@ -749,7 +749,7 @@ export function createShootContextComposable (options = {}) {
 
   const maintenanceAutoUpdateMachineImageVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], configStore.defaultAutoUpdateOS)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], value)
@@ -757,8 +757,8 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetMaintenanceAutoUpdate () {
-    maintenanceAutoUpdateKubernetesVersion.value = true
-    maintenanceAutoUpdateMachineImageVersion.value = true
+    maintenanceAutoUpdateKubernetesVersion.value = configStore.defaultAutoUpdateKubernetes
+    maintenanceAutoUpdateMachineImageVersion.value = configStore.defaultAutoUpdateOS
   }
 
   /* hibernation */
@@ -857,11 +857,18 @@ export function createShootContextComposable (options = {}) {
 
   const controlPlaneHighAvailability = computed({
     get () {
-      return !!controlPlaneHighAvailabilityFailureToleranceType.value
+      if (controlPlaneHighAvailabilityFailureToleranceType.value === undefined) {
+        controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
+          ? 'zone'
+          : 'node'
+        return !!configStore.defaultControlPlaneHighAvailability
+      } else {
+        return !!controlPlaneHighAvailabilityFailureToleranceType.value
+      }
     },
     set (value) {
       if (!value) {
-        controlPlaneHighAvailabilityFailureToleranceType.value = undefined
+        controlPlaneHighAvailabilityFailureToleranceType.value = null
       } else {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'

@@ -223,13 +223,46 @@ global:
       #       ## How would we reproduce it?
 
       #       ## Anything else we need to know?
-      defaultHibernationSchedule:
-        evaluation:
-        - start: 00 17 * * 1,2,3,4,5
-        development:
-        - start: 00 17 * * 1,2,3,4,5
-          end: 00 08 * * 1,2,3,4,5
-        production: ~
+
+      shootDefaults:
+        hibernationSchedule:
+          evaluation:
+          - start: 00 17 * * 1,2,3,4,5
+          development:
+          - start: 00 17 * * 1,2,3,4,5
+            end: 00 08 * * 1,2,3,4,5
+          production: ~
+        nodesCIDR: '10.250.0.0/16'
+      # # configure help text for control plane high availability, control plane pricing etc.
+      # controlPlaneHighAvailabilityHelp:
+      #   text: Help text
+      # purposes:
+      #   - 'evaluation'
+      #   - 'development'
+      #   - 'testing'
+      #   - 'production'
+      # workerlessCluster: false
+      # networkingType: cilium
+      # floatingPool: external
+      # loadbalancerProvider: amphora
+      # controlPlaneHighAvailability: false
+      # containerRuntime: containerd
+      # autoscalerMin: 1
+      # autoscalerMax: 2
+      # maxSurge: 1
+      # zonesSelectAll: false
+      # maintenanceHours:
+      #   - '22'
+      #   - '23'
+      #   - '00'
+      #   - '01'
+      #   - '02'
+      #   - '03'
+      #   - '04'
+      #   - '05'
+      # maintenanceWindowSizeMinutes: 60
+      # autoUpdateOS: true
+      # autoUpdateKubernetes: true
       seedCandidateDeterminationStrategy: SameRegion
       features:
         terminalEnabled: false
@@ -344,8 +377,6 @@ global:
       #     error: 'red.darken4'
       #     warning: 'orange.darken4'
 
-      defaultNodesCIDR: 10.250.0.0/16 # default CIDR used for nodes network when creating new shoots
-
       # serviceAccountDefaultTokenExpiration - is the default requested duration of validity of the token request for garden cluster service accounts.
       # If no value is provided, the default value corresponds to 90 days
       # The token issuer may return a token with a different validity duration
@@ -367,10 +398,6 @@ global:
 
       # # resourceQuotaHelp - configure help text how to configure project resource quota
       # resourceQuotaHelp:
-      #   text: Help text
-
-      # # controlPlaneHighAvailabilityHelp - configure help text for control plane high availability, control plane pricing etc.
-      # controlPlaneHighAvailabilityHelp:
       #   text: Help text
 
       # # knownConditions - overwrite or add shoot condition descriptions

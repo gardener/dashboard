@@ -193,14 +193,6 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.resourceQuotaHelp
   })
 
-  const controlPlaneHighAvailabilityHelp = computed(() => {
-    return state.value?.controlPlaneHighAvailabilityHelp
-  })
-
-  const defaultHibernationSchedule = computed(() => {
-    return state.value?.defaultHibernationSchedule
-  })
-
   const themes = computed(() => {
     return state.value?.themes
   })
@@ -243,8 +235,80 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.externalTools ?? []
   })
 
+  const shootDefaults = computed(() => {
+    return state.value?.shootDefaults ?? {}
+  })
+
+  const controlPlaneHighAvailabilityHelp = computed(() => {
+    return shootDefaults.value.controlPlaneHighAvailabilityHelp ?? state.value?.controlPlaneHighAvailabilityHelp
+  })
+
+  const defaultHibernationSchedule = computed(() => {
+    return shootDefaults.value.hibernationSchedule ?? state.value?.defaultHibernationSchedule
+  })
+
   const defaultNodesCIDR = computed(() => {
-    return state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+    return shootDefaults.value.nodesCIDR ?? state.value?.defaultNodesCIDR ?? '10.250.0.0/16'
+  })
+
+  const defaultPurposes = computed(() => {
+    return shootDefaults.value.purposes ?? ['evaluation', 'development', 'testing', 'production']
+  })
+
+  const defaultWorkerlessCluster = computed(() => {
+    return shootDefaults.value.workerlessCluster ?? false
+  })
+
+  const defaultNetworkingType = computed(() => {
+    return shootDefaults.value.networkingType
+  })
+
+  const defaultFloatingPool = computed(() => {
+    return shootDefaults.value.floatingPool
+  })
+
+  const defaultLoadbalancerProvider = computed(() => {
+    return shootDefaults.value.loadbalancerProvider
+  })
+
+  const defaultControlPlaneHighAvailability = computed(() => {
+    return shootDefaults.value.controlPlaneHighAvailability ?? false
+  })
+
+  const defaultContainerRuntime = computed(() => {
+    return shootDefaults.value.containerRuntime
+  })
+
+  const defaultAutoscalerMin = computed(() => {
+    return shootDefaults.value.autoscalerMin ?? 1
+  })
+
+  const defaultAutoscalerMax = computed(() => {
+    return shootDefaults.value.autoscalerMax ?? 2
+  })
+
+  const defaultMaxSurge = computed(() => {
+    return shootDefaults.value.maxSurge ?? 1
+  })
+
+  const defaultZonesSelectAll = computed(() => {
+    return shootDefaults.value.zonesSelectAll ?? false
+  })
+
+  const defaultMaintenanceHours = computed(() => {
+    return shootDefaults.value.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+  })
+
+  const defaultMaintenanceWindowSizeMinutes = computed(() => {
+    return shootDefaults.value.maintenanceWindowSizeMinutes ?? 60
+  })
+
+  const defaultAutoUpdateOS = computed(() => {
+    return shootDefaults.value.autoUpdateOS ?? true
+  })
+
+  const defaultAutoUpdateKubernetes = computed(() => {
+    return shootDefaults.value.autoUpdateKubernetes ?? true
   })
 
   const shootAdminKubeconfig = computed(() => {
@@ -413,7 +477,22 @@ export const useConfigStore = defineStore('config', () => {
     vendorHints,
     helpMenuItems,
     externalTools,
+    defaultAutoUpdateKubernetes,
+    defaultAutoUpdateOS,
+    defaultAutoscalerMax,
+    defaultAutoscalerMin,
+    defaultContainerRuntime,
+    defaultControlPlaneHighAvailability,
+    defaultFloatingPool,
+    defaultLoadbalancerProvider,
+    defaultMaintenanceHours,
+    defaultMaintenanceWindowSizeMinutes,
+    defaultMaxSurge,
+    defaultNetworkingType,
     defaultNodesCIDR,
+    defaultPurposes,
+    defaultWorkerlessCluster,
+    defaultZonesSelectAll,
     shootAdminKubeconfig,
     apiServerUrl,
     clusterIdentity,
