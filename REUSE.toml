@@ -26,6 +26,8 @@ path = [
   "charts/**/templates/**/**.yaml",
   "frontend/index.html",
   "CODEOWNERS",
+  "OWNERS",
+  "OWNERS_ALIASES",
   "VERSION",
   ".editorconfig",
   ".gitignore",
