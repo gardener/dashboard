@@ -24,6 +24,24 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `oidcLoginTitle` | Title of tabstrip for loginType OIDC | `OIDC` |
 | `oidcLoginText` | Text show above the login button on the OIDC tabstrip | `Press Login to be redirected to`<br> `configured OpenID Connect Provider.` |
 
+## Vendor Branding
+
+Here’s a polished and clearer version of your sentence:
+
+You can customize the appearance of built-in vendors displayed in the dashboard. This includes overriding the display name, icon, sorting, and order of *cloud provider vendors* and *machine image vendors*. In addition, you can configure custom vendors.
+
+
+Vendor customization is configured in the arrays
+`frontendConfig.branding.infraVendors`, `frontendConfig.branding.dnsVendors`, and `frontendConfig.branding.machineImageVendors`.
+Each entry must be an object with a `name` key that identifies the vendor. The following configuration properties are supported:
+
+| name          | usage|
+| ------------- |------|
+| `name`        | Unique vendor identifier (required) |
+| `displayName` | Name displayed in the dashboard |
+| `weight`      | Sorting weight. Lower values appear first. See default weights in `frontend/src/store/config.js` |
+| `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
+
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
 Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. `#FF0000` for red) or by referencing a color (e.g `grey.darken3` or `shades.white`) from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
@@ -50,13 +68,13 @@ If you use the helm chart, you can configure those with `frontendConfig.themes.l
 
 ## Logos and Icons
 
-You can customize the Dashboard logo and icons by creating a `ConfigMap` with the filenames as keys and the base64-encoded image data as values. This allows you to override any file that exists under public/static/assets by specifying the filename as the key.
+You can customize the Dashboard logo and icons by creating a `ConfigMap` with the filenames as keys and the base64-encoded image data as values. This allows you to override any file that exists under `public/static/assets` by specifying the filename as the key.
 
 ### Replace Assets
 
 You can replace individual icons in the [`assets`](../../frontend/public/static/assets) folder when deploying the Dashboard via the Helm chart by configuring the frontendConfig.assets map.
 
-When you deploy the dashboard using the Gardener Operator, you can reference the `ConfigMap` using `.spec.virtualCluster.gardener.gardenerDashboard.assetsConfigMapRef` within the `Garden` resource
+When you deploy the dashboard using the Gardener Operator, you can reference the `ConfigMap` using `.spec.virtualCluster.gardener.gardenerDashboard.assetsConfigMapRef` within the `Garden` resource.
 
 The Dashboard backend will serve these custom asset files when available and fall back to the built-in ones otherwise.
 

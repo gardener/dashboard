@@ -19,14 +19,14 @@ SPDX-License-Identifier: Apache-2.0
           <template #item="{ props }">
             <v-list-item v-bind="props">
               <template #prepend>
-                <g-vendor-icon :icon="props.value" />
+                <g-vendor-icon :name="props.value" />
               </template>
             </v-list-item>
           </template>
           <template #selection="{ item }">
             <div class="d-flex">
               <g-vendor-icon
-                :icon="item.value"
+                :name="item.title"
                 class="mr-2"
               />
               {{ item.title }}

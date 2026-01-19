@@ -54,6 +54,13 @@ export function useMachineTypes (cloudProfile) {
     }
 
     const items = machineTypes.value
+
+    items.forEach(item => {
+      if (!item.architecture) {
+        item.architecture = 'amd64' // default if not maintained
+      }
+    })
+
     if (!region) {
       return items
     }
@@ -86,12 +93,7 @@ export function useMachineTypes (cloudProfile) {
 
     return computed(() => {
       const zones = getZones(cloudProfile.value, region.value)
-      let types = filterMachineTypes(region.value, zones)
-      types = map(types, item => {
-        const machineType = { ...item }
-        machineType.architecture ??= 'amd64' // default if not maintained
-        return machineType
-      })
+      const types = filterMachineTypes(region.value, zones)
 
       if (architecture?.value) {
         return filter(types, { architecture: architecture.value })

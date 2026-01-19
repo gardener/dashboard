@@ -12,7 +12,7 @@ import {
 
 import { useLogger } from '@/composables/useLogger.js'
 import {
-  decorateClassificationObject,
+  addClassificationHelpers,
   firstItemMatchingVersionClassification,
 } from '@/composables/helper.js'
 
@@ -55,7 +55,7 @@ export function useKubernetesVersions (cloudProfile) {
       }
       return true
     })
-    return map(validVersions, decorateClassificationObject)
+    return map(validVersions, addClassificationHelpers)
   })
 
   const sortedKubernetesVersions = computed(() => {

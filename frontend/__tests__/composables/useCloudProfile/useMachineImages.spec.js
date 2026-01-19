@@ -88,6 +88,14 @@ describe('composables', () => {
           message: 'test',
           matchNames: ['gardenlinux'],
         }],
+        branding: {
+          machineImageVendors: [{
+            name: 'foo',
+            displayName: 'Foo Inc.',
+            icon: 'foo-icon.svg',
+            weight: 1,
+          }],
+        },
       })
 
       cloudProfile = ref({
@@ -115,7 +123,8 @@ describe('composables', () => {
         expect(imageWithExpirationDate.expirationDate).toBe('2024-04-05T01:02:03Z')
         expect(imageWithExpirationDate.expirationDateString).toBeDefined()
         expect(imageWithExpirationDate.vendorName).toBe('gardenlinux')
-        expect(imageWithExpirationDate.icon).toBe('gardenlinux')
+        expect(imageWithExpirationDate.icon).toBe('gardenlinux.svg')
+        expect(imageWithExpirationDate.displayName).toBe('Garden Linux')
         expect(imageWithExpirationDate.vendorHint).toBeDefined()
         expect(imageWithExpirationDate.vendorHint).toEqual(configStore.vendorHints[0])
         expect(imageWithExpirationDate.classification).toBe('supported')
@@ -123,7 +132,7 @@ describe('composables', () => {
         expect(imageWithExpirationDate.isDeprecated).toBe(false)
         expect(imageWithExpirationDate.isPreview).toBe(false)
         expect(imageWithExpirationDate.isExpirationWarning).toBe(false)
-        expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages.value[2]) // check sorting
+        expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages.value[5]) // check sorting
 
         const imageWithNoExpirationDate = find(decoratedAndSortedMachineImages.value, { name: 'gardenlinux', version: '1.1.5' })
         expect(imageWithNoExpirationDate.isExpirationWarning).toBe(false)
@@ -135,6 +144,9 @@ describe('composables', () => {
 
         const normalizedImage = find(decoratedAndSortedMachineImages.value, { name: 'foo', version: '1.2.0' })
         expect(normalizedImage).toBeDefined()
+
+        expect(normalizedImage.icon).toBe('foo-icon.svg')
+        expect(normalizedImage.displayName).toBe('Foo Inc.')
 
         const invalidImage = find(decoratedAndSortedMachineImages.value, { name: 'foo', version: '1.2.x' })
         expect(invalidImage).toBeUndefined()

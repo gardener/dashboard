@@ -13,9 +13,9 @@ import {
 import { useConfigStore } from '@/store/config'
 
 import {
-  decorateClassificationObject,
+  addClassificationHelpers,
   firstItemMatchingVersionClassification,
-  vendorNameFromImageName,
+  getDistroFromImageName,
   findVendorHint,
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
@@ -28,6 +28,7 @@ import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
+import sortBy from 'lodash/sortBy'
 
 /**
  * @typedef {import('vue').ComputedRef} ComputedRef
@@ -53,12 +54,23 @@ export function useMachineImages (cloudProfile) {
   /**
    * Flattens and processes machine images from cloud profile format.
    * Validates semver versions, normalizes where possible, and decorates with vendor information.
+   * Sorts machine images by vendor weight and filters out hidden vendors.
    *
    * @param {Array} machineImages - Raw machine images from cloud profile spec
    * @returns {Array} Flattened array of decorated machine image objects
    */
-  function flattenMachineImages (machineImages) {
-    return flatMap(machineImages, machineImage => {
+  function flattenAndSortMachineImages (machineImages) {
+    const machineImagesWithVendors = map(machineImages, machineImage => {
+      const imageDistro = getDistroFromImageName(machineImage.name)
+      const vendor = configStore.vendorDetails(imageDistro)
+      return {
+        ...machineImage,
+        vendor,
+      }
+    })
+    const sortedMachineImagesWithVendors = sortBy(machineImagesWithVendors, 'vendor.weight')
+
+    return flatMap(sortedMachineImagesWithVendors, machineImage => {
       const { name, updateStrategy = 'major' } = machineImage
 
       const versions = []
@@ -81,26 +93,30 @@ export function useMachineImages (cloudProfile) {
         return semver.rcompare(a.version, b.version)
       })
 
-      const vendorName = vendorNameFromImageName(name)
-      const vendorHint = findVendorHint(configStore.vendorHints, vendorName)
+      const vendorName = machineImage.vendor.name
+      const icon = machineImage.vendor.icon
+      const displayName = machineImage.vendor.displayName || machineImage.name
+      const vendorHint = findVendorHint(configStore.vendorHints, machineImage.vendor.name)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
         if (isEmpty(architectures)) {
           architectures = ['amd64'] // default if not maintained
         }
-        return decorateClassificationObject({
+        const image = {
           key: name + '/' + version,
           name,
+          vendorName,
+          icon,
+          displayName,
           version,
           updateStrategy,
           cri,
           classification,
           expirationDate,
-          vendorName,
-          icon: vendorName,
           vendorHint,
           architectures,
-        })
+        }
+        return addClassificationHelpers(image)
       })
     })
   }
@@ -110,7 +126,7 @@ export function useMachineImages (cloudProfile) {
    */
   const machineImages = computed(() => {
     const rawImages = get(cloudProfile.value, ['spec', 'machineImages'], [])
-    return flattenMachineImages(rawImages)
+    return flattenAndSortMachineImages(rawImages)
   })
 
   /**

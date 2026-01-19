@@ -13,17 +13,20 @@ import {
   computed,
 } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import { useApi } from '@/composables/useApi'
 
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import uniq from 'lodash/uniq'
 import map from 'lodash/map'
-import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 
 export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
+
+  const configStore = useConfigStore()
 
   const list = ref(null)
 
@@ -44,27 +47,14 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list.value = cloudProfiles
   }
 
-  const knownProviderTypesList = ref([
-    'aws',
-    'azure',
-    'gcp',
-    'openstack',
-    'alicloud',
-    'metal',
-    'vsphere',
-    'hcloud',
-    'onmetal',
-    'ironcore',
-    'stackit',
-    'local',
-  ])
-
-  const providerTypesList = computed(() => {
+  const infraProviderTypesList = computed(() => {
     return uniq(map(list.value, 'spec.type'))
   })
 
-  const sortedProviderTypeList = computed(() => {
-    return intersection(knownProviderTypesList.value, providerTypesList.value)
+  const sortedInfraProviderTypeList = computed(() => {
+    const infraProviderVendors = map(infraProviderTypesList.value, configStore.vendorDetails)
+    const sortedVisibleInfraVendors = sortBy(infraProviderVendors, 'weight')
+    return map(sortedVisibleInfraVendors, 'name')
   })
 
   function cloudProfilesByProviderType (providerType) {
@@ -87,7 +77,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     setCloudProfiles,
     fetchCloudProfiles,
     cloudProfilesByProviderType,
-    sortedProviderTypeList,
+    sortedInfraProviderTypeList,
     cloudProfileByRef,
   }
 })

@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${name} Secret`"
-    :update-title="`Update ${name} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -268,15 +266,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    name () {
-      if (this.providerType === 'aws') {
-        return 'AWS'
-      }
-      if (this.providerType === 'aws-route53') {
-        return 'Amazon Route 53'
-      }
-      return undefined
     },
   },
   methods: {

@@ -10,8 +10,6 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
-    :create-title="`Add new ${providerType} Secret`"
-    :update-title="`Update ${providerType} Secret`"
   >
     <template #secret-slot>
       <div>
@@ -34,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for {{ providerType }}.
+          Please enter data required for {{ vendorName }}.
         </p>
       </div>
     </template>
@@ -42,9 +40,12 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import yaml from 'js-yaml'
+
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
@@ -135,6 +136,9 @@ export default {
     isCreateMode () {
       return !this.secret
     },
+    vendorName () {
+      return this.vendorDisplayName(this.providerType)
+    },
   },
   watch: {
     stringData (value) {
@@ -149,6 +153,8 @@ export default {
   },
   methods: {
     getErrorMessages,
+    ...mapActions(useConfigStore, ['vendorDisplayName']),
+
   },
 }
 </script>
