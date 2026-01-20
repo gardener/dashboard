@@ -19,6 +19,17 @@ const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest,
 
 class OctokitLog {
   static debug (...args) {
+    if (args.length > 1 && typeof args[1] === 'object' && args[1] !== null) {
+      const msg = args[0]
+      const obj = args[1]
+      const hasAuthHeader = obj.headers && obj.headers.authorization
+      if (hasAuthHeader) {
+        const sanitized = _.cloneDeep(obj)
+        sanitized.headers.authorization = '[REDACTED]'
+        logger.debug(msg, sanitized, ...args.slice(2))
+        return
+      }
+    }
     logger.debug(...args)
   }
 
