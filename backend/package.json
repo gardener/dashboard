@@ -58,7 +58,7 @@
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
     "openapi-types": "^12.1.3",

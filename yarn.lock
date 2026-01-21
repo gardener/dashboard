@@ -992,7 +992,7 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.23"
     morgan: "npm:^1.10.0"
     neostandard: "npm:^0.12.0"
     object-hash: "npm:^3.0.0"
@@ -1142,7 +1142,7 @@ __metadata:
     http-errors: "npm:^2.0.0"
     jest: "npm:^30.0.0"
     jsonwebtoken: "npm:^9.0.2"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.23"
     mixwith: "npm:^0.1.1"
     neostandard: "npm:^0.12.0"
     rimraf: "npm:^6.0.1"
@@ -1176,7 +1176,7 @@ __metadata:
     gtoken: "npm:^8.0.0"
     jest: "npm:^30.0.0"
     js-yaml: "npm:^4.1.0"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.23"
     neostandard: "npm:^0.12.0"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^4.41.1"
@@ -1287,7 +1287,7 @@ __metadata:
     eslint-plugin-security: "npm:^3.0.1"
     http-errors: "npm:^2.0.0"
     jest: "npm:^30.0.0"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.23"
     neostandard: "npm:^0.12.0"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^4.41.1"
@@ -6511,7 +6511,7 @@ __metadata:
     eslint: "npm:^9.11.0"
     husky: "npm:^9.1.7"
     jest: "npm:^30.0.0"
-    lodash-es: "npm:^4.17.21"
+    lodash-es: "npm:^4.17.23"
     node-gyp: "npm:latest"
   dependenciesMeta:
     deasync:
@@ -8385,10 +8385,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash-es@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "lodash-es@npm:4.17.21"
-  checksum: 10c0/fb407355f7e6cd523a9383e76e6b455321f0f153a6c9625e21a8827d10c54c2a2341bd2ae8d034358b60e07325e1330c14c224ff582d04612a46a4f0479ff2f2
+"lodash-es@npm:^4.17.23":
+  version: 4.17.23
+  resolution: "lodash-es@npm:4.17.23"
+  checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
   languageName: node
   linkType: hard
 

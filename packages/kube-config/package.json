@@ -34,7 +34,7 @@
     "@gardener-dashboard/polling-watcher": "workspace:^",
     "gtoken": "^8.0.0",
     "js-yaml": "^4.1.0",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.23"
   },
   "devDependencies": {
     "@gardener-dashboard/polling-watcher": "workspace:^",
