@@ -57,7 +57,7 @@
     "jose": "^5.2.3",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "lodash-es": "^4.17.21",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
