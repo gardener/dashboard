@@ -1004,27 +1004,27 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/autocomplete", [\
-      ["npm:6.18.7", {\
-        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.18.7-669d8427da-562c13711f.zip/node_modules/@codemirror/autocomplete/",\
+      ["npm:6.20.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.20.0-eb8eebfc4e-d0d1cf3eca.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
-          ["@lezer/common", "npm:1.2.3"]\
+          ["@codemirror/autocomplete", "npm:6.20.0"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@codemirror/view", "npm:6.39.11"],\
+          ["@lezer/common", "npm:1.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/commands", [\
-      ["npm:6.8.1", {\
-        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.8.1-55a15bb735-da61311f4c.zip/node_modules/@codemirror/commands/",\
+      ["npm:6.10.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-commands-npm-6.10.1-2cee21b99d-1841d8ad67.zip/node_modules/@codemirror/commands/",\
         "packageDependencies": [\
-          ["@codemirror/commands", "npm:6.8.1"],\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
-          ["@lezer/common", "npm:1.2.3"]\
+          ["@codemirror/commands", "npm:6.10.1"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@codemirror/view", "npm:6.39.11"],\
+          ["@lezer/common", "npm:1.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1033,11 +1033,11 @@ const RAW_RUNTIME_STATE =
       ["npm:6.1.2", {\
         "packageLocation": "./.yarn/cache/@codemirror-lang-yaml-npm-6.1.2-9fd6e82b08-fc993c5e24.zip/node_modules/@codemirror/lang-yaml/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
+          ["@codemirror/autocomplete", "npm:6.20.0"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
@@ -1046,13 +1046,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/language", [\
-      ["npm:6.11.3", {\
-        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.11.3-c85c315135-0cbc2a98bd.zip/node_modules/@codemirror/language/",\
+      ["npm:6.12.1", {\
+        "packageLocation": "./.yarn/cache/@codemirror-language-npm-6.12.1-78242dba5f-d37e526a83.zip/node_modules/@codemirror/language/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@codemirror/view", "npm:6.39.11"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["style-mod", "npm:4.1.2"]\
@@ -1061,22 +1061,22 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/search", [\
-      ["npm:6.5.11", {\
-        "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.5.11-db9628f26c-8f25647ceb.zip/node_modules/@codemirror/search/",\
+      ["npm:6.6.0", {\
+        "packageLocation": "./.yarn/cache/@codemirror-search-npm-6.6.0-9beac8228b-dacb6dbf94.zip/node_modules/@codemirror/search/",\
         "packageDependencies": [\
-          ["@codemirror/search", "npm:6.5.11"],\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/search", "npm:6.6.0"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@codemirror/view", "npm:6.39.11"],\
           ["crelt", "npm:1.0.6"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/state", [\
-      ["npm:6.5.2", {\
-        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.2-c5ecf2ea0f-1ef773394e.zip/node_modules/@codemirror/state/",\
+      ["npm:6.5.4", {\
+        "packageLocation": "./.yarn/cache/@codemirror-state-npm-6.5.4-5cd48dc89a-8f40e1a22b.zip/node_modules/@codemirror/state/",\
         "packageDependencies": [\
-          ["@codemirror/state", "npm:6.5.2"],\
+          ["@codemirror/state", "npm:6.5.4"],\
           ["@marijn/find-cluster-break", "npm:1.0.2"]\
         ],\
         "linkType": "HARD"\
@@ -1086,21 +1086,21 @@ const RAW_RUNTIME_STATE =
       ["npm:6.1.3", {\
         "packageLocation": "./.yarn/cache/@codemirror-theme-one-dark-npm-6.1.3-6a784764dc-de8483c699.zip/node_modules/@codemirror/theme-one-dark/",\
         "packageDependencies": [\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/state", "npm:6.5.2"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/state", "npm:6.5.4"],\
           ["@codemirror/theme-one-dark", "npm:6.1.3"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.39.11"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@codemirror/view", [\
-      ["npm:6.38.3", {\
-        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.38.3-9c7ec320e4-70c9ec6d6a.zip/node_modules/@codemirror/view/",\
+      ["npm:6.39.11", {\
+        "packageLocation": "./.yarn/cache/@codemirror-view-npm-6.39.11-7b2809961f-832c240d9e.zip/node_modules/@codemirror/view/",\
         "packageDependencies": [\
-          ["@codemirror/state", "npm:6.5.2"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/state", "npm:6.5.4"],\
+          ["@codemirror/view", "npm:6.39.11"],\
           ["crelt", "npm:1.0.6"],\
           ["style-mod", "npm:4.1.2"],\
           ["w3c-keyname", "npm:2.2.8"]\
@@ -1747,18 +1747,18 @@ const RAW_RUNTIME_STATE =
       ["workspace:frontend", {\
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.18.7"],\
-          ["@codemirror/commands", "npm:6.8.1"],\
+          ["@codemirror/autocomplete", "npm:6.20.0"],\
+          ["@codemirror/commands", "npm:6.10.1"],\
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
-          ["@codemirror/language", "npm:6.11.3"],\
-          ["@codemirror/search", "npm:6.5.11"],\
-          ["@codemirror/state", "npm:6.5.2"],\
+          ["@codemirror/language", "npm:6.12.1"],\
+          ["@codemirror/search", "npm:6.6.0"],\
+          ["@codemirror/state", "npm:6.5.4"],\
           ["@codemirror/theme-one-dark", "npm:6.1.3"],\
-          ["@codemirror/view", "npm:6.38.3"],\
+          ["@codemirror/view", "npm:6.39.11"],\
           ["@fontsource/roboto", "npm:5.2.8"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -2703,10 +2703,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@lezer/common", [\
-      ["npm:1.2.3", {\
-        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.2.3-ee9d05545d-fe9f8e1110.zip/node_modules/@lezer/common/",\
+      ["npm:1.5.0", {\
+        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.5.0-321d54f8ca-12c4b0ea9d.zip/node_modules/@lezer/common/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.2.3"]\
+          ["@lezer/common", "npm:1.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2715,7 +2715,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.2.1", {\
         "packageLocation": "./.yarn/cache/@lezer-highlight-npm-1.2.1-e7943f0de4-51b4c08596.zip/node_modules/@lezer/highlight/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
@@ -2725,7 +2725,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.4.2", {\
         "packageLocation": "./.yarn/cache/@lezer-lr-npm-1.4.2-3bce75dd47-22bb5d0d4b.zip/node_modules/@lezer/lr/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@lezer/lr", "npm:1.4.2"]\
         ],\
         "linkType": "HARD"\
@@ -2735,7 +2735,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.0.3", {\
         "packageLocation": "./.yarn/cache/@lezer-yaml-npm-1.0.3-30ba8f36a4-cef3d0c0a2.zip/node_modules/@lezer/yaml/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.2.3"],\
+          ["@lezer/common", "npm:1.5.0"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
