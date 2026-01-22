@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// TODO(esm-migration): This is the canonical ESM implementation.
+// It is split out so that CommonJS callers can load it indirectly via dynamic import() from markdown.js.
+// When the backend/test suite is fully ESM, this file can become the sole entrypoint (and markdown.js can be deleted).
+
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
