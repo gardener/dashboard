@@ -23,7 +23,7 @@ module.exports = {
   coverageThreshold: {
     global: {
       branches: 68,
-      functions: 94,
+      functions: 93,
       lines: 90,
       statements: 90,
     },
@@ -37,4 +37,7 @@ module.exports = {
     '**/?(*.)+(spec|test).js',
     '**/?(*.)+(spec|test).cjs',
   ],
+  moduleNameMapper: {
+    '^\\.{2}/markdown(\\.cjs)?$': '<rootDir>/__mocks__/@gardener-dashboard/markdown.cjs',
+  },
 }

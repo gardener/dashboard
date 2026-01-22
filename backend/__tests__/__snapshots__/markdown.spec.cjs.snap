@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`createConverter().makeSanitizedHtml Details/Summary allowed through sanitizer + markdown inside 1`] = `
+"<details>
+<summary>More</summary>
+<p>Inside <strong>bold</strong> and a list:</p>
+<ul>
+<li>a</li>
+<li>b</li>
+</ul>
+</details>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Details/Summary: allow open attribute, strip others 1`] = `
+"<details>
+<summary>More</summary>
+<p>Inside <strong>bold</strong></p>
+</details>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Emoji (emoji) 1`] = `"<p>Ship it 🚀 and smile 😄</p>"`;
+
+exports[`createConverter().makeSanitizedHtml GFM tables (tables) 1`] = `
+"<table>
+<thead>
+<tr>
+<th>col A</th>
+<th>col B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>left</td>
+<td>123</td>
+</tr>
+<tr>
+<td>wow</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>"
+`;
+
+exports[`createConverter().makeSanitizedHtml General: style attributes stripped, scripts dropped 1`] = `
+"<p>red?</p>
+<span>span</span>
+<div>click</div>"
+`;
+
+exports[`createConverter().makeSanitizedHtml GitHub-style fenced code blocks (ghCodeBlocks) 1`] = `
+"<pre><code>const x = 1
+console.log(x)
+</code></pre>
+<p>Indented code:</p>
+<pre><code>let y = 2
+</code></pre>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Images: allow src/alt/title/width/height, strip event handlers 1`] = `
+"<img src="https://example.com/x.png" alt="x" title="t" width="10" height="20" />
+<img src="https://example.com/x.png" />"
+`;
+
+exports[`createConverter().makeSanitizedHtml Links: target/rel enforced and javascript: stripped 1`] = `
+"<p><a href="https://example.com" target="_blank">https://example.com</a></p>
+<p><a>xss</a></p>
+<p><a href="mailto:test@example.com">mail</a></p>
+<p><a href="https://safe.example" target="_self">safe</a></p>"
+`;
+
+exports[`createConverter().makeSanitizedHtml Non-string input does not throw (treated as empty) 1`] = `""`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization options can be overridden (example: allow only a subset) 1`] = `"<p>Hello <strong>bold</strong> <em>html em</em></p>"`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: dangerous attributes removed (e.g. onerror) 1`] = `"<img src="https://example.com/x.png" />"`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: disallowed tags dropped (e.g. iframe) 1`] = `""`;
+
+exports[`createConverter().makeSanitizedHtml Sanitization: scripts removed (not the main focus, but safety baseline) 1`] = `
+"<p>Hello</p>
+
+<p>Bye</p>"
+`;
+
+exports[`createConverter().makeSanitizedHtml basic markdown: emphasis, strong, links, line breaks 1`] = `
+"<p>Hello <em>world</em> and <strong>friends</strong>.</p>
+<p>A link: <a href="https://example.com" target="_blank">https://example.com</a></p>
+<p>Line 1<br />
+Line 2 (should be a simple line break with <code>simpleLineBreaks</code>).</p>"
+`;
