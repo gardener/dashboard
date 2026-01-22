@@ -131,7 +131,7 @@ export async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
   const { metadata: { name, projectName } } = ticketCache.getIssue(number)
   const githubComments = await getComments({ number })
-  return Promise.all(_.map(githubComments, githubComment =>
+  return Promise.all(_.map(githubComments || [], githubComment =>
     fromComment(number, name, projectName, githubComment),
   ))
 }
