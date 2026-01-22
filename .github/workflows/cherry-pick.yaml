@@ -10,10 +10,13 @@ permissions:
 jobs:
   cherry-pick:
     if: |
+      false &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/cherry-pick ') &&
       (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER') &&
-      github.event.comment.user.type == 'User'
+      github.event.comment.user.type == 'User' &&
+      !startsWith(github.event.comment.user.login, 'gardener-ci-robot') &&
+      !startsWith(github.event.comment.user.login, 'gardener-prow')
     uses: gardener/dashboard/.github/workflows/cherry-pick-reusable.yaml@master
     with:
       pr-number: ${{ github.event.issue.number }}
