@@ -15,14 +15,30 @@ import { metricsRoute } from '../middleware.js'
 const { dashboardClient } = kubeClientModule
 
 const router = express.Router()
-
-const frontendConfig = sanitizeFrontendConfig(config.frontend)
 const metricsMiddleware = metricsRoute('config')
+
+let cachedFrontendConfigPromise
+async function getFrontendConfig () {
+  if (cachedFrontendConfigPromise) {
+    return cachedFrontendConfigPromise
+  }
+  cachedFrontendConfigPromise = (async () => {
+    try {
+      return await sanitizeFrontendConfig(config.frontend)
+    } catch (err) {
+      cachedFrontendConfigPromise = undefined
+      throw err
+    }
+  })()
+  return cachedFrontendConfigPromise
+}
 
 router.route('/')
   .all(metricsMiddleware)
   .get(async (req, res, next) => {
     try {
+      const frontendConfig = await getFrontendConfig()
+
       if (!frontendConfig.clusterIdentity) {
         try {
           const { data } = await dashboardClient.core.configmaps.get('kube-system', 'cluster-identity')
@@ -38,12 +54,15 @@ router.route('/')
     }
   })
 
-function sanitizeFrontendConfig (frontendConfig) {
+async function sanitizeFrontendConfig (frontendConfig) {
   const converter = createConverter()
-  const convertAndSanitize = (obj, key) => {
-    const value = obj[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+  const tasks = []
+
+  const convertAndSanitize = async (obj, key) => {
+    const value = obj?.[key] // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     if (value) {
-      obj[key] = converter.makeSanitizedHtml(value) // eslint-disable-line security/detect-object-injection -- key is a local fixed string
+      const html = await converter.makeSanitizedHtml(value)
+      obj[key] = html // eslint-disable-line security/detect-object-injection -- key is a local fixed string
     }
   }
 
@@ -57,18 +76,20 @@ function sanitizeFrontendConfig (frontendConfig) {
       items = [],
     } = {},
     vendorHints = [],
-    resourceQuotaHelp = '',
-    controlPlaneHighAvailabilityHelp = '',
+    resourceQuotaHelp = {},
+    controlPlaneHighAvailabilityHelp = {},
   } = sanitizedFrontendConfig
 
-  convertAndSanitize(alert, 'message')
+  tasks.push(convertAndSanitize(alert, 'message'))
+
   for (const costObject of costObjects) {
-    convertAndSanitize(costObject, 'description')
+    tasks.push(convertAndSanitize(costObject, 'description'))
   }
-  convertAndSanitize(sla, 'description')
-  convertAndSanitize(addonDefinition, 'description')
-  convertAndSanitize(resourceQuotaHelp, 'text')
-  convertAndSanitize(controlPlaneHighAvailabilityHelp, 'text')
+
+  tasks.push(convertAndSanitize(sla, 'description'))
+  tasks.push(convertAndSanitize(addonDefinition, 'description'))
+  tasks.push(convertAndSanitize(resourceQuotaHelp, 'text'))
+  tasks.push(convertAndSanitize(controlPlaneHighAvailabilityHelp, 'text'))
 
   for (const item of items) {
     const {
@@ -76,22 +97,23 @@ function sanitizeFrontendConfig (frontendConfig) {
       input = {},
       options = [],
     } = item
-    convertAndSanitize(display, 'description')
-    convertAndSanitize(input, 'description')
+    tasks.push(convertAndSanitize(display, 'description'))
+    tasks.push(convertAndSanitize(input, 'description'))
     for (const option of options) {
       const {
         display = {},
         input = {},
       } = option
-      convertAndSanitize(display, 'description')
-      convertAndSanitize(input, 'description')
+      tasks.push(convertAndSanitize(display, 'description'))
+      tasks.push(convertAndSanitize(input, 'description'))
     }
   }
 
   for (const vendorHint of vendorHints) {
-    convertAndSanitize(vendorHint, 'message')
+    tasks.push(convertAndSanitize(vendorHint, 'message'))
   }
 
+  await Promise.all(tasks)
   return sanitizedFrontendConfig
 }
 

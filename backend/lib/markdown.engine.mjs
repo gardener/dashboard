@@ -1,0 +1,51 @@
+//
+// SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// TODO(esm-migration): This is the canonical ESM implementation.
+// It is split out so that CommonJS callers can load it indirectly via dynamic import() from markdown.js.
+// When the backend/test suite is fully ESM, this file can become the sole entrypoint (and markdown.js can be deleted).
+
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkGfm from 'remark-gfm'
+import remarkGithub from 'remark-github'
+import remarkBreaks from 'remark-breaks'
+import remarkEmoji from 'remark-emoji'
+import remarkRehype from 'remark-rehype'
+import rehypeExternalLinks from 'rehype-external-links'
+import rehypeStringify from 'rehype-stringify'
+import sanitizeHtml from 'sanitize-html'
+
+const SANITIZE = {
+  allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
+}
+
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkGithub)
+  .use(remarkBreaks)
+  .use(remarkEmoji, { emoticon: false })
+
+  // Keep raw HTML as raw nodes, required too keep some tags like details/summary
+  // Unsafe HTML will be sanitized later
+  .use(remarkRehype, { allowDangerousHtml: true })
+
+  .use(rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] })
+
+  // emit raw nodes as HTML (unsafe until sanitized)
+  .use(rehypeStringify, { allowDangerousHtml: true })
+
+export function createConverter () {
+  return {
+    async makeSanitizedHtml (text) {
+      const file = await processor.process(text)
+      const rawHtml = String(file)
+      // Sanitize the generated HTML
+      return sanitizeHtml(rawHtml, SANITIZE).trim()
+    },
+  }
+}
