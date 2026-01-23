@@ -12201,7 +12201,7 @@ const RAW_RUNTIME_STATE =
           ["minipass", "npm:7.1.2"],\
           ["minipass-fetch", "npm:4.0.0"],\
           ["minipass-sized", "npm:1.0.3"],\
-          ["minizlib", "npm:3.0.1"]\
+          ["minizlib", "npm:3.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -12237,15 +12237,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["minizlib", [\
-      ["npm:3.0.1", {\
-        "packageLocation": "./.yarn/cache/minizlib-npm-3.0.1-4bdabd978f-82f8bf70da.zip/node_modules/minizlib/",\
-        "packageDependencies": [\
-          ["minipass", "npm:7.1.2"],\
-          ["minizlib", "npm:3.0.1"],\
-          ["rimraf", "npm:5.0.10"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:3.1.0", {\
         "packageLocation": "./.yarn/cache/minizlib-npm-3.1.0-6680befdba-5aad75ab00.zip/node_modules/minizlib/",\
         "packageDependencies": [\
@@ -13620,14 +13611,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["glob", "npm:7.2.3"],\
           ["rimraf", "npm:3.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:5.0.10", {\
-        "packageLocation": "./.yarn/cache/rimraf-npm-5.0.10-d0c6647697-7da4fd0e15.zip/node_modules/rimraf/",\
-        "packageDependencies": [\
-          ["glob", "npm:10.4.5"],\
-          ["rimraf", "npm:5.0.10"]\
         ],\
         "linkType": "HARD"\
       }],\
