@@ -368,7 +368,7 @@ function highlightProjectWithKeys (keyDirection) {
   }
 
   const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex] // eslint-disable-line security/detect-object-injection
-  highlightedProjectName.value = newHighlightedProject.metadata.name
+  highlightedProjectName.value = newHighlightedProject?.metadata.name
 
   scrollToActiveProject()
 }

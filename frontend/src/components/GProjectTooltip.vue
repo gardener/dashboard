@@ -11,7 +11,6 @@ SPDX-License-Identifier: Apache-2.0
     :open-delay="openDelay"
     :open-on-hover="openOnHover"
     :max-width="300"
-    :eager="false"
   >
     <template #activator="{ props: activatorProps }">
       <div v-bind="activatorProps">

@@ -196,15 +196,17 @@ function getProjectMenuTargetRoute (namespace) {
 
 watch(selectedProject, project => {
   const namespace = project?.spec?.namespace
-  if (!namespace) return
-
+  if (!namespace) {
+    return
+  }
   const target = getProjectMenuTargetRoute(namespace)
 
   const current = router.resolve(currentRoute)
   const next = router.resolve(target)
 
-  if (current.fullPath === next.fullPath) return
-
+  if (current.fullPath === next.fullPath) {
+    return
+  }
   router.push(target)
 })
 
