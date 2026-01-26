@@ -1677,7 +1677,7 @@ const RAW_RUNTIME_STATE =
           ["@rollup/plugin-node-resolve", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:16.0.1"],\
           ["abort-controller", "npm:3.0.0"],\
           ["base64url", "npm:3.0.1"],\
-          ["body-parser", "npm:2.2.1"],\
+          ["body-parser", "npm:2.2.2"],\
           ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:10.0.0"],\
@@ -6077,10 +6077,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["body-parser", [\
-      ["npm:2.2.1", {\
-        "packageLocation": "./.yarn/cache/body-parser-npm-2.2.1-79691d0c2a-ce9608cff4.zip/node_modules/body-parser/",\
+      ["npm:2.2.2", {\
+        "packageLocation": "./.yarn/cache/body-parser-npm-2.2.2-2aa532c1f4-95a830a003.zip/node_modules/body-parser/",\
         "packageDependencies": [\
-          ["body-parser", "npm:2.2.1"],\
+          ["body-parser", "npm:2.2.2"],\
           ["bytes", "npm:3.1.2"],\
           ["content-type", "npm:1.0.5"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
@@ -8544,7 +8544,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/express-npm-5.1.0-e44442bf7d-80ce7c53c5.zip/node_modules/express/",\
         "packageDependencies": [\
           ["accepts", "npm:2.0.0"],\
-          ["body-parser", "npm:2.2.1"],\
+          ["body-parser", "npm:2.2.2"],\
           ["content-disposition", "npm:1.0.0"],\
           ["content-type", "npm:1.0.5"],\
           ["cookie", "npm:0.7.2"],\
