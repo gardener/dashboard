@@ -940,9 +940,9 @@ __metadata:
   linkType: hard
 
 "@fontsource/roboto@npm:^5.0.12":
-  version: 5.2.8
-  resolution: "@fontsource/roboto@npm:5.2.8"
-  checksum: 10c0/b215a7e08d65063e9e1714e39c023f0a1f2d33f0d48f06edf4e0d09a8945f682dd39ca7089efb83a48ceffa20d92d65392297831198e9a694b5be8a96b1a40cd
+  version: 5.2.9
+  resolution: "@fontsource/roboto@npm:5.2.9"
+  checksum: 10c0/8280ab6504ab7da105c77afc1231236be86f7cd02a708e25b6cfc2871975699a44be7a42491e59934f2a84c874a8109bb2babfbc6b1986bcad9f3ac1de3980ca
   languageName: node
   linkType: hard
 
