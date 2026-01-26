@@ -426,6 +426,39 @@ global:
       failureThreshold: 6
       successThreshold: 1
 
+    # # PodDisruptionBudget - specify minAvailable OR maxUnavailable
+    # podDisruptionBudget:
+    #   minAvailable: 1
+    #   # maxUnavailable: 1
+
+    # # Pod affinity/anti-affinity rules
+    # affinity:
+    #   podAntiAffinity:
+    #     preferredDuringSchedulingIgnoredDuringExecution:
+    #     - weight: 100
+    #       podAffinityTerm:
+    #         labelSelector:
+    #           matchLabels:
+    #             app.kubernetes.io/name: gardener-dashboard
+    #             app.kubernetes.io/component: dashboard
+    #         topologyKey: kubernetes.io/hostname
+
+    # # Pod-level security context
+    # podSecurityContext:
+    #   runAsNonRoot: true
+    #   runAsUser: 65532
+    #   runAsGroup: 65532
+    #   fsGroup: 65532
+    #   seccompProfile:
+    #     type: RuntimeDefault
+
+    # # Container-level security context
+    # securityContext:
+    #   allowPrivilegeEscalation: false
+    #   capabilities:
+    #     drop:
+    #     - ALL
+
   # Virtual garden related configuration
   virtualGarden:
     # enabled should be set to true if the application and runtime charts should be deployed on two separate clusters, usually in a so-called "virtual garden" setup
