@@ -57,6 +57,10 @@ spec:
         {{- toYaml .Values.global.dashboard.podLabels | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.global.dashboard.podSecurityContext }}
+      securityContext:
+        {{- toYaml .Values.global.dashboard.podSecurityContext | nindent 8 }}
+      {{- end }}
       volumes:
       - name: gardener-dashboard-config
         configMap:
@@ -132,6 +136,10 @@ spec:
       {{- else }}
       serviceAccountName: default
       {{- end }}
+      {{- if .Values.global.dashboard.affinity }}
+      affinity:
+        {{- toYaml .Values.global.dashboard.affinity | nindent 8 }}
+      {{- end }}
       containers:
         - name: gardener-dashboard
           {{- if .Values.global.dashboard.nodeOptions }}
@@ -143,6 +151,10 @@ spec:
           {{- end }}
           image: "{{ include "utils-templates.image" .Values.global.dashboard.image }}"
           imagePullPolicy: {{ .Values.global.dashboard.image.pullPolicy }}
+          {{- if .Values.global.dashboard.securityContext }}
+          securityContext:
+            {{- toYaml .Values.global.dashboard.securityContext | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.global.dashboard.containerPort }}
