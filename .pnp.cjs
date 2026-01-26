@@ -1765,7 +1765,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/view", "npm:6.39.11"],\
           ["@fontsource/roboto", "npm:5.2.9"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
-          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
+          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
           ["@lezer/common", "npm:1.5.0"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
@@ -2689,17 +2689,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@kyvg/vue3-notification", [\
-      ["npm:3.4.1", {\
-        "packageLocation": "./.yarn/cache/@kyvg-vue3-notification-npm-3.4.1-4dcb225fc4-831d79e5ef.zip/node_modules/@kyvg/vue3-notification/",\
+      ["npm:3.4.2", {\
+        "packageLocation": "./.yarn/cache/@kyvg-vue3-notification-npm-3.4.2-2b16e9ade8-b2f7d9b2fd.zip/node_modules/@kyvg/vue3-notification/",\
         "packageDependencies": [\
-          ["@kyvg/vue3-notification", "npm:3.4.1"]\
+          ["@kyvg/vue3-notification", "npm:3.4.2"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1", {\
-        "packageLocation": "./.yarn/__virtual__/@kyvg-vue3-notification-virtual-c0a4f5839a/0/cache/@kyvg-vue3-notification-npm-3.4.1-4dcb225fc4-831d79e5ef.zip/node_modules/@kyvg/vue3-notification/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2", {\
+        "packageLocation": "./.yarn/__virtual__/@kyvg-vue3-notification-virtual-1998331f0a/0/cache/@kyvg-vue3-notification-npm-3.4.2-2b16e9ade8-b2f7d9b2fd.zip/node_modules/@kyvg/vue3-notification/",\
         "packageDependencies": [\
-          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.1"],\
+          ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
           ["@types/vue", null],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.22"]\
         ],\
