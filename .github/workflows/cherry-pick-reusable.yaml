@@ -26,13 +26,13 @@ jobs:
       branches: ${{ steps.parse.outputs.branches }}
       has-branches: ${{ steps.parse.outputs.has-branches }}
     steps:
-      - uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: token
         with:
           app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
           private-key: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}
           permission-pull-requests: write
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           ref: ${{ github.event.repository.default_branch }}
           token: ${{ steps.token.outputs.token }}
@@ -53,7 +53,7 @@ jobs:
         target-branch: ${{ fromJson(needs.parse-branches.outputs.branches) }}
       fail-fast: false
     steps:
-      - uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: token
         with:
           app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
@@ -61,7 +61,7 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
           permission-workflows: write
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           ref: ${{ github.event.repository.default_branch }}
           token: ${{ steps.token.outputs.token }}
@@ -77,13 +77,13 @@ jobs:
     needs: [parse-branches, cherry-pick]
     if: always() && needs.parse-branches.outputs.has-branches == 'true'
     steps:
-      - uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: token
         with:
           app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
           private-key: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}
           permission-pull-requests: write
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           ref: ${{ github.event.repository.default_branch }}
           token: ${{ steps.token.outputs.token }}
