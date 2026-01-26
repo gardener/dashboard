@@ -131,23 +131,23 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/swagger-parser", [\
-      ["npm:12.0.0", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-12.0.0-67e85db9c8-c905c49dc5.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["npm:12.1.0", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-12.1.0-e8adb44e0d-ccac54e2f6.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "npm:12.0.0"]\
+          ["@apidevtools/swagger-parser", "npm:12.1.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-2e14c2bcc8/0/cache/@apidevtools-swagger-parser-npm-12.0.0-67e85db9c8-c905c49dc5.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.1.0", {\
+        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-ea0321ac84/0/cache/@apidevtools-swagger-parser-npm-12.1.0-e8adb44e0d-ccac54e2f6.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
           ["@apidevtools/json-schema-ref-parser", "npm:14.0.1"],\
           ["@apidevtools/openapi-schemas", "npm:2.1.0"],\
           ["@apidevtools/swagger-methods", "npm:3.0.2"],\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.1.0"],\
           ["@types/openapi-types", null],\
           ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0"],\
+          ["ajv-draft-04", "virtual:ea0321ac8495c94cbd095345d50743c4d3866193c98938ea0cba0e78f4e3b6a0a30d03536f6d5bd9e68e415abaa3b3c7465f6c1107e06b1f44e23dab268e13ff#npm:1.0.0"],\
           ["call-me-maybe", "npm:1.0.2"],\
           ["openapi-types", "npm:12.1.3"]\
         ],\
@@ -1656,7 +1656,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:backend", {\
         "packageLocation": "./backend/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.0.0"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:12.1.0"],\
           ["@gardener-dashboard/backend", "workspace:backend"],\
           ["@gardener-dashboard/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client"],\
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
@@ -5578,12 +5578,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-900a776629/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
+      ["virtual:ea0321ac8495c94cbd095345d50743c4d3866193c98938ea0cba0e78f4e3b6a0a30d03536f6d5bd9e68e415abaa3b3c7465f6c1107e06b1f44e23dab268e13ff#npm:1.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-92f7d239c9/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
         "packageDependencies": [\
           ["@types/ajv", null],\
           ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:2e14c2bcc847580c404461325322b2c1b250f8b344f90ef3b78a6f6384b2479d7a79f1e5373ee71aa0ec4db6e04a491ee0887d861dffb48b5916b0ab35c5a9b1#npm:1.0.0"]\
+          ["ajv-draft-04", "virtual:ea0321ac8495c94cbd095345d50743c4d3866193c98938ea0cba0e78f4e3b6a0a30d03536f6d5bd9e68e415abaa3b3c7465f6c1107e06b1f44e23dab268e13ff#npm:1.0.0"]\
         ],\
         "packagePeers": [\
           "@types/ajv",\
