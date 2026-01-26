@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="hideWorkerlessOption">
       <v-col cols="12">
         <v-checkbox
           v-model="workerless"
@@ -175,6 +175,7 @@ export default {
   computed: {
     ...mapState(useConfigStore, [
       'sla',
+      'hideWorkerlessOption',
     ]),
     unexpiredKubernetesVersions () {
       return filter(this.sortedKubernetesVersions, ({ isExpired }) => !isExpired)

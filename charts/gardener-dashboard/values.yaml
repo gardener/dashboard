@@ -164,6 +164,14 @@ global:
       - title: Issues
         icon: mdi-bug
         url: https://github.com/gardener/gardener/issues
+      # hide: # hides new shoot creation items
+      #   DNSConfiguration: false
+      #   addons: false
+      #   autoUpdate: false
+      #   controlPlaneHighAvailability: false
+      #   hibernation: false
+      #   infrastructure: false
+      #   workerlessOption: false
       # # supported grantTypes of the garden cluster oidc issuer. See https://github.com/int128/kubelogin/blob/master/docs/usage.md for possible values.
       # grantTypes:
       # - auto
