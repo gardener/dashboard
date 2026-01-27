@@ -33,7 +33,7 @@ const routes = {
   '/projects': projectsRoute,
   '/namespaces/:namespace/shoots': shootsRoute,
   '/namespaces/:namespace/tickets': ticketsRoute,
-  '/namespaces/:namespace/cloudprofiles': namespacedCloudProfilesRoute,
+  '/namespaces/:namespace/namespacedcloudprofiles': namespacedCloudProfilesRoute,
   '/cloudprovidercredentials': cloudProviderCredentialsRoute,
   '/namespaces/:namespace/members': membersRoute,
   '/namespaces/:namespace/resourcequotas': resourceQuotasRoute,

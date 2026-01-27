@@ -31,7 +31,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/cloudprofiles`)
+        .get(`/api/namespaces/${namespace}/namespacedcloudprofiles`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
 
@@ -47,7 +47,7 @@ describe('api', function () {
       }))
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/cloudprofiles`)
+        .get(`/api/namespaces/${namespace}/namespacedcloudprofiles`)
         .set('cookie', await user.cookie)
         .expect(403)
 
