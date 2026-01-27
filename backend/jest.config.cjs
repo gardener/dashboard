@@ -5,6 +5,7 @@
 //
 
 module.exports = {
+  globalSetup: './jest.globalSetup.cjs',
   restoreMocks: true,
   verbose: true,
   coverageDirectory: 'coverage',

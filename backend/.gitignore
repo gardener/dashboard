@@ -25,3 +25,7 @@ my*
 
 # Ignore CJS build output directory
 dist/
+
+# Ignore packages hash cache file (used by jest.globalSetup.cjs)
+.packages-hash
+
