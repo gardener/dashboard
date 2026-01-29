@@ -293,7 +293,6 @@ import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   displayName,
-  gravatarUrlGeneric,
   isEmail,
   parseServiceAccountUsername,
   isForeignServiceAccount,
@@ -381,7 +380,6 @@ const userList = computed(() => {
     const { username } = user
     return {
       ...user,
-      avatarUrl: gravatarUrlGeneric(username),
       displayName: displayName(username),
       isEmail: isEmail(username),
       isOwner: isOwner(username),
@@ -447,7 +445,6 @@ const serviceAccountList = computed(() => {
     const { username } = serviceAccount
     return {
       ...serviceAccount,
-      avatarUrl: gravatarUrlGeneric(username),
       displayName: displayName(username),
       roleDescriptors: sortedRoleDescriptors(serviceAccount.roles),
       isCurrentUser: isCurrentUser(username),

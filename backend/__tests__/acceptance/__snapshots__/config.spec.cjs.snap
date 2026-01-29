@@ -17,6 +17,7 @@ exports[`config should return the frontend configuration 1`] = `
 exports[`config should return the frontend configuration 2`] = `
 {
   "apiServerUrl": "https://kubernetes.external.foo.bar",
+  "avatarSource": "gravatar",
   "clusterIdentity": "test-id",
   "features": {
     "terminalEnabled": true,

@@ -150,6 +150,11 @@ global:
 
     frontendConfig:
       landingPageUrl: https://github.com/gardener
+      # # Avatar source configuration for members, accounts, and general dashboard avatars
+      # # Note: The ticket feature has its own separate avatarSource configuration (see frontendConfig.ticket.avatarSource)
+      # # Possible values: gravatar, none
+      # # Default: gravatar
+      # avatarSource: gravatar
       # # asset configuration (see https://github.com/gardener/dashboard/blob/master/docs/customization.md#logos-and-icons for the format and generation of the default values).
       # assets:
       #   favicon-16x16.png: |
@@ -170,7 +175,12 @@ global:
       # - authcode
       # - device-code
       # ticket:
-      #   avatarSource: github # Define from which source the avatar is fetched. For enterprise github instances it is recommended to use gravatar or none. Possible values: github, gravatar, none
+      #   # Avatar source configuration specifically for ticket comments/authors
+      #   # This setting is independent from the global avatarSource configuration above
+      #   # For enterprise GitHub instances it is recommended to use gravatar or none
+      #   # Possible values: github, gravatar, none
+      #   # Default: github
+      #   avatarSource: github
       #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
       #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
       #   - ignore

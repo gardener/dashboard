@@ -14,9 +14,13 @@ SPDX-License-Identifier: Apache-2.0
         class="pa-0"
         density="compact"
       >
-        <v-list-item
-          :prepend-avatar="item.avatarUrl"
-        >
+        <v-list-item>
+          <template #prepend>
+            <g-avatar
+              :account-name="item.username"
+              :size="40"
+            />
+          </template>
           <v-list-item-title>
             {{ item.displayName }}
             <v-icon
@@ -164,6 +168,7 @@ import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GTimeString from '@/components/GTimeString.vue'
 import GActionButton from '@/components/GActionButton.vue'
 import GScrollContainer from '@/components/GScrollContainer'
+import GAvatar from '@/components/GAvatar.vue'
 
 import {
   isForeignServiceAccount,

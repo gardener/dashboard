@@ -31,8 +31,8 @@ SPDX-License-Identifier: Apache-2.0
         >
           <g-account-avatar
             :account-name="modelValue"
-            mail-to
             :color="color"
+            mail-to
           />
         </div>
         <div>
@@ -73,17 +73,14 @@ SPDX-License-Identifier: Apache-2.0
         @update:model-value="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
       >
-        <template #item="{ item, props }">
+        <template #item="{ item, props: itemProps }">
           <v-list-item
-            v-bind="props"
-            :title="item.title"
+            v-bind="{ ...itemProps, title: undefined }"
           >
-            <template #prepend>
-              <v-avatar
-                :image="getAvatarUrl(item)"
-                size="x-small"
-              />
-            </template>
+            <g-account-avatar
+              :account-name="item.value"
+              :size="24"
+            />
           </v-list-item>
         </template>
         <template #append>
@@ -114,7 +111,6 @@ import { useVuelidate } from '@vuelidate/core'
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
 import {
-  gravatarUrlGeneric,
   setDelayedInputFocus,
   getErrorMessages,
 } from '@/utils'
@@ -244,9 +240,6 @@ export default {
   methods: {
     clearMessages () {
       this.messages = []
-    },
-    getAvatarUrl (item) {
-      return gravatarUrlGeneric(item.value)
     },
     onCancel () {
       this.internalValue = this.modelValue

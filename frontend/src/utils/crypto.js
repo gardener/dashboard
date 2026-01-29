@@ -13,6 +13,14 @@ import set from 'lodash/set'
 
 export { md5 }
 
+export async function sha256 (value) {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(value)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
 export function normalizeObject (obj) {
   if (!obj) {
     return null

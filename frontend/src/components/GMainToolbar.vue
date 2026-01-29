@@ -119,28 +119,18 @@ SPDX-License-Identifier: Apache-2.0
             location="bottom right"
             icon="mdi-account-supervisor"
           >
-            <v-avatar
+            <g-avatar
               v-bind="props"
-              size="40"
-              class="cursor-pointer"
-            >
-              <v-img
-                :src="avatarUrl"
-                :alt="`avatar of ${avatarTitle}`"
-              />
-            </v-avatar>
-          </v-badge>
-          <v-avatar
-            v-else
-            v-bind="props"
-            size="40"
-            class="cursor-pointer"
-          >
-            <v-img
-              :src="avatarUrl"
+              :account-name="username"
               :alt="`avatar of ${avatarTitle}`"
             />
-          </v-avatar>
+          </v-badge>
+          <g-avatar
+            v-else
+            v-bind="props"
+            :account-name="username"
+            :alt="`avatar of ${avatarTitle}`"
+          />
         </template>
         <span v-if="isAdmin">
           {{ avatarTitle }}
@@ -317,6 +307,7 @@ import { useAuthnStore } from '@/store/authn'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
 
+import GAvatar from '@/components/GAvatar.vue'
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
 
@@ -345,7 +336,11 @@ const branding = toRef(configStore, 'branding')
 const autoLogin = toRef(localStorageStore, 'autoLogin')
 const colorMode = toRef(localStorageStore, 'colorScheme')
 
-const { isAdmin, username, displayName, avatarUrl, avatarTitle } = storeToRefs(authnStore)
+const { isAdmin, username, displayName } = storeToRefs(authnStore)
+
+const avatarTitle = computed(() => {
+  return `${displayName.value} (${username.value})`
+})
 
 const tabs = computed(() => {
   const meta = route.meta ?? {}

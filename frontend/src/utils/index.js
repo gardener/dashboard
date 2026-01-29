@@ -15,7 +15,7 @@ import { useLogger } from '@/composables/useLogger'
 
 import moment from './moment'
 import {
-  md5,
+  sha256,
   hash,
 } from './crypto'
 import TimeWithOffset from './TimeWithOffset'
@@ -256,17 +256,22 @@ export function isEmail (value) {
   return true
 }
 
-export function gravatarUrlGeneric (username, size = 128) {
+export async function gravatarUrlGeneric (username, size = 128, avatarSource = 'gravatar') {
+  // Support 'none' option - return undefined to hide avatar
+  if (avatarSource === 'none') {
+    return undefined
+  }
+
   if (!username) {
-    return gravatarUrlMp('undefined', size)
+    return await gravatarUrlMp('undefined', size)
   }
   if (isEmail(username)) {
-    return gravatarUrlIdenticon(username, size)
+    return await gravatarUrlIdenticon(username, size)
   }
   if (isServiceAccountUsername(username)) {
-    return gravatarUrlRobohash(username, size)
+    return await gravatarUrlRobohash(username, size)
   }
-  return gravatarUrlRetro(username, size)
+  return await gravatarUrlRetro(username, size)
 }
 
 export function gravatarUrlMp (username, size = 128) {
@@ -285,8 +290,12 @@ export function gravatarUrlRobohash (username, size = 128) {
   return gravatarUrl(username, 'robohash', size)
 }
 
-export function gravatarUrl (value, image, size) {
-  return `https://www.gravatar.com/avatar/${md5(toLower(value))}?d=${image}&s=${size}`
+export async function gravatarUrl (value, image, size) {
+  let hash = await sha256(toLower(value))
+  hash = encodeURIComponent(hash)
+  image = encodeURIComponent(image)
+  size = encodeURIComponent(size)
+  return `https://www.gravatar.com/avatar/${hash}?d=${image}&s=${size}`
 }
 
 export function routes (router, includeRoutesWithProjectScope) {

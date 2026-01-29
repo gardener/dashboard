@@ -8,11 +8,11 @@ SPDX-License-Identifier: Apache-2.0
   <div class="d-flex my-2 mx-4">
     <div class="mr-2">
       <v-avatar
-        v-if="avatarUrl"
+        v-if="displayAvatarUrl"
         size="40px"
       >
         <v-img
-          :src="avatarUrl"
+          :src="displayAvatarUrl"
           :title="login"
           :alt="`avatar of github user ${login}`"
         />
@@ -49,17 +49,20 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
+import {
+  computed,
+  toRefs,
+} from 'vue'
+import { useTheme } from 'vuetify'
 
 import { useConfigStore } from '@/store/config'
 
 import GTimeString from '@/components/GTimeString.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import {
-  gravatarUrlIdenticon,
-  transformHtml,
-} from '@/utils'
+import { useAvatarUrl } from '@/composables/useAvatarUrl'
+
+import { transformHtml } from '@/utils'
 
 import get from 'lodash/get'
 
@@ -80,38 +83,62 @@ export default {
       required: true,
     },
   },
-  computed: {
-    ...mapState(useConfigStore, {
-      ticketConfig: 'ticket',
-    }),
-    commentHtml () {
-      return transformHtml(get(this.comment, ['data', 'body'], ''))
-    },
-    login () {
-      return get(this.comment, ['data', 'user', 'login'])
-    },
-    createdAt () {
-      return get(this.comment, ['metadata', 'created_at'])
-    },
-    avatarSource () {
-      return get(this.ticketConfig, ['avatarSource'], AvatarEnum.GITHUB)
-    },
-    avatarUrl () {
-      switch (this.avatarSource) {
+  setup (props) {
+    const { comment } = toRefs(props)
+    const theme = useTheme()
+    const configStore = useConfigStore()
+
+    const ticketConfig = computed(() => configStore.ticket)
+
+    const commentHtml = computed(() => {
+      return transformHtml(get(comment.value, ['data', 'body'], ''))
+    })
+
+    const login = computed(() => {
+      return get(comment.value, ['data', 'user', 'login'])
+    })
+
+    const createdAt = computed(() => {
+      return get(comment.value, ['metadata', 'created_at'])
+    })
+
+    const avatarSource = computed(() => {
+      return get(ticketConfig.value, ['avatarSource'], AvatarEnum.GITHUB)
+    })
+
+    const githubAvatarUrl = computed(() => {
+      return get(comment.value, ['data', 'user', 'avatar_url'])
+    })
+
+    const { avatarUrl: gravatarUrl } = useAvatarUrl(login, 128, avatarSource)
+
+    const displayAvatarUrl = computed(() => {
+      switch (avatarSource.value) {
         case AvatarEnum.GITHUB:
-          return get(this.comment, ['data', 'user', 'avatar_url'])
+          return githubAvatarUrl.value
         case AvatarEnum.GRAVATAR:
-          return gravatarUrlIdenticon(this.login)
+          return gravatarUrl.value
         default:
           return undefined
       }
-    },
-    htmlUrl () {
-      return get(this.comment, ['data', 'html_url'])
-    },
-    gThemeClass () {
-      return this.$vuetify.theme.current.dark ? 'g-theme-dark' : 'g-theme-light'
-    },
+    })
+
+    const htmlUrl = computed(() => {
+      return get(comment.value, ['data', 'html_url'])
+    })
+
+    const gThemeClass = computed(() => {
+      return theme.current.value.dark ? 'g-theme-dark' : 'g-theme-light'
+    })
+
+    return {
+      commentHtml,
+      login,
+      createdAt,
+      displayAvatarUrl,
+      htmlUrl,
+      gThemeClass,
+    }
   },
 }
 </script>
