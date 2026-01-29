@@ -1708,7 +1708,7 @@ const RAW_RUNTIME_STATE =
           ["p-event", "npm:6.0.1"],\
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
-          ["p-timeout", "npm:4.1.0"],\
+          ["p-timeout", "npm:7.0.1"],\
           ["path-to-regexp", "npm:8.2.0"],\
           ["rehype-external-links", "npm:3.0.0"],\
           ["rehype-stringify", "npm:10.0.1"],\
@@ -12797,17 +12797,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["p-timeout", [\
-      ["npm:4.1.0", {\
-        "packageLocation": "./.yarn/cache/p-timeout-npm-4.1.0-d6c6e20c58-25aaf13ae9.zip/node_modules/p-timeout/",\
-        "packageDependencies": [\
-          ["p-timeout", "npm:4.1.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:6.1.4", {\
         "packageLocation": "./.yarn/cache/p-timeout-npm-6.1.4-84ec228b4c-019edad1c6.zip/node_modules/p-timeout/",\
         "packageDependencies": [\
           ["p-timeout", "npm:6.1.4"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.0.1", {\
+        "packageLocation": "./.yarn/cache/p-timeout-npm-7.0.1-3a2b4a11cc-87d96529d1.zip/node_modules/p-timeout/",\
+        "packageDependencies": [\
+          ["p-timeout", "npm:7.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
