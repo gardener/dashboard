@@ -93,7 +93,7 @@ app.use(helmet.contentSecurityPolicy({
     styleSrc: ['\'self\'', '\'unsafe-inline\''],
     fontSrc: ['\'self\'', 'data:'],
     imgSrc,
-    scriptSrc: ['\'self\''],
+    scriptSrc: ['\'self\'', '\'unsafe-eval\''],
     frameAncestors: ['\'self\''],
   },
 }))
