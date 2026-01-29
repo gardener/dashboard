@@ -890,6 +890,40 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('avatarSource', function () {
+      it('should render the template with avatarSource', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                avatarSource: 'none',
+              },
+            },
+          },
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(pick(config, ['frontend.avatarSource'])).toMatchSnapshot()
+      })
+
+      it('should not render avatarSource when not specified', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {},
+            },
+          },
+        }
+        const documents = await renderTemplates(templates, values)
+        expect(documents).toHaveLength(1)
+        const [configMap] = documents
+        const config = yaml.load(configMap.data['config.yaml'])
+        expect(config.frontend).not.toHaveProperty('avatarSource')
+      })
+    })
+
     describe('socket io', function () {
       it('should render the template with multiple allowed origins', async function () {
         const values = {

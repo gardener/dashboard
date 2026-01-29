@@ -230,6 +230,26 @@ export default {
       _.unset(config, ['frontend', 'ticket'])
     }
 
+    const avatarSource = _.get(config, ['frontend', 'avatarSource'])
+    if (avatarSource) {
+      const validAvatarSources = ['gravatar', 'none']
+      if (!validAvatarSources.includes(avatarSource)) {
+        assert.fail(`Configuration value 'frontend.avatarSource' must be one of: ${validAvatarSources.join(', ')}. Got: ${avatarSource}`)
+      }
+    } else {
+      _.set(config, ['frontend', 'avatarSource'], 'gravatar')
+    }
+
+    const ticketAvatarSource = _.get(config, ['frontend', 'ticket', 'avatarSource'])
+    if (ticketAvatarSource) {
+      const validTicketAvatarSources = ['gravatar', 'none', 'github']
+      if (!validTicketAvatarSources.includes(ticketAvatarSource)) {
+        assert.fail(`Configuration value 'frontend.ticket.avatarSource' must be one of: ${validTicketAvatarSources.join(', ')}. Got: ${ticketAvatarSource}`)
+      }
+    } else if (_.has(config, ['frontend', 'ticket'])) {
+      _.set(config, ['frontend', 'ticket', 'avatarSource'], 'github')
+    }
+
     return config
   },
   readConfig (path) {

@@ -88,6 +88,14 @@ exports[`gardener-dashboard configmap alert should render the template w/o \`ale
 }
 `;
 
+exports[`gardener-dashboard configmap avatarSource should render the template with avatarSource 1`] = `
+{
+  "frontend": {
+    "avatarSource": "none",
+  },
+}
+`;
+
 exports[`gardener-dashboard configmap branding should render the template 1`] = `
 {
   "frontend": {

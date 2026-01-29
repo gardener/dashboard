@@ -14,9 +14,12 @@ SPDX-License-Identifier: Apache-2.0
         class="pa-0"
         density="compact"
       >
-        <v-list-item
-          :prepend-avatar="item.avatarUrl"
-        >
+        <v-list-item>
+          <template #prepend>
+            <g-avatar
+              :account-name="item.username"
+            />
+          </template>
           <v-list-item-title>
             {{ item.displayName }}
           </v-list-item-title>
@@ -82,6 +85,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GAvatar from '@/components/GAvatar.vue'
 
 import { mapTableHeader } from '@/utils'
 

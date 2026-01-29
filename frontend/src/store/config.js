@@ -161,6 +161,10 @@ export const useConfigStore = defineStore('config', () => {
     return state.value?.alert
   })
 
+  const avatarSource = computed(() => {
+    return state.value?.avatarSource
+  })
+
   const accessRestriction = computed(() => {
     return state.value?.accessRestriction
   })
@@ -710,6 +714,7 @@ export const useConfigStore = defineStore('config', () => {
     isInitial,
     appVersion,
     alert,
+    avatarSource,
     accessRestriction,
     sla,
     costObject,

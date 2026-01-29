@@ -52,7 +52,12 @@ const STATIC_ASSETS_OVERRIDE_FS_PATH = join(PUBLIC_FS_PATH, 'static', 'custom-as
 
 // csp sources
 const connectSrc = _.get(config, ['contentSecurityPolicy', 'connectSrc'], ['\'self\''])
-const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
+const imgSrc = ['\'self\'', 'data:']
+const frontendAvatarSource = _.get(config, ['frontend', 'avatarSource'])
+const ticketAvatarSource = _.get(config, ['frontend', 'ticket', 'avatarSource'])
+if (frontendAvatarSource === 'gravatar' || ticketAvatarSource === 'gravatar') {
+  imgSrc.push('https://www.gravatar.com')
+}
 const gitHubRepoUrl = _.get(config, ['frontend', 'ticket', 'gitHubRepoUrl'])
 if (gitHubRepoUrl) {
   const url = new URL(gitHubRepoUrl)

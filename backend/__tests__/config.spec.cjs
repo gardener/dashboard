@@ -207,6 +207,117 @@ describe('config', function () {
         expect(() => gardener.loadConfig(undefined, { env }))
           .toThrow("Configuration value 'oidc.issuer' is required")
       })
+
+      it('should default avatarSource to gravatar if not defined', function () {
+        const env = Object.assign({
+          NODE_ENV: 'test',
+        }, environmentVariables)
+
+        const config = gardener.loadConfig(undefined, { env })
+        expect(config.frontend.avatarSource).toBe('gravatar')
+      })
+
+      it('should accept valid avatarSource values', function () {
+        const filename = '/etc/gardener/config-with-avatarsource.yaml'
+
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          frontend: {
+            avatarSource: 'none',
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        const config = gardener.loadConfig(filename, { env })
+        expect(config.frontend.avatarSource).toBe('none')
+      })
+
+      it('should throw on invalid avatarSource value', function () {
+        const filename = '/etc/gardener/config-invalid-avatarsource.yaml'
+
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          frontend: {
+            avatarSource: 'invalid',
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        expect(() => gardener.loadConfig(filename, { env }))
+          .toThrow("Configuration value 'frontend.avatarSource' must be one of: gravatar, none")
+      })
+
+      it('should default ticket avatarSource to github if ticket config exists but avatarSource not defined', function () {
+        const filename = '/etc/gardener/config-ticket-no-avatarsource.yaml'
+
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          gitHub: {
+            apiUrl: 'https://github.com',
+          },
+          frontend: {
+            ticket: {
+              gitHubRepoUrl: 'https://github.com/gardener/tickets',
+            },
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        const config = gardener.loadConfig(filename, { env })
+        expect(config.frontend.ticket.avatarSource).toBe('github')
+      })
+
+      it('should accept valid ticket avatarSource values including github', function () {
+        const filename = '/etc/gardener/config-ticket-github.yaml'
+
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          gitHub: {
+            apiUrl: 'https://github.com',
+          },
+          frontend: {
+            ticket: {
+              avatarSource: 'github',
+              gitHubRepoUrl: 'https://github.com/gardener/tickets',
+            },
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        const config = gardener.loadConfig(filename, { env })
+        expect(config.frontend.ticket.avatarSource).toBe('github')
+      })
+
+      it('should throw on invalid ticket avatarSource value', function () {
+        const filename = '/etc/gardener/config-ticket-invalid.yaml'
+
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          gitHub: {
+            apiUrl: 'https://github.com',
+          },
+          frontend: {
+            ticket: {
+              avatarSource: 'invalid',
+              gitHubRepoUrl: 'https://github.com/gardener/tickets',
+            },
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        expect(() => gardener.loadConfig(filename, { env }))
+          .toThrow("Configuration value 'frontend.ticket.avatarSource' must be one of: gravatar, none, github")
+      })
     })
   })
 })

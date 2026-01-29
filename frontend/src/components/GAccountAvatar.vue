@@ -6,15 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-nowrap align-center">
-    <v-avatar
+    <g-avatar
+      :account-name="accountName"
       :size="size"
-      class="mr-2"
-    >
-      <v-img
-        :src="avatarUrl"
-        :alt="`avatar of ${accountName}`"
-      />
-    </v-avatar>
+      :alt="`avatar of ${accountName}`"
+      class="mr-1"
+    />
     <a
       v-if="mailTo && isAccountNameEmail"
       :href="`mailto:${accountName}`"
@@ -34,10 +31,9 @@ import {
   toRefs,
 } from 'vue'
 
-import {
-  gravatarUrlGeneric,
-  isEmail,
-} from '@/utils'
+import GAvatar from '@/components/GAvatar.vue'
+
+import { isEmail } from '@/utils'
 
 const props = defineProps({
   accountName: {
@@ -54,11 +50,7 @@ const props = defineProps({
   },
 })
 
-const { accountName, mailTo, size } = toRefs(props)
-
-const avatarUrl = computed(() => {
-  return gravatarUrlGeneric(accountName.value, size.value * 2)
-})
+const { accountName } = toRefs(props)
 
 const isAccountNameEmail = computed(() => {
   return isEmail(accountName.value)

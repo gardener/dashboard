@@ -18,7 +18,6 @@ import { useLogger } from '@/composables/useLogger'
 import { useInterceptors } from '@/composables/useApi'
 
 import {
-  gravatarUrlGeneric,
   displayName as getDisplayName,
   fullDisplayName as getFullDisplayName,
 } from '@/utils'
@@ -82,14 +81,6 @@ export const useAuthnStore = defineStore('authn', () => {
     return (user.value?.exp ?? 0) * 1000
   })
 
-  const avatarUrl = computed(() => {
-    return gravatarUrlGeneric(username.value)
-  })
-
-  const avatarTitle = computed(() => {
-    return `${displayName.value} (${username.value})`
-  })
-
   function $reset () {
     user.value = decodeCookie()
   }
@@ -101,8 +92,6 @@ export const useAuthnStore = defineStore('authn', () => {
     displayName,
     fullDisplayName,
     sessionExpiresAt,
-    avatarUrl,
-    avatarTitle,
     isExpired,
     signout,
     signin,

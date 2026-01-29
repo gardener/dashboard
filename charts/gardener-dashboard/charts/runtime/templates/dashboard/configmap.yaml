@@ -163,6 +163,9 @@ data:
         {{- end }}
     {{- end }}
     frontend:
+      {{- if .Values.global.dashboard.frontendConfig.avatarSource }}
+      avatarSource: {{ .Values.global.dashboard.frontendConfig.avatarSource }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.helpMenuItems }}
       helpMenuItems:
       {{- range .Values.global.dashboard.frontendConfig.helpMenuItems }}
