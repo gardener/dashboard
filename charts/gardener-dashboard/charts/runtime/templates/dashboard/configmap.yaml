@@ -42,6 +42,30 @@ data:
     {{- range $allowedOrigins }}
     - {{ . | quote }}
     {{- end }}
+    {{- if .Values.global.dashboard.hide }}
+    hide:
+      {{- if .Values.global.dashboard.hide.DNSConfiguration }}
+      DNSConfiguration: {{ .Values.global.dashboard.hide.DNSConfiguration }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.addons }}
+      addons: {{ .Values.global.dashboard.hide.addons }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.autoUpdate }}
+      autoUpdate: {{ .Values.global.dashboard.hide.autoUpdate }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.controlPlaneHighAvailability }}
+      controlPlaneHighAvailability: {{ .Values.global.dashboard.hide.controlPlaneHighAvailability }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.hibernation }}
+      hibernation: {{ .Values.global.dashboard.hide.hibernation }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.infrastructure }}
+      infrastructure: {{ .Values.global.dashboard.hide.infrastructure }}
+      {{- end }}
+      {{- if .Values.global.dashboard.hide.workerlessOption }}
+      workerlessOption: {{ .Values.global.dashboard.hide.workerlessOption }}
+      {{- end }}
+    {{- end }}
     {{- if .Values.global.dashboard.gitHub }}
     gitHub:
       apiUrl: {{ .Values.global.dashboard.gitHub.apiUrl }}
