@@ -47,7 +47,7 @@ describe('components', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
-        status: 'True',
+        status: 'Healthy',
       })
       authnStore.user.isAdmin = true
       const vm = wrapper.vm
@@ -55,7 +55,7 @@ describe('components', () => {
       expect(vm.chipStatus).toBe('Healthy')
       expect(vm.chipTooltip.title).toBe('foo-bar')
       expect(vm.chipIcon).toBe('')
-      expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
+      expect(vm.isError || vm.isUnknown || vm.isProgressing || vm.isDegraded).toBe(false)
       expect(vm.color).toBe('primary')
       expect(vm.visible).toBe(true)
     })
@@ -64,14 +64,14 @@ describe('components', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
-        status: 'True',
+        status: 'Healthy',
         codes: [
           'ERR_CONFIGURATION_PROBLEM',
         ],
       })
       const vm = wrapper.vm
       expect(vm.chipText).toBe('foo')
-      expect(vm.chipStatus).toBe('Error')
+      expect(vm.chipStatus).toBe('Healthy')
       expect(vm.isError).toBe(true)
       expect(vm.isUserError).toBe(true)
       expect(vm.chipIcon).toBe('mdi-account-alert-outline')
@@ -79,7 +79,7 @@ describe('components', () => {
       expect(vm.visible).toBe(true)
     })
 
-    it('should render condition for a user without admin role', () => {
+    it('should render progressing condition', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
@@ -91,6 +91,21 @@ describe('components', () => {
       expect(vm.isProgressing).toBe(true)
       expect(vm.color).toBe('primary')
       expect(vm.chipStatus).toBe('Progressing')
+      expect(vm.chipIcon).toBe('mdi-progress-clock')
+    })
+
+    it('should render condition for a user without admin role', () => {
+      const wrapper = mountStatusTag({
+        shortName: 'foo',
+        name: 'foo-bar',
+        status: 'Degraded',
+        showAdminOnly: true,
+      })
+      const vm = wrapper.vm
+      expect(vm.visible).toBe(false)
+      expect(vm.isDegraded).toBe(true)
+      expect(vm.color).toBe('primary')
+      expect(vm.chipStatus).toBe('Degraded')
       expect(vm.chipIcon).toBe('')
     })
 
@@ -98,15 +113,15 @@ describe('components', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
-        status: 'Progressing',
+        status: 'Degraded',
         showAdminOnly: true,
       })
       authnStore.user.isAdmin = true
       const vm = wrapper.vm
       expect(vm.visible).toBe(true)
-      expect(vm.isProgressing).toBe(true)
+      expect(vm.isDegraded).toBe(true)
       expect(vm.color).toBe('info')
-      expect(vm.chipStatus).toBe('Progressing')
+      expect(vm.chipStatus).toBe('Degraded')
       expect(vm.chipIcon).toBe('mdi-progress-alert')
     })
   })

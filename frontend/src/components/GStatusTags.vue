@@ -77,24 +77,50 @@ const {
   shootCloudProviderBinding,
   shootMetadata,
   shootUid,
-  shootReadiness,
+  shootConditions,
+  shootConstraints,
 } = useShootItem()
 
 const configStore = useConfigStore()
 const shootStore = useShootStore()
 
+/**
+ * Merge an item (condition or constraint) with its default config,
+ * apply status-mapping and padded sortOrder.
+ */
+function mergeItem (item) {
+  const defaults = configStore.conditionForType(item.type) ?? {}
+
+  return {
+    ...item,
+    ...defaults,
+    sortOrder: padStart(defaults.sortOrder ?? '', 8, '0'),
+  }
+}
+
 const conditions = computed(() => {
-  const conditions = shootReadiness.value
-    .filter(condition => !!condition.lastTransitionTime)
-    .map(condition => {
-      const conditionDefaults = configStore.conditionForType(condition.type)
-      return {
-        ...conditionDefaults,
-        ...condition,
-        sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
-      }
-    })
-  return sortBy(conditions, 'sortOrder')
+  const merged = []
+
+  // helper to avoid repeating the same checks
+  const pushIfValid = (item, mustNotBeTrue) => {
+    item = mergeItem(item)
+    if (!item.lastTransitionTime) {
+      return
+    }
+    if (mustNotBeTrue && item.status === 'True') {
+      return
+    }
+    merged.push(item)
+  }
+
+  for (const c of shootConditions.value) {
+    pushIfValid(c, false)
+  }
+  for (const c of shootConstraints.value) {
+    pushIfValid(c, true)
+  }
+
+  return sortBy(merged, 'sortOrder')
 })
 
 const errorCodeObjects = computed(() => {
