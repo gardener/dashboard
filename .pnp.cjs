@@ -1726,7 +1726,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.3"],\
           ["socket.io-client", "npm:4.8.3"],\
           ["supertest", "npm:7.1.4"],\
-          ["undici", "npm:7.19.1"],\
+          ["undici", "npm:7.19.2"],\
           ["unified", "npm:11.0.5"],\
           ["uuid", "npm:11.1.0"]\
         ],\
@@ -15092,10 +15092,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:7.19.1", {\
-        "packageLocation": "./.yarn/cache/undici-npm-7.19.1-ae1415bcc1-3807f9968d.zip/node_modules/undici/",\
+      ["npm:7.19.2", {\
+        "packageLocation": "./.yarn/cache/undici-npm-7.19.2-23f5b65d5e-2fdd9a2f6f.zip/node_modules/undici/",\
         "packageDependencies": [\
-          ["undici", "npm:7.19.1"]\
+          ["undici", "npm:7.19.2"]\
         ],\
         "linkType": "HARD"\
       }]\
