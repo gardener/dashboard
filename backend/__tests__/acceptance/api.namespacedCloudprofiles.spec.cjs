@@ -23,14 +23,15 @@ describe('api', function () {
     mockRequest.mockReset()
   })
 
-  describe('cloudprofiles', function () {
+  describe('namespaced cloudprofiles', function () {
     const user = fixtures.user.create({ id: 'john.doe@example.org' })
+    const namespace = 'garden-local'
 
-    it('should return all cloudprofiles', async function () {
+    it('should return all namespaced cloudprofiles for a namespace', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
       const res = await agent
-        .get('/api/cloudprofiles')
+        .get(`/api/namespaces/${namespace}/namespacedcloudprofiles`)
         .set('cookie', await user.cookie)
         .expect('content-type', /json/)
 
@@ -40,19 +41,19 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should return 403 when user is not allowed to list cloudprofiles', async function () {
+    it('should return 403 when user is not allowed to list namespaced cloudprofiles', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({
         allowed: false,
       }))
 
       const res = await agent
-        .get('/api/cloudprofiles')
+        .get(`/api/namespaces/${namespace}/namespacedcloudprofiles`)
         .set('cookie', await user.cookie)
         .expect(403)
 
       expect(mockRequest).toHaveBeenCalledTimes(1)
       expect(res.body.code).toBe(403)
-      expect(res.body.message).toMatch(/You are not allowed to list cloudprofiles/)
+      expect(res.body.message).toMatch(/not allowed to list namespaced cloudprofiles/)
     })
   })
 })
