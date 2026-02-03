@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
+  <!-- use scroll-y-transition as an animation using resize causes issues with v-virtual-scroll -->
   <v-menu
     v-model="projectMenu"
     location="bottom"
@@ -13,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     :close-on-content-click="false"
     :offset="[0]"
     content-class="project-menu"
-    transition="slide-y-transition"
+    transition="scroll-y-transition"
   >
     <template #activator="{ props }">
       <v-btn
@@ -106,44 +107,47 @@ SPDX-License-Identifier: Apache-2.0
         <v-virtual-scroll
           ref="refProjectVirtualScroll"
           class="project-list"
-          :items="sortedAndFilteredProjectList"
+          :items="sortedAndFilteredProjectItems"
           :item-key="item => item.metadata.uid"
+          item-height="62"
         >
-          <template #default="{ item: project }">
+          <template #default="{ item }">
             <v-list-item
-              :key="project.metadata.name"
-              class="project-list-tile"
-              :class="{ 'highlighted-item': isHighlightedProject(project) }"
-              :data-g-project-name="project.metadata.name"
-              @click="onProjectClick($event, project)"
+              :key="item.projectName"
+              class="project-tile"
+              :class="{
+                'highlighted-item': isHighlightedProject(item),
+                'selected-item': isSelectedProject(item)
+              }"
+              :data-g-project-name="item.projectName"
+              height="62"
+              @click="onProjectClick($event, item)"
             >
               <template #prepend>
-                <v-icon color="primary">
-                  {{ project.metadata.name === selectedProjectName ? 'mdi-check' : '' }}
-                </v-icon>
+                <div class="project-tile-prepend-bar" />
               </template>
               <g-project-tooltip
                 :open-delay="1000"
-                :project="project"
-                :open-on-hover="!isAllProjectsItem(project)"
+                :project="item"
+                :open-on-hover="!isAllProjectsItem(item)"
               >
                 <v-list-item-title class="project-name text-uppercase">
-                  {{ project.metadata.name }}
+                  {{ item.projectName }}
                 </v-list-item-title>
                 <v-list-item-title class="project-title">
-                  {{ getProjectTitle(project) }}
+                  {{ item.projectTitle }}
                 </v-list-item-title>
                 <v-list-item-subtitle class="project-owner">
-                  {{ getProjectOwner(project) }}
+                  {{ item.projectOwner }}
                 </v-list-item-subtitle>
               </g-project-tooltip>
               <template #append>
                 <g-stale-project-warning
-                  :project="project"
+                  :project="item"
                   size="small"
                 />
                 <g-not-ready-project-warning
-                  :project="project"
+                  :project="item"
                   size="small"
                 />
               </template>
@@ -195,7 +199,6 @@ import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
 import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
-import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
 import {
   emailToDisplayName,
@@ -211,6 +214,7 @@ import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
+import map from 'lodash/map'
 
 const allProjectsItem = {
   metadata: {
@@ -244,8 +248,6 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const selectedProject = defineModel({ type: Object })
 
-const { projectTitle: selectedProjectTitle } = useProjectMetadata(selectedProject)
-
 const projectMenuIcon = computed(() => {
   return projectMenu.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
 })
@@ -255,46 +257,59 @@ const selectedProjectName = computed(() => {
   return project ? project.metadata.name : ''
 })
 
-const sortedAndFilteredProjectList = computed(() => {
+const selectedProjectTitle = computed(() => {
+  const project = selectedProject.value
+  return project ? getProjectTitle(project) : ''
+})
+
+const sortedAndFilteredProjectItems = computed(() => {
+  const projectItems = map([allProjectsItem, ...projectList.value], project => {
+    const projectOwner = getProjectOwner(project)
+    const projectTitle = getProjectTitle(project)
+    const projectName = project.metadata.name
+    return {
+      ...project,
+      projectOwner,
+      projectTitle,
+      projectName,
+      normalizedOwner: toLower(replace(projectOwner, /@.*$/, '')),
+      normalizedTitle: toLower(projectTitle),
+      normalizedName: toLower(projectName),
+    }
+  })
+
+  const normalizedFilter = toLower(projectFilter.value)
+
   const predicate = item => {
     if (!projectFilter.value) {
       return true
     }
-    const filter = toLower(projectFilter.value)
-    const name = toLower(item.metadata.name)
-    let owner = get(item, ['spec', 'owner', 'name'])
-    owner = toLower(replace(owner, /@.*$/, ''))
-    const projectTitle = toLower(getProjectTitle(item) || '')
-    return includes(name, filter) || includes(owner, filter) || includes(projectTitle, filter)
+    return includes(item.normalizedName, normalizedFilter) ||
+      includes(item.normalizedOwner, normalizedFilter) ||
+      includes(item.normalizedTitle, normalizedFilter)
   }
-  const filteredList = filter([
-    allProjectsItem,
-    ...projectList.value,
-  ], predicate)
+  const filteredList = filter(projectItems, predicate)
 
   const exactMatch = item => {
-    return toLower(item.metadata.name) === toLower(projectFilter.value) ? 0 : 1
+    return item.normalizedName === normalizedFilter ? 0 : 1
   }
   const allProjectsMatch = item => {
     return isAllProjectsItem(item) ? 0 : 1
   }
 
-  const lowerTitleOrName = item => {
-    const title = getProjectTitle(item)
-    return title ? toLower(title) : toLower(item.metadata.name)
+  const normalizedTitleOrName = item => {
+    return item.normalizedTitle || item.normalizedName
   }
-  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, lowerTitleOrName])
+  const sortedList = sortBy(filteredList, [allProjectsMatch, exactMatch, normalizedTitleOrName])
   return sortedList
 })
 
 const projectNameThatMatchesFilter = computed(() => {
-  const project = head(sortedAndFilteredProjectList.value)
-  const projectName = get(project, ['metadata', 'name'])
-
-  const singleMatch = sortedAndFilteredProjectList.value?.length === 1
+  const item = head(sortedAndFilteredProjectItems.value)
+  const singleMatch = sortedAndFilteredProjectItems.value?.length === 1
 
   return singleMatch
-    ? projectName
+    ? item.projectName
     : undefined
 })
 
@@ -303,13 +318,13 @@ function getProjectOwner (project) {
 }
 
 function findProjectCaseInsensitive (projectName) {
-  return find(sortedAndFilteredProjectList.value, project => {
+  return find(sortedAndFilteredProjectItems.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
 
 function findProjectIndexCaseInsensitive (projectName) {
-  return findIndex(sortedAndFilteredProjectList.value, project => {
+  return findIndex(sortedAndFilteredProjectItems.value, project => {
     return toLower(projectName) === toLower(project.metadata.name)
   })
 }
@@ -356,18 +371,19 @@ function onInputProjectFilter () {
 function highlightProjectWithKeys (keyDirection) {
   const projectName = highlightedProjectName.value ?? selectedProjectName.value
 
-  let currentHighlightedIndex = findProjectIndexCaseInsensitive(projectName)
+  const currentHighlightedIndex = findProjectIndexCaseInsensitive(projectName)
+  let targetIndex = currentHighlightedIndex
 
-  if (currentHighlightedIndex < 0) {
+  if (targetIndex < 0) {
     // reset index, regardless of key direction
-    currentHighlightedIndex = 0
+    targetIndex = 0
   } else if (keyDirection === 'up' && currentHighlightedIndex > 0) {
-    currentHighlightedIndex--
-  } else if (keyDirection === 'down' && currentHighlightedIndex < sortedAndFilteredProjectList.value.length - 1) {
-    currentHighlightedIndex++
+    targetIndex--
+  } else if (keyDirection === 'down' && currentHighlightedIndex < sortedAndFilteredProjectItems.value.length - 1) {
+    targetIndex++
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectList.value[currentHighlightedIndex] // eslint-disable-line security/detect-object-injection
+  const newHighlightedProject = sortedAndFilteredProjectItems.value[targetIndex] // eslint-disable-line security/detect-object-injection
   highlightedProjectName.value = newHighlightedProject?.metadata.name
 
   scrollToActiveProject()
@@ -375,6 +391,10 @@ function highlightProjectWithKeys (keyDirection) {
 
 function isHighlightedProject (project) {
   return project.metadata.name === highlightedProjectName.value
+}
+
+function isSelectedProject (project) {
+  return project.metadata.name === selectedProjectName.value
 }
 
 function isAllProjectsItem (project) {
@@ -487,14 +507,12 @@ async function scrollToActiveProject () {
       }
     }
 
-    .project-add>div {
+    .project-add > div {
       justify-content: left;
     }
 
     .project-list {
-      height: auto;
-      max-height: (4 * 48px) + (2 * 8px);
-      overflow-y: auto;
+      max-height: calc(100vh - 420px);
       max-width: 255px;
 
       .project-name {
@@ -505,17 +523,23 @@ async function scrollToActiveProject () {
         font-size: 11px;
       }
 
-      :deep(.v-list-item__prepend > .v-icon) {
-        opacity: 0.9;
-      }
-
-      :deep(.v-list-item__prepend > .v-list-item__spacer) {
-        width: 16px;
+      .project-tile-prepend-bar {
+        width: 4px;
+        height: 50px;
+        margin-right: 12px;
+        margin-left: -8px;
+        background-color: rgba(#c0c0c0, .2);
       }
 
       .highlighted-item {
         background-color: rgba(#c0c0c0, .2) !important;
         font-weight: bold;
+      }
+
+      .selected-item {
+        .project-tile-prepend-bar {
+          background-color: rgb(var(--v-theme-primary));
+        }
       }
     }
   }
