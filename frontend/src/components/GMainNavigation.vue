@@ -22,7 +22,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </g-teaser>
     <template v-if="projectList.length">
-      <g-main-project-selection v-model="selectedProject" />
+      <g-main-project-selection
+        v-model="selectedProject"
+        @project-select="onSelectProject"
+      />
     </template>
 
     <v-list
@@ -85,7 +88,6 @@ import {
   computed,
   toRef,
   onMounted,
-  watch,
 } from 'vue'
 import {
   useRouter,
@@ -194,7 +196,7 @@ function getProjectMenuTargetRoute (namespace) {
   }
 }
 
-watch(selectedProject, project => {
+function onSelectProject (project) {
   const namespace = project?.spec?.namespace
   if (!namespace) {
     return
@@ -208,7 +210,7 @@ watch(selectedProject, project => {
     return
   }
   router.push(target)
-})
+}
 
 onMounted(() => {
   if (mdAndDown.value) {
