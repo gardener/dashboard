@@ -89,4 +89,9 @@ export default createVuetify({
     themes: { light, dark },
     variations,
   },
+  defaults: {
+    VTooltip: {
+      eager: false,
+    },
+  },
 })

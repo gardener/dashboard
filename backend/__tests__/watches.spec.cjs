@@ -393,7 +393,7 @@ describe('watches', function () {
 
     it('should call loadOpenIssuesAndComments with defaulted concurrency parameter', async () => {
       jest.spyOn(tickets, 'loadOpenIssues')
-      tickets.loadOpenIssues.mockReturnValue([])
+      tickets.loadOpenIssues.mockResolvedValue([])
 
       gitHubStub.mockReturnValue({})
       watches.leases(io, informer, { signal })
@@ -406,7 +406,7 @@ describe('watches', function () {
 
     it('should call loadOpenIssuesAndComments with configured concurrency parameter', async () => {
       jest.spyOn(tickets, 'loadOpenIssues')
-      tickets.loadOpenIssues.mockReturnValue([])
+      tickets.loadOpenIssues.mockResolvedValue([])
 
       gitHubStub.mockReturnValue({ syncConcurrency: 42 })
       watches.leases(io, informer, { signal })
@@ -450,12 +450,15 @@ describe('watches', function () {
       const issues = fixtures.github.issues.list()
       const issueNumbers = issues.map(i => i.number)
       const comments = fixtures.github.comments.list()
-      const t = issues.map(i => tickets.fromIssue(i))
+
+      const t = await Promise.all(issues.map(i => tickets.fromIssue(i)))
 
       jest.spyOn(tickets, 'loadOpenIssues')
       jest.spyOn(tickets, 'loadIssueComments')
-      tickets.loadOpenIssues.mockReturnValue(t)
-      const loadIssueCommentsMock = ({ number }) => comments.filter((comment) => comment.number === number)
+
+      tickets.loadOpenIssues.mockResolvedValue(t)
+
+      const loadIssueCommentsMock = ({ number }) => comments.filter(comment => comment.number === number)
       tickets.loadIssueComments.mockImplementation(loadIssueCommentsMock)
 
       await loadOpenIssuesAndComments(10)

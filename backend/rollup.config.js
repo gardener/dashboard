@@ -19,6 +19,7 @@ export default [
   {
     input: 'server.js',
     cache: false,
+    external: (id) => id.includes('markdown.engine.mjs'),
     output: {
       dir: resolve(__dirname, 'dist'),
       format: 'cjs',
@@ -34,6 +35,7 @@ export default [
       copy({
         targets: [
           { src: 'package.json', dest: resolve(__dirname, 'dist') },
+          { src: 'lib/markdown.engine.mjs', dest: resolve(__dirname, 'dist/lib') },
         ],
       }),
     ],

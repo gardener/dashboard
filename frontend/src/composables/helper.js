@@ -73,7 +73,7 @@ export function matchesPropertyOrEmpty (path, srcValue) {
   }
 }
 
-export function vendorNameFromImageName (imageName) {
+export function getDistroFromImageName (imageName) {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
     return 'coreos'
@@ -88,34 +88,16 @@ export function vendorNameFromImageName (imageName) {
   } else if (lowerCaseName.includes('flatcar')) {
     return 'flatcar'
   } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
-    return 'memoryone'
-  } else if (lowerCaseName.includes('aws-route53')) {
-    return 'aws-route53'
-  } else if (lowerCaseName.includes('azure-dns')) {
-    return 'azure-dns'
-  } else if (lowerCaseName.includes('azure-private-dns')) {
-    return 'azure-private-dns'
-  } else if (lowerCaseName.includes('google-clouddns')) {
-    return 'google-clouddns'
-  } else if (lowerCaseName.includes('openstack-designate')) {
-    return 'openstack-designate'
-  } else if (lowerCaseName.includes('alicloud-dns')) {
-    return 'alicloud-dns'
-  } else if (lowerCaseName.includes('cloudflare-dns')) {
-    return 'cloudflare-dns'
-  } else if (lowerCaseName.includes('infoblox-dns')) {
-    return 'infoblox-dns'
-  } else if (lowerCaseName.includes('netlify-dns')) {
-    return 'netlify-dns'
+    return 'memoryone-chost'
   }
-  return undefined
+  return imageName
 }
 
 export function findVendorHint (vendorHints, vendorName) {
   return find(vendorHints, hint => includes(hint.matchNames, vendorName))
 }
 
-export function decorateClassificationObject (plainObject) {
+export function addClassificationHelpers (plainObject) {
   const object = { ...plainObject }
   object.classification ??= 'supported'
   Object.defineProperty(object, 'isPreview', {

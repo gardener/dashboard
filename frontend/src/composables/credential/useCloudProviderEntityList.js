@@ -33,10 +33,10 @@ export const useCloudProviderEntityList = (providerType, options = {}) => {
   } = options
 
   const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
 
   return computed(() => {
-    if (sortedProviderTypeList.value.includes(providerType.value)) {
+    if (sortedInfraProviderTypeList.value.includes(providerType.value)) {
       return filter(credentialStore.infrastructureBindingList, binding => {
         return bindingProviderType(binding) === providerType.value
       })

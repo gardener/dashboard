@@ -5,7 +5,7 @@ exports[`api tickets should fetch open issues and comments for shoot cluster tes
   "comments": [
     {
       "data": {
-        "body": "<p>This is comment 1 for issue #2</p>",
+        "body": "This is comment 1 for issue #2",
         "html_url": "https://github.com/gardener/ticket-dev/issues/2#issuecomment-1",
         "user": {
           "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
@@ -26,7 +26,7 @@ exports[`api tickets should fetch open issues and comments for shoot cluster tes
   "issues": [
     {
       "data": {
-        "body": "<p>The second bug</p>",
+        "body": "The second bug",
         "comments": 1,
         "html_url": "https://github.com/gardener/ticket-dev/issues/2",
         "labels": [
@@ -62,7 +62,7 @@ exports[`api tickets should fetch open issues for all namespaces 1`] = `
   "issues": [
     {
       "data": {
-        "body": "<p>The first bug</p>",
+        "body": "The first bug",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/1",
         "labels": [
@@ -91,7 +91,7 @@ exports[`api tickets should fetch open issues for all namespaces 1`] = `
     },
     {
       "data": {
-        "body": "<p>The second bug</p>",
+        "body": "The second bug",
         "comments": 1,
         "html_url": "https://github.com/gardener/ticket-dev/issues/2",
         "labels": [
@@ -120,7 +120,7 @@ exports[`api tickets should fetch open issues for all namespaces 1`] = `
     },
     {
       "data": {
-        "body": "<p>The third bug</p>",
+        "body": "The third bug",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/3",
         "labels": [
@@ -156,7 +156,7 @@ exports[`api tickets should fetch open issues for namespace foo 1`] = `
   "issues": [
     {
       "data": {
-        "body": "<p>The first bug</p>",
+        "body": "The first bug",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/1",
         "labels": [

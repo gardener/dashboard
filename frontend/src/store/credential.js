@@ -40,7 +40,7 @@ export const useCredentialStore = defineStore('credential', () => {
   const gardenerExtensionStore = useGardenerExtensionStore()
   const cloudProfileStore = useCloudProfileStore()
 
-  const { sortedProviderTypeList } = storeToRefs(cloudProfileStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
   const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
 
   const state = reactive({
@@ -151,7 +151,7 @@ export const useCredentialStore = defineStore('credential', () => {
     return [
       ...secretBindingList.value,
       ...credentialsBindingList.value,
-    ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedProviderTypeList.value }))
+    ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedInfraProviderTypeList.value }))
   })
 
   const dnsCredentialList = computed(() => {
