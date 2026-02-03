@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
             class="project-filter"
             spellcheck="false"
             @keyup.esc="projectFilter = ''"
-            @keyup.enter="navigateToHighlightedProject"
+            @keyup.enter="selectHighlightedProject"
             @update:model-value="onInputProjectFilter"
             @keydown.down.prevent="highlightProjectWithKeys('down')"
             @keydown.up.prevent="highlightProjectWithKeys('up')"
@@ -187,6 +187,7 @@ import {
   toRef,
   onMounted,
   useTemplateRef,
+  defineEmits,
 } from 'vue'
 import { useDisplay } from 'vuetify'
 
@@ -215,6 +216,10 @@ import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
+
+const emit = defineEmits([
+  'projectSelect',
+])
 
 const allProjectsItem = {
   metadata: {
@@ -329,27 +334,28 @@ function findProjectIndexCaseInsensitive (projectName) {
   })
 }
 
-function navigateToHighlightedProject () {
+function selectHighlightedProject () {
   if (!highlightedProjectName.value) {
     return
   }
 
   const project = findProjectCaseInsensitive(highlightedProjectName.value)
-  navigateToProject(project)
+  selectProject(project)
 }
 
 function onProjectClick (event, project) {
   if (event.isTrusted) {
     // skip untrusted events - e.g. events triggered via enter key
-    navigateToProject(project)
+    selectProject(project)
   }
 }
 
-function navigateToProject (project) {
+function selectProject (project) {
   projectMenu.value = false
 
   if (project !== selectedProject.value) {
     selectedProject.value = project
+    emit('projectSelect', project)
   }
 }
 
