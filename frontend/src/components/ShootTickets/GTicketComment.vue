@@ -7,20 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex my-2 mx-4">
     <div class="mr-2">
-      <v-avatar
-        v-if="displayAvatarUrl"
-        size="40px"
-      >
-        <v-img
-          :src="displayAvatarUrl"
-          :title="login"
-          :alt="`avatar of github user ${login}`"
-        />
-      </v-avatar>
-      <v-icon
-        v-else
-        icon="mdi-comment-outline"
-        color="primary"
+      <g-ticket-avatar
+        :login="login"
+        :github-avatar-url="githubAvatarUrl"
+        :alt="`avatar of github user ${login}`"
       />
     </div>
     <div class="comment d-flex flex-column flex-grow-1">
@@ -55,27 +45,19 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify'
 
-import { useConfigStore } from '@/store/config'
-
 import GTimeString from '@/components/GTimeString.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-
-import { useAvatarUrl } from '@/composables/useAvatarUrl'
+import GTicketAvatar from '@/components/GTicketAvatar.vue'
 
 import { transformHtml } from '@/utils'
 
 import get from 'lodash/get'
 
-const AvatarEnum = {
-  GITHUB: 'github', // default
-  GRAVATAR: 'gravatar',
-  NONE: 'none',
-}
-
 export default {
   components: {
     GTimeString,
     GExternalLink,
+    GTicketAvatar,
   },
   props: {
     comment: {
@@ -86,9 +68,6 @@ export default {
   setup (props) {
     const { comment } = toRefs(props)
     const theme = useTheme()
-    const configStore = useConfigStore()
-
-    const ticketConfig = computed(() => configStore.ticket)
 
     const commentHtml = computed(() => {
       return transformHtml(get(comment.value, ['data', 'body'], ''))
@@ -102,25 +81,8 @@ export default {
       return get(comment.value, ['metadata', 'created_at'])
     })
 
-    const avatarSource = computed(() => {
-      return get(ticketConfig.value, ['avatarSource'], AvatarEnum.GITHUB)
-    })
-
     const githubAvatarUrl = computed(() => {
       return get(comment.value, ['data', 'user', 'avatar_url'])
-    })
-
-    const { avatarUrl: gravatarUrl } = useAvatarUrl(login, 128, avatarSource)
-
-    const displayAvatarUrl = computed(() => {
-      switch (avatarSource.value) {
-        case AvatarEnum.GITHUB:
-          return githubAvatarUrl.value
-        case AvatarEnum.GRAVATAR:
-          return gravatarUrl.value
-        default:
-          return undefined
-      }
     })
 
     const htmlUrl = computed(() => {
@@ -135,7 +97,7 @@ export default {
       commentHtml,
       login,
       createdAt,
-      displayAvatarUrl,
+      githubAvatarUrl,
       htmlUrl,
       gThemeClass,
     }
