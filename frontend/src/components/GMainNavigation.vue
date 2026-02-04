@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-main-project-selection
         v-model="selectedProject"
         @project-select="onSelectProject"
+        @open-project-dialog="projectDialog = true"
       />
     </template>
 

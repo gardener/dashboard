@@ -75,7 +75,7 @@ import { useProjectMetadata } from '@/composables/useProjectMetadata'
 import { useProvideProjectItem } from '@/composables/useProjectItem.js'
 
 const props = defineProps({
-  project: { type: Object },
+  project: { type: Object, required: true },
   openDelay: { type: Number, default: 200 },
   openOnHover: { type: Boolean, default: true },
 })
