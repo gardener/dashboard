@@ -40,7 +40,7 @@ describe('dockerfile', function () {
       .fromPairs()
       .value()
     const imageTag = buildStages.builder.getImageTag()
-    const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine/.exec(imageTag) || []
+    const [, nodeRelease] = /^(\d+)\./.exec(imageTag) || []
     expect(_.keys(activeNodeReleases)).toContain(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     // Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.
