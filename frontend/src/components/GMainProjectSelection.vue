@@ -5,11 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <!-- use scroll-y-transition as an animation using resize causes issues with v-virtual-scroll -->
+  <!-- scroll-y-transition used here - resize transitions cause issues with v-virtual-scroll (e.g., wrong initial scroll position or jumps after a delay) -->
   <v-menu
     v-model="projectMenu"
     location="bottom"
-    :attach="false"
     open-on-click
     :close-on-content-click="false"
     :offset="[0]"
@@ -36,7 +35,10 @@ SPDX-License-Identifier: Apache-2.0
           class="text-left"
           :class="{ placeholder: !selectedProject }"
         >
-          <div class="flex-align-center">
+          <div
+            v-if="selectedProject"
+            class="flex-align-center"
+          >
             <g-project-tooltip
               :open-delay="1000"
               :project="selectedProject"
@@ -185,13 +187,10 @@ import {
   computed,
   watch,
   toRef,
-  onMounted,
   useTemplateRef,
   defineEmits,
 } from 'vue'
-import { useDisplay } from 'vuetify'
 
-import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
@@ -219,6 +218,7 @@ import map from 'lodash/map'
 
 const emit = defineEmits([
   'projectSelect',
+  'openProjectDialog',
 ])
 
 const allProjectsItem = {
@@ -234,11 +234,8 @@ const allProjectsItem = {
 }
 
 const projectStore = useProjectStore()
-const appStore = useAppStore()
 const authzStore = useAuthzStore()
-const { mdAndDown } = useDisplay()
 
-const projectDialog = ref(false)
 const projectFilter = ref('')
 const projectMenu = ref(false)
 const highlightedProjectName = ref()
@@ -248,7 +245,6 @@ const refProjectVirtualScroll = useTemplateRef('refProjectVirtualScroll')
 
 const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
-const sidebar = toRef(appStore, 'sidebar')
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const selectedProject = defineModel({ type: Object })
@@ -361,7 +357,7 @@ function selectProject (project) {
 
 function openProjectDialog () {
   projectMenu.value = false
-  projectDialog.value = true
+  emit('openProjectDialog')
 }
 
 function onInputProjectFilter () {
@@ -389,7 +385,7 @@ function highlightProjectWithKeys (keyDirection) {
     targetIndex++
   }
 
-  const newHighlightedProject = sortedAndFilteredProjectItems.value[targetIndex] // eslint-disable-line security/detect-object-injection
+  const newHighlightedProject = sortedAndFilteredProjectItems.value[targetIndex] // eslint-disable-line security/detect-object-injection -- index controlled internally
   highlightedProjectName.value = newHighlightedProject?.metadata.name
 
   scrollToActiveProject()
@@ -406,12 +402,6 @@ function isSelectedProject (project) {
 function isAllProjectsItem (project) {
   return project?.spec.namespace === allProjectsItem.spec.namespace
 }
-
-onMounted(() => {
-  if (mdAndDown.value) {
-    sidebar.value = false
-  }
-})
 
 watch(projectMenu, value => {
   if (value) {
@@ -447,7 +437,7 @@ async function scrollToActiveProject () {
   }
 
   let index = findProjectIndexCaseInsensitive(activeProjectName)
-  index = index - 1 // padding
+  index = index - 1 //  scroll to one item above the active item
   if (index < 0) {
     return
   }
@@ -532,9 +522,9 @@ async function scrollToActiveProject () {
       .project-tile-prepend-bar {
         width: 4px;
         height: 50px;
-        margin-right: 12px;
-        margin-left: -8px;
+        margin: 0 12px 0 -8px;
         background-color: rgba(#c0c0c0, .2);
+        border-radius: 4px;
       }
 
       .highlighted-item {
