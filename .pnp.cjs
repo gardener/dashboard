@@ -1011,7 +1011,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.1"],\
           ["@codemirror/state", "npm:6.5.4"],\
           ["@codemirror/view", "npm:6.39.12"],\
-          ["@lezer/common", "npm:1.5.0"]\
+          ["@lezer/common", "npm:1.5.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1024,7 +1024,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.1"],\
           ["@codemirror/state", "npm:6.5.4"],\
           ["@codemirror/view", "npm:6.39.12"],\
-          ["@lezer/common", "npm:1.5.0"]\
+          ["@lezer/common", "npm:1.5.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1037,7 +1037,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.2"],\
           ["@codemirror/language", "npm:6.12.1"],\
           ["@codemirror/state", "npm:6.5.4"],\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
@@ -1052,7 +1052,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.1"],\
           ["@codemirror/state", "npm:6.5.4"],\
           ["@codemirror/view", "npm:6.39.12"],\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["style-mod", "npm:4.1.2"]\
@@ -1766,7 +1766,7 @@ const RAW_RUNTIME_STATE =
           ["@fontsource/roboto", "npm:5.2.9"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -2711,10 +2711,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@lezer/common", [\
-      ["npm:1.5.0", {\
-        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.5.0-321d54f8ca-12c4b0ea9d.zip/node_modules/@lezer/common/",\
+      ["npm:1.5.1", {\
+        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.5.1-b2a8c1074a-49baefdfc6.zip/node_modules/@lezer/common/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.0"]\
+          ["@lezer/common", "npm:1.5.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2723,7 +2723,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.2.1", {\
         "packageLocation": "./.yarn/cache/@lezer-highlight-npm-1.2.1-e7943f0de4-51b4c08596.zip/node_modules/@lezer/highlight/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
@@ -2733,7 +2733,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.4.2", {\
         "packageLocation": "./.yarn/cache/@lezer-lr-npm-1.4.2-3bce75dd47-22bb5d0d4b.zip/node_modules/@lezer/lr/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@lezer/lr", "npm:1.4.2"]\
         ],\
         "linkType": "HARD"\
@@ -2743,7 +2743,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.0.3", {\
         "packageLocation": "./.yarn/cache/@lezer-yaml-npm-1.0.3-30ba8f36a4-cef3d0c0a2.zip/node_modules/@lezer/yaml/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.0"],\
+          ["@lezer/common", "npm:1.5.1"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
