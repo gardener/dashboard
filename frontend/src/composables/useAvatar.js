@@ -20,7 +20,7 @@ import {
 
 import get from 'lodash/get'
 
-export function useAvatarUrl (username, size = 128, avatarSource = null) {
+export function useAvatar (username, size = 128, avatarSource = null) {
   const configStore = useConfigStore()
   const avatarUrl = ref(undefined)
 

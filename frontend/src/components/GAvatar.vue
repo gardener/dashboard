@@ -28,7 +28,7 @@ import {
   toRefs,
 } from 'vue'
 
-import { useAvatarUrl } from '@/composables/useAvatarUrl'
+import { useAvatar } from '@/composables/useAvatar'
 
 const props = defineProps({
   accountName: {
@@ -54,5 +54,5 @@ const { accountName, size } = toRefs(props)
 const avatarSize = computed(() => size.value * 2)
 const iconSize = computed(() => size.value)
 
-const { avatarUrl, placeholderIcon } = useAvatarUrl(accountName, avatarSize)
+const { avatarUrl, placeholderIcon } = useAvatar(accountName, avatarSize)
 </script>
