@@ -41,7 +41,7 @@ describe('gardener-dashboard', function () {
       expect(poddisruptionbudget.spec.minAvailable).toEqual(values.global.dashboard.podDisruptionBudget.minAvailable)
     })
 
-    it('hould render the template with maxUnavailable', async function () {
+    it('should render the template with maxUnavailable', async function () {
       const values = {
         global: {
           dashboard: {
