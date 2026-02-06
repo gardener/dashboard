@@ -56,6 +56,7 @@ describe('gardener-dashboard', function () {
       const [poddisruptionbudget] = documents
       expect(poddisruptionbudget.spec.maxUnavailable).toEqual(values.global.dashboard.podDisruptionBudget.maxUnavailable)
     })
+
     it('should fail when both minAvailable and maxUnavailable are set', async function () {
       const values = {
         global: {
