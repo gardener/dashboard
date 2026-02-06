@@ -189,6 +189,70 @@ describe('gardener-dashboard', function () {
       expect(deployment.metadata.annotations).toEqual(expect.objectContaining(values.global.dashboard.deploymentAnnotations))
     })
 
+    it('should render the template with affinity', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            affinity: {
+              podAntiAffinity: {
+                preferredDuringSchedulingIgnoredDuringExecution: [{
+                  weight: 100,
+                  podAffinityTerm: {
+                    topologyKey: 'kubernetes.io/hostname',
+                  },
+                }],
+              },
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.spec.affinity).toEqual(values.global.dashboard.affinity)
+    })
+
+    it('should render the template with securityContext', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            securityContext: {
+              allowPrivilegeEscalation: false,
+              capabilities: {
+                drop: ['ALL'],
+              },
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.spec.containers[0].securityContext).toEqual(values.global.dashboard.securityContext)
+    })
+
+    it('should render the template with podSecurityContext', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            podSecurityContext: {
+              runAsNonRoot: true,
+              runAsUser: 65532,
+              runAsGroup: 65532,
+              fsGroup: 65532,
+              seccompProfile: {
+                type: 'RuntimeDefault',
+              },
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      expect(deployment.spec.template.spec.securityContext).toEqual(values.global.dashboard.podSecurityContext)
+    })
+
     describe('kubeconfig', function () {
       it('should render the template', async function () {
         const values = {
