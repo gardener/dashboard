@@ -46,9 +46,13 @@
     "**/coverage": true,
     "**/dist": true
   },
-  "jestrunner.changeDirectoryToWorkspaceRoot": true,
-  "jestrunner.jestCommand": "node scripts/test.cjs",
-  "jestrunner.enableYarnPnpSupport": true,
-  // The command is prefixed with `.yarn/releases/`, so we need `../..` (see https://github.com/firsttris/vscode-jest-runner/blob/4dea33a0f692a8f1519dbb8b2567787ffe1843da/src/jestRunner.ts#L180)
-  "jestrunner.yarnPnpCommand": "../../scripts/debug.cjs"
+  "jestrunner.changeDirectoryToWorkspaceRoot": false,
+  "jestrunner.vitestCommand": "./scripts/test.cjs --runner=vitest",
+  "jestrunner.vitestDebugOptions": {
+    "env": { "VS_DEBUG": "1" }
+  },
+  "jestrunner.jestCommand": "./scripts/test.cjs --runner=jest",
+  "jestrunner.debugOptions": {
+    "env": { "VS_DEBUG": "1" }
+  }
 }
