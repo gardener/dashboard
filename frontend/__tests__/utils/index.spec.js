@@ -6,6 +6,7 @@
 
 import {
   canI,
+  machineImageHasUpdateForAutoUpdateStrategy,
   machineImageHasUpdate,
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
@@ -186,7 +187,7 @@ describe('utils', () => {
     })
   })
 
-  describe('#machineImageHasUpdate', () => {
+  describe('#machineImageHasUpdateForAutoUpdateStrategy', () => {
     const sampleMachineImages = [
       {
         vendorName: 'Foo',
@@ -229,61 +230,65 @@ describe('utils', () => {
 
     it('image should have update (updateStrategy major | patch, minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.1', 'major')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy minor | patch, minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.1', 'minor')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy patch | patch, minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.1', 'patch')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy major | minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.2', 'major')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should have update (updateStrategy minor | minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.2', 'minor')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should not have update (updateStrategy patch | minor, major exist)', () => {
       const maschineImage = createMachineImage('1.1.2', 'patch')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
     it('image should have update (updateStrategy major | major exists)', () => {
       const maschineImage = createMachineImage('1.2.0', 'major')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
 
     it('image should not have update (updateStrategy minor | major exists)', () => {
       const maschineImage = createMachineImage('1.2.0', 'minor')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      let result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
+      result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      expect(result).toBe(true)
     })
 
     it('image should not have update (updateStrategy major | none exists)', () => {
       const maschineImage = createMachineImage('2.0.0', 'major')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      let result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
+      expect(result).toBe(false)
+      result = machineImageHasUpdate(maschineImage, sampleMachineImages)
       expect(result).toBe(false)
     })
 
     it('image should have update (updateStrategy unknown defaults to major | major exists)', () => {
       const maschineImage = createMachineImage('1.2.0', 'foo')
-      const result = machineImageHasUpdate(maschineImage, sampleMachineImages)
+      const result = machineImageHasUpdateForAutoUpdateStrategy(maschineImage, sampleMachineImages)
       expect(result).toBe(true)
     })
   })

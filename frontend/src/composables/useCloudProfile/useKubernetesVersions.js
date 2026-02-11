@@ -194,6 +194,7 @@ export function useKubernetesVersions (cloudProfile) {
           version: k8sVersion.value,
           expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
           isValidTerminationDate: false,
+          isExpired: true,
           severity: 'warning',
         }
       }
@@ -212,9 +213,10 @@ export function useKubernetesVersions (cloudProfile) {
       }
 
       return {
+        version: version.version,
         expirationDate: version.expirationDate,
-        isExpired: version.isExpired,
         isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+        isExpired: version.isExpired,
         severity,
       }
     })

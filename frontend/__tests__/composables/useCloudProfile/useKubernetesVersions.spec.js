@@ -203,6 +203,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'info',
+          version: unclassified164VersionWithExpiration.version,
         })
       })
 
@@ -216,6 +217,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'warning',
+          version: supported162VersionWithExpirationWarning.version,
         })
       })
 
@@ -229,6 +231,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'warning',
+          version: supported162VersionWithExpirationWarning.version,
         })
       })
 
@@ -242,6 +245,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'warning',
+          version: supported17VersionWithExpirationWarning.version,
         })
 
         k8sAutoPatch = ref(false)
@@ -251,6 +255,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'warning',
+          version: supported17VersionWithExpirationWarning.version,
         })
       })
 
@@ -264,6 +269,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'error',
+          version: supported18VersionWithExpirationWarning.version,
         })
       })
 
@@ -285,6 +291,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'info',
+          version: unclassified164VersionWithExpiration.version,
         })
       })
 
@@ -306,6 +313,7 @@ describe('composables', () => {
           isExpired: false,
           isValidTerminationDate: true,
           severity: 'warning',
+          version: deprecated14Version.version,
         })
       })
 
@@ -319,6 +327,7 @@ describe('composables', () => {
           isExpired: true,
           isValidTerminationDate: false,
           severity: 'warning',
+          version: expiredVersion.version,
         })
       })
     })

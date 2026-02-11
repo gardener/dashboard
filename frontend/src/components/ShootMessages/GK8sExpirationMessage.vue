@@ -6,7 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <span v-if="isValidTerminationDate">Kubernetes version of this cluster expires
+    Kubernetes <span class="font-weight-bold">version {{ version }}</span> of this cluster
+    <span v-if="isValidTerminationDate">
+      expires
       <g-time-string
         :date-time="expirationDate"
         mode="future"
@@ -15,13 +17,13 @@ SPDX-License-Identifier: Apache-2.0
       />
       <span>. </span>
     </span>
-    <span v-else-if="isExpired">Kubernetes version of this cluster is expired.</span>
-    <span v-if="severity === 'info'">Version will be updated in the next maintenance window</span>
-    <template v-else-if="severity === 'warning'">
+    <span v-else-if="isExpired">is expired. </span>
+    <span v-if="regularUpdate">Version will be updated in the next maintenance window</span>
+    <template v-else-if="forcedUpdate">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
       <span v-else>Version update will be enforced soon</span>
     </template>
-    <span v-else-if="severity === 'error'">Kubernetes version of this cluster will expire soon and there is no newer supported version available. Please contact your landscape administrator</span>
+    <span v-else-if="noUpdate">Version of this cluster will expire soon and there is no supported version available. Please contact your landscape administrator</span>
   </div>
 </template>
 
@@ -40,13 +42,25 @@ export default {
       type: Boolean,
       required: true,
     },
-    severity: {
+    version: {
       type: String,
+      required: true,
+    },
+    regularUpdate: {
+      type: Boolean,
+      required: true,
+    },
+    forcedUpdate: {
+      type: Boolean,
+      required: true,
+    },
+    noUpdate: {
+      type: Boolean,
       required: true,
     },
     isExpired: {
       type: Boolean,
-      default: false,
+      required: true,
     },
   },
 }

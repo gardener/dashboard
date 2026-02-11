@@ -13,6 +13,7 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 
 import {
   isValidTerminationDate,
+  machineImageHasUpdateForAutoUpdateStrategy,
   machineImageHasUpdate,
   machineVendorHasSupportedVersion,
   UNKNOWN_EXPIRED_TIMESTAMP,
@@ -85,16 +86,18 @@ export function useShootMessages (cloudProfile) {
             isValidTerminationDate: false,
             severity: 'warning',
             supportedVersionAvailable: false,
+            isExpired: true,
           }
         }
 
+        const updateAvailableForUpdateStrategy = machineImageHasUpdateForAutoUpdateStrategy(workerImageDetails, allMachineImages)
         const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
         const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
         const severity = getVersionExpirationWarningSeverity({
           isExpirationWarning: workerImageDetails.isExpirationWarning,
           autoPatchEnabled: imageAutoPatch.value,
           updateAvailable,
-          autoUpdatePossible: updateAvailable,
+          autoUpdatePossible: updateAvailableForUpdateStrategy,
         })
 
         return {

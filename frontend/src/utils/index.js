@@ -641,6 +641,14 @@ const allowedSemverDiffs = {
 }
 
 export function machineImageHasUpdate (machineImage, machineImages) {
+  return some(machineImages, ({ version, vendorName, isSupported }) => {
+    return isSupported &&
+      machineImage.vendorName === vendorName &&
+      semver.gt(version, machineImage.version)
+  })
+}
+
+export function machineImageHasUpdateForAutoUpdateStrategy (machineImage, machineImages) {
   let { updateStrategy } = machineImage
   if (!Object.keys(allowedSemverDiffs).includes(updateStrategy)) {
     updateStrategy = 'major'

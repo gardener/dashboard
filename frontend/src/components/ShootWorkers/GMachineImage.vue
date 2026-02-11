@@ -55,7 +55,7 @@ import GMultiMessage from '@/components/GMultiMessage'
 
 import {
   getErrorMessages,
-  machineImageHasUpdate,
+  machineImageHasUpdateForAutoUpdateStrategy,
   transformHtml,
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -151,7 +151,7 @@ export default {
           severity: 'warning',
         })
       }
-      if (this.autoUpdate && this.machineImageHasUpdate) {
+      if (this.autoUpdate && this.machineImageHasUpdateForAutoUpdateStrategy) {
         hints.push({
           type: 'text',
           hint: 'You selected a version that is eligible for an automatic update. You should disable automatic operating system updates if you want to maintain this specific version',
@@ -167,8 +167,8 @@ export default {
       }
       return JSON.stringify(hints)
     },
-    machineImageHasUpdate () {
-      return machineImageHasUpdate(this.machineImage, this.machineImages)
+    machineImageHasUpdateForAutoUpdateStrategy () {
+      return machineImageHasUpdateForAutoUpdateStrategy(this.machineImage, this.machineImages)
     },
   },
   validations () {
