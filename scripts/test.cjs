@@ -23,10 +23,6 @@ const isDebug = process.env.VS_DEBUG === '1'
 const start = process.argv[2] === 'run' ? 3 : 2;
 const baseArgs = process.argv.slice(start);
 let testFile = baseArgs[0]
-testFile = testFile.replace(/^['"]|['"]$/g, '')
-testFile = testFile.replace(/\\\./g, '.')
-testFile = testFile.replace(/\\/g, '/')
-testFile = path.posix.normalize(testFile)
 
 assert(testFile, 'Missing test file argument')
 
