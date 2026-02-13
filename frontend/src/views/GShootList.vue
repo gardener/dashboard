@@ -128,14 +128,12 @@ import {
   reactive,
   provide,
   toRef,
-  watch,
 } from 'vue'
 import {
   mapState,
   mapWritableState,
   mapActions,
 } from 'pinia'
-import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -156,6 +154,7 @@ import GTableSearch from '@/components/GTableSearch.vue'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
+import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
 
 import { mapTableHeader } from '@/utils'
 
@@ -223,8 +222,7 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
-    const params = useUrlSearchParams('hash-params')
-    const shootSearch = ref(params.q)
+    const { search: shootSearch } = useUrlSearchSync()
     const debouncedShootSearch = ref(shootSearch.value)
 
     function setShootSearch (value) {
@@ -235,20 +233,6 @@ export default {
     const setDebouncedShootSearch = debounce(() => {
       debouncedShootSearch.value = shootSearch.value
     }, 300)
-
-    watch(() => params.q, value => {
-      if (shootSearch.value !== value) {
-        setShootSearch(value)
-      }
-    })
-
-    watch(debouncedShootSearch, value => {
-      if (!value) {
-        params.q = null
-      } else if (params.q !== value) {
-        params.q = value
-      }
-    })
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value ?? ''
