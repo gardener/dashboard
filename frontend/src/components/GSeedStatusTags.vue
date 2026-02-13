@@ -43,7 +43,6 @@ import {
   toRefs,
 } from 'vue'
 
-import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 
 import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
@@ -54,14 +53,7 @@ import {
   useSeedItem,
   useSeedConditions,
 } from '@/composables/useSeedItem'
-
-import {
-  objectsFromErrorCodes,
-  errorCodesFromArray,
-} from '@/utils/errorCodes'
-
-import padStart from 'lodash/padStart'
-import sortBy from 'lodash/sortBy'
+import { useStatusConditions } from '@/composables/useStatusConditions'
 
 const props = defineProps({
   popperPlacement: {
@@ -88,32 +80,11 @@ const {
 } = useSeedItem()
 const seedConditions = useSeedConditions(seedItem)
 
-const configStore = useConfigStore()
 const shootStore = useShootStore()
-
-const conditions = computed(() => {
-  if (!seedConditions.value) {
-    return []
-  }
-  const conditions = seedConditions.value
-    .filter(condition => !!condition.lastTransitionTime)
-    .map(condition => {
-      const conditionDefaults = configStore.conditionForType(condition.type)
-      return {
-        ...conditionDefaults,
-        ...condition,
-        sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
-      }
-    })
-  return sortBy(conditions, 'sortOrder')
-})
-
-const errorCodeObjects = computed(() => {
-  const allErrorCodes = errorCodesFromArray(conditions.value)
-  return objectsFromErrorCodes(allErrorCodes)
-})
 
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
 })
+
+const { conditions, errorCodeObjects } = useStatusConditions(seedConditions)
 </script>

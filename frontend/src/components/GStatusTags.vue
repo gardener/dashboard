@@ -43,21 +43,13 @@ import {
   toRefs,
 } from 'vue'
 
-import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
 
 import GStatusTag from '@/components/GStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
-
-import {
-  objectsFromErrorCodes,
-  errorCodesFromArray,
-} from '@/utils/errorCodes'
-
-import padStart from 'lodash/padStart'
-import sortBy from 'lodash/sortBy'
+import { useStatusConditions } from '@/composables/useStatusConditions'
 
 const props = defineProps({
   popperPlacement: {
@@ -80,27 +72,9 @@ const {
   shootReadiness,
 } = useShootItem()
 
-const configStore = useConfigStore()
 const shootStore = useShootStore()
 
-const conditions = computed(() => {
-  const conditions = shootReadiness.value
-    .filter(condition => !!condition.lastTransitionTime)
-    .map(condition => {
-      const conditionDefaults = configStore.conditionForType(condition.type)
-      return {
-        ...conditionDefaults,
-        ...condition,
-        sortOrder: padStart(conditionDefaults.sortOrder, 8, '0'),
-      }
-    })
-  return sortBy(conditions, 'sortOrder')
-})
-
-const errorCodeObjects = computed(() => {
-  const allErrorCodes = errorCodesFromArray(conditions.value)
-  return objectsFromErrorCodes(allErrorCodes)
-})
+const { conditions, errorCodeObjects } = useStatusConditions(shootReadiness)
 
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
