@@ -18,6 +18,7 @@ import {
   getLastOperationSortVal,
   getReadinessSortVal,
 } from '@/composables/useTableSorting/helper'
+import { parseSearch } from '@/composables/useTableFilter/helper'
 
 import {
   isTruthyValue,
@@ -32,67 +33,16 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
-import find from 'lodash/find'
-import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import some from 'lodash/some'
+import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import padStart from 'lodash/padStart'
 import orderBy from 'lodash/orderBy'
-
-const tokenizePattern = /(-?"([^"]|"")*"|\S+)/g
-
-export function tokenizeSearch (text) {
-  const tokens = typeof text === 'string'
-    ? text.match(tokenizePattern)
-    : null
-  return tokens || []
-}
-
-export class SearchQuery {
-  constructor (terms) {
-    this.terms = terms
-  }
-
-  matches (values) {
-    for (const term of this.terms) {
-      const found = !!find(values, value => term.exact ? value === term.value : includes(value, term.value))
-      if ((!found && !term.exclude) || (found && term.exclude)) {
-        return false
-      }
-    }
-    return true
-  }
-}
-
-export function parseSearch (text) {
-  const terms = []
-  for (let value of tokenizeSearch(text)) {
-    let exclude = false
-    if (value[0] === '-') {
-      exclude = true
-      value = value.substring(1)
-    }
-    let exact = false
-    const end = value.length - 1
-    if (value[0] === '"' && value[end] === '"') { // eslint-disable-line security/detect-object-injection
-      exact = true
-      value = value.substring(1, end).replace(/""/g, '"')
-    }
-    if (value) {
-      terms.push({
-        value,
-        exact,
-        exclude,
-      })
-    }
-  }
-  return new SearchQuery(terms)
-}
 
 export const constants = Object.freeze({
   DEFINED: 0,
