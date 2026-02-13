@@ -14,13 +14,16 @@ import {
   formatProjectNameAndTitle,
   getProjectTitle,
 } from '@/composables/useProjectMetadata/helper.js'
+import {
+  getLastOperationSortVal,
+  getReadinessSortVal,
+} from '@/composables/useTableSorting/helper'
 
 import {
   isTruthyValue,
   isStatusProgressing,
   isReconciliationDeactivated,
   getCreatedBy,
-  isStatusHibernated,
   getIssueSince,
 } from '@/utils'
 import {
@@ -252,31 +255,6 @@ export function getRawVal (context, item, column) {
   }
 }
 
-function getReadinessSortVal ({
-  conditions,
-  lastOperationTime,
-  creationTime,
-  isErrorFn,
-  configStore,
-}) {
-  if (!conditions.length) {
-    // items without conditions have medium priority
-    const priority = '00000100'
-    const time = lastOperationTime ?? creationTime
-    return `${priority}-${time}`
-  }
-  const iteratee = ({ type, status = 'True', lastTransitionTime = '1970-01-01T00:00:00Z' }) => {
-    const isError = isErrorFn(status)
-    // items without any error have lowest priority
-    const priority = !isError
-      ? '99999999'
-      : padStart(configStore.conditionForType(type).sortOrder, 8, '0')
-    return `${priority}-${lastTransitionTime}`
-  }
-  // the condition with the lowest priority and transitionTime is used
-  return head(conditions.map(iteratee).sort())
-}
-
 export function getSortVal (state, context, item, sortBy) {
   const {
     configStore,
@@ -300,35 +278,12 @@ export function getSortVal (state, context, item, sortBy) {
     case 'k8sVersion':
       return (value || '0.0.0').split('.').map(i => padStart(i, 4, '0')).join('.')
     case 'lastOperation': {
-      const operation = value || {}
-      const lastErrors = item.status?.lastErrors ?? []
-      const isError = operation.state === 'Failed' || lastErrors.length
-      const ignoredFromReconciliation = isReconciliationDeactivated(item.metadata ?? {})
-
-      if (ignoredFromReconciliation) {
-        return isError
-          ? 400
-          : 450
-      }
-
-      const userError = isUserError(errorCodesFromArray(lastErrors))
-      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-
-      if (userError) {
-        return inProgress
-          ? '3' + padStart(operation.progress, 2, '0')
-          : 200
-      }
-      if (isError) {
-        return inProgress
-          ? '1' + padStart(operation.progress, 2, '0')
-          : 0
-      }
-      return inProgress
-        ? '6' + padStart(operation.progress, 2, '0')
-        : isStatusHibernated(status)
-          ? 500
-          : 700
+      return getLastOperationSortVal({
+        operation: value,
+        lastErrors: item.status?.lastErrors,
+        metadata: item.metadata,
+        status,
+      })
     }
     case 'readiness': {
       const conditions = item.status?.conditions ?? []
