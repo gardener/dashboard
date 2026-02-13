@@ -138,9 +138,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapActions } from 'pinia'
+import { computed } from 'vue'
 
 import { useShootStore } from '@/store/shoot'
 
+import { useOperationStatus } from '@/composables/useOperationStatus'
 import { useShootItem } from '@/composables/useShootItem'
 
 import {
@@ -190,6 +192,24 @@ export default {
       isShootStatusHibernationProgressing,
     } = useShootItem()
 
+    const hasErrors = computed(() => {
+      return shootLastErrors.value.length > 0
+    })
+
+    const {
+      operationType,
+      operationState,
+      showProgress,
+      isError,
+      isAborted,
+      isPending,
+      isSucceeded,
+      isTypeCreate,
+      baseStatusIcon,
+      baseColor,
+      defaultLastMessage,
+    } = useOperationStatus(shootLastOperation, hasErrors)
+
     return {
       shootCloudProviderBinding,
       shootLastOperation,
@@ -200,6 +220,17 @@ export default {
       shootMetadata,
       shootLastErrors,
       isShootStatusHibernationProgressing,
+      operationType,
+      operationState,
+      showProgress,
+      isError,
+      isAborted,
+      isPending,
+      isSucceeded,
+      isTypeCreate,
+      baseStatusIcon,
+      baseColor,
+      defaultLastMessage,
     }
   },
   data () {
@@ -218,24 +249,6 @@ export default {
       set (value) {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
-    },
-    showProgress () {
-      return this.operationState === 'Processing'
-    },
-    isError () {
-      return this.operationState === 'Failed' || this.operationState === 'Error' || this.shootLastErrors.length
-    },
-    isAborted () {
-      return this.operationState === 'Aborted'
-    },
-    isPending () {
-      return this.operationState === 'Pending'
-    },
-    isSucceeded () {
-      return this.operationState === 'Succeeded'
-    },
-    isTypeCreate () {
-      return this.operationType === 'Create'
     },
     isTypeReconcile () {
       return this.operationType === 'Reconcile'
@@ -268,16 +281,7 @@ export default {
       if (this.isShootMarkedForDeletion) {
         return 'mdi-delete-clock'
       }
-      if (this.isTypeCreate && !this.isSucceeded) {
-        return 'mdi-plus'
-      }
-      if (this.isError) {
-        if (this.showProgress) {
-          return 'mdi-exclamation'
-        }
-        return 'mdi-alert-outline'
-      }
-      return undefined
+      return this.baseStatusIcon
     },
     hasStatusIcon () {
       return !!this.statusIcon
@@ -312,20 +316,11 @@ export default {
         errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes),
       }
     },
-    operationType () {
-      return this.shootLastOperation.type || 'Create'
-    },
-    operationState () {
-      return this.shootLastOperation.state || 'Pending'
-    },
     color () {
-      if (this.isAborted || this.isStaleShoot) {
+      if (this.isStaleShoot) {
         return 'unknown'
-      } else if (this.isError) {
-        return 'error'
-      } else {
-        return 'primary'
       }
+      return this.baseColor
     },
     errorDescriptions () {
       return map(this.shootLastErrors, lastError => ({
@@ -334,7 +329,7 @@ export default {
       }))
     },
     lastMessage () {
-      const message = this.shootLastOperation.description || 'No description'
+      const message = this.defaultLastMessage
       if (map(this.errorDescriptions, 'description').includes(message)) {
         return undefined
       }
