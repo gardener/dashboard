@@ -296,7 +296,17 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: seedListBreadcrumbs,
       },
-      beforeEnter: addNamespaceToUrl,
+      beforeEnter (to, from) {
+        if (!authnStore.isAdmin) {
+          if (from?.name && from.name !== 'SeedList') {
+            return from
+          }
+          return {
+            name: 'Home',
+          }
+        }
+        return addNamespaceToUrl(to)
+      },
     }
   }
 
