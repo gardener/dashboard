@@ -45,6 +45,7 @@ SPDX-License-Identifier: Apache-2.0
           <span v-if="!shootConditions.length">-</span>
           <g-seed-status-tags
             v-else
+            :identifier="shootUid"
             popper-placement="bottom"
             show-status-text
           />
@@ -92,6 +93,7 @@ const shootItem = useShootItem()
 const {
   shootNamespace,
   shootName,
+  shootUid,
   shootConditions,
 } = shootItem
 

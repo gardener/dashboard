@@ -118,7 +118,10 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'seedReadiness'">
         <div class="d-flex">
-          <g-seed-status-tags />
+          <g-seed-status-tags
+            :identifier="shootUid"
+            :is-stale-shoot="isStaleShoot"
+          />
         </div>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">

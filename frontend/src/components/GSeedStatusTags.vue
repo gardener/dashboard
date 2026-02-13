@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :seed-name="seedName"
       :condition="condition"
       :popper-placement="popperPlacement"
-      :shoot-metadata="shootMetadata"
+      :identifier="identifier"
       :stale-shoot="isStaleShoot"
     />
   </div>
@@ -38,17 +38,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import {
-  computed,
-  toRefs,
-} from 'vue'
-
-import { useShootStore } from '@/store/shoot'
+import { toRefs } from 'vue'
 
 import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import { useShootItem } from '@/composables/useShootItem'
 import {
   useSeedItem,
   useSeedConditions,
@@ -63,28 +57,27 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  identifier: {
+    type: String,
+    required: true,
+  },
+  isStaleShoot: {
+    type: Boolean,
+    default: false,
+  },
 })
 const {
   popperPlacement,
   showStatusText,
+  identifier,
+  isStaleShoot,
 } = toRefs(props)
-
-const {
-  shootMetadata,
-  shootUid,
-} = useShootItem()
 
 const {
   seedItem,
   seedName,
 } = useSeedItem()
 const seedConditions = useSeedConditions(seedItem)
-
-const shootStore = useShootStore()
-
-const isStaleShoot = computed(() => {
-  return !shootStore.isShootActive(shootUid.value)
-})
 
 const { conditions, errorCodeObjects } = useStatusConditions(seedConditions)
 </script>
