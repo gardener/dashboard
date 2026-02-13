@@ -50,12 +50,15 @@ export function createSeedItemComposable (seedItem) {
     return get(seedItem.value, ['spec', 'purpose'], '')
   })
   const seedProviderType = useSeedProviderType(seedItem)
+  const seedProviderRegion = useSeedProviderRegion(seedItem)
 
   /* status */
   const seedConditions = useSeedConditions(seedItem)
   const seedKubernetesVersion = useSeedKubernetesVersion(seedItem)
+  const seedGardenerVersion = useSeedGardenerVersion(seedItem)
   const seedAllocatableShoots = useSeedAllocatableShoots(seedItem)
   const seedCapacityShoots = useSeedCapacityShoots(seedItem)
+  const seedLastOperation = useSeedLastOperation(seedItem)
 
   return {
     seedItem,
@@ -81,11 +84,14 @@ export function createSeedItemComposable (seedItem) {
     seedDescription,
     seedPurpose,
     seedProviderType,
+    seedProviderRegion,
     /* status */
     seedConditions,
     seedKubernetesVersion,
+    seedGardenerVersion,
     seedAllocatableShoots,
     seedCapacityShoots,
+    seedLastOperation,
   }
 }
 
@@ -106,6 +112,12 @@ export function useSeedProviderType (seedItem) {
   })
 }
 
+export function useSeedProviderRegion (seedItem) {
+  return computed(() => {
+    return get(seedItem.value, ['spec', 'provider', 'region'])
+  })
+}
+
 /* status */
 export function useSeedConditions (seedItem) {
   return computed(() => {
@@ -119,6 +131,12 @@ export function useSeedKubernetesVersion (seedItem) {
   })
 }
 
+export function useSeedGardenerVersion (seedItem) {
+  return computed(() => {
+    return get(seedItem.value, ['status', 'gardener', 'version'])
+  })
+}
+
 export function useSeedAllocatableShoots (seedItem) {
   return computed(() => {
     return get(seedItem.value, ['status', 'allocatable', 'shoots'])
@@ -128,5 +146,11 @@ export function useSeedAllocatableShoots (seedItem) {
 export function useSeedCapacityShoots (seedItem) {
   return computed(() => {
     return get(seedItem.value, ['status', 'capacity', 'shoots'])
+  })
+}
+
+export function useSeedLastOperation (seedItem) {
+  return computed(() => {
+    return get(seedItem.value, ['status', 'lastOperation'], {})
   })
 }

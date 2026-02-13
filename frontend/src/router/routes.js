@@ -30,6 +30,7 @@ import {
   accountBreadcrumbs,
   settingsBreadcrumbs,
   shootListBreadcrumbs,
+  seedListBreadcrumbs,
   shootItemBreadcrumbs,
   shootItemTerminalBreadcrumbs,
   credentialsBreadcrumbs,
@@ -52,6 +53,7 @@ const GAdministration = () => import('@/views/GAdministration.vue')
 
 const GNewShoot = () => import('@/views/GNewShoot.vue')
 const GShootList = () => import('@/views/GShootList.vue')
+const GSeedList = () => import('@/views/GSeedList.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
@@ -73,6 +75,7 @@ export function createRoutes () {
       homeRoute(''),
       accountRoute('account'),
       settingsRoute('settings'),
+      seedListRoute('seeds'),
       projectsRoute('namespace'),
       newProjectRoute('namespace/+'),
       projectHierarchy('namespace/:namespace'),
@@ -272,6 +275,28 @@ export function createRoutes () {
         projectScope: false,
         breadcrumbs: shootListBreadcrumbs,
       },
+    }
+  }
+
+  function seedListRoute (path) {
+    return {
+      path,
+      name: 'SeedList',
+      component: GSeedList,
+      meta: {
+        namespaced: false,
+        menu: {
+          title: 'Seeds',
+          icon: 'mdi-sprout',
+          get hidden () {
+            return !authnStore.isAdmin
+          },
+        },
+        title: 'Seeds',
+        projectScope: false,
+        breadcrumbs: seedListBreadcrumbs,
+      },
+      beforeEnter: addNamespaceToUrl,
     }
   }
 

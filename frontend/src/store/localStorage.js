@@ -216,6 +216,19 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const seedSelectedColumns = useLocalStorage('seeds/seed-list/selected-columns', {}, {
+    serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
+  const seedSortBy = useLocalStorage('seeds/seed-list/sortBy', [{
+    key: 'name',
+    order: 'asc',
+  }], {
+    serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
   const lazyLocalStorage = useLazyLocalStorage()
 
   const shootCustomSelectedColumns = computed({
@@ -262,6 +275,8 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     dnsCredentialSortBy,
     shootSelectedColumns,
     shootSortBy,
+    seedSelectedColumns,
+    seedSortBy,
     allProjectsShootFilter,
     shootListFetchFromCache,
     shootCustomSortBy,
