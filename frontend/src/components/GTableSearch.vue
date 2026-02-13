@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         class="g-table-search-field mr-3"
         @update:model-value="$emit('update:modelValue', $event)"
-        @keyup.esc="$emit('update:modelValue', null)"
+        @keyup.esc="$emit('update:modelValue', '')"
       />
     </template>
     Search terms are <span class="font-weight-bold">ANDed</span>.<br>

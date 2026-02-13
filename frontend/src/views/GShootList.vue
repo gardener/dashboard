@@ -187,7 +187,7 @@ export default {
   },
   beforeRouteUpdate (to, from, next) {
     if (to.path !== from.path) {
-      this.setShootSearch(null)
+      this.setShootSearch('')
     }
     this.updateTableSettings()
     this.focusModeInternal = false
@@ -199,7 +199,7 @@ export default {
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.setShootSearch(null)
+    this.setShootSearch('')
     this.focusModeInternal = false
 
     next()
@@ -226,7 +226,7 @@ export default {
     const debouncedShootSearch = ref(shootSearch.value)
 
     function setShootSearch (value) {
-      shootSearch.value = value ?? ''
+      shootSearch.value = value
       debouncedShootSearch.value = shootSearch.value
     }
 
@@ -235,7 +235,7 @@ export default {
     }, 300)
 
     function onUpdateShootSearch (value) {
-      shootSearch.value = value ?? ''
+      shootSearch.value = value
       setDebouncedShootSearch()
     }
 
