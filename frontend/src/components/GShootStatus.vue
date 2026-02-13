@@ -167,10 +167,6 @@ export default {
     'activePopoverKey',
   ],
   props: {
-    popperKey: {
-      type: String,
-      required: true,
-    },
     popperPlacement: {
       type: String,
     },
@@ -258,9 +254,6 @@ export default {
     },
     allErrorCodes () {
       return errorCodesFromArray(this.shootLastErrors)
-    },
-    popperKeyWithType () {
-      return `shootStatus_${this.popperKey}`
     },
     toolbarTitle () {
       if (this.isStaleShoot) {

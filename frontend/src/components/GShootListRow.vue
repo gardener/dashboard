@@ -101,9 +101,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
-          <g-shoot-status
-            :popper-key="`${shootNamespace}/${shootName}`"
-          />
+          <g-shoot-status />
         </div>
       </template>
       <template v-if="cell.header.key === 'k8sVersion'">

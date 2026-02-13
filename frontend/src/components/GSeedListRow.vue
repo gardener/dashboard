@@ -23,9 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-else-if="header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
-          <g-seed-status
-            :popper-key="`seed/${seedName}`"
-          />
+          <g-seed-status />
         </div>
       </template>
       <template v-else-if="header.key === 'readiness'">

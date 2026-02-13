@@ -15,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <g-list-item-content label="Status">
         <g-shoot-status
-          :popper-key="`${shootNamespace}/${shootName}_lastOp`"
           popper-placement="bottom"
           show-status-text
         />

@@ -217,9 +217,6 @@ export default {
       }
       return undefined
     },
-    popperKeyWithType () {
-      return `statusTag_${this.popperKey}`
-    },
     color () {
       if (this.isUnknown || this.staleShoot) {
         return 'unknown'

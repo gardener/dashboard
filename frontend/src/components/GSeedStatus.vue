@@ -104,10 +104,6 @@ import { useOperationStatus } from '@/composables/useOperationStatus'
 import { useSeedItem } from '@/composables/useSeedItem'
 
 defineProps({
-  popperKey: {
-    type: String,
-    required: true,
-  },
   popperPlacement: {
     type: String,
   },
