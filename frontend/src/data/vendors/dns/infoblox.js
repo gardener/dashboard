@@ -12,5 +12,31 @@ export default {
         },
       },
     ],
+    fields: [
+      {
+        key: 'USERNAME',
+        label: 'Infoblox Username',
+        type: 'text',
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+      {
+        key: 'PASSWORD',
+        label: 'Infoblox Password',
+        type: 'password',
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+    ],
+    help: `
+      <p>Before you can use Infoblox DNS provider, you need to add account credentials.</p>
+      <p>Please enter account information for a technical user.</p>
+      `,
   },
 }
