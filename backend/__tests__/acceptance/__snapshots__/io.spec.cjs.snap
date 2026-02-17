@@ -44,6 +44,7 @@ exports[`api events when user is "admin" should subscribe shoots for a single cl
         "kind": "CloudProfile",
         "name": "infra1-profileName",
       },
+      "credentialsBindingName": "foo-credentials",
       "hibernation": {
         "enabled": false,
       },
@@ -127,6 +128,7 @@ exports[`api events when user is "admin" should subscribe shoots for a single na
         "kind": "CloudProfile",
         "name": "infra1-profileName",
       },
+      "credentialsBindingName": "foo-credentials",
       "hibernation": {
         "enabled": false,
       },
@@ -209,6 +211,7 @@ exports[`api events when user is "admin" should subscribe shoots for all namespa
         "kind": "CloudProfile",
         "name": "infra1-profileName",
       },
+      "credentialsBindingName": "foo-credentials",
       "hibernation": {
         "enabled": false,
       },
@@ -247,6 +250,7 @@ exports[`api events when user is "admin" should subscribe shoots for all namespa
         "kind": "CloudProfile",
         "name": "infra1-profileName",
       },
+      "credentialsBindingName": "foo-credentials",
       "hibernation": {
         "enabled": false,
       },

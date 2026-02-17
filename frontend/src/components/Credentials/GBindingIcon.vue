@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-tooltip:top="tooltip"
     size="small"
     class="mr-2"
+    :color="isSecretBinding ? 'warning' : undefined"
   >
     {{ icon }}
   </v-icon>
@@ -21,8 +22,8 @@ import {
 } from 'vue'
 
 import {
-  isCredentialsBinding,
-  isSecretBinding,
+  isCredentialsBinding as _isCredentialsBinding,
+  isSecretBinding as _isSecretBinding,
 } from '@/composables/credential/helper'
 
 const props = defineProps({
@@ -31,11 +32,14 @@ const props = defineProps({
 
 const binding = toRef(props, 'binding')
 
+const isSecretBinding = computed(() => _isSecretBinding(binding.value))
+const isCredentialsBinding = computed(() => _isCredentialsBinding(binding.value))
+
 const icon = computed(() => {
-  if (isSecretBinding(binding.value)) {
+  if (isSecretBinding.value) {
     return 'mdi-key'
   }
-  if (isCredentialsBinding(binding.value)) {
+  if (isCredentialsBinding.value) {
     if (binding.value.credentialsRef.kind === 'Secret') {
       return 'mdi-key-outline'
     }
@@ -47,10 +51,10 @@ const icon = computed(() => {
 })
 
 const tooltip = computed(() => {
-  if (isSecretBinding(binding.value)) {
-    return 'Secret (SecretBinding)'
+  if (isSecretBinding.value) {
+    return 'Secret (SecretBinding | Deprecated)'
   }
-  if (isCredentialsBinding(binding.value)) {
+  if (isCredentialsBinding.value) {
     return `${binding.value.credentialsRef.kind} (${binding.value.kind})`
   }
   return 'Unknown binding type'

@@ -60,6 +60,7 @@ exports[`api shoots should create a shoot 1`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -95,6 +96,7 @@ exports[`api shoots should create a shoot 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -162,6 +164,7 @@ exports[`api shoots should delete a shoot 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -173,7 +176,6 @@ exports[`api shoots should delete a shoot 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -184,6 +186,70 @@ exports[`api shoots should delete a shoot 2`] = `
       },
     ],
     "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
+exports[`api shoots should migrate shoot secret binding 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/fooShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "credentialsBindingName": "foo-new-credentials-binding",
+        "secretBindingName": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should migrate shoot secret binding 2`] = `
+{
+  "metadata": {
+    "annotations": {
+      "gardener.cloud/created-by": "foo@example.org",
+    },
+    "name": "fooShoot",
+    "namespace": "garden-foo",
+    "resourceVersion": "43",
+    "uid": 1,
+  },
+  "spec": {
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "infra1-profileName",
+    },
+    "credentialsBindingName": "foo-new-credentials-binding",
+    "hibernation": {
+      "enabled": false,
+    },
+    "kubernetes": {
+      "version": "1.16.0",
+    },
+    "provider": {
+      "type": "fooInfra",
+    },
+    "purpose": "fooPurpose",
+    "region": "foo-west",
+    "secretBindingName": null,
+    "seedName": "infra1-seed",
+  },
+  "status": {
+    "advertisedAddresses": [
+      {
+        "name": "external",
+        "url": "https://api.fooShoot.foo.shoot.test",
+      },
+    ],
+    "technicalID": "shoot--foo--fooShoot",
   },
 }
 `;
@@ -227,6 +293,7 @@ exports[`api shoots should patch annotations 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -238,7 +305,6 @@ exports[`api shoots should patch annotations 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -304,6 +370,7 @@ exports[`api shoots should replace addons 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -315,7 +382,6 @@ exports[`api shoots should replace addons 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -368,6 +434,7 @@ exports[`api shoots should replace hibernation enabled 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": true,
     },
@@ -379,7 +446,6 @@ exports[`api shoots should replace hibernation enabled 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -437,6 +503,7 @@ exports[`api shoots should replace hibernation schedules 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
       "schedules": [
@@ -454,7 +521,6 @@ exports[`api shoots should replace hibernation schedules 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -505,6 +571,7 @@ exports[`api shoots should replace purpose 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -516,7 +583,6 @@ exports[`api shoots should replace purpose 2`] = `
     },
     "purpose": "testing",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -569,6 +635,7 @@ exports[`api shoots should replace shoot 1`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -580,7 +647,6 @@ exports[`api shoots should replace shoot 1`] = `
         },
         "purpose": "barPurpose",
         "region": "foo-west",
-        "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
       "status": {
@@ -616,6 +682,7 @@ exports[`api shoots should replace shoot 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -627,7 +694,70 @@ exports[`api shoots should replace shoot 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
+    "seedName": "infra1-seed",
+  },
+  "status": {
+    "advertisedAddresses": [
+      {
+        "name": "external",
+        "url": "https://api.barShoot.foo.shoot.test",
+      },
+    ],
+    "technicalID": "shoot--foo--barShoot",
+  },
+}
+`;
+
+exports[`api shoots should replace shoot credentials binding 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "patch",
+      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/shoots/barShoot",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
+      "content-type": "application/merge-patch+json",
+    },
+    {
+      "spec": {
+        "credentialsBindingName": "foo-new-credentials-binding",
+        "secretBindingName": null,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api shoots should replace shoot credentials binding 2`] = `
+{
+  "metadata": {
+    "annotations": {
+      "gardener.cloud/created-by": "bar@example.org",
+    },
+    "name": "barShoot",
+    "namespace": "garden-foo",
+    "resourceVersion": "43",
+    "uid": 2,
+  },
+  "spec": {
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "infra1-profileName",
+    },
+    "credentialsBindingName": "foo-new-credentials-binding",
+    "hibernation": {
+      "enabled": false,
+    },
+    "kubernetes": {
+      "version": "1.16.0",
+    },
+    "provider": {
+      "type": "fooInfra",
+    },
+    "purpose": "barPurpose",
+    "region": "foo-west",
+    "secretBindingName": null,
     "seedName": "infra1-seed",
   },
   "status": {
@@ -680,6 +810,7 @@ exports[`api shoots should replace shoot kubernetes version 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -691,7 +822,6 @@ exports[`api shoots should replace shoot kubernetes version 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -751,6 +881,7 @@ exports[`api shoots should replace shoot maintenance data 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -771,7 +902,6 @@ exports[`api shoots should replace shoot maintenance data 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -823,6 +953,7 @@ exports[`api shoots should replace shoot seedname 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -834,7 +965,6 @@ exports[`api shoots should replace shoot seedname 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "foo-new-seed",
   },
   "status": {
@@ -898,6 +1028,7 @@ exports[`api shoots should replace shoot workers 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -921,7 +1052,6 @@ exports[`api shoots should replace shoot workers 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -965,6 +1095,7 @@ exports[`api shoots should return a shoot 2`] = `
       "kind": "CloudProfile",
       "name": "infra1-profileName",
     },
+    "credentialsBindingName": "foo-credentials",
     "hibernation": {
       "enabled": false,
     },
@@ -976,7 +1107,6 @@ exports[`api shoots should return a shoot 2`] = `
     },
     "purpose": "barPurpose",
     "region": "foo-west",
-    "secretBindingName": "foo-infra1",
     "seedName": "infra1-seed",
   },
   "status": {
@@ -1142,6 +1272,7 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1183,6 +1314,7 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1194,7 +1326,6 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
         },
         "purpose": "barPurpose",
         "region": "foo-west",
-        "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
       "status": {
@@ -1224,6 +1355,7 @@ exports[`api shoots should return all shoots for a non-admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1295,6 +1427,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1336,6 +1469,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1347,7 +1481,6 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
         },
         "purpose": "barPurpose",
         "region": "foo-west",
-        "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
       "status": {
@@ -1377,6 +1510,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1412,6 +1546,7 @@ exports[`api shoots should return all shoots for an admin user 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1489,6 +1624,7 @@ exports[`api shoots should return all unhealthy shoots 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1779,6 +1915,7 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1820,6 +1957,7 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },
@@ -1831,7 +1969,6 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
         },
         "purpose": "barPurpose",
         "region": "foo-west",
-        "secretBindingName": "foo-infra1",
         "seedName": "infra1-seed",
       },
       "status": {
@@ -1861,6 +1998,7 @@ exports[`api shoots should return shoots for a single namespace 2`] = `
           "kind": "CloudProfile",
           "name": "infra1-profileName",
         },
+        "credentialsBindingName": "foo-credentials",
         "hibernation": {
           "enabled": false,
         },

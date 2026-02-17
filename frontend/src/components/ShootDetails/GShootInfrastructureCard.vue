@@ -41,6 +41,11 @@ SPDX-License-Identifier: Apache-2.0
             render-link
           />
         </g-list-item-content>
+        <template #append>
+          <g-credential-configuration
+            v-if="canPatchShootsBinding"
+          />
+        </template>
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-credential-details-item-content
@@ -263,6 +268,7 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
+import GCredentialConfiguration from '@/components/GCredentialConfiguration'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -291,6 +297,7 @@ export default {
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
     GCredentialDetailsItemContent,
+    GCredentialConfiguration,
   },
   setup () {
     const cloudProfileStore = useCloudProfileStore()

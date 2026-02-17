@@ -193,7 +193,7 @@ export function updateShootAddons ({ namespace, name, data }) {
 export function updateShootControlPlaneHighAvailability ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/highAvailability`, data)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/controlPlane/high-availability`, data)
 }
 
 export function updateShootDns ({ namespace, name, data }) {
@@ -219,13 +219,19 @@ export function updateShootPurpose ({ namespace, name, data }) {
 export function updateShootSeedName ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`, data)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/seed-name`, data)
+}
+
+export function updateShootCredentialName ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/credentials-binding-name`, data)
 }
 
 export function createShootAdminKubeconfig ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return createResource(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`, data)
+  return createResource(`/api/namespaces/${namespace}/shoots/${name}/admin-kubeconfig`, data)
 }
 
 /* Cloud Profiles */
@@ -434,6 +440,7 @@ export default {
   getShootSchemaDefinition,
   updateShootPurpose,
   updateShootSeedName,
+  updateShootCredentialName,
   createShootAdminKubeconfig,
   getCloudProfiles,
   getSeeds,

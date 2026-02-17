@@ -149,8 +149,8 @@ export const useCredentialStore = defineStore('credential', () => {
 
   const infrastructureBindingList = computed(() => {
     return [
-      ...secretBindingList.value,
       ...credentialsBindingList.value,
+      ...secretBindingList.value,
     ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedInfraProviderTypeList.value }))
   })
 
