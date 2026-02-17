@@ -63,11 +63,7 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
       if (fileTypePattern.test(file.type)) {
         const reader = new FileReader()
         const onLoaded = event => {
-          try {
-            const result = JSON.parse(event.target.result)
-
-            onDrop(JSON.stringify(result, null, '  '))
-          } catch (err) { /* ignore error */ }
+          onDrop(event.target.result)
         }
         reader.onloadend = onLoaded
         reader.readAsText(file)
@@ -81,9 +77,9 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
     event.dataTransfer.dropEffect = 'copy'
   }
 
-  const textarea = textField.$refs['input-slot']
-  textarea.addEventListener('dragover', dragOver, false)
-  textarea.addEventListener('drop', drop, false)
+  const field = textField.$el
+  field.addEventListener('dragover', dragOver, false)
+  field.addEventListener('drop', drop, false)
 }
 
 export function getErrorMessages (property) {
@@ -502,7 +498,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
     if (transformToExternalLinks) {
-      linkElement.classList.add('text-anchor', 'text-decoration-none')
+      linkElement.classList.add('text-anchor', 'text-decoration-none', 'text-no-wrap')
       linkElement.setAttribute('target', '_blank')
       linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML

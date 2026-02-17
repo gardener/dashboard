@@ -12,126 +12,61 @@ SPDX-License-Identifier: Apache-2.0
     :provider-type="providerType"
   >
     <template #secret-slot>
-      <div v-if="providerType==='openstack-designate'">
-        <v-text-field
-          v-model="authURL"
-          color="primary"
-          label="Auth URL"
-          :error-messages="getErrorMessages(v$.authURL)"
-          variant="underlined"
-          @update:model-value="v$.authURL.$touch()"
-          @blur="v$.authURL.$touch()"
+      <GGenericInputField
+        v-if="providerType==='openstack-designate'"
+        v-model="authURL"
+        :field="fields['authURL']"
+      />
+      <GGenericInputField
+        v-model="domainName"
+        :field="fields['domainName']"
+      />
+      <GGenericInputField
+        v-model="tenantName"
+        :field="fields['tenantName']"
+      />
+      <v-radio-group
+        v-model="authenticationMethod"
+        row
+      >
+        <template #label>
+          <span class="text-body-1">Authentication Method:</span>
+        </template>
+        <v-radio
+          label="Technical User"
+          value="USER"
         />
-      </div>
-      <div>
-        <v-text-field
-          v-model="domainName"
-          color="primary"
-          label="Domain Name"
-          :error-messages="getErrorMessages(v$.domainName)"
-          variant="underlined"
-          @update:model-value="v$.domainName.$touch()"
-          @blur="v$.domainName.$touch()"
+        <v-radio
+          label="Application Credentials"
+          value="APPLICATION_CREDENTIALS"
         />
-      </div>
-      <div>
-        <v-text-field
-          v-model="tenantName"
-          color="primary"
-          label="Project / Tenant Name"
-          :error-messages="getErrorMessages(v$.tenantName)"
-          variant="underlined"
-          @update:model-value="v$.tenantName.$touch()"
-          @blur="v$.tenantName.$touch()"
-        />
-      </div>
-      <div>
-        <v-radio-group
-          v-model="authenticationMethod"
-          row
-        >
-          <template #label>
-            <span class="text-body-1">Authentication Method:</span>
-          </template>
-          <v-radio
-            label="Technical User"
-            value="USER"
-          />
-          <v-radio
-            label="Application Credentials"
-            value="APPLICATION_CREDENTIALS"
-          />
-        </v-radio-group>
-      </div>
+      </v-radio-group>
       <v-container class="py-0">
-        <template v-if="authenticationMethod === 'APPLICATION_CREDENTIALS'">
-          <div>
-            <v-text-field
-              v-model="applicationCredentialID"
-              color="primary"
-              label="ID"
-              :error-messages="getErrorMessages(v$.applicationCredentialID)"
-              variant="underlined"
-              @update:model-value="v$.applicationCredentialID.$touch()"
-              @blur="v$.applicationCredentialID.$touch()"
-            />
-          </div>
-          <div>
-            <v-text-field
-              v-model="applicationCredentialName"
-              color="primary"
-              label="Name"
-              :error-messages="getErrorMessages(v$.applicationCredentialName)"
-              variant="underlined"
-              @update:model-value="v$.applicationCredentialName.$touch()"
-              @blur="v$.applicationCredentialName.$touch()"
-            />
-          </div>
-          <div>
-            <v-text-field
-              v-model="applicationCredentialSecret"
-              color="primary"
-              label="Password"
-              :error-messages="getErrorMessages(v$.applicationCredentialSecret)"
-              :append-icon="hideApplicationCredentialSecret ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="hideApplicationCredentialSecret ? 'password' : 'text'"
-              variant="underlined"
-              @click:append="() => (hideApplicationCredentialSecret = !hideApplicationCredentialSecret)"
-              @update:model-value="v$.applicationCredentialSecret.$touch()"
-              @blur="v$.applicationCredentialSecret.$touch()"
-            />
-          </div>
+        <template v-if="authenticationMethod === 'USER'">
+          <GGenericInputField
+            v-model="username"
+            :field="fields['username']"
+            :input-props="{ 'v-messages-color': { color: 'warning' } }"
+          />
+          <GGenericInputField
+            v-model="password"
+            :field="fields['password']"
+            :input-props="{ 'v-messages-color': {color: 'warning' } }"
+          />
         </template>
         <template v-else>
-          <div>
-            <v-text-field
-              v-model="username"
-              v-messages-color="{ color: 'primary' }"
-              color="primary"
-              label="Technical User"
-              :error-messages="getErrorMessages(v$.username)"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              variant="underlined"
-              @update:model-value="v$.username.$touch()"
-              @blur="v$.username.$touch()"
-            />
-          </div>
-          <div>
-            <v-text-field
-              v-model="password"
-              v-messages-color="{ color: 'warning' }"
-              color="primary"
-              label="Password"
-              :error-messages="getErrorMessages(v$.password)"
-              :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="hideSecret ? 'password' : 'text'"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-              variant="underlined"
-              @click:append="() => (hideSecret = !hideSecret)"
-              @update:model-value="v$.password.$touch()"
-              @blur="v$.password.$touch()"
-            />
-          </div>
+          <GGenericInputField
+            v-model="applicationCredentialID"
+            :field="fields['applicationCredentialID']"
+          />
+          <GGenericInputField
+            v-model="applicationCredentialName"
+            :field="fields['applicationCredentialName']"
+          />
+          <GGenericInputField
+            v-model="applicationCredentialSecret"
+            :field="fields['applicationCredentialSecret']"
+          />
         </template>
       </v-container>
     </template>
@@ -162,10 +97,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import {
-  required,
-  requiredIf,
-} from '@vuelidate/validators'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
@@ -173,18 +104,17 @@ import GExternalLink from '@/components/GExternalLink'
 import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
 import {
-  withMessage,
-  withFieldName,
-} from '@/utils/validators'
-import {
   getErrorMessages,
   setDelayedInputFocus,
 } from '@/utils'
+
+import GGenericInputField from '../GGenericInputField.vue'
 
 export default {
   components: {
     GSecretDialog,
     GExternalLink,
+    GGenericInputField,
   },
   props: {
     modelValue: {
@@ -241,63 +171,83 @@ export default {
       hideSecret: true,
       hideApplicationCredentialSecret: true,
       authenticationMethod: 'USER',
+      fields: {
+        authURL: {
+          label: 'Auth URL',
+          type: 'text',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        domainName: {
+          label: 'Domain Name',
+          type: 'text',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        tenantName: {
+          label: 'Project / Tenant Name',
+          type: 'text',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        applicationCredentialID: {
+          label: 'ID',
+          type: 'text',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        applicationCredentialName: {
+          label: 'Name',
+          type: 'text',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        applicationCredentialSecret: {
+          label: 'Secret',
+          type: 'password',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        username: {
+          label: 'Technical User',
+          type: 'text',
+          hint: 'Do not use personalized login credentials. Instead, use credentials of a technical user',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+        password: {
+          label: 'Password',
+          type: 'password',
+          hint: 'Do not use personalized login credentials. Instead, use credentials of a technical user',
+          validators: {
+            required: {
+              type: 'required',
+            },
+          },
+        },
+      },
     }
-  },
-  validations () {
-    const requiredUserMessage = 'Required for technical user authentication'
-    const requiredApplicationCredentialsMessage = 'Required for application credentials authentication'
-
-    const rules = {}
-
-    rules.domainName = withFieldName('Domain Name', {
-      required,
-    })
-
-    rules.tenantName = withFieldName('Project / Tenant Name', {
-      required,
-    })
-
-    const usernameRules = {
-      required: withMessage(requiredUserMessage,
-        requiredIf(() => this.authenticationMethod === 'USER'),
-      ),
-    }
-    rules.username = withFieldName('Technical User', usernameRules)
-
-    const passwordRules = {
-      required: withMessage(requiredUserMessage,
-        requiredIf(() => this.authenticationMethod === 'USER'),
-      ),
-    }
-    rules.password = withFieldName('Password', passwordRules)
-
-    const authURLRules = {
-      required: requiredIf(() => this.providerType === 'openstack-designate'),
-    }
-    rules.authURL = withFieldName('Auth URL', authURLRules)
-
-    const applicationCredentialIDRules = {
-      required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
-      ),
-    }
-    rules.applicationCredentialID = withFieldName('Application Credentials ID', applicationCredentialIDRules)
-
-    const applicationCredentialNameRules = {
-      required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
-      ),
-    }
-    rules.applicationCredentialName = withFieldName('Application Credentials Name', applicationCredentialNameRules)
-
-    const applicationCredentialSecretRules = {
-      required: withMessage(requiredApplicationCredentialsMessage,
-        requiredIf(() => this.authenticationMethod === 'APPLICATION_CREDENTIALS'),
-      ),
-    }
-    rules.applicationCredentialSecret = withFieldName('Application Credentials Secret', applicationCredentialSecretRules)
-
-    return rules
   },
   computed: {
     visible: {
