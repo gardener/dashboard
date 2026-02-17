@@ -164,6 +164,7 @@ import { useCloudProviderBinding } from '@/composables/credential/useCloudProvid
 import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import {
+  withMessage,
   messageFromErrors,
   withFieldName,
   unique,
@@ -309,7 +310,7 @@ export default {
       maxLength: maxLength(128),
       lowerCaseAlphaNumHyphen,
       noStartEndHyphen,
-      unique: unique('credentialNames'),
+      unique: withMessage('Secret name must be unique', unique('credentialNames')),
     }
     rules.name = withFieldName('Secret Name', nameRules)
 
