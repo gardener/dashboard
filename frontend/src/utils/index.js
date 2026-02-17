@@ -575,7 +575,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
     if (transformToExternalLinks) {
-      linkElement.classList.add('text-anchor', 'text-decoration-none')
+      linkElement.classList.add('text-anchor', 'text-decoration-none', 'text-no-wrap')
       linkElement.setAttribute('target', '_blank')
       linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML
