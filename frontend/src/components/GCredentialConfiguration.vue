@@ -14,9 +14,10 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-select-credential
+        <g-select-binding
           v-model="infrastructureBinding"
           :provider-type="shootProviderType"
+          change-infra-binding
         />
       </v-card-text>
     </template>
@@ -30,7 +31,7 @@ import {
 } from 'vue'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
-import GSelectCredential from '@/components/Credentials/GSelectCredential'
+import GSelectBinding from '@/components/Credentials/GSelectBinding'
 
 import { useShootItem } from '@/composables/useShootItem'
 import {

@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         v-if="!workerless"
         cols="3"
       >
-        <g-select-credential
+        <g-select-binding
           v-model="infrastructureBinding"
           :provider-type="providerType"
         />
@@ -184,7 +184,7 @@ import { useVuelidate } from '@vuelidate/core'
 
 import GSelectCloudProfile from '@/components/GSelectCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
-import GSelectCredential from '@/components/Credentials/GSelectCredential'
+import GSelectBinding from '@/components/Credentials/GSelectBinding'
 
 import { useShootContext } from '@/composables/useShootContext'
 
@@ -204,7 +204,7 @@ export default {
   components: {
     GSelectCloudProfile,
     GWildcardSelect,
-    GSelectCredential,
+    GSelectBinding,
   },
   setup () {
     const {

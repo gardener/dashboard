@@ -5,39 +5,119 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-icon
-    v-tooltip:top="tooltip"
-    size="small"
-    class="mr-2"
-    :color="isSecretBinding ? 'warning' : undefined"
-  >
-    {{ icon }}
-  </v-icon>
+  <div class="d-flex align-center">
+    <v-icon
+      v-tooltip:top="tooltip"
+      size="small"
+      class="mr-2"
+      :color="isSecretBinding ? 'warning' : undefined"
+    >
+      {{ icon }}
+    </v-icon>
+    <template v-if="isSecretBinding && showMigrationStatus">
+      <div v-if="credentialsBindingNamesForSecretBinding.length > 0">
+        <v-icon
+          v-if="credentialUsageCount === 0"
+          icon="mdi-information-outline"
+          color="success"
+          class="mr-2"
+        />
+        <v-icon
+          v-else
+          icon="mdi-alert-circle-outline"
+          color="warning"
+          class="mr-2"
+        />
+        <v-tooltip
+          location="top"
+          activator="parent"
+        >
+          <p class="font-weight-bold text-warning">
+            SecretBindings are deprecated and unsupported in Kubernetes 1.34 or later
+          </p>
+          <p>
+            This Secret is referenced by {{ credentialsBindingNamesForSecretBinding.length }} CredentialsBinding{{ credentialsBindingNamesForSecretBinding.length === 1 ? '' : 's' }}:
+          </p>
+          <div class="list-style">
+            <ul>
+              <li
+                v-for="bindingName in credentialsBindingNamesForSecretBinding"
+                :key="bindingName"
+              >
+                <pre>{{ bindingName }}</pre>
+              </li>
+            </ul>
+          </div>
+          <p v-if="credentialUsageCount === 0">
+            No clusters are currently using this deprecated binding. You can safely delete it.
+          </p>
+          <p v-else>
+            {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }} still use{{ credentialUsageCount === 1 ? 's' : '' }} this deprecated binding.<br>
+            Please update those clusters to use a CredentialsBinding before deleting it.
+          </p>
+        </v-tooltip>
+      </div>
+      <div v-else>
+        <v-btn
+          icon="mdi-key-change"
+          color="primary"
+          variant="tonal"
+          size="small"
+          class="mr-2"
+          density="comfortable"
+          @click="migrationDialogVisible = true"
+        />
+        <v-tooltip
+          location="top"
+          activator="parent"
+        >
+          <p class="font-weight-bold text-warning">
+            SecretBindings are deprecated and unsupported in Kubernetes 1.34 or later
+          </p>
+          <p>
+            This Secret is not referenced by any CredentialsBindings.<br>
+            Click to review the migration steps and create a CredentialsBinding for this Secret.
+          </p>
+        </v-tooltip>
+      </div>
+    </template>
+  </div>
+  <g-secret-dialog-migration
+    v-if="migrationDialogVisible"
+    v-model="migrationDialogVisible"
+    :binding="binding"
+  />
 </template>
 
 <script setup>
 import {
   computed,
-  toRef,
+  ref,
+  toRefs,
 } from 'vue'
 
-import {
-  isCredentialsBinding as _isCredentialsBinding,
-  isSecretBinding as _isSecretBinding,
-} from '@/composables/credential/helper'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+
+import GSecretDialogMigration from './GSecretDialogSBMigration.vue'
 
 const props = defineProps({
   binding: Object,
+  showMigrationStatus: Boolean,
 })
 
-const binding = toRef(props, 'binding')
+const { binding, showMigrationStatus } = toRefs(props)
+const migrationDialogVisible = ref(false)
 
-const isSecretBinding = computed(() => _isSecretBinding(binding.value))
-const isCredentialsBinding = computed(() => _isCredentialsBinding(binding.value))
+const {
+  isSecretBinding,
+  isCredentialsBinding,
+  bindingsWithSameCredential,
+  credentialUsageCount,
+} = useCloudProviderBinding(binding)
 
 const icon = computed(() => {
   if (isSecretBinding.value) {
-    return 'mdi-key'
+    return 'mdi-key-alert'
   }
   if (isCredentialsBinding.value) {
     if (binding.value.credentialsRef.kind === 'Secret') {
@@ -60,4 +140,26 @@ const tooltip = computed(() => {
   return 'Unknown binding type'
 })
 
+const credentialsBindingNamesForSecretBinding = computed(() => {
+  if (!isSecretBinding.value) {
+    return []
+  }
+  return bindingsWithSameCredential.value
+    .filter(binding => binding.kind === 'CredentialsBinding')
+    .map(binding => binding.metadata.name)
+})
+
 </script>
+
+<style scoped>
+
+.list-style {
+  ul {
+    margin-left: 10px;
+  }
+  li {
+    margin-left: 10px;
+  }
+}
+
+</style>

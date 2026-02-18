@@ -23,7 +23,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-binding-icon :binding="item.binding" />
+      <g-binding-icon
+        :binding="item.binding"
+        show-migration-status
+      />
     </td>
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor

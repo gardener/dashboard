@@ -157,6 +157,45 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should create a cloudProvider credentialsbinding without secret (secret already exists)', async function () {
+      const newCredentialsBinding = {
+        apiVersion: 'security.gardener.cloud/v1alpha1',
+        kind: 'CredentialsBinding',
+        metadata: {
+          name: `new-${infraName}-credentialsbinding`,
+          namespace,
+        },
+        provider: {
+          type: infraName,
+        },
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          namespace,
+          name: `new-${infraName}-secret`,
+        },
+      }
+
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.create())
+
+      const params = {
+        binding: newCredentialsBinding,
+      }
+
+      const res = await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'createInfra', params })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body.binding.metadata.name).toBe(`new-${infraName}-credentialsbinding`)
+      expect(res.body).toMatchSnapshot()
+    })
+
     it('should create a cloudProvider dns secret (no binding)', async function () {
       const newSecret = {
         apiVersion: 'v1',
