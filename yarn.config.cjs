@@ -56,7 +56,7 @@ module.exports = {
     enforceWorkspaceDependencies(ctx)
     enforceFieldsOnAllWorkspaces(ctx, {
       license: 'Apache-2.0',
-      'engines.node': '24.13.0',
+      'engines.node': '24.13.1',
       'packageManager': 'yarn@4.12.0',
       'repository.type': 'git',
       'repository.url': 'git+https://github.com/gardener/dashboard.git',
