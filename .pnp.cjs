@@ -1831,7 +1831,7 @@ const RAW_RUNTIME_STATE =
           ["vitest-fetch-mock", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.4.5"],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.28"],\
           ["vue-eslint-parser", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.2.0"],\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.2"],\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.3"],\
           ["vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.11.8"]\
         ],\
         "linkType": "SOFT"\
@@ -4969,11 +4969,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:93888d1cb5fcbc1ac67fd244282a660b699a2bbad709596b85f3f40c4f9e0f07bf93ff1a067c565f33482cc71cccb2aa14e212d59d4901de2aa21a81fc2bb2bd#npm:3.1.2", {\
-        "packageLocation": "./.yarn/__virtual__/@vue-macros-common-virtual-03012ec9a8/0/cache/@vue-macros-common-npm-3.1.2-ebb0426640-2ea55f5296.zip/node_modules/@vue-macros/common/",\
+      ["virtual:91eca35892b0d4c395bbe126f5a6e3fbcbbda095d5baafdf8d34a6dfe210ae6bfc1cae3f8777bb86b6a41999c960dd8291f1343f43a72ac61b184e1f95c621d8#npm:3.1.2", {\
+        "packageLocation": "./.yarn/__virtual__/@vue-macros-common-virtual-b64c4558a9/0/cache/@vue-macros-common-npm-3.1.2-ebb0426640-2ea55f5296.zip/node_modules/@vue-macros/common/",\
         "packageDependencies": [\
           ["@types/vue", null],\
-          ["@vue-macros/common", "virtual:93888d1cb5fcbc1ac67fd244282a660b699a2bbad709596b85f3f40c4f9e0f07bf93ff1a067c565f33482cc71cccb2aa14e212d59d4901de2aa21a81fc2bb2bd#npm:3.1.2"],\
+          ["@vue-macros/common", "virtual:91eca35892b0d4c395bbe126f5a6e3fbcbbda095d5baafdf8d34a6dfe210ae6bfc1cae3f8777bb86b6a41999c960dd8291f1343f43a72ac61b184e1f95c621d8#npm:3.1.2"],\
           ["@vue/compiler-sfc", "npm:3.5.28"],\
           ["ast-kit", "npm:2.2.0"],\
           ["local-pkg", "npm:1.1.2"],\
@@ -5404,7 +5404,7 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:13.9.0"],\
           ["@vueuse/shared", "virtual:c98407f3ab82fb9a2e51abc5c3bff2daf14a9283541bb769264eb5c249120a12fdcd3c5dfa652339c11401df0bae19eb7f22772735836c50176a0c0f0ae0de0d#npm:13.9.0"],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.28"],\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.2"]\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.3"]\
         ],\
         "packagePeers": [\
           "@types/vue-router",\
@@ -16087,15 +16087,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["vue-router", [\
-      ["npm:5.0.2", {\
-        "packageLocation": "./.yarn/cache/vue-router-npm-5.0.2-593543d1f1-b87246f75e.zip/node_modules/vue-router/",\
+      ["npm:5.0.3", {\
+        "packageLocation": "./.yarn/cache/vue-router-npm-5.0.3-3b160d99bd-ccb465bf62.zip/node_modules/vue-router/",\
         "packageDependencies": [\
-          ["vue-router", "npm:5.0.2"]\
+          ["vue-router", "npm:5.0.3"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.2", {\
-        "packageLocation": "./.yarn/__virtual__/vue-router-virtual-93888d1cb5/0/cache/vue-router-npm-5.0.2-593543d1f1-b87246f75e.zip/node_modules/vue-router/",\
+      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.3", {\
+        "packageLocation": "./.yarn/__virtual__/vue-router-virtual-91eca35892/0/cache/vue-router-npm-5.0.3-3b160d99bd-ccb465bf62.zip/node_modules/vue-router/",\
         "packageDependencies": [\
           ["@babel/generator", "npm:7.29.1"],\
           ["@pinia/colada", null],\
@@ -16103,7 +16103,7 @@ const RAW_RUNTIME_STATE =
           ["@types/pinia__colada", null],\
           ["@types/vue", null],\
           ["@types/vue__compiler-sfc", null],\
-          ["@vue-macros/common", "virtual:93888d1cb5fcbc1ac67fd244282a660b699a2bbad709596b85f3f40c4f9e0f07bf93ff1a067c565f33482cc71cccb2aa14e212d59d4901de2aa21a81fc2bb2bd#npm:3.1.2"],\
+          ["@vue-macros/common", "virtual:91eca35892b0d4c395bbe126f5a6e3fbcbbda095d5baafdf8d34a6dfe210ae6bfc1cae3f8777bb86b6a41999c960dd8291f1343f43a72ac61b184e1f95c621d8#npm:3.1.2"],\
           ["@vue/compiler-sfc", null],\
           ["@vue/devtools-api", "npm:8.0.6"],\
           ["ast-walker-scope", "npm:0.8.3"],\
@@ -16121,7 +16121,7 @@ const RAW_RUNTIME_STATE =
           ["unplugin", "npm:3.0.0"],\
           ["unplugin-utils", "npm:0.3.1"],\
           ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.28"],\
-          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.2"],\
+          ["vue-router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.0.3"],\
           ["yaml", "npm:2.8.2"]\
         ],\
         "packagePeers": [\
