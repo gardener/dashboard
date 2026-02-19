@@ -31,6 +31,12 @@ SPDX-License-Identifier: Apache-2.0
           <p>
             After updating your clusters, you can safely delete the deprecated SecretBinding.
           </p>
+          <p>
+            More information:
+            <g-external-link url="https://github.com/gardener/gardener/blob/master/docs/usage/shoot-operations/secretbinding-to-credentialsbinding-migration.md">
+              SecretBinding to CredentialsBinding Migration
+            </g-external-link>
+          </p>
           <div
             class="mt-3"
             style="overflow-y: scroll"
@@ -131,6 +137,7 @@ import { useCredentialStore } from '@/store/credential'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
+import GExternalLink from '@/components/GExternalLink.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
