@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
                     color="warning"
                     class="ml-2"
                   >
-                    SecretBinding
+                    SecretBinding (Exists)
                   </v-chip>
                 </v-chip>
                 <v-chip
@@ -91,7 +91,7 @@ SPDX-License-Identifier: Apache-2.0
                     class="ml-2"
                     size="x-small"
                   >
-                    CredentialsBinding
+                    CredentialsBinding (New)
                   </v-chip>
                 </v-chip>
               </div>

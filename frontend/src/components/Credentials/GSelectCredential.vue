@@ -131,7 +131,7 @@ export default {
   },
   validations () {
     return {
-      internalValue: withFieldName('Secret', {
+      internalValue: withFieldName(this.label, {
         required,
       }),
     }
@@ -148,7 +148,7 @@ export default {
     allowedCredentials () {
       return this.cloudProviderEntityList
         ?.filter(credentialEntity => {
-          const name = credentialEntity.secretRef?.name || credentialEntity.cedentialsRef?.name || credentialEntity.metadata?.name
+          const name = credentialEntity.secretRef?.name || credentialEntity.credentialsRef?.name || credentialEntity.metadata?.name
           return !this.notAllowedSecretNames.includes(name)
         })
     },

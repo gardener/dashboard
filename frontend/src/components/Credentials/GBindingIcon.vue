@@ -36,10 +36,14 @@ SPDX-License-Identifier: Apache-2.0
             SecretBindings are deprecated and unsupported in Kubernetes 1.34 or later
           </p>
           <p>
+            <v-icon
+              size="x-small"
+              icon="mdi-check"
+            />
             This Secret is referenced by {{ credentialsBindingNamesForSecretBinding.length }} CredentialsBinding{{ credentialsBindingNamesForSecretBinding.length === 1 ? '' : 's' }}:
           </p>
           <div class="list-style">
-            <ul>
+            <ul class="pl-4">
               <li
                 v-for="bindingName in credentialsBindingNamesForSecretBinding"
                 :key="bindingName"
@@ -49,12 +53,28 @@ SPDX-License-Identifier: Apache-2.0
             </ul>
           </div>
           <p v-if="credentialUsageCount === 0">
-            No clusters are currently using this deprecated binding. You can safely delete it.
+            <v-icon
+              size="x-small"
+              icon="mdi-check"
+            />
+            No clusters are currently using this deprecated binding. You can safely delete it
           </p>
-          <p v-else>
-            {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }} still use{{ credentialUsageCount === 1 ? 's' : '' }} this deprecated binding.<br>
-            Please update those clusters to use a CredentialsBinding before deleting it.
-          </p>
+          <template v-else>
+            <p>
+              <v-icon
+                size="x-small"
+                icon="mdi-alert-outline"
+              />
+              {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }} still use{{ credentialUsageCount === 1 ? 's' : '' }} this deprecated binding
+            </p>
+            <p>
+              <v-icon
+                size="x-small"
+                icon="mdi-arrow-right"
+              />
+              Please update those clusters to use a CredentialsBinding before deleting it
+            </p>
+          </template>
         </v-tooltip>
       </div>
       <div v-else>
@@ -75,8 +95,41 @@ SPDX-License-Identifier: Apache-2.0
             SecretBindings are deprecated and unsupported in Kubernetes 1.34 or later
           </p>
           <p>
-            This Secret is not referenced by any CredentialsBindings.<br>
-            Click to review the migration steps and create a CredentialsBinding for this Secret.
+            <v-icon
+              size="x-small"
+              icon="mdi-alert-outline"
+            />
+            This Secret is currently not referenced by any CredentialsBindings
+          </p>
+          <template v-if="credentialUsageCount === 0">
+            <p>
+              <v-icon
+                size="x-small"
+                icon="mdi-check"
+              />
+              No clusters are currently using this deprecated binding
+            </p>
+            <p>
+              <v-icon
+                size="x-small"
+                icon="mdi-arrow-right"
+              />
+              You can delete it if you don't need it
+            </p>
+          </template>
+          <p v-else>
+            <v-icon
+              size="x-small"
+              icon="mdi-alert-outline"
+            />
+            {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }} currently use{{ credentialUsageCount === 1 ? 's' : '' }} this deprecated binding
+          </p>
+          <p>
+            <v-icon
+              size="x-small"
+              icon="mdi-arrow-right"
+            />
+            Click to review the migration steps and create a CredentialsBinding for this Secret
           </p>
         </v-tooltip>
       </div>

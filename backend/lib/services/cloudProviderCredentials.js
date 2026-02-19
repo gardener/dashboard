@@ -100,11 +100,9 @@ export async function createInfra ({ user, params }) {
       throw createError(422, 'Unknown binding')
   }
 
-  if (secret) {
-    if (bindingNamespace !== secretRefNamespace ||
-      secretRefNamespace !== secretNamespace) {
-      throw createError(422, 'Create only allowed if secret and credentialsbinding are in the same namespace')
-    }
+  if (bindingNamespace !== secretRefNamespace ||
+      (secret && secretNamespace !== secretRefNamespace)) {
+    throw createError(422, 'Create only allowed if secret and credentialsbinding are in the same namespace')
   }
 
   if (secret) {
