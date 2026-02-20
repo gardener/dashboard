@@ -7,10 +7,10 @@
 import {
   watch,
   nextTick,
+  toValue,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import vuetifyColors from 'vuetify/lib/util/colors'
-import { toValue } from '@vueuse/core'
 
 import { isHtmlColorCode } from '@/utils'
 

@@ -32,8 +32,8 @@ import {
   ref,
   computed,
   inject,
+  toValue,
 } from 'vue'
-import { toValue } from '@vueuse/core'
 
 const logger = inject('logger')
 
