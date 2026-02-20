@@ -188,7 +188,6 @@ import {
   watch,
   toRef,
   useTemplateRef,
-  defineEmits,
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
