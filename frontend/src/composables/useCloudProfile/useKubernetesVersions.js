@@ -136,7 +136,7 @@ export function useKubernetesVersions (cloudProfile) {
    * @throws {Error} If k8sVersion or k8sAutoPatch are not refs
    */
   function useKubernetesVersionExpiration (k8sVersion, k8sAutoPatch) {
-    if (!isRef(k8sVersion) && !isRef(k8sAutoPatch)) {
+    if (!isRef(k8sVersion) || !isRef(k8sAutoPatch)) {
       throw Error('k8sVersion and k8sAutoPatch must be a ref!')
     }
 
