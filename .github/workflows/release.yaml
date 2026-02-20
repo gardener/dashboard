@@ -12,11 +12,11 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yaml
+    secrets: inherit
     permissions:
-      contents: write
+      contents: read
       id-token: write
       packages: write
-      pull-requests: write
     with:
       mode: release
 
