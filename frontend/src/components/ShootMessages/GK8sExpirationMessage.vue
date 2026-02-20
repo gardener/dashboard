@@ -18,12 +18,13 @@ SPDX-License-Identifier: Apache-2.0
       <span>. </span>
     </span>
     <span v-else-if="isExpired">is expired. </span>
+    <span v-else>will expire soon. </span>
     <span v-if="regularUpdate">Version will be updated in the next maintenance window</span>
     <template v-else-if="forcedUpdate">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
       <span v-else>Version update will be enforced soon</span>
     </template>
-    <span v-else-if="noUpdate">Version of this cluster will expire soon and there is no supported version available. Please contact your landscape administrator</span>
+    <span v-else-if="noUpdate">There is no supported version available that you can update to. Please contact your landscape administrator</span>
   </div>
 </template>
 

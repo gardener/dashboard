@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       <span>. </span>
     </span>
     <span v-else-if="isExpired"> is expired. </span>
+    <span v-else>will expire soon. </span>
     <span v-if="regularUpdate">Version will be updated in the next maintenance window</span>
     <template v-else-if="forcedUpdate">
       <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
@@ -25,10 +26,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template v-else-if="noUpdate">
       <div>
-        Machine image version
-        <span v-if="isExpired">is expired</span>
-        <span v-else>will expire soon</span>
-        and there is no newer supported version available.
+        There is no supported version available that you can update to.
       </div>
       <div v-if="supportedVersionAvailable">
         However, an older <code>supported</code> version for this image vendor is available. You may want to consider downgrading to that version.

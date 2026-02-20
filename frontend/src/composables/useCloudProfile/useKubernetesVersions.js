@@ -18,6 +18,7 @@ import {
 
 import {
   isValidTerminationDate,
+  getVersionExpirationWarning,
   UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils/index.js'
 
@@ -141,24 +142,6 @@ export function useKubernetesVersions (cloudProfile) {
 
     const patchAvailable = useKubernetesVersionIsNotLatestPatch(k8sVersion)
 
-    function getVersionExpirationWarningSeverity (options) {
-      const {
-        isExpirationWarning,
-        autoPatchEnabled,
-        updateAvailable,
-        autoUpdatePossible,
-      } = options
-      const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
-      if (!isExpirationWarning) {
-        return autoPatchEnabledAndPossible
-          ? 'info'
-          : undefined
-      }
-      if (!updateAvailable) {
-        return 'error'
-      }
-      return 'warning'
-    }
     function kubernetesVersionUpdatePathAvailable () {
       if (patchAvailable.value) {
         return true
@@ -195,20 +178,23 @@ export function useKubernetesVersions (cloudProfile) {
           expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
           isValidTerminationDate: false,
           isExpired: true,
-          severity: 'warning',
+          severity: 'warning', // we treat unknown versions as expiring soon to trigger attention and investigation
+          regularUpdate: false,
+          forcedUpdate: true, // we treat it as expired so update will be enforced
+          noUpdate: false,
         }
       }
 
       const updatePathAvailable = kubernetesVersionUpdatePathAvailable()
 
-      const severity = getVersionExpirationWarningSeverity({
+      const expirationWarning = getVersionExpirationWarning({
         isExpirationWarning: version.isExpirationWarning,
         autoPatchEnabled: k8sAutoPatch.value,
         updateAvailable: updatePathAvailable,
         autoUpdatePossible: patchAvailable.value,
       })
 
-      if (!severity) {
+      if (!expirationWarning) {
         return undefined
       }
 
@@ -217,7 +203,7 @@ export function useKubernetesVersions (cloudProfile) {
         expirationDate: version.expirationDate,
         isValidTerminationDate: isValidTerminationDate(version.expirationDate),
         isExpired: version.isExpired,
-        severity,
+        ...expirationWarning,
       }
     })
   }

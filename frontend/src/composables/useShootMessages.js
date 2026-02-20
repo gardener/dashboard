@@ -16,34 +16,14 @@ import {
   machineImageHasUpdateForAutoUpdateStrategy,
   machineImageHasUpdate,
   machineVendorHasSupportedVersion,
+  getVersionExpirationWarning,
   UNKNOWN_EXPIRED_TIMESTAMP,
 } from '@/utils'
 
 import map from 'lodash/map'
-import filter from 'lodash/filter'
+import compact from 'lodash/compact'
 import find from 'lodash/find'
 import get from 'lodash/get'
-
-/**
- * Get version expiration warning severity
- */
-function getVersionExpirationWarningSeverity (options) {
-  const {
-    isExpirationWarning,
-    autoPatchEnabled,
-    updateAvailable,
-    autoUpdatePossible,
-  } = options
-
-  const autoPatchEnabledAndPossible = autoPatchEnabled && autoUpdatePossible
-  if (!isExpirationWarning) {
-    return autoPatchEnabledAndPossible ? 'info' : undefined
-  }
-  if (!updateAvailable) {
-    return 'error'
-  }
-  return 'warning'
-}
 
 /**
  * Composable for shoot message validation and warnings
@@ -86,30 +66,37 @@ export function useShootMessages (cloudProfile) {
             isValidTerminationDate: false,
             severity: 'warning',
             supportedVersionAvailable: false,
-            isExpired: true,
+            isExpired: true, // we treat it as expired
+            regularUpdate: false,
+            forcedUpdate: true, // probably expired so update will be enforced
+            noUpdate: false,
           }
         }
 
         const updateAvailableForUpdateStrategy = machineImageHasUpdateForAutoUpdateStrategy(workerImageDetails, allMachineImages)
         const updateAvailable = machineImageHasUpdate(workerImageDetails, allMachineImages)
         const supportedVersionAvailable = machineVendorHasSupportedVersion(workerImageDetails, allMachineImages)
-        const severity = getVersionExpirationWarningSeverity({
+        const expirationWarning = getVersionExpirationWarning({
           isExpirationWarning: workerImageDetails.isExpirationWarning,
           autoPatchEnabled: imageAutoPatch.value,
           updateAvailable,
           autoUpdatePossible: updateAvailableForUpdateStrategy,
         })
 
+        if (!expirationWarning) {
+          return undefined
+        }
+
         return {
           ...workerImageDetails,
           isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
           workerName: worker.name,
-          severity,
           supportedVersionAvailable,
+          ...expirationWarning,
         }
       })
 
-      return filter(workerGroups, 'severity')
+      return compact(workerGroups)
     })
   }
 
