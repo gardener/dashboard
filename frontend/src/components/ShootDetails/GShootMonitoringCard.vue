@@ -90,8 +90,6 @@ const {
 
 const shootItem = useShootItem()
 const {
-  shootNamespace,
-  shootName,
   shootUid,
   shootConditions,
 } = shootItem
