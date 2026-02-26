@@ -132,6 +132,7 @@ export default {
   },
   computed: {
     plutonoIcon () {
+      // Avoid duplicate icon when Seed Plutono tile is also shown for admins
       return this.isAdmin
         ? undefined
         : 'mdi-developer-board'
