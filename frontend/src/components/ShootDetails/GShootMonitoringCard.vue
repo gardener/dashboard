@@ -52,22 +52,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item-content>
     </g-list-item>
     <template
-      v-if="isOidcObservabilityUrlsEnabled || canGetCloudProviderCredentials"
+      v-if="showMetricsSection"
     >
       <v-divider inset />
-      <g-cluster-metrics
-        v-if="!metricsNotAvailableText"
-      />
-      <g-list-item v-else>
-        <template #prepend>
-          <v-icon color="primary">
-            mdi-alert-circle-outline
-          </v-icon>
-        </template>
-        <g-list-item-content>
-          {{ metricsNotAvailableText }}
-        </g-list-item-content>
-      </g-list-item>
+      <g-cluster-metrics />
     </template>
   </v-card>
 </template>
@@ -86,7 +74,6 @@ import GSeedStatusTags from '@/components/GSeedStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
 import { useShootItem } from '@/composables/useShootItem'
-import { useShootHelper } from '@/composables/useShootHelper'
 const authnStore = useAuthnStore()
 const {
   isAdmin,
@@ -106,20 +93,11 @@ const {
   shootNamespace,
   shootName,
   shootConditions,
-  isTestingCluster,
 } = shootItem
 
-const {
-  seedIngressDomain,
-} = useShootHelper()
-
-const metricsNotAvailableText = computed(() => {
-  if (isTestingCluster.value) {
-    return 'Cluster Metrics not available for clusters with purpose testing'
-  }
-  if (!seedIngressDomain.value) {
-    return 'Cluster Metrics not available'
-  }
-  return undefined
+const showMetricsSection = computed(() => {
+  return isAdmin.value ||
+    isOidcObservabilityUrlsEnabled ||
+    canGetCloudProviderCredentials.value
 })
 </script>

@@ -6,42 +6,76 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-list>
-    <g-link-list-tile
-      icon="mdi-developer-board"
-      app-title="Plutono"
-      :url="plutonoUrl"
-      :url-text="plutonoUrl"
-      :is-shoot-status-hibernated="isShootStatusHibernated"
-    />
-    <g-link-list-tile
-      app-title="Prometheus"
-      :url="prometheusUrl"
-      :url-text="prometheusUrl"
-      :is-shoot-status-hibernated="isShootStatusHibernated"
-      content-class="pt-0"
-    />
-    <g-link-list-tile
-      v-if="hasAlertmanager"
-      app-title="Alertmanager"
-      :url="alertmanagerUrl"
-      :url-text="alertmanagerUrl"
-      :is-shoot-status-hibernated="isShootStatusHibernated"
-      content-class="pt-0"
-    />
-    <v-divider
-      v-show="!!username && !!password"
-      inset
-    />
-    <g-username-password
-      :username="username"
-      :password="password"
-    />
+    <g-list-item v-if="!seedIngressDomain">
+      <template #prepend>
+        <v-icon color="primary">
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <g-list-item-content>
+        Cluster Metrics not available
+      </g-list-item-content>
+    </g-list-item>
+    <template v-else>
+      <g-link-list-tile
+        v-if="isAdmin"
+        icon="mdi-developer-board"
+        app-title="Seed Plutono"
+        :url="seedPlutonoUrl"
+        :url-text="seedPlutonoUrl"
+      />
+      <template v-if="!isTestingCluster">
+        <g-link-list-tile
+          :icon="plutonoIcon"
+          app-title="Plutono"
+          :url="plutonoUrl"
+          :url-text="plutonoUrl"
+          :is-shoot-status-hibernated="isShootStatusHibernated"
+        />
+        <g-link-list-tile
+          app-title="Prometheus"
+          :url="prometheusUrl"
+          :url-text="prometheusUrl"
+          :is-shoot-status-hibernated="isShootStatusHibernated"
+          content-class="pt-0"
+        />
+        <g-link-list-tile
+          v-if="hasAlertmanager"
+          app-title="Alertmanager"
+          :url="alertmanagerUrl"
+          :url-text="alertmanagerUrl"
+          :is-shoot-status-hibernated="isShootStatusHibernated"
+          content-class="pt-0"
+        />
+        <v-divider
+          v-show="!!username && !!password"
+          inset
+        />
+        <g-username-password
+          :username="username"
+          :password="password"
+        />
+      </template>
+      <g-list-item v-else>
+        <template #prepend>
+          <v-icon color="primary">
+            mdi-alert-circle-outline
+          </v-icon>
+        </template>
+        <g-list-item-content>
+          Cluster Metrics not available for clusters with purpose testing
+        </g-list-item-content>
+      </g-list-item>
+    </template>
   </g-list>
 </template>
 
 <script>
 
+import { storeToRefs } from 'pinia'
+
 import { useConfigStore } from '@/store/config'
+import { useAuthnStore } from '@/store/authn'
 
 import GUsernamePassword from '@/components/GUsernamePasswordListTile'
 import GLinkListTile from '@/components/GLinkListTile'
@@ -61,6 +95,11 @@ export default {
     GLinkListTile,
   },
   setup () {
+    const authnStore = useAuthnStore()
+    const {
+      isAdmin,
+    } = storeToRefs(authnStore)
+
     const {
       isOidcObservabilityUrlsEnabled,
     } = useConfigStore()
@@ -69,6 +108,7 @@ export default {
       shootItem,
       shootInfo,
       isShootStatusHibernated,
+      isTestingCluster,
     } = useShootItem()
 
     const {
@@ -86,9 +126,16 @@ export default {
       seedIngressDomain,
       shootTechnicalId,
       isOidcObservabilityUrlsEnabled,
+      isAdmin,
+      isTestingCluster,
     }
   },
   computed: {
+    plutonoIcon () {
+      return this.isAdmin
+        ? undefined
+        : 'mdi-developer-board'
+    },
     plutonoUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
         return this.getOidcDeploymentUrl('plutono')
@@ -109,6 +156,9 @@ export default {
       }
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
+    },
+    seedPlutonoUrl () {
+      return `https://plutono-garden.${this.seedIngressDomain}`
     },
     username () {
       return get(this.shootInfo, ['monitoringUsername'], '')
