@@ -117,5 +117,3 @@ If no suitable binding is shown:
 ## Cleanup
 
 After all clusters referencing a specific `SecretBinding` have been migrated to use the corresponding `CredentialsBinding`, you can safely delete the old `SecretBinding`.
-
-<img width="600" src="../images/sb-migration-dialog-3.png">
