@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-alert
               v-if="credentialUsageCount > 0"
               type="warning"
-              varaint="tonal"
+              variant="tonal"
               class="mt-3"
             >
               <p>
@@ -138,14 +138,6 @@ SPDX-License-Identifier: Apache-2.0
               <p>
                 You can do this on the cluster details page using the migration button on the infrastructure card.
               </p>
-            </v-alert>
-            <v-alert
-              v-else
-              type="info"
-              class="mt-3"
-              variant="tonal"
-            >
-              No clusters are currently using this credential. You can safely delete this deprecated SecretBinding.
             </v-alert>
           </div>
           <g-message

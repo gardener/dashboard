@@ -42,11 +42,13 @@ SPDX-License-Identifier: Apache-2.0
     </v-select>
     <v-alert
       v-if="needsMigration"
-      color="warning"
+      type="warning"
       variant="tonal"
     >
       <p>
-        This cluster uses a SecretBinding. You need to migrate to a CredentialsBinding before upgrading to Kubernetes 1.34.
+        This cluster uses a SecretBinding. You need to migrate to a CredentialsBinding before upgrading to Kubernetes version 1.34.
+      </p>
+      <p>
         <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
           More Information
         </g-external-link>
@@ -137,7 +139,7 @@ export default {
     const rules = {
       selectedItem: withFieldName('Kubernetes Version', {
         required,
-        noSecreTbinding: withMessage('The selected version requires changes to your cluster before you can upgrade', function () {
+        noSecretBinding: withMessage('The selected version requires changes to your cluster before you can upgrade', function () {
           return !this.needsMigration
         }),
       }),
@@ -259,8 +261,12 @@ export default {
       return undefined
     },
     needsMigration () {
-      const currentMinorVersion = semver.minor(this.selectedItem.version)
-      return this.shootSecretBindingName && currentMinorVersion > 33
+      const selectedVersion = this.selectedItem?.version
+      if (!selectedVersion) {
+        return false
+      }
+      const selectedMinorVersion = semver.minor(selectedVersion)
+      return Boolean(this.shootSecretBindingName) && selectedMinorVersion >= 34
     },
   },
   methods: {

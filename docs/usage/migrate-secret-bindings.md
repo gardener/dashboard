@@ -4,11 +4,22 @@ With the introduction of the `CredentialsBinding` resource, a new way of referen
 
 `SecretBinding` resources are deprecated and are no longer supported for Shoots running **Kubernetes version 1.34 or higher**.
 
-For more details, see the [official migration guide](https://github.com/gardener/gardener/blob/master/docs/usage/shoot-operations/secretbinding-to-credentialsbinding-migration.md).
+Follow [this](https://github.com/gardener/gardener/blob/master/docs/usage/shoot-operations/secretbinding-to-credentialsbinding-migration.md) link if you want to learn more about what the migration does.
 
----
+* [Migrate SecretBindings to CredentialsBindings](#migrate-secretbindings-to-credentialsbindings)
+  * [Background Information - How the Dashboard Handles Credentials](#background-information---how-the-dashboard-handles-credentials)
+    * [DNS Credentials](#dns-credentials)
+    * [Infrastructure Credentials](#infrastructure-credentials)
+    * [Important Version Change](#important-version-change)
+    * [How to Distinguish Binding Types](#how-to-distinguish-binding-types)
+  * [Migration Steps](#migration-steps)
+    * [Create a CredentialsBinding for a SecretBinding](#create-a-credentialsbinding-for-a-secretbinding)
+    * [Migrate Clusters](#migrate-clusters)
+    * [Cleanup](#cleanup)
 
-## How the Dashboard Handles Credentials
+
+
+## Background Information - How the Dashboard Handles Credentials
 
 On the **Credentials** page, you can view:
 
@@ -50,13 +61,13 @@ The underlying `Secret` or `WorkloadIdentity`:
 You can identify the binding type in the Dashboard:
 
 * Hover over the icon next to the binding to see its type.
-* **Secret (SecretBinding)** → filled key icon
-* **Secret (CredentialsBinding)** → outlined key icon
-* **WorkloadIdentity credentials** → card symbol (always referenced by a CredentialsBinding)
+* <img src="../images/mdi-key.svg" width="16" /> **Secret (SecretBinding)** → filled key icon
+* <img src="../images/mdi-key-outline.svg" width="16" /> **Secret (CredentialsBinding)** → outlined key icon
+* <img src="../images/mdi-id-card.svg" width="16" /> **WorkloadIdentity credentials** → card symbol (always referenced by a CredentialsBinding)
 
----
+## Migration Steps
 
-## Create a CredentialsBinding for Existing SecretBindings
+### Create a CredentialsBinding for a SecretBinding
 
 On the **Credentials** page, SecretBindings now have an additional action button:
 
@@ -83,9 +94,7 @@ the dialog will show the current migration status.
 
 <img width="600" src="../images/sb-migration-dialog-2.png">
 
----
-
-## Migrate Clusters
+### Migrate Clusters
 
 After creating `CredentialsBinding` resources for your `SecretBindings`, you must update your Shoots.
 
@@ -104,8 +113,6 @@ If no suitable binding is shown:
 <img width="600" src="../images/sb-migration-shoot-1.png">
 
 <img width="600" src="../images/sb-migration-shoot-2.png">
-
----
 
 ## Cleanup
 

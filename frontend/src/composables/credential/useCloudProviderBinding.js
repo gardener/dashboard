@@ -138,7 +138,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   const shootsUsingThisCredential = computed(() => {
     if (!isInfrastructureBinding.value) {
-      return 0
+      return []
     }
     const name = binding.value?.metadata.name
 
@@ -148,7 +148,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     } else if (isCredentialsBinding.value) {
       bindingNameKey = 'credentialsBindingName'
     } else {
-      return 0
+      return []
     }
 
     const shoots = filter(

@@ -31,6 +31,11 @@ SPDX-License-Identifier: Apache-2.0
               Select a CredentialsBinding to migrate the cluster's credential.
               The CredentialsBinding must reference the same Secret as the currently used SecretBinding.
             </p>
+            <p>
+              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
+                More Information
+              </g-external-link>
+            </p>
           </v-alert>
           <v-alert
             v-else
@@ -39,7 +44,12 @@ SPDX-License-Identifier: Apache-2.0
             class="mt-2"
           >
             <p>
-              There are no available CredentialsBindings to migrate. Please create a CredentialsBinding that references the same Secret as the currently used SecretBinding before you can migrate.
+              There are no available CredentialsBindings to migrate to. Please create a CredentialsBinding that references the same Secret as the currently used SecretBinding before you can migrate.
+            </p>
+            <p>
+              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
+                More Information
+              </g-external-link>
             </p>
           </v-alert>
         </template>

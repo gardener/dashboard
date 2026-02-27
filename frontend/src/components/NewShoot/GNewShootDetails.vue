@@ -172,6 +172,9 @@ export default {
     const kubernetesVersionRules = {
       required,
       noSecreTbinding: withMessage('The selected version requires a CredentialsBinding. You can migrate your SecretBinding to a CredentialsBinding on the Credentials page', function (version) {
+        if (!version || !semver.valid(version)) {
+          return true
+        }
         const currentMinorVersion = semver.minor(version)
         return !(!this.workerless && isSecretBinding(this.infrastructureBinding) && currentMinorVersion > 33)
       }),

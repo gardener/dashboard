@@ -7,8 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex justify-end">
     <g-action-button
-      v-if="canPatchCredentials && isSecretBinding"
+      v-if="canPatchCredentials && isSecretBinding && credentialUsageCount > 0"
       icon="mdi-key-change"
+      :disabled="isSharedBinding || isMarkedForDeletion"
       @click="onMigrateSecretBinding"
     >
       <template #tooltip>
