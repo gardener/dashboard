@@ -98,6 +98,7 @@ const {
 } = useCloudProviderBinding(shootCloudProviderBinding)
 
 async function onConfigurationDialogOpened () {
+  infrastructureBinding.value = null
   if (!props.migrationMode) {
     infrastructureBinding.value = shootCloudProviderBinding.value
   }
@@ -141,6 +142,7 @@ function credentialFilterFn (credential) {
   if (!props.migrationMode) {
     return true
   }
+  // shootCloudProviderBinding is a secret binding in migration mode
   return shootCloudProviderBinding.value.secretRef.name === credential.credentialsRef.name
 }
 </script>

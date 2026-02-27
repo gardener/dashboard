@@ -242,7 +242,7 @@ const errorMessage = ref()
 const detailedErrorMessage = ref()
 
 const createStep = computed(() => {
-  return !credentialsBindingNamesForSecretBinding.value.length > 0
+  return credentialsBindingNamesForSecretBinding.value.length === 0
 })
 
 const visible = computed({
@@ -268,11 +268,9 @@ function hide () {
 
 async function onCreateCredentialsBinding () {
   try {
-    if (secretName?.value) {
-      await createInfraCredential({
-        binding: credentialsBindingManifest.value,
-      })
-    }
+    await createInfraCredential({
+      binding: credentialsBindingManifest.value,
+    })
   } catch (err) {
     const errorDetails = errorDetailsFromError(err)
     errorMessage.value = 'Failed to create CredentialsBinding'
