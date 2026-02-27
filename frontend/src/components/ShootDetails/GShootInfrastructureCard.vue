@@ -41,9 +41,16 @@ SPDX-License-Identifier: Apache-2.0
             render-link
           />
         </g-list-item-content>
-        <template #append>
+        <template
+          v-if="canPatchShootsBinding"
+          #append
+        >
           <g-credential-configuration
-            v-if="canPatchShootsBinding"
+            v-if="shootSecretBindingName"
+            migration-mode
+          />
+          <g-credential-configuration
+            v-else
           />
         </template>
       </g-list-item>
@@ -268,7 +275,7 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
-import GCredentialConfiguration from '@/components/GCredentialConfiguration'
+import GCredentialConfiguration from '@/components/Credentials/GShootCredentialConfiguration'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -322,6 +329,7 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
+      shootSecretBindingName,
     } = useShootItem()
 
     const { getResourceRefName } = useShootResources(shootItem)
@@ -361,6 +369,7 @@ export default {
       credential,
       isSharedBinding,
       availableFloatingPools,
+      shootSecretBindingName,
     }
   },
   computed: {

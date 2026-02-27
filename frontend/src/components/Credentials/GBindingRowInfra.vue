@@ -23,10 +23,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </td>
     <td v-if="selectedHeaders.kind">
-      <g-binding-icon
-        :binding="item.binding"
-        show-migration-status
-      />
+      <g-binding-icon :binding="item.binding" />
     </td>
     <td v-if="selectedHeaders.infrastructure">
       <g-vendor
@@ -53,6 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         :binding="item.binding"
         @update="onUpdate"
         @delete="onDelete"
+        @migrate-secret-binding="onMigrateSecretBinding"
       />
     </td>
   </tr>
@@ -95,7 +93,7 @@ const {
   headers,
 } = toRefs(props)
 
-const emit = defineEmits(['updateInfraBinding', 'deleteInfraBinding'])
+const emit = defineEmits(['updateInfraBinding', 'deleteInfraBinding', 'migrateSecretBinding'])
 
 const selectedHeaders = computed(() => {
   return mapTableHeader(headers.value, 'selected')
@@ -107,6 +105,10 @@ function onUpdate (value) {
 
 function onDelete (value) {
   emit('deleteInfraBinding', value)
+}
+
+function onMigrateSecretBinding (value) {
+  emit('migrateSecretBinding', value)
 }
 
 </script>

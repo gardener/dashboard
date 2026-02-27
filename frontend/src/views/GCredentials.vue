@@ -120,6 +120,7 @@ SPDX-License-Identifier: Apache-2.0
             :headers="infraCredentialTableHeaders"
             @update-infra-binding="onUpdateInfraBinding"
             @delete-infra-binding="onDeleteInfraBinding"
+            @migrate-secret-binding="onMigrateSecretBinding"
           />
         </template>
         <template #bottom>
@@ -574,6 +575,11 @@ export default {
       this.selectedInfraBinding = binding
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = 'delete'
+    },
+    onMigrateSecretBinding (binding) {
+      this.selectedInfraBinding = binding
+      this.selectedDnsCredential = undefined
+      this.visibleCredentialDialog = 'migrate-secret-binding'
     },
     onUpdateDnsCredential (credential) {
       const providerType = credentialProviderType(credential)

@@ -18,6 +18,8 @@ SPDX-License-Identifier: Apache-2.0
       item-title="metadata.name"
       return-object
       :error-messages="getErrorMessages(v$.internalValue)"
+      persistent-hint
+      :hint="credentialHint"
       variant="underlined"
       @blur="v$.internalValue.$touch()"
     >
@@ -26,11 +28,25 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           :title="undefined"
         >
-          <g-credential-name :credential="item.raw" />
+          <g-credential-name
+            v-if="isDnsProvider"
+            :credential="item.raw"
+          />
+          <g-binding-name
+            v-else
+            :binding="item.raw"
+          />
         </v-list-item>
       </template>
       <template #selection="{ item }">
-        <g-credential-name :credential="item.raw" />
+        <g-credential-name
+          v-if="isDnsProvider"
+          :credential="item.raw"
+        />
+        <g-binding-name
+          v-else
+          :binding="item.raw"
+        />
       </template>
       <template #append-item>
         <v-divider class="mb-2" />
@@ -54,20 +70,33 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { toRef } from 'vue'
+import {
+  toRef,
+  computed,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { storeToRefs } from 'pinia'
 
+import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
+import GBindingName from '@/components/Credentials/GBindingName'
 
+import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
+import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
+import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 
-import { withFieldName } from '@/utils/validators'
+import {
+  withParams,
+  withMessage,
+  withFieldName,
+} from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
 import head from 'lodash/head'
@@ -79,6 +108,7 @@ export default {
   components: {
     GSecretDialogWrapper,
     GCredentialName,
+    GBindingName,
   },
   props: {
     modelValue: {
@@ -94,9 +124,8 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    notAllowedSecretNames: {
-      type: Array,
-      default: () => [],
+    filterFn: {
+      type: Function,
     },
     label: {
       type: String,
@@ -107,6 +136,13 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
+    const projectStore = useProjectStore()
+    const projectItem = toRef(projectStore, 'project')
+    const {
+      costObjectsSettingEnabled,
+      costObjectErrorMessage,
+      costObject,
+    } = useProjectCostObject(projectItem)
     const credentialStore = useCredentialStore()
     const gardenerExtensionStore = useGardenerExtensionStore()
     const cloudProfileStore = useCloudProfileStore()
@@ -116,10 +152,31 @@ export default {
     })
 
     const providerType = toRef(props, 'providerType')
+    const credential = toRef(props, 'modelValue')
+
     const cloudProviderEntityList = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
+    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
+    let composable
+    if (isDnsProvider.value) {
+      composable = useCloudProviderCredential(credential)
+    } else {
+      composable = useCloudProviderBinding(credential)
+    }
+    const {
+      isSharedBinding,
+      selfTerminationDays,
+    } = composable
+
     return {
+      costObjectsSettingEnabled,
+      costObjectErrorMessage,
+      costObject,
       cloudProviderEntityList,
+      isSharedBinding,
+      selfTerminationDays,
+      isDnsProvider,
       v$,
     }
   },
@@ -130,9 +187,22 @@ export default {
     }
   },
   validations () {
+    const requiresCostObjectIfEnabled = (enabled = false) => withParams(
+      { type: 'requiresCostObjectIfEnabled', enabled },
+      function requiresCostObjectIfEnabled () {
+        return enabled
+          ? !!this.costObject || this.isSharedBinding
+          : true
+      },
+    )
+
     return {
-      internalValue: withFieldName(this.label, {
+      internalValue: withFieldName('Secret', {
         required,
+        requiresCostObjectIfEnabled: withMessage(
+          'A Cost Object is required. Go to the ADMINISTRATION page to edit the project and set the Cost Object.',
+          requiresCostObjectIfEnabled(this.costObjectsSettingEnabled),
+        ),
       }),
     }
   },
@@ -146,11 +216,16 @@ export default {
       },
     },
     allowedCredentials () {
-      return this.cloudProviderEntityList
-        ?.filter(credentialEntity => {
-          const name = credentialEntity.secretRef?.name || credentialEntity.credentialsRef?.name || credentialEntity.metadata?.name
-          return !this.notAllowedSecretNames.includes(name)
-        })
+      if (!this.filterFn) {
+        return this.cloudProviderEntityList
+      }
+      return this.cloudProviderEntityList.filter(this.filterFn)
+    },
+    credentialHint () {
+      if (this.selfTerminationDays) {
+        return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+      }
+      return undefined
     },
   },
   mounted () {

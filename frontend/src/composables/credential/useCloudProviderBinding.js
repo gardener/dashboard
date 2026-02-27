@@ -136,7 +136,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
       !hasOwnWorkloadIdentity.value
   })
 
-  const credentialUsageCount = computed(() => {
+  const shootsUsingThisCredential = computed(() => {
     if (!isInfrastructureBinding.value) {
       return 0
     }
@@ -155,7 +155,11 @@ export const useCloudProviderBinding = (binding, options = {}) => {
       shootList.value,
       ({ spec }) => get(spec, [bindingNameKey]) === name,
     )
-    return shoots.length
+    return shoots
+  })
+
+  const credentialUsageCount = computed(() => {
+    return shootsUsingThisCredential.value.length
   })
 
   const bindingsWithSameCredential = computed(() => {
@@ -182,6 +186,15 @@ export const useCloudProviderBinding = (binding, options = {}) => {
         otherRef.name === currentRef.name &&
         otherKind === selectedKind
     })
+  })
+
+  const credentialsBindingNamesForSecretBinding = computed(() => {
+    if (!isSecretBinding.value) {
+      return []
+    }
+    return bindingsWithSameCredential.value
+      .filter(binding => binding.kind === 'CredentialsBinding')
+      .map(binding => binding.metadata.name)
   })
 
   // Quotas & Lifecycles
@@ -237,7 +250,11 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     hasOwnWorkloadIdentity,
     isOrphanedBinding,
     credentialUsageCount,
+    shootsUsingThisCredential,
     bindingsWithSameCredential,
+
+    // For SecretBinding migration purpose
+    credentialsBindingNamesForSecretBinding,
 
     // Quotas & lifecycle
     quotas,

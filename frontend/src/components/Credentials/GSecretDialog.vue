@@ -93,18 +93,24 @@ SPDX-License-Identifier: Apache-2.0
           :model-value="!isCreateMode && bindingsWithSameCredential?.length > 0"
           type="info"
           rounded="0"
-          class="mb-2 list-style"
+          class="mb-2"
         >
-          This <code>Secret</code> is also referenced by
-          <ul>
-            <li
-              v-for="referencedBinding in bindingsWithSameCredential"
-              :key="referencedBinding.metadata.uid"
-            >
-              <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
-            </li>
-          </ul>
-          Updating <code>Secret</code> data for this <code>{{ resourceKind }}</code> will also affect the other <code>Bindings</code> that reference this <code>Secret</code>.
+          <p>
+            This <code>Secret</code> is also referenced by
+          </p>
+          <v-chip
+            v-for="{ kind, metadata: { uid, name: bName }} in bindingsWithSameCredential"
+            :key="uid"
+            v-tooltip:top="kind"
+            class="mr-2"
+            size="small"
+            :prepend-icon="kind === 'SecretBinding' ? 'mdi-key' : 'mdi-key-outline'"
+          >
+            {{ bName }}
+          </v-chip>
+          <p class="mt-2">
+            Updating <code>Secret</code> data for this <code>{{ resourceKind }}</code> will also affect the other <code>Bindings</code> that reference this <code>Secret</code>.
+          </p>
         </v-alert>
       </div>
       <v-divider />
@@ -476,15 +482,6 @@ export default {
   height: 100%;
   padding-right: 15px;
   box-sizing: content-box;
-}
-
-.list-style {
-  ul {
-    margin-left: 10px;
-  }
-  li {
-    margin-left: 10px;
-  }
 }
 
 </style>

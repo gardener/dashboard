@@ -31,6 +31,7 @@ const HcloudDialog = defineAsyncComponent(() => import('@/components/Credentials
 const PowerdnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogPowerdns'))
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
 const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
+const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
 
 export default {
   props: {
@@ -71,6 +72,7 @@ export default {
 
         // Generic Dialogs
         case 'delete': return DeleteDialog
+        case 'migrate-secret-binding': return MigrationDialog
 
         default: return GenericDialog
       }

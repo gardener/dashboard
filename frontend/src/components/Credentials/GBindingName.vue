@@ -5,10 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div
-    v-if="resourceHash"
-    class="d-flex"
-  >
+  <span v-if="resourceHash">
     <g-binding-icon
       :binding="binding"
     />
@@ -46,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
       v-if="isOrphanedBinding"
       :binding="binding"
     />
-  </div>
+  </span>
   <span v-else>
     <span>Unknown credential</span>
   </span>
