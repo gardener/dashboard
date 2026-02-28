@@ -101,7 +101,7 @@
     "neostandard": "^0.12.0",
     "p-event": "^6.0.0",
     "path-to-regexp": "^8.0.0",
-    "rollup": "^4.41.1",
+    "rollup": "^4.59.0",
     "rollup-plugin-copy": "^3.5.0",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
