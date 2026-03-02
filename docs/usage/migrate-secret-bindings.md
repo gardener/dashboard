@@ -13,9 +13,9 @@ Follow [this](https://github.com/gardener/gardener/blob/master/docs/usage/shoot-
     * [Important Version Change](#important-version-change)
     * [How to Distinguish Binding Types](#how-to-distinguish-binding-types)
   * [Migration Steps](#migration-steps)
-    * [Create a CredentialsBinding for a SecretBinding](#create-a-credentialsbinding-for-a-secretbinding)
-    * [Migrate Clusters](#migrate-clusters)
-    * [Cleanup](#cleanup)
+    * [Step 1: Create a `CredentialsBinding` for a `SecretBinding`](#step-1-create-a-credentialsbinding-for-a-secretbinding)
+    * [Step 2: Migrate Clusters](#step-2-migrate-clusters)
+    * [Step 3: Cleanup](#step-3-cleanup)
 
 
 
@@ -39,10 +39,10 @@ They are directly visible in the Dashboard.
 
 Infrastructure credentials are always created as a **pair**:
 
-1. A **CredentialsBinding** resource
-2. A referenced **Secret** or **WorkloadIdentity** resource
+1. A `CredentialsBinding` resource
+2. A referenced `Secret` or `WorkloadIdentity` resource
 
-The **CredentialsBinding** is the resource that is referenced by the Shoot cluster.
+The `CredentialsBinding` is the resource that is referenced by the Shoot cluster.
 
 The underlying `Secret` or `WorkloadIdentity`:
 
@@ -67,7 +67,13 @@ You can identify the binding type in the Dashboard:
 
 ## Migration Steps
 
-### Create a CredentialsBinding for a SecretBinding
+The migration consists of three steps:
+
+1. [Create a `CredentialsBinding` for each existing `SecretBinding`](#step-1-create-a-credentialsbinding-for-a-secretbinding).
+2. [Update all Shoots that still reference a `SecretBinding` to use the new `CredentialsBinding`](#step-2-migrate-clusters).
+3. [Delete old `SecretBinding` resources after all Shoots have been migrated](#step-3-cleanup).
+
+### Step 1: Create a `CredentialsBinding` for a `SecretBinding`
 
 On the **Credentials** page, SecretBindings now have an additional action button:
 
@@ -77,43 +83,35 @@ Clicking this button opens a dialog where you can create a new `CredentialsBindi
 
 When clicking **CREATE CREDENTIALSBINDING**:
 
-* The Dashboard attempts to create a `CredentialsBinding`
+* The Dashboard creates a `CredentialsBinding`
 * It uses the **same name** as the existing `SecretBinding`
 * It references the same underlying `Secret`
 
 <img width="600" src="../images/sb-migration-dialog-1.png">
 
-After successful creation, the dialog displays an overview of clusters that still need to be migrated.
-
-If:
-
-* A `CredentialsBinding` referencing the same Secret already exists, or
-* You reopen the dialog later,
-
-the dialog will show the current migration status.
+After creation, the dialog shows the current migration status, including an overview of clusters that still need to be migrated.
 
 <img width="600" src="../images/sb-migration-dialog-2.png">
 
-### Migrate Clusters
+### Step 2: Migrate Clusters
 
 After creating `CredentialsBinding` resources for your `SecretBindings`, you must update your Shoots.
 
 To migrate a Shoot:
 
-1. Open the **cluster details page**
-2. Click the button next to the credential information
+1. Navigate to the **cluster details page**
+2. Click the key-change icon button (**Migrate Credential**) next to the credential information
 3. A dialog opens where you can select a `CredentialsBinding`
 
 You can only select a `CredentialsBinding` that references the **same Secret** as the currently used `SecretBinding`.
-
-If no suitable binding is shown:
-
-* Ensure that you successfully created a `CredentialsBinding` for the corresponding `SecretBinding` on the **Credentials** page.
 
 <img width="600" src="../images/sb-migration-shoot-1.png">
 
 <img width="600" src="../images/sb-migration-shoot-2.png">
 
-## Cleanup
+> [!NOTE]
+> If no suitable binding is shown, ensure that you completed [Step 1](#step-1-create-a-credentialsbinding-for-a-secretbinding) and created a `CredentialsBinding` for the corresponding `SecretBinding` on the **Credentials** page.
 
-After all clusters referencing a specific `SecretBinding` have been migrated to use the corresponding `CredentialsBinding`, you can safely delete the old `SecretBinding`.
+### Step 3: Cleanup
+
+If a `SecretBinding` is no longer referenced by any Shoots because they were migrated to use a `CredentialsBinding`, it can be safely deleted.

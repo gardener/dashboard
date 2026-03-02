@@ -50,7 +50,8 @@ SPDX-License-Identifier: Apache-2.0
             migration-mode
           />
           <g-credential-configuration
-            v-else
+            :disabled="!!shootSecretBindingName"
+            :tooltip="!!shootSecretBindingName ? 'Credential migration to a CredentialsBinding is required' : undefined"
           />
         </template>
       </g-list-item>

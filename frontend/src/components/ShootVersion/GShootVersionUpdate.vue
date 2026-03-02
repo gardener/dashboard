@@ -139,7 +139,7 @@ export default {
     const rules = {
       selectedItem: withFieldName('Kubernetes Version', {
         required,
-        noSecretBinding: withMessage('The selected version requires changes to your cluster before you can upgrade', function () {
+        noSecretBindingForSelectedVersion: withMessage('The selected version requires changes to your cluster before you can upgrade', function () {
           return !this.needsMigration
         }),
       }),

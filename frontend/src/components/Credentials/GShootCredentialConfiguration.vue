@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
               The CredentialsBinding must reference the same Secret as the currently used SecretBinding.
             </p>
             <p>
-              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
+              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md#migration-steps">
                 More Information
               </g-external-link>
             </p>
@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0
               There are no available CredentialsBindings to migrate to. Please create a CredentialsBinding that references the same Secret as the currently used SecretBinding before you can migrate.
             </p>
             <p>
-              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
+              <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md#step-1-create-a-credentialsbinding-for-a-secretbinding">
                 More Information
               </g-external-link>
             </p>
@@ -143,6 +143,6 @@ function credentialFilterFn (credential) {
     return true
   }
   // shootCloudProviderBinding is a secret binding in migration mode
-  return shootCloudProviderBinding.value.secretRef.name === credential.credentialsRef.name
+  return shootCloudProviderBinding.value.secretRef.name === credential.credentialsRef.name && credential.credentialsRef.kind === 'Secret'
 }
 </script>

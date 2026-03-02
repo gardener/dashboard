@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
               <div class="d-flex align-center">
                 <div class="d-flex flex-column">
                   <v-chip
-                    v-tooltip:top="`Used by ${secretUsageCount} cluster${secretUsageCount === 1 ? '' : 's'}`"
+                    v-tooltip:top="'Deprecated SecretBinding that needs to be migrated'"
                     tile
                     color="primary"
                     class="my-1"
@@ -101,14 +101,14 @@ SPDX-License-Identifier: Apache-2.0
               variant="tonal"
             >
               <p>
-                The Secret referenced by this deprecated SecretBinding <code>{{ secretName }}</code> has been migrated and is referenced by the following CredentialsBindings:
+                Step 1 complete: The following CredentialsBindings reference the same Secret as this deprecated SecretBinding <code>{{ secretName }}</code>:
               </p>
               <v-chip
                 v-for="bindingName in credentialsBindingNamesForSecretBinding"
                 :key="bindingName"
                 class="mr-2"
                 size="small"
-                prepend-icon="mdi-key"
+                prepend-icon="mdi-key-outline"
               >
                 {{ bindingName }}
               </v-chip>
@@ -133,10 +133,17 @@ SPDX-License-Identifier: Apache-2.0
                 {{ name }}
               </v-chip>
               <p class="mt-2">
-                Please change these clusters to use a CredentialsBinding instead.
+                Step 2 required: Change these clusters to use a CredentialsBinding.
               </p>
               <p>
-                You can do this on the cluster details page using the migration button on the infrastructure card.
+                Follow
+                the
+                <g-external-link
+                  url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md#step-2-migrate-clusters"
+                >
+                  Migrate Clusters
+                </g-external-link>
+                steps in the documentation.
               </p>
             </v-alert>
           </div>
@@ -197,16 +204,15 @@ import { useCredentialsBindingContext } from '@/composables/credential/useCreden
 import { errorDetailsFromError } from '@/utils/error' // adjust path
 
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true,
-  },
   binding: {
     type: Object,
   },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const visible = defineModel({
+  type: Boolean,
+  required: true,
+})
 
 const logger = inject('logger')
 
@@ -216,7 +222,6 @@ const {
   resourceName: secretBindingName,
   credentialName: secretName,
   credentialNamespace: secretNamespace,
-  credentialUsageCount: secretUsageCount,
   providerType: secretProviderType,
   credentialsBindingNamesForSecretBinding,
   credentialUsageCount,
@@ -243,11 +248,6 @@ const detailedErrorMessage = ref()
 
 const createStep = computed(() => {
   return credentialsBindingNamesForSecretBinding.value.length === 0
-})
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value),
 })
 
 const title = computed(() => {
