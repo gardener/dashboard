@@ -32,18 +32,24 @@ SPDX-License-Identifier: Apache-2.0
           :model-value="bindingsWithSameCredential?.length > 0"
           type="info"
           rounded="0"
-          class="mb-2 list-style"
+          class="mb-2"
         >
-          This secret is also referenced by
-          <ul>
-            <li
-              v-for="referencedBinding in bindingsWithSameCredential"
-              :key="referencedBinding.metadata.uid"
-            >
-              <pre>{{ referencedBinding.metadata.name }} ({{ (referencedBinding.kind) }})</pre>
-            </li>
-          </ul>
-          Deleting this {{ resourceKind }} will not delete the referenced secret.
+          <p>
+            This secret is also referenced by
+          </p>
+          <v-chip
+            v-for="{ kind, metadata: { uid, name }} in bindingsWithSameCredential"
+            :key="uid"
+            v-tooltip:top="kind"
+            class="mr-2"
+            size="small"
+            :prepend-icon="kind === 'SecretBinding' ? 'mdi-key' : 'mdi-key-outline'"
+          >
+            {{ name }}
+          </v-chip>
+          <p class="mt-2">
+            Deleting this {{ resourceKind }} will not delete the referenced secret.
+          </p>
         </v-alert>
       </div>
       <v-divider />
@@ -196,14 +202,5 @@ export default {
   .credential_title {
     font-size: 30px;
     font-weight: 400;
-  }
-
-  .list-style {
-    ul {
-      margin-left: 10px;
-    }
-    li {
-      margin-left: 10px;
-    }
   }
 </style>

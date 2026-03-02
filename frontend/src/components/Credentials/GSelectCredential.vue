@@ -124,9 +124,8 @@ export default {
     registerVuelidateAs: {
       type: String,
     },
-    notAllowedSecretNames: {
-      type: Array,
-      default: () => [],
+    filterFn: {
+      type: Function,
     },
     label: {
       type: String,
@@ -217,11 +216,10 @@ export default {
       },
     },
     allowedCredentials () {
-      return this.cloudProviderEntityList
-        ?.filter(credentialEntity => {
-          const name = credentialEntity.secretRef?.name || credentialEntity.cedentialsRef?.name || credentialEntity.metadata?.name
-          return !this.notAllowedSecretNames.includes(name)
-        })
+      if (!this.filterFn) {
+        return this.cloudProviderEntityList
+      }
+      return this.cloudProviderEntityList.filter(this.filterFn)
     },
     credentialHint () {
       if (this.selfTerminationDays) {

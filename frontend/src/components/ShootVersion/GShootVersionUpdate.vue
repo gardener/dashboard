@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div>
     <v-select
       v-model="v$.selectedItem.$model"
-      v-messages-color="{ color: hintColor }"
+      v-messages-color="{ color: 'warning' }"
       :items="visibleItems"
       color="primary"
       class="mb-2"
@@ -41,6 +41,20 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-alert
+      v-if="needsMigration"
+      type="warning"
+      variant="tonal"
+    >
+      <p>
+        This cluster uses a SecretBinding. You need to migrate to a CredentialsBinding before upgrading to Kubernetes version 1.34.
+      </p>
+      <p>
+        <g-external-link url="https://github.com/gardener/dashboard/blob/master/docs/usage/migrate-secret-bindings.md">
+          More Information
+        </g-external-link>
+      </p>
+    </v-alert>
+    <v-alert
       v-if="shootKubernetesVersionObject.isExpirationWarning && !selectedItem"
       type="warning"
       variant="tonal"
@@ -52,6 +66,13 @@ SPDX-License-Identifier: Apache-2.0
         date-tooltip
       />.
       Kubernetes update will be enforced after that date.
+    </v-alert>
+    <v-alert
+      v-if="hasMoreSupportedVersions"
+      type="info"
+      variant="tonal"
+    >
+      Newer versions are available than those currently shown. However, cluster upgrades must be performed one minor version at a time.
     </v-alert>
   </div>
 </template>
@@ -65,9 +86,14 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import semver from 'semver'
 
+import GExternalLink from '@/components/GExternalLink.vue'
+
 import { useShootItem } from '@/composables/useShootItem'
 
-import { withFieldName } from '@/utils/validators'
+import {
+  withFieldName,
+  withMessage,
+} from '@/utils/validators'
 import { getErrorMessages } from '@/utils'
 
 import map from 'lodash/map'
@@ -79,6 +105,9 @@ import join from 'lodash/join'
 import filter from 'lodash/filter'
 
 export default {
+  components: {
+    GExternalLink,
+  },
   props: {
     modelValue: {
       type: Object,
@@ -92,6 +121,9 @@ export default {
     const {
       shootKubernetesVersionObject,
       shootAvailableK8sUpdates,
+      shootSecretBindingName,
+      shootName,
+      shootNamespace,
     } = useShootItem()
 
     const snackbar = ref(false)
@@ -107,6 +139,9 @@ export default {
     const rules = {
       selectedItem: withFieldName('Kubernetes Version', {
         required,
+        noSecretBindingForSelectedVersion: withMessage('The selected version requires changes to your cluster before you can upgrade', function () {
+          return !this.needsMigration
+        }),
       }),
     }
 
@@ -114,6 +149,9 @@ export default {
       v$: useVuelidate(rules, { selectedItem }),
       shootKubernetesVersionObject,
       shootAvailableK8sUpdates,
+      shootSecretBindingName,
+      shootName,
+      shootNamespace,
       snackbar,
       selectedItem,
     }
@@ -216,21 +254,19 @@ export default {
         return 'Selected version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
       if (this.selectedItem?.isDeprecated) {
-        return `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
-      }
-      if (this.hasMoreSupportedVersions) {
-        return 'There are newer minor versions available. However you can only upgrade your cluster one minor version at a time'
+        return this.selectedItem.expirationDate
+          ? `Selected version is deprecated. It will expire on ${this.selectedItem.expirationDateString}`
+          : 'Selected version is deprecated'
       }
       return undefined
     },
-    hintColor () {
-      if (this.selectedItem?.isPreview || this.selectedItem?.isDeprecated) {
-        return 'warning'
+    needsMigration () {
+      const selectedVersion = this.selectedItem?.version
+      if (!selectedVersion) {
+        return false
       }
-      if (this.hasMoreSupportedVersions) {
-        return 'info'
-      }
-      return undefined
+      const selectedMinorVersion = semver.minor(selectedVersion)
+      return Boolean(this.shootSecretBindingName) && selectedMinorVersion >= 34
     },
   },
   methods: {

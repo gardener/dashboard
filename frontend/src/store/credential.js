@@ -149,8 +149,8 @@ export const useCredentialStore = defineStore('credential', () => {
 
   const infrastructureBindingList = computed(() => {
     return [
-      ...secretBindingList.value,
       ...credentialsBindingList.value,
+      ...secretBindingList.value,
     ].filter(binding => isInfrastructureBinding({ binding, infraProviderTypes: sortedProviderTypeList.value }))
   })
 
@@ -197,8 +197,10 @@ export const useCredentialStore = defineStore('credential', () => {
       set(state.credentialsBindings, [bindingKey], binding)
     }
 
-    const secretKey = namespaceNameKey(secret.metadata)
-    set(state.secrets, [secretKey], secret)
+    if (secret) {
+      const secretKey = namespaceNameKey(secret.metadata)
+      set(state.secrets, [secretKey], secret)
+    }
   }
 
   return {

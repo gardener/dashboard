@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-credential
           v-model="dnsServiceExtensionProviderSecret"
           :provider-type="dnsProviderType"
-          :not-allowed-secret-names="usedSecretNames"
+          :filter-fn="credential => !usedSecretNames.includes(credential.metadata.name)"
           register-vuelidate-as="dnsServiceExtensionProviderSecret"
         />
       </div>

@@ -45,7 +45,6 @@ import { useCloudProviderCredential } from '@/composables/credential/useCloudPro
 
 const props = defineProps({
   credential: Object,
-  binding: Object,
 })
 const credential = toRef(props, 'credential')
 

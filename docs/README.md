@@ -13,6 +13,7 @@
 * [Terminal Shortcuts](usage/terminal-shortcuts.md)
 * [Connect kubectl](usage/connect-kubectl.md)
 * [Custom Shoot Fields](usage/custom-fields.md)
+* [Migrate SecretBindings for Kubernetes version > 1.34](usage/migrate-secret-bindings.md)
 
 ## Operations
 

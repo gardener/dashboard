@@ -162,7 +162,7 @@ router.route('/:name/spec/addons')
     }
   })
 
-router.route('/:name/spec/controlPlane/highAvailability')
+router.route('/:name/spec/controlPlane/high-availability')
   .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
@@ -231,7 +231,7 @@ router.route('/:name/spec/purpose')
     }
   })
 
-router.route('/:name/spec/seedName')
+router.route('/:name/spec/seed-name')
   .all(metricsMiddleware)
   .put(async (req, res, next) => {
     try {
@@ -245,7 +245,21 @@ router.route('/:name/spec/seedName')
     }
   })
 
-router.route('/:name/adminkubeconfig')
+router.route('/:name/spec/credentials-binding-name')
+  .all(metricsMiddleware)
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.patchCredentialsBindingName({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
+router.route('/:name/admin-kubeconfig')
   .all(metricsMiddleware)
   .post(async (req, res, next) => {
     try {

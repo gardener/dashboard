@@ -7,6 +7,21 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex justify-end">
     <g-action-button
+      v-if="canPatchCredentials && isSecretBinding && credentialUsageCount > 0"
+      icon="mdi-key-change"
+      :disabled="isSharedBinding || isMarkedForDeletion"
+      @click="onMigrateSecretBinding"
+    >
+      <template #tooltip>
+        <p class="font-weight-bold">
+          SecretBindings are deprecated and unsupported in Kubernetes 1.34 or later
+        </p>
+        <p>
+          Click to review the migration steps and create a CredentialsBinding to replace this deprecated SecretBinding
+        </p>
+      </template>
+    </g-action-button>
+    <g-action-button
       v-if="canPatchCredentials"
       icon="mdi-pencil"
       :disabled="isSharedBinding || hasOwnWorkloadIdentity"
@@ -46,12 +61,11 @@ import GActionButton from '@/components/GActionButton.vue'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 
 const props = defineProps({
-  credential: Object,
   binding: Object,
 })
 const binding = toRef(props, 'binding')
 
-const emit = defineEmits(['update', 'delete'])
+const emit = defineEmits(['update', 'delete', 'migrateSecretBinding'])
 
 const authzStore = useAuthzStore()
 const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
@@ -61,6 +75,7 @@ const {
   credentialUsageCount,
   isMarkedForDeletion,
   isSharedBinding,
+  isSecretBinding,
 } = useCloudProviderBinding(binding)
 
 function onUpdate () {
@@ -69,6 +84,10 @@ function onUpdate () {
 
 function onDelete () {
   emit('delete', binding.value)
+}
+
+function onMigrateSecretBinding () {
+  emit('migrateSecretBinding', binding.value)
 }
 
 </script>

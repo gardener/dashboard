@@ -32,7 +32,6 @@ const shootList = [
     project: 'foo',
     createdBy: 'bar@example.org',
     purpose: 'barPurpose',
-    secretBindingName: 'foo-infra1',
   }),
   getShoot({
     uid: 3,
@@ -69,7 +68,8 @@ function getShoot ({
     kind: 'CloudProfile',
   },
   region = 'foo-west',
-  secretBindingName = 'foo-secret',
+  secretBindingName,
+  credentialsBindingName = 'foo-credentials',
   seed = 'infra1-seed',
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0',
@@ -84,7 +84,6 @@ function getShoot ({
       annotations: {},
     },
     spec: {
-      secretBindingName,
       cloudProfile: cloudProfileRef,
       region,
       hibernation,
@@ -98,6 +97,12 @@ function getShoot ({
       purpose,
     },
     status: {},
+  }
+  if (secretBindingName) {
+    shoot.spec.secretBindingName = secretBindingName
+  }
+  if (credentialsBindingName) {
+    shoot.spec.credentialsBindingName = credentialsBindingName
   }
   if (createdBy) {
     shoot.metadata.annotations['gardener.cloud/created-by'] = createdBy
