@@ -418,10 +418,47 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patchBinding())
 
       const res = await agent
-        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/seedname`)
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/seed-name`)
         .set('cookie', await user.cookie)
         .send({
           seedName: 'foo-new-seed',
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should replace shoot credentials binding', async function () {
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/credentials-binding-name`)
+        .set('cookie', await user.cookie)
+        .send({
+          credentialsBindingName: 'foo-new-credentials-binding',
+        })
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls).toMatchSnapshot()
+
+      expect(res.body).toMatchSnapshot()
+    })
+
+    it('should migrate shoot secret binding', async function () {
+      const name = 'fooShoot' // has secretBindingName but no credentialsBindingName
+      mockRequest.mockImplementationOnce(fixtures.shoots.mocks.patch())
+
+      const res = await agent
+        .put(`/api/namespaces/${namespace}/shoots/${name}/spec/credentials-binding-name`)
+        .set('cookie', await user.cookie)
+        .send({
+          credentialsBindingName: 'foo-new-credentials-binding',
         })
         .expect('content-type', /json/)
         .expect(200)
@@ -459,7 +496,7 @@ describe('api', function () {
       mockRequest.mockImplementationOnce(fixtures.shoots.mocks.createAdminKubeconfigRequest())
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/shoots/${name}/adminkubeconfig`)
+        .post(`/api/namespaces/${namespace}/shoots/${name}/admin-kubeconfig`)
         .set('cookie', await user.cookie)
         .send({
           expirationSeconds: 600,

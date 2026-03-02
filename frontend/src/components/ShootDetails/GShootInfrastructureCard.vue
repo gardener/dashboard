@@ -41,6 +41,19 @@ SPDX-License-Identifier: Apache-2.0
             render-link
           />
         </g-list-item-content>
+        <template
+          v-if="canPatchShootsBinding"
+          #append
+        >
+          <g-credential-configuration
+            v-if="shootSecretBindingName"
+            migration-mode
+          />
+          <g-credential-configuration
+            :disabled="!!shootSecretBindingName"
+            :tooltip="!!shootSecretBindingName ? 'Credential migration to a CredentialsBinding is required' : undefined"
+          />
+        </template>
       </g-list-item>
       <g-list-item v-if="hasShootWorkerGroups">
         <g-credential-details-item-content
@@ -265,6 +278,7 @@ import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
 import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
+import GCredentialConfiguration from '@/components/Credentials/GShootCredentialConfiguration'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
@@ -292,6 +306,7 @@ export default {
     GControlPlaneHighAvailabilityConfiguration,
     GControlPlaneHighAvailabilityTag,
     GCredentialDetailsItemContent,
+    GCredentialConfiguration,
   },
   setup () {
     const {
@@ -314,6 +329,7 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
+      shootSecretBindingName,
     } = useShootItem()
 
     const { getResourceRefName } = useShootResources(shootItem)
@@ -348,6 +364,7 @@ export default {
       credential,
       isSharedBinding,
       openStackDomainName,
+      shootSecretBindingName,
     }
   },
   computed: {

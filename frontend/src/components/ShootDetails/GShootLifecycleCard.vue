@@ -28,7 +28,6 @@ SPDX-License-Identifier: Apache-2.0
         </g-list-item-content>
         <template #append>
           <g-shoot-action-change-hibernation
-            v-model="changeHibernationDialog"
             dialog
             button
           />
@@ -86,7 +85,6 @@ SPDX-License-Identifier: Apache-2.0
         </g-list-item-content>
         <template #append>
           <g-shoot-action-maintenance-start
-            v-model="maintenanceStartDialog"
             dialog
             button
           />
@@ -107,9 +105,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </g-list-item-content>
         <template #append>
-          <g-shoot-action-reconcile-start
-            v-model="reconcileStartDialog"
-          />
+          <g-shoot-action-reconcile-start />
         </template>
       </g-list-item>
       <template v-if="canPatchShoots">
@@ -140,14 +136,8 @@ SPDX-License-Identifier: Apache-2.0
             </template>
           </g-list-item-content>
           <template #append>
-            <g-shoot-action-delete-cluster
-              v-if="!canForceDeleteShoot"
-              v-model="deleteClusterDialog"
-            />
-            <g-shoot-action-force-delete
-              v-else
-              v-model="forceDeleteDialog"
-            />
+            <g-shoot-action-delete-cluster v-if="!canForceDeleteShoot" />
+            <g-shoot-action-force-delete v-else />
           </template>
         </g-list-item>
       </template>
@@ -200,11 +190,6 @@ const {
 } = useShootItem()
 
 const hibernationConfiguration = ref(null)
-const changeHibernationDialog = ref(false)
-const maintenanceStartDialog = ref(false)
-const reconcileStartDialog = ref(false)
-const deleteClusterDialog = ref(false)
-const forceDeleteDialog = ref(false)
 
 const hibernationDescription = computed(() => {
   if (isShootStatusHibernationProgressing.value) {

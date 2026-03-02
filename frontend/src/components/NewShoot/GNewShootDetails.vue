@@ -89,6 +89,7 @@ import {
   required,
   maxLength,
 } from '@vuelidate/validators'
+import semver from 'semver'
 
 import { useConfigStore } from '@/store/config'
 import { useShootStore } from '@/store/shoot'
@@ -96,6 +97,7 @@ import { useShootStore } from '@/store/shoot'
 import GMultiMessage from '@/components/GMultiMessage'
 
 import { useShootContext } from '@/composables/useShootContext'
+import { isSecretBinding } from '@/composables/credential/helper'
 
 import {
   withFieldName,
@@ -130,6 +132,7 @@ export default {
       maintenanceAutoUpdateKubernetesVersion,
       sortedKubernetesVersions,
       kubernetesVersionIsNotLatestPatch,
+      infrastructureBinding,
       allPurposes,
     } = useShootContext()
 
@@ -144,6 +147,7 @@ export default {
       maintenanceAutoUpdateKubernetesVersion,
       sortedKubernetesVersions,
       kubernetesVersionIsNotLatestPatch,
+      infrastructureBinding,
       allPurposes,
     }
   },
@@ -167,6 +171,16 @@ export default {
 
     const kubernetesVersionRules = {
       required,
+      noSecretBindingForSelectedVersion: withMessage('The selected version requires a CredentialsBinding. You can migrate your SecretBinding to a CredentialsBinding on the Credentials page', function (version) {
+        if (!version || !semver.valid(version)) {
+          return true
+        }
+        const currentMinorVersion = semver.minor(version)
+        const usesSecretBinding = isSecretBinding(this.infrastructureBinding)
+        const requiresCredentialsBinding = currentMinorVersion >= 34
+        const noSecretBindingForSelectedVersion = !this.workerless && usesSecretBinding && requiresCredentialsBinding
+        return !noSecretBindingForSelectedVersion
+      }),
     }
     rules.kubernetesVersion = withFieldName('Kubernetes Version', kubernetesVersionRules)
 
@@ -230,6 +244,7 @@ export default {
   },
   mounted () {
     setDelayedInputFocus(this, 'name')
+    this.v$.kubernetesVersion.$touch() // show version related errors immediately
   },
   methods: {
     ...mapActions(useShootStore, [

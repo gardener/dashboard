@@ -18,9 +18,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <g-shoot-version-update
-          v-model="selectedItem"
-        />
+        <g-shoot-version-update v-model="selectedItem" />
         <template v-if="!v$.$invalid && selectedVersionType === 'minor'">
           <div class="my-2">
             You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!

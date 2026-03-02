@@ -99,6 +99,7 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
       "kind": "CloudProfile",
       "name": "gcp",
     },
+    "credentialsBindingName": "gcp-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -167,7 +168,6 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
@@ -296,6 +296,7 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
       "kind": "CloudProfile",
       "name": "alicloud",
     },
+    "credentialsBindingName": "alicloud-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -371,7 +372,6 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
     },
     "purpose": "evaluation",
     "region": "eu-central-1",
-    "secretBindingName": "alicloud-secretbinding",
   },
 }
 `;
@@ -397,6 +397,7 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
       "kind": "CloudProfile",
       "name": "aws",
     },
+    "credentialsBindingName": "aws-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -474,7 +475,6 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
     },
     "purpose": "evaluation",
     "region": "eu-central-1",
-    "secretBindingName": "aws-secretbinding",
   },
 }
 `;
@@ -500,6 +500,7 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
       "kind": "CloudProfile",
       "name": "az",
     },
+    "credentialsBindingName": "azure-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -571,7 +572,6 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
     },
     "purpose": "evaluation",
     "region": "westeurope",
-    "secretBindingName": "azure-secretbinding",
   },
 }
 `;
@@ -597,6 +597,7 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
       "kind": "CloudProfile",
       "name": "gcp",
     },
+    "credentialsBindingName": "gcp-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -665,7 +666,6 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
     },
     "purpose": "evaluation",
     "region": "europe-west1",
-    "secretBindingName": "gcp-secretbinding",
   },
 }
 `;
@@ -691,6 +691,7 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
       "kind": "CloudProfile",
       "name": "ironcore",
     },
+    "credentialsBindingName": "ironcore-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -747,7 +748,6 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
     },
     "purpose": "evaluation",
     "region": "de-fra",
-    "secretBindingName": "ironcore-secretbinding",
   },
 }
 `;
@@ -773,6 +773,7 @@ exports[`composables > useShootContext > should create a default "openstack" sho
       "kind": "CloudProfile",
       "name": "openstack-1",
     },
+    "credentialsBindingName": "openstack-credentialsbinding",
     "hibernation": {
       "schedules": [
         {
@@ -838,7 +839,6 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     },
     "purpose": "evaluation",
     "region": "eu-de-1",
-    "secretBindingName": "openstack-secretbinding",
   },
 }
 `;

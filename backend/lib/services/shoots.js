@@ -176,6 +176,19 @@ export async function replaceSeedName ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, [name, 'binding'], patchOperations)
 }
 
+export async function patchCredentialsBindingName ({ user, namespace, name, body }) {
+  const client = user.client
+  const credentialsBindingName = body.credentialsBindingName
+  const payload = {
+    spec: {
+      credentialsBindingName,
+      secretBindingName: null, // for migration purpose
+    },
+  }
+
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
 export async function createAdminKubeconfig ({ user, namespace, name, body }) {
   const client = user.client
   const { apiVersion, kind } = Resources.AdminKubeconfigRequest

@@ -84,7 +84,7 @@ export async function createDns ({ user, params }) {
 export async function createInfra ({ user, params }) {
   const client = user.client
   let { secret, binding } = params
-  const secretNamespace = secret.metadata.namespace
+  const secretNamespace = secret?.metadata.namespace
 
   const bindingNamespace = binding.metadata.namespace
   const kind = binding.kind
@@ -101,18 +101,22 @@ export async function createInfra ({ user, params }) {
   }
 
   if (bindingNamespace !== secretRefNamespace ||
-    secretRefNamespace !== secretNamespace) {
-    throw createError(422, 'Create allowed if secret and credentialsbinding are in the same namespace')
+      (secret && secretNamespace !== secretRefNamespace)) {
+    throw createError(422, 'Create only allowed if secret and credentialsbinding are in the same namespace')
   }
 
-  secret = await client.core.secrets.create(secretNamespace, secret)
+  if (secret) {
+    // When creating credentialsbinding as replacement for deprecated secretbinding, the secret already exists
+    secret = await client.core.secrets.create(secretNamespace, secret)
+  }
 
   try {
     binding = await client['security.gardener.cloud'].credentialsbindings.create(bindingNamespace, binding)
   } catch (err) {
-    logger.error('failed to create CredentialsBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
-    await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
-
+    if (secret) {
+      logger.error('failed to create CredentialsBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
+      await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
+    }
     throw err
   }
 
