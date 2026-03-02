@@ -123,11 +123,13 @@ SPDX-License-Identifier: Apache-2.0
                 The SecretBinding is currently used by {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }}:
               </p>
               <v-chip
-                v-for="{ metadata: { uid, name }} in shootsUsingThisCredential"
+                v-for="{ metadata: { uid, name, namespace }} in shootsUsingThisCredential"
                 :key="uid"
+                v-tooltip:top="'Open Cluster Details'"
                 class="mr-2"
                 size="small"
                 prepend-icon="mdi-hexagon-multiple"
+                :to="{ name: 'ShootItem', params: { name, namespace } }"
                 target="_blank"
               >
                 {{ name }}
