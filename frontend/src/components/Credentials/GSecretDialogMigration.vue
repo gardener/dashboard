@@ -94,24 +94,29 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <div
             v-else
-            class="list-style mt-3"
+            class="mt-3"
           >
             <v-alert
               type="success"
               variant="tonal"
             >
-              <p>
-                Step 1 complete: The following CredentialsBindings reference the same Secret as this deprecated SecretBinding <code>{{ secretName }}</code>:
+              <p class="font-weight-bold">
+                Step 1 complete:
               </p>
-              <v-chip
-                v-for="bindingName in credentialsBindingNamesForSecretBinding"
-                :key="bindingName"
-                class="mr-2"
-                size="small"
-                prepend-icon="mdi-key-outline"
-              >
-                {{ bindingName }}
-              </v-chip>
+              <p>
+                The following CredentialsBindings reference the same Secret as this deprecated SecretBinding <code>{{ secretName }}</code>
+              </p>
+              <p class="mt-2">
+                <v-chip
+                  v-for="bindingName in credentialsBindingNamesForSecretBinding"
+                  :key="bindingName"
+                  class="mr-2"
+                  size="small"
+                  prepend-icon="mdi-key-outline"
+                >
+                  {{ bindingName }}
+                </v-chip>
+              </p>
             </v-alert>
             <v-alert
               v-if="credentialUsageCount > 0"
@@ -119,25 +124,27 @@ SPDX-License-Identifier: Apache-2.0
               variant="tonal"
               class="mt-3"
             >
-              <p>
-                The SecretBinding is currently used by {{ credentialUsageCount }} cluster{{ credentialUsageCount === 1 ? '' : 's' }}:
+              <p class="font-weight-bold">
+                Step 2 required:
               </p>
-              <v-chip
-                v-for="{ metadata: { uid, name, namespace }} in shootsUsingThisCredential"
-                :key="uid"
-                v-tooltip:top="'Open Cluster Details'"
-                class="mr-2"
-                size="small"
-                prepend-icon="mdi-hexagon-multiple"
-                :to="{ name: 'ShootItem', params: { name, namespace } }"
-                target="_blank"
-              >
-                {{ name }}
-              </v-chip>
+              <p>
+                Change the following clusters to use a CredentialsBinding:
+              </p>
               <p class="mt-2">
-                Step 2 required: Change these clusters to use a CredentialsBinding.
+                <v-chip
+                  v-for="{ metadata: { uid, name, namespace }} in shootsUsingThisCredential"
+                  :key="uid"
+                  v-tooltip:top="'Open Cluster Details'"
+                  class="mr-2"
+                  size="small"
+                  prepend-icon="mdi-hexagon-multiple"
+                  :to="{ name: 'ShootItem', params: { name, namespace } }"
+                  target="_blank"
+                >
+                  {{ name }}
+                </v-chip>
               </p>
-              <p>
+              <p class="mt-2">
                 Follow
                 the
                 <g-external-link
