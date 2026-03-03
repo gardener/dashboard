@@ -54,6 +54,7 @@
     "http-errors": "^2.0.0",
     "jose": "^5.2.3",
     "js-yaml": "^5.0.0",
+    "jsondiffpatch": "^0.7.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",

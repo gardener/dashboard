@@ -85,6 +85,7 @@ vi.mock('./lib/cache/index.js', async (importOriginal) => {
   const { cache } = originalCache
   const keys = [
     'cloudprofiles',
+    'namespacedcloudprofiles',
     'seeds',
     'quotas',
     'projects',

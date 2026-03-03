@@ -453,6 +453,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@dmsnell/diff-match-patch", [\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/@dmsnell-diff-match-patch-npm-1.1.0-021308d314-8547bf4a62.zip/node_modules/@dmsnell/diff-match-patch/",\
+        "packageDependencies": [\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@emnapi/core", [\
       ["npm:1.11.1", {\
         "packageLocation": "./.yarn/cache/@emnapi-core-npm-1.11.1-99a234b095-2c6defdac2.zip/node_modules/@emnapi/core/",\
@@ -955,6 +964,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["jose", "npm:5.10.0"],\
           ["js-yaml", "npm:5.2.3"],\
+          ["jsondiffpatch", "npm:0.7.6"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
           ["lodash-es", "npm:4.18.1"],\
@@ -8885,6 +8895,16 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/json5-npm-2.2.3-9962c55073-5a04eed948.zip/node_modules/json5/",\
         "packageDependencies": [\
           ["json5", "npm:2.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jsondiffpatch", [\
+      ["npm:0.7.6", {\
+        "packageLocation": "./.yarn/cache/jsondiffpatch-npm-0.7.6-61b4736c98-c82ea96bcc.zip/node_modules/jsondiffpatch/",\
+        "packageDependencies": [\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"],\
+          ["jsondiffpatch", "npm:0.7.6"]\
         ],\
         "linkType": "HARD"\
       }]\

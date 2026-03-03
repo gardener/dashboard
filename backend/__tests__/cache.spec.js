@@ -38,7 +38,7 @@ describe('cache', function () {
   it('should dispatch "getCloudProfiles" to internal cache', function () {
     const list = []
     const stub = vi.spyOn(internalCache, 'getCloudProfiles').mockReturnValue(list)
-    expect(cache.getCloudProfiles()).toBe(list)
+    expect(cache.getCloudProfiles()).toStrictEqual(list)
     expect(stub).toHaveBeenCalledTimes(1)
   })
 
