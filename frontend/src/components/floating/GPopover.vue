@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           :color="toolbarColor"
         >
           <template #title>
-            <span class="text-subtitle-1 pr-6">
+            <span class="text-body-large pr-6">
               <slot name="toolbar-title">
                 {{ toolbarTitle }}
               </slot>

@@ -100,7 +100,7 @@ describe('components', () => {
       const wrapper = mountLogin()
       await nextTick()
 
-      expect(wrapper.find('div.text-h5.text-primary').text()).toBe('Universal Kubernetes at Scale')
+      expect(wrapper.find('div.text-headline-small.text-primary').text()).toBe('Universal Kubernetes at Scale')
     })
 
     describe('#beforeRouteEnter', () => {

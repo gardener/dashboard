@@ -74,12 +74,12 @@ SPDX-License-Identifier: Apache-2.0
             align-self="center"
             class="grow mr-3"
           >
-            <div class="text-body-2">
+            <div class="text-body-medium">
               {{ message }}
             </div>
             <div
               v-if="hint"
-              class="text-caption"
+              class="text-body-small"
             >
               {{ hint }}
             </div>

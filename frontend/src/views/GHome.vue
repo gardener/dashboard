@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-container fluid>
     <v-card class="mt-2">
       <v-card-text>
-        <h3>Let's get started</h3>
+        <span class="text-display-medium">Let's get started</span>
         <div
           v-tooltip:top="{
             text: 'You are not authorized to create projects',

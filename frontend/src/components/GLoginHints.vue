@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-breadcrumbs
       :items="items"
       density="compact"
-      class="text-caption text-anchor"
+      class="text-body-small text-anchor"
       divider="&bull;"
     />
   </div>

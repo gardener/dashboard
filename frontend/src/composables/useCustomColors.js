@@ -10,7 +10,7 @@ import {
   toValue,
 } from 'vue'
 import { useTheme } from 'vuetify'
-import vuetifyColors from 'vuetify/lib/util/colors'
+import vuetifyColors from 'vuetify/util/colors'
 
 import { isHtmlColorCode } from '@/utils'
 

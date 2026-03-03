@@ -99,10 +99,10 @@ SPDX-License-Identifier: Apache-2.0
       </v-col>
     </v-row>
     <template v-if="hasDnsServiceExtension">
-      <div class="text-subtitle-1 my-3">
+      <div class="text-body-large my-3">
         DNS Providers for the shoot-dns-service Extension
       </div>
-      <div class="text-caption">
+      <div class="text-body-small">
         Configure DNS providers for the shoot-dns-service extension to automatically manage and synchronize DNS entries for cluster resources like services and ingresses
       </div>
       <div class="alternate-row-background">

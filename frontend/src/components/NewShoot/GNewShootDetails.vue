@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         <label>{{ slaTitle }}</label>
         <!-- eslint-disable vue/no-v-html -->
         <p
-          class="text-subtitle-1"
+          class="text-body-large"
           v-html="slaDescriptionHtml"
         />
       </v-col>

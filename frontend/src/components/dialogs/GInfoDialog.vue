@@ -25,9 +25,9 @@ SPDX-License-Identifier: Apache-2.0
             class="mr-3"
           >
           <div>
-            <h2 class="mb-1">
+            <span class="text-display-large mb-1">
               {{ branding.productName }} Dashboard
-            </h2>
+            </span>
           </div>
         </div>
         <v-divider class="my-3" />

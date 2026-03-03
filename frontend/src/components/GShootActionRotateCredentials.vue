@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <div class="text-h5 pb-3">
+        <div class="text-headline-small pb-3">
           {{ componentTexts.heading }}
         </div>
         <v-alert
