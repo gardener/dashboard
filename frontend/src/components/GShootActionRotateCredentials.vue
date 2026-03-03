@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="mode === 'START'"
           type="info"
           variant="tonal"
-          dense
+          density="comfortable"
         >
           Note: This rotation operation is split into two steps. This step will <strong>prepare</strong> the rotation.
         </v-alert>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="mode === 'COMPLETE'"
           type="info"
           variant="tonal"
-          dense
+          density="comfortable"
         >
           Note: This rotation operation is split into two steps. This step will <strong>complete</strong> the rotation.
         </v-alert>

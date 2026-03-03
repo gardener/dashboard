@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <v-window-item value="overview">
           <v-container class="pa-0">
-            <v-row dense>
+            <v-row density="comfortable">
               <v-col cols="6">
                 <v-card
                   class="border"
@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
                     </template>
                   </v-toolbar>
                   <v-card-text>
-                    <v-row dense>
+                    <v-row density="comfortable">
                       <v-col v-if="workerGroup.machine.architecture">
                         <legend class="text-body-small text-medium-emphasis">
                           Architecture
@@ -196,7 +196,7 @@ SPDX-License-Identifier: Apache-2.0
                     </template>
                   </v-toolbar>
                   <v-card-text>
-                    <v-row dense>
+                    <v-row density="comfortable">
                       <v-col>
                         <legend class="text-body-small text-medium-emphasis">
                           Name
@@ -278,7 +278,7 @@ SPDX-License-Identifier: Apache-2.0
                     </template>
                   </v-toolbar>
                   <v-card-text>
-                    <v-row dense>
+                    <v-row density="comfortable">
                       <v-col cols="6">
                         <legend class="text-body-small text-medium-emphasis">
                           Maximum
@@ -326,7 +326,7 @@ SPDX-License-Identifier: Apache-2.0
                     </template>
                   </v-toolbar>
                   <v-card-text>
-                    <v-row dense>
+                    <v-row density="comfortable">
                       <v-col>
                         <legend class="text-body-small text-medium-emphasis">
                           Name
