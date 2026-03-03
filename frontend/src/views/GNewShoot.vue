@@ -174,30 +174,28 @@ export default {
     GToolbar,
   },
   inject: ['api', 'logger'],
-  async beforeRouteLeave (to, from, next) {
+  async beforeRouteLeave (to) {
     if (!this.sortedInfraProviderTypeList.length) {
-      return next()
+      return true
     }
 
     if (to.name === 'NewShootEditor') {
       if (this.v$.$invalid && !await this.confirmNavigateToYamlIfInvalid()) {
-        return next(false)
+        return false
       }
-      return next()
+      return true
     }
 
     if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
-      return next(false)
+      return false
     }
-
-    return next()
   },
-  async beforeRouteUpdate (to, from, next) {
+  async beforeRouteUpdate () {
     if (!this.isShootCreated && this.isShootDirty && !await this.confirmNavigation()) {
-      return next(false)
+      return false
     }
 
-    return next()
+    return true
   },
   setup () {
     const {
