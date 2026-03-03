@@ -77,11 +77,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item
             v-if="!isAutoSelectNodeItem(item)"
             v-bind="props"
-            :title="item.raw.data?.kubernetesHostname"
+            :title="item.data?.kubernetesHostname"
           >
             <v-list-item-subtitle>
-              Ready: {{ item.raw.data.readyStatus }} | Version: {{ item.raw.data.version }} | Created: <g-time-string
-                :date-time="item.raw.metadata.creationTimestamp"
+              Ready: {{ item.data.readyStatus }} | Version: {{ item.data.version }} | Created: <g-time-string
+                :date-time="item.metadata.creationTimestamp"
                 mode="past"
               />
             </v-list-item-subtitle>
@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
             class="ml-2"
           >
             <template v-if="!isAutoSelectNodeItem(item)">
-              {{ item.raw.data?.kubernetesHostname }} [{{ item.raw.data?.version }}]
+              {{ item.data?.kubernetesHostname }} [{{ item.data?.version }}]
             </template>
             <template v-else>Auto select node</template>
           </span>
@@ -172,7 +172,7 @@ export default {
   },
   methods: {
     isAutoSelectNodeItem (item) {
-      return this.isAutoSelectNode(item.raw.data?.kubernetesHostname)
+      return this.isAutoSelectNode(item.data?.kubernetesHostname)
     },
     isAutoSelectNode (hostname) {
       return hostname === '<AUTO-SELECT>'

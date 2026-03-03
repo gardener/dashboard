@@ -39,8 +39,8 @@ SPDX-License-Identifier: Apache-2.0
         >
           <template #item="{ item, props }">
             <!-- Divider / header in items not implemented yet in Vuetify 3: https://github.com/vuetifyjs/vuetify/issues/15721 -->
-            <v-list-subheader v-if="!!item.raw.header">
-              {{ item.raw.header }}
+            <v-list-subheader v-if="!!item.header">
+              {{ item.header }}
             </v-list-subheader>
             <v-list-item
               v-else
