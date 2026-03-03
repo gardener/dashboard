@@ -57,13 +57,6 @@ export default {
     GShootItemLoading,
     GShootItemError,
   },
-  beforeRouteEnter (to, from, next) {
-    next(async vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        await vm.load(to)
-      }
-    })
-  },
   setup () {
     const route = useRoute()
     const authnStore = useAuthnStore()

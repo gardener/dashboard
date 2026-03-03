@@ -147,19 +147,15 @@ function confirmOverwrite () {
   })
 }
 
-onBeforeRouteLeave(async (to, from, next) => {
+onBeforeRouteLeave(async () => {
   if (clean.value) {
-    return next()
+    return true
   }
-  try {
-    if (await confirmEditorNavigation()) {
-      next()
-    } else {
-      focusEditor()
-      next(false)
-    }
-  } catch (err) {
-    next(err)
+  if (await confirmEditorNavigation()) {
+    return true
+  } else {
+    focusEditor()
+    return false
   }
 })
 </script>

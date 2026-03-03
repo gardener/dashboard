@@ -123,35 +123,35 @@ async function save () {
   }
 }
 
-onBeforeRouteLeave(async (to, from, next) => {
+onBeforeRouteLeave(async to => {
   if (to.name === 'NewShoot') {
     try {
       setShootManifest(getEditorValue())
-      return next()
+      return true
     } catch (err) {
       errorMessage.value = err.message
-      return next(false)
+      return false
     }
   }
   if (isShootCreated.value) {
-    return next()
+    return true
   }
   if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
-      return next(false)
+      return false
     }
   }
-  return next()
+  return true
 })
 
-onBeforeRouteUpdate(async (to, from, next) => {
+onBeforeRouteUpdate(async () => {
   if (!clean.value || isShootDirty.value) {
     if (!await confirmEditorNavigation()) {
       focusEditor()
-      return next(false)
+      return false
     }
   }
-  return next()
+  return true
 })
 </script>
