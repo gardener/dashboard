@@ -319,15 +319,6 @@ export function routes (router, includeRoutesWithProjectScope) {
   return menuRoutes
 }
 
-export function namespacedRoute (route, namespace) {
-  return {
-    name: routeName(route),
-    params: {
-      namespace,
-    },
-  }
-}
-
 export function routeName (route) {
   if (route.name) {
     return route.name

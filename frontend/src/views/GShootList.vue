@@ -56,70 +56,13 @@ SPDX-License-Identifier: Apache-2.0
               new clusters were added to the list since you enabled focus mode.
             </template>
           </v-tooltip>
-          <v-tooltip
+          <g-table-search
             v-if="shootSearch || items.length > 3"
-            location="top"
-          >
-            <template #activator="{ props }">
-              <v-text-field
-                v-bind="props"
-                :model-value="shootSearch"
-                prepend-inner-icon="mdi-magnify"
-                color="primary"
-                label="Search"
-                single-line
-                hide-details
-                variant="solo"
-                flat
-                clearable
-                clear-icon="mdi-close"
-                density="compact"
-                class="g-table-search-field mr-3"
-                @update:model-value="onUpdateShootSearch"
-                @keyup.esc="setShootSearch(null)"
-              />
-            </template>
-            Search terms are <span class="font-weight-bold">ANDed</span>.<br>
-            <span class="font-weight-bold">Use quotes</span> for exact words or phrases:
-            <v-chip
-              label
-              color="primary"
-              variant="flat"
-              size="small"
-              class="mr-1"
-            >
-              "my-shoot"
-            </v-chip>
-            <v-chip
-              label
-              color="primary"
-              variant="flat"
-              size="small"
-            >
-              "John Doe"
-            </v-chip>
-            <br>
-            <span class="font-weight-bold">Use minus sign</span>
-            to exclude words that you don't want:
-            <v-chip
-              label
-              color="primary"
-              variant="flat"
-              size="small"
-              class="mr-1"
-            >
-              -myproject
-            </v-chip>
-            <v-chip
-              label
-              color="primary"
-              variant="flat"
-              size="small"
-            >
-              -"Jane Doe"
-            </v-chip>
-            <br>
-          </v-tooltip>
+            :model-value="shootSearch"
+            :examples="['my-shoot', 'John Doe']"
+            :exclude-examples="['myproject', 'Jane Doe']"
+            @update:model-value="onUpdateShootSearch"
+          />
           <v-btn
             v-if="canCreateShoots && projectScope"
             v-tooltip:top="'Create Cluster'"
@@ -185,14 +128,12 @@ import {
   reactive,
   provide,
   toRef,
-  watch,
 } from 'vue'
 import {
   mapState,
   mapWritableState,
   mapActions,
 } from 'pinia'
-import { useUrlSearchParams } from '@vueuse/core'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -208,10 +149,12 @@ import GShootListProgress from '@/components/GShootListProgress.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
+import GTableSearch from '@/components/GTableSearch.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
+import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
 
 import { mapTableHeader } from '@/utils'
 
@@ -234,6 +177,7 @@ export default {
     GTableColumnSelection,
     GDataTableFooter,
     GShootListActions,
+    GTableSearch,
   },
   inject: ['logger'],
   beforeRouteEnter (to, from, next) {
@@ -243,7 +187,7 @@ export default {
   },
   beforeRouteUpdate (to, from, next) {
     if (to.path !== from.path) {
-      this.setShootSearch(null)
+      this.setShootSearch('')
     }
     this.updateTableSettings()
     this.focusModeInternal = false
@@ -255,7 +199,7 @@ export default {
     next()
   },
   beforeRouteLeave (to, from, next) {
-    this.setShootSearch(null)
+    this.setShootSearch('')
     this.focusModeInternal = false
 
     next()
@@ -278,31 +222,17 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
-    const params = useUrlSearchParams('hash-params')
-    const shootSearch = ref(params.q)
+    const { search: shootSearch } = useUrlSearchSync()
     const debouncedShootSearch = ref(shootSearch.value)
 
     function setShootSearch (value) {
-      debouncedShootSearch.value = shootSearch.value = value
+      shootSearch.value = value
+      debouncedShootSearch.value = shootSearch.value
     }
 
     const setDebouncedShootSearch = debounce(() => {
       debouncedShootSearch.value = shootSearch.value
     }, 300)
-
-    watch(() => params.q, value => {
-      if (shootSearch.value !== value) {
-        setShootSearch(value)
-      }
-    })
-
-    watch(debouncedShootSearch, value => {
-      if (!value) {
-        params.q = null
-      } else if (params.q !== value) {
-        params.q = value
-      }
-    })
 
     function onUpdateShootSearch (value) {
       shootSearch.value = value

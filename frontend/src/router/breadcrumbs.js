@@ -87,6 +87,14 @@ export function shootListBreadcrumbs () {
   ]
 }
 
+export function seedListBreadcrumbs () {
+  return [
+    {
+      title: 'Seeds',
+    },
+  ]
+}
+
 export function credentialsBreadcrumbs () {
   return [
     {

@@ -428,7 +428,12 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   function conditionForType (type) {
-    return get(allKnownConditions.value, [type], getCondition(type))
+    const condition = get(allKnownConditions.value, [type])
+    if (condition) {
+      return condition
+    }
+    // Fallback: generate condition dynamically
+    return getCondition(type)
   }
 
   const knownInfraVendors = [

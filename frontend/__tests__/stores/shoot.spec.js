@@ -14,7 +14,6 @@ import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 import { useSocketStore } from '@/store/socket'
-import { parseSearch } from '@/store/shoot/helper'
 
 import { useApi } from '@/composables/useApi'
 
@@ -415,45 +414,6 @@ describe('stores', () => {
           'shoot1',
           'shoot2',
         ])
-      })
-    })
-  })
-
-  describe('helper', () => {
-    describe('#parseSearch', () => {
-      it('should parse search text', () => {
-        const searchQuery = parseSearch('a "b""s" -"c" -d')
-        expect(searchQuery.terms).toEqual([
-          {
-            exact: false,
-            exclude: false,
-            value: 'a',
-          },
-          {
-            exact: true,
-            exclude: false,
-            value: 'b"s',
-          },
-          {
-            exact: true,
-            exclude: true,
-            value: 'c',
-          },
-          {
-            exact: false,
-            exclude: true,
-            value: 'd',
-          },
-        ])
-      })
-
-      it('should match values correctly', () => {
-        const searchQuery = parseSearch('a "b""s" -"c" -d')
-        expect(searchQuery.matches(['$a', 'b"s', '$c'])).toBe(true)
-        expect(searchQuery.matches(['$a', 'b"s', '$d'])).toBe(false)
-        expect(searchQuery.matches(['$a', 'b"s', 'c'])).toBe(false)
-        expect(searchQuery.matches(['$a', '$b"s'])).toBe(false)
-        expect(searchQuery.matches(['b"s'])).toBe(false)
       })
     })
   })

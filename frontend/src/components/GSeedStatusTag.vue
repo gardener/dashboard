@@ -97,11 +97,9 @@ export default {
     staleShoot: {
       type: Boolean,
     },
-    shootMetadata: {
-      type: Object,
-      default () {
-        return { uid: '' }
-      },
+    identifier: {
+      type: String,
+      required: true,
     },
   },
   computed: {
@@ -109,7 +107,7 @@ export default {
       'isAdmin',
     ]),
     popoverKey () {
-      return `g-seed-status-tag[${this.condition.type}]:${this.shootMetadata.uid}`
+      return `g-seed-status-tag[${this.condition.type}]:${this.identifier}`
     },
     internalValue: {
       get () {
@@ -195,9 +193,6 @@ export default {
         return this.condition.message
       }
       return undefined
-    },
-    popperKeyWithType () {
-      return `statusTag_${this.popperKey}`
     },
     color () {
       if (this.isUnknown || this.staleShoot) {

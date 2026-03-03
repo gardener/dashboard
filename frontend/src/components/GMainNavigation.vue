@@ -56,11 +56,36 @@ SPDX-License-Identifier: Apache-2.0
       </v-list-item>
       <template v-if="namespace">
         <template
-          v-for="route in visibleRoutes"
+          v-for="route in namespacedRoutes"
           :key="`${namespace}-${route.path}`"
         >
           <v-list-item
-            :to="namespacedRoute(route)"
+            :to="namespacedMenuRoute(route)"
+            class="bg-main-background"
+            active-class="active-item"
+          >
+            <template #prepend>
+              <v-icon
+                size="x-small"
+                color="main-navigation-title"
+                :icon="route.meta.menu.icon"
+              />
+            </template>
+            <v-list-item-title class="text-uppercase text-main-navigation-title">
+              {{ route.meta.menu.title }}
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+        <v-divider
+          v-if="nonNamespacedRoutes.length"
+          class="my-2"
+        />
+        <template
+          v-for="route in nonNamespacedRoutes"
+          :key="`${namespace}-${route.path}`"
+        >
+          <v-list-item
+            :to="nonNamespacedMenuRoute(route)"
             class="bg-main-background"
             active-class="active-item"
           >
@@ -105,7 +130,6 @@ import GTeaser from '@/components/GTeaser.vue'
 
 import {
   routes as getRoutes,
-  namespacedRoute as getNamespacedRoute,
   routeName as getRouteName,
 } from '@/utils'
 
@@ -148,6 +172,14 @@ const visibleRoutes = computed(() => {
   })
 })
 
+const namespacedRoutes = computed(() => {
+  return visibleRoutes.value.filter(route => get(route, ['meta', 'namespaced']) !== false)
+})
+
+const nonNamespacedRoutes = computed(() => {
+  return visibleRoutes.value.filter(route => get(route, ['meta', 'namespaced']) === false)
+})
+
 const hasNoProjects = computed(() => {
   return !projectList.value.length
 })
@@ -157,13 +189,30 @@ const routes = computed(() => {
   return getRoutes(router, hasProjectScope)
 })
 
-function namespacedRoute (route) {
-  return getNamespacedRoute(route, namespace.value)
+function namespacedMenuRoute (route) {
+  return {
+    name: getRouteName(route),
+    params: {
+      namespace: namespace.value,
+    },
+  }
+}
+
+function nonNamespacedMenuRoute (route) {
+  return {
+    name: getRouteName(route),
+    query: {
+      namespace: namespace.value,
+    },
+  }
 }
 
 function getProjectMenuTargetRoute (namespace) {
   const fallbackToShootList = route => {
     if (namespace === '_all' && get(route, ['meta', 'projectScope']) !== false) {
+      return true
+    }
+    if (get(route, ['name']) === 'SeedList') {
       return true
     }
     if (has(route, ['params', 'name'])) {

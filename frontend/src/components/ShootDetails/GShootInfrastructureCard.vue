@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item>
           <template #prepend>
             <v-icon color="primary">
-              mdi-spa
+              mdi-sprout
             </v-icon>
           </template>
           <g-list-item-content label="Seed">

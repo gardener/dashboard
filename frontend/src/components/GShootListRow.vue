@@ -101,9 +101,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
-          <g-shoot-status
-            :popper-key="`${shootNamespace}/${shootName}`"
-          />
+          <g-shoot-status />
         </div>
       </template>
       <template v-if="cell.header.key === 'k8sVersion'">
@@ -118,7 +116,10 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'seedReadiness'">
         <div class="d-flex">
-          <g-seed-status-tags />
+          <g-seed-status-tags
+            :identifier="shootUid"
+            :is-stale-shoot="isStaleShoot"
+          />
         </div>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
