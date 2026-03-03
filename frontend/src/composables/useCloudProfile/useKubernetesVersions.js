@@ -20,6 +20,7 @@ import {
   isValidTerminationDate,
   getVersionExpirationWarning,
   UNKNOWN_EXPIRED_TIMESTAMP,
+  getCloudProfileSpec,
 } from '@/utils/index.js'
 
 import get from 'lodash/get'
@@ -48,7 +49,7 @@ export function useKubernetesVersions (cloudProfile) {
   const logger = useLogger()
 
   const kubernetesVersions = computed(() => {
-    const allVersions = get(cloudProfile.value, ['spec', 'kubernetes', 'versions'], [])
+    const allVersions = get(getCloudProfileSpec(cloudProfile.value), ['kubernetes', 'versions'], [])
     const validVersions = filter(allVersions, ({ version }) => {
       if (!semver.valid(version)) {
         logger.info(`Skipped Kubernetes version ${version} as it is not a valid semver version`)

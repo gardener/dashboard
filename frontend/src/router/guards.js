@@ -81,6 +81,8 @@ export function createGlobalBeforeGuards () {
       }
 
       try {
+        const namespace = to.params.namespace ?? to.query.namespace
+
         // Load garden rules, then conditionally load managed seeds once resolved
         const gardenRulesAndManagedSeeds = async () => {
           await ensureGardenRulesLoaded(authzStore)
@@ -91,11 +93,12 @@ export function createGlobalBeforeGuards () {
             ])
           }
         }
-
         await Promise.all([
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
-          ensureCloudProfilesLoaded(cloudProfileStore),
+        ])
+        await Promise.all([
+          ensureCloudProfilesLoaded(cloudProfileStore, namespace, projectStore.namespaces),
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
@@ -253,9 +256,16 @@ function ensureProjectsLoaded (store) {
   }
 }
 
-function ensureCloudProfilesLoaded (store) {
+async function ensureCloudProfilesLoaded (store, namespace, namespaces = []) {
   if (store.isInitial) {
-    return store.fetchCloudProfiles()
+    await store.fetchCloudProfiles()
+  }
+  if (namespace === '_all') {
+    await store.fetchNamespacedCloudProfilesForNamespaces(namespaces)
+    return
+  }
+  if (namespace && !store.hasNamespacedCloudProfilesForNamespace(namespace)) {
+    await store.fetchNamespacedCloudProfiles(namespace)
   }
 }
 

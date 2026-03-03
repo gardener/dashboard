@@ -17,7 +17,37 @@ SPDX-License-Identifier: Apache-2.0
     :hint="hint"
     persistent-hint
     @blur="v$.selectedValue.$touch()"
-  />
+  >
+    <template #item="{ item, props: itemProps }">
+      <v-list-item
+        v-bind="itemProps"
+        :title="undefined"
+      >
+        <span>{{ item.raw.title }}</span>
+        <v-chip
+          v-if="item.raw.namespaced"
+          size="x-small"
+          color="primary"
+          variant="tonal"
+          class="ml-2"
+        >
+          Namespaced
+        </v-chip>
+      </v-list-item>
+    </template>
+    <template #selection="{ item }">
+      <span>{{ item.raw.title }}</span>
+      <v-chip
+        v-if="item.raw.namespaced"
+        size="x-small"
+        color="primary"
+        variant="tonal"
+        class="ml-2"
+      >
+        Namespaced
+      </v-chip>
+    </template>
+  </v-select>
 </template>
 
 <script setup>
@@ -41,8 +71,6 @@ import {
 } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
-import find from 'lodash/find'
-
 const props = defineProps({
   modelValue: {
     type: Object,
@@ -52,16 +80,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  namespacedCloudProfiles: {
-    type: Array,
-    required: false,
-    default: () => [],
-  },
 })
 
 const cloudProfileRef = toRef(props, 'modelValue')
 const cloudProfiles = toRef(props, 'cloudProfiles')
-const namespacedCloudProfiles = toRef(props, 'namespacedCloudProfiles')
 
 const cloudProfileStore = useCloudProfileStore()
 const projectStore = useProjectStore()
@@ -78,39 +100,21 @@ const emit = defineEmits([
 ])
 
 const selectItems = computed(() => {
-  const items = []
-
-  if (namespacedCloudProfiles.value.length > 0) {
-    items.push(
-      ...namespacedCloudProfiles.value.map(profile => {
-        const namespacedCloudProfileRef = {
-          name: profile.metadata.name,
-          kind: 'NamespacedCloudProfile',
-        }
-        return {
-          value: namespacedCloudProfileRef,
-          title: `${cloudProfileDisplayName(profile)} (Namespaced)`,
-        }
-      }),
-    )
-  }
-
-  if (cloudProfiles.value.length > 0) {
-    items.push(
-      ...cloudProfiles.value.map(profile => {
-        const cloudProfileRef = {
-          name: profile.metadata.name,
-          kind: 'CloudProfile',
-        }
-        return {
-          value: cloudProfileRef,
-          title: cloudProfileDisplayName(profile),
-        }
-      }),
-    )
-  }
-
-  return items
+  return cloudProfiles.value.map(profile => {
+    const namespaced = profile.kind === 'NamespacedCloudProfile'
+    const ref = {
+      name: profile.metadata.name,
+      kind: namespaced ? 'NamespacedCloudProfile' : 'CloudProfile',
+    }
+    if (namespaced && profile.metadata.namespace) {
+      ref.namespace = profile.metadata.namespace
+    }
+    return {
+      value: ref,
+      title: cloudProfileDisplayName(profile),
+      namespaced,
+    }
+  })
 })
 
 const selectedValue = ref(null)
@@ -137,18 +141,9 @@ const rules = {
   }),
 }
 
-const selectedCloudProfile = computed(() => {
-  if (cloudProfileRef.value?.kind === 'CloudProfile') {
-    return find(cloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
-  }
-  if (cloudProfileRef.value?.kind === 'NamespacedCloudProfile') {
-    return find(namespacedCloudProfiles.value, { metadata: { name: cloudProfileRef.value?.name } })
-  }
-  return undefined
-})
-
 const hint = computed(() => {
-  if (selectedCloudProfile.value && !seeds.value.length) {
+  const cloudProfile = cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
+  if (cloudProfile && !seeds.value.length) {
     return 'This cloud profile does not have a matching seed. Gardener will not be able to schedule shoots using this cloud profile'
   }
   return ''
