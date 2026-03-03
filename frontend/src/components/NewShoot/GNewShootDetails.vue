@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           <template #item="{ item, props }">
             <v-list-item
               v-bind="props"
-              :subtitle="versionItemDescription(item.raw)"
+              :subtitle="versionItemDescription(item)"
             />
           </template>
           <template #message="{ message }">

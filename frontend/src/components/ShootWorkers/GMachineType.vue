@@ -27,10 +27,10 @@ SPDX-License-Identifier: Apache-2.0
     <template #item="{ item, props }">
       <v-list-item v-bind="props">
         <v-list-item-subtitle>
-          <span v-if="item.raw.cpu">CPU: {{ item.raw.cpu }} | </span>
-          <span v-if="item.raw.gpu">GPU: {{ item.raw.gpu }} | </span>
-          <span v-if="item.raw.memory">Memory: {{ item.raw.memory }}</span>
-          <span v-if="item.raw.storage"> | Volume Type: {{ item.raw.storage.type }} | Class: {{ item.raw.storage.class }} | Default Size: {{ item.raw.storage.size }}</span>
+          <span v-if="item.cpu">CPU: {{ item.cpu }} | </span>
+          <span v-if="item.gpu">GPU: {{ item.gpu }} | </span>
+          <span v-if="item.memory">Memory: {{ item.memory }}</span>
+          <span v-if="item.storage"> | Volume Type: {{ item.storage.type }} | Class: {{ item.storage.class }} | Default Size: {{ item.storage.size }}</span>
         </v-list-item-subtitle>
       </v-list-item>
     </template>
@@ -126,14 +126,15 @@ export default {
     }
   },
   methods: {
-    customFilter (title, query, item) {
+    customFilter (_, query, internalItem) {
+      const item = internalItem.raw
       if (!item) {
         return false
       }
       if (typeof query !== 'string') {
         return true
       }
-      const name = item.raw.name?.toLowerCase()
+      const name = item.name?.toLowerCase()
       const terms = query
         .trim()
         .split(/ +/)
@@ -144,13 +145,13 @@ export default {
           properties.push(value.toString().toLowerCase())
         }
       }
-      addProperty(item.raw.cpu)
-      addProperty(item.raw.gpu)
-      addProperty(item.raw.memory)
-      if (item.raw.storage) {
-        addProperty(item.raw.storage.type)
-        addProperty(item.raw.storage.class)
-        addProperty(item.raw.storage.size)
+      addProperty(item.cpu)
+      addProperty(item.gpu)
+      addProperty(item.memory)
+      if (item.storage) {
+        addProperty(item.storage.type)
+        addProperty(item.storage.class)
+        addProperty(item.storage.size)
       }
 
       const includesTerm = term => name?.includes(term) || properties.includes(term)

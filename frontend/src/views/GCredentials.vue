@@ -657,13 +657,14 @@ export default {
     isHighlightedBinding (binding) {
       return this.highlightedBindingUid && this.highlightedBindingUid === binding.metadata.uid
     },
-    customFilter (_, query, item) {
+    customFilter (_, query, internalItem) {
+      const item = internalItem.raw
       const {
         credentialDetails,
         credential,
         binding,
         providerType,
-      } = item.raw
+      } = item
 
       const detailValues = map(credentialDetails, 'value')
       const values = [
@@ -682,11 +683,11 @@ export default {
       })
     },
     getBindingItemKey (item, fallback) {
-      const bindingUid = item.raw?.binding?.metadata?.uid
+      const bindingUid = item?.binding?.metadata?.uid
       return bindingUid ?? fallback
     },
     getCredentialItemKey (item, fallback) {
-      const credentialUid = item.raw?.credential?.metadata?.uid
+      const credentialUid = item?.credential?.metadata?.uid
       return credentialUid ?? fallback
     },
     resetHighlighted () {

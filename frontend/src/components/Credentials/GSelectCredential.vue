@@ -30,22 +30,22 @@ SPDX-License-Identifier: Apache-2.0
         >
           <g-credential-name
             v-if="isDnsProvider"
-            :credential="item.raw"
+            :credential="item"
           />
           <g-binding-name
             v-else
-            :binding="item.raw"
+            :binding="item"
           />
         </v-list-item>
       </template>
       <template #selection="{ item }">
         <g-credential-name
           v-if="isDnsProvider"
-          :credential="item.raw"
+          :credential="item"
         />
         <g-binding-name
           v-else
-          :binding="item.raw"
+          :binding="item"
         />
       </template>
       <template #append-item>

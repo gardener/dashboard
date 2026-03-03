@@ -24,8 +24,8 @@ SPDX-License-Identifier: Apache-2.0
     >
       <template #item="{ item, props }">
         <v-list-item v-bind="props">
-          <v-list-item-subtitle v-if="item.raw.class">
-            Class: {{ item.raw.class }}
+          <v-list-item-subtitle v-if="item.class">
+            Class: {{ item.class }}
           </v-list-item-subtitle>
         </v-list-item>
       </template>
