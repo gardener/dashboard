@@ -83,13 +83,13 @@ SPDX-License-Identifier: Apache-2.0
                 :prominent="!!userError"
               >
                 <template v-if="userError">
-                  <span class="text-display-medium">
+                  <h3 class="ma-0">
                     Your Action is required
-                  </span>
-                  <span class="text-headline-large wrap-text font-weight-bold">
+                  </h3>
+                  <h4 class="wrap-text font-weight-bold ma-0">
                     This is a user-resolvable error — no Gardener operations team intervention needed.
                     Please read the error message carefully and take action.
-                  </span>
+                  </h4>
                 </template>
                 <span class="wrap-text">
                   <span v-if="infraAccountError">
