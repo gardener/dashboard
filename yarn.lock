@@ -594,6 +594,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dmsnell/diff-match-patch@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@dmsnell/diff-match-patch@npm:1.1.0"
+  checksum: 10c0/8547bf4a62dfca0a61b9c6490ea0ea468ec108879892f2e1ebe14dc12e9e6c50ad91b184a186ab5119f47baf631ab4f1f152372b8b89ba4d8d42a8ae5dcb6e44
+  languageName: node
+  linkType: hard
+
 "@emnapi/core@npm:^1.4.3":
   version: 1.4.4
   resolution: "@emnapi/core@npm:1.4.4"
@@ -968,6 +975,7 @@ __metadata:
     "@rollup/plugin-commonjs": "npm:^28.0.3"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
+    "@vitest/coverage-v8": "npm:^3.0.0"
     abort-controller: "npm:^3.0.0"
     base64url: "npm:^3.0.1"
     body-parser: "npm:^2.0.0"
@@ -990,6 +998,7 @@ __metadata:
     jest: "npm:^30.0.0"
     jose: "npm:^5.2.3"
     js-yaml: "npm:^4.1.0"
+    jsondiffpatch: "npm:^0.7.3"
     jsonwebtoken: "npm:^9.0.2"
     lodash: "npm:^4.17.21"
     lodash-es: "npm:^4.17.21"
@@ -1022,6 +1031,7 @@ __metadata:
     undici: "npm:^7.18.2"
     unified: "npm:^11.0.5"
     uuid: "npm:^11.0.0"
+    vitest: "npm:^3.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1093,6 +1103,7 @@ __metadata:
     js-cookie: "npm:^3.0.5"
     js-yaml: "npm:^4.1.0"
     jsdom: "npm:^26.0.0"
+    jsondiffpatch: "npm:^0.7.3"
     jwt-decode: "npm:^4.0.0"
     lodash: "npm:^4.17.21"
     md5: "npm:^2.3.0"
@@ -8416,6 +8427,17 @@ __metadata:
   bin:
     json5: lib/cli.js
   checksum: 10c0/5a04eed94810fa55c5ea138b2f7a5c12b97c3750bc63d11e511dcecbfef758003861522a070c2272764ee0f4e3e323862f386945aeb5b85b87ee43f084ba586c
+  languageName: node
+  linkType: hard
+
+"jsondiffpatch@npm:^0.7.3":
+  version: 0.7.3
+  resolution: "jsondiffpatch@npm:0.7.3"
+  dependencies:
+    "@dmsnell/diff-match-patch": "npm:^1.1.0"
+  bin:
+    jsondiffpatch: bin/jsondiffpatch.js
+  checksum: 10c0/fae49073e5cacef98a4700bf6c46d1a946549bb526597f57ad52a0ca4ac7f510be256386577ff39a966e227f132fc667bef4c547be7b68a69c2a5e7db9cc2d4f
   languageName: node
   linkType: hard
 

@@ -25,6 +25,7 @@ const resourcequotas = require('./resourcequotas')
 const projects = require('./projects')
 const serviceaccounts = require('./serviceaccounts')
 const cloudprofiles = require('./cloudprofiles')
+const namespacedcloudprofiles = require('./namespacedcloudprofiles.cjs')
 const nodes = require('./nodes')
 const terminals = require('./terminals')
 const github = require('./github')
@@ -58,6 +59,7 @@ const fixtures = {
   projects,
   serviceaccounts,
   cloudprofiles,
+  namespacedcloudprofiles,
   quotas,
   controllerregistrations,
   resourcequotas,
