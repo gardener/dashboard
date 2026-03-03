@@ -130,6 +130,10 @@
   }
 }
 
+.v-btn {
+  text-transform: uppercase;
+}
+
 /* Theme dependant classes */
 @mixin alternate-row-background($background-color) {
   .alternate-row-background>div:nth-of-type(even) {

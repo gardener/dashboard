@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           width="300px"
         >
           <v-card-title primary-title>
-            <div class="content text-h6 mb-2">
+            <div class="content text-title-large mb-2">
               {{ branding.productName }}
             </div>
           </v-card-title>
@@ -162,15 +162,15 @@ SPDX-License-Identifier: Apache-2.0
           :elevation="4"
         >
           <div class="text-center pa-3">
-            <div class="text-h6">
+            <div class="text-title-large">
               {{ displayName }}
             </div>
-            <div class="text-caption">
+            <div class="text-body-small">
               {{ username }}
             </div>
             <div
               v-if="isAdmin"
-              class="text-caption"
+              class="text-body-small"
             >
               Operator
             </div>

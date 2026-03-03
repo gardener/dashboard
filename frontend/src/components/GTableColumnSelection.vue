@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-card>
       <v-card-text class="pt-1">
         <div class="d-flex align-center justify-space-between">
-          <span class="text-subtitle-2 text-medium-emphasis py-2">
+          <span class="text-title-small text-medium-emphasis py-2">
             Column Selection
           </span>
           <v-btn
@@ -42,14 +42,14 @@ SPDX-License-Identifier: Apache-2.0
           :model-value="header.selected"
           :color="checkboxColor(header.selected)"
           density="compact"
-          class="text-body-2"
+          class="text-body-medium"
           @update:model-value="onSetSelectedHeader(header)"
         >
           <template #label>
             <span
               v-if="header.customField"
               v-tooltip:top="'Custom Field'"
-              class="text-caption"
+              class="text-body-small"
             >
               {{ header.title }}
               <v-icon
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
             </span>
             <span
               v-else
-              class="text-caption"
+              class="text-body-small"
             >
               {{ header.title }}
             </span>
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
           }"
           class="pt-1"
         >
-          <div class="text-subtitle-2 text-medium-emphasis py-2">
+          <div class="text-title-small text-medium-emphasis py-2">
             Table Filter
           </div>
           <v-checkbox-btn
@@ -86,12 +86,12 @@ SPDX-License-Identifier: Apache-2.0
             :color="checkboxColor(filter.selected)"
             :disabled="filter.disabled"
             density="compact"
-            class="text-body-2"
+            class="text-body-medium"
             @update:model-value="onToggleFilter(filter)"
           >
             <template #label>
               <span
-                class="text-caption"
+                class="text-body-small"
               >
                 {{ filter.text }}
               </span>

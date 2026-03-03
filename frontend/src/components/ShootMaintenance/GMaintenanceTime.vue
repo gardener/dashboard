@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <span class="text-subtitle-2">Provide start of maintenance time window in which Gardener may schedule automated cluster updates</span>
+  <span class="text-title-small">Provide start of maintenance time window in which Gardener may schedule automated cluster updates</span>
   <v-row class="my-0">
     <v-col class="smallInput">
       <g-time-text-field

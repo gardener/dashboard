@@ -49,7 +49,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
         <template #title>
-          <div class="text-subtitle-1 text-main-navigation-title">
+          <div class="text-body-large text-main-navigation-title">
             Home
           </div>
         </template>

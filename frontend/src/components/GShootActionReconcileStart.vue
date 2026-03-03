@@ -20,12 +20,12 @@ SPDX-License-Identifier: Apache-2.0
     <template #content>
       <v-card-text>
         <v-row>
-          <v-col class="text-subtitle-1">
+          <v-col class="text-body-large">
             Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?
           </v-col>
         </v-row>
         <v-row v-if="lastOperationFailed">
-          <v-col class="text-subtitle-1">
+          <v-col class="text-body-large">
             Note: For clusters in failed state this will retry the operation.
           </v-col>
         </v-row>

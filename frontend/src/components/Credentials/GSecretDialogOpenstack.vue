@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
           row
         >
           <template #label>
-            <span class="text-body-1">Authentication Method:</span>
+            <span class="text-body-large">Authentication Method:</span>
           </template>
           <v-radio
             label="Technical User"

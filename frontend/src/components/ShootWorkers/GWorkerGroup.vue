@@ -38,13 +38,13 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-tab
         value="overview"
-        class="text-caption text-medium-emphasis"
+        class="text-body-small text-medium-emphasis"
       >
         OVERVIEW
       </v-tab>
       <v-tab
         value="yaml"
-        class="text-caption text-medium-emphasis"
+        class="text-body-small text-medium-emphasis"
       >
         YAML
       </v-tab>
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </template>
                     <template #title>
-                      <span class="text-body-2">
+                      <span class="text-body-medium">
                         Machine
                       </span>
                     </template>
@@ -80,22 +80,22 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text>
                     <v-row dense>
                       <v-col v-if="workerGroup.machine.architecture">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Architecture
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.machine.architecture }}</span>
+                        <span class="text-body-medium">{{ workerGroup.machine.architecture }}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Type
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.machine.type }}</span>
+                        <span class="text-body-medium">{{ workerGroup.machine.type }}</span>
                       </v-col>
                       <v-col
                         v-if="workerGroup.zones && workerGroup.zones.length"
                         cols="12"
                       >
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Zones
                         </legend>
                         <v-chip
@@ -111,22 +111,22 @@ SPDX-License-Identifier: Apache-2.0
                       </v-col>
                       <template v-if="machineType">
                         <v-col>
-                          <legend class="text-caption text-medium-emphasis">
+                          <legend class="text-body-small text-medium-emphasis">
                             CPUs
                           </legend>
-                          <span class="text-body-2">{{ machineType.cpu }}</span>
+                          <span class="text-body-medium">{{ machineType.cpu }}</span>
                         </v-col>
                         <v-col>
-                          <legend class="text-caption text-medium-emphasis">
+                          <legend class="text-body-small text-medium-emphasis">
                             GPUs
                           </legend>
-                          <span class="text-body-2">{{ machineType.gpu }}</span>
+                          <span class="text-body-medium">{{ machineType.gpu }}</span>
                         </v-col>
                         <v-col>
-                          <legend class="text-caption text-medium-emphasis">
+                          <legend class="text-body-small text-medium-emphasis">
                             Memory
                           </legend>
-                          <span class="text-body-2">{{ machineType.memory }}</span>
+                          <span class="text-body-medium">{{ machineType.memory }}</span>
                         </v-col>
                       </template>
                     </v-row>
@@ -146,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </template>
                     <template #title>
-                      <span class="text-body-2">
+                      <span class="text-body-medium">
                         Volume
                       </span>
                     </template>
@@ -154,22 +154,22 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text>
                     <v-row>
                       <v-col v-if="volumeCardData.type">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Type
                         </legend>
-                        <span class="text-body-2">{{ volumeCardData.type }}</span>
+                        <span class="text-body-medium">{{ volumeCardData.type }}</span>
                       </v-col>
                       <v-col v-if="volumeCardData.class">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Class
                         </legend>
-                        <span class="text-body-2">{{ volumeCardData.class }}</span>
+                        <span class="text-body-medium">{{ volumeCardData.class }}</span>
                       </v-col>
                       <v-col v-if="volumeCardData.size">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Size
                         </legend>
-                        <span class="text-body-2">{{ volumeCardData.size }}</span>
+                        <span class="text-body-medium">{{ volumeCardData.size }}</span>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -190,7 +190,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </template>
                     <template #title>
-                      <span class="text-body-2">
+                      <span class="text-body-medium">
                         Image
                       </span>
                     </template>
@@ -198,22 +198,22 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text>
                     <v-row dense>
                       <v-col>
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Name
                         </legend>
-                        <span class="text-body-2">{{ machineImage ? machineImage.displayName : workerGroup.machine.image.name }}</span>
+                        <span class="text-body-medium">{{ machineImage ? machineImage.displayName : workerGroup.machine.image.name }}</span>
                       </v-col>
                       <v-col>
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Version
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.machine.image.version }}</span>
+                        <span class="text-body-medium">{{ workerGroup.machine.image.version }}</span>
                       </v-col>
                       <template v-if="machineImage">
                         <v-col
                           cols="12"
                         >
-                          <legend class="text-caption text-medium-emphasis">
+                          <legend class="text-body-small text-medium-emphasis">
                             Classification
                           </legend>
                           <v-icon
@@ -272,7 +272,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </template>
                     <template #title>
-                      <span class="text-body-2">
+                      <span class="text-body-medium">
                         Autoscaler
                       </span>
                     </template>
@@ -280,28 +280,28 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text>
                     <v-row dense>
                       <v-col cols="6">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Maximum
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.maximum }}</span>
+                        <span class="text-body-medium">{{ workerGroup.maximum }}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Minimum
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.minimum }}</span>
+                        <span class="text-body-medium">{{ workerGroup.minimum }}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Max. Surge
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.maxSurge }}</span>
+                        <span class="text-body-medium">{{ workerGroup.maxSurge }}</span>
                       </v-col>
                       <v-col cols="6">
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Max. Unavailable
                         </legend>
-                        <span class="text-body-2">{{ workerGroup.maxUnavailable }}</span>
+                        <span class="text-body-medium">{{ workerGroup.maxUnavailable }}</span>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -320,7 +320,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </template>
                     <template #title>
-                      <span class="text-body-2">
+                      <span class="text-body-medium">
                         Container Runtime
                       </span>
                     </template>
@@ -328,16 +328,16 @@ SPDX-License-Identifier: Apache-2.0
                   <v-card-text>
                     <v-row dense>
                       <v-col>
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Name
                         </legend>
-                        <span class="text-body-2">{{ machineCri.name }}</span>
+                        <span class="text-body-medium">{{ machineCri.name }}</span>
                       </v-col>
                       <v-col
                         v-if="machineCri.containerRuntimes && machineCri.containerRuntimes.length"
                         cols="12"
                       >
-                        <legend class="text-caption text-medium-emphasis">
+                        <legend class="text-body-small text-medium-emphasis">
                           Additional OCI Runtimes
                         </legend>
                         <v-chip

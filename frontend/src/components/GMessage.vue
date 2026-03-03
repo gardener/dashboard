@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :rounded="!tile ? true : 0"
       closable
     >
-      <div class="text-subtitle-1">
+      <div class="text-body-large">
         {{ message }}
         <v-btn
           v-if="!!detailedMessage"

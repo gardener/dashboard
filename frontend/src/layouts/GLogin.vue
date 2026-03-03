@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
           >
             <!-- eslint-disable vue/no-v-html -->
             <div
-              class="text-subtitle-1 text-center text-medium-emphasis"
+              class="text-body-large text-center text-medium-emphasis"
               v-html="oidcLoginText"
             />
             <!-- eslint-enable vue/no-v-html -->
@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
           >
             <!-- eslint-disable vue/no-v-html -->
             <div
-              class="text-subtitle-1 text-center text-medium-emphasis"
+              class="text-body-large text-center text-medium-emphasis"
               v-html="tokenLoginText"
             />
             <!-- eslint-enable vue/no-v-html -->

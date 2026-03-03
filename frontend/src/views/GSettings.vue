@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
                     <template #prepend>
                       <v-icon :color="color" />
                     </template>
-                    <span class="text-lowercase text-caption">{{ text }}</span>
+                    <span class="text-lowercase text-body-small">{{ text }}</span>
                   </v-btn>
                 </v-btn-toggle>
               </v-col>

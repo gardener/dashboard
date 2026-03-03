@@ -506,7 +506,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
       linkElement.setAttribute('target', '_blank')
       linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML
-      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><em class="v-icon mdi mdi-open-in-new text-body-1"></em>`
+      linkElement.innerHTML = `<span class="text-decoration-underline pr-1">${linkText}</span><em class="v-icon mdi mdi-open-in-new text-body-large"></em>`
     }
   })
 
