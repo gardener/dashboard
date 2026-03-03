@@ -124,6 +124,20 @@ describe('composables', () => {
         expect(type2.architecture).toBe('amd64')
         expect(type3.architecture).toBe('amd64')
       })
+
+      it('should not mutate cloud profile machine types when defaulting architecture', () => {
+        const { useZones } = useRegions(cloudProfile)
+        const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
+
+        const region = ref('region2')
+        const architecture = ref(undefined)
+        useFilteredMachineTypes(region, architecture)
+
+        const type2InProfile = find(cloudProfile.value.spec.machineTypes, { name: 'machineType2' })
+        const type3InProfile = find(cloudProfile.value.spec.machineTypes, { name: 'machineType3' })
+        expect(type2InProfile.architecture).toBeUndefined()
+        expect(type3InProfile.architecture).toBeUndefined()
+      })
     })
 
     describe('#useMachineArchitectures', () => {

@@ -46,7 +46,7 @@ function getVersionExpirationWarningSeverity (options) {
 
 /**
  * Composable for shoot message validation and warnings
- * @param {Ref<CloudProfile>} cloudProfile - Vue ref containing the cloud profile object
+ * @param {Ref<object>} cloudProfile - A Vue ref containing a CloudProfile or NamespacedCloudProfile object
  * @returns {Object} Object containing functions for shoot validation
  */
 export function useShootMessages (cloudProfile) {

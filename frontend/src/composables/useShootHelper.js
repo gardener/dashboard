@@ -99,15 +99,20 @@ export function createShootHelperComposable (shootItem, options = {}) {
   const defaultCloudProfileRef = computed(() => {
     const defaultCloudProfile = head(cloudProfiles.value)
     const name = get(defaultCloudProfile, ['metadata', 'name'])
-    const cloudProfileRef = {
+    const namespace = get(defaultCloudProfile, ['metadata', 'namespace'])
+    return {
       name,
-      kind: 'CloudProfile',
+      kind: namespace ? 'NamespacedCloudProfile' : 'CloudProfile',
+      ...(namespace && { namespace }),
     }
-    return cloudProfileRef
   })
 
   const cloudProfile = computed(() => {
     return cloudProfileStore.cloudProfileByRef(cloudProfileRef.value)
+  })
+
+  const isNamespacedCloudProfile = computed(() => {
+    return cloudProfileRef.value?.kind === 'NamespacedCloudProfile'
   })
 
   const {
@@ -232,6 +237,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     cloudProfiles,
     defaultCloudProfileRef,
     cloudProfile,
+    isNamespacedCloudProfile,
     seed,
     seedIngressDomain,
     seeds,

@@ -20,7 +20,10 @@ import {
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
 
-import { normalizeVersion } from '@/utils/index.js'
+import {
+  normalizeVersion,
+  getCloudProfileSpec,
+} from '@/utils/index.js'
 
 import filter from 'lodash/filter'
 import map from 'lodash/map'
@@ -125,7 +128,7 @@ export function useMachineImages (cloudProfile) {
    * Returns all machine images from the cloud profile, flattened and decorated.
    */
   const machineImages = computed(() => {
-    const rawImages = get(cloudProfile.value, ['spec', 'machineImages'], [])
+    const rawImages = get(getCloudProfileSpec(cloudProfile.value), ['machineImages'], [])
     return flattenAndSortMachineImages(rawImages)
   })
 

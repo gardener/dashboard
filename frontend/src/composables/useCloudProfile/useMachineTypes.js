@@ -11,6 +11,8 @@ import {
 
 import { getZones } from '@/composables/helper.js'
 
+import { getCloudProfileSpec } from '@/utils'
+
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -38,7 +40,7 @@ export function useMachineTypes (cloudProfile) {
     throw new Error('cloudProfile must be a ref!')
   }
 
-  const machineTypes = computed(() => get(cloudProfile.value, ['spec', 'machineTypes'], []))
+  const machineTypes = computed(() => get(getCloudProfileSpec(cloudProfile.value), ['machineTypes'], []))
 
   function filterMachineTypes (region, zones) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -53,19 +55,16 @@ export function useMachineTypes (cloudProfile) {
       }
     }
 
-    const items = machineTypes.value
-
-    items.forEach(item => {
-      if (!item.architecture) {
-        item.architecture = 'amd64' // default if not maintained
-      }
-    })
+    const items = map(machineTypes.value, item => ({
+      ...item,
+      architecture: item.architecture || 'amd64', // default if not maintained
+    }))
 
     if (!region) {
       return items
     }
 
-    const regionObject = find(cloudProfile.value?.spec.regions, { name: region })
+    const regionObject = find(getCloudProfileSpec(cloudProfile.value).regions, { name: region })
     let regionZones = get(regionObject, ['zones'], [])
     regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
     const unavailableItems = map(regionZones, zone => zone.unavailableMachineTypes)
