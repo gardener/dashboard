@@ -138,12 +138,17 @@
   max-height: 100%;
 }
 
+/* vuetify 4 overrides - consider removing them after updating usages*/
 .v-btn {
   text-transform: uppercase;
 }
 
 ul {
   padding: 0px;
+  margin: 0px;
+}
+
+p {
   margin: 0px;
 }
 
