@@ -134,6 +134,11 @@
   text-transform: uppercase;
 }
 
+ul {
+  padding: 0px;
+  margin: 0px;
+}
+
 /* Theme dependant classes */
 @mixin alternate-row-background($background-color) {
   .alternate-row-background>div:nth-of-type(even) {
