@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-row no-gutters>
+    <v-row density="compact">
       <v-col
         cols="12"
         md="6"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="flex-column"
         >
           <v-col class="pa-3">
@@ -296,7 +296,7 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="flex-column"
         >
           <v-col

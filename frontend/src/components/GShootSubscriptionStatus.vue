@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
         class="pr-0 ma-0"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="ml-2"
         >
           <v-col
