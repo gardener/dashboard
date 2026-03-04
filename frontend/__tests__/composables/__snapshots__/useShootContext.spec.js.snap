@@ -670,6 +670,86 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
 }
 `;
 
+exports[`composables > useShootContext > should create a default "hcloud" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "hcloud",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "hcloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+        "zone": "fsn1-dc14",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "hcloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.180.0.0/16",
+        },
+      },
+      "type": "hcloud",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "cpx11",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "fsn1-dc14",
+          ],
+        },
+      ],
+    },
+    "region": "fsn1",
+  },
+}
+`;
+
 exports[`composables > useShootContext > should create a default "ironcore" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
@@ -748,6 +828,168 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
     "purpose": "evaluation",
     "region": "de-fra",
     "secretBindingName": "ironcore-secretbinding",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "local" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "local",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "type": "local",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "local-dev-small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+        },
+      ],
+    },
+    "region": "local",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "metal" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "metal",
+    },
+    "kubernetes": {
+      "kubeControllerManager": {
+        "nodeCIDRMaskSize": 23,
+      },
+      "kubelet": {
+        "maxPods": 510,
+      },
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "pods": "10.244.128.0/18",
+      "providerConfig": {
+        "apiVersion": "calico.networking.extensions.gardener.cloud/v1alpha1",
+        "backend": "vxlan",
+        "ipv4": {
+          "autoDetectionMethod": "interface=lo",
+          "mode": "Always",
+          "pool": "vxlan",
+        },
+        "kind": "NetworkConfig",
+        "typha": {
+          "enabled": true,
+        },
+      },
+      "services": "10.244.192.0/18",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "metal.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "metal.provider.extensions.gardener.cloud/v1alpha1",
+        "firewall": {
+          "size": "c1-metal-small",
+        },
+        "kind": "InfrastructureConfig",
+        "partitionID": "eu01-a",
+      },
+      "type": "metal",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "c1-metal-small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+        },
+      ],
+    },
+    "region": "eu01",
   },
 }
 `;
@@ -839,6 +1081,157 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     "purpose": "evaluation",
     "region": "eu-de-1",
     "secretBindingName": "openstack-secretbinding",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "stackit" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "stackit",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "stackit.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "stackit.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.180.0.0/16",
+        },
+      },
+      "type": "stackit",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "stackit-machine-1",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "eu01-1",
+          ],
+        },
+      ],
+    },
+    "region": "eu01",
+  },
+}
+`;
+
+exports[`composables > useShootContext > should create a default "vsphere" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "vsphere",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "vsphere.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "type": "vsphere",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "vsphere-machine-1",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "zone1",
+          ],
+        },
+      ],
+    },
+    "region": "region1",
   },
 }
 `;

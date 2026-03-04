@@ -71,6 +71,10 @@ describe('composables', () => {
   }
 
   describe('useShootContext', () => {
+    it('should create a default "alicloud" shoot manifest', async () => {
+      expect(createShootManifest('alicloud')).toMatchSnapshot()
+    })
+
     it('should create a default "aws" shoot manifest', async () => {
       expect(createShootManifest('aws')).toMatchSnapshot()
     })
@@ -79,20 +83,36 @@ describe('composables', () => {
       expect(createShootManifest('azure')).toMatchSnapshot()
     })
 
-    it('should create a default "alicloud" shoot manifest', async () => {
-      expect(createShootManifest('alicloud')).toMatchSnapshot()
-    })
-
     it('should create a default "gcp" shoot manifest', async () => {
       expect(createShootManifest('gcp')).toMatchSnapshot()
+    })
+
+    it('should create a default "hcloud" shoot manifest', async () => {
+      expect(createShootManifest('hcloud')).toMatchSnapshot()
+    })
+
+    it('should create a default "ironcore" shoot manifest', async () => {
+      expect(createShootManifest('ironcore')).toMatchSnapshot()
+    })
+
+    it('should create a default "local" shoot manifest', async () => {
+      expect(createShootManifest('local')).toMatchSnapshot()
+    })
+
+    it('should create a default "metal" shoot manifest', async () => {
+      expect(createShootManifest('metal')).toMatchSnapshot()
     })
 
     it('should create a default "openstack" shoot manifest', async () => {
       expect(createShootManifest('openstack')).toMatchSnapshot()
     })
 
-    it('should create a default "ironcore" shoot manifest', async () => {
-      expect(createShootManifest('ironcore')).toMatchSnapshot()
+    it('should create a default "stackit" shoot manifest', async () => {
+      expect(createShootManifest('stackit')).toMatchSnapshot()
+    })
+
+    it('should create a default "vsphere" shoot manifest', async () => {
+      expect(createShootManifest('vsphere')).toMatchSnapshot()
     })
 
     it('should change the infrastructure kind', async () => {
