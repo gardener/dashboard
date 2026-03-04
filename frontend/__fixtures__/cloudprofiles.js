@@ -4,6 +4,118 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+const DEFAULT_ARCHITECTURE = 'amd64'
+
+const createMachineType = ({
+  name,
+  cpu,
+  memory,
+  gpu = '0',
+  architecture = DEFAULT_ARCHITECTURE,
+  usable = true,
+  storage,
+}) => ({
+  name,
+  cpu,
+  gpu,
+  memory,
+  usable,
+  architecture,
+  ...(storage ? { storage } : {}),
+})
+
+const createVolumeType = ({
+  name,
+  class: volumeClass,
+  usable = true,
+  minSize,
+}) => ({
+  name,
+  class: volumeClass,
+  usable,
+  ...(minSize ? { minSize } : {}),
+})
+
+const createZone = ({
+  name,
+  unavailableMachineTypes,
+  unavailableVolumeTypes,
+}) => ({
+  name,
+  ...(unavailableMachineTypes ? { unavailableMachineTypes } : {}),
+  ...(unavailableVolumeTypes ? { unavailableVolumeTypes } : {}),
+})
+
+const createRegion = ({
+  name,
+  zones,
+  accessRestrictions,
+}) => ({
+  name,
+  zones,
+  ...(accessRestrictions?.length
+    ? {
+        accessRestrictions: accessRestrictions.map(name => ({ name })),
+      }
+    : {}),
+})
+
+const createCloudProfile = ({
+  metadataName,
+  displayName,
+  type,
+  seedNames,
+  providerConfig,
+  machineTypes,
+  regions,
+  volumeTypes,
+  kubernetes = { versions: [...kubernetesVersions] },
+  machineImagesProfile = [...machineImages],
+}) => ({
+  metadata: {
+    name: metadataName,
+    annotations: {
+      'garden.sapcloud.io/displayName': displayName,
+    },
+  },
+  spec: {
+    ...(seedNames ? { seedNames } : {}),
+    kubernetes,
+    machineImages: machineImagesProfile,
+    machineTypes,
+    providerConfig,
+    regions,
+    type,
+    ...(volumeTypes ? { volumeTypes } : {}),
+  },
+})
+
+const createOpenstackMachineTypes = ({ prefix, gpuType }) => {
+  const storage = {
+    class: 'standard',
+    size: '64Gi',
+    type: 'default',
+  }
+  return [
+    createMachineType({ name: `${prefix}_c2_m16`, cpu: '2', memory: '16Gi', storage }),
+    createMachineType({ name: `${prefix}_c4_m32`, cpu: '4', memory: '32Gi', storage }),
+    createMachineType({ name: `${prefix}_c8_m64`, cpu: '8', memory: '64Gi', storage }),
+    createMachineType({ name: `${prefix}_c16_m128`, cpu: '16', memory: '128Gi', storage }),
+    createMachineType({ name: `${prefix}_c32_m256`, cpu: '32', memory: '256Gi', storage }),
+    createMachineType({
+      name: gpuType,
+      cpu: '32',
+      gpu: '3',
+      memory: '384Gi',
+      storage: {
+        class: 'standard',
+        size: '1966Gi',
+        type: 'default',
+      },
+    }),
+  ]
+}
+
 export const kubernetesVersions = [
   {
     version: '1.29.2',
@@ -153,1007 +265,584 @@ export const machineImages = [
   },
 ]
 
+const alicloudMachineTypes = [
+  createMachineType({ name: 'ecs.c1.small', cpu: '8', memory: '8Gi' }),
+  createMachineType({ name: 'ecs.c2.medium', cpu: '16', memory: '16Gi' }),
+  createMachineType({ name: 'ecs.c2.large', cpu: '16', memory: '32Gi' }),
+  createMachineType({ name: 'ecs.c2.xlarge', cpu: '16', memory: '64Gi' }),
+  createMachineType({ name: 'ecs.c6.large', cpu: '2', memory: '4Gi' }),
+  createMachineType({ name: 'ecs.c6.xlarge', cpu: '4', memory: '8Gi' }),
+]
+
+const awsMachineTypes = [
+  createMachineType({ name: 'm4.large', cpu: '2', memory: '8Gi' }),
+  createMachineType({ name: 'm4.xlarge', cpu: '4', memory: '16Gi' }),
+  createMachineType({ name: 'm4.2xlarge', cpu: '8', memory: '32Gi' }),
+  createMachineType({ name: 'a1.large', cpu: '2', memory: '4Gi', architecture: 'arm64' }),
+  createMachineType({ name: 'a1.xlarge', cpu: '4', memory: '8Gi', architecture: 'arm64' }),
+  createMachineType({ name: 'a1.2xlarge', cpu: '8', memory: '16Gi', architecture: 'arm64' }),
+  createMachineType({ name: 'g5.large', cpu: '2', memory: '8Gi', gpu: '1' }),
+  createMachineType({ name: 'g5.xlarge', cpu: '4', memory: '16Gi', gpu: '1' }),
+  createMachineType({ name: 'g5.2xlarge', cpu: '8', memory: '32Gi', gpu: '1' }),
+]
+
+const azureMachineTypes = [
+  createMachineType({ name: 'Standard_A4_v2', cpu: '4', memory: '8Gi' }),
+  createMachineType({ name: 'Basic_A3', cpu: '4', memory: '7Gi' }),
+  createMachineType({ name: 'Basic_A4', cpu: '8', memory: '14Gi' }),
+]
+
+const gcpMachineTypes = [
+  createMachineType({ name: 'n1-standard-2', cpu: '2', memory: '7Gi' }),
+  createMachineType({ name: 'n1-standard-4', cpu: '4', memory: '15Gi' }),
+  createMachineType({ name: 'n1-standard-8', cpu: '8', memory: '30Gi' }),
+  createMachineType({ name: 'n1-standard-16', cpu: '16', memory: '60Gi' }),
+  createMachineType({ name: 't2a-standard-2', cpu: '2', memory: '8Gi', architecture: 'arm64' }),
+  createMachineType({ name: 't2a-standard-4', cpu: '4', memory: '16Gi', architecture: 'arm64' }),
+  createMachineType({ name: 't2a-standard-8', cpu: '8', memory: '32Gi', architecture: 'arm64' }),
+  createMachineType({ name: 't2a-standard-16', cpu: '16', memory: '64Gi', architecture: 'arm64' }),
+]
+
+const metalMachineTypes = [
+  createMachineType({ name: 'c1-metal-small', cpu: '2', memory: '4Gi' }),
+  createMachineType({ name: 'c1-metal-medium', cpu: '4', memory: '8Gi' }),
+]
+
+const localMachineTypes = [
+  createMachineType({ name: 'local-dev-small', cpu: '2', memory: '4Gi' }),
+]
+
+const hcloudMachineTypes = [
+  createMachineType({ name: 'cpx11', cpu: '2', memory: '2Gi' }),
+  createMachineType({ name: 'cpx21', cpu: '3', memory: '4Gi' }),
+]
+
+const stackitMachineTypes = [
+  createMachineType({ name: 'stackit-machine-1', cpu: '2', memory: '8Gi' }),
+  createMachineType({ name: 'stackit-machine-2', cpu: '4', memory: '16Gi' }),
+]
+
+const vsphereMachineTypes = [
+  createMachineType({ name: 'vsphere-machine-1', cpu: '2', memory: '4Gi' }),
+  createMachineType({ name: 'vsphere-machine-2', cpu: '4', memory: '8Gi' }),
+]
+
+const openstack1MachineTypes = createOpenstackMachineTypes({
+  prefix: 'g',
+  gpuType: 'xg1bcm1.medium',
+})
+
+const openstack2MachineTypes = createOpenstackMachineTypes({
+  prefix: 'm',
+  gpuType: 'zg1bcm1.medium',
+})
+
 export default [
-  {
-    metadata: {
-      name: 'alicloud',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'Alibaba Cloud',
-      },
+  createCloudProfile({
+    metadataName: 'alicloud',
+    displayName: 'Alibaba Cloud',
+    type: 'alicloud',
+    machineTypes: alicloudMachineTypes,
+    providerConfig: {
+      apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
     },
-    spec: {
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+    regions: [
+      createRegion({
+        name: 'eu-central-1',
+        zones: [
+          createZone({ name: 'eu-central-1a' }),
+          createZone({ name: 'eu-central-1b' }),
+          createZone({
+            name: 'eu-central-1c',
+            unavailableMachineTypes: [
+              alicloudMachineTypes[0].name,
+              alicloudMachineTypes[1].name,
+            ],
+            unavailableVolumeTypes: [
+              'cloud_ssd',
+            ],
+          }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'ecs.c1.small',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '16Gi',
-          name: 'ecs.c2.medium',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '32Gi',
-          name: 'ecs.c2.large',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '64Gi',
-          name: 'ecs.c2.xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '4Gi',
-          name: 'ecs.c6.large',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'ecs.c6.xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'eu-central-1',
-          zones: [
-            {
-              name: 'eu-central-1a',
-            },
-            {
-              name: 'eu-central-1b',
-            },
-            {
-              name: 'eu-central-1c',
-              unavailableMachineTypes: [
-                'ecs.c1.small',
-                'ecs.c2.medium',
-              ],
-              unavailableVolumeTypes: [
-                'cloud_ssd',
-              ],
-            },
-          ],
-        },
-        {
-          name: 'us-east-1',
-          zones: [
-            {
-              name: 'us-east-1a',
-            },
-            {
-              name: 'us-east-1b',
-            },
-          ],
-        },
-      ],
-      type: 'alicloud',
-      volumeTypes: [
-        {
-          class: 'standard',
-          name: 'cloud',
-          usable: true,
-        },
-        {
-          class: 'standard',
-          name: 'cloud_efficiency',
-          usable: true,
-        },
-        {
-          class: 'premium',
-          name: 'cloud_ssd',
-          usable: true,
-        },
-      ],
-    },
-  },
-  {
-    metadata: {
-      name: 'aws',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'aws',
-      },
-    },
-    spec: {
-      seedNames: [
-        'aws-ha',
-      ],
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+      }),
+      createRegion({
+        name: 'us-east-1',
+        zones: [
+          createZone({ name: 'us-east-1a' }),
+          createZone({ name: 'us-east-1b' }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'm4.large',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '16Gi',
-          name: 'm4.xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '32Gi',
-          name: 'm4.2xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '4Gi',
-          name: 'a1.large',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'a1.xlarge',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '16Gi',
-          name: 'a1.2xlarge',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '2',
-          gpu: '1',
-          memory: '8Gi',
-          name: 'g5.large',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '1',
-          memory: '16Gi',
-          name: 'g5.xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '1',
-          memory: '32Gi',
-          name: 'g5.2xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'eu-central-1',
-          zones: [
-            {
-              name: 'eu-central-1a',
-            },
-            {
-              name: 'eu-central-1b',
-            },
-            {
-              name: 'eu-central-1c',
-              unavailableMachineTypes: [
-                'm4.large',
-                'a1.large',
-                'g5.large',
-              ],
-              unavailableVolumeTypes: [
-                'gp3',
-                'io1',
-              ],
-            },
-          ],
-          accessRestrictions: [{
-            name: 'eu-access-only',
-          }],
-        },
-        {
-          name: 'eu-west-1',
-          zones: [
-            {
-              name: 'eu-west-1a',
-            },
-            {
-              name: 'eu-west-1b',
-            },
-            {
-              name: 'eu-west-1c',
-              unavailableMachineTypes: [
-                'm4.xlarge',
-                'a1.xlarge',
-                'g5.xlarge',
-              ],
-              unavailableVolumeTypes: [
-                'io1',
-              ],
-            },
-          ],
-          accessRestrictions: [{
-            name: 'eu-access-only',
-          }],
-        },
-        {
-          name: 'us-east-1',
-          zones: [
-            {
-              name: 'us-east-1a',
-            },
-            {
-              name: 'us-east-1b',
-            },
-            {
-              name: 'us-east-1c',
-            },
-            {
-              name: 'us-east-1d',
-            },
-          ],
-        },
-      ],
-      type: 'aws',
-      volumeTypes: [
-        {
-          class: 'standard',
-          name: 'gp3',
-          usable: true,
-        },
-        {
-          class: 'standard',
-          name: 'gp2',
-          usable: true,
-        },
-        {
-          class: 'standard',
-          name: 'io1',
-          usable: true,
-          minSize: '4Gi',
-        },
-      ],
+      }),
+    ],
+    volumeTypes: [
+      createVolumeType({ name: 'cloud', class: 'standard' }),
+      createVolumeType({ name: 'cloud_efficiency', class: 'standard' }),
+      createVolumeType({ name: 'cloud_ssd', class: 'premium' }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'aws',
+    displayName: 'aws',
+    type: 'aws',
+    seedNames: [
+      'aws-ha',
+    ],
+    machineTypes: awsMachineTypes,
+    providerConfig: {
+      apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
     },
-  },
-  {
-    metadata: {
-      name: 'az',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'Azure',
-      },
-    },
-    spec: {
-      seedNames: [
-        'az-ha',
-      ],
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+    regions: [
+      createRegion({
+        name: 'eu-central-1',
+        zones: [
+          createZone({ name: 'eu-central-1a' }),
+          createZone({ name: 'eu-central-1b' }),
+          createZone({
+            name: 'eu-central-1c',
+            unavailableMachineTypes: [
+              awsMachineTypes[0].name,
+              awsMachineTypes[3].name,
+              awsMachineTypes[6].name,
+            ],
+            unavailableVolumeTypes: [
+              'gp3',
+              'io1',
+            ],
+          }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'Standard_A4_v2',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '7Gi',
-          name: 'Basic_A3',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '14Gi',
-          name: 'Basic_A4',
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'westeurope',
-          zones: [
-            {
-              name: '1',
-            },
-            {
-              name: '2',
-            },
-            {
-              name: '3',
-              unavailableMachineTypes: [
-                'Standard_A4_v2',
-              ],
-              unavailableVolumeTypes: [
-                'StandardSSD_LRS',
-              ],
-            },
-          ],
-          accessRestrictions: [{
-            name: 'eu-access-only',
-          }],
-        },
-        {
-          name: 'eastus',
-          zones: [
-            {
-              name: '1',
-            },
-            {
-              name: '2',
-            },
-            {
-              name: '3',
-            },
-          ],
-        },
-      ],
-      type: 'azure',
-      volumeTypes: [
-        {
-          class: 'premium',
-          name: 'StandardSSD_LRS',
-          usable: true,
-          minSize: '20Gi',
-        },
-        {
-          class: 'standard',
-          name: 'Standard_LRS',
-          usable: true,
-          minSize: '20Gi',
-        },
-        {
-          class: 'premium',
-          name: 'Premium_LRS',
-          usable: true,
-          minSize: '20Gi',
-        },
-      ],
-    },
-  },
-  {
-    metadata: {
-      name: 'openstack-1',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'Openstack 1',
-      },
-    },
-    spec: {
-      seedNames: [
-        'openstack-ha',
-      ],
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+        accessRestrictions: ['eu-access-only'],
+      }),
+      createRegion({
+        name: 'eu-west-1',
+        zones: [
+          createZone({ name: 'eu-west-1a' }),
+          createZone({ name: 'eu-west-1b' }),
+          createZone({
+            name: 'eu-west-1c',
+            unavailableMachineTypes: [
+              awsMachineTypes[1].name,
+              awsMachineTypes[4].name,
+              awsMachineTypes[7].name,
+            ],
+            unavailableVolumeTypes: [
+              'io1',
+            ],
+          }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '16Gi',
-          name: 'g_c2_m16',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '32Gi',
-          name: 'g_c4_m32',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '64Gi',
-          name: 'g_c8_m64',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '128Gi',
-          name: 'g_c16_m128',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '32',
-          gpu: '0',
-          memory: '256Gi',
-          name: 'g_c32_m256',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '32',
-          gpu: '3',
-          memory: '384Gi',
-          name: 'xg1bcm1.medium',
-          storage: {
-            class: 'standard',
-            size: '1966Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
-        constraints: {
-          floatingPools: [
-            {
-              name: 'FloatingIP*',
-              region: 'eu-de-1',
-            },
-            {
-              name: 'FloatingIP*',
-              region: 'na-us-1',
-            },
-          ],
-          loadBalancerProviders: [
-            {
-              name: 'f5',
-            },
-          ],
-        },
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'eu-de-1',
-          zones: [
-            {
-              name: 'eu-de-1a',
-            },
-            {
-              name: 'eu-de-1b',
-            },
-            {
-              name: 'eu-de-1d',
-              unavailableMachineTypes: [
-                'g_c2_m16',
-              ],
-            },
-          ],
-          accessRestrictions: [{
-            name: 'eu-access-only',
-          }],
-        },
-        {
-          name: 'na-us-1',
-          zones: [
-            {
-              name: 'na-us-1a',
-            },
-            {
-              name: 'na-us-1b',
-            },
-            {
-              name: 'na-us-1d',
-            },
-          ],
-        },
-      ],
-      type: 'openstack',
-    },
-  },
-  {
-    metadata: {
-      name: 'openstack-2',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'Openstack 2',
-      },
-    },
-    spec: {
-      seedNames: [
-        'openstack-ha',
-      ],
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+        accessRestrictions: ['eu-access-only'],
+      }),
+      createRegion({
+        name: 'us-east-1',
+        zones: [
+          createZone({ name: 'us-east-1a' }),
+          createZone({ name: 'us-east-1b' }),
+          createZone({ name: 'us-east-1c' }),
+          createZone({ name: 'us-east-1d' }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '16Gi',
-          name: 'm_c2_m16',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '32Gi',
-          name: 'm_c4_m32',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '64Gi',
-          name: 'm_c8_m64',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '128Gi',
-          name: 'm_c16_m128',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '32',
-          gpu: '0',
-          memory: '256Gi',
-          name: 'm_c32_m256',
-          storage: {
-            class: 'standard',
-            size: '64Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '32',
-          gpu: '3',
-          memory: '384Gi',
-          name: 'zg1bcm1.medium',
-          storage: {
-            class: 'standard',
-            size: '1966Gi',
-            type: 'default',
-          },
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
-        constraints: {
-          floatingPools: [
-            {
-              defaultFloatingSubnet: 'FloatingIP-intranet-*',
-              loadBalancerClasses: [
-                {
-                  floatingSubnetName: 'FloatingIP-internet-*',
-                  name: 'internet',
-                },
-                {
-                  floatingSubnetName: 'FloatingIP-intranet-*',
-                  name: 'intranet',
-                  purpose: 'default',
-                },
-              ],
-              name: 'FloatingIP*',
-              region: 'eu-de-2',
-            },
-            {
-              defaultFloatingSubnet: 'FloatingIP-intranet-*',
-              loadBalancerClasses: [
-                {
-                  floatingSubnetName: 'FloatingIP-internet-*',
-                  name: 'internet',
-                },
-                {
-                  floatingSubnetName: 'FloatingIP-intranet-*',
-                  name: 'intranet',
-                  purpose: 'default',
-                },
-              ],
-              name: 'FloatingIP*',
-              region: 'na-us-2',
-            },
-          ],
-          loadBalancerProviders: [
-            {
-              name: 'f5',
-            },
-          ],
-        },
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'eu-de-2',
-          zones: [
-            {
-              name: 'eu-de-2a',
-            },
-            {
-              name: 'eu-de-2b',
-            },
-            {
-              name: 'eu-de-2d',
-              unavailableMachineTypes: [
-                'm_c2_m16',
-              ],
-            },
-          ],
-          accessRestrictions: [{
-            name: 'eu-access-only',
-          }],
-        },
-        {
-          name: 'na-us-2',
-          zones: [
-            {
-              name: 'na-us-2a',
-            },
-            {
-              name: 'na-us-2b',
-            },
-            {
-              name: 'na-us-2d',
-            },
-          ],
-        },
-      ],
-      type: 'openstack',
+      }),
+    ],
+    volumeTypes: [
+      createVolumeType({ name: 'gp3', class: 'standard' }),
+      createVolumeType({ name: 'gp2', class: 'standard' }),
+      createVolumeType({ name: 'io1', class: 'standard', minSize: '4Gi' }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'az',
+    displayName: 'Azure',
+    type: 'azure',
+    seedNames: [
+      'az-ha',
+    ],
+    machineTypes: azureMachineTypes,
+    providerConfig: {
+      apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
     },
-  },
-  {
-    metadata: {
-      name: 'gcp',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'Google Cloud',
-      },
-    },
-    spec: {
-      seedNames: [
-        'gcp-ha',
-      ],
-      kubernetes: {
-        versions: [
-          ...kubernetesVersions,
+    regions: [
+      createRegion({
+        name: 'westeurope',
+        zones: [
+          createZone({ name: '1' }),
+          createZone({ name: '2' }),
+          createZone({
+            name: '3',
+            unavailableMachineTypes: [
+              azureMachineTypes[0].name,
+            ],
+            unavailableVolumeTypes: [
+              'StandardSSD_LRS',
+            ],
+          }),
         ],
-      },
-      machineImages: [
-        ...machineImages,
-      ],
-      machineTypes: [
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '7Gi',
-          name: 'n1-standard-2',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '15Gi',
-          name: 'n1-standard-4',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '30Gi',
-          name: 'n1-standard-8',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '60Gi',
-          name: 'n1-standard-16',
-          usable: true,
-          architecture: 'amd64',
-        },
-        {
-          cpu: '2',
-          gpu: '0',
-          memory: '8Gi',
-          name: 't2a-standard-2',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '16Gi',
-          name: 't2a-standard-4',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '8',
-          gpu: '0',
-          memory: '32Gi',
-          name: 't2a-standard-8',
-          usable: true,
-          architecture: 'arm64',
-        },
-        {
-          cpu: '16',
-          gpu: '0',
-          memory: '64Gi',
-          name: 't2a-standard-16',
-          usable: true,
-          architecture: 'arm64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'CloudProfileConfig',
-      },
-      regions: [
-        {
-          name: 'europe-west1',
-          zones: [
-            {
-              name: 'europe-west1-b',
-            },
-            {
-              name: 'europe-west1-c',
-            },
-            {
-              name: 'europe-west1-d',
-              unavailableMachineTypes: [
-                'n1-standard-2',
-                'n1-standard-4',
-                't2a-standard-2',
-                't2a-standard-8',
-              ],
-              unavailableVolumeTypes: [
-                'pd-balanced',
-                'pd-ssd',
-              ],
-            },
-          ],
-        },
-        {
-          name: 'us-east1',
-          zones: [
-            {
-              name: 'us-east1-b',
-            },
-            {
-              name: 'us-east1-c',
-            },
-            {
-              name: 'us-east1-d',
-            },
-          ],
-        },
-      ],
-      type: 'gcp',
-      volumeTypes: [
-        {
-          class: 'premium',
-          name: 'pd-balanced',
-          usable: true,
-          minSize: '20Gi',
-        },
-        {
-          class: 'standard',
-          name: 'pd-standard',
-          usable: true,
-          minSize: '20Gi',
-        },
-        {
-          class: 'premium',
-          name: 'pd-ssd',
-          usable: true,
-          minSize: '20Gi',
-        },
-      ],
-    },
-  },
-  {
-    metadata: {
-      name: 'ironcore',
-      annotations: {
-        'garden.sapcloud.io/displayName': 'IronCore',
-      },
-    },
-    spec: {
-      seedNames: [
-        'gcp-ha',
-      ],
-      kubernetes: {
-        versions: [
+        accessRestrictions: ['eu-access-only'],
+      }),
+      createRegion({
+        name: 'eastus',
+        zones: [
+          createZone({ name: '1' }),
+          createZone({ name: '2' }),
+          createZone({ name: '3' }),
+        ],
+      }),
+    ],
+    volumeTypes: [
+      createVolumeType({ name: 'StandardSSD_LRS', class: 'premium', minSize: '20Gi' }),
+      createVolumeType({ name: 'Standard_LRS', class: 'standard', minSize: '20Gi' }),
+      createVolumeType({ name: 'Premium_LRS', class: 'premium', minSize: '20Gi' }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'openstack-1',
+    displayName: 'Openstack 1',
+    type: 'openstack',
+    seedNames: [
+      'openstack-ha',
+    ],
+    machineTypes: openstack1MachineTypes,
+    providerConfig: {
+      apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+      constraints: {
+        floatingPools: [
           {
-            version: '1.28.4',
+            name: 'FloatingIP*',
+            region: 'eu-de-1',
           },
           {
-            version: '1.27.8',
+            name: 'FloatingIP*',
+            region: 'na-us-1',
           },
+        ],
+        loadBalancerProviders: [
           {
-            version: '1.26.11',
+            name: 'f5',
           },
         ],
       },
-      machineImages: [
-        {
-          name: 'gardenlinux',
-          versions: [
-            {
-              version: '1312.2.0',
-              cri: [
-                {
-                  name: 'containerd',
-                },
-                {
-                  name: 'docker',
-                },
-              ],
-              architectures: [
-                'amd64',
-              ],
-            },
-          ],
-          updateStrategy: 'major',
-        },
-      ],
-      machineTypes: [
-        {
-          cpu: '4',
-          gpu: '0',
-          memory: '8Gi',
-          name: 'x3-xlarge',
-          usable: true,
-          architecture: 'amd64',
-        },
-      ],
-      providerConfig: {
-        apiVersion: 'ironcore.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'CloudProfileConfig',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'eu-de-1',
+        zones: [
+          createZone({ name: 'eu-de-1a' }),
+          createZone({ name: 'eu-de-1b' }),
+          createZone({
+            name: 'eu-de-1d',
+            unavailableMachineTypes: [
+              openstack1MachineTypes[0].name,
+            ],
+          }),
+        ],
+        accessRestrictions: ['eu-access-only'],
+      }),
+      createRegion({
+        name: 'na-us-1',
+        zones: [
+          createZone({ name: 'na-us-1a' }),
+          createZone({ name: 'na-us-1b' }),
+          createZone({ name: 'na-us-1d' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'openstack-2',
+    displayName: 'Openstack 2',
+    type: 'openstack',
+    seedNames: [
+      'openstack-ha',
+    ],
+    machineTypes: openstack2MachineTypes,
+    providerConfig: {
+      apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+      constraints: {
+        floatingPools: [
+          {
+            defaultFloatingSubnet: 'FloatingIP-intranet-*',
+            loadBalancerClasses: [
+              {
+                floatingSubnetName: 'FloatingIP-internet-*',
+                name: 'internet',
+              },
+              {
+                floatingSubnetName: 'FloatingIP-intranet-*',
+                name: 'intranet',
+                purpose: 'default',
+              },
+            ],
+            name: 'FloatingIP*',
+            region: 'eu-de-2',
+          },
+          {
+            defaultFloatingSubnet: 'FloatingIP-intranet-*',
+            loadBalancerClasses: [
+              {
+                floatingSubnetName: 'FloatingIP-internet-*',
+                name: 'internet',
+              },
+              {
+                floatingSubnetName: 'FloatingIP-intranet-*',
+                name: 'intranet',
+                purpose: 'default',
+              },
+            ],
+            name: 'FloatingIP*',
+            region: 'na-us-2',
+          },
+        ],
+        loadBalancerProviders: [
+          {
+            name: 'f5',
+          },
+        ],
       },
-      regions: [
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'eu-de-2',
+        zones: [
+          createZone({ name: 'eu-de-2a' }),
+          createZone({ name: 'eu-de-2b' }),
+          createZone({
+            name: 'eu-de-2d',
+            unavailableMachineTypes: [
+              openstack2MachineTypes[0].name,
+            ],
+          }),
+        ],
+        accessRestrictions: ['eu-access-only'],
+      }),
+      createRegion({
+        name: 'na-us-2',
+        zones: [
+          createZone({ name: 'na-us-2a' }),
+          createZone({ name: 'na-us-2b' }),
+          createZone({ name: 'na-us-2d' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'gcp',
+    displayName: 'Google Cloud',
+    type: 'gcp',
+    seedNames: [
+      'gcp-ha',
+    ],
+    machineTypes: gcpMachineTypes,
+    providerConfig: {
+      apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'europe-west1',
+        zones: [
+          createZone({ name: 'europe-west1-b' }),
+          createZone({ name: 'europe-west1-c' }),
+          createZone({
+            name: 'europe-west1-d',
+            unavailableMachineTypes: [
+              gcpMachineTypes[0].name,
+              gcpMachineTypes[1].name,
+              gcpMachineTypes[4].name,
+              gcpMachineTypes[6].name,
+            ],
+            unavailableVolumeTypes: [
+              'pd-balanced',
+              'pd-ssd',
+            ],
+          }),
+        ],
+      }),
+      createRegion({
+        name: 'us-east1',
+        zones: [
+          createZone({ name: 'us-east1-b' }),
+          createZone({ name: 'us-east1-c' }),
+          createZone({ name: 'us-east1-d' }),
+        ],
+      }),
+    ],
+    volumeTypes: [
+      createVolumeType({ name: 'pd-balanced', class: 'premium', minSize: '20Gi' }),
+      createVolumeType({ name: 'pd-standard', class: 'standard', minSize: '20Gi' }),
+      createVolumeType({ name: 'pd-ssd', class: 'premium', minSize: '20Gi' }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'hcloud',
+    displayName: 'Hetzner Cloud',
+    type: 'hcloud',
+    seedNames: [
+      'hcloud-ha',
+    ],
+    machineTypes: hcloudMachineTypes,
+    providerConfig: {
+      apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'fsn1',
+        zones: [
+          createZone({ name: 'fsn1-dc14' }),
+          createZone({ name: 'fsn1-dc8' }),
+        ],
+      }),
+      createRegion({
+        name: 'hel1',
+        zones: [
+          createZone({ name: 'hel1-dc2' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'metal',
+    displayName: 'OnMetal',
+    type: 'metal',
+    seedNames: [
+      'metal-ha',
+    ],
+    machineTypes: metalMachineTypes,
+    providerConfig: {
+      apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'eu01',
+        zones: [
+          createZone({ name: 'eu01-a' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'local',
+    displayName: 'Local',
+    type: 'local',
+    machineTypes: localMachineTypes,
+    providerConfig: {
+      apiVersion: 'local.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'local',
+        zones: [
+          createZone({ name: 'local-a' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'stackit',
+    displayName: 'stackit',
+    type: 'stackit',
+    seedNames: [
+      'stackit-ha',
+    ],
+    machineTypes: stackitMachineTypes,
+    providerConfig: {
+      apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'eu01',
+        zones: [
+          createZone({ name: 'eu01-1' }),
+          createZone({ name: 'eu01-2' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'vsphere',
+    displayName: 'vSphere',
+    type: 'vsphere',
+    seedNames: [
+      'vsphere-ha',
+    ],
+    machineTypes: vsphereMachineTypes,
+    providerConfig: {
+      apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'region1',
+        zones: [
+          createZone({ name: 'zone1' }),
+          createZone({ name: 'zone2' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'ironcore',
+    displayName: 'IronCore',
+    type: 'ironcore',
+    seedNames: [
+      'ironcore-ha',
+    ],
+    kubernetes: {
+      versions: [
         {
-          name: 'de-fra',
-          zones: [
-            {
-              name: 'fra3',
-            },
-          ],
+          version: '1.28.4',
         },
-      ],
-      type: 'ironcore',
-      volumeTypes: [
         {
-          class: 'standard',
-          name: 'general-purpose',
-          usable: true,
+          version: '1.27.8',
         },
         {
-          class: 'premium',
-          name: 'io-optimized',
-          usable: true,
+          version: '1.26.11',
         },
       ],
     },
-  },
+    machineImagesProfile: [
+      {
+        name: 'gardenlinux',
+        versions: [
+          {
+            version: '1312.2.0',
+            cri: [
+              {
+                name: 'containerd',
+              },
+              {
+                name: 'docker',
+              },
+            ],
+            architectures: [
+              'amd64',
+            ],
+          },
+        ],
+        updateStrategy: 'major',
+      },
+    ],
+    machineTypes: [
+      createMachineType({ name: 'x3-xlarge', cpu: '4', memory: '8Gi' }),
+    ],
+    providerConfig: {
+      apiVersion: 'ironcore.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'de-fra',
+        zones: [
+          createZone({ name: 'fra3' }),
+        ],
+      }),
+    ],
+    volumeTypes: [
+      createVolumeType({ name: 'general-purpose', class: 'standard' }),
+      createVolumeType({ name: 'io-optimized', class: 'premium' }),
+    ],
+  }),
 ]
