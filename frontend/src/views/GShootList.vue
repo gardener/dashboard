@@ -180,12 +180,7 @@ export default {
     GTableSearch,
   },
   inject: ['logger'],
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.updateTableSettings()
-    })
-  },
-  beforeRouteUpdate (to, from, next) {
+  beforeRouteUpdate (to, from) {
     if (to.path !== from.path) {
       this.setShootSearch('')
     }
@@ -195,14 +190,10 @@ export default {
     // Reset expanded state in case project changes
     this.resetState(this.expandedWorkerGroups, { default: false })
     this.resetState(this.expandedAccessRestrictions, { default: false })
-
-    next()
   },
-  beforeRouteLeave (to, from, next) {
+  beforeRouteLeave () {
     this.setShootSearch('')
     this.focusModeInternal = false
-
-    next()
   },
   setup () {
     const projectStore = useProjectStore()
@@ -685,6 +676,9 @@ export default {
         this.shootSortBy = sortBy
       }
     },
+  },
+  mounted () {
+    this.updateTableSettings()
   },
   methods: {
     ...mapActions(useShootStore, [

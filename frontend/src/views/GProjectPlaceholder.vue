@@ -41,13 +41,6 @@ export default {
   components: {
     GProjectError,
   },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        vm.load(to)
-      }
-    })
-  },
   setup () {
     const route = useRoute()
     const authzStore = useAuthzStore()

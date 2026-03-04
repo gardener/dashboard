@@ -34,8 +34,6 @@ describe('components', () => {
     let loginStore // eslint-disable-line no-unused-vars
     let localStorageStore
     let mockRoute
-    let mockRouter
-    let mockNext
 
     function mountLogin () {
       return mount(GLogin, {
@@ -49,7 +47,6 @@ describe('components', () => {
           ],
           mocks: {
             $route: mockRoute,
-            $router: mockRouter,
           },
         },
       })
@@ -72,10 +69,6 @@ describe('components', () => {
         query: {
           redirectPath: '/namespace/garden/shoots',
         },
-      }
-      mockRouter = {
-        push: vi.fn(),
-        replace: vi.fn(),
       }
       pinia = createTestingPinia({
         stubActions: false,
@@ -120,16 +113,10 @@ describe('components', () => {
             title: error.title,
           }),
         }
-        mockNext = vi.fn().mockImplementation(fn => {
-          if (typeof fn === 'function') {
-            fn(wrapper.vm)
-          }
-        })
-        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined, mockNext)
-        expect(wrapper.vm.error.message).toBe(error.message)
-        await GLogin.beforeRouteUpdate.call(wrapper.vm, undefined, undefined, () => {})
-        expect(mockNext).toBeCalledTimes(1)
-        expect(mockNext.mock.calls[0]).toEqual([expect.any(Function)])
+
+        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined)
+        expect(wrapper.vm.loginError.message).toBe(error.message)
+        await GLogin.mounted.call(wrapper.vm)
         expect(appStore.setError).toBeCalledTimes(1)
         expect(appStore.setError.mock.calls[0]).toEqual([
           expect.objectContaining({
@@ -137,8 +124,6 @@ describe('components', () => {
             title: 'title',
           }),
         ])
-        expect(mockRouter.replace).toBeCalledTimes(1)
-        expect(mockRouter.replace.mock.calls[0]).toEqual(['/login'])
       })
 
       it('should not show a login error', async () => {
@@ -150,17 +135,10 @@ describe('components', () => {
             title: error.title,
           }),
         }
-        mockNext = vi.fn().mockImplementation(fn => {
-          if (typeof fn === 'function') {
-            fn(wrapper.vm)
-          }
-        })
-        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined, mockNext)
-        expect(mockNext).toBeCalledTimes(1)
-        expect(mockNext.mock.calls[0]).toEqual([expect.any(Function)])
+
+        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined)
+        await GLogin.mounted.call(wrapper.vm)
         expect(appStore.setError).not.toBeCalled()
-        expect(mockRouter.replace).toBeCalledTimes(1)
-        expect(mockRouter.replace.mock.calls[0]).toEqual(['/login'])
       })
 
       it('should automatically login', async () => {
@@ -171,10 +149,7 @@ describe('components', () => {
             redirectPath: '/namespace/garden-foo/shoots',
           },
         }
-        mockNext = vi.fn()
-        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined, mockNext)
-        expect(mockNext).toBeCalledTimes(1)
-        expect(mockNext.mock.calls[0]).toEqual([false])
+        await GLogin.beforeRouteEnter.call(wrapper.vm, to, undefined)
         expect(authnStore.signinWithOidc).toBeCalledTimes(1)
         expect(authnStore.signinWithOidc.mock.calls[0]).toEqual([to.query.redirectPath])
       })
