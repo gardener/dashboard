@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       />
       <v-card-text>
         <v-container fluid>
-          <span class="text-subtitle-1">
+          <span class="text-body-large">
             Are you sure to delete the <code>Secret</code> <span class="font-weight-bold">{{ resourceName }} (<code>{{ resourceKind }}</code>)</span>?<br>
             <span class="text-error font-weight-bold">The operation can not be undone.</span>
           </span>

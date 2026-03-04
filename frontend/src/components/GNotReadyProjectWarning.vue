@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
           {{ projectPhase }}
         </v-chip>
       </div>
-      <div class="text-caption">
+      <div class="text-body-small">
         <span v-if="projectPhase === 'Terminating'">
           Gardener is currently cleaning up BackupEntries related to this project. The project will be removed when all cleanup activity has been finished.
         </span>

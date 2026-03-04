@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
   <!-- eslint-disable vue/no-v-html -->
   <div
     v-else-if="hasFooter"
-    class="text-caption text-center"
+    class="text-body-small text-center"
   >
     <span class="text-primary">
       Discover what our service is about at the

@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-key"
         :height="64"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           Infrastructure Credentials
         </div>
         <template #append>
@@ -88,10 +88,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-alert>
       </v-card-text>
       <v-card-text v-else-if="!infrastructureBindingList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">
+        <div class="text-title-large text-grey-darken-1 my-4">
           Add Infrastructure Credentials to your project
         </div>
-        <p class="text-body-1">
+        <p class="text-body-large">
           Before you can provision and access a Kubernetes cluster, you need to add infrastructure account credentials. The Gardener needs the credentials to provision and operate the infrastructure for your Kubernetes cluster.
         </p>
       </v-card-text>
@@ -140,7 +140,7 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-key"
         :height="64"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           DNS Credentials
         </div>
 
@@ -204,10 +204,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-toolbar>
 
       <v-card-text v-if="!dnsCredentialList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">
+        <div class="text-title-large text-grey-darken-1 my-4">
           Add DNS Credentials to your project
         </div>
-        <p class="text-body-1">
+        <p class="text-body-large">
           Before you can use your DNS Provider account for your cluster, you need to configure the credentials here.
         </p>
       </v-card-text>
@@ -657,13 +657,14 @@ export default {
     isHighlightedBinding (binding) {
       return this.highlightedBindingUid && this.highlightedBindingUid === binding.metadata.uid
     },
-    customFilter (_, query, item) {
+    customFilter (_, query, internalItem) {
+      const item = internalItem.raw
       const {
         credentialDetails,
         credential,
         binding,
         providerType,
-      } = item.raw
+      } = item
 
       const detailValues = map(credentialDetails, 'value')
       const values = [
@@ -682,11 +683,11 @@ export default {
       })
     },
     getBindingItemKey (item, fallback) {
-      const bindingUid = item.raw?.binding?.metadata?.uid
+      const bindingUid = item?.binding?.metadata?.uid
       return bindingUid ?? fallback
     },
     getCredentialItemKey (item, fallback) {
-      const credentialUid = item.raw?.credential?.metadata?.uid
+      const credentialUid = item?.credential?.metadata?.uid
       return credentialUid ?? fallback
     },
     resetHighlighted () {

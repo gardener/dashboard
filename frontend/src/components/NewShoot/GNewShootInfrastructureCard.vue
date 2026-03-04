@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
           no-background
           :style="getVendorIconStyles(isHovering)"
         />
-        <div class="mt-2 text-subtitle-1">
+        <div class="mt-2 text-body-large">
           {{ vendorName }}
         </div>
       </div>

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="ml-3">
-    <div class="text-subtitle-1 pt-4">
+    <div class="text-body-large pt-4">
       {{ title }}
     </div>
     <template v-if="!workerless">
@@ -28,10 +28,10 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </div>
         <div class="d-flex flex-column">
-          <div class="wrap-text text-subtitle-2">
+          <div class="wrap-text text-title-small">
             Operating System
           </div>
-          <div class="wrap-text pt-1 text-body-2">
+          <div class="wrap-text pt-1 text-body-medium">
             Update the operating system of the workers<br>
             (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
           </div>
@@ -56,10 +56,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-icon>
       </div>
       <div class="d-flex flex-column">
-        <div class="wrap-text text-subtitle-2">
+        <div class="wrap-text text-title-small">
           Kubernetes Patch Version
         </div>
-        <div class="wrap-text pt-1 text-body-2">
+        <div class="wrap-text pt-1 text-body-medium">
           Update the control plane of the cluster and the worker components<br>
           (control plane, most notably the API server, will be briefly unavailable during switch-over)
         </div>
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex align-center justify-center action-select">
         <v-icon>mdi-information-outline</v-icon>
       </div>
-      <div class="d-flex align-center justify-center wrap-text text-subtitle-2">
+      <div class="d-flex align-center justify-center wrap-text text-title-small">
         Automatic updates will not update to preview versions
       </div>
     </div>
@@ -84,10 +84,10 @@ SPDX-License-Identifier: Apache-2.0
         <v-icon>mdi-close-circle-outline</v-icon>
       </div>
       <div class="d-flex flex-column">
-        <div class="wrap-text text-subtitle-2">
+        <div class="wrap-text text-title-small">
           Updates disabled
         </div>
-        <div class="wrap-text pt-1 text-body-2">
+        <div class="wrap-text pt-1 text-body-medium">
           All automatic updates have been disabled for this cluster
         </div>
       </div>

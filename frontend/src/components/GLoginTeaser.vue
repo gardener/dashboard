@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
       :height="logoSize"
       class="mt-2"
     >
-    <div class="text-h5 text-center font-weight-light text-primary mt-4">
+    <div class="text-headline-small text-center font-weight-light text-primary mt-4">
       {{ branding.productSlogan }}
     </div>
   </div>

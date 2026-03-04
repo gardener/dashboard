@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-sprout"
         :height="64"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           Seeds
         </div>
         <template #append>

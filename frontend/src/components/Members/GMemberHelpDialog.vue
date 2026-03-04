@@ -16,27 +16,27 @@ SPDX-License-Identifier: Apache-2.0
       />
       <v-card-text class="help-class pt-0">
         <template v-if="isUserDialog">
-          <div class="text-h6 text-grey-darken-1 my-4">
+          <div class="text-title-large text-grey-darken-1 my-4">
             Add users to your project.
           </div>
-          <p class="text-body-1">
+          <p class="text-body-large">
             Adding users to your project allows you to collaborate across your team.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
         <template v-if="isServiceDialog">
-          <div class="text-h6 text-grey-darken-1 my-4">
+          <div class="text-title-large text-grey-darken-1 my-4">
             Add service accounts to your project.
           </div>
-          <p class="text-body-1">
+          <p class="text-body-large">
             Adding service accounts to your project allows you to automate processes in your project.
             Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
-        <div class="text-h6 text-grey-darken-1 my-4">
+        <div class="text-title-large text-grey-darken-1 my-4">
           Assign roles to your members.
         </div>
-        <p class="text-body-1">
+        <p class="text-body-large">
           Add roles to your members to gain access to resources of this project. Currently supported built-in roles are:
         </p>
         <ul>

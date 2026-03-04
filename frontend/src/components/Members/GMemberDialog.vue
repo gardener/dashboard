@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
                     closable
                     @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()"
                   >
-                    <span>{{ item.raw.displayName }}</span>
+                    <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>
               </v-select>

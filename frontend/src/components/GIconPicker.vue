@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #item="{ props: itemProps, item }">
       <v-list-item v-bind="itemProps">
         <template #prepend>
-          <v-icon>{{ item.raw }}</v-icon>
+          <v-icon>{{ item }}</v-icon>
         </template>
       </v-list-item>
     </template>

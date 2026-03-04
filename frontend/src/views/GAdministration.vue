@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container fluid>
-    <v-row no-gutters>
+    <v-row density="compact">
       <v-col
         cols="12"
         md="6"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="flex-column"
         >
           <v-col class="pa-3">
@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-information-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     <span>
                       <span>Name</span>
                       <v-tooltip
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </span>
                   </div>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     {{ projectName }}
                   </div>
                   <template #append>
@@ -52,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-text-subject
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     <span>
                       <span>Title</span>
                       <v-tooltip
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </span>
                   </div>
-                  <div class="text-body-1 wrap-text">
+                  <div class="text-body-large wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
                       color="action-button"
@@ -80,10 +80,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-text-subject
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Description
                   </div>
-                  <div class="text-body-1 wrap-text">
+                  <div class="text-body-large wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
                       color="action-button"
@@ -109,10 +109,10 @@ SPDX-License-Identifier: Apache-2.0
                         mdi-clock-alert-outline
                       </v-icon>
                     </template>
-                    <div class="text-body-2 text-medium-emphasis">
+                    <div class="text-body-medium text-medium-emphasis">
                       Stale Project Information
                     </div>
-                    <div class="text-body-1 d-flex align-center pt-1">
+                    <div class="text-body-large d-flex align-center pt-1">
                       <span v-if="staleAutoDeleteTimestamp">
                         This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project on
                         <v-tooltip location="right">
@@ -147,10 +147,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-account-cog-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Owner
                   </div>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     <g-editable-account
                       :read-only="!canManageMembers"
                       color="action-button"
@@ -170,10 +170,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-account-clock-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Created By
                   </div>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     <g-account-avatar
                       :account-name="createdBy"
                       mail-to
@@ -189,10 +189,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-clock-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Created At
                   </div>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     <g-time-string
                       :date-time="creationTimestamp"
                       :point-in-time="-1"
@@ -206,10 +206,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-label-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Purpose
                   </div>
-                  <div class="text-body-1 wrap-text">
+                  <div class="text-body-large wrap-text">
                     <g-editable-text
                       :read-only="!canPatchProject"
                       color="action-button"
@@ -226,12 +226,12 @@ SPDX-License-Identifier: Apache-2.0
                         mdi-file-document-outline
                       </v-icon>
                     </template>
-                    <div class="text-body-2 text-medium-emphasis">
+                    <div class="text-body-medium text-medium-emphasis">
                       {{ slaTitle }}
                     </div>
                     <!-- eslint-disable vue/no-v-html -->
                     <div
-                      class="text-body-1 markdown wrap-text"
+                      class="text-body-large markdown wrap-text"
                       v-html="slaDescriptionHtml"
                     />
                     <!-- eslint-enable vue/no-v-html -->
@@ -244,10 +244,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-playlist-star
                     </v-icon>
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Custom Fields for Shoots
                   </div>
-                  <div class="text-body-1 d-flex flex-wrap align-center pt-1">
+                  <div class="text-body-large d-flex flex-wrap align-center pt-1">
                     <g-shoot-custom-field
                       v-for="{
                         name,
@@ -296,7 +296,7 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="flex-column"
         >
           <v-col
@@ -312,7 +312,7 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-delete-circle-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     Delete Project
                   </div>
                   <template #append>
@@ -351,12 +351,12 @@ SPDX-License-Identifier: Apache-2.0
                       :color="color"
                     />
                   </template>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     {{ costObjectTitle || "Cost Object" }}
                   </div>
                   <div
                     v-if="costObject"
-                    class="text-body-1 wrap-text"
+                    class="text-body-large wrap-text"
                   >
                     {{ costObject }}
                   </div>
@@ -384,10 +384,10 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-file
                     </v-icon>
                   </template>
-                  <div class="text-body-1">
+                  <div class="text-body-large">
                     Command Line Interface Access
                   </div>
-                  <div class="text-body-2 text-medium-emphasis">
+                  <div class="text-body-medium text-medium-emphasis">
                     Go to
                     <g-text-router-link
                       :to="{ name: 'Account', query: { namespace } }"
@@ -463,7 +463,7 @@ SPDX-License-Identifier: Apache-2.0
                       mdi-information-outline
                     </v-icon>
                   </template>
-                  <div class="text-body-2">
+                  <div class="text-body-medium">
                     No resource quotas defined for this project.
                   </div>
                 </g-list-item>

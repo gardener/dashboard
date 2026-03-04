@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #text>
-      <div class="text-h6 text-grey-darken-1 mb-4">
+      <div class="text-title-large text-grey-darken-1 mb-4">
         Gardenlogin
       </div>
       <p>

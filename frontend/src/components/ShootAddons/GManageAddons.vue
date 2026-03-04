@@ -26,10 +26,10 @@ SPDX-License-Identifier: Apache-2.0
           class="d-flex flex-column"
           :class="getTextClass(name)"
         >
-          <div class="wrap-text text-subtitle-2">
+          <div class="wrap-text text-title-small">
             {{ title }}
           </div>
-          <div class="wrap-text pt-1 text-body-2">
+          <div class="wrap-text pt-1 text-body-medium">
             {{ description }}
           </div>
         </div>

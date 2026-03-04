@@ -26,11 +26,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
         <div>
-          <span class="wrap-text text-subtitle-2">{{ input.title }}</span>
+          <span class="wrap-text text-title-small">{{ input.title }}</span>
           <!-- eslint-disable vue/no-v-html -->
           <span
             v-if="input.description"
-            class="wrap-text pt-1 text-body-2"
+            class="wrap-text pt-1 text-body-medium"
             v-html="transformHtml(input.description)"
           />
           <!-- eslint-enable vue/no-v-html -->
@@ -55,14 +55,14 @@ SPDX-License-Identifier: Apache-2.0
           :class="getTextClass(key)"
         >
           <span
-            class="text-subtitle-2"
+            class="text-title-small"
           >
             {{ optionInput.title }}
           </span>
           <!-- eslint-disable vue/no-v-html -->
           <span
             v-if="optionInput.description"
-            class="pt-1 text-body-2"
+            class="pt-1 text-body-medium"
             v-html="transformHtml(optionInput.description)"
           />
           <!-- eslint-enable vue/no-v-html -->

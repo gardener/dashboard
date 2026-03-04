@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
     @update:model-value="onUpdateModelValue"
   >
     <v-row
-      no-gutters
+      density="compact"
       align="center"
       class="alert-expansion-panel"
       :class="{ 'alert-expansion-panel--active': expanded }"
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row
       v-if="expanded"
-      no-gutters
+      density="compact"
       align="center"
     >
       <v-col class="alert-subtitle">

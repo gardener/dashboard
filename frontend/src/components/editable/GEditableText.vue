@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <div
             v-else
-            class="text-body-2 font-weight-light text-disabled"
+            class="text-body-medium font-weight-light text-disabled"
           >
             {{ noValueText }}
           </div>

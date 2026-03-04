@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
     :target="shootActionTarget"
   >
     <v-list
-      dense
+      density="comfortable"
       @click.capture="actionMenu = false"
     >
       <v-list-item>

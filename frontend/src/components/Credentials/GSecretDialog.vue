@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
                 />
               </template>
               <template v-else>
-                <div class="text-h6 pb-4">
+                <div class="text-title-large pb-4">
                   {{ resourceName }} ({{ resourceKind }})
                 </div>
               </template>

@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         flat
         class="title-background"
       >
-        <v-card-title class="text-subtitle-1">
+        <v-card-title class="text-body-large">
           Loading cluster {{ clusterName }}
         </v-card-title>
         <v-card-text>

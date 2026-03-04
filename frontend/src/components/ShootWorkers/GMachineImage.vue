@@ -26,18 +26,18 @@ SPDX-License-Identifier: Apache-2.0
         :title="undefined"
       >
         <template #prepend>
-          <g-vendor-icon :icon="item.raw.icon" />
+          <g-vendor-icon :icon="item.icon" />
         </template>
-        <v-list-item-title>Name: {{ item.raw.displayName }} | Version: {{ item.raw.version }}</v-list-item-title>
-        <v-list-item-subtitle v-if="itemDescription(item.raw).length">
-          {{ itemDescription(item.raw) }}
+        <v-list-item-title>Name: {{ item.displayName }} | Version: {{ item.version }}</v-list-item-title>
+        <v-list-item-subtitle v-if="itemDescription(item).length">
+          {{ itemDescription(item) }}
         </v-list-item-subtitle>
       </v-list-item>
     </template>
     <template #selection="{ item }">
-      <g-vendor-icon :icon="item.raw.icon" />
+      <g-vendor-icon :icon="item.icon" />
       <span class="ml-2">
-        {{ item.raw.displayName }} [{{ item.raw.version }}]
+        {{ item.displayName }} [{{ item.version }}]
       </span>
     </template>
     <template #message="{ message }">

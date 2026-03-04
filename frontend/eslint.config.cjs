@@ -51,7 +51,7 @@ const importConfig = {
           ['vuetify/components', null],
           ['vuetify/directives', null],
           ['vuetify/styles', null],
-          ['vuetify/lib/util/colors', null],
+          ['vuetify/util/colors', null],
           ['@/assets/whitespace-eye.svg?raw', null],
           ['@/assets/whitespace-eye-off.svg?raw', null],
           ['virtual:g-mdi-meta', null],
