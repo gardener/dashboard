@@ -124,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
-          <g-control-plane-high-availability-tag
+          <g-shoot-control-plane-high-availability-tag
 
             size="small"
           />
@@ -258,7 +258,7 @@ import GShootSeedName from '@/components/GShootSeedName.vue'
 import GShootMessages from '@/components/ShootMessages/GShootMessages.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
-import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag.vue'
+import GShootControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GShootControlPlaneHighAvailabilityTag.vue'
 import GWorkerGroup from '@/components/ShootWorkers/GWorkerGroup'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'

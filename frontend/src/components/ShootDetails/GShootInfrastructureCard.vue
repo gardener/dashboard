@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0
             class="d-flex"
           >
             <span class="mr-1">Failure tolerance type</span>
-            <g-control-plane-high-availability-tag
+            <g-shoot-control-plane-high-availability-tag
               size="x-small"
             />
           </div>
@@ -274,7 +274,7 @@ import GDnsProvider from '@/components/ShootDns/GDnsProvider'
 import GDnsConfiguration from '@/components/ShootDns/GDnsConfiguration'
 import GSeedConfiguration from '@/components/GSeedConfiguration'
 import GControlPlaneHighAvailabilityConfiguration from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityConfiguration'
-import GControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GControlPlaneHighAvailabilityTag'
+import GShootControlPlaneHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GShootControlPlaneHighAvailabilityTag'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 import GCredentialConfiguration from '@/components/Credentials/GShootCredentialConfiguration'
 
@@ -303,7 +303,7 @@ export default {
     GDnsConfiguration,
     GSeedConfiguration,
     GControlPlaneHighAvailabilityConfiguration,
-    GControlPlaneHighAvailabilityTag,
+    GShootControlPlaneHighAvailabilityTag,
     GCredentialDetailsItemContent,
     GCredentialConfiguration,
   },
