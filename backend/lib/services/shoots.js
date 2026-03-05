@@ -300,7 +300,7 @@ export async function info ({ user, namespace, name }) {
   const shoot = await read({ user, namespace, name })
 
   const data = {
-    canLinkToSeed: false,
+    seedIsManagedSeed: false,
   }
 
   try {
@@ -313,9 +313,9 @@ export async function info ({ user, namespace, name }) {
     const seed = cache.getSeed(getSeedNameFromShoot(shoot))
     if (seed) {
       try {
-        data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
+        data.seedIsManagedSeed = !!(await client['seedmanagement.gardener.cloud'].managedseeds.get('garden', seed.metadata.name))
       } catch (err) {
-        data.canLinkToSeed = false
+        data.seedIsManagedSeed = false
       }
     }
   }

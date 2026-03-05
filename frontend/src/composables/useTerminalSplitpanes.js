@@ -87,7 +87,7 @@ export function createTerminalSplitpanesComposable () {
   })
 
   const canScheduleOnSeed = computed(() => {
-    return get(shootItem.value, ['info', 'canLinkToSeed'], false)
+    return get(shootItem.value, ['info', 'seedIsManagedSeed'], false)
   })
 
   const slotItemUUIds = computed(() => {
@@ -99,7 +99,7 @@ export function createTerminalSplitpanesComposable () {
     if (terminalCoordinates.value.target) {
       return terminalCoordinates.value.target
     }
-    if (get(shootItem.value, ['info', 'canLinkToSeed']) === undefined) {
+    if (get(shootItem.value, ['info', 'seedIsManagedSeed']) === undefined) {
       // target depends on shootItem info, this ensures target is stable during loading
       return undefined
     }

@@ -139,7 +139,7 @@ export function createShootItemComposable (shootItem, options = {}) {
 
   const {
     shootInfo,
-    canLinkToSeed,
+    seedIsManagedSeed,
   } = useShootInfo(shootItem)
 
   const {
@@ -252,7 +252,7 @@ export function createShootItemComposable (shootItem, options = {}) {
     caCertificateValiditiesAcceptableMessage,
     /* info */
     shootInfo,
-    canLinkToSeed,
+    seedIsManagedSeed,
     /* others */
     shootAccessRestrictions: accessRestrictionList,
     isShootStatusHibernationProgressing,

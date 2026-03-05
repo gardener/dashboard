@@ -13,12 +13,12 @@ export function useShootInfo (shootItem) {
     return get(shootItem.value, ['info'], {})
   })
 
-  const canLinkToSeed = computed(() => {
-    return get(shootInfo.value, ['canLinkToSeed'], false)
+  const seedIsManagedSeed = computed(() => {
+    return get(shootInfo.value, ['seedIsManagedSeed'], false)
   })
 
   return {
     shootInfo,
-    canLinkToSeed,
+    seedIsManagedSeed,
   }
 }

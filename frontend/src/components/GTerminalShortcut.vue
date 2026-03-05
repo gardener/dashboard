@@ -165,7 +165,7 @@ export default {
       return join(args, ' ')
     },
     canScheduleOnSeed () {
-      return get(this.shootItem, ['info', 'canLinkToSeed'], false)
+      return get(this.shootItem, ['info', 'seedIsManagedSeed'], false)
     },
     isShootTarget () {
       return this.shortcut.target === TargetEnum.SHOOT
