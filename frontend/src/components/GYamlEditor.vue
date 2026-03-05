@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
  -->
@@ -86,7 +86,10 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
         <v-divider vertical />
-        <div class="px-2">
+        <div
+          v-if="!props.hideManagedFieldsToggle"
+          class="px-2"
+        >
           <g-action-button
             v-tooltip:top="showManagedFields ? 'Hide managed fields' : 'Show managed fields'"
             size="x-small"
@@ -165,7 +168,15 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  warningIdentifier: {
+    type: String,
+    default: undefined,
+  },
   hideToolbar: {
+    type: Boolean,
+    default: false,
+  },
+  hideManagedFieldsToggle: {
     type: Boolean,
     default: false,
   },
@@ -193,14 +204,11 @@ const {
   execUndo,
   execRedo,
   getDocumentValue,
-  isReadOnly,
   filename,
 } = inject(props.identifier)
 
 const alertBannerIdentifier = computed(() => {
-  return props.identifier === 'shoot-worker-editor'
-    ? 'workerEditorWarning'
-    : `${camelCase(props.identifier)}Warning`
+  return props.warningIdentifier ?? `${camelCase(props.identifier)}Warning`
 })
 
 const containerStyles = computed(() => {
@@ -220,7 +228,7 @@ const toolbarStyles = computed(() => {
 })
 
 const showToolbar = computed(() => {
-  return !isReadOnly.value && !props.hideToolbar
+  return !props.hideToolbar
 })
 
 function downloadContent () {

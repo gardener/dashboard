@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="fill-height">
-    <g-shoot-editor :identifier="injectionKey">
+    <g-yaml-editor :identifier="injectionKey">
       <template #modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
           @click.stop="save"
         />
       </template>
-    </g-shoot-editor>
+    </g-yaml-editor>
     <g-confirm-dialog ref="confirmDialog" />
   </div>
 </template>
@@ -47,7 +47,7 @@ import {
 
 import { useAppStore } from '@/store/app'
 
-import GShootEditor from '@/components/GShootEditor'
+import GYamlEditor from '@/components/GYamlEditor.vue'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
 

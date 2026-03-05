@@ -21,6 +21,8 @@ import { useProjectStore } from '@/store/project'
 import { useAuthzStore } from '@/store/authz'
 
 import { useLogger } from '@/composables/useLogger'
+import { useApi } from '@/composables/useApi'
+import { useShootSchemaDefinition } from '@/composables/useShootSchemaDefinition'
 
 import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
@@ -28,6 +30,7 @@ import get from 'lodash/get'
 
 export function useShootEditor (initialValue, options = {}) {
   const {
+    api = useApi(),
     logger = useLogger(),
     theme = useTheme(),
     authzStore = useAuthzStore(),
@@ -107,6 +110,7 @@ export function useShootEditor (initialValue, options = {}) {
   const isShootActionsDisabled = computed(() => {
     return get(shootItem.value, ['spec', 'purpose']) === 'infrastructure'
   })
+  const schemaDefinition = useShootSchemaDefinition({ api })
 
   let cm = null
 
@@ -115,6 +119,7 @@ export function useShootEditor (initialValue, options = {}) {
       const { useCodemirror } = await import('./useCodemirror')
       cm = useCodemirror(element, {
         ...options,
+        schemaDefinition,
         doc: yaml.dump(shootItem.value),
         onDocChanged ({ modified, undoDepth, redoDepth }) {
           if (!touched.value && modified) {
