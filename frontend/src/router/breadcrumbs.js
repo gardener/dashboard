@@ -95,6 +95,23 @@ export function seedListBreadcrumbs () {
   ]
 }
 
+export function seedItemBreadcrumbs ({ params, query }) {
+  return [
+    {
+      title: 'Seeds',
+      to: {
+        name: 'SeedList',
+        query: pick(query, ['namespace']),
+      },
+    },
+    {
+      get title () {
+        return get(params, ['name'])
+      },
+    },
+  ]
+}
+
 export function credentialsBreadcrumbs () {
   return [
     {

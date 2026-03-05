@@ -20,6 +20,7 @@ import GProjectPlaceholder from '@/views/GProjectPlaceholder.vue'
 import GNewShootPlaceholder from '@/views/GNewShootPlaceholder.vue'
 import GNewShootEditor from '@/views/GNewShootEditor.vue'
 import GShootItemPlaceholder from '@/views/GShootItemPlaceholder.vue'
+import GSeedItemPlaceholder from '@/views/GSeedItemPlaceholder.vue'
 import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
@@ -31,6 +32,7 @@ import {
   settingsBreadcrumbs,
   shootListBreadcrumbs,
   seedListBreadcrumbs,
+  seedItemBreadcrumbs,
   shootItemBreadcrumbs,
   shootItemTerminalBreadcrumbs,
   credentialsBreadcrumbs,
@@ -43,6 +45,7 @@ import {
 } from './breadcrumbs'
 import {
   newShootTabs,
+  seedItemTabs,
   shootItemTabs,
 } from './tabs'
 
@@ -54,6 +57,8 @@ const GAdministration = () => import('@/views/GAdministration.vue')
 const GNewShoot = () => import('@/views/GNewShoot.vue')
 const GShootList = () => import('@/views/GShootList.vue')
 const GSeedList = () => import('@/views/GSeedList.vue')
+const GSeedItem = () => import('@/views/GSeedItem.vue')
+const GSeedItemEditor = () => import('@/views/GSeedItemEditor.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
@@ -76,6 +81,7 @@ export function createRoutes () {
       accountRoute('account'),
       settingsRoute('settings'),
       seedListRoute('seeds'),
+      seedItemHierarchy('seeds/:name'),
       projectsRoute('namespace'),
       newProjectRoute('namespace/+'),
       projectHierarchy('namespace/:namespace'),
@@ -135,6 +141,25 @@ export function createRoutes () {
           component: GNotFound,
           meta: {
             breadcrumbs: notFoundBreadcrumbs,
+          },
+        },
+      ],
+    }
+  }
+
+  /* Seed Item Hierachy "/seeds/:name" */
+  function seedItemHierarchy (path) {
+    return {
+      path,
+      component: GSeedItemPlaceholder,
+      children: [
+        seedItemRoute(''),
+        seedItemEditorRoute('yaml'),
+        {
+          path: ':pathMatch(.*)*',
+          component: GNotFound,
+          meta: {
+            breadcrumbs: seedItemBreadcrumbs,
           },
         },
       ],
@@ -324,6 +349,60 @@ export function createRoutes () {
     }
   }
 
+  function seedItemRoute (path) {
+    return {
+      path,
+      name: 'SeedItem',
+      component: GSeedItem,
+      meta: {
+        namespaced: false,
+        title: 'Seed Details',
+        projectScope: false,
+        breadcrumbs: seedItemBreadcrumbs,
+        tabKey: 'seedOverview',
+        tabs: seedItemTabs,
+      },
+      beforeEnter (to, from) {
+        if (!authnStore.isAdmin) {
+          if (from?.name && from.name !== 'SeedItem') {
+            return from
+          }
+          return {
+            name: 'Home',
+          }
+        }
+        return addNamespaceToUrl(to)
+      },
+    }
+  }
+
+  function seedItemEditorRoute (path) {
+    return {
+      path,
+      name: 'SeedItemEditor',
+      component: GSeedItemEditor,
+      meta: {
+        namespaced: false,
+        title: 'Seed YAML',
+        projectScope: false,
+        breadcrumbs: seedItemBreadcrumbs,
+        tabKey: 'seedYaml',
+        tabs: seedItemTabs,
+      },
+      beforeEnter (to, from) {
+        if (!authnStore.isAdmin) {
+          if (from?.name && from.name !== 'SeedItemEditor') {
+            return from
+          }
+          return {
+            name: 'Home',
+          }
+        }
+        return addNamespaceToUrl(to)
+      },
+    }
+  }
+
   function newShootEditorRoute (path) {
     return {
       path,
@@ -492,6 +571,7 @@ export function createRoutes () {
     if (!to.query.namespace && namespace) {
       return {
         name: to.name,
+        params: to.params,
         query: {
           namespace,
           ...to.query,

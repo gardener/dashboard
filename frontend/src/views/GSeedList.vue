@@ -68,6 +68,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
+  reactive,
   provide,
   onMounted,
 } from 'vue'
@@ -87,6 +88,7 @@ import { useSeedTableSorting } from '@/composables/useSeedTableSorting'
 import { useTableFilter } from '@/composables/useTableFilter'
 import { parseSearch } from '@/composables/useTableFilter/helper'
 import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
+import { getBestSupportedFailureToleranceType } from '@/composables/useSeedItem/helper'
 
 import { mapTableHeader } from '@/utils'
 import { errorCodesFromArray } from '@/utils/errorCodes'
@@ -109,6 +111,9 @@ const { seedSelectedColumns, seedSortBy } = storeToRefs(localStorageStore)
 
 const activePopoverKey = ref('')
 provide('activePopoverKey', activePopoverKey)
+
+const expandedAccessRestrictions = reactive({ default: false })
+provide('expandedAccessRestrictions', expandedAccessRestrictions)
 
 const selectedColumns = ref({})
 
@@ -152,6 +157,36 @@ const allHeaders = computed(() => [
     value: item => item,
   },
   {
+    title: 'HIGH AVAILABILITY',
+    key: 'controlPlaneHighAvailability',
+    sortable: true,
+    align: 'center',
+    defaultSelected: false,
+    hidden: false,
+    value: item => ({
+      failureToleranceType: getBestSupportedFailureToleranceType(item),
+      name: get(item, ['metadata', 'name'], ''),
+    }),
+  },
+  {
+    title: 'ACCESS RESTRICTIONS',
+    key: 'accessRestrictions',
+    sortable: false,
+    align: 'center',
+    defaultSelected: false,
+    hidden: false,
+    value: item => get(item, ['spec', 'accessRestrictions'], []),
+  },
+  {
+    title: 'SCHEDULING',
+    key: 'schedulingVisible',
+    sortable: true,
+    align: 'center',
+    defaultSelected: false,
+    hidden: false,
+    value: item => get(item, ['spec', 'settings', 'scheduling', 'visible'], false),
+  },
+  {
     title: 'CREATED AT',
     key: 'createdAt',
     sortable: true,
@@ -174,7 +209,7 @@ const allHeaders = computed(() => [
     key: 'gardenerVersion',
     sortable: true,
     align: 'center',
-    defaultSelected: false,
+    defaultSelected: true,
     hidden: false,
     value: item => get(item, ['status', 'gardener', 'version']),
   },
@@ -207,14 +242,18 @@ const defaultSelectedColumns = computed(() => {
 function seedFilterFn (item, query) {
   const conditions = get(item, ['status', 'conditions'], [])
   const errorCodes = join(errorCodesFromArray(conditions), ' ')
+  const accessRestrictionNames = join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')
 
   const searchableFields = [
     get(item, ['metadata', 'name']),
     get(item, ['spec', 'provider', 'type']),
     get(item, ['spec', 'provider', 'region']),
+    getBestSupportedFailureToleranceType(item),
     get(item, ['status', 'kubernetesVersion']),
     get(item, ['status', 'gardener', 'version']),
+    get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden',
     errorCodes,
+    accessRestrictionNames,
   ]
 
   const searchQuery = parseSearch(query)

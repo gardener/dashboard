@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template #toolbarItemsRight>
         <v-btn
+          v-if="!isReadOnly"
           variant="text"
           :disabled="clean"
           color="primary"
@@ -75,6 +76,7 @@ const useProvide = (key, value) => {
 const {
   clean,
   touched,
+  isReadOnly,
   conflictPath,
   getEditorValue,
   focusEditor,

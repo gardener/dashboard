@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0
             v-if="!!shootControlPlaneHighAvailabilityFailureTolerance"
             class="d-flex"
           >
-            <span class="mr-1">Failure tolerance type</span>
+            <span class="mr-1">Failure tolerance</span>
             <g-shoot-control-plane-high-availability-tag
               size="x-small"
             />
