@@ -9,6 +9,31 @@ export default {
   displayName: 'Azure',
   weight: 200,
   icon: 'azure.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'azure',
+        infrastructureConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vnet: {
+              cidr: '__DEFAULT_WORKER_CIDR__',
+            },
+            workers: '__DEFAULT_WORKER_CIDR__',
+          },
+          zoned: true,
+        },
+        controlPlaneConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        nodes: '__DEFAULT_WORKER_CIDR__',
+      },
+    },
+  },
   secret: {
     fields: [
       {

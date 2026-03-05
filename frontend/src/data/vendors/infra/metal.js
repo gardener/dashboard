@@ -5,10 +5,51 @@
 //
 
 export default {
-  name: 'onMetal',
-  displayName: 'OnMetal',
+  name: 'metal',
+  displayName: 'Metal',
   weight: 900,
-  icon: 'onmetal.svg',
+  icon: 'metal.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'metal',
+        infrastructureConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+        },
+        controlPlaneConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        type: 'calico',
+        pods: '10.244.128.0/18',
+        services: '10.244.192.0/18',
+        providerConfig: {
+          apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
+          kind: 'NetworkConfig',
+          backend: 'vxlan',
+          ipv4: {
+            autoDetectionMethod: 'interface=lo',
+            mode: 'Always',
+            pool: 'vxlan',
+          },
+          typha: {
+            enabled: true,
+          },
+        },
+      },
+      kubernetes: {
+        kubeControllerManager: {
+          nodeCIDRMaskSize: 23,
+        },
+        kubelet: {
+          maxPods: 510,
+        },
+      },
+    },
+  },
   secret: {
     fields: [
       {

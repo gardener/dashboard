@@ -9,6 +9,30 @@ export default {
   displayName: 'Google Cloud',
   weight: 300,
   icon: 'gcp.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'gcp',
+        infrastructureConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: '__DEFAULT_WORKER_CIDR__',
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        nodes: '__DEFAULT_WORKER_CIDR__',
+      },
+    },
+    controlPlane: {
+      zoneStrategy: 'worker-zones',
+    },
+  },
   secret: {
     fields: [
       {

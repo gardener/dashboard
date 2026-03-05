@@ -9,6 +9,20 @@ export default {
   displayName: 'vSphere',
   weight: 700,
   icon: 'vsphere.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'vsphere',
+        controlPlaneConfig: {
+          apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        nodes: '__DEFAULT_WORKER_CIDR__',
+      },
+    },
+  },
   secret: {
     fields: [
       {

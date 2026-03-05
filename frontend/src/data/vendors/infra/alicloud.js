@@ -9,6 +9,32 @@ export default {
   displayName: 'Alibaba Cloud',
   weight: 500,
   icon: 'alicloud.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'alicloud',
+        infrastructureConfig: {
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: '__DEFAULT_WORKER_CIDR__',
+            },
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        nodes: '__DEFAULT_WORKER_CIDR__',
+      },
+    },
+    zoneNetworking: {
+      strategy: 'alicloud',
+    },
+  },
   secret: {
     fields: [
       {

@@ -103,6 +103,10 @@ describe('composables', () => {
       expect(createShootManifest('metal')).toMatchSnapshot()
     })
 
+    it('should create a default "onmetal" shoot manifest', async () => {
+      expect(createShootManifest('onmetal')).toMatchSnapshot()
+    })
+
     it('should create a default "openstack" shoot manifest', async () => {
       expect(createShootManifest('openstack')).toMatchSnapshot()
     })

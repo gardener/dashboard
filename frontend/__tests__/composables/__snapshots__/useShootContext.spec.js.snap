@@ -994,6 +994,74 @@ exports[`composables > useShootContext > should create a default "metal" shoot m
 }
 `;
 
+exports[`composables > useShootContext > should create a default "onmetal" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "addons": {
+      "kubernetesDashboard": {
+        "enabled": false,
+      },
+      "nginxIngress": {
+        "enabled": false,
+      },
+    },
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "onmetal",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "type": "onmetal",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "c1-onmetal-small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "on01-a",
+          ],
+        },
+      ],
+    },
+    "region": "on01",
+  },
+}
+`;
+
 exports[`composables > useShootContext > should create a default "openstack" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",
