@@ -41,7 +41,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'

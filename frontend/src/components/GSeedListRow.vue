@@ -55,7 +55,7 @@ import GSeedStatus from '@/components/GSeedStatus.vue'
 import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GTimeString from '@/components/GTimeString.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 
 const props = defineProps({
   modelValue: {

@@ -265,7 +265,7 @@ import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
 import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'

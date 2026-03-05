@@ -49,7 +49,7 @@ import { useSeedStore } from '@/store/seed'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 
 import { useShootItem } from '@/composables/useShootItem'
-import { useSeedProviderType } from '@/composables/useSeedItem'
+import { useSeedProviderType } from '@/composables/useSeedItem/index'
 
 import { errorDetailsFromError } from '@/utils/error'
 

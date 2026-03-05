@@ -113,7 +113,7 @@ import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,

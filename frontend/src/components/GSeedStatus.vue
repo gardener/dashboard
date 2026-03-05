@@ -101,7 +101,7 @@ import {
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 
 import { useOperationStatus } from '@/composables/useOperationStatus'
-import { useSeedItem } from '@/composables/useSeedItem'
+import { useSeedItem } from '@/composables/useSeedItem/index'
 
 defineProps({
   popperPlacement: {
