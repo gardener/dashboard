@@ -308,6 +308,11 @@ const metalMachineTypes = [
   createMachineType({ name: 'c1-metal-medium', cpu: '4', memory: '8Gi' }),
 ]
 
+const onmetalMachineTypes = [
+  createMachineType({ name: 'c1-onmetal-small', cpu: '2', memory: '4Gi' }),
+  createMachineType({ name: 'c1-onmetal-medium', cpu: '4', memory: '8Gi' }),
+]
+
 const localMachineTypes = [
   createMachineType({ name: 'local-dev-small', cpu: '2', memory: '4Gi' }),
 ]
@@ -702,7 +707,7 @@ export default [
   }),
   createCloudProfile({
     metadataName: 'metal',
-    displayName: 'OnMetal',
+    displayName: 'Metal',
     type: 'metal',
     seedNames: [
       'metal-ha',
@@ -717,6 +722,27 @@ export default [
         name: 'eu01',
         zones: [
           createZone({ name: 'eu01-a' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'onmetal',
+    displayName: 'OnMetal',
+    type: 'onmetal',
+    seedNames: [
+      'onmetal-ha',
+    ],
+    machineTypes: onmetalMachineTypes,
+    providerConfig: {
+      apiVersion: 'onmetal.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'on01',
+        zones: [
+          createZone({ name: 'on01-a' }),
         ],
       }),
     ],

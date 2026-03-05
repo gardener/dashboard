@@ -4,6 +4,7 @@ import azure from './azure'
 import hcloud from './hcloud'
 import gcp from './gcp'
 import metal from './metal'
+import onmetal from './onmetal'
 import openstack from './openstack'
 import vsphere from './vsphere'
 import ironcore from './ironcore'
@@ -17,6 +18,7 @@ export default [
   hcloud,
   gcp,
   metal,
+  onmetal,
   openstack,
   vsphere,
   ironcore,

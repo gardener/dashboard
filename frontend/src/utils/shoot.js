@@ -6,6 +6,8 @@
 
 import { Netmask } from 'netmask'
 
+import knownInfraVendors from '@/data/vendors/infra'
+
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
@@ -17,6 +19,32 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
+import find from 'lodash/find'
+
+const DEFAULT_WORKER_CIDR_PLACEHOLDER = '__DEFAULT_WORKER_CIDR__'
+
+function resolveShootVendor (providerType) {
+  return find(knownInfraVendors, vendor => {
+    return vendor?.name === providerType
+  })
+}
+
+function replacePlaceholderInTemplate (value, defaultWorkerCIDR) {
+  if (typeof value === 'string') {
+    return value === DEFAULT_WORKER_CIDR_PLACEHOLDER ? defaultWorkerCIDR : value
+  }
+  if (Array.isArray(value)) {
+    return map(value, item => replacePlaceholderInTemplate(item, defaultWorkerCIDR))
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => {
+        return [key, replacePlaceholderInTemplate(nestedValue, defaultWorkerCIDR)]
+      }),
+    )
+  }
+  return value
+}
 
 export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
@@ -31,187 +59,29 @@ export function getSpecTemplate (providerType, defaultWorkerCIDR) {
 }
 
 export function getProviderTemplate (providerType, defaultWorkerCIDR) {
-  switch (providerType) {
-    case 'aws':
-      return {
-        type: 'aws',
-        infrastructureConfig: {
-          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            vpc: {
-              cidr: defaultWorkerCIDR,
-            },
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'azure':
-      return {
-        type: 'azure',
-        infrastructureConfig: {
-          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            vnet: {
-              cidr: defaultWorkerCIDR,
-            },
-            workers: defaultWorkerCIDR,
-          },
-          zoned: true,
-        },
-        controlPlaneConfig: {
-          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'gcp':
-      return {
-        type: 'gcp',
-        infrastructureConfig: {
-          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            workers: defaultWorkerCIDR,
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'openstack':
-      return {
-        type: 'openstack',
-        infrastructureConfig: {
-          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            workers: defaultWorkerCIDR,
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'stackit':
-      return {
-        type: 'stackit',
-        infrastructureConfig: {
-          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            workers: defaultWorkerCIDR,
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'alicloud':
-      return {
-        type: 'alicloud',
-        infrastructureConfig: {
-          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            vpc: {
-              cidr: defaultWorkerCIDR,
-            },
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'metal':
-      return {
-        type: 'metal',
-        infrastructureConfig: {
-          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-        },
-        controlPlaneConfig: {
-          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'vsphere':
-      return {
-        type: 'vsphere',
-        controlPlaneConfig: {
-          apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    case 'hcloud':
-      return {
-        type: 'hcloud',
-        infrastructureConfig: {
-          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          networks: {
-            workers: defaultWorkerCIDR,
-          },
-        },
-        controlPlaneConfig: {
-          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
-    default:
-      return {
-        type: providerType,
-      }
+  const template = resolveShootVendor(providerType)?.shoot?.templates?.provider
+  if (!template) {
+    return {
+      type: providerType,
+    }
   }
+
+  return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
 export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
-  switch (providerType) {
-    case 'metal':
-      return {
-        type: 'calico',
-        pods: '10.244.128.0/18',
-        services: '10.244.192.0/18',
-        providerConfig: {
-          apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
-          kind: 'NetworkConfig',
-          backend: 'vxlan',
-          ipv4: {
-            autoDetectionMethod: 'interface=lo',
-            mode: 'Always',
-            pool: 'vxlan',
-          },
-          typha: {
-            enabled: true,
-          },
-        },
-      }
-    default:
-      return {
-        nodes: defaultWorkerCIDR,
-      }
+  const template = resolveShootVendor(providerType)?.shoot?.templates?.networking
+  if (!template) {
+    return {
+      nodes: defaultWorkerCIDR,
+    }
   }
+
+  return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
 export function getKubernetesTemplate (providerType) {
-  switch (providerType) {
-    case 'metal':
-      return {
-        kubeControllerManager: {
-          nodeCIDRMaskSize: 23,
-        },
-        kubelet: {
-          maxPods: 510,
-        },
-      }
-  }
+  return resolveShootVendor(providerType)?.shoot?.templates?.kubernetes
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
@@ -233,7 +103,7 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 }
 
 export function getDefaultNetworkConfigurationForAllZones (numberOfZones, providerType, workerCIDR) {
-  switch (providerType) {
+  switch (resolveShootVendor(providerType)?.shoot?.zoneNetworking?.strategy) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
@@ -343,9 +213,8 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
 
 export function getControlPlaneZone (workers, providerType, oldControlPlaneZone) {
   const workerZones = uniq(flatMap(workers, 'zones'))
-  switch (providerType) {
-    case 'gcp':
-    case 'hcloud':
+  switch (resolveShootVendor(providerType)?.shoot?.controlPlane?.zoneStrategy) {
+    case 'worker-zones':
       if (includes(workerZones, oldControlPlaneZone)) {
         return oldControlPlaneZone
       }
@@ -356,12 +225,5 @@ export function getControlPlaneZone (workers, providerType, oldControlPlaneZone)
 }
 
 export function getWorkerProviderConfig (providerType) {
-  switch (providerType) {
-    case 'aws': {
-      return {
-        apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
-        kind: 'WorkerConfig',
-      }
-    }
-  }
+  return resolveShootVendor(providerType)?.shoot?.workerProviderConfig
 }
