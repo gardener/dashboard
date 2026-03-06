@@ -10,10 +10,6 @@ on:
         required: false
         type: string
         default: ''
-    secrets:
-      GARDENER_GITHUB_ACTIONS_PRIVATE_KEY:
-        description: "Private key for the Gardener GitHub Actions app"
-        required: true
   workflow_dispatch:
     inputs:
       tag:
@@ -27,7 +23,7 @@ on:
         default: .github/actions/prepare-hotfix
 
 permissions:
-  contents: none  # we rely on the GitHub App token instead
+  id-token: write # required for GitHub OIDC Federation Service token
 
 jobs:
   prepare-hotfix:
@@ -36,14 +32,15 @@ jobs:
       TAG: ${{ inputs.tag }}
     steps:
       - name: Create GitHub App token
-        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf   # v2.2.1
+        uses: gardener/cc-utils/.github/actions/github-auth@master
         id: app-token
         with:
-          app-id: ${{ vars.GARDENER_GITHUB_ACTIONS_APP_ID }}
-          private-key: ${{ secrets.GARDENER_GITHUB_ACTIONS_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-          permission-workflows: write
+          token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}
+          repositories: ${{ github.event.repository.name }}
+          permissions: |
+            contents: write
+            pull-requests: write
+            workflows: write
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
