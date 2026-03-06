@@ -19,7 +19,7 @@ import {
 
 import isEqual from 'lodash/isEqual'
 
-export function isLoadRequired (route, to) {
+function isLoadRequired (route, to) {
   return route.name !== to.name || !isEqual(route.params, to.params)
 }
 

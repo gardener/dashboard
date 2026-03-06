@@ -37,22 +37,12 @@ import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
-import {
-  isLoadRequired,
-  useItemPlaceholder,
-} from '@/composables/useItemPlaceholder'
+import { useItemPlaceholder } from '@/composables/useItemPlaceholder'
 
 export default {
   components: {
     GShootItemLoading,
     GShootItemError,
-  },
-  beforeRouteEnter (to, from, next) {
-    next(async vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        await vm.load(to)
-      }
-    })
   },
   setup () {
     const route = useRoute()

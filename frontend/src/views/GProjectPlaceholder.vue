@@ -23,21 +23,11 @@ import { useProjectStore } from '@/store/project'
 
 import GProjectError from '@/views/GProjectError.vue'
 
-import {
-  isLoadRequired,
-  useItemPlaceholder,
-} from '@/composables/useItemPlaceholder'
+import { useItemPlaceholder } from '@/composables/useItemPlaceholder'
 
 export default {
   components: {
     GProjectError,
-  },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        vm.load(to)
-      }
-    })
   },
   setup () {
     const route = useRoute()
