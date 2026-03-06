@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Allocatable Shoots">
-          {{ seedAllocatableShoots || '-' }}
+          {{ seedAllocatableShoots ?? '-' }}
         </g-list-item-content>
       </g-list-item>
       <v-divider inset />

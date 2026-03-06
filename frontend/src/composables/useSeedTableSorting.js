@@ -56,11 +56,16 @@ function compareLastOperation (a, b, compareValues) {
 }
 
 function compareControlPlaneHighAvailability (a, b, compareValues) {
-  const getFailureToleranceTypeRank = value => {
+  function getFailureToleranceTypeRank (value) {
     const failureToleranceType = value?.failureToleranceType
-    return failureToleranceType === 'node'
-      ? 1
-      : 0
+    switch (failureToleranceType) {
+      case 'zone':
+        return 0
+      case 'node':
+        return 1
+      default:
+        return 2
+    }
   }
 
   const compareFailureToleranceType = compareValues(

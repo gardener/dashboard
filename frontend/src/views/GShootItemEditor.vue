@@ -91,6 +91,10 @@ const {
 }))
 
 async function save () {
+  if (isReadOnly.value) {
+    return
+  }
+
   try {
     if (!touched.value) {
       return

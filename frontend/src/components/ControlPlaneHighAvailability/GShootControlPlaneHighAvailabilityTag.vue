@@ -54,7 +54,7 @@ const {
 const { isFailureToleranceTypeZoneSupported } = useShootHelper()
 
 const popoverKey = computed(() => {
-  return `g-control-plane-hig-availability-tag:${shootUid.value}`
+  return `g-control-plane-high-availability-tag:${shootUid.value}`
 })
 
 const zoneHighAvailabilityConfigurationError = computed(() => {

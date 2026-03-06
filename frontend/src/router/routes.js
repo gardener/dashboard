@@ -322,13 +322,9 @@ export function createRoutes () {
         breadcrumbs: seedListBreadcrumbs,
       },
       beforeEnter (to, from) {
-        if (!authnStore.isAdmin) {
-          if (from?.name && from.name !== 'SeedList') {
-            return from
-          }
-          return {
-            name: 'Home',
-          }
+        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        if (fallbackRedirect) {
+          return fallbackRedirect
         }
         return addNamespaceToUrl(to)
       },
@@ -363,13 +359,9 @@ export function createRoutes () {
         tabs: seedItemTabs,
       },
       beforeEnter (to, from) {
-        if (!authnStore.isAdmin) {
-          if (from?.name && from.name !== 'SeedItem') {
-            return from
-          }
-          return {
-            name: 'Home',
-          }
+        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        if (fallbackRedirect) {
+          return fallbackRedirect
         }
         return addNamespaceToUrl(to)
       },
@@ -390,13 +382,9 @@ export function createRoutes () {
         tabs: seedItemTabs,
       },
       beforeEnter (to, from) {
-        if (!authnStore.isAdmin) {
-          if (from?.name && from.name !== 'SeedItemEditor') {
-            return from
-          }
-          return {
-            name: 'Home',
-          }
+        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        if (fallbackRedirect) {
+          return fallbackRedirect
         }
         return addNamespaceToUrl(to)
       },
@@ -556,6 +544,20 @@ export function createRoutes () {
   }
 
   /* Helper functions */
+  function getFallbackRedirectIfNotAdmin (to, from) {
+    if (authnStore.isAdmin) {
+      return
+    }
+
+    if (from?.name && from.name !== to.name) {
+      return from
+    }
+
+    return {
+      name: 'Home',
+    }
+  }
+
   function redirectToShootList (to) {
     const namespace = authzStore.namespace || projectStore.defaultNamespace
     if (namespace) {

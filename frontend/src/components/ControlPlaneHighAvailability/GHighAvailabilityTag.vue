@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popover
     v-model="internalValue"
-    :disabled="isDisabled"
     :toolbar-title="toolbarTitle"
     :toolbar-color="color"
   >
@@ -75,10 +74,6 @@ const props = defineProps({
     type: [String, Array, Object],
     default: undefined,
   },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 const activePopoverKey = inject('activePopoverKey', ref(''))
@@ -90,10 +85,6 @@ const failureToleranceTypeLabels = Object.freeze({
 
 const failureToleranceTypeLabel = computed(() => {
   return failureToleranceTypeLabels[props.failureToleranceType] ?? props.failureToleranceType
-})
-
-const isDisabled = computed(() => {
-  return props.disabled || !props.failureToleranceType
 })
 
 const internalValue = computed({

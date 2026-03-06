@@ -86,7 +86,7 @@ export default {
         }
         await Promise.all(promises)
 
-        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin & hasShootWorkerGroups.value) {
+        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin && !hasShootWorkerGroups.value) {
           setError(Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
             code: 404,
             reason: 'Terminal not available',
