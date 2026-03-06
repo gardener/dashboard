@@ -34,6 +34,12 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'Project',
+        valueFrom: 'gcpProjectId',
+      },
+    ],
     fields: [
       {
         key: 'serviceaccount.json',

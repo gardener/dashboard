@@ -12,6 +12,7 @@ export default {
   weight: 600,
   icon: 'alicloud-dns.png',
   secret: {
+    details: alicloud.secret.details,
     fields: alicloud.secret.fields,
     help: `
       <p>

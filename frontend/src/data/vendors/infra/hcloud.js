@@ -34,6 +34,12 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'Hetzner Cloud Token',
+        hidden: true,
+      },
+    ],
     fields: [
       {
         key: 'hcloudToken',
