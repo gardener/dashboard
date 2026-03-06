@@ -20,6 +20,7 @@ import {
   isEmail,
   convertToGi,
   convertToGibibyte,
+  getCloudProfileSpec,
 } from '@/utils'
 
 import pick from 'lodash/pick'
@@ -527,6 +528,51 @@ describe('utils', () => {
     it('should not allow pre or suffix other than allowed ones', () => {
       expect(normalizeVersion('x23.1')).toBeUndefined()
       expect(normalizeVersion('23.2x')).toBeUndefined()
+    })
+  })
+
+  describe('getCloudProfileSpec', () => {
+    it('should return spec for a regular CloudProfile', () => {
+      const cloudProfile = {
+        kind: 'CloudProfile',
+        metadata: { name: 'aws' },
+        spec: { type: 'aws', kubernetes: { versions: [] } },
+      }
+      expect(getCloudProfileSpec(cloudProfile)).toEqual(cloudProfile.spec)
+    })
+
+    it('should return status.cloudProfileSpec for a NamespacedCloudProfile', () => {
+      const cloudProfile = {
+        kind: 'NamespacedCloudProfile',
+        metadata: { name: 'custom', namespace: 'garden-local' },
+        spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+        status: {
+          cloudProfileSpec: { type: 'aws', kubernetes: { versions: [{ version: '1.30.0' }] } },
+        },
+      }
+      expect(getCloudProfileSpec(cloudProfile)).toEqual(cloudProfile.status.cloudProfileSpec)
+    })
+
+    it('should return empty object for NamespacedCloudProfile without status', () => {
+      const cloudProfile = {
+        kind: 'NamespacedCloudProfile',
+        metadata: { name: 'custom' },
+        spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+      }
+      expect(getCloudProfileSpec(cloudProfile)).toEqual({})
+    })
+
+    it('should return empty object for null or undefined input', () => {
+      expect(getCloudProfileSpec(null)).toEqual({})
+      expect(getCloudProfileSpec(undefined)).toEqual({})
+    })
+
+    it('should return spec for a profile without kind (defaults to CloudProfile behavior)', () => {
+      const cloudProfile = {
+        metadata: { name: 'aws' },
+        spec: { type: 'aws' },
+      }
+      expect(getCloudProfileSpec(cloudProfile)).toEqual(cloudProfile.spec)
     })
   })
 

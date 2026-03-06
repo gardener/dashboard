@@ -61,6 +61,7 @@
     "js-base64": "^3.7.6",
     "js-cookie": "^3.0.5",
     "js-yaml": "^4.1.0",
+    "jsondiffpatch": "^0.7.3",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
