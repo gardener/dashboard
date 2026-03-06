@@ -19,10 +19,13 @@ import { useAuthzStore } from '@/store/authz'
 
 import { createShootContextComposable } from '@/composables/useShootContext'
 
+import infraProviders from '@/data/vendors/infra'
+
 import cloneDeep from 'lodash/cloneDeep'
 
 describe('composables', () => {
   let shootContextStore
+  const infraProviderTypes = infraProviders.map(({ name }) => name)
 
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
 
@@ -71,53 +74,11 @@ describe('composables', () => {
   }
 
   describe('useShootContext', () => {
-    it('should create a default "alicloud" shoot manifest', async () => {
-      expect(createShootManifest('alicloud')).toMatchSnapshot()
-    })
-
-    it('should create a default "aws" shoot manifest', async () => {
-      expect(createShootManifest('aws')).toMatchSnapshot()
-    })
-
-    it('should create a default "azure" shoot manifest', async () => {
-      expect(createShootManifest('azure')).toMatchSnapshot()
-    })
-
-    it('should create a default "gcp" shoot manifest', async () => {
-      expect(createShootManifest('gcp')).toMatchSnapshot()
-    })
-
-    it('should create a default "hcloud" shoot manifest', async () => {
-      expect(createShootManifest('hcloud')).toMatchSnapshot()
-    })
-
-    it('should create a default "ironcore" shoot manifest', async () => {
-      expect(createShootManifest('ironcore')).toMatchSnapshot()
-    })
-
-    it('should create a default "local" shoot manifest', async () => {
-      expect(createShootManifest('local')).toMatchSnapshot()
-    })
-
-    it('should create a default "metal" shoot manifest', async () => {
-      expect(createShootManifest('metal')).toMatchSnapshot()
-    })
-
-    it('should create a default "onmetal" shoot manifest', async () => {
-      expect(createShootManifest('onmetal')).toMatchSnapshot()
-    })
-
-    it('should create a default "openstack" shoot manifest', async () => {
-      expect(createShootManifest('openstack')).toMatchSnapshot()
-    })
-
-    it('should create a default "stackit" shoot manifest', async () => {
-      expect(createShootManifest('stackit')).toMatchSnapshot()
-    })
-
-    it('should create a default "vsphere" shoot manifest', async () => {
-      expect(createShootManifest('vsphere')).toMatchSnapshot()
-    })
+    for (const providerType of infraProviderTypes) {
+      it(`should create a default "${providerType}" shoot manifest`, () => {
+        expect(createShootManifest(providerType)).toMatchSnapshot()
+      })
+    }
 
     it('should change the infrastructure kind', async () => {
       shootContextStore.createShootManifest()
