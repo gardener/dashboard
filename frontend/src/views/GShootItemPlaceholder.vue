@@ -15,17 +15,9 @@ import {
   ref,
   computed,
   provide,
-  watch,
-  onBeforeMount,
-  onMounted,
-  onBeforeUnmount,
   toRef,
 } from 'vue'
-import {
-  useRoute,
-  onBeforeRouteLeave,
-  onBeforeRouteUpdate,
-} from 'vue-router'
+import { useRoute } from 'vue-router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useAuthnStore } from '@/store/authn'
@@ -41,28 +33,16 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
 import { useProvideShootHelper } from '@/composables/useShootHelper'
-
-import isEqual from 'lodash/isEqual'
-
-function isLoadRequired (route, to) {
-  return route.name !== to.name || !isEqual(route.params, to.params)
-}
+import { useItemPlaceholder } from '@/composables/useItemPlaceholder'
 
 export default {
   components: {
     GShootItemLoading,
     GShootItemError,
-  },
-  beforeRouteEnter (to, from, next) {
-    next(async vm => {
-      if (isLoadRequired(vm.$route, to)) {
-        await vm.load(to)
-      }
-    })
   },
   setup () {
     const route = useRoute()
@@ -78,52 +58,10 @@ export default {
     const gardenerExtensionStore = useGardenerExtensionStore()
 
     const activePopoverKey = ref('')
-    const error = ref(null)
-    const readyState = ref('initial')
 
     const shootItem = computed(() => shootStore.shootByNamespaceAndName(route.params))
 
-    const component = computed(() => {
-      if (error.value) {
-        return 'g-shoot-item-error'
-      } else if (readyState.value === 'loading') {
-        return 'g-shoot-item-loading'
-      } else if (readyState.value === 'loaded') {
-        return 'router-view'
-      }
-      return 'div'
-    })
-
-    const componentProperties = computed(() => {
-      switch (component.value) {
-        case 'g-shoot-item-error': {
-          const {
-            code = 500,
-            reason = 'Oops, something went wrong',
-            message = 'An unexpected error occurred. Please try again later',
-          } = error.value
-          return {
-            code,
-            text: reason,
-            message,
-          }
-        }
-        case 'router-view': {
-          return {
-            key: route.name === 'ShootItemTerminal'
-              ? route.path
-              : undefined,
-          }
-        }
-        default: {
-          return {}
-        }
-      }
-    })
-
-    async function load (to) {
-      error.value = null
-      readyState.value = 'loading'
+    async function load (to, { setError }) {
       const routeName = to.name
       const routeParams = to.params
       try {
@@ -138,11 +76,11 @@ export default {
         }
         await Promise.all(promises)
 
-        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin & hasShootWorkerGroups.value) {
-          error.value = Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
+        if (routeName === 'ShootItemTerminal' && !authnStore.isAdmin && !hasShootWorkerGroups.value) {
+          setError(Object.assign(Error('Shoot has no workers to schedule a terminal pod'), {
             code: 404,
             reason: 'Terminal not available',
-          })
+          }))
         }
       } catch (err) {
         let {
@@ -160,54 +98,12 @@ export default {
           reason = 'Oops, something went wrong'
           message = 'An unexpected error occurred. Please try again later'
         }
-        error.value = Object.assign(new Error(message), {
+        setError(Object.assign(new Error(message), {
           code,
           reason,
-        })
+        }))
       }
     }
-
-    onBeforeMount(() => {
-      readyState.value = 'initial'
-    })
-
-    onMounted(async () => {
-      await load(route)
-      readyState.value = 'loaded'
-    })
-
-    onBeforeUnmount(() => {
-      readyState.value = 'initial'
-    })
-
-    onBeforeRouteUpdate(async to => {
-      if (isLoadRequired(route, to)) {
-        await load(to)
-      }
-    })
-
-    onBeforeRouteLeave(() => {
-      readyState.value = 'initial'
-    })
-
-    watch(() => route.path, value => {
-      if (value) {
-        readyState.value = 'loaded'
-      }
-    })
-
-    watch(() => shootItem.value, value => {
-      if (readyState.value === 'loaded') {
-        if (!value) {
-          error.value = Object.assign(new Error('The cluster you are looking for is no longer available'), {
-            code: 410,
-            reason: 'Cluster is gone',
-          })
-        } else if ([404, 410].includes(error.value?.code)) {
-          error.value = null
-        }
-      }
-    })
 
     provide('activePopoverKey', activePopoverKey)
 
@@ -233,10 +129,31 @@ export default {
     const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
     useProvideSeedItem(seedItem)
 
+    const {
+      component,
+      componentProperties,
+      load: loadRoute,
+    } = useItemPlaceholder({
+      route,
+      item: shootItem,
+      load,
+      errorComponent: 'g-shoot-item-error',
+      loadingComponent: 'g-shoot-item-loading',
+      getRouterViewProps: () => ({
+        key: route.name === 'ShootItemTerminal'
+          ? route.path
+          : undefined,
+      }),
+      getGoneError: () => Object.assign(new Error('The cluster you are looking for is no longer available'), {
+        code: 410,
+        reason: 'Cluster is gone',
+      }),
+    })
+
     return {
       component,
       componentProperties,
-      load,
+      load: loadRoute,
     }
   },
 }

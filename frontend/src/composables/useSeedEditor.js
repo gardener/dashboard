@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -17,28 +17,22 @@ import { useTheme } from 'vuetify'
 import yaml from 'js-yaml'
 
 import { useLocalStorageStore } from '@/store/localStorage'
-import { useProjectStore } from '@/store/project'
-import { useAuthzStore } from '@/store/authz'
 
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
-import { useShootSchemaDefinition } from '@/composables/useShootSchemaDefinition'
+import { useSeedSchemaDefinition } from '@/composables/useSeedSchemaDefinition'
 
-import isEqual from 'lodash/isEqual'
 import omit from 'lodash/omit'
 import get from 'lodash/get'
 
-export function useShootEditor (initialValue, options = {}) {
+export function useSeedEditor (initialValue, options = {}) {
   const {
     api = useApi(),
     logger = useLogger(),
     theme = useTheme(),
-    authzStore = useAuthzStore(),
-    projectStore = useProjectStore(),
     localStorageStore = useLocalStorageStore(),
   } = options
 
-  const conflictPath = ref(null)
   const touched = ref(false)
   const clean = ref(true)
   const showManagedFields = ref(false)
@@ -56,25 +50,15 @@ export function useShootEditor (initialValue, options = {}) {
     description: undefined,
   })
 
-  function getExtraKeys () {
-    const extraKeys = get(options, ['extraKeys'], [])
-    for (const extraKey of extraKeys) {
-      if (get(localStorageStore.editorShortcuts, [extraKey.key])) {
-        extraKey.key = get(localStorageStore.editorShortcuts, [extraKey.key])
-      }
-    }
-    return extraKeys
-  }
-
   const isReadOnly = computed(() => {
-    return isShootActionsDisabled.value || !authzStore.canPatchShoots
+    return true
   })
 
   const isDarkMode = computed(() => {
     return !!theme.global.current.value?.dark
   })
 
-  const shootItem = computed(() => {
+  const seedItem = computed(() => {
     const value = unref(initialValue)
     if (!value) {
       return null
@@ -98,19 +82,10 @@ export function useShootEditor (initialValue, options = {}) {
   })
 
   const filename = computed(() => {
-    const namespace = get(shootItem.value, ['metadata', 'namespace'])
-    if (!namespace) {
-      return get(options, ['filename'], 'unknown.yaml')
-    }
-    const name = get(shootItem.value, ['metadata', 'name'], 'unnamed')
-    const projectName = projectStore.projectNameByNamespace(namespace)
-    return `shoot--${projectName}--${name}.yaml`
+    const name = get(seedItem.value, ['metadata', 'name'], 'unnamed')
+    return `seed--${name}.yaml`
   })
-
-  const isShootActionsDisabled = computed(() => {
-    return get(shootItem.value, ['spec', 'purpose']) === 'infrastructure'
-  })
-  const schemaDefinition = useShootSchemaDefinition({ api })
+  const schemaDefinition = useSeedSchemaDefinition({ api })
 
   let cm = null
 
@@ -120,7 +95,7 @@ export function useShootEditor (initialValue, options = {}) {
       cm = useCodemirror(element, {
         ...options,
         schemaDefinition,
-        doc: yaml.dump(shootItem.value),
+        doc: yaml.dump(seedItem.value),
         onDocChanged ({ modified, undoDepth, redoDepth }) {
           if (!touched.value && modified) {
             touched.value = true
@@ -138,7 +113,6 @@ export function useShootEditor (initialValue, options = {}) {
         hideTooltip () {
           helpTooltip.visible = false
         },
-        extraKeys: getExtraKeys(),
         readOnly: isReadOnly.value,
         darkMode: isDarkMode.value,
       })
@@ -152,23 +126,14 @@ export function useShootEditor (initialValue, options = {}) {
     cm = null
   }
 
-  function getEditorValue () {
-    const value = cm?.getDocValue()
-    return value
-      ? yaml.load(value)
-      : null
-  }
-
   function setEditorValue (value) {
     if (value) {
       cm?.setDocValue(yaml.dump(value))
-      setEditorTouched(false)
-      resetEditorHistory()
     }
   }
 
   function refreshEditor () {
-    setEditorValue(shootItem.value)
+    setEditorValue(seedItem.value)
   }
 
   function focusEditor () {
@@ -187,19 +152,6 @@ export function useShootEditor (initialValue, options = {}) {
     cm?.redo()
   }
 
-  function setEditorTouched (editorTouched) {
-    clean.value = !editorTouched
-    touched.value = editorTouched
-  }
-
-  function resetEditorHistory () {
-    cm?.clearDocHistory()
-    historySize.value = {
-      undo: 0,
-      redo: 0,
-    }
-  }
-
   watch(renderWhitespaces, value => {
     cm?.dispatchWhitespaceEffect(value)
   })
@@ -212,31 +164,11 @@ export function useShootEditor (initialValue, options = {}) {
     cm?.dispatchThemeEffect(value)
   })
 
-  watch(shootItem, (newValue, oldValue) => {
-    conflictPath.value = null
-    if (!touched.value) {
-      setEditorValue(newValue)
-      return
-    }
-    const paths = [
-      ['spec'],
-      ['metadata', 'annotations'],
-      ['metadata', 'labels'],
-    ]
-
-    for (const path of paths) {
-      const newProp = get(newValue, path)
-      const oldProp = get(oldValue, path)
-      if (!isEqual(newProp, oldProp)) {
-        conflictPath.value = path
-        break
-      }
-    }
+  watch(seedItem, newValue => {
+    setEditorValue(newValue)
   })
 
   return {
-    conflictPath,
-    setEditorTouched,
     touched,
     clean,
     showManagedFields,
@@ -246,7 +178,6 @@ export function useShootEditor (initialValue, options = {}) {
     loadEditor,
     destroyEditor,
     getDocumentValue,
-    getEditorValue,
     setEditorValue,
     refreshEditor,
     focusEditor,

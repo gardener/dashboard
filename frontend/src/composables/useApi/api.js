@@ -210,6 +210,11 @@ export async function getShootSchemaDefinition () {
   return data['com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot']
 }
 
+export async function getSeedSchemaDefinition () {
+  const { data = {} } = await getResource('/api/openapi')
+  return data['com.github.gardener.gardener.pkg.apis.core.v1beta1.Seed']
+}
+
 export function updateShootPurpose ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
@@ -438,6 +443,7 @@ export default {
   updateShootAddons,
   updateShootDns,
   getShootSchemaDefinition,
+  getSeedSchemaDefinition,
   updateShootPurpose,
   updateShootSeedName,
   updateShootCredentialName,

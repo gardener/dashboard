@@ -55,6 +55,30 @@ function compareLastOperation (a, b, compareValues) {
   return compareValues(getSeedLastOperationSortVal(a), getSeedLastOperationSortVal(b))
 }
 
+function compareControlPlaneHighAvailability (a, b, compareValues) {
+  function getFailureToleranceTypeRank (value) {
+    const failureToleranceType = value?.failureToleranceType
+    switch (failureToleranceType) {
+      case 'zone':
+        return 0
+      case 'node':
+        return 1
+      default:
+        return 2
+    }
+  }
+
+  const compareFailureToleranceType = compareValues(
+    getFailureToleranceTypeRank(a),
+    getFailureToleranceTypeRank(b),
+  )
+  if (compareFailureToleranceType !== 0) {
+    return compareFailureToleranceType
+  }
+
+  return compareValues(a?.name, b?.name)
+}
+
 export function useSeedTableSorting (options = {}) {
   const {
     defaultSortBy = [{ key: 'name', order: 'asc' }],
@@ -81,6 +105,7 @@ export function useSeedTableSorting (options = {}) {
     shoots: (a, b) => compareValues(a, b),
     createdAt: (a, b) => compareValues(a, b),
     readiness: (a, b) => compareReadiness(a, b, configStore),
+    controlPlaneHighAvailability: (a, b) => compareControlPlaneHighAvailability(a, b, compareValues),
   }
 
   return {

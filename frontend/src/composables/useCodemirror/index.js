@@ -3,7 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-import { computed } from 'vue'
+import {
+  computed,
+  isRef,
+} from 'vue'
 import {
   EditorView,
   keymap,
@@ -39,8 +42,6 @@ import {
 import { yaml } from '@codemirror/lang-yaml'
 
 import { useLogger } from '@/composables/useLogger'
-import { useApi } from '@/composables/useApi'
-import { useShootSchemaDefinition } from '@/composables/useShootSchemaDefinition'
 
 import {
   createWhitespaceViewPlugin,
@@ -113,7 +114,6 @@ function dispatchWhitespaceEffect (view, value) {
 
 export function useCodemirror (element, options) {
   const {
-    api = useApi(),
     logger = useLogger(),
     doc = '',
     onDocChanged = noop,
@@ -121,12 +121,16 @@ export function useCodemirror (element, options) {
     hideTooltip = noop,
     extraKeys = [],
     completionPaths = [],
+    schemaDefinition,
     readOnly = false,
     darkMode = false,
     disableLineHighlighting = false,
   } = options
 
-  const schemaDefinition = useShootSchemaDefinition({ api })
+  if (!isRef(schemaDefinition)) {
+    throw new TypeError('Option `schemaDefinition` must be a ref object')
+  }
+
   const completions = computed(() => {
     if (!schemaDefinition.value) {
       return null
@@ -142,6 +146,9 @@ export function useCodemirror (element, options) {
   const enterKey = {
     key: 'Enter',
     run (view) {
+      if (view.state.readOnly) {
+        return true
+      }
       if (!completions.value) {
         return false
       }

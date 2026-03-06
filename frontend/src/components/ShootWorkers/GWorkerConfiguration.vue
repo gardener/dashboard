@@ -50,8 +50,9 @@ SPDX-License-Identifier: Apache-2.0
         </v-window-item>
         <v-window-item value="yaml">
           <div :style="{ 'min-height': `${overviewTabHeight}px` }">
-            <g-shoot-editor
+            <g-yaml-editor
               :identifier="injectionKey"
+              warning-identifier="workerEditorWarning"
               hide-toolbar
               animate-on-appear
             >
@@ -59,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
                 Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
                 Use worker resource editor with caution.
               </template>
-            </g-shoot-editor>
+            </g-yaml-editor>
           </div>
         </v-window-item>
       </v-window>
@@ -109,7 +110,7 @@ import yaml from 'js-yaml'
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
 import GManageWorkers from '@/components/ShootWorkers/GManageWorkers'
-import GShootEditor from '@/components/GShootEditor'
+import GYamlEditor from '@/components/GYamlEditor.vue'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useShootItem } from '@/composables/useShootItem'
@@ -131,7 +132,7 @@ export default {
   components: {
     GActionButtonDialog,
     GManageWorkers,
-    GShootEditor,
+    GYamlEditor,
     GCodeBlock,
   },
   inject: ['api', 'logger'],

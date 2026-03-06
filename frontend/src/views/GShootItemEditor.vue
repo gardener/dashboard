@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="fill-height">
-    <g-shoot-editor :identifier="injectionKey">
+    <g-yaml-editor :identifier="injectionKey">
       <template #modificationWarning>
         Directly modifying this resource can result in irreversible configurations that may severely compromise your cluster's stability and functionality.
         Use resource editor with caution.
@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template #toolbarItemsRight>
         <v-btn
+          v-if="!isReadOnly"
           variant="text"
           :disabled="clean"
           color="primary"
@@ -30,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
           Save
         </v-btn>
       </template>
-    </g-shoot-editor>
+    </g-yaml-editor>
     <g-confirm-dialog ref="confirmDialog" />
   </div>
 </template>
@@ -43,7 +44,7 @@ import {
 } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
-import GShootEditor from '@/components/GShootEditor'
+import GYamlEditor from '@/components/GYamlEditor.vue'
 import GConfirmDialog from '@/components/dialogs/GConfirmDialog'
 import GMessage from '@/components/GMessage'
 
@@ -75,6 +76,7 @@ const useProvide = (key, value) => {
 const {
   clean,
   touched,
+  isReadOnly,
   conflictPath,
   getEditorValue,
   focusEditor,
@@ -89,6 +91,10 @@ const {
 }))
 
 async function save () {
+  if (isReadOnly.value) {
+    return
+  }
+
   try {
     if (!touched.value) {
       return

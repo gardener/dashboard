@@ -379,6 +379,12 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
+export function getSeedPlutonoUrl (ingressDomain) {
+  return ingressDomain
+    ? `https://plutono-garden.${ingressDomain}`
+    : ''
+}
+
 export function isStatusHibernated (status) {
   return get(status, ['hibernated'], false)
 }

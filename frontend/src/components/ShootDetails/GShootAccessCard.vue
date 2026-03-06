@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0
       inset
     />
 
-    <g-gardenctl-commands
+    <g-shoot-gardenctl-commands
       v-if="isGardenctlTileVisible"
     />
   </g-list>
@@ -113,7 +113,7 @@ import GListItem from '@/components/GListItem.vue'
 import GListItemContent from '@/components/GListItemContent.vue'
 import GTerminalListTile from '@/components/GTerminalListTile.vue'
 
-import { useProvideSeedItem } from '@/composables/useSeedItem'
+import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useShootAdminKubeconfig } from '@/composables/useShootAdminKubeconfig'
 import {
   useShootItem,
@@ -121,7 +121,7 @@ import {
 } from '@/composables/useShootItem'
 import { useProvideSeedHelper } from '@/composables/useSeedHelper'
 
-import GGardenctlCommands from './GGardenctlCommands.vue'
+import GShootGardenctlCommands from './GShootGardenctlCommands.vue'
 import GShootKubeconfig from './GShootKubeconfig.vue'
 import GShootAdminKubeconfig from './GShootAdminKubeconfig.vue'
 import GTerminalShortcutsTile from './GTerminalShortcutsTile.vue'

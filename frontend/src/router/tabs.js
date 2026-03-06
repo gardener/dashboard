@@ -37,6 +37,33 @@ export function shootItemTabs ({ params }) {
   ]
 }
 
+export function seedItemTabs ({ params, query }) {
+  return [
+    {
+      key: 'seedOverview',
+      title: 'Overview',
+      get to () {
+        return {
+          name: 'SeedItem',
+          params,
+          query,
+        }
+      },
+    },
+    {
+      key: 'seedYaml',
+      title: 'YAML',
+      get to () {
+        return {
+          name: 'SeedItemEditor',
+          params,
+          query,
+        }
+      },
+    },
+  ]
+}
+
 export function newShootTabs ({ params }) {
   return [
     {

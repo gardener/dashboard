@@ -1681,7 +1681,7 @@ exports[`api shoots should return shoot info 1`] = `
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
@@ -1736,7 +1736,7 @@ exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] 
     {
       ":authority": "kubernetes:6443",
       ":method": "get",
-      ":path": "/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/infra1-seed",
+      ":path": "/apis/seedmanagement.gardener.cloud/v1alpha1/namespaces/garden/managedseeds/infra1-seed",
       ":scheme": "https",
       "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
     },
@@ -1778,20 +1778,20 @@ exports[`api shoots should return shoot info without gardenlogin kubeconfig 1`] 
 
 exports[`api shoots should return shoot info without gardenlogin kubeconfig: body 1`] = `
 {
-  "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "monitoringPassword": "pass-garden-foo-dummyShoot.monitoring",
   "monitoringUsername": "user-garden-foo-dummyShoot.monitoring",
+  "seedIsManagedSeed": false,
 }
 `;
 
 exports[`api shoots should return shoot info: body 1`] = `
 {
-  "canLinkToSeed": false,
   "dashboardUrlPath": "/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/",
   "kubeconfigGardenlogin": Any<String>,
   "monitoringPassword": "pass-garden-foo-barShoot.monitoring",
   "monitoringUsername": "user-garden-foo-barShoot.monitoring",
+  "seedIsManagedSeed": false,
 }
 `;
 

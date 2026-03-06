@@ -46,7 +46,7 @@ import GExternalLink from '@/components/GExternalLink.vue'
 import {
   useSeedItem,
   useSeedConditions,
-} from '@/composables/useSeedItem'
+} from '@/composables/useSeedItem/index'
 import { useStatusConditions } from '@/composables/useStatusConditions'
 
 const props = defineProps({

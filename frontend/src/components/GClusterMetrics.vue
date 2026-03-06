@@ -84,7 +84,10 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 import { useShootStatus } from '@/composables/useShootStatus'
 
-import { isTruthyValue } from '@/utils'
+import {
+  getSeedPlutonoUrl,
+  isTruthyValue,
+} from '@/utils'
 
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -159,7 +162,7 @@ export default {
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
     },
     seedPlutonoUrl () {
-      return `https://plutono-garden.${this.seedIngressDomain}`
+      return getSeedPlutonoUrl(this.seedIngressDomain)
     },
     username () {
       return get(this.shootInfo, ['monitoringUsername'], '')
