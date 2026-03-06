@@ -149,6 +149,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   function destroyEditor () {
     cm?.destroy()
+    cm = null
   }
 
   function getEditorValue () {

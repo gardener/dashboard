@@ -123,6 +123,7 @@ export function useSeedEditor (initialValue, options = {}) {
 
   function destroyEditor () {
     cm?.destroy()
+    cm = null
   }
 
   function setEditorValue (value) {
