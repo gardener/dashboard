@@ -79,7 +79,7 @@
     "socket.io": "^4.7.5",
     "undici": "^7.22.0",
     "unified": "^11.0.5",
-    "uuid": "^11.0.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
