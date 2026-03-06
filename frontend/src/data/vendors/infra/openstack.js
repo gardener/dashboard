@@ -30,4 +30,16 @@ export default {
       },
     },
   },
+  secret: {
+    details: [
+      {
+        label: 'Domain Name',
+        key: 'domainName',
+      },
+      {
+        label: 'Tenant Name',
+        key: 'tenantName',
+      },
+    ],
+  },
 }

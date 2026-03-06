@@ -51,6 +51,12 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'API URL',
+        key: 'metalAPIURL',
+      },
+    ],
     fields: [
       {
         key: 'metalAPIURL',

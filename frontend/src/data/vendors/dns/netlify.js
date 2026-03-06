@@ -10,6 +10,12 @@ export default {
   weight: 10300,
   icon: 'netlify-dns.svg',
   secret: {
+    details: [
+      {
+        label: 'API Key',
+        hidden: true,
+      },
+    ],
     fields: [
       {
         key: 'apiToken',

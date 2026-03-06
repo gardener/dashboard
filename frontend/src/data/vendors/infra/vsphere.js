@@ -24,6 +24,16 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'vSphere Username',
+        key: ['vsphereUsername', 'vSphereUsername'],
+      },
+      {
+        label: 'NSX-T Username',
+        key: ['nsxtUsername', 'NSXTUsername'],
+      },
+    ],
     fields: [
       {
         key: 'vSphereUsername',

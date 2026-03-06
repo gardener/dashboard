@@ -10,6 +10,12 @@ export default {
   weight: 10200,
   icon: 'infoblox-dns.svg',
   secret: {
+    details: [
+      {
+        label: 'Infoblox Username',
+        key: 'USERNAME',
+      },
+    ],
     fields: [
       {
         key: 'USERNAME',

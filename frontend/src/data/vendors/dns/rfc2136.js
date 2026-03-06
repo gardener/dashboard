@@ -10,6 +10,20 @@ export default {
   weight: 10500,
   icon: 'rfc2136.svg',
   secret: {
+    details: [
+      {
+        label: 'Server',
+        key: ['Server', 'server'],
+      },
+      {
+        label: 'TSIG Key Name',
+        key: ['TSIGKeyName', 'tsigKeyName'],
+      },
+      {
+        label: 'Zone',
+        key: ['Zone', 'zone'],
+      },
+    ],
     fields: [
       {
         key: 'server',

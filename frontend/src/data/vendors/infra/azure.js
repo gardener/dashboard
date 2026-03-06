@@ -35,6 +35,12 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'Subscription ID',
+        key: ['subscriptionID', 'subscriptionId'],
+      },
+    ],
     fields: [
       {
         key: 'clientId',

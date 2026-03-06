@@ -40,6 +40,12 @@ export default {
     },
   },
   secret: {
+    details: [
+      {
+        label: 'Access Key ID',
+        key: 'accessKeyID',
+      },
+    ],
     fields: [
       {
         key: 'accessKeyID',

@@ -12,6 +12,12 @@ export default {
   weight: 200,
   icon: 'azure-dns.svg',
   secret: {
+    details: [
+      {
+        label: 'Subscription ID',
+        key: ['subscriptionID', 'subscriptionId'],
+      },
+    ],
     fields: [
       ...azure.secret.fields,
       {

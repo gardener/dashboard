@@ -12,6 +12,12 @@ export default {
   weight: 100,
   icon: 'aws-route53.svg',
   secret: {
+    details: [
+      {
+        label: 'Access Key ID',
+        key: 'accessKeyID',
+      },
+    ],
     fields: [
       ...aws.secret.fields,
       {

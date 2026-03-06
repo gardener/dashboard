@@ -5,8 +5,81 @@
 //
 
 import { decodeBase64 } from '@/utils'
+import infraProviders from '@/data/vendors/infra'
+import dnsProviders from '@/data/vendors/dns'
 
 import get from 'lodash/get'
+
+const cloudProviderConfigs = [...infraProviders, ...dnsProviders]
+const cloudProviderConfigByName = new Map(cloudProviderConfigs.map(provider => [provider.name, provider]))
+
+function decodeSecretValue (secretData, key) {
+  const keys = Array.isArray(key) ? key : [key]
+  const selectedKey = keys.find(currentKey => get(secretData, [currentKey]))
+  if (!selectedKey) {
+    return undefined
+  }
+  const value = get(secretData, [selectedKey])
+  if (!value) {
+    return undefined
+  }
+  return decodeBase64(value)
+}
+
+function getGCPProjectId (secretData) {
+  const serviceAccount = get(secretData, ['serviceaccount.json'])
+  if (!serviceAccount) {
+    return undefined
+  }
+  return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
+}
+
+function getGCPDNSProject (secretData) {
+  return decodeSecretValue(secretData, 'project') || getGCPProjectId(secretData)
+}
+
+const detailValueResolver = new Map([
+  ['gcpProjectId', getGCPProjectId],
+  ['gcpDnsProject', getGCPDNSProject],
+])
+
+function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
+  const detailDefinitions = get(providerConfig, ['secret', 'details'])
+  if (!Array.isArray(detailDefinitions) || detailDefinitions.length === 0) {
+    return undefined
+  }
+
+  return detailDefinitions.map(detail => {
+    const {
+      label,
+      key,
+      hidden,
+      valueFrom,
+      decode = true,
+    } = detail
+
+    if (hidden) {
+      return { label, hidden: true }
+    }
+
+    if (valueFrom) {
+      const resolver = detailValueResolver.get(valueFrom)
+      return {
+        label,
+        value: resolver?.(secretData),
+      }
+    }
+
+    if (!key) {
+      return { label }
+    }
+
+    return {
+      label,
+      value: decode ? decodeSecretValue(secretData, key) : get(secretData, [key]),
+    }
+  })
+}
 
 // Credentials
 export function isSecret (credential) {
@@ -100,168 +173,16 @@ export function isInfrastructureBinding ({ binding, infraProviderTypes }) {
 // Secret Details
 export function secretDetails ({ secret, providerType }) {
   const secretData = secret.data || {}
-  const getGCPProjectId = () => {
-    const serviceAccount = get(secretData, ['serviceaccount.json'])
-    return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
-  }
   try {
-    switch (providerType) {
-      // infra
-      case 'openstack':
-        return [
-          {
-            label: 'Domain Name',
-            value: decodeBase64(secretData.domainName),
-          },
-          {
-            label: 'Tenant Name',
-            value: decodeBase64(secretData.tenantName),
-          },
-        ]
-      case 'vsphere':
-        return [
-          {
-            label: 'vSphere Username',
-            value: decodeBase64(secretData.vsphereUsername),
-          },
-          {
-            label: 'NSX-T Username',
-            value: decodeBase64(secretData.nsxtUsername),
-          },
-        ]
-      case 'aws':
-        return [
-          {
-            label: 'Access Key ID',
-            value: decodeBase64(secretData.accessKeyID),
-          },
-        ]
-      case 'azure':
-        return [
-          {
-            label: 'Subscription ID',
-            value: decodeBase64(secretData.subscriptionID),
-          },
-        ]
-      case 'gcp':
-        return [
-          {
-            label: 'Project',
-            value: getGCPProjectId(),
-          },
-        ]
-      case 'alicloud':
-        return [
-          {
-            label: 'Access Key ID',
-            value: decodeBase64(secretData.accessKeyID),
-          },
-        ]
-      case 'metal':
-        return [
-          {
-            label: 'API URL',
-            value: decodeBase64(secretData.metalAPIURL),
-          },
-        ]
-      case 'hcloud':
-        return [
-          {
-            label: 'Hetzner Cloud Token',
-            hidden: true,
-          },
-        ]
-      case 'openstack-designate':
-        return [
-          {
-            label: 'Domain Name',
-            value: decodeBase64(secretData.domainName),
-          },
-          {
-            label: 'Tenant Name',
-            value: decodeBase64(secretData.tenantName),
-          },
-        ]
-        // dns
-      case 'aws-route53':
-        return [
-          {
-            label: 'Access Key ID',
-            value: decodeBase64(secretData.accessKeyID),
-          },
-        ]
-      case 'azure-dns':
-      case 'azure-private-dns':
-        return [
-          {
-            label: 'Subscription ID',
-            value: decodeBase64(secretData.subscriptionID),
-          },
-        ]
-      case 'google-clouddns':
-        return [
-          {
-            label: 'Project',
-            value: decodeBase64(secretData.project),
-          },
-        ]
-      case 'alicloud-dns':
-        return [
-          {
-            label: 'Access Key ID',
-            value: decodeBase64(secretData.accessKeyID),
-          },
-        ]
-      case 'infoblox-dns':
-        return [
-          {
-            label: 'Infoblox Username',
-            value: decodeBase64(secretData.USERNAME),
-          },
-        ]
-      case 'cloudflare-dns':
-        return [
-          {
-            label: 'API Key',
-            hidden: true,
-          },
-        ]
-      case 'netlify-dns':
-        return [
-          {
-            label: 'API Key',
-            hidden: true,
-          },
-        ]
-      case 'rfc2136':
-        return [
-          {
-            label: 'Server',
-            value: decodeBase64(secretData.Server),
-          },
-          {
-            label: 'TSIG Key Name',
-            value: decodeBase64(secretData.TSIGKeyName),
-          },
-          {
-            label: 'Zone',
-            value: decodeBase64(secretData.Zone),
-          },
-        ]
-      case 'powerdns':
-        return [
-          {
-            label: 'Server',
-            value: decodeBase64(secretData.server),
-          },
-          {
-            label: 'API Key',
-            hidden: true,
-          },
-        ]
-      default:
-        return undefined
+    const providerConfig = cloudProviderConfigByName.get(providerType)
+    if (!providerConfig) {
+      return undefined
     }
+
+    return resolveSecretDetailsFromVendorConfig({
+      secretData,
+      providerConfig,
+    })
   } catch (err) {
     return undefined
   }
