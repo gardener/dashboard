@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     :label="field.label"
     :hint="field.hint"
     :type="computedTextFieldType"
+    :autocomplete="inputAutocomplete"
     :append-icon="appendIcon"
     :error-messages="getErrorMessages(v$.localValue)"
     variant="underlined"
@@ -45,6 +46,7 @@ SPDX-License-Identifier: Apache-2.0
     :label="field.label"
     :hint="field.hint"
     :error-messages="getErrorMessages(v$.localValue)"
+    :autocomplete="inputAutocomplete"
     :append-icon="appendIcon"
     :class="{ 'hide-secret': hideSecret }"
     variant="filled"
@@ -127,6 +129,22 @@ const isStructuredPassword = computed(() => props.field.type === 'yaml-secret' |
 const isTextLike = computed(() => props.field.type === 'text' || props.field.type === 'password')
 const isSelectLike = computed(() => props.field.type === 'select' || props.field.type === 'select-multiple')
 const isStructuredLike = computed(() => isYAML.value || isJSON.value)
+
+const inputAutocomplete = computed(() => {
+  if (props.field.autocomplete) {
+    return props.field.autocomplete
+  }
+
+  if (props.field.type === 'password' || isStructuredPassword.value) {
+    return 'current-password'
+  }
+
+  if (isTextLike.value || isStructuredLike.value) {
+    return 'off'
+  }
+
+  return undefined
+})
 
 // ----- password eye handling -----
 const showPassword = ref(false)

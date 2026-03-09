@@ -31,26 +31,28 @@ SPDX-License-Identifier: Apache-2.0
             ref="secretDetails"
             class="d-flex flex-column flex-grow-1"
           >
-            <div>
-              <template v-if="isCreateMode">
-                <v-text-field
-                  ref="name"
-                  v-model.trim="name"
-                  color="primary"
-                  label="Secret Name"
-                  :error-messages="getErrorMessages(v$.name)"
-                  variant="underlined"
-                  @update:model-value="v$.name.$touch()"
-                  @blur="v$.name.$touch()"
-                />
-              </template>
-              <template v-else>
-                <div class="text-title-large pb-4">
-                  {{ resourceName }} ({{ resourceKind }})
-                </div>
-              </template>
-            </div>
-            <slot name="secret-slot" />
+            <form @submit.prevent="submit">
+              <div>
+                <template v-if="isCreateMode">
+                  <v-text-field
+                    ref="name"
+                    v-model.trim="name"
+                    color="primary"
+                    label="Secret Name"
+                    :error-messages="getErrorMessages(v$.name)"
+                    variant="underlined"
+                    @update:model-value="v$.name.$touch()"
+                    @blur="v$.name.$touch()"
+                  />
+                </template>
+                <template v-else>
+                  <div class="text-title-large pb-4">
+                    {{ resourceName }} ({{ resourceKind }})
+                  </div>
+                </template>
+              </div>
+              <slot name="secret-slot" />
+            </form>
             <g-message
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"
