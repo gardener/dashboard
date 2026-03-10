@@ -36,7 +36,7 @@ export function useSeedEditor (initialValue, options = {}) {
   const touched = ref(false)
   const clean = ref(true)
   const showManagedFields = ref(false)
-  const renderWhitespaces = toRef(localStorageStore, 'renderEditorWhitespaes')
+  const renderWhitespaces = toRef(localStorageStore, 'renderEditorWhitespaces')
   const historySize = shallowRef({
     undo: 0,
     redo: 0,
