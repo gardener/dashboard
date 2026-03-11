@@ -87,14 +87,6 @@ exports[`composables > useShootContext > should change the infrastructure kind 1
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "gcp",
@@ -181,14 +173,6 @@ exports[`composables > useShootContext > should change to credentials binding 1`
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "aws",
@@ -284,14 +268,6 @@ exports[`composables > useShootContext > should create a default "alicloud" shoo
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "alicloud",
@@ -385,14 +361,6 @@ exports[`composables > useShootContext > should create a default "aws" shoot man
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "aws",
@@ -488,14 +456,6 @@ exports[`composables > useShootContext > should create a default "azure" shoot m
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "az",
@@ -585,14 +545,6 @@ exports[`composables > useShootContext > should create a default "gcp" shoot man
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "gcp",
@@ -679,14 +631,6 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "ironcore",
@@ -761,14 +705,6 @@ exports[`composables > useShootContext > should create a default "openstack" sho
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "openstack-1",

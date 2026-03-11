@@ -75,6 +75,56 @@ describe('composables', () => {
       expect(createShootManifest('aws')).toMatchSnapshot()
     })
 
+    it('should omit spec.addons if no addon is enabled', () => {
+      createShootManifest('aws')
+
+      expect(shootContextStore.shootManifest.spec.addons).toBeUndefined()
+    })
+
+    it('should include spec.addons if an addon is enabled', () => {
+      createShootManifest('aws')
+
+      shootContextStore.setAddonEnabled('nginxIngress', true)
+
+      expect(shootContextStore.shootManifest.spec.addons).toEqual({
+        kubernetesDashboard: {
+          enabled: false,
+        },
+        nginxIngress: {
+          enabled: true,
+        },
+      })
+    })
+
+    it('should recreate spec.addons when enabling an addon after loading a manifest without addons', () => {
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'test-shoot',
+        },
+        spec: {
+          provider: {
+            workers: [
+              {
+                name: 'worker-test',
+                minimum: 1,
+                maximum: 2,
+              },
+            ],
+          },
+        },
+      })
+
+      expect(shootContextStore.shootManifest.spec.addons).toBeUndefined()
+
+      shootContextStore.setAddonEnabled('nginxIngress', true)
+
+      expect(shootContextStore.shootManifest.spec.addons).toEqual({
+        nginxIngress: {
+          enabled: true,
+        },
+      })
+    })
+
     it('should create a default "azure" shoot manifest', async () => {
       expect(createShootManifest('azure')).toMatchSnapshot()
     })

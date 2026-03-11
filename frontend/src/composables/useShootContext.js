@@ -64,6 +64,7 @@ import unset from 'lodash/unset'
 import flatMap from 'lodash/flatMap'
 import keyBy from 'lodash/keyBy'
 import map from 'lodash/map'
+import some from 'lodash/some'
 import has from 'lodash/has'
 import set from 'lodash/set'
 import get from 'lodash/get'
@@ -81,11 +82,27 @@ export function createShootContextComposable (options = {}) {
     seedStore = useSeedStore(),
   } = options
 
+  function hasEnabledAddons (value) {
+    return some(value, ['enabled', true])
+  }
+
+  function ensureAddonsObject () {
+    let value = get(manifest.value, ['spec', 'addons'])
+    if (!value) {
+      value = {}
+      set(manifest.value, ['spec', 'addons'], value)
+    }
+    return value
+  }
+
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
     }, value)
+    if (!hasEnabledAddons(get(object, ['spec', 'addons']))) {
+      unset(object, ['spec', 'addons'])
+    }
     if (workerless.value) {
       unset(object, ['spec', 'provider', 'infrastructureConfig'])
       unset(object, ['spec', 'provider', 'controlPlaneConfig'])
@@ -708,7 +725,7 @@ export function createShootContextComposable (options = {}) {
   }
 
   function setAddonEnabled (name, value) {
-    set(addons.value, [name, 'enabled'], value)
+    set(ensureAddonsObject(), [name, 'enabled'], value)
   }
 
   /* maintenance */
