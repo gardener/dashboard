@@ -74,6 +74,7 @@ export default {
         key: 'NSXTPassword',
         label: 'NSX-T Password',
         type: 'text',
+        sensitive: true,
         validators: {
           required: {
             type: 'required',
