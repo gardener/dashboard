@@ -21,7 +21,7 @@ const createMachineType = ({
   memory,
   usable,
   architecture,
-  ...(storage ? { storage } : {}),
+  ...(storage ? { storage: { ...storage } } : {}),
 })
 
 const createVolumeType = ({
