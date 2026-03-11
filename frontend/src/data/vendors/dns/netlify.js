@@ -33,7 +33,7 @@ export default {
         You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate with the Netlify DNS API.
       </p>
       <p>
-        Then, base64 encode the token. For example, if the generated token in 1234567890123456, use
+        Then, base64 encode the token. For example, if the generated token is 1234567890123456789, use
       </p>
       <pre>$ echo -n '1234567890123456789' | base64</pre>
       <p>

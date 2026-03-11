@@ -72,8 +72,6 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
-import { useCloudProfileStore } from '@/store/cloudProfile'
-
 import { useStructuredTextField } from '@/composables/useStructuredTextField'
 
 import {
@@ -87,12 +85,9 @@ import {
 } from '@/utils'
 
 import get from 'lodash/get'
-import map from 'lodash/map'
 import forEach from 'lodash/forEach'
 import set from 'lodash/set'
 import isEmpty from 'lodash/isEmpty'
-
-const cloudProfileStore = useCloudProfileStore()
 
 const props = defineProps({
   field: {
@@ -136,10 +131,6 @@ const inputAutocomplete = computed(() => {
   }
 
   if (props.field.type === 'password' || isStructuredPassword.value) {
-    return 'current-password'
-  }
-
-  if (isTextLike.value || isStructuredLike.value) {
     return 'off'
   }
 
@@ -249,7 +240,13 @@ const rules = computed(() => {
         break
       // structured content validators
       case 'isValidObject': // TODO need to fix invalid yaml => always update modelValue also on yaml error?
-        set(compiledValidators, [validatorName], value => isEmpty(value) || Object.keys(props.modelValue).length > 0)
+        set(compiledValidators, [validatorName], value => {
+          if (isEmpty(value)) {
+            return true // empty is valid (unless required validator is also present)
+          }
+          // Check if modelValue is a non-empty object (successful parse)
+          return typeof props.modelValue === 'object' && props.modelValue !== null && Object.keys(props.modelValue).length > 0
+        })
         if (!validator.message) {
           if (isYAML.value) {
             validator.message = 'You need to enter secret data as YAML key-value pairs'
@@ -292,16 +289,11 @@ const rules = computed(() => {
 
 const v$ = useVuelidate(rules, { localValue })
 
-// TODO only required for custom fields => remove?
 const items = computed(() => {
   const field = props.field
   let items
   if (Array.isArray(field.values)) {
     items = field.values
-  } else if (field.values?.cloudprofilePath) {
-    const cloudProfile = cloudProfileStore.cloudProfileByRef(props.cloudProfileRef)
-    const values = get(cloudProfile, field.values.cloudprofilePath)
-    items = map(values, field.values.key)
   }
   return items
 })

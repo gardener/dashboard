@@ -61,4 +61,37 @@ describe('secretDetails', () => {
 
     expect(secretDetails({ secret, providerType: 'unknown-provider' })).toMatchSnapshot()
   })
+
+  it('does not throw when secret is undefined', () => {
+    expect(secretDetails({ secret: undefined, providerType: 'aws' })).toEqual([
+      {
+        label: 'Access Key ID',
+        value: undefined,
+      },
+    ])
+  })
+
+  it('returns undefined for gcp-derived values when serviceaccount.json is invalid', () => {
+    const secret = {
+      data: {
+        ...createSecretData(),
+        project: undefined,
+        'serviceaccount.json': encode('not-json'),
+      },
+    }
+
+    expect(secretDetails({ secret, providerType: 'gcp' })).toEqual([
+      {
+        label: 'Project',
+        value: undefined,
+      },
+    ])
+
+    expect(secretDetails({ secret, providerType: 'google-clouddns' })).toEqual([
+      {
+        label: 'Project',
+        value: undefined,
+      },
+    ])
+  })
 })

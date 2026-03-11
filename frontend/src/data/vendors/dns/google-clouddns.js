@@ -25,7 +25,7 @@ export default {
         </p>
         <p>
           For details on Cloud DNS see
-          <a href=="https://cloud.google.com/dns/docs/zones">Cloud DNS documentation</a>,
+          <a href="https://cloud.google.com/dns/docs/zones">Cloud DNS documentation</a>,
           and on Service Accounts see
           <a href="https://cloud.google.com/iam/docs/service-accounts">Service Account documentation</a>.
         </p>

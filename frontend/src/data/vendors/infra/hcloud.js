@@ -44,7 +44,7 @@ export default {
       {
         key: 'hcloudToken',
         label: 'Hetzner Cloud Token',
-        type: 'text',
+        type: 'password',
         validators: {
           required: {
             type: 'required',

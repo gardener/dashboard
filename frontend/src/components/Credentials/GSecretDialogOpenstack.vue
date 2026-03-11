@@ -103,10 +103,7 @@ import GExternalLink from '@/components/GExternalLink'
 
 import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
-import {
-  getErrorMessages,
-  setDelayedInputFocus,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import GGenericInputField from '../GGenericInputField.vue'
 
@@ -170,7 +167,7 @@ export default {
     return {
       hideSecret: true,
       hideApplicationCredentialSecret: true,
-      authenticationMethod: 'USER',
+      authenticationMethodInternal: 'USER',
       fields: {
         authURL: {
           label: 'Auth URL',
@@ -250,6 +247,21 @@ export default {
     }
   },
   computed: {
+    authenticationMethod: {
+      get () {
+        return this.authenticationMethodInternal
+      },
+      set (value) {
+        this.authenticationMethodInternal = value
+        this.username = undefined
+        this.password = undefined
+        this.applicationCredentialID = undefined
+        this.applicationCredentialName = undefined
+        this.applicationCredentialSecret = undefined
+
+        this.v$.$reset()
+      },
+    },
     visible: {
       get () {
         return this.modelValue
@@ -266,36 +278,13 @@ export default {
     },
   },
   watch: {
-    authenticationMethod () {
-      this.username = undefined
-      this.password = undefined
-      this.applicationCredentialID = undefined
-      this.applicationCredentialName = undefined
-      this.applicationCredentialSecret = undefined
-      this.v$.$reset()
+    applicationCredentialID (value) {
+      if (value) {
+        this.authenticationMethodInternal = 'APPLICATION_CREDENTIALS'
+      }
     },
   },
   methods: {
-    reset () {
-      this.v$.$reset()
-
-      this.domainName = ''
-      this.tenantName = ''
-      this.username = ''
-      this.password = ''
-      this.authURL = ''
-      this.applicationCredentialID = ''
-      this.applicationCredentialName = ''
-      this.applicationCredentialSecret = ''
-
-      if (!this.isCreateMode) {
-        if (this.secret.data) {
-          this.domainName = this.secret.data.domainName
-          this.tenantName = this.secret.data.tenantName
-        }
-        setDelayedInputFocus(this, 'domainName')
-      }
-    },
     getErrorMessages,
   },
 }

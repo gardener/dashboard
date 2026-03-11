@@ -27,7 +27,7 @@ export default {
     fields: [
       {
         key: 'server',
-        label: '<host>:<port> of the authorive DNS server',
+        label: '<host>:<port> of the authoritative DNS server',
         type: 'text',
         validators: {
           required: {
@@ -119,7 +119,7 @@ export default {
     ],
     help: `
       <p>
-        This DNS provider allows you to create and manage DNS entries for authoritive DNS server supporting dynamic updates with DNS messages following
+        This DNS provider allows you to create and manage DNS entries for authoritative DNS server supporting dynamic updates with DNS messages following
         <a href="https://datatracker.ietf.org/doc/html/rfc2136">RFC2136</a>
         (DNS Update) like knot-dns or others.
       </p>
