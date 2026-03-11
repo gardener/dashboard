@@ -140,9 +140,6 @@ export default {
     helpJSONTemplate () {
       return JSON.stringify(this.vendorSecretConfiguration?.helpJSONTemplate, undefined, 2)
     },
-    isCreateMode () {
-      return !this.secret
-    },
     vendorName () {
       return this.vendorDisplayName({
         type: this.vendorType,

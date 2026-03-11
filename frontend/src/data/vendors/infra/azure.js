@@ -66,7 +66,7 @@ export default {
       },
       {
         key: 'tenantId',
-        label: 'Tenant Id"',
+        label: 'Tenant Id',
         type: 'text',
         validators: {
           required: {

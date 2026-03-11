@@ -89,7 +89,7 @@ export default {
 
       <p>
         Read the
-        <a url="https://cloud.google.com/compute/docs/access/service-accounts">Service Account Documentation</a>
+        <a href="https://cloud.google.com/compute/docs/access/service-accounts">Service Account Documentation</a>
         on how to apply for credentials to service accounts.
       </p>
       `,
