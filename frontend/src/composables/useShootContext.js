@@ -682,21 +682,16 @@ export function createShootContextComposable (options = {}) {
   /* addons */
   const addons = computed({
     get () {
-      return get(manifest.value, ['spec', 'addons'], {})
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'addons'], value)
+      return get(manifest.value, ['spec', 'addons'])
     },
   })
 
   function resetAddons () {
-    const defaultAddons = {}
     if (!providerState.workerless) {
       for (const { name, enabled } of visibleAddonDefinitionList.value) {
-        set(defaultAddons, [name], { enabled })
+        set(manifest.value, ['spec', 'addons', name, 'enabled'], enabled)
       }
     }
-    addons.value = defaultAddons
   }
 
   const visibleAddonDefinitionList = computed(() => {
@@ -716,10 +711,7 @@ export function createShootContextComposable (options = {}) {
   }
 
   function setAddonEnabled (name, value) {
-    addons.value = {
-      ...addons.value,
-      [name]: { enabled: value },
-    }
+    set(manifest.value, ['spec', 'addons', name, 'enabled'], value)
   }
 
   /* maintenance */
