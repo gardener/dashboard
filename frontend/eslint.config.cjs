@@ -218,6 +218,7 @@ module.exports = [
       'vite.config.js',
     ],
     rules: {
+      'vue/one-component-per-file': 'off',
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'security/detect-unsafe-regex': 'off',
