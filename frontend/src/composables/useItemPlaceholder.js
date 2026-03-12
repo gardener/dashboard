@@ -19,7 +19,7 @@ import {
 
 import isEqual from 'lodash/isEqual'
 
-function isLoadRequired (route, to) {
+function shouldReloadForRouteChange (route, to) {
   return route.name !== to.name || !isEqual(route.params, to.params)
 }
 
@@ -70,9 +70,11 @@ export function useItemPlaceholder ({
     }
   })
 
-  async function loadRoute (to) {
+  async function loadRoute (to, { showLoading = true } = {}) {
     error.value = null
-    readyState.value = 'loading'
+    if (showLoading) {
+      readyState.value = 'loading'
+    }
     await load(to, {
       setError: value => {
         error.value = value
@@ -94,8 +96,10 @@ export function useItemPlaceholder ({
   })
 
   onBeforeRouteUpdate(async to => {
-    if (isLoadRequired(route, to)) {
-      await loadRoute(to)
+    if (shouldReloadForRouteChange(route, to)) {
+      await loadRoute(to, {
+        showLoading: !isEqual(route.params, to.params),
+      })
     }
   })
 
