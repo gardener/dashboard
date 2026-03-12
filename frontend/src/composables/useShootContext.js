@@ -96,15 +96,6 @@ export function createShootContextComposable (options = {}) {
     return some(value, ['enabled', true])
   }
 
-  function ensureAddonsObject () {
-    let value = get(manifest.value, ['spec', 'addons'])
-    if (!value) {
-      value = {}
-      set(manifest.value, ['spec', 'addons'], value)
-    }
-    return value
-  }
-
   function normalizeManifest (value) {
     const object = Object.assign({
       apiVersion: 'core.gardener.cloud/v1beta1',
@@ -725,7 +716,10 @@ export function createShootContextComposable (options = {}) {
   }
 
   function setAddonEnabled (name, value) {
-    set(ensureAddonsObject(), [name, 'enabled'], value)
+    addons.value = {
+      ...addons.value,
+      [name]: { enabled: value },
+    }
   }
 
   /* maintenance */
