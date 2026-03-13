@@ -631,14 +631,6 @@ exports[`composables > useShootContext > should create a default "hcloud" shoot 
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "hcloud",
@@ -785,14 +777,6 @@ exports[`composables > useShootContext > should create a default "local" shoot m
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "local",
@@ -850,14 +834,6 @@ exports[`composables > useShootContext > should create a default "metal" shoot m
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "metal",
@@ -947,14 +923,6 @@ exports[`composables > useShootContext > should create a default "onmetal" shoot
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "onmetal",
@@ -1098,14 +1066,6 @@ exports[`composables > useShootContext > should create a default "stackit" shoot
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "stackit",
@@ -1177,14 +1137,6 @@ exports[`composables > useShootContext > should create a default "vsphere" shoot
     "namespace": "garden-test",
   },
   "spec": {
-    "addons": {
-      "kubernetesDashboard": {
-        "enabled": false,
-      },
-      "nginxIngress": {
-        "enabled": false,
-      },
-    },
     "cloudProfile": {
       "kind": "CloudProfile",
       "name": "vsphere",
