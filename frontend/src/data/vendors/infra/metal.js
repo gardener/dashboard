@@ -6,7 +6,7 @@
 
 export default {
   name: 'metal',
-  displayName: 'Metal',
+  displayName: 'metal-stack',
   weight: 900,
   icon: 'metal.svg',
   shoot: {
