@@ -96,7 +96,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
+
+import { useConfigStore } from '@/store/config'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GExternalLink from '@/components/GExternalLink'
@@ -168,84 +171,6 @@ export default {
       hideSecret: true,
       hideApplicationCredentialSecret: true,
       authenticationMethodInternal: 'USER',
-      fields: {
-        authURL: {
-          label: 'Auth URL',
-          type: 'text',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        domainName: {
-          label: 'Domain Name',
-          type: 'text',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        tenantName: {
-          label: 'Project / Tenant Name',
-          type: 'text',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        applicationCredentialID: {
-          label: 'ID',
-          type: 'text',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        applicationCredentialName: {
-          label: 'Name',
-          type: 'text',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        applicationCredentialSecret: {
-          label: 'Secret',
-          type: 'text',
-          sensitive: true,
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        username: {
-          label: 'Technical User',
-          type: 'text',
-          hint: 'Do not use personalized login credentials. Instead, use credentials of a technical user',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-        password: {
-          label: 'Password',
-          type: 'text',
-          sensitive: true,
-          hint: 'Do not use personalized login credentials. Instead, use credentials of a technical user',
-          validators: {
-            required: {
-              type: 'required',
-            },
-          },
-        },
-      },
     }
   },
   computed: {
@@ -272,6 +197,12 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
+    fields () {
+      return Object.fromEntries(this.providerFields.map(field => [field.key, field]))
+    },
+    providerFields () {
+      return this.vendorDetails(this.providerType)?.secret?.fields ?? []
+    },
     valid () {
       return !this.v$.$invalid
     },
@@ -287,6 +218,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useConfigStore, ['vendorDetails']),
     getErrorMessages,
   },
 }
