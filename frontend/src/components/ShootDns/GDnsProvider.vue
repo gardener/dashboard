@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-popover
     v-model="popover"
-    :toolbar-title="secretName"
+    :toolbar-title="credentialName"
   >
     <template #activator="{ props }">
       <v-chip
@@ -22,47 +22,53 @@ SPDX-License-Identifier: Apache-2.0
           :name="type"
           :size="14"
         />
-        <span class="px-1">{{ secretName }}</span>
+        <g-credential-name
+          :credential="credential"
+          hide-icon
+        />
       </v-chip>
     </template>
     <v-list min-width="300">
       <v-list-item
-        v-for="({title, value, to}) in dnsProviderDescriptions"
+        v-for="({title, value}) in dnsProviderDescriptions"
         :key="title"
       >
         <v-list-item-subtitle class="pt-1">
           {{ title }}
         </v-list-item-subtitle>
-        <v-list-item-title v-if="to">
-          <g-text-router-link
-            :to="to"
-            :text="value"
-          />
-        </v-list-item-title>
-        <v-list-item-title v-else>
+        <v-list-item-title>
           {{ value }}
         </v-list-item-title>
       </v-list-item>
-      <v-list-item v-if="secret">
-        <g-credential-details-item-content
-          class="pb-2"
-          :credential="secret"
-          :provider-type="type"
-          details-title
-        />
-      </v-list-item>
+      <template v-if="credential">
+        <v-list-item>
+          <v-list-item-subtitle class="pt-1">
+            Credential
+          </v-list-item-subtitle>
+          <v-list-item-title>
+            <g-credential-name
+              :credential="credential"
+              render-link
+            />
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item>
+          <g-credential-details-item-content
+            class="pb-2"
+            :credential="credential"
+            :provider-type="type"
+            details-title
+          />
+        </v-list-item>
+      </template>
     </v-list>
   </g-popover>
 </template>
 
 <script>
-import { mapActions } from 'pinia'
-
-import { useCredentialStore } from '@/store/credential'
-
 import GVendorIcon from '@/components/GVendorIcon'
+import GCredentialName from '@/components/Credentials/GCredentialName.vue'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent.vue'
-import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 import get from 'lodash/get'
 import join from 'lodash/join'
@@ -71,20 +77,16 @@ export default {
   components: {
     GVendorIcon,
     GCredentialDetailsItemContent,
-    GTextRouterLink,
+    GCredentialName,
   },
   props: {
     type: {
       type: String,
       required: true,
     },
-    secretName: {
-      type: String,
-      required: true,
-    },
-    shootNamespace: {
-      type: String,
-      required: true,
+    credential: {
+      type: Object,
+      required: false,
     },
     primary: {
       type: Boolean,
@@ -105,29 +107,14 @@ export default {
     }
   },
   computed: {
-    secret () {
-      return this.getSecret({ namespace: this.shootNamespace, name: this.secretName })
-    },
-    resourceHash () {
-      const uid = get(this.secret, ['metadata', 'uid'])
-      return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
+    credentialName () {
+      return get(this.credential, ['metadata', 'name'])
     },
     dnsProviderDescriptions () {
       const descriptions = []
       descriptions.push({
         title: 'DNS Provider Type',
         value: this.type,
-      })
-      descriptions.push({
-        title: 'Credential',
-        value: this.secretName,
-        to: {
-          name: 'Credentials',
-          params: {
-            namespace: this.shootNamespace,
-          },
-          hash: this.resourceHash,
-        },
       })
       descriptions.push({
         title: 'Primary DNS Provider',
@@ -159,11 +146,6 @@ export default {
       }
       return descriptions
     },
-  },
-  methods: {
-    ...mapActions(useCredentialStore, [
-      'getSecret',
-    ]),
   },
 }
 </script>

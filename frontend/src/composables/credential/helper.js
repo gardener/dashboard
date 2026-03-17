@@ -7,6 +7,7 @@
 import { decodeBase64 } from '@/utils'
 
 import get from 'lodash/get'
+import find from 'lodash/find'
 
 // Credentials
 export function isSecret (credential) {
@@ -18,29 +19,82 @@ export function isWorkloadIdentity (credential) {
 }
 
 export function credentialProviderType (credential) {
-  // TODO check for provider.extensions.gardener.cloud once wlids are supported
   const labels = credential?.metadata?.labels
+  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
+  const SHOOT_PREFIX = 'provider.shoot.gardener.cloud/'
+  const EXTENSION_PREFIX = 'provider.extensions.gardener.cloud/'
+
+  // for DNS credentials: prefer the dashboard-specific label
+  if (DASHBOARD in (labels || {})) {
+    return get(labels, [DASHBOARD])
+  }
+
   if (!labels) {
     return undefined
   }
 
-  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
-  const PREFIX = 'provider.shoot.gardener.cloud/'
-
-  // for DNS credentials: prefer the dashboard-specific label
-  if (DASHBOARD in labels) {
-    return get(labels, [DASHBOARD])
-  }
   // Or find the first shoot provider label set to "true"
-  const key = Object.keys(labels).find(k => {
-    return k.startsWith(PREFIX) && get(labels, [k]) === 'true'
+  let key = Object.keys(labels).find(k => {
+    return k.startsWith(SHOOT_PREFIX) && get(labels, [k]) === 'true'
   })
 
-  return key ? key.slice(PREFIX.length) : undefined
+  if (key) {
+    return key.slice(SHOOT_PREFIX.length)
+  }
+
+  // WorkloadIdentities for extensions use provider.extensions.gardener.cloud/<provider>
+  key = Object.keys(labels).find(k => {
+    return k.startsWith(EXTENSION_PREFIX) && get(labels, [k]) === 'true'
+  })
+
+  return key ? key.slice(EXTENSION_PREFIX.length) : undefined
 }
 
 export function isDNSCredential ({ credential, dnsProviderTypes }) {
   return dnsProviderTypes.includes(credentialProviderType(credential))
+}
+
+// DNS Provider references
+export function dnsProviderCredentialsRef (provider) {
+  if (!provider) {
+    return undefined
+  }
+  if (provider.credentialsRef) {
+    return provider.credentialsRef
+  }
+  // Suppport legacy field secretName for backward compatibility, but prefer credentialsRef if both are set
+  if (provider.secretName) {
+    return {
+      apiVersion: 'v1',
+      kind: 'Secret',
+      name: provider.secretName,
+    }
+  }
+  return undefined
+}
+
+export function dnsProviderCredentialName (provider) {
+  return dnsProviderCredentialsRef(provider)?.name
+}
+
+export function dnsProviderCredentialKind (provider) {
+  return dnsProviderCredentialsRef(provider)?.kind
+}
+
+export function dnsExtensionProviderResourceName (provider) {
+  // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
+  return provider?.credentials ?? provider?.secretName
+}
+
+export function resolvedDnsProviderCredentialKind ({ provider, extensionProviders, getResourceRefName, getResourceRef }) {
+  const credentialName = dnsProviderCredentialName(provider)
+  const matchingExtensionProvider = find(extensionProviders, extensionProvider => {
+    return getResourceRefName(dnsExtensionProviderResourceName(extensionProvider)) === credentialName
+  })
+
+  return matchingExtensionProvider
+    ? getResourceRef(dnsExtensionProviderResourceName(matchingExtensionProvider))?.kind
+    : dnsProviderCredentialKind(provider)
 }
 
 // Bindings

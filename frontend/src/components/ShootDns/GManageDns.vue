@@ -183,7 +183,8 @@ export default {
     const {
       dnsDomain,
       dnsPrimaryProviderType,
-      dnsPrimaryProviderSecretName,
+      dnsPrimaryProviderCredentialsRef,
+      dnsPrimaryProviderCredentialName,
       isNewCluster,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
@@ -204,7 +205,8 @@ export default {
       v$: useVuelidate(),
       dnsDomain,
       dnsPrimaryProviderType,
-      dnsPrimaryProviderSecretName,
+      dnsPrimaryProviderCredentialsRef,
+      dnsPrimaryProviderCredentialName,
       isNewCluster,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
@@ -269,11 +271,17 @@ export default {
     primaryDnsProviderCredential: {
       get () {
         return find(this.dnsPrimaryProviderCredentials, credential => {
-          return credential?.metadata?.name === this.dnsPrimaryProviderSecretName
+          return credential?.metadata?.name === this.dnsPrimaryProviderCredentialName
         })
       },
       set (credential) {
-        this.dnsPrimaryProviderSecretName = credential?.metadata?.name
+        this.dnsPrimaryProviderCredentialsRef = credential
+          ? {
+              apiVersion: credential.apiVersion,
+              kind: credential.kind,
+              name: credential.metadata?.name,
+            }
+          : undefined
       },
     },
     domainRecommendationVisible () {
@@ -300,6 +308,9 @@ export default {
         this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
         this.v$.dnsDomain.$reset()
       }
+    },
+    dnsPrimaryProviderType () {
+      this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
     },
   },
   methods: {

@@ -64,7 +64,11 @@ describe('composables', () => {
     it('should add primary dns provider', () => {
       shootDns.dnsDomain = 'example.org'
       shootDns.dnsPrimaryProviderType = 'foo'
-      shootDns.dnsPrimaryProviderSecretName = 'bar'
+      shootDns.dnsPrimaryProviderCredentialsRef = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        name: 'bar',
+      }
 
       expect(manifest.spec).toMatchSnapshot()
     })
@@ -72,12 +76,46 @@ describe('composables', () => {
     it('should add extension custom domain dns provider', () => {
       shootDns.dnsDomain = 'example.org'
       shootDns.dnsPrimaryProviderType = 'foo'
-      shootDns.dnsPrimaryProviderSecretName = 'bar'
+      shootDns.dnsPrimaryProviderCredentialsRef = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        name: 'bar',
+      }
 
       expect(shootDns.hasDnsServiceExtensionProviderForCustomDomain).toBe(false)
 
       shootDns.addDnsServiceExtensionProviderForCustomDomain()
       expect(shootDns.hasDnsServiceExtensionProviderForCustomDomain).toBe(true)
+
+      expect(manifest.spec).toMatchSnapshot()
+    })
+
+    it('should read old primary dns provider secretName as fallback', () => {
+      manifest.spec.dns = {
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+        }],
+      }
+
+      expect(shootDns.dnsPrimaryProviderCredentialName).toBe('legacy-secret')
+      expect(shootDns.dnsPrimaryProviderCredentialsRef).toEqual({
+        apiVersion: 'v1',
+        kind: 'Secret',
+        name: 'legacy-secret',
+      })
+    })
+
+    it('should fallback to provider credentialsRef when credential is not found in store', () => {
+      shootDns.addDnsServiceExtensionProvider({
+        type: 'foo',
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'bar',
+        },
+      })
 
       expect(manifest.spec).toMatchSnapshot()
     })

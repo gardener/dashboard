@@ -877,7 +877,8 @@ export function createShootContextComposable (options = {}) {
   const {
     dnsDomain,
     dnsPrimaryProviderType,
-    dnsPrimaryProviderSecretName,
+    dnsPrimaryProviderCredentialsRef,
+    dnsPrimaryProviderCredentialName,
     dnsServiceExtensionProviders,
     hasDnsServiceExtensionProviderForCustomDomain,
     addDnsServiceExtensionProviderForCustomDomain,
@@ -886,10 +887,10 @@ export function createShootContextComposable (options = {}) {
     getDnsServiceExtensionResourceName,
     resetDnsPrimaryProvider,
     forceMigrateSyncDnsProvidersToFalse,
-    addExtensionDnsProviderResourceRef,
     setResource,
     deleteResource,
     getResourceRefName,
+    getResourceRef,
   } = useShootDns(manifest, {
     gardenerExtensionStore,
     credentialStore,
@@ -1085,7 +1086,8 @@ export function createShootContextComposable (options = {}) {
     /* dns */
     dnsDomain,
     dnsPrimaryProviderType,
-    dnsPrimaryProviderSecretName,
+    dnsPrimaryProviderCredentialsRef,
+    dnsPrimaryProviderCredentialName,
     dnsServiceExtensionProviders,
     hasDnsServiceExtensionProviderForCustomDomain,
     addDnsServiceExtensionProviderForCustomDomain,
@@ -1094,10 +1096,10 @@ export function createShootContextComposable (options = {}) {
     getDnsServiceExtensionResourceName,
     resetDnsPrimaryProvider,
     forceMigrateSyncDnsProvidersToFalse,
-    addExtensionDnsProviderResourceRef,
     setResource,
     deleteResource,
     getResourceRefName,
+    getResourceRef,
     /* accessRestrictions */
     getAccessRestrictionValue,
     setAccessRestrictionValue,

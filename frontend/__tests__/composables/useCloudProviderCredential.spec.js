@@ -32,7 +32,11 @@ describe('useCloudProviderCredential composable', () => {
         spec: {
           dns: {
             providers: [
-              { primary: true, type: 'aws-route53', secretName: 'aws-route53-secret' },
+              {
+                primary: true,
+                type: 'aws-route53',
+                credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'aws-route53-secret' },
+              },
             ],
           },
         },
@@ -63,5 +67,22 @@ describe('useCloudProviderCredential composable', () => {
     const bindingCredentialRef = findbindingCredentialRef('aws-route53-secret')
     const composable = useCloudProviderCredential(bindingCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(2)
+  })
+
+  it('counts shoots referencing legacy dns provider secretName', () => {
+    shootStore.state.shoots['abc-126'] = {
+      metadata: { name: 'shoot-4', uid: 'abc-126' },
+      spec: {
+        dns: {
+          providers: [
+            { primary: true, type: 'aws-route53', secretName: 'aws-route53-secret' },
+          ],
+        },
+      },
+    }
+
+    const bindingCredentialRef = findbindingCredentialRef('aws-route53-secret')
+    const composable = useCloudProviderCredential(bindingCredentialRef)
+    expect(composable.credentialUsageCount.value).toBe(3)
   })
 })

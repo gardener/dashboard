@@ -128,7 +128,7 @@ describe('composables', () => {
 
       setShootItem('spec.dns.providers', [
         { primary: false },
-        { primary: true },
+        { primary: true, credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'foo' } },
       ])
       expect(reactiveShootItem.isCustomShootDomain).toBe(true)
     })

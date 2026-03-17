@@ -18,7 +18,6 @@ import { useApi } from '@/composables/useApi'
 import {
   isInfrastructureBinding,
   isDNSCredential,
-  isSecret,
 } from '@/composables/credential/helper'
 
 import { useAuthzStore } from './authz'
@@ -76,24 +75,28 @@ export const useCredentialStore = defineStore('credential', () => {
     secretBindings?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
       item.kind = 'SecretBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
+      item.apiVersion = 'core.gardener.cloud/v1beta1' // ensure apiVersion is set (might not be set if objects are retrieved using list call)
       set(state.secretBindings, [key], item)
     })
 
     secrets?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
       item.kind = 'Secret' // ensure kind is set (might not be set if objects are retrieved using list call)
+      item.apiVersion = 'v1' // ensure apiVersion is set (might not be set if objects are retrieved using list call)
       set(state.secrets, [key], item)
     })
 
     credentialsBindings?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
       item.kind = 'CredentialsBinding' // ensure kind is set (might not be set if objects are retrieved using list call)
+      item.apiVersion = 'security.gardener.cloud/v1alpha1' // ensure apiVersion is set (might not be set if objects are retrieved using list call)
       set(state.credentialsBindings, [key], item)
     })
 
     workloadIdentities?.forEach(item => {
       const key = namespaceNameKey(item.metadata)
       item.kind = 'WorkloadIdentity' // ensure kind is set (might not be set if objects are retrieved using list call)
+      item.apiVersion = 'security.gardener.cloud/v1alpha1' // ensure apiVersion is set (might not be set if objects are retrieved using list call)
       set(state.workloadIdentities, [key], item)
     })
 
@@ -161,7 +164,6 @@ export const useCredentialStore = defineStore('credential', () => {
     ]
     return credentials
       .filter(credential => isDNSCredential({ credential, dnsProviderTypes: dnsProviderTypes.value }))
-      .filter(credential => isSecret(credential)) // Remove filter when DNS supports credentials of kind WorkloadIdentity
   })
 
   const secretBindingList = computed(() => {

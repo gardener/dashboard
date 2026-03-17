@@ -6,8 +6,12 @@ exports[`composables > useShootDns > should add extension custom domain dns prov
     "domain": "example.org",
     "providers": [
       {
+        "credentialsRef": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "bar",
+        },
         "primary": true,
-        "secretName": "bar",
         "type": "foo",
       },
     ],
@@ -19,12 +23,12 @@ exports[`composables > useShootDns > should add extension custom domain dns prov
         "kind": "DNSConfig",
         "providers": [
           {
+            "credentials": "shoot-dns-service-bar",
             "domains": {
               "include": [
                 "example.org",
               ],
             },
-            "secretName": "shoot-dns-service-bar",
             "type": "foo",
           },
         ],
@@ -58,7 +62,7 @@ exports[`composables > useShootDns > should add extension dns providers 1`] = `
         "kind": "DNSConfig",
         "providers": [
           {
-            "secretName": "shoot-dns-service-aws-route53-secret",
+            "credentials": "shoot-dns-service-aws-route53-secret",
             "type": "aws-route53",
           },
         ],
@@ -86,8 +90,12 @@ exports[`composables > useShootDns > should add primary dns provider 1`] = `
     "domain": "example.org",
     "providers": [
       {
+        "credentialsRef": {
+          "apiVersion": "v1",
+          "kind": "Secret",
+          "name": "bar",
+        },
         "primary": true,
-        "secretName": "bar",
         "type": "foo",
       },
     ],
@@ -111,7 +119,7 @@ exports[`composables > useShootDns > should delete extension dns providers > one
         "kind": "DNSConfig",
         "providers": [
           {
-            "secretName": undefined,
+            "credentials": undefined,
             "type": "aws-route53",
           },
         ],
@@ -133,11 +141,11 @@ exports[`composables > useShootDns > should delete extension dns providers > two
         "kind": "DNSConfig",
         "providers": [
           {
-            "secretName": "shoot-dns-service-aws-route53-secret",
+            "credentials": "shoot-dns-service-aws-route53-secret",
             "type": "aws-route53",
           },
           {
-            "secretName": undefined,
+            "credentials": undefined,
             "type": "aws-route53",
           },
         ],
@@ -153,6 +161,37 @@ exports[`composables > useShootDns > should delete extension dns providers > two
         "apiVersion": "v1",
         "kind": "Secret",
         "name": "aws-route53-secret",
+      },
+    },
+  ],
+}
+`;
+
+exports[`composables > useShootDns > should fallback to provider credentialsRef when credential is not found in store 1`] = `
+{
+  "extensions": [
+    {
+      "providerConfig": {
+        "apiVersion": "service.dns.extensions.gardener.cloud/v1alpha1",
+        "kind": "DNSConfig",
+        "providers": [
+          {
+            "credentials": "shoot-dns-service-bar",
+            "type": "foo",
+          },
+        ],
+        "syncProvidersFromShootSpecDNS": false,
+      },
+      "type": "shoot-dns-service",
+    },
+  ],
+  "resources": [
+    {
+      "name": "shoot-dns-service-bar",
+      "resourceRef": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "name": "bar",
       },
     },
   ],

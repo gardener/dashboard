@@ -26,7 +26,7 @@ export async function list ({ user, params }) {
     client['security.gardener.cloud'].workloadidentities.list(namespace),
   ])
 
-  const hasProviderLabel = item => {
+  const hasCloudProviderSecretLabel = item => {
     const labels = item.metadata?.labels || {}
     return Object.entries(labels).some(([key, value]) => {
       if (key.startsWith('provider.shoot.gardener.cloud/') && value === 'true') {
@@ -41,15 +41,23 @@ export async function list ({ user, params }) {
     })
   }
 
-  const hasExtensionProviderLabel = item => {
+  const hasCloudProviderWorkloadIdentityLabel = item => {
     const labels = item.metadata?.labels || {}
     return Object.entries(labels).some(([key, value]) => {
-      return key.startsWith('provider.extensions.gardener.cloud/') && value === 'true'
+      // The label results of the binding created together with the secret and is set by Gardener
+      // used by infra credentials
+      if (key.startsWith('provider.extensions.gardener.cloud/') && value === 'true') {
+        return true
+      }
+      if (key === 'dashboard.gardener.cloud/dnsProviderType') {
+        return true
+      }
+      return false
     })
   }
 
-  const providerSecrets = secrets.filter(hasProviderLabel)
-  const providerWorkloadIdentities = workloadIdentities.filter(hasExtensionProviderLabel)
+  const providerSecrets = secrets.filter(hasCloudProviderSecretLabel)
+  const providerWorkloadIdentities = workloadIdentities.filter(hasCloudProviderWorkloadIdentityLabel)
 
   const quotas = _
     .chain([

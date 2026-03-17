@@ -45,10 +45,12 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   })
 
   const credentialUsageCount = computed(() => {
-    // TODO: Add count for wlid once supported
     const name = credentialName.value
-    const kind = credentialKind.value || 'Secret'
-    const byProvider = providers => some(providers, ['secretName', name])
+    const kind = credentialKind.value
+    const byProvider = providers => some(providers, provider => {
+      // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
+      return (provider?.credentialsRef?.name === name && provider?.credentialsRef?.kind === kind) || provider?.secretName === name
+    })
     const byResource = resources => some(resources, { resourceRef: { kind, name } })
 
     let count = 0

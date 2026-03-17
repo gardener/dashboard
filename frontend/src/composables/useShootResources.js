@@ -43,8 +43,13 @@ export const useShootResources = manifest => {
   }
 
   function getResourceRefName (resourceName) {
-    const secret = find(resources.value, ['name', resourceName])
-    return get(secret, ['resourceRef', 'name'])
+    const resource = find(resources.value, ['name', resourceName])
+    return get(resource, ['resourceRef', 'name'])
+  }
+
+  function getResourceRef (resourceName) {
+    const resource = find(resources.value, ['name', resourceName])
+    return get(resource, ['resourceRef'])
   }
 
   return {
@@ -52,5 +57,6 @@ export const useShootResources = manifest => {
     deleteResource,
     setResource,
     getResourceRefName,
+    getResourceRef,
   }
 }

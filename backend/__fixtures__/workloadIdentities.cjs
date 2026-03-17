@@ -33,10 +33,13 @@ const workloadIdentitiesList = [
     metadata: {
       namespace: 'garden-foo',
       name: 'dns-wlid',
+      labels: {
+        'provider.extensions.gardener.cloud/aws-route53': 'true',
+      },
     },
     spec: {
       targetSystem: {
-        type: 'infra-1',
+        type: 'aws-route53',
       },
     },
   }),

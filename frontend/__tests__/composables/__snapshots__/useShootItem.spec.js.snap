@@ -2,6 +2,7 @@
 
 exports[`composables > useProvideShootItem > should compute shootCloudProviderBinding correctly 1`] = `
 {
+  "apiVersion": "security.gardener.cloud/v1alpha1",
   "credentialsRef": {
     "kind": "Secret",
     "name": "aws-secret",
@@ -21,6 +22,7 @@ exports[`composables > useProvideShootItem > should compute shootCloudProviderBi
 
 exports[`composables > useProvideShootItem > should compute shootCloudProviderBinding correctly 2`] = `
 {
+  "apiVersion": "core.gardener.cloud/v1beta1",
   "kind": "SecretBinding",
   "metadata": {
     "name": "aws-secretbinding",
