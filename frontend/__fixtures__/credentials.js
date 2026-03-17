@@ -43,6 +43,8 @@ function createProviderCredentials (type, options = {}) {
   let secretBinding
   if (createSecretBinding) {
     secretBinding = {
+      apiVersion: 'core.gardener.cloud/v1beta1',
+      kind: 'SecretBinding',
       metadata: {
         namespace: bindingNamespace,
         name: secretBindingName,
@@ -72,6 +74,8 @@ function createProviderCredentials (type, options = {}) {
       name = workloadIdentityName
     }
     credentialsBinding = {
+      apiVersion: 'security.gardener.cloud/v1alpha1',
+      kind: 'CredentialsBinding',
       metadata: {
         namespace: bindingNamespace,
         name: credentialsBindingName,
@@ -105,6 +109,8 @@ function createProviderCredentials (type, options = {}) {
       }
     }
     secret = {
+      apiVersion: 'v1',
+      kind: 'Secret',
       metadata: {
         namespace: secretNamepace,
         name: secretName,
@@ -124,6 +130,8 @@ function createProviderCredentials (type, options = {}) {
       [`provider.extensions.gardener.cloud/${type}`]: 'true',
     }
     workloadIdentity = {
+      apiVersion: 'security.gardener.cloud/v1alpha1',
+      kind: 'WorkloadIdentity',
       metadata: {
         namespace: secretNamepace,
         name: workloadIdentityName,

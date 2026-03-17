@@ -45,6 +45,7 @@ describe('kube-client', () => {
       static get names () {
         return {
           plural: 'dummies',
+          kind: 'Dummy',
         }
       }
     }
@@ -99,12 +100,55 @@ describe('kube-client', () => {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource', () => {
+        it('should list a resource', async () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list({})
+          const [url, { method, searchParams }] = await testObject.list({})
           expect(url).toBe('dummies')
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
+        })
+
+        it('should enrich listed items with apiVersion and kind', async () => {
+          const body = {
+            items: [
+              { metadata: { name: 'foo' } },
+            ],
+          }
+          const testObject = new TestObject()
+          testObject[http.request] = jest.fn(() => body)
+
+          const response = await testObject.list({})
+
+          expect(response).toBe(body)
+          expect(response.items).toEqual([
+            {
+              apiVersion: 'group/version',
+              kind: 'Dummy',
+              metadata: { name: 'foo' },
+            },
+          ])
+        })
+
+        it('should preserve apiVersion and kind on listed items if already set', async () => {
+          const body = {
+            items: [
+              {
+                apiVersion: 'custom/v1',
+                kind: 'CustomDummy',
+                metadata: { name: 'foo' },
+              },
+            ],
+          }
+          const testObject = new TestObject()
+          testObject[http.request] = jest.fn(() => body)
+
+          const response = await testObject.list({})
+
+          expect(response.items[0]).toEqual({
+            apiVersion: 'custom/v1',
+            kind: 'CustomDummy',
+            metadata: { name: 'foo' },
+          })
         })
       })
 
@@ -234,20 +278,60 @@ describe('kube-client', () => {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource', () => {
+        it('should list a resource', async () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list('namespace', {})
+          const [url, { method, searchParams }] = await testObject.list('namespace', {})
           expect(url).toBe('namespaces/namespace/dummies')
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource across all namespaces', () => {
+        it('should list a resource across all namespaces', async () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.listAllNamespaces({})
+          const [url, { method, searchParams }] = await testObject.listAllNamespaces({})
           expect(url).toBe('dummies')
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
+        })
+
+        it('should enrich namespaced listed items with apiVersion and kind', async () => {
+          const body = {
+            items: [
+              { metadata: { name: 'foo' } },
+            ],
+          }
+          const testObject = new TestObject()
+          testObject[http.request] = jest.fn(() => body)
+
+          const response = await testObject.list('namespace', {})
+
+          expect(response.items).toEqual([
+            {
+              apiVersion: 'group/version',
+              kind: 'Dummy',
+              metadata: { name: 'foo' },
+            },
+          ])
+        })
+
+        it('should enrich all-namespaces listed items with apiVersion and kind', async () => {
+          const body = {
+            items: [
+              { metadata: { name: 'foo' } },
+            ],
+          }
+          const testObject = new TestObject()
+          testObject[http.request] = jest.fn(() => body)
+
+          const response = await testObject.listAllNamespaces({})
+
+          expect(response.items).toEqual([
+            {
+              apiVersion: 'group/version',
+              kind: 'Dummy',
+              metadata: { name: 'foo' },
+            },
+          ])
         })
       })
 

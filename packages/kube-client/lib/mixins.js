@@ -8,6 +8,7 @@ import { isPlainObject, isEmpty } from 'lodash-es'
 import { join } from 'path'
 import { Mixin } from 'mixwith'
 import { Informer, ListWatcher } from './cache/index.js'
+import { normalizeResourceListItems } from './resource.js'
 import { http } from './symbols.js'
 import { clusterScopedUrl, namespaceScopedUrl, validateLabelValue, setPatchType, PatchType } from './util.js'
 
@@ -72,7 +73,7 @@ ClusterScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams })
+    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
   }
 }
 
@@ -95,7 +96,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams })
+    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
   }
 
   listAllNamespaces ({ searchParams, signal, ...options } = {}) {
@@ -104,7 +105,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams })
+    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
   }
 }
 
@@ -531,6 +532,11 @@ function normalizeSearchParams (method, searchParams, options) {
     return null
   }
   return normalizedSearchParams
+}
+
+function normalizeListResponse (response, Resource) {
+  return Promise.resolve(response)
+    .then(body => normalizeResourceListItems(body, Resource))
 }
 
 export {
