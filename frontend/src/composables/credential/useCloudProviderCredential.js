@@ -48,8 +48,11 @@ export const useCloudProviderCredential = (credential, options = {}) => {
     const name = credentialName.value
     const kind = credentialKind.value
     const byProvider = providers => some(providers, provider => {
+      if (provider?.credentialsRef) {
+        return provider.credentialsRef.name === name && provider.credentialsRef.kind === kind
+      }
       // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
-      return (provider?.credentialsRef?.name === name && provider?.credentialsRef?.kind === kind) || provider?.secretName === name
+      return kind === 'Secret' && provider?.secretName === name
     })
     const byResource = resources => some(resources, { resourceRef: { kind, name } })
 

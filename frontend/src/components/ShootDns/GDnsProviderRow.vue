@@ -132,7 +132,7 @@ export default {
       getDnsServiceExtensionResourceName,
       setResource,
       deleteResource,
-      getResourceRefName,
+      getResourceRef,
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
@@ -149,7 +149,7 @@ export default {
       getDnsServiceExtensionResourceName,
       setResource,
       deleteResource,
-      getResourceRefName,
+      getResourceRef,
       dnsCloudProviderCredentials,
     }
   },
@@ -178,14 +178,16 @@ export default {
     dnsProviderCredential: {
       get () {
         const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
-        const credentialName = this.getResourceRefName(resourceName)
+        const resourceRef = this.getResourceRef(resourceName)
 
         return find(this.dnsCloudProviderCredentials, credential => {
-          return credential?.metadata?.name === credentialName
+          return credential?.metadata?.name === resourceRef?.name &&
+            credential?.kind === resourceRef?.kind
         })
       },
       set (credential) {
         if (!credential) {
+          this.deleteResource(dnsExtensionProviderResourceName(this.dnsProvider))
           this.dnsProvider.credentials = undefined
           this.dnsProvider.secretName = undefined
           return
@@ -237,8 +239,8 @@ export default {
         set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
-    usedResourceRefNames () {
-      return this.dnsServiceExtensionProviders.map(provider => this.getResourceRefName(dnsExtensionProviderResourceName(provider)))
+    usedResourceRefs () {
+      return this.dnsServiceExtensionProviders.map(provider => this.getResourceRef(dnsExtensionProviderResourceName(provider)))
     },
   },
   mounted () {
@@ -247,16 +249,16 @@ export default {
   methods: {
     getErrorMessages,
     credentialFilter (credential) {
-      const credentialName = credential.metadata.name
-      if (!credentialName) {
+      const { metadata: { name }, kind } = credential
+      if (!name || !kind) {
         return false
       }
       const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
-      const currentCredentialName = this.getResourceRefName(resourceName)
-      if (credentialName === currentCredentialName) {
+      const currentResourceRef = this.getResourceRef(resourceName)
+      if (name === currentResourceRef?.name && kind === currentResourceRef?.kind) {
         return true
       }
-      return !this.usedResourceRefNames.includes(credentialName)
+      return !this.usedResourceRefs.some(ref => ref?.name === name && ref?.kind === kind)
     },
   },
 }

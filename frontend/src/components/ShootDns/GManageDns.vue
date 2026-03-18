@@ -184,7 +184,6 @@ export default {
       dnsDomain,
       dnsPrimaryProviderType,
       dnsPrimaryProviderCredentialsRef,
-      dnsPrimaryProviderCredentialName,
       isNewCluster,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
@@ -206,7 +205,6 @@ export default {
       dnsDomain,
       dnsPrimaryProviderType,
       dnsPrimaryProviderCredentialsRef,
-      dnsPrimaryProviderCredentialName,
       isNewCluster,
       dnsServiceExtensionProviders,
       hasDnsServiceExtensionProviderForCustomDomain,
@@ -271,7 +269,8 @@ export default {
     primaryDnsProviderCredential: {
       get () {
         return find(this.dnsPrimaryProviderCredentials, credential => {
-          return credential?.metadata?.name === this.dnsPrimaryProviderCredentialName
+          return credential?.metadata?.name === this.dnsPrimaryProviderCredentialsRef?.name &&
+            credential?.kind === this.dnsPrimaryProviderCredentialsRef?.kind
         })
       },
       set (credential) {

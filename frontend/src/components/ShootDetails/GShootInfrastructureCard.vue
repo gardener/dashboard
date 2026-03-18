@@ -282,7 +282,7 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 import {
-  dnsProviderCredentialName,
+  dnsProviderCredentialsRef,
   resolvedDnsProviderCredentialKind,
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
@@ -338,7 +338,7 @@ export default {
       shootSecretBindingName,
     } = useShootItem()
 
-    const { getResourceRefName, getResourceRef } = useShootResources(shootItem)
+    const { getResourceRef } = useShootResources(shootItem)
 
     const {
       credential,
@@ -371,7 +371,6 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
-      getResourceRefName,
       getResourceRef,
       dnsExtensionProviderResourceName,
       credential,
@@ -449,12 +448,11 @@ export default {
       return resolvedDnsProviderCredentialKind({
         provider: this.shootDnsPrimaryProvider,
         extensionProviders: this.shootDnsServiceExtensionProviders,
-        getResourceRefName: this.getResourceRefName,
         getResourceRef: this.getResourceRef,
       })
     },
     shootDnsPrimaryProviderCredentialName () {
-      return dnsProviderCredentialName(this.shootDnsPrimaryProvider)
+      return dnsProviderCredentialsRef(this.shootDnsPrimaryProvider)?.name
     },
   },
   methods: {
@@ -473,9 +471,8 @@ export default {
     dnsProviderCredential (provider) {
       const resourceName = dnsExtensionProviderResourceName(provider)
       const resourceRef = this.getResourceRef(resourceName)
-      const credentialName = this.getResourceRefName(resourceName)
       return this.getCredentialByRef({
-        name: credentialName,
+        name: resourceRef?.name,
         kind: resourceRef?.kind,
         namespace: this.shootNamespace,
       })

@@ -99,7 +99,6 @@ describe('composables', () => {
         }],
       }
 
-      expect(shootDns.dnsPrimaryProviderCredentialName).toBe('legacy-secret')
       expect(shootDns.dnsPrimaryProviderCredentialsRef).toEqual({
         apiVersion: 'v1',
         kind: 'Secret',

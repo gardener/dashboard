@@ -889,7 +889,6 @@ export function createShootContextComposable (options = {}) {
     forceMigrateSyncDnsProvidersToFalse,
     setResource,
     deleteResource,
-    getResourceRefName,
     getResourceRef,
   } = useShootDns(manifest, {
     gardenerExtensionStore,
@@ -1098,7 +1097,6 @@ export function createShootContextComposable (options = {}) {
     forceMigrateSyncDnsProvidersToFalse,
     setResource,
     deleteResource,
-    getResourceRefName,
     getResourceRef,
     /* accessRestrictions */
     getAccessRestrictionValue,

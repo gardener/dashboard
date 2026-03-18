@@ -62,7 +62,7 @@ export function dnsProviderCredentialsRef (provider) {
   if (provider.credentialsRef) {
     return provider.credentialsRef
   }
-  // Suppport legacy field secretName for backward compatibility, but prefer credentialsRef if both are set
+  // Support legacy field secretName for backward compatibility, but prefer credentialsRef if both are set
   if (provider.secretName) {
     return {
       apiVersion: 'v1',
@@ -73,28 +73,20 @@ export function dnsProviderCredentialsRef (provider) {
   return undefined
 }
 
-export function dnsProviderCredentialName (provider) {
-  return dnsProviderCredentialsRef(provider)?.name
-}
-
-export function dnsProviderCredentialKind (provider) {
-  return dnsProviderCredentialsRef(provider)?.kind
-}
-
 export function dnsExtensionProviderResourceName (provider) {
   // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
   return provider?.credentials ?? provider?.secretName
 }
 
-export function resolvedDnsProviderCredentialKind ({ provider, extensionProviders, getResourceRefName, getResourceRef }) {
-  const credentialName = dnsProviderCredentialName(provider)
+export function resolvedDnsProviderCredentialKind ({ provider, extensionProviders, getResourceRef }) {
+  const credentialsRef = dnsProviderCredentialsRef(provider)
   const matchingExtensionProvider = find(extensionProviders, extensionProvider => {
-    return getResourceRefName(dnsExtensionProviderResourceName(extensionProvider)) === credentialName
+    return getResourceRef(dnsExtensionProviderResourceName(extensionProvider))?.name === credentialsRef?.name
   })
 
   return matchingExtensionProvider
     ? getResourceRef(dnsExtensionProviderResourceName(matchingExtensionProvider))?.kind
-    : dnsProviderCredentialKind(provider)
+    : credentialsRef?.kind
 }
 
 // Bindings

@@ -18,7 +18,6 @@ import { useShootExtensions } from '@/composables/useShootExtensions'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import {
   dnsProviderCredentialsRef,
-  dnsProviderCredentialName,
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
 
@@ -45,7 +44,6 @@ export const useShootDns = (manifest, options) => {
     resources,
     deleteResource,
     setResource,
-    getResourceRefName,
     getResourceRef,
   } = useShootResources(manifest)
 
@@ -145,17 +143,16 @@ export const useShootDns = (manifest, options) => {
     },
   })
 
-  const dnsPrimaryProviderCredentialName = computed(() => dnsProviderCredentialName(dnsPrimaryProvider.value))
-
   const primaryDnsServiceExtensionProvider = computed(() => {
     if (!dnsPrimaryProvider.value) {
       return undefined
     }
     return find(dnsServiceExtensionProviders.value, provider => {
       const resourceName = dnsExtensionProviderResourceName(provider)
-      const providerCredentialName = getResourceRefName(resourceName)
+      const providerCredentialRef = getResourceRef(resourceName)
       return provider.type === dnsPrimaryProvider.value.type &&
-        providerCredentialName === dnsPrimaryProviderCredentialName.value
+        providerCredentialRef?.name === dnsPrimaryProviderCredentialsRef.value?.name &&
+        providerCredentialRef?.kind === dnsPrimaryProviderCredentialsRef.value?.kind
     })
   })
 
@@ -270,7 +267,6 @@ export const useShootDns = (manifest, options) => {
     dnsDomain,
     dnsPrimaryProviderType,
     dnsPrimaryProviderCredentialsRef,
-    dnsPrimaryProviderCredentialName,
     resetDnsPrimaryProvider,
     forceMigrateSyncDnsProvidersToFalse,
     dnsServiceExtensionProviders,
@@ -281,7 +277,6 @@ export const useShootDns = (manifest, options) => {
     getDnsServiceExtensionResourceName,
     deleteResource,
     setResource,
-    getResourceRefName,
     getResourceRef,
     primaryDnsServiceExtensionProviderResourceRef,
   }

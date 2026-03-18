@@ -73,7 +73,7 @@ ClusterScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
+    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
   }
 }
 
@@ -96,7 +96,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
+    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
   }
 
   listAllNamespaces ({ searchParams, signal, ...options } = {}) {
@@ -105,7 +105,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams }), this.constructor)
+    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
   }
 }
 
