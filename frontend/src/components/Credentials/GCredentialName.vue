@@ -10,9 +10,11 @@ SPDX-License-Identifier: Apache-2.0
       :credential="credential"
     />
     <v-tooltip
-      class="credentials-details-tooltip"
       :open-delay="500"
       location="top"
+      width="200"
+      content-class="pa-0"
+      :content-props="{ style: { background: 'transparent' } }"
     >
       <template #activator="{ props: tProps }">
         <g-text-router-link
@@ -80,14 +82,3 @@ const resourceHash = computed(() => {
 const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid.value)
 
 </script>
-
-<style lang="scss" scoped>
-
-.credentials-details-tooltip {
-  :deep(.v-overlay__content) {
-    opacity: 1 !important;
-    padding: 0;
-    width: 200px;
-  }
-}
-</style>

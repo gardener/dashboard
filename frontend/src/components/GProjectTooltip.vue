@@ -11,6 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     :open-delay="openDelay"
     :open-on-hover="openOnHover"
     :max-width="300"
+    content-class="pa-0"
+    :content-props="{ style: { background: 'transparent' } }"
   >
     <template #activator="{ props: activatorProps }">
       <div v-bind="activatorProps">
@@ -96,10 +98,3 @@ const {
   projectPurpose,
 } = useProvideProjectItem(project)
 </script>
-
-<style lang="scss" scoped>
-:deep(.v-overlay__content) {
-  opacity: 1 !important;
-  padding: 0;
-}
-</style>

@@ -11,6 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     v-else
     location="top"
     :open-delay="200"
+    content-class="pa-0"
+    :content-props="{ style: { background: 'transparent' } }"
   >
     <template #activator="{ props }">
       <div
@@ -157,10 +159,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  :deep(.v-overlay__content) {
-    opacity: 1 !important;
-    padding: 0;
-  }
-</style>
