@@ -106,6 +106,172 @@ describe('composables', () => {
       })
     })
 
+    it('should migrate old primary dns provider secretName to credentialsRef when dns config changes', () => {
+      manifest.spec.dns = {
+        domain: 'example.org',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+        }],
+      }
+
+      shootDns.dnsPrimaryProviderType = 'bar'
+
+      expect(manifest.spec.dns.providers).toEqual([{
+        primary: true,
+        type: 'bar',
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'legacy-secret',
+        },
+      }])
+    })
+
+    it('should migrate old primary dns provider secretName to credentialsRef when only the domain changes', () => {
+      manifest.spec.dns = {
+        domain: 'example.org',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+        }],
+      }
+
+      shootDns.dnsDomain = 'example.com'
+
+      expect(manifest.spec.dns).toEqual({
+        domain: 'example.com',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'legacy-secret',
+          },
+        }],
+      })
+    })
+
+    it('should drop legacy primary dns provider secretName when credentialsRef is already set', () => {
+      manifest.spec.dns = {
+        domain: 'example.org',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'new-secret',
+          },
+        }],
+      }
+
+      shootDns.dnsDomain = 'example.com'
+
+      expect(manifest.spec.dns.providers).toEqual([{
+        primary: true,
+        type: 'foo',
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'new-secret',
+        },
+      }])
+    })
+
+    it('should migrate old extension provider secretName to credentials when dns config changes', () => {
+      manifest.spec.extensions = [{
+        type: 'shoot-dns-service',
+        providerConfig: {
+          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+          kind: 'DNSConfig',
+          syncProvidersFromShootSpecDNS: false,
+          providers: [{
+            type: 'aws-route53',
+            secretName: 'shoot-dns-service-aws-test',
+            domains: {
+              include: ['foo.bar'],
+            },
+          }, {
+            type: 'aws-route53',
+            credentials: 'shoot-dns-service-my-amazon-route-53-secret',
+          }],
+        },
+      }]
+      manifest.spec.dns = {
+        domain: 'example.org',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+        }],
+      }
+
+      shootDns.dnsDomain = 'example.com'
+
+      expect(manifest.spec.extensions).toEqual([{
+        type: 'shoot-dns-service',
+        providerConfig: {
+          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+          kind: 'DNSConfig',
+          syncProvidersFromShootSpecDNS: false,
+          providers: [{
+            type: 'aws-route53',
+            credentials: 'shoot-dns-service-aws-test',
+            domains: {
+              include: ['foo.bar'],
+            },
+          }, {
+            type: 'aws-route53',
+            credentials: 'shoot-dns-service-my-amazon-route-53-secret',
+          }],
+        },
+      }])
+    })
+
+    it('should drop legacy extension provider secretName when credentials is already set', () => {
+      manifest.spec.extensions = [{
+        type: 'shoot-dns-service',
+        providerConfig: {
+          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+          kind: 'DNSConfig',
+          syncProvidersFromShootSpecDNS: false,
+          providers: [{
+            type: 'aws-route53',
+            secretName: 'legacy-resource-name',
+            credentials: 'current-resource-name',
+          }],
+        },
+      }]
+      manifest.spec.dns = {
+        domain: 'example.org',
+        providers: [{
+          primary: true,
+          type: 'foo',
+          secretName: 'legacy-secret',
+        }],
+      }
+
+      shootDns.dnsDomain = 'example.com'
+
+      expect(manifest.spec.extensions).toEqual([{
+        type: 'shoot-dns-service',
+        providerConfig: {
+          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+          kind: 'DNSConfig',
+          syncProvidersFromShootSpecDNS: false,
+          providers: [{
+            type: 'aws-route53',
+            credentials: 'current-resource-name',
+          }],
+        },
+      }])
+    })
+
     it('should fallback to provider credentialsRef when credential is not found in store', () => {
       shootDns.addDnsServiceExtensionProvider({
         type: 'foo',

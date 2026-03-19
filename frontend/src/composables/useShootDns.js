@@ -79,12 +79,33 @@ export const useShootDns = (manifest, options) => {
     },
   })
 
+  function normalizeDnsServiceExtensionProvider (provider) {
+    if (!provider?.secretName) {
+      return provider
+    }
+
+    return {
+      ...omit(provider, ['secretName']),
+      credentials: provider.credentials ?? provider.secretName,
+    }
+  }
+
+  function normalizeDnsServiceExtensionProviders () {
+    if (!dnsServiceExtension.value) {
+      return
+    }
+
+    dnsServiceExtensionProviders.value = map(dnsServiceExtensionProviders.value, normalizeDnsServiceExtensionProvider)
+  }
+
   /* dns */
   const dnsDomain = computed({
     get () {
       return get(manifest.value, ['spec', 'dns', 'domain'])
     },
     set (value) {
+      normalizeDnsServiceExtensionProviders()
+      normalizeDnsProviderCredentialsRefs()
       set(manifest.value, ['spec', 'dns', 'domain'], value)
     },
   })
@@ -112,11 +133,31 @@ export const useShootDns = (manifest, options) => {
     return find(dnsProviders.value, ['primary', true])
   })
 
+  function normalizeDnsProviderCredentialsRef (provider) {
+    const credentialsRef = dnsProviderCredentialsRef(provider)
+    if (!credentialsRef) {
+      return provider
+    }
+
+    return {
+      ...omit(provider, ['secretName']),
+      credentialsRef,
+    }
+  }
+
+  function normalizeDnsProviderCredentialsRefs () {
+    if (!dnsProviders.value) {
+      return
+    }
+
+    dnsProviders.value = map(dnsProviders.value, normalizeDnsProviderCredentialsRef)
+  }
+
   function patchDnsPrimaryProvider (data) {
     // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
     dnsProviders.value = [{
       primary: true,
-      ...dnsPrimaryProvider.value,
+      ...normalizeDnsProviderCredentialsRef(dnsPrimaryProvider.value),
       ...data,
     }]
   }
@@ -201,6 +242,9 @@ export const useShootDns = (manifest, options) => {
   }
 
   function addDnsServiceExtensionProvider (options = {}) {
+    normalizeDnsServiceExtensionProviders()
+    normalizeDnsProviderCredentialsRefs()
+
     const type = options.type ?? head(gardenerExtensionStore.dnsProviderTypes)
     const secretName = options.credentialsRef?.name ?? options.secretName ?? getDefaultCredentialName(type)
 
@@ -237,6 +281,9 @@ export const useShootDns = (manifest, options) => {
   }
 
   function deleteDnsServiceExtensionProvider (index) {
+    normalizeDnsServiceExtensionProviders()
+    normalizeDnsProviderCredentialsRefs()
+
     const provider = get(dnsServiceExtensionProviders.value, [index])
     if (!provider) {
       return
@@ -252,6 +299,9 @@ export const useShootDns = (manifest, options) => {
   }
 
   function forceMigrateSyncDnsProvidersToFalse () {
+    normalizeDnsServiceExtensionProviders()
+    normalizeDnsProviderCredentialsRefs()
+
     if (get(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS']) === true) {
       // Migrate from old DNS configuration to new DNS configuration
       set(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS'], false)
