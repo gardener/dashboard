@@ -246,12 +246,12 @@ export const useShootDns = (manifest, options) => {
     normalizeDnsProviderCredentialsRefs()
 
     const type = options.type ?? head(gardenerExtensionStore.dnsProviderTypes)
-    const secretName = options.credentialsRef?.name ?? options.secretName ?? getDefaultCredentialName(type)
+    const credentialName = options.credentialsRef?.name ?? options.secretName ?? getDefaultCredentialName(type)
 
     const credentials = useCloudProviderEntityList(toRef(type), { credentialStore, gardenerExtensionStore, cloudProfileStore })
-    const credential = find(credentials.value, ['metadata.name', secretName])
+    const credential = find(credentials.value, ['metadata.name', credentialName])
 
-    const resourceName = getDnsServiceExtensionResourceName(secretName)
+    const resourceName = getDnsServiceExtensionResourceName(credentialName)
     const provider = {
       type,
       credentials: resourceName,
@@ -266,7 +266,7 @@ export const useShootDns = (manifest, options) => {
       ? {
           apiVersion: credential.apiVersion,
           kind: credential.kind,
-          name: secretName,
+          name: credentialName,
         }
       : options.credentialsRef
 
