@@ -26,7 +26,10 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
       <template v-else-if="header.key === 'shoot'">
-        <g-managed-seed-shoot-link :managed-seed-shoot-name="managedSeedShootName" />
+        <g-managed-seed-shoot-link
+          :managed-seed-shoot-name="managedSeedShootName"
+          :show-unmanaged-chip="false"
+        />
       </template>
       <template v-else-if="header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
