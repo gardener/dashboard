@@ -7,7 +7,6 @@
 import { decodeBase64 } from '@/utils'
 
 import get from 'lodash/get'
-import find from 'lodash/find'
 
 // Credentials
 export function isSecret (credential) {
@@ -78,15 +77,27 @@ export function dnsExtensionProviderResourceName (provider) {
   return provider?.credentials ?? provider?.secretName
 }
 
-export function resolvedDnsProviderCredentialKind ({ provider, extensionProviders, getResourceRef }) {
-  const credentialsRef = dnsProviderCredentialsRef(provider)
-  const matchingExtensionProvider = find(extensionProviders, extensionProvider => {
-    return getResourceRef(dnsExtensionProviderResourceName(extensionProvider))?.name === credentialsRef?.name
-  })
+export function dnsCredentialResourceNamePart (credentialRef) {
+  const kind = credentialRef?.kind
+  const name = credentialRef?.name
+  if (!kind || !name) {
+    return undefined
+  }
 
-  return matchingExtensionProvider
-    ? getResourceRef(dnsExtensionProviderResourceName(matchingExtensionProvider))?.kind
-    : credentialsRef?.kind
+  let kindPrefix
+  switch (kind) {
+    case 'Secret':
+      kindPrefix = 's'
+      break
+    case 'WorkloadIdentity':
+      kindPrefix = 'wlid'
+      break
+    default:
+      kindPrefix = kind.toLowerCase()
+      break
+  }
+
+  return `${kindPrefix}-${name}`
 }
 
 // Bindings

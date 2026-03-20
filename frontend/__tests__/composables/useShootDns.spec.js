@@ -17,6 +17,8 @@ import { useCredentialStore } from '@/store/credential'
 
 import { useShootDns } from '@/composables/useShootDns'
 
+import cloneDeep from 'lodash/cloneDeep'
+
 describe('composables', () => {
   describe('useShootDns', () => {
     const manifest = reactive({})
@@ -283,6 +285,87 @@ describe('composables', () => {
       })
 
       expect(manifest.spec).toMatchSnapshot()
+    })
+
+    it('should generate distinct dns service resources for same-name credentials with different kinds', () => {
+      const credentialStore = useCredentialStore()
+      const credentials = cloneDeep(global.fixtures.credentials)
+      credentials.secrets.push({
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: {
+          namespace: 'garden-test',
+          name: 'shared-name',
+          uid: 'secret-shared-name-uid',
+          labels: {
+            'dashboard.gardener.cloud/dnsProviderType': 'aws-route53',
+          },
+        },
+      })
+      credentials.workloadIdentities.push({
+        apiVersion: 'security.gardener.cloud/v1alpha1',
+        kind: 'WorkloadIdentity',
+        metadata: {
+          namespace: 'garden-test',
+          name: 'shared-name',
+          uid: 'wlid-shared-name-uid',
+          labels: {
+            'provider.extensions.gardener.cloud/aws-route53': 'true',
+          },
+        },
+        spec: {
+          targetSystem: {
+            type: 'foo-infra',
+          },
+        },
+      })
+      credentialStore._setCredentials(credentials)
+
+      shootDns.addDnsServiceExtensionProvider({
+        type: 'aws-route53',
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'shared-name',
+        },
+      })
+      shootDns.addDnsServiceExtensionProvider({
+        type: 'aws-route53',
+        credentialsRef: {
+          apiVersion: 'security.gardener.cloud/v1alpha1',
+          kind: 'WorkloadIdentity',
+          name: 'shared-name',
+        },
+      })
+
+      expect(manifest.spec.resources).toEqual([
+        {
+          name: 'shoot-dns-service-s-shared-name',
+          resourceRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'shared-name',
+          },
+        },
+        {
+          name: 'shoot-dns-service-wlid-shared-name',
+          resourceRef: {
+            apiVersion: 'security.gardener.cloud/v1alpha1',
+            kind: 'WorkloadIdentity',
+            name: 'shared-name',
+          },
+        },
+      ])
+      expect(shootDns.dnsServiceExtensionProviders).toEqual([
+        {
+          type: 'aws-route53',
+          credentials: 'shoot-dns-service-s-shared-name',
+        },
+        {
+          type: 'aws-route53',
+          credentials: 'shoot-dns-service-wlid-shared-name',
+        },
+      ])
     })
   })
 })

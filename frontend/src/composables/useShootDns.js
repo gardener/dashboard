@@ -19,6 +19,7 @@ import { useCloudProviderEntityList } from '@/composables/credential/useCloudPro
 import {
   dnsProviderCredentialsRef,
   dnsExtensionProviderResourceName,
+  dnsCredentialResourceNamePart,
 } from '@/composables/credential/helper'
 
 import get from 'lodash/get'
@@ -211,9 +212,10 @@ export const useShootDns = (manifest, options) => {
       : false
   })
 
-  function getDnsServiceExtensionResourceName (credentialName) {
-    return credentialName
-      ? `shoot-dns-service-${credentialName}`
+  function getDnsServiceExtensionResourceName (credentialRef) {
+    const key = dnsCredentialResourceNamePart(credentialRef)
+    return key
+      ? `shoot-dns-service-${key}`
       : undefined
   }
 
@@ -234,11 +236,14 @@ export const useShootDns = (manifest, options) => {
     // find unused credential
     const usedResourceNames = map(resources.value, 'name')
     const credential = find(credentials.value, credential => {
-      const resourceName = getDnsServiceExtensionResourceName(credential?.metadata?.name)
+      const resourceName = getDnsServiceExtensionResourceName({
+        kind: credential?.kind,
+        name: credential?.metadata?.name,
+      })
       return !includes(usedResourceNames, resourceName)
     })
 
-    return credential ? credential?.metadata?.name : undefined
+    return credential
   }
 
   function addDnsServiceExtensionProvider (options = {}) {
@@ -246,12 +251,30 @@ export const useShootDns = (manifest, options) => {
     normalizeDnsProviderCredentialsRefs()
 
     const type = options.type ?? head(gardenerExtensionStore.dnsProviderTypes)
-    const credentialName = options.credentialsRef?.name ?? options.secretName ?? getDefaultCredentialName(type)
+    const defaultCredential = getDefaultCredentialName(type)
+    const credentialsRef = options.credentialsRef ?? (options.secretName
+      ? {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: options.secretName,
+        }
+      : defaultCredential
+        ? {
+            apiVersion: defaultCredential.apiVersion,
+            kind: defaultCredential.kind,
+            name: defaultCredential.metadata?.name,
+          }
+        : undefined)
 
     const credentials = useCloudProviderEntityList(toRef(type), { credentialStore, gardenerExtensionStore, cloudProfileStore })
-    const credential = find(credentials.value, ['metadata.name', credentialName])
+    const credential = find(credentials.value, credential => {
+      return dnsCredentialResourceNamePart({
+        kind: credential?.kind,
+        name: credential?.metadata?.name,
+      }) === dnsCredentialResourceNamePart(credentialsRef)
+    })
 
-    const resourceName = getDnsServiceExtensionResourceName(credentialName)
+    const resourceName = getDnsServiceExtensionResourceName(credentialsRef)
     const provider = {
       type,
       credentials: resourceName,
@@ -266,9 +289,9 @@ export const useShootDns = (manifest, options) => {
       ? {
           apiVersion: credential.apiVersion,
           kind: credential.kind,
-          name: credentialName,
+          name: credential.metadata?.name,
         }
-      : options.credentialsRef
+      : credentialsRef
 
     if (resourceName && resourceRef) {
       setResource({

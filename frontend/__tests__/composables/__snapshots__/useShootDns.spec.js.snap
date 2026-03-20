@@ -23,7 +23,7 @@ exports[`composables > useShootDns > should add extension custom domain dns prov
         "kind": "DNSConfig",
         "providers": [
           {
-            "credentials": "shoot-dns-service-bar",
+            "credentials": "shoot-dns-service-s-bar",
             "domains": {
               "include": [
                 "example.org",
@@ -39,7 +39,7 @@ exports[`composables > useShootDns > should add extension custom domain dns prov
   ],
   "resources": [
     {
-      "name": "shoot-dns-service-bar",
+      "name": "shoot-dns-service-s-bar",
       "resourceRef": {
         "apiVersion": "v1",
         "kind": "Secret",
@@ -62,7 +62,7 @@ exports[`composables > useShootDns > should add extension dns providers 1`] = `
         "kind": "DNSConfig",
         "providers": [
           {
-            "credentials": "shoot-dns-service-aws-route53-secret",
+            "credentials": "shoot-dns-service-s-aws-route53-secret",
             "type": "aws-route53",
           },
         ],
@@ -73,7 +73,7 @@ exports[`composables > useShootDns > should add extension dns providers 1`] = `
   ],
   "resources": [
     {
-      "name": "shoot-dns-service-aws-route53-secret",
+      "name": "shoot-dns-service-s-aws-route53-secret",
       "resourceRef": {
         "apiVersion": "v1",
         "kind": "Secret",
@@ -141,7 +141,7 @@ exports[`composables > useShootDns > should delete extension dns providers > two
         "kind": "DNSConfig",
         "providers": [
           {
-            "credentials": "shoot-dns-service-aws-route53-secret",
+            "credentials": "shoot-dns-service-s-aws-route53-secret",
             "type": "aws-route53",
           },
           {
@@ -156,7 +156,7 @@ exports[`composables > useShootDns > should delete extension dns providers > two
   ],
   "resources": [
     {
-      "name": "shoot-dns-service-aws-route53-secret",
+      "name": "shoot-dns-service-s-aws-route53-secret",
       "resourceRef": {
         "apiVersion": "v1",
         "kind": "Secret",
@@ -176,7 +176,7 @@ exports[`composables > useShootDns > should fallback to provider credentialsRef 
         "kind": "DNSConfig",
         "providers": [
           {
-            "credentials": "shoot-dns-service-bar",
+            "credentials": "shoot-dns-service-s-bar",
             "type": "foo",
           },
         ],
@@ -187,7 +187,7 @@ exports[`composables > useShootDns > should fallback to provider credentialsRef 
   ],
   "resources": [
     {
-      "name": "shoot-dns-service-bar",
+      "name": "shoot-dns-service-s-bar",
       "resourceRef": {
         "apiVersion": "v1",
         "kind": "Secret",
