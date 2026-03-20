@@ -282,7 +282,7 @@ import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 import {
-  dnsProviderCredentialsRef,
+  getDnsPrimaryProviderCredentialsRef,
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
 
@@ -437,7 +437,7 @@ export default {
       return 'generated'
     },
     shootDnsPrimaryProviderCredential () {
-      const credentialsRef = dnsProviderCredentialsRef(this.shootDnsPrimaryProvider)
+      const credentialsRef = getDnsPrimaryProviderCredentialsRef(this.shootDnsPrimaryProvider)
       return this.getCredentialByRef({
         name: credentialsRef?.name,
         kind: credentialsRef?.kind,

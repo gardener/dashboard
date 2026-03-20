@@ -54,7 +54,7 @@ export function isDNSCredential ({ credential, dnsProviderTypes }) {
 }
 
 // DNS Provider references
-export function dnsProviderCredentialsRef (provider) {
+export function getDnsPrimaryProviderCredentialsRef (provider) {
   if (!provider) {
     return undefined
   }

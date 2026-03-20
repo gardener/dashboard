@@ -17,7 +17,7 @@ import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import {
-  dnsProviderCredentialsRef,
+  getDnsPrimaryProviderCredentialsRef,
   dnsExtensionProviderResourceName,
   dnsCredentialResourceNamePart,
 } from '@/composables/credential/helper'
@@ -106,7 +106,7 @@ export const useShootDns = (manifest, options) => {
     },
     set (value) {
       normalizeDnsServiceExtensionProviders()
-      normalizeDnsProviderCredentialsRefs()
+      normalizeDnsPrimaryProviderCredentialsRefs()
       set(manifest.value, ['spec', 'dns', 'domain'], value)
     },
   })
@@ -134,8 +134,8 @@ export const useShootDns = (manifest, options) => {
     return find(dnsProviders.value, ['primary', true])
   })
 
-  function normalizeDnsProviderCredentialsRef (provider) {
-    const credentialsRef = dnsProviderCredentialsRef(provider)
+  function normalizeDnsPrimaryProviderCredentialsRef (provider) {
+    const credentialsRef = getDnsPrimaryProviderCredentialsRef(provider)
     if (!credentialsRef) {
       return provider
     }
@@ -146,19 +146,19 @@ export const useShootDns = (manifest, options) => {
     }
   }
 
-  function normalizeDnsProviderCredentialsRefs () {
+  function normalizeDnsPrimaryProviderCredentialsRefs () {
     if (!dnsProviders.value) {
       return
     }
 
-    dnsProviders.value = map(dnsProviders.value, normalizeDnsProviderCredentialsRef)
+    dnsProviders.value = map(dnsProviders.value, normalizeDnsPrimaryProviderCredentialsRef)
   }
 
   function patchDnsPrimaryProvider (data) {
     // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
     dnsProviders.value = [{
       primary: true,
-      ...normalizeDnsProviderCredentialsRef(dnsPrimaryProvider.value),
+      ...normalizeDnsPrimaryProviderCredentialsRef(dnsPrimaryProvider.value),
       ...data,
     }]
   }
@@ -174,7 +174,7 @@ export const useShootDns = (manifest, options) => {
 
   const dnsPrimaryProviderCredentialsRef = computed({
     get () {
-      return dnsProviderCredentialsRef(dnsPrimaryProvider.value)
+      return getDnsPrimaryProviderCredentialsRef(dnsPrimaryProvider.value)
     },
     set (credentialsRef) {
       const provider = omit(dnsPrimaryProvider.value, ['secretName'])
@@ -248,7 +248,7 @@ export const useShootDns = (manifest, options) => {
 
   function addDnsServiceExtensionProvider (options = {}) {
     normalizeDnsServiceExtensionProviders()
-    normalizeDnsProviderCredentialsRefs()
+    normalizeDnsPrimaryProviderCredentialsRefs()
 
     const type = options.type ?? head(gardenerExtensionStore.dnsProviderTypes)
     const defaultCredential = getDefaultCredentialName(type)
@@ -305,7 +305,7 @@ export const useShootDns = (manifest, options) => {
 
   function deleteDnsServiceExtensionProvider (index) {
     normalizeDnsServiceExtensionProviders()
-    normalizeDnsProviderCredentialsRefs()
+    normalizeDnsPrimaryProviderCredentialsRefs()
 
     const provider = get(dnsServiceExtensionProviders.value, [index])
     if (!provider) {
@@ -323,7 +323,7 @@ export const useShootDns = (manifest, options) => {
 
   function forceMigrateSyncDnsProvidersToFalse () {
     normalizeDnsServiceExtensionProviders()
-    normalizeDnsProviderCredentialsRefs()
+    normalizeDnsPrimaryProviderCredentialsRefs()
 
     if (get(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS']) === true) {
       // Migrate from old DNS configuration to new DNS configuration
