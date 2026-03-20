@@ -193,15 +193,19 @@ export default {
           return
         }
         this.deleteResource(dnsExtensionProviderResourceName(this.dnsProvider))
+        const credentialKind = credential?.kind
         const credentialName = credential?.metadata?.name
-        const resourceName = this.getDnsServiceExtensionResourceName(credentialName)
+        const resourceName = this.getDnsServiceExtensionResourceName({
+          kind: credentialKind,
+          name: credentialName,
+        })
         this.dnsProvider.credentials = resourceName
         delete this.dnsProvider.secretName
         this.setResource({
           name: resourceName,
           resourceRef: {
             apiVersion: credential.apiVersion,
-            kind: credential.kind,
+            kind: credentialKind,
             name: credentialName,
           },
         })

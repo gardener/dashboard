@@ -287,6 +287,36 @@ describe('composables', () => {
       expect(manifest.spec).toMatchSnapshot()
     })
 
+    it('should not create a duplicate provider when a legacy resource name already references the credential', () => {
+      manifest.spec.resources = [{
+        name: 'legacy-resource-name',
+        resourceRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'aws-route53-secret',
+        },
+      }]
+
+      shootDns.addDnsServiceExtensionProvider({
+        type: 'aws-route53',
+      })
+
+      expect(manifest.spec.extensions?.[0]?.providerConfig?.providers).toEqual([
+        {
+          type: 'aws-route53',
+          credentials: undefined,
+        },
+      ])
+      expect(manifest.spec.resources).toEqual([{
+        name: 'legacy-resource-name',
+        resourceRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'aws-route53-secret',
+        },
+      }])
+    })
+
     it('should generate distinct dns service resources for same-name credentials with different kinds', () => {
       const credentialStore = useCredentialStore()
       const credentials = cloneDeep(global.fixtures.credentials)
