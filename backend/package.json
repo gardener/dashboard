@@ -29,7 +29,8 @@
     "build-packages-for-test-target": "yarn workspaces foreach --all --topological --no-private --include 'packages/*' run build",
     "build-test-target": "rollup -c rollup.config.js",
     "test": "NODE_PATH=./dist cross-env NODE_ENV=test node --experimental-vm-modules $(yarn bin jest)",
-    "test-coverage": "yarn test --coverage"
+    "test-coverage": "yarn test --coverage",
+    "test-vitest": "vitest run"
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
@@ -56,6 +57,7 @@
     "http-errors": "^2.0.0",
     "jose": "^5.2.3",
     "js-yaml": "^4.1.0",
+    "jsondiffpatch": "^0.7.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
@@ -87,6 +89,7 @@
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@vitest/coverage-v8": "^3.0.0",
     "abort-controller": "^3.0.0",
     "cross-env": "^10.0.0",
     "dockerfile-ast": "^0.7.0",
@@ -105,7 +108,8 @@
     "rollup-plugin-copy": "^3.5.0",
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.0"
   },
   "packageManager": "yarn@4.12.0",
   "engines": {

@@ -70,6 +70,7 @@ class LifecycleHooks {
     const informers = {
       // core.gardener
       cloudprofiles: client['core.gardener.cloud'].cloudprofiles.informer(),
+      namespacedcloudprofiles: client['core.gardener.cloud'].namespacedcloudprofiles.informerAllNamespaces(),
       controllerregistrations: client['core.gardener.cloud'].controllerregistrations.informer(),
       projects: client['core.gardener.cloud'].projects.informer(),
       quotas: client['core.gardener.cloud'].quotas.informerAllNamespaces(),

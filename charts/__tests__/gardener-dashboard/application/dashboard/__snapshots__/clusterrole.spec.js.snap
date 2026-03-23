@@ -87,6 +87,18 @@ exports[`gardener-dashboard clusterrole should render the template with default 
     },
     {
       "apiGroups": [
+        "core.gardener.cloud",
+      ],
+      "resources": [
+        "namespacedcloudprofiles",
+      ],
+      "verbs": [
+        "list",
+        "watch",
+      ],
+    },
+    {
+      "apiGroups": [
         "",
       ],
       "resourceNames": [

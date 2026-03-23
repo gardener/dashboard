@@ -28,6 +28,16 @@ class CloudProfile extends mix(GardenerCore).with(ClusterScoped, Readable, Obser
   }
 }
 
+class NamespacedCloudProfile extends mix(GardenerCore).with(NamespaceScoped, Readable, Observable) {
+  static get names () {
+    return {
+      plural: 'namespacedcloudprofiles',
+      singular: 'namespacedcloudprofile',
+      kind: 'NamespacedCloudProfile',
+    }
+  }
+}
+
 class Seed extends mix(GardenerCore).with(ClusterScoped, Readable, Observable) {
   static get names () {
     return {
@@ -84,6 +94,7 @@ class ControllerRegistration extends mix(GardenerCore).with(ClusterScoped, Reada
 
 export default {
   CloudProfile,
+  NamespacedCloudProfile,
   Project,
   Quota,
   SecretBinding,

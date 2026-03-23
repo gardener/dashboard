@@ -11,11 +11,13 @@ import {
 
 import { useConfigStore } from '@/store/config'
 
+import { getCloudProfileSpec } from '@/utils'
+
 import get from 'lodash/get'
 
 /**
  * Composable for getting default nodes CIDR from cloud profile
- * @param {Ref<CloudProfile>} cloudProfile - Vue ref containing the cloud profile object
+ * @param {Ref<object>} cloudProfile - A Vue ref containing a CloudProfile or NamespacedCloudProfile object
  * @returns {Object} Object containing computed property for default nodes CIDR
  */
 export function useDefaultNodesCIDR (cloudProfile) {
@@ -27,8 +29,8 @@ export function useDefaultNodesCIDR (cloudProfile) {
 
   const defaultNodesCIDR = computed(() => {
     return get(
-      cloudProfile.value,
-      ['spec', 'providerConfig', 'defaultNodesCIDR'],
+      getCloudProfileSpec(cloudProfile.value),
+      ['providerConfig', 'defaultNodesCIDR'],
       configStore.defaultNodesCIDR,
     )
   })

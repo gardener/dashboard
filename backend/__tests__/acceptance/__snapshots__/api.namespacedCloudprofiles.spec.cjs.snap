@@ -1,0 +1,209 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api namespaced cloudprofiles should return all namespaced cloudprofiles for a namespace 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "namespace": "garden-local",
+          "resource": "namespacedcloudprofiles",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api namespaced cloudprofiles should return all namespaced cloudprofiles for a namespace 2`] = `
+[
+  {
+    "metadata": {
+      "name": "custom-cloudprofile-1",
+      "namespace": "garden-local",
+      "uid": 1001,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "expirationDate": "2025-02-28T23:59:59Z",
+            "version": "1.31.1",
+          },
+        ],
+      },
+      "machineTypes": [
+        {
+          "cpu": "4",
+          "gpu": "0",
+          "memory": "16Gi",
+          "name": "local-large",
+          "usable": true,
+        },
+      ],
+      "parent": {
+        "kind": "CloudProfile",
+        "name": "local",
+      },
+    },
+    "status": {
+      "cloudProfileSpec": {
+        "kubernetes": {
+          "versions": [
+            {
+              "expirationDate": "2025-02-28T23:59:59Z",
+              "version": "1.31.1",
+            },
+            {
+              "version": "1.30.8",
+            },
+            {
+              "version": "1.29.10",
+            },
+          ],
+        },
+        "machineImages": [
+          {
+            "name": "gardenlinux",
+            "versions": [
+              {
+                "version": "15.4.20220818",
+              },
+            ],
+          },
+        ],
+        "machineTypes": [
+          {
+            "cpu": "4",
+            "gpu": "0",
+            "memory": "16Gi",
+            "name": "local-large",
+            "usable": true,
+          },
+          {
+            "cpu": "2",
+            "gpu": "0",
+            "memory": "8Gi",
+            "name": "local-medium",
+            "usable": true,
+          },
+        ],
+        "regions": [
+          {
+            "name": "europe-central-1",
+            "zones": [
+              {
+                "name": "europe-central-1a",
+              },
+            ],
+          },
+        ],
+        "seedSelector": {},
+        "type": "local",
+      },
+    },
+  },
+  {
+    "metadata": {
+      "name": "custom-cloudprofile-2",
+      "namespace": "garden-local",
+      "uid": 1002,
+    },
+    "spec": {
+      "kubernetes": {
+        "versions": [
+          {
+            "expirationDate": "2025-02-28T23:59:59Z",
+            "version": "1.31.1",
+          },
+        ],
+      },
+      "machineTypes": [
+        {
+          "cpu": "4",
+          "gpu": "0",
+          "memory": "16Gi",
+          "name": "infra1-large",
+          "usable": true,
+        },
+      ],
+      "parent": {
+        "kind": "CloudProfile",
+        "name": "infra1-profileName",
+      },
+    },
+    "status": {
+      "cloudProfileSpec": {
+        "kubernetes": {
+          "versions": [
+            {
+              "expirationDate": "2025-02-28T23:59:59Z",
+              "version": "1.31.1",
+            },
+            {
+              "version": "1.30.8",
+            },
+            {
+              "version": "1.29.10",
+            },
+          ],
+        },
+        "machineImages": [
+          {
+            "name": "gardenlinux",
+            "versions": [
+              {
+                "version": "15.4.20220818",
+              },
+            ],
+          },
+        ],
+        "machineTypes": [
+          {
+            "cpu": "4",
+            "gpu": "0",
+            "memory": "16Gi",
+            "name": "infra1-large",
+            "usable": true,
+          },
+          {
+            "cpu": "2",
+            "gpu": "0",
+            "memory": "8Gi",
+            "name": "infra1-medium",
+            "usable": true,
+          },
+        ],
+        "regions": [
+          {
+            "name": "europe-central-1",
+            "zones": [
+              {
+                "name": "europe-central-1a",
+              },
+            ],
+          },
+        ],
+        "seedSelector": {
+          "matchLabels": {
+            "env": "dev",
+          },
+        },
+        "type": "infra1",
+      },
+    },
+  },
+]
+`;

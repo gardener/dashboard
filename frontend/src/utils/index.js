@@ -156,6 +156,26 @@ export function cloudProfileDisplayName (cloudProfile) {
   return get(cloudProfile, ['metadata', 'annotations', 'garden.sapcloud.io/displayName'], name)
 }
 
+/**
+ * Returns the effective spec object for a CloudProfile or NamespacedCloudProfile.
+ *
+ * For a regular CloudProfile the spec lives at `.spec`.
+ * For a NamespacedCloudProfile the effective merged spec (computed by Gardener from the parent
+ * CloudProfile plus any overrides) lives at `.status.cloudProfileSpec`.
+ *
+ * Use this whenever you need to read provider type, machine types, kubernetes versions, regions,
+ * providerConfig etc. from a profile object without knowing its kind upfront.
+ *
+ * @param {Object|null|undefined} cloudProfile - A CloudProfile or NamespacedCloudProfile object
+ * @returns {Object} The effective spec, or an empty object if not available
+ */
+export function getCloudProfileSpec (cloudProfile) {
+  if (cloudProfile?.kind === 'NamespacedCloudProfile') {
+    return cloudProfile?.status?.cloudProfileSpec ?? {}
+  }
+  return cloudProfile?.spec ?? {}
+}
+
 export function convertToGibibyte (value) {
   if (!value) {
     throw new TypeError('Value is empty')

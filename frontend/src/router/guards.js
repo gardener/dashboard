@@ -70,10 +70,13 @@ export function createGlobalBeforeGuards () {
       }
 
       try {
+        const namespace = to.params.namespace ?? to.query.namespace
         await Promise.all([
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
-          ensureCloudProfilesLoaded(cloudProfileStore),
+        ])
+        await Promise.all([
+          ensureCloudProfilesLoaded(cloudProfileStore, namespace, projectStore.namespaces),
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
@@ -215,9 +218,16 @@ async function refreshRules (store, ...args) {
   return store.fetchRules(...args)
 }
 
-function ensureCloudProfilesLoaded (store) {
+async function ensureCloudProfilesLoaded (store, namespace, namespaces = []) {
   if (store.isInitial) {
-    return store.fetchCloudProfiles()
+    await store.fetchCloudProfiles()
+  }
+  if (namespace === '_all') {
+    await store.fetchNamespacedCloudProfilesForNamespaces(namespaces)
+    return
+  }
+  if (namespace && !store.hasNamespacedCloudProfilesForNamespace(namespace)) {
+    await store.fetchNamespacedCloudProfiles(namespace)
   }
 }
 

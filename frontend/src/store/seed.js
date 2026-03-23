@@ -17,6 +17,8 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
+import { getCloudProfileSpec } from '@/utils'
+
 import find from 'lodash/find'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
@@ -82,12 +84,13 @@ export const useSeedStore = defineStore('seed', () => {
       return () => false
     }
 
-    const providerType = get(cloudProfile, ['spec', 'type'])
-    const matchLabels = get(cloudProfile, ['spec', 'seedSelector', 'matchLabels'])
+    const spec = getCloudProfileSpec(cloudProfile)
+    const providerType = get(spec, ['type'])
+    const matchLabels = get(spec, ['seedSelector', 'matchLabels'])
     const labelMatcher = !isEmpty(matchLabels)
       ? matches(matchLabels)
       : null
-    const providerTypes = get(cloudProfile, ['spec', 'seedSelector', 'providerTypes'], [providerType])
+    const providerTypes = get(spec, ['seedSelector', 'providerTypes'], [providerType])
 
     return function matchSeed (seed) {
       const seedProviderType = get(seed, ['spec', 'provider', 'type'])

@@ -12,9 +12,6 @@ module.exports = {
     'dist/**/*.cjs',
   ],
   testEnvironment: 'node',
-  testPathIgnorePatterns: [
-    '/test-ignore/',
-  ],
   transformIgnorePatterns: [
     '/node_modules/',
     '\\.pnp\\.[^\\/]+$',
@@ -32,12 +29,11 @@ module.exports = {
     '<rootDir>/jest.setup.cjs',
   ],
   testMatch: [
-    '**/__tests__/**/*.js',
     '**/__tests__/**/*.cjs',
-    '**/?(*.)+(spec|test).js',
     '**/?(*.)+(spec|test).cjs',
   ],
   moduleNameMapper: {
     '^\\.{2}/markdown(\\.cjs)?$': '<rootDir>/__mocks__/@gardener-dashboard/markdown.cjs',
+    '^jsondiffpatch$': '<rootDir>/__mocks__/jsondiffpatch.cjs',
   },
 }
