@@ -41,10 +41,7 @@ SPDX-License-Identifier: Apache-2.0
             render-link
           />
         </g-list-item-content>
-        <template
-          v-if="canPatchShootsBinding"
-          #append
-        >
+        <template #append>
           <g-credential-configuration
             v-if="shootSecretBindingName"
             migration-mode
