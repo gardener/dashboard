@@ -110,17 +110,23 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
-        <div class="d-flex">
+        <g-scroll-container
+          direction="horizontal"
+          class="readiness-container"
+        >
           <g-status-tags />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'seedReadiness'">
-        <div class="d-flex">
+        <g-scroll-container
+          direction="horizontal"
+          class="readiness-container"
+        >
           <g-seed-status-tags
             :identifier="shootUid"
             :is-stale-shoot="isStaleShoot"
           />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
@@ -449,6 +455,10 @@ const hasShootWorkerGroupWarning = computed(() => {
   .large-container {
     max-height: 140px;
     max-width: 350px;
+  }
+
+  .readiness-container {
+    max-width: 120px;
   }
 
   .small-container {

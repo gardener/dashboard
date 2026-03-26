@@ -5,7 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
+  <div
+    class="d-flex flex-nowrap justify-start"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+  >
     <g-seed-status-tag
       v-for="condition in conditions"
       :key="condition.type"
@@ -14,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :popper-placement="popperPlacement"
       :identifier="identifier"
       :stale-shoot="isStaleShoot"
+      :container-hovered="hovered"
     />
   </div>
   <template v-if="showStatusText">
@@ -38,7 +43,11 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { toRefs } from 'vue'
+import {
+  ref,
+  onBeforeUnmount,
+  toRefs,
+} from 'vue'
 
 import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
@@ -80,4 +89,22 @@ const {
 const seedConditions = useSeedConditions(seedItem)
 
 const { conditions, errorCodeObjects } = useStatusConditions(seedConditions)
+
+const hovered = ref(false)
+let collapseTimer = null
+
+function onMouseEnter () {
+  clearTimeout(collapseTimer)
+  hovered.value = true
+}
+
+function onMouseLeave () {
+  collapseTimer = setTimeout(() => {
+    hovered.value = false
+  }, 1500)
+}
+
+onBeforeUnmount(() => {
+  clearTimeout(collapseTimer)
+})
 </script>
