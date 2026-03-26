@@ -116,6 +116,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-scroll-container
           direction="x"
           hide-scrollbar
+          class="readiness-container"
         >
           <g-status-tags />
         </g-scroll-container>
@@ -124,6 +125,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-scroll-container
           direction="x"
           hide-scrollbar
+          class="readiness-container"
         >
           <g-seed-status-tags
             :identifier="shootUid"
@@ -460,6 +462,10 @@ const hasShootWorkerGroupWarning = computed(() => {
   .large-container {
     max-height: 140px;
     max-width: 350px;
+  }
+
+  .readiness-container {
+    max-width: 120px;
   }
 
   .small-container {

@@ -5,7 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="visible">
+  <div
+    v-if="visible"
+    class="status-tag-wrapper"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+  >
     <g-popover
       v-model="internalValue"
       :placement="popperPlacement"
@@ -16,20 +21,23 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props }">
         <v-chip
           v-bind="props"
-          :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
+          :class="chipClasses"
+          :variant="chipVariant"
           :text-color="textColor"
           size="small"
           :color="color"
           class="status-tag"
         >
           <v-icon
-            v-if="chipIcon"
+            v-if="chipIcon && !isCollapsed"
             :icon="chipIcon"
             size="x-small"
             class="chip-icon"
           />
-          {{ chipText }}
+          <span
+            v-if="!isCollapsed"
+            class="chip-label"
+          >{{ chipText }}</span>
           <v-tooltip
             activator="parent"
             location="top"
@@ -117,11 +125,33 @@ export default {
         return { uid: '' }
       },
     },
+    containerHovered: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data () {
+    return {
+      selfExpanded: false,
+      expandTimer: null,
+    }
   },
   computed: {
     ...mapState(useAuthzStore, [
       'canViewLandscape',
     ]),
+    isHealthy () {
+      return !this.isError && !this.isUnknown && !this.isProgressing
+    },
+    isCollapsed () {
+      return !this.isError && !this.selfExpanded && !this.internalValue
+    },
+    chipClasses () {
+      return {
+        'cursor-pointer': this.condition.message,
+        'status-tag--collapsed': this.isCollapsed,
+      }
+    },
     popoverKey () {
       return `g-status-tag[${this.condition.type}]:${this.shootMetadata.uid}`
     },
@@ -219,7 +249,7 @@ export default {
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'unknown'
+        return 'unknown-lighten-3'
       }
       if (this.isError) {
         return 'error'
@@ -227,13 +257,19 @@ export default {
       if (this.isProgressing && this.canViewLandscape) {
         return 'info'
       }
-      return 'primary'
+      return 'success'
+    },
+    chipVariant () {
+      if (this.isError) {
+        return 'flat'
+      }
+      return 'tonal'
     },
     textColor () {
-      if (this.isError) {
-        return 'white'
+      if (this.isUnknown) {
+        return this.color
       }
-      return this.color
+      return 'white'
     },
     visible () {
       if (!this.canViewLandscape) {
@@ -242,12 +278,41 @@ export default {
       return true
     },
   },
+  watch: {
+    containerHovered (val) {
+      if (!val) {
+        clearTimeout(this.expandTimer)
+        this.selfExpanded = false
+      }
+    },
+  },
+  beforeUnmount () {
+    clearTimeout(this.expandTimer)
+  },
+  methods: {
+    onMouseEnter () {
+      clearTimeout(this.expandTimer)
+      this.expandTimer = setTimeout(() => {
+        this.selfExpanded = true
+      }, 100)
+    },
+    onMouseLeave () {
+      clearTimeout(this.expandTimer)
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+  .status-tag-wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+
   .status-tag {
     margin: 0 1px;
+    transition: max-width 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
 
     &.cursor-pointer :deep(.v-chip__content) {
       cursor: pointer;
@@ -255,11 +320,26 @@ export default {
 
     :deep(.v-chip__content) {
       margin: -2px;
+      white-space: nowrap;
     }
 
     .chip-icon {
       margin-left: -4px;
       margin-right: 1px;
     }
+
+    &.status-tag--collapsed {
+      max-width: 8px;
+      min-width: 8px;
+      padding: 0;
+      border-radius: 4px;
+      justify-content: center;
+
+      :deep(.v-chip__content) {
+        margin: 0;
+        padding: 0;
+      }
+    }
+
   }
 </style>

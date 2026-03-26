@@ -79,7 +79,7 @@ describe('components', () => {
       expect(vm.chipTooltip.title).toBe('foo-bar')
       expect(vm.chipIcon).toBe('')
       expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
-      expect(vm.color).toBe('primary')
+      expect(vm.color).toBe('success')
       expect(vm.visible).toBe(true)
     })
 
@@ -112,7 +112,7 @@ describe('components', () => {
       const vm = wrapper.vm
       expect(vm.visible).toBe(false)
       expect(vm.isProgressing).toBe(true)
-      expect(vm.color).toBe('primary')
+      expect(vm.color).toBe('success')
       expect(vm.chipStatus).toBe('Progressing')
       expect(vm.chipIcon).toBe('')
     })
