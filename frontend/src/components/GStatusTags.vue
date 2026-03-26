@@ -5,7 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
+  <div
+    class="d-flex flex-nowrap justify-start"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+  >
     <g-status-tag
       v-for="condition in conditions"
       :key="condition.type"
@@ -14,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :shoot-binding="shootCloudProviderBinding"
       :shoot-metadata="shootMetadata"
       :stale-shoot="isStaleShoot"
+      :container-hovered="hovered"
     />
   </div>
   <template v-if="showStatusText">
@@ -40,6 +45,8 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  ref,
+  onBeforeUnmount,
   toRefs,
 } from 'vue'
 
@@ -78,5 +85,23 @@ const { conditions, errorCodeObjects } = useStatusConditions(shootReadiness)
 
 const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
+})
+
+const hovered = ref(false)
+let collapseTimer = null
+
+function onMouseEnter () {
+  clearTimeout(collapseTimer)
+  hovered.value = true
+}
+
+function onMouseLeave () {
+  collapseTimer = setTimeout(() => {
+    hovered.value = false
+  }, 1500)
+}
+
+onBeforeUnmount(() => {
+  clearTimeout(collapseTimer)
 })
 </script>
