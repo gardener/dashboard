@@ -14,12 +14,44 @@ import {
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
+import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootDns } from '@/composables/useShootDns'
+import { getCloudProviderEntityList } from '@/composables/credential/helper'
 
 import cloneDeep from 'lodash/cloneDeep'
 
 describe('composables', () => {
+  describe('getCloudProviderEntityList', () => {
+    beforeEach(() => {
+      setActivePinia(createPinia())
+
+      const credentialStore = useCredentialStore()
+      credentialStore._setCredentials(global.fixtures.credentials)
+
+      const gardenerExtensionStore = useGardenerExtensionStore()
+      gardenerExtensionStore.list = global.fixtures.gardenerExtensions
+
+      const cloudProfileStore = useCloudProfileStore()
+      cloudProfileStore.setCloudProfiles(global.fixtures.cloudprofiles)
+    })
+
+    it('should return dns credentials as a plain array for a dns provider type', () => {
+      const credentialStore = useCredentialStore()
+      const gardenerExtensionStore = useGardenerExtensionStore()
+      const cloudProfileStore = useCloudProfileStore()
+
+      const credentialsForProviderType = getCloudProviderEntityList('aws-route53', {
+        credentialStore,
+        gardenerExtensionStore,
+        cloudProfileStore,
+      })
+
+      expect(Array.isArray(credentialsForProviderType)).toBe(true)
+      expect(credentialsForProviderType).toEqual(credentialStore.dnsCredentialList.filter(credential => credential.metadata?.labels?.['dashboard.gardener.cloud/dnsProviderType'] === 'aws-route53'))
+    })
+  })
+
   describe('useShootDns', () => {
     const manifest = reactive({})
     let shootDns
@@ -31,10 +63,13 @@ describe('composables', () => {
       credentialStore._setCredentials(global.fixtures.credentials)
       const gardenerExtensionStore = useGardenerExtensionStore()
       gardenerExtensionStore.list = global.fixtures.gardenerExtensions
+      const cloudProfileStore = useCloudProfileStore()
+      cloudProfileStore.setCloudProfiles(global.fixtures.cloudprofiles)
 
       const composable = useShootDns(toRef(manifest), {
         gardenerExtensionStore,
         credentialStore,
+        cloudProfileStore,
       })
       shootDns = reactive(composable)
     })

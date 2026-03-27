@@ -4,9 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { decodeBase64 } from '@/utils'
+import { storeToRefs } from 'pinia'
+
+import {
+  decodeBase64,
+  isTruthyValue,
+} from '@/utils'
 
 import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 // Credentials
 export function isSecret (credential) {
@@ -19,38 +25,54 @@ export function isWorkloadIdentity (credential) {
 
 export function credentialProviderType (credential) {
   const labels = credential?.metadata?.labels
-  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
-  const SHOOT_PREFIX = 'provider.shoot.gardener.cloud/'
-  const EXTENSION_PREFIX = 'provider.extensions.gardener.cloud/'
-
-  // for DNS credentials: prefer the dashboard-specific label
-  if (DASHBOARD in (labels || {})) {
-    return get(labels, [DASHBOARD])
-  }
-
   if (!labels) {
     return undefined
   }
 
-  // Or find the first shoot provider label set to "true"
-  let key = Object.keys(labels).find(k => {
-    return k.startsWith(SHOOT_PREFIX) && get(labels, [k]) === 'true'
-  })
-
-  if (key) {
-    return key.slice(SHOOT_PREFIX.length)
+  // For DNS credentials: prefer the dashboard-specific label
+  const dnsProviderType = labels['dashboard.gardener.cloud/dnsProviderType']
+  if (dnsProviderType) {
+    return dnsProviderType
   }
 
-  // WorkloadIdentities for extensions use provider.extensions.gardener.cloud/<provider>
-  key = Object.keys(labels).find(k => {
-    return k.startsWith(EXTENSION_PREFIX) && get(labels, [k]) === 'true'
-  })
+  const providerPrefixes = [
+    'provider.shoot.gardener.cloud/',     // Infrastructure credentials referenced on the shoot (e.g. Shoot.spec.credentialsBindingName)
+    'provider.extensions.gardener.cloud/', // WorkloadIdentities referenced via resource ref in extensions
+  ]
 
-  return key ? key.slice(EXTENSION_PREFIX.length) : undefined
+  for (const prefix of providerPrefixes) {
+    const key = Object.keys(labels).find(k => k.startsWith(prefix) && isTruthyValue(get(labels, k)))
+    if (key) {
+      return key.slice(prefix.length)
+    }
+  }
+
+  return undefined
 }
 
 export function isDNSCredential ({ credential, dnsProviderTypes }) {
   return dnsProviderTypes.includes(credentialProviderType(credential))
+}
+
+export function getCloudProviderEntityList (providerType, {
+  credentialStore,
+  gardenerExtensionStore,
+  cloudProfileStore,
+}) {
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
+
+  if (sortedInfraProviderTypeList.value.includes(providerType)) {
+    return filter(credentialStore.infrastructureBindingList, binding => {
+      return bindingProviderType(binding) === providerType
+    })
+  }
+  if (dnsProviderTypes.value.includes(providerType)) {
+    return filter(credentialStore.dnsCredentialList, credential => {
+      return credentialProviderType(credential) === providerType
+    })
+  }
+  return []
 }
 
 // DNS Provider references
@@ -62,6 +84,7 @@ export function getDnsPrimaryProviderCredentialsRef (provider) {
     return provider.credentialsRef
   }
   // Support legacy field secretName for backward compatibility, but prefer credentialsRef if both are set
+  // TODO(grolu): drop support for legacy field secretName
   if (provider.secretName) {
     return {
       apiVersion: 'v1',

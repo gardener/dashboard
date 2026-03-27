@@ -47,18 +47,18 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   const credentialUsageCount = computed(() => {
     const name = credentialName.value
     const kind = credentialKind.value
-    const byProvider = providers => some(providers, provider => {
+    const isCredentialReferencedByDnsProvider = shoot => some(shoot.spec?.dns?.providers, provider => {
       if (provider?.credentialsRef) {
         return provider.credentialsRef.name === name && provider.credentialsRef.kind === kind
       }
       // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
       return kind === 'Secret' && provider?.secretName === name
     })
-    const byResource = resources => some(resources, { resourceRef: { kind, name } })
+    const isCredentialReferencedByResource = shoot => some(shoot.spec?.resources, { resourceRef: { kind, name } })
 
     let count = 0
     for (const shoot of shootList.value) {
-      if (byProvider(shoot.spec?.dns?.providers) || byResource(shoot.spec?.resources)) {
+      if (isCredentialReferencedByDnsProvider(shoot) || isCredentialReferencedByResource(shoot)) {
         count++
       }
     }

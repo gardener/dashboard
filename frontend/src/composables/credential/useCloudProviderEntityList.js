@@ -8,18 +8,12 @@ import {
   computed,
   isRef,
 } from 'vue'
-import { storeToRefs } from 'pinia'
 
 import { useCredentialStore } from '@/store/credential'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
-import {
-  bindingProviderType,
-  credentialProviderType,
-} from './helper'
-
-import filter from 'lodash/filter'
+import { getCloudProviderEntityList } from './helper'
 
 export const useCloudProviderEntityList = (providerType, options = {}) => {
   if (!isRef(providerType)) {
@@ -32,20 +26,11 @@ export const useCloudProviderEntityList = (providerType, options = {}) => {
     cloudProfileStore = useCloudProfileStore(),
   } = options
 
-  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
-
   return computed(() => {
-    if (sortedInfraProviderTypeList.value.includes(providerType.value)) {
-      return filter(credentialStore.infrastructureBindingList, binding => {
-        return bindingProviderType(binding) === providerType.value
-      })
-    }
-    if (dnsProviderTypes.value.includes(providerType.value)) {
-      return filter(credentialStore.dnsCredentialList, credential => {
-        return credentialProviderType(credential) === providerType.value
-      })
-    }
-    return []
+    return getCloudProviderEntityList(providerType.value, {
+      credentialStore,
+      gardenerExtensionStore,
+      cloudProfileStore,
+    })
   })
 }

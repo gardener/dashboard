@@ -73,7 +73,8 @@ ClusterScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = clusterScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
+    const response = this[http.request](url, { method, searchParams, signal })
+    return normalizeListResponse(response, this.constructor)
   }
 }
 
@@ -96,7 +97,8 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
+    const response = this[http.request](url, { method, searchParams, signal })
+    return normalizeListResponse(response, this.constructor)
   }
 
   listAllNamespaces ({ searchParams, signal, ...options } = {}) {
@@ -105,7 +107,8 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return normalizeListResponse(this[http.request](url, { method, searchParams, signal }), this.constructor)
+    const response = this[http.request](url, { method, searchParams, signal })
+    return normalizeListResponse(response, this.constructor)
   }
 }
 
@@ -534,9 +537,9 @@ function normalizeSearchParams (method, searchParams, options) {
   return normalizedSearchParams
 }
 
-function normalizeListResponse (response, Resource) {
-  return Promise.resolve(response)
-    .then(body => normalizeResourceListItems(body, Resource))
+async function normalizeListResponse (response, Resource) {
+  const body = await response
+  return normalizeResourceListItems(body, Resource)
 }
 
 export {

@@ -199,7 +199,7 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderCredentials = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
       v$: useVuelidate(),
@@ -214,7 +214,7 @@ export default {
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
-      dnsPrimaryProviderCredentials,
+      availableCredentialsForPrimaryDnsProvider,
     }
   },
   validations () {
@@ -269,19 +269,24 @@ export default {
     },
     primaryDnsProviderCredential: {
       get () {
-        return find(this.dnsPrimaryProviderCredentials, credential => {
+        const matchesPrimaryDnsProviderCredential = credential => {
           return credential?.metadata?.name === this.dnsPrimaryProviderCredentialsRef?.name &&
             credential?.kind === this.dnsPrimaryProviderCredentialsRef?.kind
-        })
+        }
+
+        return find(this.dnsPrimaryProviderCredentials, matchesPrimaryDnsProviderCredential)
       },
       set (credential) {
-        this.dnsPrimaryProviderCredentialsRef = credential
-          ? {
-              apiVersion: credential.apiVersion,
-              kind: credential.kind,
-              name: credential.metadata?.name,
-            }
-          : undefined
+        if (!credential) {
+          this.dnsPrimaryProviderCredentialsRef = undefined
+          return
+        }
+
+        this.dnsPrimaryProviderCredentialsRef = {
+          apiVersion: credential.apiVersion,
+          kind: credential.kind,
+          name: credential.metadata?.name,
+        }
       },
     },
     domainRecommendationVisible () {
@@ -305,12 +310,12 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
+        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
         this.v$.dnsDomain.$reset()
       }
     },
     dnsPrimaryProviderType () {
-      this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
+      this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
     },
   },
   methods: {

@@ -243,7 +243,7 @@ export default {
         set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
-    usedResourceRefs () {
+    dnsExtensionProviderResourceRefs () {
       return this.dnsServiceExtensionProviders.map(provider => this.getResourceRef(dnsExtensionProviderResourceName(provider)))
     },
   },
@@ -253,16 +253,17 @@ export default {
   methods: {
     getErrorMessages,
     credentialFilter (credential) {
-      const { metadata: { name }, kind } = credential
-      if (!name || !kind) {
+      const credentialName = credential?.metadata?.name
+      const credentialKind = credential?.kind
+      if (!credentialName || !credentialKind) {
         return false
       }
-      const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
-      const currentResourceRef = this.getResourceRef(resourceName)
-      if (name === currentResourceRef?.name && kind === currentResourceRef?.kind) {
+      const currentResourceRef = this.getResourceRef(dnsExtensionProviderResourceName(this.dnsProvider))
+      const matchesCredential = ref => ref?.name === credentialName && ref?.kind === credentialKind
+      if (matchesCredential(currentResourceRef)) {
         return true
       }
-      return !this.usedResourceRefs.some(ref => ref?.name === name && ref?.kind === kind)
+      return !this.dnsExtensionProviderResourceRefs.some(matchesCredential)
     },
   },
 }
