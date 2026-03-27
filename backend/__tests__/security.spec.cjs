@@ -139,6 +139,8 @@ describe('security', function () {
         }))
         jest.mock('../dist/lib/services/authorization', () => ({
           isAdmin: jest.fn(),
+          canListManagedSeedsInGardenNamespace: jest.fn(),
+          canListShootsInGardenNamespace: jest.fn(),
         }))
         undici = require('undici')
         authentication = require('../dist/lib/services/authentication')
@@ -345,6 +347,8 @@ describe('security', function () {
 
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
+        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(true)
+        authorization.canListShootsInGardenNamespace.mockResolvedValue(true)
 
         // Create an expired ID token and an access token
         const iat = Math.floor(Date.now() / 1000) - 3600
@@ -443,6 +447,7 @@ describe('security', function () {
             groups: [],
             aud: ['gardener'],
             isAdmin: false,
+            canGetManagedSeedAndShootInGardenNs: true,
           }),
         )
       })
@@ -459,6 +464,8 @@ describe('security', function () {
         })
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
+        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(false)
+        authorization.canListShootsInGardenNamespace.mockResolvedValue(false)
 
         const req = {
           originalUrl: '/auth/callback?code=some-code',
@@ -534,6 +541,8 @@ describe('security', function () {
         discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
+        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(false)
+        authorization.canListShootsInGardenNamespace.mockResolvedValue(false)
 
         const req = {
           originalUrl: '/auth/callback?code=some-code',

@@ -65,6 +65,10 @@ export const useAuthnStore = defineStore('authn', () => {
     return user.value?.isAdmin === true
   })
 
+  const canGetManagedSeedAndShootInGardenNs = computed(() => {
+    return user.value?.canGetManagedSeedAndShootInGardenNs === true
+  })
+
   const username = computed(() => {
     return user.value?.email ?? user.value?.id ?? ''
   })
@@ -88,6 +92,7 @@ export const useAuthnStore = defineStore('authn', () => {
   return {
     user,
     isAdmin,
+    canGetManagedSeedAndShootInGardenNs,
     username,
     displayName,
     fullDisplayName,

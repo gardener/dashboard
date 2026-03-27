@@ -5,25 +5,31 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-text-router-link
-    v-if="managedSeedShootItemLink"
-    :to="managedSeedShootItemLink"
-    :text="managedSeedShootName"
-  />
-  <v-chip
-    v-else-if="showUnmanagedChip"
-    v-tooltip:top="'This seed is not backed by a ManagedSeed / Shoot resource'"
-    size="small"
-    variant="tonal"
-  >
-    Unmanaged
-  </v-chip>
+  <template v-if="!managedSeedStore.isInitial">
+    <g-text-router-link
+      v-if="managedSeedShootItemLink"
+      :to="managedSeedShootItemLink"
+      :text="managedSeedShootName"
+    />
+    <v-chip
+      v-else-if="showUnmanagedChip"
+      v-tooltip:top="'This seed is not backed by a ManagedSeed / Shoot resource'"
+      size="small"
+      variant="tonal"
+    >
+      Unmanaged
+    </v-chip>
+  </template>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
+import { useManagedSeedStore } from '@/store/managedSeed'
+
 import GTextRouterLink from '@/components/GTextRouterLink'
+
+const managedSeedStore = useManagedSeedStore()
 
 const props = defineProps({
   managedSeedShootName: {

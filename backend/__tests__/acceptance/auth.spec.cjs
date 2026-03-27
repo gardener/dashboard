@@ -218,6 +218,8 @@ describe('auth', function () {
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     authorizationCodeGrant.mockImplementationOnce((config, currentUrl, checks) => {
       assert.strictEqual(currentUrl.searchParams.get('code'), OTAC)
@@ -229,7 +231,7 @@ describe('auth', function () {
       .redirects(0)
       .expect(302)
 
-    expect(mockRequest).toHaveBeenCalledTimes(2)
+    expect(mockRequest).toHaveBeenCalledTimes(4)
     expect(mockRequest.mock.calls[0]).toEqual([
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
@@ -251,7 +253,7 @@ describe('auth', function () {
 
     expect(discovery).toHaveBeenCalledTimes(1)
     expect(res.headers).toHaveProperty('location', '/')
-    expect(mockRequest).toHaveBeenCalledTimes(2)
+    expect(mockRequest).toHaveBeenCalledTimes(4)
     expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
   })
 
@@ -287,6 +289,8 @@ describe('auth', function () {
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
 
     const res = await agent
       .post('/auth')
@@ -294,7 +298,7 @@ describe('auth', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toHaveBeenCalledTimes(2)
+    expect(mockRequest).toHaveBeenCalledTimes(4)
     expect(mockRequest.mock.calls[0]).toEqual([
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
@@ -390,6 +394,8 @@ describe('auth', function () {
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     discovery.mockResolvedValue({
       code_challenge_methods_supported: ['S256'],
       issuer: 'https://issuer.example.org',
@@ -403,7 +409,7 @@ describe('auth', function () {
       .expect('content-type', /json/)
       .expect(200)
 
-    expect(mockRequest).toHaveBeenCalledTimes(2)
+    expect(mockRequest).toHaveBeenCalledTimes(4)
     expect(mockRequest.mock.calls).toEqual([[
       {
         ...pick(fixtures.kube, [':scheme', ':authority', 'authorization']),
@@ -439,6 +445,46 @@ describe('auth', function () {
           },
         },
       },
+    ], [
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority']),
+        authorization: `Bearer ${tokenSet.refresh_token}`,
+        ':method': 'post',
+        ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews',
+      },
+      {
+        apiVersion: 'authorization.k8s.io/v1',
+        kind: 'SelfSubjectAccessReview',
+        spec: {
+          nonResourceAttributes: undefined,
+          resourceAttributes: {
+            group: 'seedmanagement.gardener.cloud',
+            resource: 'managedseeds',
+            verb: 'list',
+            namespace: 'garden',
+          },
+        },
+      },
+    ], [
+      {
+        ...pick(fixtures.kube, [':scheme', ':authority']),
+        authorization: `Bearer ${tokenSet.refresh_token}`,
+        ':method': 'post',
+        ':path': '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews',
+      },
+      {
+        apiVersion: 'authorization.k8s.io/v1',
+        kind: 'SelfSubjectAccessReview',
+        spec: {
+          nonResourceAttributes: undefined,
+          resourceAttributes: {
+            group: 'core.gardener.cloud',
+            resource: 'shoots',
+            verb: 'list',
+            namespace: 'garden',
+          },
+        },
+      },
     ]])
 
     expect(refreshTokenGrant).toHaveBeenCalledTimes(1)
@@ -463,6 +509,7 @@ describe('auth', function () {
       exp: accessTokenPayload.exp,
       aud: accessTokenPayload.aud,
       isAdmin: false,
+      canGetManagedSeedAndShootInGardenNs: true,
       refresh_at: refreshTokenPayload.exp,
       rti: expect.stringMatching(/^[a-z0-9]{7}$/),
     })

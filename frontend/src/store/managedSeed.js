@@ -35,17 +35,8 @@ export const useManagedSeedStore = defineStore('managedseed', () => {
   })
 
   async function fetchManagedSeeds () {
-    try {
-      const response = await api.getManagedSeedsForGardenNamespace()
-      list.value = response.data
-    } catch (err) {
-      // User may not have permission — gracefully handle 403
-      if (err.statusCode === 403 || err.status === 403) {
-        list.value = []
-      } else {
-        throw err
-      }
-    }
+    const response = await api.getManagedSeedsForGardenNamespace()
+    list.value = response.data
   }
 
   function managedSeedByName (name) {

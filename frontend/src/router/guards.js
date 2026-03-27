@@ -83,7 +83,7 @@ export function createGlobalBeforeGuards () {
           ensureKubeconfigLoaded(kubeconfigStore),
         ]
 
-        if (authnStore.isAdmin) {
+        if (authnStore.canGetManagedSeedAndShootInGardenNs) {
           promises.push(
             ensureManagedSeedsLoaded(managedSeedStore),
             ensureManagedSeedShootsLoaded(managedSeedShootStore),
