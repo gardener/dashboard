@@ -13,7 +13,9 @@ import createError from 'http-errors'
 import config from '../../config/index.js'
 
 function digestsEqual (a, b) {
-  if (a.length !== b.length) return false
+  if (a.length !== b.length) {
+    return false
+  }
   return timingSafeEqual(a, b)
 }
 

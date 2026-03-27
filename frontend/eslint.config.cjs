@@ -184,9 +184,12 @@ module.exports = [
       'no-restricted-globals': ['error', 'find', 'event', 'location', 'history'],
       'no-console': 'error',
       '@stylistic/arrow-parens': ['error', 'as-needed'],
+      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
+      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/space-before-function-paren': ['error', 'always'],
+      curly: ['error', 'all'],
       '@stylistic/object-curly-newline': ['error', {
         ImportDeclaration: {
           multiline: true,

@@ -35,8 +35,11 @@ module.exports = [
   },
   {
     rules: {
+      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       'no-console': 'error',
+      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+      curly: ['error', 'all'],
     },
   },
   pluginSecurity.configs.recommended,
