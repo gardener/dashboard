@@ -197,6 +197,7 @@ module.exports = [
           minProperties: 2,
         },
       }],
+      'max-depth': ['error', 3],
     },
   },
   ...pluginVue.configs['flat/recommended'],

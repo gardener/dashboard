@@ -41,6 +41,7 @@ module.exports = [
       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
       'no-nested-ternary': 'error',
       curly: ['error', 'all'],
+      'max-depth': ['error', 3],
     },
   },
   pluginSecurity.configs.recommended,

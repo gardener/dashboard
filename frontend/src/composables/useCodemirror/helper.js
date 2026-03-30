@@ -486,6 +486,54 @@ export class EditorCompletions {
     return token
   }
 
+  #hasSingleDiscriminatorEntry (propertyValue) {
+    return propertyValue.length === 1
+  }
+
+  #hasSupportedOneOfTypes (propertyName, propertyValue, hasValidKeys) {
+    return propertyValue.length > 1 && propertyName === 'oneOf' && hasValidKeys(propertyValue)
+  }
+
+  #warnMultipleDiscriminators (foundDiscriminators, parentPropertyName) {
+    if (foundDiscriminators) {
+      // We cursorrently do not support merging when schema has multiple discriminators on same level
+      this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
+    }
+  }
+
+  #applySingleDiscriminatorEntry (properties, propertyValue, parentPropertyName) {
+    this.#resolveSchemaArrays(propertyValue[0], parentPropertyName)
+    Object.assign(properties, propertyValue[0])
+  }
+
+  #applySupportedOneOfTypes (properties, propertyValue) {
+    // In case of oneOf, we support multiple entries if they are only used to define different types
+    properties.type = propertyValue.map(obj => obj.type)
+    properties.format = propertyValue.map(obj => obj.format)
+  }
+
+  #warnUnsupportedDiscriminator (propertyName, propertyValue, parentPropertyName) {
+    if (propertyName === 'oneOf') {
+      this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
+      return
+    }
+    this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
+  }
+
+  #handleDiscriminatorProperty (properties, propertyName, propertyValue, parentPropertyName, foundDiscriminators, hasValidKeys) {
+    this.#warnMultipleDiscriminators(foundDiscriminators, parentPropertyName)
+
+    if (this.#hasSingleDiscriminatorEntry(propertyValue)) {
+      this.#applySingleDiscriminatorEntry(properties, propertyValue, parentPropertyName)
+    } else if (this.#hasSupportedOneOfTypes(propertyName, propertyValue, hasValidKeys)) {
+      this.#applySupportedOneOfTypes(properties, propertyValue)
+    } else {
+      this.#warnUnsupportedDiscriminator(propertyName, propertyValue, parentPropertyName)
+    }
+
+    unset(properties, [propertyName])
+  }
+
   #resolveSchemaArrays (properties, parentPropertyName = '') {
     const hasValidKeys = value => {
       const validKeyCombinations = [
@@ -503,28 +551,8 @@ export class EditorCompletions {
     let foundDiscriminators = false
     for (const [propertyName, propertyValue] of Object.entries(properties)) {
       if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !properties.type) {
-        if (foundDiscriminators) {
-          // We cursorrently do not support merging when schema has multiple discriminators on same level
-          this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
-        }
+        this.#handleDiscriminatorProperty(properties, propertyName, propertyValue, parentPropertyName, foundDiscriminators, hasValidKeys)
         foundDiscriminators = true
-
-        if (propertyValue.length === 1) {
-          this.#resolveSchemaArrays(propertyValue[0], parentPropertyName)
-          Object.assign(properties, propertyValue[0])
-        } else if (propertyValue.length > 1 && propertyName === 'oneOf') {
-          if (hasValidKeys(propertyValue)) {
-            // In case of oneOf, we support multiple entries if they are only used to define different types
-            properties.type = propertyValue.map(obj => obj.type)
-            properties.format = propertyValue.map(obj => obj.format)
-          } else {
-            this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
-          }
-        } else {
-          this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
-        }
-
-        unset(properties, [propertyName])
       } else if (typeof propertyValue === 'object') {
         this.#resolveSchemaArrays(propertyValue, propertyName)
       }

@@ -52,6 +52,27 @@ export function useSocketEventHandler (useStore, options = {}) {
 
   const eventMap = new Map([])
 
+  function markDeletedUidForStatusItem (item, uidMap) {
+    if (item.code !== 404) {
+      return
+    }
+    const uid = item.details?.uid
+    if (uid) {
+      uidMap.set(uid, false)
+    }
+  }
+
+  function synchronizeItem (item, store, uidMap) {
+    if (item.kind === 'Status') {
+      logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
+      markDeletedUidForStatusItem(item, uidMap)
+      return
+    }
+
+    const uid = item.metadata.uid
+    uidMap.set(uid, item)
+  }
+
   async function handleEvents (store) {
     const pluralName = store.$id + 's'
     const events = Array.from(eventMap.values())
@@ -69,18 +90,7 @@ export function useSocketEventHandler (useStore, options = {}) {
       }
       const items = await socketStore.synchronize(pluralName, uids)
       for (const item of items) {
-        if (item.kind === 'Status') {
-          logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
-          if (item.code === 404) {
-            const uid = item.details?.uid
-            if (uid) {
-              uidMap.set(uid, false)
-            }
-          }
-        } else {
-          const uid = item.metadata.uid
-          uidMap.set(uid, item)
-        }
+        synchronizeItem(item, store, uidMap)
       }
       store.$patch(state => {
         const operator = createOperator(state)
