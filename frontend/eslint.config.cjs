@@ -198,6 +198,7 @@ module.exports = [
         },
       }],
       'max-depth': ['error', 3],
+      'max-nested-callbacks': ['warn', 5],
     },
   },
   ...pluginVue.configs['flat/recommended'],

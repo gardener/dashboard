@@ -42,6 +42,7 @@ module.exports = [
       'no-nested-ternary': 'error',
       curly: ['error', 'all'],
       'max-depth': ['error', 3],
+      'max-nested-callbacks': ['warn', 5],
     },
   },
   pluginSecurity.configs.recommended,
