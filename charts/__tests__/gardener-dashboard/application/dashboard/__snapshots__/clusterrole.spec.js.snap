@@ -64,6 +64,18 @@ exports[`gardener-dashboard clusterrole should render the template with default 
     },
     {
       "apiGroups": [
+        "seedmanagement.gardener.cloud",
+      ],
+      "resources": [
+        "managedseeds",
+      ],
+      "verbs": [
+        "list",
+        "watch",
+      ],
+    },
+    {
+      "apiGroups": [
         "apiregistration.k8s.io",
       ],
       "resources": [

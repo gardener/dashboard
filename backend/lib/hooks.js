@@ -75,6 +75,8 @@ class LifecycleHooks {
       quotas: client['core.gardener.cloud'].quotas.informerAllNamespaces(),
       seeds: client['core.gardener.cloud'].seeds.informer(),
       shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
+      // seedmanagement.gardener
+      managedseeds: client['seedmanagement.gardener.cloud'].managedseeds.informer('garden'),
       // core
       resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
     }

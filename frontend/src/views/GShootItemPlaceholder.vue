@@ -33,6 +33,7 @@ import { useTerminalStore } from '@/store/terminal'
 import GShootItemLoading from '@/views/GShootItemLoading.vue'
 import GShootItemError from '@/views/GShootItemError.vue'
 
+import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
 import { useProvideShootItem } from '@/composables/useShootItem'
@@ -128,6 +129,7 @@ export default {
 
     const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
     useProvideSeedItem(seedItem)
+    useProvideManagedSeedShoot(shootSeedName)
 
     const {
       component,

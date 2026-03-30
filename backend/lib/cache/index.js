@@ -49,6 +49,13 @@ class Cache extends Map {
     return this.get('controllerregistrations').list()
   }
 
+  getManagedSeedsInGardenNamespace () {
+    return this
+      .get('managedseeds')
+      .list()
+      .filter(item => item?.metadata?.namespace === 'garden')
+  }
+
   getResourceQuotas () {
     return this.get('resourcequotas').list()
   }
@@ -139,6 +146,21 @@ export default {
     }
     return project
   },
+  getManagedSeedsInGardenNamespace () {
+    return cache.getManagedSeedsInGardenNamespace()
+  },
+  getManagedSeedByName (name) {
+    return cache.get('managedseeds').find({ metadata: { namespace: 'garden', name } })
+  },
+  getManagedSeedByUid (uid) {
+    return cache.get('managedseeds').find(['metadata.uid', uid])
+  },
+  getManagedSeedForShootInGardenNamespace (shootName) {
+    return cache.get('managedseeds').find({
+      metadata: { namespace: 'garden' },
+      spec: { shoot: { name: shootName } },
+    })
+  },
   getTicketCache () {
     return cache.getTicketCache()
   },
@@ -150,6 +172,8 @@ export default {
         return this.getShootByUid(uid)
       case 'Seed':
         return this.getSeedByUid(uid)
+      case 'ManagedSeed':
+        return this.getManagedSeedByUid(uid)
       default:
         throw new TypeError(`Kind '${kind}' not supported`)
     }

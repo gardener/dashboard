@@ -25,6 +25,17 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item>
         <template #prepend>
           <v-icon color="primary">
+            mdi-hexagon-multiple
+          </v-icon>
+        </template>
+        <g-list-item-content label="Shoot">
+          <g-managed-seed-shoot-link :managed-seed-shoot-name="managedSeedShootName" />
+        </g-list-item-content>
+      </g-list-item>
+      <v-divider inset />
+      <g-list-item>
+        <template #prepend>
+          <v-icon color="primary">
             mdi-cube-outline
           </v-icon>
         </template>
@@ -106,9 +117,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <script setup>
 import GCopyBtn from '@/components/GCopyBtn'
+import GManagedSeedShootLink from '@/components/GManagedSeedShootLink'
 import GTimeString from '@/components/GTimeString'
 import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip'
 
+import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useSeedItem } from '@/composables/useSeedItem/index'
 
 const {
@@ -119,4 +132,6 @@ const {
   seedSchedulingVisible,
   seedCreationTimestamp,
 } = useSeedItem()
+
+const { managedSeedShootName } = useManagedSeedShoot()
 </script>

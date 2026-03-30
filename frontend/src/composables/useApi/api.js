@@ -251,6 +251,18 @@ export function getSeeds () {
   return getResource('/api/seeds')
 }
 
+/* Managed Seeds */
+
+export function getManagedSeedsForGardenNamespace () {
+  return getResource('/api/namespaces/garden/managedseeds')
+}
+
+/* Managed Seed Shoots */
+
+export function getManagedSeedShootsForGardenNamespace () {
+  return getResource('/api/namespaces/garden/managedseed-shoots')
+}
+
 /* Projects */
 
 export function getProjects () {
@@ -450,6 +462,8 @@ export default {
   createShootAdminKubeconfig,
   getCloudProfiles,
   getSeeds,
+  getManagedSeedsForGardenNamespace,
+  getManagedSeedShootsForGardenNamespace,
   getProjects,
   createProject,
   patchProject,

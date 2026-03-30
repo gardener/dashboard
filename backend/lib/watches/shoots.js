@@ -5,6 +5,7 @@
 //
 
 import { shootHasIssue } from '../utils/index.js'
+import cache from '../cache/index.js'
 
 export default (io, informer, options) => {
   const nsp = io.of('/')
@@ -45,9 +46,29 @@ export default (io, informer, options) => {
     nsp.to(rooms).emit('shoots', { type, uid })
   }
 
+  const publishManagedSeedShoots = event => {
+    const { type, object } = event
+    const { namespace, name, uid } = object.metadata
+    if (namespace !== 'garden') {
+      return
+    }
+    if (type !== 'DELETED') {
+      const managedSeed = cache.getManagedSeedForShootInGardenNamespace(name)
+      if (!managedSeed) {
+        return
+      }
+    }
+    // Always emit DELETED events without consulting the managedSeed cache:
+    // the ManagedSeed may already be gone when the shoot delete arrives.
+    // This is safe because the managedSeed shoot reference is immutable and
+    // deleting an unknown UID is a no-op for the frontend
+    nsp.to('managedseed-shoots;garden').emit('managedseed-shoots', { type, uid })
+  }
+
   const handleEvent = event => {
     publishShoots(event)
     publishUnhealthyShoots(event)
+    publishManagedSeedShoots(event)
   }
 
   informer.on('add', object => handleEvent({ type: 'ADDED', object }))

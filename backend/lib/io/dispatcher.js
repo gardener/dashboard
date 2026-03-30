@@ -11,6 +11,8 @@ import {
 } from './shoots.js'
 import { synchronize as synchronizeProjects } from './projects.js'
 import { synchronize as synchronizeSeeds } from './seeds.js'
+import { synchronize as synchronizeManagedSeeds } from './managedseeds.js'
+import { synchronize as synchronizeManagedSeedShoots } from './managedseedshoots.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
@@ -47,6 +49,16 @@ function synchronize (socket, key, ...args) {
       const [uids] = args
       assertArray(uids)
       return synchronizeSeeds(socket, uids)
+    }
+    case 'managedseeds': {
+      const [uids] = args
+      assertArray(uids)
+      return synchronizeManagedSeeds(socket, uids)
+    }
+    case 'managedseed-shoots': {
+      const [uids] = args
+      assertArray(uids)
+      return synchronizeManagedSeedShoots(socket, uids)
     }
     default:
       throw new TypeError(`Invalid synchronization type - ${key}`)

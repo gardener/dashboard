@@ -15,6 +15,8 @@ import { useKubeconfigStore } from '@/store/kubeconfig'
 import { useMemberStore } from '@/store/member'
 import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
+import { useManagedSeedStore } from '@/store/managedSeed'
+import { useManagedSeedShootStore } from '@/store/managedSeedShoot'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
@@ -28,6 +30,8 @@ export function createGlobalBeforeGuards () {
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
   const seedStore = useSeedStore()
+  const managedSeedStore = useManagedSeedStore()
+  const managedSeedShootStore = useManagedSeedShootStore()
   const gardenerExtensionStore = useGardenerExtensionStore()
   const kubeconfigStore = useKubeconfigStore()
 
@@ -70,14 +74,23 @@ export function createGlobalBeforeGuards () {
       }
 
       try {
-        await Promise.all([
+        const promises = [
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
           ensureCloudProfilesLoaded(cloudProfileStore),
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
-        ])
+        ]
+
+        if (authnStore.canGetManagedSeedAndShootInGardenNs) {
+          promises.push(
+            ensureManagedSeedsLoaded(managedSeedStore),
+            ensureManagedSeedShootsLoaded(managedSeedShootStore),
+          )
+        }
+
+        await Promise.all(promises)
       } catch (err) {
         appStore.setRouterError(err)
       }
@@ -224,6 +237,18 @@ function ensureCloudProfilesLoaded (store) {
 function ensureSeedsLoaded (store) {
   if (store.isInitial) {
     return store.fetchSeeds()
+  }
+}
+
+function ensureManagedSeedsLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchManagedSeeds()
+  }
+}
+
+function ensureManagedSeedShootsLoaded (store) {
+  if (store.isInitial) {
+    return store.fetchManagedSeedShoots()
   }
 }
 

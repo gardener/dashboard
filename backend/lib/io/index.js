@@ -65,6 +65,12 @@ function init (httpServer, cache) {
       logger.debug('Socket %s auto-joined seeds room', socket.id)
     }
 
+    if (_.get(user, ['profiles', 'canGetManagedSeedAndShootInGardenNs'], false)) {
+      socket.join('managedseeds;garden')
+      socket.join('managedseed-shoots;garden')
+      logger.debug('Socket %s auto-joined managed seed garden rooms', socket.id)
+    }
+
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
       logger.debug('Socket %s subscribed to %s', socket.id, key)

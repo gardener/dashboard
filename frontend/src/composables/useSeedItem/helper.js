@@ -9,9 +9,3 @@ import get from 'lodash/get'
 export function isFailureToleranceTypeZoneSupported (seedItem) {
   return get(seedItem, ['spec', 'provider', 'zones'], []).length >= 3
 }
-
-export function getBestSupportedFailureToleranceType (seedItem) {
-  return isFailureToleranceTypeZoneSupported(seedItem)
-    ? 'zone'
-    : 'node'
-}

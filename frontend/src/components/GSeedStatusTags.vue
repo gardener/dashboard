@@ -43,10 +43,9 @@ import { toRefs } from 'vue'
 import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
 import GExternalLink from '@/components/GExternalLink.vue'
 
-import {
-  useSeedItem,
-  useSeedConditions,
-} from '@/composables/useSeedItem/index'
+import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
+import { useSeedEffectiveConditions } from '@/composables/useSeedEffectiveConditions'
+import { useSeedItem } from '@/composables/useSeedItem/index'
 import { useStatusConditions } from '@/composables/useStatusConditions'
 
 const props = defineProps({
@@ -74,10 +73,18 @@ const {
 } = toRefs(props)
 
 const {
-  seedItem,
   seedName,
+  seedConditions,
 } = useSeedItem()
-const seedConditions = useSeedConditions(seedItem)
 
-const { conditions, errorCodeObjects } = useStatusConditions(seedConditions)
+const {
+  managedSeedShootConditions,
+} = useManagedSeedShoot()
+
+const effectiveConditions = useSeedEffectiveConditions(seedConditions, managedSeedShootConditions)
+
+const {
+  conditions,
+  errorCodeObjects,
+} = useStatusConditions(effectiveConditions)
 </script>

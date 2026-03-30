@@ -22,6 +22,13 @@ SPDX-License-Identifier: Apache-2.0
         <g-vendor
           :provider-type="seedProviderType"
           :region="seedProviderRegion"
+          :zones="seedProviderZones"
+        />
+      </template>
+      <template v-else-if="header.key === 'shoot'">
+        <g-managed-seed-shoot-link
+          :managed-seed-shoot-name="managedSeedShootName"
+          hide-unmanaged-chip
         />
       </template>
       <template v-else-if="header.key === 'lastOperation'">
@@ -31,18 +38,8 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-else-if="header.key === 'readiness'">
         <div class="d-flex">
-          <g-seed-status-tags :identifier="seedName" />
-        </div>
-      </template>
-      <template v-else-if="header.key === 'controlPlaneHighAvailability'">
-        <div class="d-flex justify-center flex-wrap">
-          <g-high-availability-tag
-            v-if="seedBestSupportedFailureToleranceType === 'zone'"
-            :popover-key="controlPlaneHighAvailabilityTagPopoverKey"
-            :failure-tolerance-type="seedBestSupportedFailureToleranceType"
-            size="small"
-            color="primary"
-            chip-class="mr-1"
+          <g-seed-status-tags
+            :identifier="seedName"
           />
         </div>
       </template>
@@ -98,16 +95,17 @@ import {
 } from 'vue'
 import { useRoute } from 'vue-router'
 
+import GManagedSeedShootLink from '@/components/GManagedSeedShootLink.vue'
+import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GVendor from '@/components/GVendor.vue'
 import GSeedStatus from '@/components/GSeedStatus.vue'
 import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GTimeString from '@/components/GTimeString.vue'
-import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GAccessRestrictionChip from '@/components/ShootAccessRestrictions/GAccessRestrictionChip.vue'
-import GHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GHighAvailabilityTag.vue'
 import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
 
+import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 
 const props = defineProps({
@@ -128,8 +126,8 @@ const {
   seedName,
   seedProviderType,
   seedProviderRegion,
+  seedProviderZones,
   seedUid,
-  seedBestSupportedFailureToleranceType,
   seedAccessRestrictions,
   seedSchedulingVisible,
   seedKubernetesVersion,
@@ -137,9 +135,9 @@ const {
   seedCreationTimestamp,
 } = useProvideSeedItem(seedItem)
 
-const controlPlaneHighAvailabilityTagPopoverKey = computed(() => {
-  return `g-seed-control-plane-high-availability-tag:${seedUid.value}`
-})
+const {
+  managedSeedShootName,
+} = useProvideManagedSeedShoot(seedName)
 
 const seedItemLink = computed(() => ({
   name: 'SeedItem',

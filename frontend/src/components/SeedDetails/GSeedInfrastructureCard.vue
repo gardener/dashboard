@@ -49,26 +49,6 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item>
         <template #prepend>
           <v-icon color="primary">
-            mdi-spa
-          </v-icon>
-        </template>
-        <g-list-item-content label="High Availability">
-          <div class="d-flex flex-wrap align-center">
-            <span class="mr-1">Failure tolerance</span>
-            <g-high-availability-tag
-              :popover-key="controlPlaneHighAvailabilityTagPopoverKey"
-              :failure-tolerance-type="seedBestSupportedFailureToleranceType"
-              size="small"
-              color="primary"
-              chip-class="mr-1"
-            />
-          </div>
-        </g-list-item-content>
-      </g-list-item>
-      <v-divider inset />
-      <g-list-item>
-        <template #prepend>
-          <v-icon color="primary">
             mdi-ip-network
           </v-icon>
         </template>
@@ -108,7 +88,6 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { computed } from 'vue'
 
-import GHighAvailabilityTag from '@/components/ControlPlaneHighAvailability/GHighAvailabilityTag.vue'
 import GVendor from '@/components/GVendor.vue'
 
 import { useSeedItem } from '@/composables/useSeedItem/index'
@@ -117,8 +96,6 @@ const {
   seedProviderType,
   seedProviderRegion,
   seedProviderZones,
-  seedUid,
-  seedBestSupportedFailureToleranceType,
   seedNetworksNodes,
   seedNetworksPods,
   seedNetworksServices,
@@ -127,10 +104,6 @@ const {
   seedNetworksBlockCIDRs,
   seedAllocatableShoots,
 } = useSeedItem()
-
-const controlPlaneHighAvailabilityTagPopoverKey = computed(() => {
-  return `g-seed-control-plane-high-availability-tag:${seedUid.value}`
-})
 
 const seedNetworksBlockCIDRsText = computed(() => {
   return seedNetworksBlockCIDRs.value?.join(', ') ?? ''

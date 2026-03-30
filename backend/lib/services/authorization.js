@@ -92,6 +92,28 @@ export function canListSeeds (user) {
   })
 }
 
+export function canListManagedSeedsInGardenNamespace (user) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'seedmanagement.gardener.cloud',
+      resource: 'managedseeds',
+      namespace: 'garden',
+    },
+  })
+}
+
+export function canListShootsInGardenNamespace (user) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'list',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace: 'garden',
+    },
+  })
+}
+
 export function canListCloudProfiles (user) {
   return hasAuthorization(user, {
     resourceAttributes: {

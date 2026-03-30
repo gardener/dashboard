@@ -117,6 +117,35 @@ function simplifySeed (seed) {
   return simplifyObjectMetadata(seed)
 }
 
+function simplifyManagedSeed (managedSeed) {
+  return {
+    metadata: {
+      name: managedSeed.metadata.name,
+      namespace: managedSeed.metadata.namespace,
+      uid: managedSeed.metadata.uid,
+    },
+    spec: {
+      shoot: {
+        name: managedSeed.spec.shoot?.name,
+      },
+    },
+  }
+}
+
+function simplifyManagedSeedShoot (shoot) {
+  return {
+    metadata: {
+      name: shoot.metadata.name,
+      namespace: shoot.metadata.namespace,
+      uid: shoot.metadata.uid,
+    },
+    status: {
+      conditions: shoot.status?.conditions,
+      advertisedAddresses: shoot.status?.advertisedAddresses,
+    },
+  }
+}
+
 function parseSelector (selector = '') {
   let notOperator
   let key
@@ -255,6 +284,8 @@ export {
   simplifyObjectMetadata,
   simplifyProject,
   simplifySeed,
+  simplifyManagedSeed,
+  simplifyManagedSeedShoot,
   parseSelector,
   parseSelectors,
   filterBySelectors,

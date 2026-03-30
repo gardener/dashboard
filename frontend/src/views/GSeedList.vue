@@ -75,6 +75,7 @@ import {
 import { storeToRefs } from 'pinia'
 
 import { useSeedStore } from '@/store/seed'
+import { useManagedSeedStore } from '@/store/managedSeed'
 import { useSocketStore } from '@/store/socket'
 import { useLocalStorageStore } from '@/store/localStorage'
 
@@ -88,7 +89,6 @@ import { useSeedTableSorting } from '@/composables/useSeedTableSorting'
 import { useTableFilter } from '@/composables/useTableFilter'
 import { parseSearch } from '@/composables/useTableFilter/helper'
 import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
-import { getBestSupportedFailureToleranceType } from '@/composables/useSeedItem/helper'
 
 import { mapTableHeader } from '@/utils'
 import { errorCodesFromArray } from '@/utils/errorCodes'
@@ -99,6 +99,7 @@ import map from 'lodash/map'
 import join from 'lodash/join'
 
 const seedStore = useSeedStore()
+const managedSeedStore = useManagedSeedStore()
 const socketStore = useSocketStore()
 const localStorageStore = useLocalStorageStore()
 
@@ -139,6 +140,15 @@ const allHeaders = computed(() => [
     value: item => `${get(item, ['spec', 'provider', 'type'], '')} ${get(item, ['spec', 'provider', 'region'], '')}`,
   },
   {
+    title: 'SHOOT',
+    key: 'shoot',
+    sortable: true,
+    align: 'start',
+    defaultSelected: true,
+    hidden: false,
+    value: item => getManagedSeedShootName(item) || '',
+  },
+  {
     title: 'STATUS',
     key: 'lastOperation',
     sortable: true,
@@ -155,18 +165,6 @@ const allHeaders = computed(() => [
     defaultSelected: true,
     hidden: false,
     value: item => item,
-  },
-  {
-    title: 'HIGH AVAILABILITY',
-    key: 'controlPlaneHighAvailability',
-    sortable: true,
-    align: 'center',
-    defaultSelected: false,
-    hidden: false,
-    value: item => ({
-      failureToleranceType: getBestSupportedFailureToleranceType(item),
-      name: get(item, ['metadata', 'name'], ''),
-    }),
   },
   {
     title: 'ACCESS RESTRICTIONS',
@@ -239,16 +237,22 @@ const defaultSelectedColumns = computed(() => {
   return mapTableHeader(headers.value, 'defaultSelected')
 })
 
+function getManagedSeedShootName (item) {
+  const seedName = get(item, ['metadata', 'name'])
+  return managedSeedStore.shootNameForSeed(seedName)
+}
+
 function seedFilterFn (item, query) {
   const conditions = get(item, ['status', 'conditions'], [])
   const errorCodes = join(errorCodesFromArray(conditions), ' ')
   const accessRestrictionNames = join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')
+  const shootName = getManagedSeedShootName(item) || 'Unmanaged'
 
   const searchableFields = [
     get(item, ['metadata', 'name']),
+    shootName,
     get(item, ['spec', 'provider', 'type']),
     get(item, ['spec', 'provider', 'region']),
-    getBestSupportedFailureToleranceType(item),
     get(item, ['status', 'kubernetesVersion']),
     get(item, ['status', 'gardener', 'version']),
     get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden',

@@ -1,0 +1,153 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`api managedseed-shoots should forbid listing managed seed shoots without full garden access 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "seedmanagement.gardener.cloud",
+          "namespace": "garden",
+          "resource": "managedseeds",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "namespace": "garden",
+          "resource": "shoots",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api managedseed-shoots should return managed seed shoots in the garden namespace 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "seedmanagement.gardener.cloud",
+          "namespace": "garden",
+          "resource": "managedseeds",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "core.gardener.cloud",
+          "namespace": "garden",
+          "resource": "shoots",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api managedseeds should forbid listing managed seeds without garden access 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "seedmanagement.gardener.cloud",
+          "namespace": "garden",
+          "resource": "managedseeds",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`api managedseeds should return managed seeds in the garden namespace 1`] = `
+[
+  [
+    {
+      ":authority": "kubernetes:6443",
+      ":method": "post",
+      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+      ":scheme": "https",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImpvaG4uZG9lQGV4YW1wbGUub3JnIiwiaWF0IjoxNTc3ODM2ODAwLCJhdWQiOlsiZ2FyZGVuZXIiXSwiZXhwIjozMTU1NzE2ODAwLCJqdGkiOiJqdGkifQ.LkQ9PEN893UNTsZZn2Ux_CAYNOoQ2ISboWuHiAc5HHU",
+    },
+    {
+      "apiVersion": "authorization.k8s.io/v1",
+      "kind": "SelfSubjectAccessReview",
+      "spec": {
+        "nonResourceAttributes": undefined,
+        "resourceAttributes": {
+          "group": "seedmanagement.gardener.cloud",
+          "namespace": "garden",
+          "resource": "managedseeds",
+          "verb": "list",
+        },
+      },
+    },
+  ],
+]
+`;

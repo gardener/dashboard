@@ -88,7 +88,7 @@ describe('hooks', () => {
       const server = {}
       const ticketCache = {}
       const ioInstance = {}
-      const keys = ['leases', 'shoots', 'projects', 'seeds']
+      const keys = ['leases', 'shoots', 'projects', 'seeds', 'managedseeds']
       let informers
       let mockCreateInformers
 

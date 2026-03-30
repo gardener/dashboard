@@ -265,6 +265,7 @@ import GCollapsibleItems from '@/components/GCollapsibleItems'
 import GScrollContainer from '@/components/GScrollContainer'
 import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
+import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useShootAction } from '@/composables/useShootAction'
 import { useProvideShootItem } from '@/composables/useShootItem'
@@ -346,6 +347,7 @@ useProvideShootHelper(shootItem, {
 
 const seedItem = computed(() => seedStore.seedByName(shootSeedName.value))
 useProvideSeedItem(seedItem)
+useProvideManagedSeedShoot(shootSeedName)
 
 const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
 const { machineImages } = useMachineImages(cloudProfile)

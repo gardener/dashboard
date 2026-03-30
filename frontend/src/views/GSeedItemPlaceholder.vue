@@ -24,6 +24,7 @@ import { useSeedStore } from '@/store/seed'
 import GSeedItemLoading from '@/views/GSeedItemLoading.vue'
 import GSeedItemError from '@/views/GSeedItemError.vue'
 
+import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
 import { useItemPlaceholder } from '@/composables/useItemPlaceholder'
 
@@ -86,5 +87,6 @@ const {
 })
 
 provide('activePopoverKey', activePopoverKey)
-useProvideSeedItem(seedItem)
+const { seedName } = useProvideSeedItem(seedItem)
+useProvideManagedSeedShoot(seedName)
 </script>

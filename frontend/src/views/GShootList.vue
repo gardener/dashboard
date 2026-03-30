@@ -253,7 +253,7 @@ export default {
   data () {
     return {
       dialog: null,
-      selectedColumns: undefined,
+      selectedColumns: {},
     }
   },
   computed: {

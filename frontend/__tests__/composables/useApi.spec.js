@@ -33,6 +33,24 @@ describe('composables', () => {
         api = useApi()
       })
 
+      describe('#getManagedSeedShootsForGardenNamespace', () => {
+        it('should fetch managed seed shoots from the garden namespace endpoint', async () => {
+          fetch.mockResponseOnce(JSON.stringify([]), {
+            headers: {
+              'content-type': 'application/json; charset=UTF-8',
+            },
+          })
+
+          const res = await api.getManagedSeedShootsForGardenNamespace()
+
+          expect(res.status).toBe(200)
+          expect(res.data).toEqual([])
+          expect(fetch).toBeCalledTimes(1)
+          const [req] = fetch.mock.calls[0]
+          expect(req.url).toBe('http://localhost:3000/api/namespaces/garden/managedseed-shoots')
+        })
+      })
+
       describe('#getConfiguration', () => {
         it('should fetch the configuration', async () => {
           const { getConfiguration } = api

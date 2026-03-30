@@ -24,6 +24,8 @@ import { useShootStore } from '../shoot'
 import { useTicketStore } from '../ticket'
 import { useProjectStore } from '../project'
 import { useSeedStore } from '../seed'
+import { useManagedSeedStore } from '../managedSeed'
+import { useManagedSeedShootStore } from '../managedSeedShoot'
 
 import { createSocket } from './helper'
 
@@ -37,6 +39,8 @@ export const useSocketStore = defineStore('socket', () => {
   const ticketStore = useTicketStore()
   const projectStore = useProjectStore()
   const seedStore = useSeedStore()
+  const managedSeedStore = useManagedSeedStore()
+  const managedSeedShootStore = useManagedSeedShootStore()
 
   const state = reactive({
     id: null,
@@ -58,6 +62,8 @@ export const useSocketStore = defineStore('socket', () => {
     ['shoots', false],
     ['projects', false],
     ['seeds', false],
+    ['managedseeds', false],
+    ['managedseed-shoots', false],
   ])
 
   const socket = createSocket(state, {
@@ -67,6 +73,8 @@ export const useSocketStore = defineStore('socket', () => {
     ticketStore,
     projectStore,
     seedStore,
+    managedSeedStore,
+    managedSeedShootStore,
   })
 
   const id = computed(() => {

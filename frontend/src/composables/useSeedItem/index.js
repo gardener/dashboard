@@ -6,17 +6,14 @@
 
 import {
   computed,
-  isRef,
   inject,
+  isRef,
   provide,
 } from 'vue'
 
 import { useSeedMetadata } from '@/composables/useSeedMetadata'
 
-import {
-  getBestSupportedFailureToleranceType,
-  isFailureToleranceTypeZoneSupported,
-} from './helper'
+import { isFailureToleranceTypeZoneSupported } from './helper'
 
 import get from 'lodash/get'
 
@@ -49,8 +46,6 @@ export function createSeedItemComposable (seedItem) {
   const seedProviderRegion = useSeedProviderRegion(seedItem)
   const seedProviderZones = useSeedProviderZones(seedItem)
   const seedIsFailureToleranceTypeZoneSupported = useSeedIsFailureToleranceTypeZoneSupported(seedItem)
-  const seedSupportedFailureToleranceTypes = useSeedSupportedFailureToleranceTypes(seedItem)
-  const seedBestSupportedFailureToleranceType = useSeedBestSupportedFailureToleranceType(seedItem)
   const seedAccessRestrictions = useSeedAccessRestrictions(seedItem)
   const seedSchedulingVisible = useSeedSchedulingVisible(seedItem)
   const seedNetworksNodes = useSeedNetworksNodes(seedItem)
@@ -92,8 +87,6 @@ export function createSeedItemComposable (seedItem) {
     seedProviderRegion,
     seedProviderZones,
     seedIsFailureToleranceTypeZoneSupported,
-    seedSupportedFailureToleranceTypes,
-    seedBestSupportedFailureToleranceType,
     seedAccessRestrictions,
     seedSchedulingVisible,
     seedNetworksNodes,
@@ -144,22 +137,6 @@ export function useSeedProviderZones (seedItem) {
 export function useSeedIsFailureToleranceTypeZoneSupported (seedItem) {
   return computed(() => {
     return isFailureToleranceTypeZoneSupported(seedItem.value)
-  })
-}
-
-export function useSeedSupportedFailureToleranceTypes (seedItem) {
-  return computed(() => {
-    const supportedFailureToleranceTypes = ['node']
-    if (isFailureToleranceTypeZoneSupported(seedItem.value)) {
-      supportedFailureToleranceTypes.push('zone')
-    }
-    return supportedFailureToleranceTypes
-  })
-}
-
-export function useSeedBestSupportedFailureToleranceType (seedItem) {
-  return computed(() => {
-    return getBestSupportedFailureToleranceType(seedItem.value)
   })
 }
 
