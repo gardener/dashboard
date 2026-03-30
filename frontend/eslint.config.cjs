@@ -187,6 +187,7 @@ module.exports = [
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+      'no-nested-ternary': 'error',
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/space-before-function-paren': ['error', 'always'],
       curly: ['error', 'all'],

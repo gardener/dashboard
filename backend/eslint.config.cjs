@@ -39,6 +39,7 @@ module.exports = [
       '@stylistic/comma-dangle': ['error', 'always-multiline'],
       'no-console': 'error',
       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+      'no-nested-ternary': 'error',
       curly: ['error', 'all'],
     },
   },

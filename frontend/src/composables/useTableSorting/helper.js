@@ -75,9 +75,11 @@ export function getLastOperationSortVal ({
       ? Number('1' + padStart(operation.progress, 2, '0'))
       : 0
   }
-  return inProgress
-    ? Number('6' + padStart(operation.progress, 2, '0'))
-    : isStatusHibernated(status)
-      ? 500
-      : 700
+  if (inProgress) {
+    return Number('6' + padStart(operation.progress, 2, '0'))
+  }
+  if (isStatusHibernated(status)) {
+    return 500
+  }
+  return 700
 }
