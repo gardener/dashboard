@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
       :text="managedSeedShootName"
     />
     <v-chip
-      v-else-if="showUnmanagedChip"
+      v-else-if="!hideUnmanagedChip"
       v-tooltip:top="'This seed is not backed by a ManagedSeed / Shoot resource'"
       size="small"
       variant="tonal"
@@ -36,9 +36,9 @@ const props = defineProps({
     type: String,
     default: undefined,
   },
-  showUnmanagedChip: {
+  hideUnmanagedChip: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 })
 

@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-else-if="header.key === 'shoot'">
         <g-managed-seed-shoot-link
           :managed-seed-shoot-name="managedSeedShootName"
-          :show-unmanaged-chip="false"
+          hide-unmanaged-chip
         />
       </template>
       <template v-else-if="header.key === 'lastOperation'">
