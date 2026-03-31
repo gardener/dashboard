@@ -6,9 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
+    ref="containerRef"
     class="d-flex flex-nowrap justify-start"
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
+    @mousemove="onMouseMove"
   >
     <g-seed-status-tag
       v-for="condition in conditions"
@@ -97,15 +99,99 @@ const {
   errorCodeObjects,
 } = useStatusConditions(effectiveConditions)
 
+const EDGE_THRESHOLD = 24
+const SCROLL_STEP = 8
+
+const containerRef = ref(null)
 const hovered = ref(false)
 let collapseTimer = null
+let animationFrameId = null
+let scrollDirection = 0
+
+function getScrollContainer () {
+  return containerRef.value?.closest('.scrollable-container--horizontal') ?? null
+}
+
+function stopAutoScroll () {
+  scrollDirection = 0
+  if (animationFrameId) {
+    window.cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+}
+
+function autoScroll () {
+  const scrollContainer = getScrollContainer()
+  if (!scrollContainer || !scrollDirection) {
+    stopAutoScroll()
+    return
+  }
+
+  const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth
+  if (maxScrollLeft <= 0) {
+    stopAutoScroll()
+    return
+  }
+
+  const nextScrollLeft = Math.min(
+    maxScrollLeft,
+    Math.max(0, scrollContainer.scrollLeft + (scrollDirection * SCROLL_STEP)),
+  )
+
+  if (nextScrollLeft === scrollContainer.scrollLeft) {
+    stopAutoScroll()
+    return
+  }
+
+  scrollContainer.scrollLeft = nextScrollLeft
+  animationFrameId = window.requestAnimationFrame(autoScroll)
+}
+
+function startAutoScroll (direction) {
+  if (!direction) {
+    stopAutoScroll()
+    return
+  }
+  if (scrollDirection === direction && animationFrameId) {
+    return
+  }
+
+  stopAutoScroll()
+  scrollDirection = direction
+  animationFrameId = window.requestAnimationFrame(autoScroll)
+}
 
 function onMouseEnter () {
   clearTimeout(collapseTimer)
   hovered.value = true
 }
 
+function onMouseMove (event) {
+  const scrollContainer = getScrollContainer()
+  if (!scrollContainer) {
+    return
+  }
+
+  const { left, right } = scrollContainer.getBoundingClientRect()
+  const isNearLeftEdge = event.clientX - left <= EDGE_THRESHOLD
+  const isNearRightEdge = right - event.clientX <= EDGE_THRESHOLD
+
+  if (isNearLeftEdge && scrollContainer.scrollLeft > 0) {
+    startAutoScroll(-1)
+    return
+  }
+
+  const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth
+  if (isNearRightEdge && scrollContainer.scrollLeft < maxScrollLeft) {
+    startAutoScroll(1)
+    return
+  }
+
+  stopAutoScroll()
+}
+
 function onMouseLeave () {
+  stopAutoScroll()
   collapseTimer = setTimeout(() => {
     hovered.value = false
   }, 1500)
@@ -113,5 +199,6 @@ function onMouseLeave () {
 
 onBeforeUnmount(() => {
   clearTimeout(collapseTimer)
+  stopAutoScroll()
 })
 </script>
