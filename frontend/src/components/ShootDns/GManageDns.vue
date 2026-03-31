@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-expand-transition group>
           <v-row
             v-for="(extensionDnsProvider, index) in dnsServiceExtensionProviders"
-            :key="dnsProviderRowKey(extensionDnsProvider)"
+            :key="getDnsServiceExtensionProviderUid(extensionDnsProvider)"
             class="list-item pt-2"
           >
             <g-dns-provider-row :dns-provider="extensionDnsProvider">
@@ -163,7 +163,6 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
-import { dnsExtensionProviderResourceName } from '@/composables/credential/helper'
 
 import {
   withFieldName,
@@ -187,6 +186,7 @@ export default {
       dnsPrimaryProviderCredentialsRef,
       isNewCluster,
       dnsServiceExtensionProviders,
+      getDnsServiceExtensionProviderUid,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
       addDnsServiceExtensionProviderForCustomDomain,
@@ -208,6 +208,7 @@ export default {
       dnsPrimaryProviderCredentialsRef,
       isNewCluster,
       dnsServiceExtensionProviders,
+      getDnsServiceExtensionProviderUid,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
       addDnsServiceExtensionProviderForCustomDomain,
@@ -320,13 +321,6 @@ export default {
   },
   methods: {
     getErrorMessages,
-    dnsProviderRowKey (provider) {
-      return dnsExtensionProviderResourceName(provider) ?? JSON.stringify({
-        type: provider?.type,
-        domains: provider?.domains,
-        zones: provider?.zones,
-      })
-    },
   },
 }
 </script>

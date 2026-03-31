@@ -19,6 +19,8 @@ import {
   dnsCredentialResourceNamePart,
 } from '@/composables/credential/helper'
 
+import { v4 as uuidv4 } from '@/utils/uuid'
+
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
@@ -29,6 +31,8 @@ import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
 import omit from 'lodash/omit'
+
+const dnsServiceExtensionProviderUidMap = new WeakMap()
 
 export const useShootDns = (manifest, options) => {
   const {
@@ -76,6 +80,20 @@ export const useShootDns = (manifest, options) => {
       set(dnsServiceExtension.value, ['providerConfig', 'providers'], value)
     },
   })
+
+  function getDnsServiceExtensionProviderUid (provider) {
+    if (!provider || typeof provider !== 'object') {
+      return undefined
+    }
+
+    let uid = dnsServiceExtensionProviderUidMap.get(provider)
+    if (!uid) {
+      uid = uuidv4()
+      dnsServiceExtensionProviderUidMap.set(provider, uid)
+    }
+
+    return uid
+  }
 
   function normalizeDnsServiceExtensionProvider (provider) {
     if (!provider?.secretName) {
@@ -348,6 +366,7 @@ export const useShootDns = (manifest, options) => {
     hasDnsServiceExtensionProviderForCustomDomain,
     addDnsServiceExtensionProviderForCustomDomain,
     getDnsServiceExtensionResourceName,
+    getDnsServiceExtensionProviderUid,
     deleteResource,
     setResource,
     getResourceRef,
