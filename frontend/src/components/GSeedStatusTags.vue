@@ -92,8 +92,8 @@ const seedConditions = useSeedConditions(seedItem)
 
 const { conditions, errorCodeObjects } = useStatusConditions(seedConditions)
 
-const EDGE_THRESHOLD = 24
-const SCROLL_STEP = 8
+const EDGE_THRESHOLD = 12
+const SCROLL_STEP = 2
 
 const containerRef = ref(null)
 const hovered = ref(false)
