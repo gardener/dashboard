@@ -275,7 +275,7 @@ export default {
             credential?.kind === this.dnsPrimaryProviderCredentialsRef?.kind
         }
 
-        return find(this.dnsPrimaryProviderCredentials, matchesPrimaryDnsProviderCredential)
+        return find(this.availableCredentialsForPrimaryDnsProvider, matchesPrimaryDnsProviderCredential)
       },
       set (credential) {
         if (!credential) {

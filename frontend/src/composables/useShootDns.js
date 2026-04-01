@@ -17,6 +17,8 @@ import {
   getDnsPrimaryProviderCredentialsRef,
   dnsExtensionProviderResourceName,
   dnsCredentialResourceNamePart,
+  normalizeDnsServiceExtensionProvider,
+  normalizeDnsPrimaryProviderCredentialsRef,
 } from '@/composables/credential/helper'
 
 import { v4 as uuidv4 } from '@/utils/uuid'
@@ -30,7 +32,6 @@ import head from 'lodash/head'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
-import omit from 'lodash/omit'
 
 const dnsServiceExtensionProviderUidMap = new WeakMap()
 
@@ -77,7 +78,7 @@ export const useShootDns = (manifest, options) => {
       return get(dnsServiceExtension.value, ['providerConfig', 'providers'], [])
     },
     set (value) {
-      set(dnsServiceExtension.value, ['providerConfig', 'providers'], value)
+      set(dnsServiceExtension.value, ['providerConfig', 'providers'], map(value, normalizeDnsServiceExtensionProvider))
     },
   })
 
@@ -95,33 +96,12 @@ export const useShootDns = (manifest, options) => {
     return uid
   }
 
-  function normalizeDnsServiceExtensionProvider (provider) {
-    if (!provider?.secretName) {
-      return provider
-    }
-
-    return {
-      ...omit(provider, ['secretName']),
-      credentials: provider.credentials ?? provider.secretName,
-    }
-  }
-
-  function normalizeDnsServiceExtensionProviders () {
-    if (!dnsServiceExtension.value) {
-      return
-    }
-
-    dnsServiceExtensionProviders.value = map(dnsServiceExtensionProviders.value, normalizeDnsServiceExtensionProvider)
-  }
-
   /* dns */
   const dnsDomain = computed({
     get () {
       return get(manifest.value, ['spec', 'dns', 'domain'])
     },
     set (value) {
-      normalizeDnsServiceExtensionProviders()
-      normalizeDnsPrimaryProviderCredentialsRefs()
       set(manifest.value, ['spec', 'dns', 'domain'], value)
     },
   })
@@ -132,7 +112,7 @@ export const useShootDns = (manifest, options) => {
     },
     set (value) {
       if (value) {
-        set(manifest.value, ['spec', 'dns', 'providers'], value)
+        set(manifest.value, ['spec', 'dns', 'providers'], map(value, normalizeDnsPrimaryProviderCredentialsRef))
       } else {
         unset(manifest.value, ['spec', 'dns', 'providers'])
       }
@@ -148,26 +128,6 @@ export const useShootDns = (manifest, options) => {
   const dnsPrimaryProvider = computed(() => {
     return find(dnsProviders.value, ['primary', true])
   })
-
-  function normalizeDnsPrimaryProviderCredentialsRef (provider) {
-    const credentialsRef = getDnsPrimaryProviderCredentialsRef(provider)
-    if (!credentialsRef) {
-      return provider
-    }
-
-    return {
-      ...omit(provider, ['secretName']),
-      credentialsRef,
-    }
-  }
-
-  function normalizeDnsPrimaryProviderCredentialsRefs () {
-    if (!dnsProviders.value) {
-      return
-    }
-
-    dnsProviders.value = map(dnsProviders.value, normalizeDnsPrimaryProviderCredentialsRef)
-  }
 
   function patchDnsPrimaryProvider (data) {
     // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
@@ -258,9 +218,6 @@ export const useShootDns = (manifest, options) => {
   }
 
   function addDnsServiceExtensionProvider (provider = {}) {
-    normalizeDnsServiceExtensionProviders()
-    normalizeDnsPrimaryProviderCredentialsRefs()
-
     const type = provider.type ?? head(gardenerExtensionStore.dnsProviderTypes)
     const defaultCredential = getDefaultCredential(type)
 
@@ -322,9 +279,6 @@ export const useShootDns = (manifest, options) => {
   }
 
   function deleteDnsServiceExtensionProvider (index) {
-    normalizeDnsServiceExtensionProviders()
-    normalizeDnsPrimaryProviderCredentialsRefs()
-
     const provider = get(dnsServiceExtensionProviders.value, [index])
     if (!provider) {
       return
@@ -339,10 +293,8 @@ export const useShootDns = (manifest, options) => {
     }
   }
 
+  // TODO(grolu): drop support for migration after this has been removed from spec
   function forceMigrateSyncDnsProvidersToFalse () {
-    normalizeDnsServiceExtensionProviders()
-    normalizeDnsPrimaryProviderCredentialsRefs()
-
     if (get(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS']) === true) {
       // Migrate from old DNS configuration to new DNS configuration
       set(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS'], false)

@@ -13,6 +13,8 @@ import {
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
+import map from 'lodash/map'
+import omit from 'lodash/omit'
 
 // Credentials
 export function isSecret (credential) {
@@ -121,6 +123,39 @@ export function dnsCredentialResourceNamePart (credentialRef) {
   }
 
   return `${kindPrefix}-${name}`
+}
+
+// legacy field normalization
+// TODO(grolu): drop normalization functions for DNS service extension providers, after legacy fields have been removed from spec
+export function normalizeDnsServiceExtensionProvider (provider) {
+  if (!provider?.secretName) {
+    return provider
+  }
+
+  return {
+    ...omit(provider, ['secretName']),
+    credentials: provider.credentials ?? provider.secretName,
+  }
+}
+
+export function normalizeDnsServiceExtensionProviders (providers) {
+  return map(providers, normalizeDnsServiceExtensionProvider)
+}
+
+export function normalizeDnsPrimaryProviderCredentialsRef (provider) {
+  const credentialsRef = getDnsPrimaryProviderCredentialsRef(provider)
+  if (!credentialsRef) {
+    return provider
+  }
+
+  return {
+    ...omit(provider, ['secretName']),
+    credentialsRef,
+  }
+}
+
+export function normalizeDnsPrimaryProviderCredentialsRefs (providers) {
+  return map(providers, normalizeDnsPrimaryProviderCredentialsRef)
 }
 
 // Bindings

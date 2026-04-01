@@ -57,6 +57,10 @@ import {
 } from '@/utils'
 
 import { useShootDns } from './useShootDns'
+import {
+  normalizeDnsPrimaryProviderCredentialsRefs,
+  normalizeDnsServiceExtensionProviders,
+} from './credential/helper'
 
 import pick from 'lodash/pick'
 import sample from 'lodash/sample'
@@ -101,6 +105,16 @@ export function createShootContextComposable (options = {}) {
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
     }, value)
+    const dnsProviders = get(object, ['spec', 'dns', 'providers'])
+    if (dnsProviders) {
+      set(object, ['spec', 'dns', 'providers'], normalizeDnsPrimaryProviderCredentialsRefs(dnsProviders))
+    }
+    const extensions = get(object, ['spec', 'extensions'])
+    const dnsServiceExtension = find(extensions, ['type', 'shoot-dns-service'])
+    const extensionProviders = get(dnsServiceExtension, ['providerConfig', 'providers'])
+    if (extensionProviders) {
+      set(dnsServiceExtension, ['providerConfig', 'providers'], normalizeDnsServiceExtensionProviders(extensionProviders))
+    }
     if (!hasEnabledAddons(get(object, ['spec', 'addons']))) {
       unset(object, ['spec', 'addons'])
     }
@@ -149,7 +163,7 @@ export function createShootContextComposable (options = {}) {
 
   function setShootManifest (value) {
     initialManifest.value = value
-    manifest.value = cloneDeep(initialManifest.value)
+    manifest.value = cloneDeep(normalizeManifest(initialManifest.value))
     hibernationSchedules.value = get(manifest.value, ['spec', 'hibernation', 'schedules'], [])
     if (shootCreationTimestamp.value) {
       providerState.workerless = isEmpty(providerWorkers.value)
