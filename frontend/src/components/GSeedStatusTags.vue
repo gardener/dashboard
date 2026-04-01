@@ -99,8 +99,8 @@ const {
   errorCodeObjects,
 } = useStatusConditions(effectiveConditions)
 
-const EDGE_THRESHOLD = 24
-const SCROLL_STEP = 8
+const EDGE_THRESHOLD = 12
+const SCROLL_STEP = 2
 
 const containerRef = ref(null)
 const hovered = ref(false)
@@ -109,7 +109,7 @@ let animationFrameId = null
 let scrollDirection = 0
 
 function getScrollContainer () {
-  return containerRef.value?.closest('.scrollable-container--horizontal') ?? null
+  return containerRef.value?.closest('.scroll-x') ?? null
 }
 
 function stopAutoScroll () {
