@@ -217,27 +217,27 @@ export const useShootDns = (manifest, options) => {
     return credentials.find(credential => !isCredentialUsed(credential))
   }
 
-  function addDnsServiceExtensionProvider (provider = {}) {
-    const type = provider.type ?? head(gardenerExtensionStore.dnsProviderTypes)
-    const defaultCredential = getDefaultCredential(type)
-
-    let credentialsRef
+  function resolveCredentialsRef (provider, defaultCredential) {
     if (provider.credentialsRef) {
-      credentialsRef = provider.credentialsRef
-    } else if (provider.secretName) {
-      credentialsRef = {
+      return provider.credentialsRef
+    }
+    if (provider.secretName) {
+      return {
         apiVersion: 'v1',
         kind: 'Secret',
         name: provider.secretName,
       }
-    } else if (defaultCredential) {
-      credentialsRef = {
+    }
+    if (defaultCredential) {
+      return {
         apiVersion: defaultCredential.apiVersion,
         kind: defaultCredential.kind,
         name: defaultCredential.metadata?.name,
       }
     }
+  }
 
+  function resolveResourceRef (type, credentialsRef) {
     const credentialsForProviderType = getCloudProviderEntityList(type, { credentialStore, gardenerExtensionStore, cloudProfileStore })
     const credential = find(credentialsForProviderType, credential => {
       return dnsCredentialResourceNamePart({
@@ -246,7 +246,17 @@ export const useShootDns = (manifest, options) => {
       }) === dnsCredentialResourceNamePart(credentialsRef)
     })
 
-    const resourceName = getDnsServiceExtensionResourceName(credentialsRef)
+    if (credential) {
+      return {
+        apiVersion: credential.apiVersion,
+        kind: credential.kind,
+        name: credential.metadata?.name,
+      }
+    }
+    return credentialsRef
+  }
+
+  function addExtensionProvider (type, resourceName) {
     const extensionProvider = {
       type,
       credentials: resourceName,
@@ -256,17 +266,17 @@ export const useShootDns = (manifest, options) => {
     } else {
       dnsServiceExtensionProviders.value.push(extensionProvider)
     }
+    return extensionProvider
+  }
 
-    let resourceRef
-    if (credential) {
-      resourceRef = {
-        apiVersion: credential.apiVersion,
-        kind: credential.kind,
-        name: credential.metadata?.name,
-      }
-    } else {
-      resourceRef = credentialsRef
-    }
+  function addDnsServiceExtensionProvider (provider = {}) {
+    const type = provider.type ?? head(gardenerExtensionStore.dnsProviderTypes)
+    const defaultCredential = getDefaultCredential(type)
+    const credentialsRef = resolveCredentialsRef(provider, defaultCredential)
+    const resourceRef = resolveResourceRef(type, credentialsRef)
+    const resourceName = getDnsServiceExtensionResourceName(credentialsRef)
+
+    const extensionProvider = addExtensionProvider(type, resourceName)
 
     if (resourceName && resourceRef) {
       setResource({
