@@ -496,7 +496,7 @@ export class EditorCompletions {
 
   #warnMultipleDiscriminators (foundDiscriminators, parentPropertyName) {
     if (foundDiscriminators) {
-      // We cursorrently do not support merging when schema has multiple discriminators on same level
+      // We currently do not support merging when schema has multiple discriminators on same level
       this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
     }
   }
