@@ -32,7 +32,7 @@ jobs:
       TAG: ${{ inputs.tag }}
     steps:
       - name: Create GitHub App token
-        uses: gardener/cc-utils/.github/actions/github-auth@master
+        uses: gardener/cc-utils/.github/actions/github-auth@v1
         id: app-token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}

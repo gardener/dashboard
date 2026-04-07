@@ -18,7 +18,7 @@ runs:
   using: composite
   steps:
     - name: Setup Git Identity
-      uses: gardener/cc-utils/.github/actions/setup-git-identity@master
+      uses: gardener/cc-utils/.github/actions/setup-git-identity@v1
 
     - name: Stage callback action outside repo (if provided)
       id: stage-callback
@@ -85,7 +85,7 @@ runs:
         echo "Created branches: $HOTFIX_BRANCH and $PREPARE_BRANCH"
 
     - name: Bump patch version
-      uses: gardener/cc-utils/.github/actions/version@master
+      uses: gardener/cc-utils/.github/actions/version@v1
       with:
         version-operation: bump-patch
         prerelease: dev

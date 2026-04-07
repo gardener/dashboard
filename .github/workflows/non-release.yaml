@@ -29,7 +29,7 @@ jobs:
 
   component-descriptor:
     if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == vars.DEFAULT_LABEL_OK_TO_TEST && vars.DEFAULT_LABEL_OK_TO_TEST != '') }}
-    uses: gardener/cc-utils/.github/workflows/post-build.yaml@master
+    uses: gardener/cc-utils/.github/workflows/post-build.yaml@v1
     needs:
       - build
     permissions:
