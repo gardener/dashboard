@@ -77,38 +77,48 @@ export class K8sAttachAddon {
     this._disposables.forEach(d => d.dispose())
   }
 
+  _handleErrorChannelData (data) {
+    try {
+      const errorData = JSON.parse(data) || {}
+      if (errorData.status === 'Success') {
+        return
+      }
+      this._logger.error('On error channel:', errorData)
+    } catch {
+      this._logger.error('On error channel:', data)
+    }
+  }
+
+  _handleChannelData (terminal, channel, data) {
+    switch (channel) {
+      case ChannelEnum.STD_OUT:
+      case ChannelEnum.STD_ERR:
+        terminal.write(data)
+        return
+      case ChannelEnum.ERR:
+        this._handleErrorChannelData(data)
+        return
+      default:
+        throw Error('Unsupported message!')
+    }
+  }
+
   _messageHandler (terminal, ev) {
     if (!this.decoder) {
       this.decoder = new TextDecoder()
     }
-    if (typeof ev.data === 'object' && ev.data instanceof ArrayBuffer) {
-      const buffer = new Uint8Array(ev.data)
-      if (buffer.length > 1) {
-        const channel = buffer[BufferEnum.CHANNEL_INDEX]
-        const data = this.decoder.decode(buffer.slice(BufferEnum.DATA_INDEX))
-        switch (channel) {
-          case ChannelEnum.STD_OUT:
-          case ChannelEnum.STD_ERR:
-            terminal.write(data)
-            break
-          case ChannelEnum.ERR:
-            try {
-              const errorData = JSON.parse(data) || {}
-              if (errorData.status === 'Success') {
-                return // just ignore success message
-              }
-              this._logger.error('On error channel:', errorData)
-            } catch (err) {
-              this._logger.error('On error channel:', data)
-            }
-            break
-          default:
-            throw Error('Unsupported message!')
-        }
-      }
-    } else {
+    if (!(typeof ev.data === 'object' && ev.data instanceof ArrayBuffer)) {
       throw Error(`Cannot handle "${typeof ev.data}" websocket message.`)
     }
+
+    const buffer = new Uint8Array(ev.data)
+    if (buffer.length <= 1) {
+      return
+    }
+
+    const channel = buffer[BufferEnum.CHANNEL_INDEX]
+    const data = this.decoder.decode(buffer.slice(BufferEnum.DATA_INDEX))
+    this._handleChannelData(terminal, channel, data)
   }
 
   _sendResize ({ cols: Width, rows: Height }) {

@@ -50,11 +50,15 @@ export function mdiMeta () {
       }
     },
     resolveId (id) {
-      if (id !== VIRTUAL_ID) return null
+      if (id !== VIRTUAL_ID) {
+        return null
+      }
       return RESOLVED_VIRTUAL_ID
     },
     load (id) {
-      if (id !== RESOLVED_VIRTUAL_ID) return null
+      if (id !== RESOLVED_VIRTUAL_ID) {
+        return null
+      }
       if (code == null) {
         this.error('[g-mdi-meta] Module requested before initialization')
         return null

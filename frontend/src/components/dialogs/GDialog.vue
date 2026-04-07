@@ -246,6 +246,14 @@ export default {
     showDialog () {
       this.visible = true
     },
+    async shouldCancelConfirmation () {
+      if (!this.confirmationInterceptor) {
+        return false
+      }
+
+      const confirmed = await this.confirmationInterceptor()
+      return !confirmed
+    },
     async resolveAction (value) {
       if (value) {
         if (!this.valid || this.notConfirmed) {
@@ -261,14 +269,9 @@ export default {
       }
 
       if (isFunction(this.resolve)) {
-        if (value) {
-          if (this.confirmationInterceptor) {
-            const confirmed = await this.confirmationInterceptor()
-            if (!confirmed) {
-              // cancel resolve action
-              return
-            }
-          }
+        if (value && await this.shouldCancelConfirmation()) {
+          // cancel resolve action
+          return
         }
         const resolve = this.resolve
         this.resolve = undefined

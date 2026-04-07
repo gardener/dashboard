@@ -680,11 +680,12 @@ export function getVersionExpirationWarning ({
   const forcedUpdate = isExpirationWarning && updateAvailable
   const regularUpdate = !isExpirationWarning
 
-  const severity = noUpdate
-    ? 'error'
-    : forcedUpdate
-      ? 'warning'
-      : 'info'
+  let severity = 'info'
+  if (noUpdate) {
+    severity = 'error'
+  } else if (forcedUpdate) {
+    severity = 'warning'
+  }
 
   return {
     severity,

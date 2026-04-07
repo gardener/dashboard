@@ -501,10 +501,21 @@ export class EditorCompletions {
       })
     }
     let foundDiscriminators = false
-    for (const [propertyName, propertyValue] of Object.entries(properties)) {
+
+    const assignPropertyValue = propertyValue => {
+      if (hasValidKeys(propertyValue)) {
+        properties.type = propertyValue.map(obj => obj.type)
+        properties.format = propertyValue.map(obj => obj.format)
+      } else {
+        this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
+      }
+    }
+
+    for (const property of Object.entries(properties)) {
+      const [propertyName, propertyValue] = property
       if (['allOf', 'anyOf', 'oneOf'].includes(propertyName) && !properties.type) {
         if (foundDiscriminators) {
-          // We cursorrently do not support merging when schema has multiple discriminators on same level
+          // We currently do not support merging when schema has multiple discriminators on same level
           this.logger.warn('Found multiple discriminators in schema at %s', parentPropertyName)
         }
         foundDiscriminators = true
@@ -513,13 +524,8 @@ export class EditorCompletions {
           this.#resolveSchemaArrays(propertyValue[0], parentPropertyName)
           Object.assign(properties, propertyValue[0])
         } else if (propertyValue.length > 1 && propertyName === 'oneOf') {
-          if (hasValidKeys(propertyValue)) {
-            // In case of oneOf, we support multiple entries if they are only used to define different types
-            properties.type = propertyValue.map(obj => obj.type)
-            properties.format = propertyValue.map(obj => obj.format)
-          } else {
-            this.logger.warn('Found unsupported oneOf discriminator at %s', parentPropertyName)
-          }
+          // In case of oneOf, we support multiple entries if they are only used to define different types
+          assignPropertyValue(propertyValue)
         } else {
           this.logger.warn('Unsupported schema array length, %s has length %i at %s', propertyName, propertyValue.length, parentPropertyName)
         }

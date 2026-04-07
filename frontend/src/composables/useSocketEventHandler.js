@@ -69,18 +69,23 @@ export function useSocketEventHandler (useStore, options = {}) {
       }
       const items = await socketStore.synchronize(pluralName, uids)
       for (const item of items) {
-        if (item.kind === 'Status') {
-          logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
-          if (item.code === 404) {
-            const uid = item.details?.uid
-            if (uid) {
-              uidMap.set(uid, false)
-            }
-          }
-        } else {
-          const uid = item.metadata.uid
-          uidMap.set(uid, item)
+        if (item.kind !== 'Status') {
+          uidMap.set(item.metadata.uid, item)
+          continue
         }
+
+        logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
+
+        if (item.code !== 404) {
+          continue
+        }
+
+        const uid = item.details?.uid
+        if (!uid) {
+          continue
+        }
+
+        uidMap.set(uid, false)
       }
       store.$patch(state => {
         const operator = createOperator(state)
