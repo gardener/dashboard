@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '24.14.0'
+          node-version: '24.14.1'
 
       - name: Install dependencies
         run: |
@@ -43,7 +43,7 @@ jobs:
         run: yarn generate-all-dependency-diagrams
 
       - name: Commit changes
-        uses: iarekylew00t/verified-bot-commit@26994940c86b57388b839ea195b5e98f6b0846a2 # v2.1.7
+        uses: iarekylew00t/verified-bot-commit@4aeee0954ea68e4e91e5fd326e9a0827ebc5b19a # v2.2.2
         with:
           message: 'Update dependency diagrams'
           files: |
