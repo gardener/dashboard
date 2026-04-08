@@ -22,7 +22,7 @@ jobs:
       branches: ${{ steps.parse.outputs.branches }}
       has-branches: ${{ steps.parse.outputs.has-branches }}
     steps:
-      - uses: gardener/cc-utils/.github/actions/github-auth@master
+      - uses: gardener/cc-utils/.github/actions/github-auth@v1
         id: token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}
@@ -51,7 +51,7 @@ jobs:
         target-branch: ${{ fromJson(needs.parse-branches.outputs.branches) }}
       fail-fast: false
     steps:
-      - uses: gardener/cc-utils/.github/actions/github-auth@master
+      - uses: gardener/cc-utils/.github/actions/github-auth@v1
         id: token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}
@@ -76,7 +76,7 @@ jobs:
     needs: [parse-branches, cherry-pick]
     if: always() && needs.parse-branches.outputs.has-branches == 'true'
     steps:
-      - uses: gardener/cc-utils/.github/actions/github-auth@master
+      - uses: gardener/cc-utils/.github/actions/github-auth@v1
         id: token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}

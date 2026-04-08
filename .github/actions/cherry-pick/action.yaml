@@ -39,10 +39,10 @@ runs:
   using: composite
   steps:
     - name: Install Gardener GHA Libs
-      uses: gardener/cc-utils/.github/actions/install-gardener-gha-libs@master
+      uses: gardener/cc-utils/.github/actions/install-gardener-gha-libs@v1
 
     - name: Setup Git Identity
-      uses: gardener/cc-utils/.github/actions/setup-git-identity@master
+      uses: gardener/cc-utils/.github/actions/setup-git-identity@v1
 
     - name: Extract PR Information
       id: extract-info
