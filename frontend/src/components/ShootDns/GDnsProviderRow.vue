@@ -186,23 +186,23 @@ export default {
         })
       },
       set (credential) {
+        const currentResourceName = dnsExtensionProviderResourceName(this.dnsProvider)
+        this.deleteResource(currentResourceName)
         if (!credential) {
-          this.deleteResource(dnsExtensionProviderResourceName(this.dnsProvider))
           this.dnsProvider.credentials = undefined
           this.dnsProvider.secretName = undefined
           return
         }
-        this.deleteResource(dnsExtensionProviderResourceName(this.dnsProvider))
-        const credentialKind = credential?.kind
-        const credentialName = credential?.metadata?.name
-        const resourceName = this.getDnsServiceExtensionResourceName({
+        const credentialKind = credential.kind
+        const credentialName = credential.metadata?.name
+        const newResourceName = this.getDnsServiceExtensionResourceName({
           kind: credentialKind,
           name: credentialName,
         })
-        this.dnsProvider.credentials = resourceName
+        this.dnsProvider.credentials = newResourceName
         delete this.dnsProvider.secretName
         this.setResource({
-          name: resourceName,
+          name: newResourceName,
           resourceRef: {
             apiVersion: credential.apiVersion,
             kind: credentialKind,
@@ -244,7 +244,10 @@ export default {
       },
     },
     dnsExtensionProviderResourceRefs () {
-      return this.dnsServiceExtensionProviders.map(provider => this.getResourceRef(dnsExtensionProviderResourceName(provider)))
+      return this.dnsServiceExtensionProviders.map(provider => {
+        const resourceName = dnsExtensionProviderResourceName(provider)
+        return this.getResourceRef(resourceName)
+      })
     },
   },
   mounted () {
@@ -258,7 +261,8 @@ export default {
       if (!credentialName || !credentialKind) {
         return false
       }
-      const currentResourceRef = this.getResourceRef(dnsExtensionProviderResourceName(this.dnsProvider))
+      const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
+      const currentResourceRef = this.getResourceRef(resourceName)
       const matchesCredential = ref => ref?.name === credentialName && ref?.kind === credentialKind
       if (matchesCredential(currentResourceRef)) {
         return true

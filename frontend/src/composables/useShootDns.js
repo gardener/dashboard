@@ -33,7 +33,21 @@ import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
 
-const dnsServiceExtensionProviderUidMap = new WeakMap()
+const UID_KEY = '_uid'
+
+function ensureProviderUid (provider) {
+  if (!Object.prototype.hasOwnProperty.call(provider, UID_KEY)) {
+    const uid = uuidv4()
+    Object.defineProperty(provider, UID_KEY, {
+      value: uid,
+      enumerable: false,
+      writable: false,
+      configurable: false,
+    })
+    return uid
+  }
+  return get(provider, UID_KEY)
+}
 
 export const useShootDns = (manifest, options) => {
   const {
@@ -86,14 +100,7 @@ export const useShootDns = (manifest, options) => {
     if (!provider || typeof provider !== 'object') {
       return undefined
     }
-
-    let uid = dnsServiceExtensionProviderUidMap.get(provider)
-    if (!uid) {
-      uid = uuidv4()
-      dnsServiceExtensionProviderUidMap.set(provider, uid)
-    }
-
-    return uid
+    return ensureProviderUid(provider)
   }
 
   /* dns */

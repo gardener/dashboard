@@ -163,7 +163,7 @@ export function createShootContextComposable (options = {}) {
 
   function setShootManifest (value) {
     initialManifest.value = value
-    manifest.value = cloneDeep(normalizeManifest(initialManifest.value))
+    manifest.value = cloneDeep(initialManifest.value)
     hibernationSchedules.value = get(manifest.value, ['spec', 'hibernation', 'schedules'], [])
     if (shootCreationTimestamp.value) {
       providerState.workerless = isEmpty(providerWorkers.value)

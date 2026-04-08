@@ -83,6 +83,41 @@ describe('composables', () => {
       expect(manifest.spec).toMatchSnapshot()
     })
 
+    describe('getDnsServiceExtensionProviderUid', () => {
+      it('should return a stable uid for the same provider object', () => {
+        shootDns.addDnsServiceExtensionProvider()
+        const provider = shootDns.dnsServiceExtensionProviders[0]
+        const uid1 = shootDns.getDnsServiceExtensionProviderUid(provider)
+        const uid2 = shootDns.getDnsServiceExtensionProviderUid(provider)
+        expect(uid1).toBe(uid2)
+      })
+
+      it('should return different uids for different provider objects', () => {
+        shootDns.addDnsServiceExtensionProvider()
+        shootDns.addDnsServiceExtensionProvider()
+        const providers = shootDns.dnsServiceExtensionProviders
+        const uid1 = shootDns.getDnsServiceExtensionProviderUid(providers[0])
+        const uid2 = shootDns.getDnsServiceExtensionProviderUid(providers[1])
+        expect(uid1).not.toBe(uid2)
+      })
+
+      it('should attach uid as a non-enumerable property', () => {
+        shootDns.addDnsServiceExtensionProvider()
+        const provider = shootDns.dnsServiceExtensionProviders[0]
+        shootDns.getDnsServiceExtensionProviderUid(provider)
+
+        expect(Object.keys(provider)).not.toContain('_uid')
+        expect(JSON.parse(JSON.stringify(provider))).not.toHaveProperty('_uid')
+        expect(provider).toHaveProperty('_uid')
+      })
+
+      it('should return undefined for non-object values', () => {
+        expect(shootDns.getDnsServiceExtensionProviderUid(null)).toBeUndefined()
+        expect(shootDns.getDnsServiceExtensionProviderUid(undefined)).toBeUndefined()
+        expect(shootDns.getDnsServiceExtensionProviderUid('string')).toBeUndefined()
+      })
+    })
+
     it('should delete extension dns providers', () => {
       shootDns.addDnsServiceExtensionProvider()
       shootDns.addDnsServiceExtensionProvider()
