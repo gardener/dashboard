@@ -4,9 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { decodeBase64 } from '@/utils'
+import { storeToRefs } from 'pinia'
+
+import {
+  decodeBase64,
+  isTruthyValue,
+} from '@/utils'
 
 import get from 'lodash/get'
+import filter from 'lodash/filter'
+import map from 'lodash/map'
+import omit from 'lodash/omit'
 
 // Credentials
 export function isSecret (credential) {
@@ -18,29 +26,136 @@ export function isWorkloadIdentity (credential) {
 }
 
 export function credentialProviderType (credential) {
-  // TODO check for provider.extensions.gardener.cloud once wlids are supported
   const labels = credential?.metadata?.labels
   if (!labels) {
     return undefined
   }
 
-  const DASHBOARD = 'dashboard.gardener.cloud/dnsProviderType'
-  const PREFIX = 'provider.shoot.gardener.cloud/'
-
-  // for DNS credentials: prefer the dashboard-specific label
-  if (DASHBOARD in labels) {
-    return get(labels, [DASHBOARD])
+  // For DNS credentials: prefer the dashboard-specific label
+  const dnsProviderType = labels['dashboard.gardener.cloud/dnsProviderType']
+  if (dnsProviderType) {
+    return dnsProviderType
   }
-  // Or find the first shoot provider label set to "true"
-  const key = Object.keys(labels).find(k => {
-    return k.startsWith(PREFIX) && get(labels, [k]) === 'true'
-  })
 
-  return key ? key.slice(PREFIX.length) : undefined
+  const providerPrefixes = [
+    'provider.shoot.gardener.cloud/',     // Infrastructure credentials referenced on the shoot (e.g. Shoot.spec.credentialsBindingName)
+    'provider.extensions.gardener.cloud/', // WorkloadIdentities referenced via resource ref in extensions
+  ]
+
+  for (const prefix of providerPrefixes) {
+    const key = Object.keys(labels).find(k => k.startsWith(prefix) && isTruthyValue(get(labels, k)))
+    if (key) {
+      return key.slice(prefix.length)
+    }
+  }
+
+  return undefined
 }
 
 export function isDNSCredential ({ credential, dnsProviderTypes }) {
   return dnsProviderTypes.includes(credentialProviderType(credential))
+}
+
+export function getCloudProviderEntityList (providerType, {
+  credentialStore,
+  gardenerExtensionStore,
+  cloudProfileStore,
+}) {
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
+
+  if (sortedInfraProviderTypeList.value.includes(providerType)) {
+    return filter(credentialStore.infrastructureBindingList, binding => {
+      return bindingProviderType(binding) === providerType
+    })
+  }
+  if (dnsProviderTypes.value.includes(providerType)) {
+    return filter(credentialStore.dnsCredentialList, credential => {
+      return credentialProviderType(credential) === providerType
+    })
+  }
+  return []
+}
+
+// DNS Provider references
+export function getDnsPrimaryProviderCredentialsRef (provider) {
+  if (!provider) {
+    return undefined
+  }
+  if (provider.credentialsRef) {
+    return provider.credentialsRef
+  }
+  // Support legacy field secretName for backward compatibility, but prefer credentialsRef if both are set
+  // TODO(grolu): drop support for legacy field secretName
+  if (provider.secretName) {
+    return {
+      apiVersion: 'v1',
+      kind: 'Secret',
+      name: provider.secretName,
+    }
+  }
+  return undefined
+}
+
+export function dnsExtensionProviderResourceName (provider) {
+  // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
+  return provider?.credentials ?? provider?.secretName
+}
+
+export function dnsCredentialResourceNamePart (credentialRef) {
+  const kind = credentialRef?.kind
+  const name = credentialRef?.name
+  if (!kind || !name) {
+    return undefined
+  }
+
+  let kindPrefix
+  switch (kind) {
+    case 'Secret':
+      kindPrefix = 's'
+      break
+    case 'WorkloadIdentity':
+      kindPrefix = 'wlid'
+      break
+    default:
+      kindPrefix = kind.toLowerCase()
+      break
+  }
+
+  return `${kindPrefix}-${name}`
+}
+
+// legacy field normalization
+// TODO(grolu): drop normalization functions for DNS service extension providers, after legacy fields have been removed from spec
+export function normalizeDnsServiceExtensionProvider (provider) {
+  if (!provider?.secretName) {
+    return provider
+  }
+
+  return {
+    ...omit(provider, ['secretName']),
+    credentials: provider.credentials ?? provider.secretName,
+  }
+}
+
+export function normalizeDnsServiceExtensionProviders (providers) {
+  return map(providers, normalizeDnsServiceExtensionProvider)
+}
+
+export function normalizeDnsPrimaryProviderCredentialsRef (provider) {
+  const credentialsRef = getDnsPrimaryProviderCredentialsRef(provider)
+  if (!credentialsRef) {
+    return provider
+  }
+
+  return {
+    ...omit(provider, ['secretName']),
+    credentialsRef,
+  }
+}
+
+export function normalizeDnsPrimaryProviderCredentialsRefs (providers) {
+  return map(providers, normalizeDnsPrimaryProviderCredentialsRef)
 }
 
 // Bindings

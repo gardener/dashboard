@@ -16,6 +16,7 @@ import {
   isAbortError,
   StatusError,
 } from '../ApiErrors.js'
+import { getResourceApiVersion, normalizeResourceListItems } from '../resource.js'
 
 function delay (milliseconds) {
   return timers.setTimeout(milliseconds)
@@ -44,8 +45,7 @@ class Reflector {
   }
 
   get apiVersion () {
-    const { group, version } = this.listWatcher
-    return group ? `${group}/${version}` : version
+    return getResourceApiVersion(this.listWatcher)
   }
 
   get names () {
@@ -111,10 +111,7 @@ class Reflector {
   }
 
   syncWith (items, resourceVersion) {
-    for (const item of items) {
-      item.kind = this.kind
-      item.apiVersion = this.apiVersion
-    }
+    normalizeResourceListItems({ items }, this.listWatcher)
     this.store.replace(items, resourceVersion)
   }
 

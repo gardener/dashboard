@@ -176,5 +176,62 @@ describe('composables', () => {
       expect(shootManifest.spec.provider.workers).toMatchSnapshot()
       expect(shootManifest.spec.provider.infrastructureConfig.networks.zones).toMatchSnapshot()
     })
+
+    it('should normalize legacy dns fields when loading a manifest', () => {
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'test-shoot',
+        },
+        spec: {
+          dns: {
+            domain: 'example.org',
+            providers: [{
+              primary: true,
+              type: 'foo',
+              secretName: 'legacy-secret',
+            }],
+          },
+          extensions: [{
+            type: 'shoot-dns-service',
+            providerConfig: {
+              apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+              kind: 'DNSConfig',
+              syncProvidersFromShootSpecDNS: false,
+              providers: [{
+                type: 'aws-route53',
+                secretName: 'legacy-resource-name',
+              }],
+            },
+          }],
+        },
+      })
+
+      expect(shootContextStore.dnsPrimaryProviderCredentialsRef).toEqual({
+        apiVersion: 'v1',
+        kind: 'Secret',
+        name: 'legacy-secret',
+      })
+      expect(shootContextStore.shootManifest.spec.dns.providers).toEqual([{
+        primary: true,
+        type: 'foo',
+        credentialsRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          name: 'legacy-secret',
+        },
+      }])
+      expect(shootContextStore.shootManifest.spec.extensions).toEqual([{
+        type: 'shoot-dns-service',
+        providerConfig: {
+          apiVersion: 'service.dns.extensions.gardener.cloud/v1alpha1',
+          kind: 'DNSConfig',
+          syncProvidersFromShootSpecDNS: false,
+          providers: [{
+            type: 'aws-route53',
+            credentials: 'legacy-resource-name',
+          }],
+        },
+      }])
+    })
   })
 })

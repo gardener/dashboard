@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <span v-if="resourceHash">
     <g-credential-icon
+      v-if="!hideIcon"
       :credential="credential"
     />
     <v-tooltip
@@ -60,6 +61,7 @@ import { useCloudProviderCredential } from '@/composables/credential/useCloudPro
 const props = defineProps({
   credential: Object,
   renderLink: Boolean,
+  hideIcon: Boolean,
 })
 
 const credential = toRef(props, 'credential')

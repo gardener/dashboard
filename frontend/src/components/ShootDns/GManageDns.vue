@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-expand-transition group>
           <v-row
             v-for="(extensionDnsProvider, index) in dnsServiceExtensionProviders"
-            :key="index"
+            :key="getDnsServiceExtensionProviderUid(extensionDnsProvider)"
             class="list-item pt-2"
           >
             <g-dns-provider-row :dns-provider="extensionDnsProvider">
@@ -183,9 +183,10 @@ export default {
     const {
       dnsDomain,
       dnsPrimaryProviderType,
-      dnsPrimaryProviderSecretName,
+      dnsPrimaryProviderCredentialsRef,
       isNewCluster,
       dnsServiceExtensionProviders,
+      getDnsServiceExtensionProviderUid,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
       addDnsServiceExtensionProviderForCustomDomain,
@@ -198,22 +199,23 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
 
     const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
-    const dnsPrimaryProviderCredentials = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
       v$: useVuelidate(),
       dnsDomain,
       dnsPrimaryProviderType,
-      dnsPrimaryProviderSecretName,
+      dnsPrimaryProviderCredentialsRef,
       isNewCluster,
       dnsServiceExtensionProviders,
+      getDnsServiceExtensionProviderUid,
       hasDnsServiceExtensionProviderForCustomDomain,
       addDnsServiceExtensionProvider,
       addDnsServiceExtensionProviderForCustomDomain,
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
       customDomain,
-      dnsPrimaryProviderCredentials,
+      availableCredentialsForPrimaryDnsProvider,
     }
   },
   validations () {
@@ -268,12 +270,24 @@ export default {
     },
     primaryDnsProviderCredential: {
       get () {
-        return find(this.dnsPrimaryProviderCredentials, credential => {
-          return credential?.metadata?.name === this.dnsPrimaryProviderSecretName
-        })
+        const matchesPrimaryDnsProviderCredential = credential => {
+          return credential?.metadata?.name === this.dnsPrimaryProviderCredentialsRef?.name &&
+            credential?.kind === this.dnsPrimaryProviderCredentialsRef?.kind
+        }
+
+        return find(this.availableCredentialsForPrimaryDnsProvider, matchesPrimaryDnsProviderCredential)
       },
       set (credential) {
-        this.dnsPrimaryProviderSecretName = credential?.metadata?.name
+        if (!credential) {
+          this.dnsPrimaryProviderCredentialsRef = undefined
+          return
+        }
+
+        this.dnsPrimaryProviderCredentialsRef = {
+          apiVersion: credential.apiVersion,
+          kind: credential.kind,
+          name: credential.metadata?.name,
+        }
       },
     },
     domainRecommendationVisible () {
@@ -297,9 +311,12 @@ export default {
       if (value) {
         const type = head(this.dnsProviderTypesWithPrimarySupport)
         this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderCredential = head(this.dnsPrimaryProviderCredentials)
+        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
         this.v$.dnsDomain.$reset()
       }
+    },
+    dnsPrimaryProviderType () {
+      this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
     },
   },
   methods: {

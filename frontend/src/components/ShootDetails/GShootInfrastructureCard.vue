@@ -171,8 +171,7 @@ SPDX-License-Identifier: Apache-2.0
               v-if="shootDnsPrimaryProvider"
               class="ml-2"
               primary
-              :secret-name="shootDnsPrimaryProvider.secretName"
-              :shoot-namespace="shootNamespace"
+              :credential="shootDnsPrimaryProviderCredential"
               :type="shootDnsPrimaryProvider.type"
             />
           </div>
@@ -186,14 +185,13 @@ SPDX-License-Identifier: Apache-2.0
             class="d-flex"
           >
             <g-dns-provider
-              v-for="({ secretName, type, domains, zones }) in shootDnsServiceExtensionProviders"
-              :key="secretName"
+              v-for="provider in shootDnsServiceExtensionProviders"
+              :key="dnsExtensionProviderResourceName(provider)"
               class="mr-2"
-              :secret-name="getResourceRefName(secretName)"
-              :shoot-namespace="shootNamespace"
-              :type="type"
-              :domains="domains"
-              :zones="zones"
+              :credential="dnsProviderCredential(provider)"
+              :type="provider.type"
+              :domains="provider.domains"
+              :zones="provider.zones"
             />
           </div>
           <span v-else>No DNS provider configured</span>
@@ -262,6 +260,7 @@ import { computed } from 'vue'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useCredentialStore } from '@/store/credential'
 
 import GCopyBtn from '@/components/GCopyBtn'
 import GShootSeedName from '@/components/GShootSeedName'
@@ -279,6 +278,10 @@ import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
+import {
+  getDnsPrimaryProviderCredentialsRef,
+  dnsExtensionProviderResourceName,
+} from '@/composables/credential/helper'
 
 import {
   wildcardObjectsFromStrings,
@@ -287,8 +290,8 @@ import {
 
 import head from 'lodash/head'
 import map from 'lodash/map'
-import find from 'lodash/find'
 import get from 'lodash/get'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -306,6 +309,7 @@ export default {
   },
   setup () {
     const cloudProfileStore = useCloudProfileStore()
+    const credentialStore = useCredentialStore()
 
     const {
       shootItem,
@@ -330,7 +334,7 @@ export default {
       shootSecretBindingName,
     } = useShootItem()
 
-    const { getResourceRefName } = useShootResources(shootItem)
+    const { getResourceRef } = useShootResources(shootItem)
 
     const {
       credential,
@@ -363,11 +367,13 @@ export default {
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
-      getResourceRefName,
+      getResourceRef,
+      dnsExtensionProviderResourceName,
       credential,
       isSharedBinding,
       availableFloatingPools,
       shootSecretBindingName,
+      credentialStore,
     }
   },
   computed: {
@@ -426,6 +432,37 @@ export default {
         return 'custom'
       }
       return 'generated'
+    },
+    shootDnsPrimaryProviderCredential () {
+      const credentialsRef = getDnsPrimaryProviderCredentialsRef(this.shootDnsPrimaryProvider)
+      return this.getCredentialByRef({
+        name: credentialsRef?.name,
+        kind: credentialsRef?.kind,
+        namespace: this.shootNamespace,
+      })
+    },
+  },
+  methods: {
+    getCredentialByRef ({ name, kind, namespace }) {
+      if (!name || !kind || !namespace) {
+        return undefined
+      }
+      if (kind === 'Secret') {
+        return this.credentialStore.getSecret({ namespace, name })
+      }
+      if (kind === 'WorkloadIdentity') {
+        return this.credentialStore.getWorkloadIdentity({ namespace, name })
+      }
+      return undefined
+    },
+    dnsProviderCredential (provider) {
+      const resourceName = dnsExtensionProviderResourceName(provider)
+      const resourceRef = this.getResourceRef(resourceName)
+      return this.getCredentialByRef({
+        name: resourceRef?.name,
+        kind: resourceRef?.kind,
+        namespace: this.shootNamespace,
+      })
     },
   },
 }

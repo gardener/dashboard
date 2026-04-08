@@ -36,10 +36,10 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <div class="regular-input">
         <g-select-credential
-          v-model="dnsServiceExtensionProviderSecret"
+          v-model="dnsProviderCredential"
           :provider-type="dnsProviderType"
-          :filter-fn="credential => !usedSecretNames.includes(credential.metadata.name)"
-          register-vuelidate-as="dnsServiceExtensionProviderSecret"
+          :filter-fn="credentialFilter"
+          register-vuelidate-as="dnsProviderCredential"
         />
       </div>
       <div class="large-input">
@@ -104,7 +104,7 @@ import GVendorIcon from '@/components/GVendorIcon'
 
 import { useShootContext } from '@/composables/useShootContext'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
-import { credentialProviderType } from '@/composables/credential/helper'
+import { dnsExtensionProviderResourceName } from '@/composables/credential/helper'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
@@ -132,7 +132,7 @@ export default {
       getDnsServiceExtensionResourceName,
       setResource,
       deleteResource,
-      getResourceRefName,
+      getResourceRef,
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
@@ -149,7 +149,7 @@ export default {
       getDnsServiceExtensionResourceName,
       setResource,
       deleteResource,
-      getResourceRefName,
+      getResourceRef,
       dnsCloudProviderCredentials,
     }
   },
@@ -170,39 +170,43 @@ export default {
       },
       set (value) {
         this.dnsProvider.type = value
-        const allowedCloudProviderCredentials = this.dnsCloudProviderCredentials.filter(credential => {
-          const secretName = credential?.metadata?.name
-          return credentialProviderType(credential) === value && !this.usedSecretNames.includes(secretName)
-        })
-
-        const defaultDnsSecret = head(allowedCloudProviderCredentials)
-        this.dnsServiceExtensionProviderSecret = defaultDnsSecret
+        const allowedCloudProviderCredentials = this.dnsCloudProviderCredentials.filter(this.credentialFilter)
+        const defaultDnsCredential = head(allowedCloudProviderCredentials)
+        this.dnsProviderCredential = defaultDnsCredential
       },
     },
-    dnsServiceExtensionProviderSecret: {
+    dnsProviderCredential: {
       get () {
-        const resourceName = this.dnsProvider.secretName
-        const secretName = this.getResourceRefName(resourceName)
+        const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
+        const resourceRef = this.getResourceRef(resourceName)
 
         return find(this.dnsCloudProviderCredentials, credential => {
-          return credential?.metadata?.name === secretName
+          return credential?.metadata?.name === resourceRef?.name &&
+            credential?.kind === resourceRef?.kind
         })
       },
-      set (secret) {
-        if (!secret) {
+      set (credential) {
+        const currentResourceName = dnsExtensionProviderResourceName(this.dnsProvider)
+        this.deleteResource(currentResourceName)
+        if (!credential) {
+          this.dnsProvider.credentials = undefined
           this.dnsProvider.secretName = undefined
           return
         }
-        this.deleteResource(this.dnsProvider.secretName)
-        const secretName = secret?.metadata?.name
-        const resourceName = this.getDnsServiceExtensionResourceName(secretName)
-        this.dnsProvider.secretName = resourceName
+        const credentialKind = credential.kind
+        const credentialName = credential.metadata?.name
+        const newResourceName = this.getDnsServiceExtensionResourceName({
+          kind: credentialKind,
+          name: credentialName,
+        })
+        this.dnsProvider.credentials = newResourceName
+        delete this.dnsProvider.secretName
         this.setResource({
-          name: resourceName,
+          name: newResourceName,
           resourceRef: {
-            apiVersion: 'v1',
-            kind: 'Secret',
-            name: secretName,
+            apiVersion: credential.apiVersion,
+            kind: credentialKind,
+            name: credentialName,
           },
         })
       },
@@ -239,8 +243,11 @@ export default {
         set(this.dnsProvider, ['zones', 'include'], value)
       },
     },
-    usedSecretNames () {
-      return this.dnsServiceExtensionProviders.map(({ secretName }) => this.getResourceRefName(secretName))
+    dnsExtensionProviderResourceRefs () {
+      return this.dnsServiceExtensionProviders.map(provider => {
+        const resourceName = dnsExtensionProviderResourceName(provider)
+        return this.getResourceRef(resourceName)
+      })
     },
   },
   mounted () {
@@ -248,6 +255,20 @@ export default {
   },
   methods: {
     getErrorMessages,
+    credentialFilter (credential) {
+      const credentialName = credential?.metadata?.name
+      const credentialKind = credential?.kind
+      if (!credentialName || !credentialKind) {
+        return false
+      }
+      const resourceName = dnsExtensionProviderResourceName(this.dnsProvider)
+      const currentResourceRef = this.getResourceRef(resourceName)
+      const matchesCredential = ref => ref?.name === credentialName && ref?.kind === credentialKind
+      if (matchesCredential(currentResourceRef)) {
+        return true
+      }
+      return !this.dnsExtensionProviderResourceRefs.some(matchesCredential)
+    },
   },
 }
 </script>

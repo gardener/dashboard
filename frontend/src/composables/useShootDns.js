@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  computed,
-  toRef,
-} from 'vue'
+import { computed } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
@@ -15,7 +12,16 @@ import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
-import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
+import {
+  getCloudProviderEntityList,
+  getDnsPrimaryProviderCredentialsRef,
+  dnsExtensionProviderResourceName,
+  dnsCredentialResourceNamePart,
+  normalizeDnsServiceExtensionProvider,
+  normalizeDnsPrimaryProviderCredentialsRef,
+} from '@/composables/credential/helper'
+
+import { v4 as uuidv4 } from '@/utils/uuid'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -26,6 +32,22 @@ import head from 'lodash/head'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
+
+const UID_KEY = '_uid'
+
+function ensureProviderUid (provider) {
+  if (!Object.prototype.hasOwnProperty.call(provider, UID_KEY)) {
+    const uid = uuidv4()
+    Object.defineProperty(provider, UID_KEY, {
+      value: uid,
+      enumerable: false,
+      writable: false,
+      configurable: false,
+    })
+    return uid
+  }
+  return get(provider, UID_KEY)
+}
 
 export const useShootDns = (manifest, options) => {
   const {
@@ -39,7 +61,7 @@ export const useShootDns = (manifest, options) => {
     resources,
     deleteResource,
     setResource,
-    getResourceRefName,
+    getResourceRef,
   } = useShootResources(manifest)
 
   /* extensions */
@@ -70,9 +92,16 @@ export const useShootDns = (manifest, options) => {
       return get(dnsServiceExtension.value, ['providerConfig', 'providers'], [])
     },
     set (value) {
-      set(dnsServiceExtension.value, ['providerConfig', 'providers'], value)
+      set(dnsServiceExtension.value, ['providerConfig', 'providers'], map(value, normalizeDnsServiceExtensionProvider))
     },
   })
+
+  function getDnsServiceExtensionProviderUid (provider) {
+    if (!provider || typeof provider !== 'object') {
+      return undefined
+    }
+    return ensureProviderUid(provider)
+  }
 
   /* dns */
   const dnsDomain = computed({
@@ -90,7 +119,7 @@ export const useShootDns = (manifest, options) => {
     },
     set (value) {
       if (value) {
-        set(manifest.value, ['spec', 'dns', 'providers'], value)
+        set(manifest.value, ['spec', 'dns', 'providers'], map(value, normalizeDnsPrimaryProviderCredentialsRef))
       } else {
         unset(manifest.value, ['spec', 'dns', 'providers'])
       }
@@ -111,7 +140,7 @@ export const useShootDns = (manifest, options) => {
     // 'spec.dns.providers' may only contain a single primary provider. For historical reasons it is still an array
     dnsProviders.value = [{
       primary: true,
-      ...dnsPrimaryProvider.value,
+      ...normalizeDnsPrimaryProviderCredentialsRef(dnsPrimaryProvider.value),
       ...data,
     }]
   }
@@ -125,12 +154,12 @@ export const useShootDns = (manifest, options) => {
     },
   })
 
-  const dnsPrimaryProviderSecretName = computed({
+  const dnsPrimaryProviderCredentialsRef = computed({
     get () {
-      return dnsPrimaryProvider.value?.secretName
+      return getDnsPrimaryProviderCredentialsRef(dnsPrimaryProvider.value)
     },
-    set (secretName) {
-      patchDnsPrimaryProvider({ secretName })
+    set (credentialsRef) {
+      patchDnsPrimaryProvider({ credentialsRef })
     },
   })
 
@@ -139,9 +168,11 @@ export const useShootDns = (manifest, options) => {
       return undefined
     }
     return find(dnsServiceExtensionProviders.value, provider => {
-      const providerSecretName = getResourceRefName(provider.secretName)
+      const resourceName = dnsExtensionProviderResourceName(provider)
+      const providerCredentialRef = getResourceRef(resourceName)
       return provider.type === dnsPrimaryProvider.value.type &&
-        providerSecretName === dnsPrimaryProvider.value.secretName
+        providerCredentialRef?.name === dnsPrimaryProviderCredentialsRef.value?.name &&
+        providerCredentialRef?.kind === dnsPrimaryProviderCredentialsRef.value?.kind
     })
   })
 
@@ -152,9 +183,10 @@ export const useShootDns = (manifest, options) => {
       : false
   })
 
-  function getDnsServiceExtensionResourceName (secretName) {
-    return secretName
-      ? `shoot-dns-service-${secretName}`
+  function getDnsServiceExtensionResourceName (credentialRef) {
+    const key = dnsCredentialResourceNamePart(credentialRef)
+    return key
+      ? `shoot-dns-service-${key}`
       : undefined
   }
 
@@ -170,45 +202,97 @@ export const useShootDns = (manifest, options) => {
     }
   }
 
-  function getDefaultSecretName (type) {
-    const credentials = useCloudProviderEntityList(toRef(type), { credentialStore, gardenerExtensionStore, cloudProfileStore })
-    // find unused secret
-    const usedResourceNames = map(resources.value, 'name')
-    const credential = find(credentials.value, credential => {
-      const resourceName = getDnsServiceExtensionResourceName(credential?.metadata?.name)
-      return !includes(usedResourceNames, resourceName)
+  function getDefaultCredential (providerType) {
+    const credentials = getCloudProviderEntityList(providerType, {
+      credentialStore,
+      gardenerExtensionStore,
+      cloudProfileStore,
     })
 
-    return credential ? credential?.metadata?.name : undefined
+    const usedResourceRefs = map(resources.value, 'resourceRef')
+
+    const isCredentialUsed = credential => {
+      const kind = credential?.kind
+      const name = credential?.metadata?.name
+
+      return usedResourceRefs.some(resourceRef =>
+        resourceRef?.kind === kind &&
+      resourceRef?.name === name,
+      )
+    }
+
+    return credentials.find(credential => !isCredentialUsed(credential))
   }
 
-  function addDnsServiceExtensionProvider (options = {}) {
-    const {
-      type = head(gardenerExtensionStore.dnsProviderTypes),
-      secretName = getDefaultSecretName(type),
-    } = options
-
-    const resourceName = getDnsServiceExtensionResourceName(secretName)
-    const provider = {
-      type,
-      secretName: resourceName, // resourceName is the secret name
+  function resolveCredentialsRef (provider, defaultCredential) {
+    if (provider.credentialsRef) {
+      return provider.credentialsRef
     }
-    if (isEmpty(dnsServiceExtensionProviders.value)) {
-      setDnsServiceExtension({ providers: [provider] })
-    } else {
-      dnsServiceExtensionProviders.value.push(provider)
-    }
-
-    setResource({
-      name: resourceName,
-      resourceRef: {
+    if (provider.secretName) {
+      return {
         apiVersion: 'v1',
         kind: 'Secret',
-        name: secretName,
-      },
+        name: provider.secretName,
+      }
+    }
+    if (defaultCredential) {
+      return {
+        apiVersion: defaultCredential.apiVersion,
+        kind: defaultCredential.kind,
+        name: defaultCredential.metadata?.name,
+      }
+    }
+  }
+
+  function resolveResourceRef (type, credentialsRef) {
+    const credentialsForProviderType = getCloudProviderEntityList(type, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const credential = find(credentialsForProviderType, credential => {
+      return dnsCredentialResourceNamePart({
+        kind: credential?.kind,
+        name: credential?.metadata?.name,
+      }) === dnsCredentialResourceNamePart(credentialsRef)
     })
 
-    return provider
+    if (credential) {
+      return {
+        apiVersion: credential.apiVersion,
+        kind: credential.kind,
+        name: credential.metadata?.name,
+      }
+    }
+    return credentialsRef
+  }
+
+  function addExtensionProvider (type, resourceName) {
+    const extensionProvider = {
+      type,
+      credentials: resourceName,
+    }
+    if (isEmpty(dnsServiceExtensionProviders.value)) {
+      setDnsServiceExtension({ providers: [extensionProvider] })
+    } else {
+      dnsServiceExtensionProviders.value.push(extensionProvider)
+    }
+    return extensionProvider
+  }
+
+  function addDnsServiceExtensionProvider (provider = {}) {
+    const type = provider.type ?? head(gardenerExtensionStore.dnsProviderTypes)
+    const defaultCredential = getDefaultCredential(type)
+    const credentialsRef = resolveCredentialsRef(provider, defaultCredential)
+    const resourceRef = resolveResourceRef(type, credentialsRef)
+    const resourceName = getDnsServiceExtensionResourceName(credentialsRef)
+
+    const extensionProvider = addExtensionProvider(type, resourceName)
+
+    if (resourceName && resourceRef) {
+      setResource({
+        name: resourceName,
+        resourceRef,
+      })
+    }
+
+    return extensionProvider
   }
 
   function deleteDnsServiceExtensionProvider (index) {
@@ -217,7 +301,7 @@ export const useShootDns = (manifest, options) => {
       return
     }
 
-    const resourceName = provider.secretName
+    const resourceName = dnsExtensionProviderResourceName(provider)
     deleteResource(resourceName)
 
     dnsServiceExtensionProviders.value.splice(index, 1)
@@ -226,6 +310,7 @@ export const useShootDns = (manifest, options) => {
     }
   }
 
+  // TODO(grolu): drop support for migration after this has been removed from spec
   function forceMigrateSyncDnsProvidersToFalse () {
     if (get(dnsServiceExtension.value, ['providerConfig', 'syncProvidersFromShootSpecDNS']) === true) {
       // Migrate from old DNS configuration to new DNS configuration
@@ -241,7 +326,7 @@ export const useShootDns = (manifest, options) => {
     /* dns */
     dnsDomain,
     dnsPrimaryProviderType,
-    dnsPrimaryProviderSecretName,
+    dnsPrimaryProviderCredentialsRef,
     resetDnsPrimaryProvider,
     forceMigrateSyncDnsProvidersToFalse,
     dnsServiceExtensionProviders,
@@ -250,8 +335,9 @@ export const useShootDns = (manifest, options) => {
     hasDnsServiceExtensionProviderForCustomDomain,
     addDnsServiceExtensionProviderForCustomDomain,
     getDnsServiceExtensionResourceName,
+    getDnsServiceExtensionProviderUid,
     deleteResource,
     setResource,
-    getResourceRefName,
+    getResourceRef,
   }
 }

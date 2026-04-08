@@ -2,6 +2,7 @@
 
 exports[`useCloudProviderBinding composable > fetches actual secret from store 1`] = `
 {
+  "apiVersion": "v1",
   "data": {
     "secret": "cw==",
   },
@@ -20,6 +21,7 @@ exports[`useCloudProviderBinding composable > fetches actual secret from store 1
 exports[`useCloudProviderBinding composable > finds other bindings with same secret 1`] = `
 [
   {
+    "apiVersion": "security.gardener.cloud/v1alpha1",
     "credentialsRef": {
       "kind": "Secret",
       "name": "aws-secret",
