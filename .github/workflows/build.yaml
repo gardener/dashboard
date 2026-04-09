@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '24.14.0'
+          node-version: '24.14.1'
       - uses: gardener/cc-utils/.github/actions/trusted-checkout@v1
       - name: run-verify
         shell: bash
@@ -106,7 +106,7 @@ jobs:
     steps:
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '24.14.0'
+          node-version: '24.14.1'
       - uses: actions/checkout@v6
       - name: run-eslint
         run: |
