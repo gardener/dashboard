@@ -62,6 +62,7 @@ import {
   computed,
   toRefs,
   inject,
+  useTemplateRef,
 } from 'vue'
 
 import { useAuthnStore } from '@/store/authn'
@@ -85,8 +86,8 @@ import get from 'lodash/get'
 
 const api = inject('api')
 
-const webterminalServiceAccountDialog = ref(null)
-const unverifiedTerminalShortcutsDialog = ref(null)
+const webterminalServiceAccountDialog = useTemplateRef('serviceAccount')
+const unverifiedTerminalShortcutsDialog = useTemplateRef('unverified')
 
 const props = defineProps({
   popperBoundariesSelector: {

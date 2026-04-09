@@ -1118,7 +1118,7 @@ __metadata:
     vite-plugin-vuetify: "npm:^2.0.4"
     vitest: "npm:^3.0.0"
     vitest-fetch-mock: "npm:^0.4.0"
-    vue: "npm:^3.4.21"
+    vue: "npm:3.5.30"
     vue-eslint-parser: "npm:^10.1.1"
     vue-router: "npm:^5.0.0"
     vuetify: "npm:^3.7.5"
@@ -12908,7 +12908,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue@npm:^3.4.21":
+"vue@npm:3.5.30":
   version: 3.5.30
   resolution: "vue@npm:3.5.30"
   dependencies:
