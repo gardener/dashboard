@@ -6,7 +6,18 @@
 
 'use strict'
 
-const { matchers } = require('@gardener-dashboard/test-utils')
+const matchers = {
+  toBeWithinRange (value, floor, ceiling) {
+    const pass = value >= floor && value <= ceiling
+    const phrase = pass ? 'not to be' : 'to be'
+    return {
+      message () {
+        return `expected ${value} ${phrase} to be within range ${floor} - ${ceiling}`
+      },
+      pass,
+    }
+  },
+}
 
 module.exports = {
   matchers,

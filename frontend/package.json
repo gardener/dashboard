@@ -88,7 +88,7 @@
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^3.0.0",
-    "@vitest/eslint-plugin": "^1.1.7",
+    "@vitest/eslint-plugin": "^1.6.15",
     "@vitest/ui": "^3.0.0",
     "@vue/test-utils": "^2.4.5",
     "eslint": "^9.11.0",

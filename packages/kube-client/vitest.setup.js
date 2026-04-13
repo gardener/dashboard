@@ -11,9 +11,9 @@ const { matchers } = testUtils
 expect.extend(matchers)
 
 vi.mock('@gardener-dashboard/request', async () => {
-  return import('./__vitest__/mocks/@gardener-dashboard/request.js')
+  return import('./__tests__/mocks/@gardener-dashboard/request.js')
 })
 
 vi.mock('@gardener-dashboard/kube-config', async () => {
-  return import('./__vitest__/mocks/@gardener-dashboard/kube-config.js')
+  return import('./__tests__/mocks/@gardener-dashboard/kube-config.js')
 })

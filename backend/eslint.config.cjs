@@ -5,7 +5,6 @@
 //
 
 const neostandard = require('neostandard')
-const pluginJest = require('eslint-plugin-jest')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
@@ -71,7 +70,6 @@ module.exports = [
     },
     rules: pluginImport.flatConfigs.recommended.rules,
   },
-
   {
     plugins: {
       lodash: pluginLodash,
@@ -82,30 +80,7 @@ module.exports = [
   },
   {
     files: [
-      '**/__fixtures__/**',
-      '**/__mocks__/**',
       '**/__tests__/**',
-      '**/jest.setup.cjs',
-    ],
-    plugins: {
-      jest: pluginJest,
-    },
-    languageOptions: {
-      globals: {
-        ...pluginJest.environments.globals.globals,
-        createAgent: true,
-        fixtures: true,
-      },
-    },
-    rules: {
-      'security/detect-object-injection': 'off',
-      'security/detect-possible-timing-attacks': 'off',
-      'security/detect-unsafe-regex': 'off',
-    },
-  },
-  {
-    files: [
-      '**/__vitest__/**',
       '**/vitest.setup.js',
     ],
     plugins: {
@@ -128,9 +103,6 @@ module.exports = [
       'vitest/expect-expect': 'off',
       'vitest/no-disabled-tests': 'off',
     },
-  },
-  {
-    ignores: ['dist'],
   },
   {
     files: ['**/vitest.config.js'],

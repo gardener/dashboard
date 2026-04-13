@@ -11,5 +11,5 @@ const { matchers } = testUtils
 expect.extend(matchers)
 
 vi.mock('@gardener-dashboard/logger', async () => {
-  return import('./__vitest__/mocks/@gardener-dashboard/logger.js')
+  return import('./__tests__/mocks/@gardener-dashboard/logger.js')
 })

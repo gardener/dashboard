@@ -9,15 +9,15 @@ import http from 'http'
 import { Test } from 'supertest'
 
 vi.mock('prom-client', async () => {
-  return import('./__vitest__/mocks/prom-client.js')
+  return import('./__tests__/mocks/prom-client.js')
 })
 
 vi.mock('response-time', async () => {
-  return import('./__vitest__/mocks/response-time.js')
+  return import('./__tests__/mocks/response-time.js')
 })
 
 vi.mock('@gardener-dashboard/logger', async () => {
-  return import('./__vitest__/mocks/@gardener-dashboard/logger.js')
+  return import('./__tests__/mocks/@gardener-dashboard/logger.js')
 })
 
 async function createHttpAgent () {

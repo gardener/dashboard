@@ -6,12 +6,20 @@
 
 'use strict'
 
-const { helper } = require('@gardener-dashboard/test-utils')
+const crypto = require('node:crypto')
+
+function decodeBase64 (data) {
+  return Buffer.from(data, 'base64').toString('utf8')
+}
+
+function encodeBase64 (data) {
+  return Buffer.from(data, 'utf8').toString('base64')
+}
 
 function getCertificate (payload = '...') {
   return [
     '-----BEGIN CERTIFICATE-----',
-    helper.encodeBase64(payload),
+    encodeBase64(payload),
     '-----END CERTIFICATE-----',
   ].join('\n')
 }
@@ -19,13 +27,19 @@ function getCertificate (payload = '...') {
 function getPrivateKey (payload = '...') {
   return [
     '-----BEGIN RSA PRIVATE KEY-----',
-    helper.encodeBase64(payload),
+    encodeBase64(payload),
     '-----END RSA PRIVATE KEY-----',
   ].join('\n')
 }
 
+function randomNumber () {
+  return crypto.randomBytes(4).readUInt32LE(0)
+}
+
 module.exports = {
-  ...helper,
+  encodeBase64,
+  decodeBase64,
   getCertificate,
   getPrivateKey,
+  randomNumber,
 }
