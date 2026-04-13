@@ -1,0 +1,378 @@
+//
+// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+import { vi } from 'vitest'
+import http2 from 'http2'
+import zlib from 'zlib'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
+import client from '../lib/index.js'
+
+const { Client, extend } = client
+
+const {
+  HTTP2_HEADER_METHOD,
+  HTTP2_HEADER_AUTHORITY,
+  HTTP2_HEADER_AUTHORIZATION,
+  HTTP2_HEADER_SCHEME,
+  HTTP2_HEADER_PATH,
+  HTTP2_HEADER_CONTENT_TYPE,
+  HTTP2_HEADER_CONTENT_LENGTH,
+  HTTP2_HEADER_ACCEPT_ENCODING,
+  HTTP2_METHOD_GET,
+  HTTP2_METHOD_POST,
+  HTTP2_HEADER_STATUS,
+} = http2.constants
+
+describe('Client', () => {
+  const url = new URL('https://127.0.0.1:31415/test')
+  const xRequestId = '4711'
+  const statusCode = 200
+  const contentType = 'application/json'
+  const contentLength = 42
+  let agent
+  let client
+  let stream
+
+  beforeAll(() => {
+    vi.useFakeTimers({ legacyFakeTimers: true })
+  })
+
+  afterAll(() => {
+    vi.useRealTimers()
+  })
+
+  beforeEach(() => {
+    const mockBody = vi.fn().mockReturnValue({
+      foo: 'bar',
+      bar: 'foo',
+    })
+    const mockHeaders = vi.fn().mockReturnValue({
+      [HTTP2_HEADER_STATUS]: statusCode,
+      [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+      [HTTP2_HEADER_CONTENT_LENGTH]: contentLength,
+    })
+    const asyncIterator = function * () {
+      yield Buffer.from('{')
+      let separator
+      for (const [key, value] of Object.entries(this.mockBody())) {
+        if (!separator) {
+          separator = ','
+        } else {
+          yield Buffer.from(separator)
+        }
+        yield Buffer.from(JSON.stringify(key))
+        yield Buffer.from(':')
+        yield Buffer.from(JSON.stringify(value))
+      }
+      yield Buffer.from('}')
+    }
+    stream = {
+      close: vi.fn(),
+      destroy: vi.fn(),
+      end: vi.fn(),
+      once: vi.fn(),
+      mockBody,
+      mockHeaders,
+      getHeaders () {
+        return Promise.resolve(mockHeaders())
+      },
+      setEncoding: vi.fn(),
+      [Symbol.asyncIterator]: asyncIterator,
+    }
+    agent = {
+      request: vi.fn().mockResolvedValue(stream),
+    }
+    client = new Client({
+      url,
+      agent,
+      headers: {
+        'X-Request-Id': xRequestId,
+      },
+    })
+  })
+
+  describe('#constructor', () => {
+    it('should create a new object', () => {
+      expect(client).toBeInstanceOf(Client)
+      expect(client.baseUrl.href).toBe(url.href)
+      expect(client.responseTimeout).toBe(15000)
+    })
+
+    it('should throw a type error', () => {
+      expect(() => new Client()).toThrow(TypeError)
+    })
+
+    it('should create an instance with url and relativeUrl', () => {
+      client = new Client({
+        url: url.origin,
+        relativeUrl: url.pathname,
+      })
+      expect(client.baseUrl.href).toBe(url.href)
+    })
+
+    it('should create an instance with url path preserved', () => {
+      client = new Client({
+        url: url.href,
+        relativeUrl: 'foo/bar',
+      })
+      expect(url.href.endsWith('/')).toBe(false)
+      expect(client.baseUrl.href).toBe(url.href + '/foo/bar')
+    })
+
+    it('should create an instance with bearer authorization', () => {
+      client = new Client({
+        url,
+        auth: {
+          bearer: 'token',
+        },
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Bearer token')
+    })
+
+    it('should create an instance with basic authorization', () => {
+      client = new Client({
+        url,
+        auth: {
+          user: 'a',
+          pass: 'b',
+        },
+      })
+      const headers = client.getRequestHeaders()
+      expect(headers[HTTP2_HEADER_AUTHORIZATION]).toBe('Basic YTpi')
+    })
+  })
+
+  describe('#executeHooks', () => {
+    const message = 'Hook execution failed'
+
+    it('should run all hooks', () => {
+      const beforeRequestSpy = vi.fn()
+      const afterResponseSpy = vi.fn(() => {
+        throw new Error(message)
+      })
+      const client = new Client({
+        url,
+        hooks: {
+          beforeRequest: [beforeRequestSpy],
+          afterResponse: [afterResponseSpy],
+        },
+      })
+      const args = ['a', 2, true]
+      client.executeHooks('beforeRequest', ...args)
+      expect(beforeRequestSpy).toHaveBeenCalledTimes(1)
+      expect(beforeRequestSpy.mock.calls[0]).toEqual(args)
+      expect(afterResponseSpy).not.toHaveBeenCalled()
+      client.executeHooks('afterResponse')
+      expect(afterResponseSpy).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenLastCalledWith('Failed to execute "afterResponse" hooks', message)
+    })
+  })
+
+  describe('#getRequestHeaders', () => {
+    const defaultRequestHeaders = {
+      [HTTP2_HEADER_SCHEME]: 'https',
+      [HTTP2_HEADER_AUTHORITY]: '127.0.0.1:31415',
+      [HTTP2_HEADER_METHOD]: HTTP2_METHOD_GET,
+      [HTTP2_HEADER_PATH]: '/test',
+      [HTTP2_HEADER_ACCEPT_ENCODING]: 'gzip, deflate, br',
+      'x-request-id': xRequestId,
+    }
+
+    it('should return request header defaults', () => {
+      expect(client.getRequestHeaders()).toEqual({
+        ...defaultRequestHeaders,
+      })
+    })
+
+    it('should return request headers with absolute path', () => {
+      expect(client.getRequestHeaders('/absolute/path')).toEqual({
+        ...defaultRequestHeaders,
+        [HTTP2_HEADER_PATH]: '/absolute/path',
+      })
+    })
+
+    it('should return request headers with relative path', () => {
+      expect(client.getRequestHeaders('relative/path')).toEqual({
+        ...defaultRequestHeaders,
+        [HTTP2_HEADER_PATH]: '/test/relative/path',
+      })
+    })
+
+    it('should return request headers with search params', () => {
+      const searchParams = new URLSearchParams({ foo: 'bar' })
+      const search = '?' + searchParams
+      expect(client.getRequestHeaders('path', {
+        method: 'post',
+        searchParams,
+      })).toEqual({
+        ...defaultRequestHeaders,
+        [HTTP2_HEADER_METHOD]: HTTP2_METHOD_POST,
+        [HTTP2_HEADER_PATH]: '/test/path' + search,
+      })
+    })
+
+    it('should return request headers with query params', () => {
+      const query = { foo: 'bar' }
+      const search = '?' + new URLSearchParams(query)
+      expect(client.getRequestHeaders('path', {
+        searchParams: { foo: 'bar' },
+      })).toEqual({
+        ...defaultRequestHeaders,
+        [HTTP2_HEADER_PATH]: '/test/path' + search,
+      })
+    })
+  })
+
+  describe('#fetch', () => {
+    it('should successfully return a response', async () => {
+      const response = await client.fetch()
+      expect(response).toMatchObject({
+        headers: stream.mockHeaders(),
+        statusCode,
+        contentType,
+        contentLength,
+        type: 'json',
+        ok: true,
+        redirected: false,
+      })
+      const body = await response.body()
+      expect(body).toEqual(stream.mockBody())
+    })
+
+    describe('when the server returns plain text for a JSON endpoint', () => {
+      const contentType = 'text/plain'
+      const chunks = ['foo', '-', 'bar']
+      const rawBody = chunks.join('')
+      const parseErrorMessage = () => {
+        try {
+          JSON.parse(rawBody)
+        } catch (err) {
+          return err.message
+        }
+      }
+
+      let statusCode
+
+      beforeEach(() => {
+        statusCode = 200
+        stream.mockHeaders.mockImplementation(() => {
+          return {
+            [HTTP2_HEADER_STATUS]: statusCode,
+            [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+          }
+        })
+        stream[Symbol.asyncIterator] = function * () {
+          for (const chunk of chunks) {
+            yield chunk
+          }
+        }
+        client.responseType = 'json'
+      })
+
+      it('should throw a ParseError for invalid json on success', async () => {
+        statusCode = 200
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).rejects.toMatchObject({
+          name: 'ParseError',
+          message: parseErrorMessage(),
+          rawBody,
+        })
+      })
+
+      it('should return a response with plain text body on failure', async () => {
+        statusCode = 500
+        const response = await client.fetch()
+        expect(response.contentType).toBe(contentType)
+        await expect(response.body()).resolves.toBe(rawBody)
+      })
+    })
+
+    it('should return a response with responseType "text"', async () => {
+      client.responseType = 'text'
+      const response = await client.fetch()
+      expect(response.type).toBe('text')
+    })
+
+    it('should return a response and destroy the stream', async () => {
+      client.responseType = 'text'
+      const response = await client.fetch()
+      const error = new Error('error')
+      response.destroy(error)
+      expect(stream.destroy).toHaveBeenCalledTimes(1)
+      expect(stream.destroy.mock.calls[0]).toEqual([error])
+    })
+  })
+
+  describe('#stream', () => {
+    it('should successfully return a response', async () => {
+      const statusCode = 200
+      const response = {
+        statusCode,
+      }
+      client.fetch = vi.fn().mockResolvedValue(response)
+      await expect(client.stream()).resolves.toBe(response)
+    })
+
+    it('should throw a NotFound error', async () => {
+      const statusCode = 404
+      const headers = {
+        [HTTP2_HEADER_STATUS]: statusCode,
+      }
+      const body = 'body'
+      const response = {
+        headers,
+        statusCode,
+        body: vi.fn().mockResolvedValue(body),
+      }
+      client.fetch = vi.fn().mockResolvedValue(response)
+      await expect(client.stream()).rejects.toEqual(expect.objectContaining({
+        name: 'NotFoundError',
+        headers,
+        statusCode,
+        body,
+      }))
+    })
+  })
+
+  describe('#defaults', () => {
+    it('should return the default options', () => {
+      const foo = 'bar'
+      const options = { url, foo }
+      const client = new Client(options)
+      expect(client.defaults.options).toEqual(options)
+    })
+  })
+
+  describe('#extend', () => {
+    it('should create a http client', () => {
+      const client = extend({ url })
+      expect(client).toBeInstanceOf(Client)
+    })
+  })
+
+  describe('#createDecompressor', () => {
+    it('should create a decompressor', () => {
+      expect(Client.createDecompressor('br')).toBeInstanceOf(zlib.BrotliDecompress)
+      expect(Client.createDecompressor('gzip')).toBeInstanceOf(zlib.Gunzip)
+      expect(Client.createDecompressor('deflate')).toBeInstanceOf(zlib.Inflate)
+      expect(Client.createDecompressor('foo')).toBeUndefined()
+    })
+  })
+
+  describe('#transformFactory', () => {
+    it('should create a transform function', () => {
+      const data = 'foo'
+      expect(Client.transformFactory('text')(data)).toBe(data)
+      expect(Client.transformFactory('json')(JSON.stringify(data))).toBe(data)
+      const buffer = Client.transformFactory(false)(data)
+      expect(Buffer.isBuffer(buffer)).toBe(true)
+      expect(buffer.toString('utf8')).toBe(data)
+    })
+  })
+})

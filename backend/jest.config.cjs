@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,6 +14,7 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: [
     '/test-ignore/',
+    '/__vitest__/',
   ],
   transformIgnorePatterns: [
     '/node_modules/',

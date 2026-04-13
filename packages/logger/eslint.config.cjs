@@ -6,6 +6,7 @@
 
 const neostandard = require('neostandard')
 const pluginJest = require('eslint-plugin-jest')
+const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
 
@@ -46,6 +47,30 @@ module.exports = [
       'security/detect-object-injection': 'off',
       'security/detect-possible-timing-attacks': 'off',
       'security/detect-unsafe-regex': 'off',
+    },
+  },
+  {
+    files: [
+      '**/__vitest__/**',
+      '**/vitest.setup.js',
+    ],
+    plugins: {
+      vitest: pluginVitest,
+    },
+    languageOptions: {
+      globals: {
+        ...pluginJest.environments.globals.globals,
+        fixtures: true,
+      },
+    },
+    rules: {
+      ...pluginVitest.configs.recommended.rules,
+      'security/detect-object-injection': 'off',
+      'security/detect-possible-timing-attacks': 'off',
+      'security/detect-unsafe-regex': 'off',
+      'vitest/no-standalone-expect': 'off',
+      'vitest/expect-expect': 'off',
+      'vitest/no-disabled-tests': 'off',
     },
   },
   {

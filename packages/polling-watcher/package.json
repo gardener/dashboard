@@ -27,6 +27,8 @@
     "lint": "eslint . --max-warnings=0",
     "test": "node --experimental-vm-modules $(yarn bin jest)",
     "test-coverage": "yarn test --coverage",
+    "vitest": "vitest run --dir __vitest__",
+    "vitest:coverage": "vitest run --dir __vitest__ --coverage",
     "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
   },
   "peerDependencies": {
@@ -40,6 +42,8 @@
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
+    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
     "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
@@ -50,7 +54,8 @@
     "jest": "^30.0.0",
     "neostandard": "^0.12.0",
     "rimraf": "^6.0.1",
-    "rollup": "^4.41.1"
+    "rollup": "^4.41.1",
+    "vitest": "^3.0.0"
   },
   "jest": {
     "restoreMocks": true,
@@ -70,6 +75,9 @@
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup.js"
+    ],
+    "testPathIgnorePatterns": [
+      "__vitest__"
     ]
   },
   "packageManager": "yarn@4.12.0",
