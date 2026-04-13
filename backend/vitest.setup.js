@@ -51,10 +51,6 @@ vi.mock('@gardener-dashboard/monitor', async () => {
   return import('./__tests__/mocks/@gardener-dashboard/monitor.js')
 })
 
-vi.mock('@gardener-dashboard/markdown', async () => {
-  return import('./__tests__/mocks/@gardener-dashboard/markdown.js')
-})
-
 vi.mock('@octokit/core', async () => {
   return import('./__tests__/mocks/@octokit/core.js')
 })

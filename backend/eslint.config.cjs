@@ -99,9 +99,7 @@ module.exports = [
       'security/detect-unsafe-regex': 'off',
       'import/named': 'off',
       'vitest/no-standalone-expect': 'off',
-      'vitest/no-identical-title': 'off',
-      'vitest/expect-expect': 'off',
-      'vitest/no-disabled-tests': 'off',
+      'vitest/no-disabled-tests': 'warn',
     },
   },
   {

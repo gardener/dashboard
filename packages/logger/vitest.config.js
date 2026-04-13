@@ -12,7 +12,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     pool: 'vmThreads',
-    restoreMocks: false,
+    restoreMocks: true,
     clearMocks: true,
     testTimeout: 10000,
     coverage: {

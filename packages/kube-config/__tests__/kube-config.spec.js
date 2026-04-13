@@ -62,10 +62,6 @@ describe('kube-config', () => {
     vi.spyOn(fsp, 'readFile')
   })
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
   describe('#load', () => {
     let ac
 

@@ -43,7 +43,6 @@ describe('polling-watcher', () => {
     })
 
     afterEach(() => {
-      fs.readFile.mockRestore()
       if (typeof stop === 'function') {
         stop()
       }

@@ -54,8 +54,7 @@ module.exports = [
       'security/detect-possible-timing-attacks': 'off',
       'security/detect-unsafe-regex': 'off',
       'security/detect-non-literal-fs-filename': 'off',
-      'vitest/expect-expect': 'off',
-      'vitest/no-disabled-tests': 'off',
+      'vitest/no-disabled-tests': 'warn',
     },
   },
 ]

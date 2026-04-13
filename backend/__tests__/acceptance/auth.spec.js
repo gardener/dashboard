@@ -200,6 +200,7 @@ describe('auth', function () {
   })
 
   // TODO migrate to latest pRetry version and use abort signal in afterEach hook to ensure that the retry is aborted. Then this test can be enabled again.
+  // eslint-disable-next-line vitest/no-disabled-tests
   it.skip('should fail to redirect to authorization url', async function () {
     const message = 'Issuer not available'
     discovery.mockRejectedValueOnce(new Error(message))

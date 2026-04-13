@@ -334,27 +334,6 @@ describe('api', function () {
         }))
       })
 
-      it('should subscribe shoots for a single namespace', async function () {
-        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-
-        await subscribe(socket, 'shoots', { namespace: 'garden-foo' })
-
-        expect(mockRequest).toHaveBeenCalledTimes(1)
-        expect(mockRequest.mock.calls).toMatchSnapshot()
-
-        expect(getRooms(socket, nsp)).toEqual(new Set([
-          ...defaultRooms,
-          'seeds',
-          'shoots;garden-foo',
-        ]))
-
-        await unsubscribe(socket, 'shoots')
-        expect(getRooms(socket, nsp)).toEqual(new Set([
-          ...defaultRooms,
-          'seeds',
-        ]))
-      })
-
       it('should fail to synchronize a secret project', async function () {
         const items = await synchronize(socket, 'projects', [6])
         expect(items).toEqual([{

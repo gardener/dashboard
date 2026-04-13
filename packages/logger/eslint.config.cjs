@@ -53,9 +53,7 @@ module.exports = [
       'security/detect-object-injection': 'off',
       'security/detect-possible-timing-attacks': 'off',
       'security/detect-unsafe-regex': 'off',
-      'vitest/no-standalone-expect': 'off',
-      'vitest/expect-expect': 'off',
-      'vitest/no-disabled-tests': 'off',
+      'vitest/no-disabled-tests': 'warn',
     },
   },
 ]
