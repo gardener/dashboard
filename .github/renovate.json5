@@ -40,12 +40,6 @@
       ],
     },
     {
-      matchUpdateTypes: [
-        'patch',
-      ],
-      automerge: true,
-    },
-    {
       matchDatasources: [
         'npm',
       ],
