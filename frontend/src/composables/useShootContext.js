@@ -1014,7 +1014,7 @@ export function createShootContextComposable (options = {}) {
       machine: {
         type: machineType.value.name,
         image: pick(machineImage.value, ['name', 'version']),
-        architecture,
+        architecture: architecture.value,
       },
       zones,
       cri: {
