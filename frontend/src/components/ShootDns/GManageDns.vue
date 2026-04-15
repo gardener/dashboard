@@ -151,7 +151,10 @@ SPDX-License-Identifier: Apache-2.0
 import { requiredIf } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import { mapState } from 'pinia'
-import { ref } from 'vue'
+import {
+  ref,
+  nextTick,
+} from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
@@ -198,7 +201,10 @@ export default {
     const gardenerExtensionStore = useGardenerExtensionStore()
     const cloudProfileStore = useCloudProfileStore()
 
-    const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
+    const customDomainEnabled = ref(
+      !!dnsDomain.value || !!dnsPrimaryProviderType.value || !!dnsPrimaryProviderCredentialsRef.value,
+    )
+
     const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
@@ -214,7 +220,7 @@ export default {
       addDnsServiceExtensionProviderForCustomDomain,
       resetDnsPrimaryProvider,
       deleteDnsServiceExtensionProvider,
-      customDomain,
+      customDomainEnabled,
       availableCredentialsForPrimaryDnsProvider,
     }
   },
@@ -252,21 +258,6 @@ export default {
       return this.isNewCluster
         ? ''
         : 'Primary DNS Provider Type cannot be changed after cluster creation'
-    },
-    customDomainEnabled: {
-      get () {
-        return this.customDomain
-      },
-      set (value) {
-        this.customDomain = value
-
-        if (!value) {
-          this.dnsDomain = undefined
-          this.resetDnsPrimaryProvider()
-        } else {
-          this.$nextTick(() => this.$refs.dnsDomainRef.focus())
-        }
-      },
     },
     primaryDnsProviderCredential: {
       get () {
@@ -307,16 +298,28 @@ export default {
     },
   },
   watch: {
-    customDomainEnabled (value) {
-      if (value) {
-        const type = head(this.dnsProviderTypesWithPrimarySupport)
-        this.dnsPrimaryProviderType = type
-        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+    customDomainEnabled (enabled) {
+      if (!enabled) {
+        this.dnsDomain = undefined
+        this.resetDnsPrimaryProvider()
         this.v$.dnsDomain.$reset()
+        return
       }
+
+      if (!this.dnsPrimaryProviderType) {
+        this.dnsPrimaryProviderType = head(this.dnsProviderTypesWithPrimarySupport)
+      }
+
+      if (!this.primaryDnsProviderCredential) {
+        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+      }
+
+      nextTick(() => this.$refs.dnsDomainRef?.focus())
     },
-    dnsPrimaryProviderType () {
-      this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+    dnsPrimaryProviderType (value) {
+      if (value) {
+        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+      }
     },
   },
   methods: {
