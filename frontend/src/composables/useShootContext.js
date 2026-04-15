@@ -107,12 +107,7 @@ export function createShootContextComposable (options = {}) {
     }, value)
     const dnsProviders = get(object, ['spec', 'dns', 'providers'])
     if (dnsProviders) {
-      const normalizedProviders = filter(normalizeDnsPrimaryProviderCredentialsRefs(dnsProviders), 'type')
-      if (normalizedProviders.length > 0) {
-        set(object, ['spec', 'dns', 'providers'], normalizedProviders)
-      } else {
-        unset(object, ['spec', 'dns', 'providers'])
-      }
+      set(object, ['spec', 'dns', 'providers'], normalizeDnsPrimaryProviderCredentialsRefs(dnsProviders))
     }
     const extensions = get(object, ['spec', 'extensions'])
     const dnsServiceExtension = find(extensions, ['type', 'shoot-dns-service'])
