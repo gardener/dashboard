@@ -389,33 +389,6 @@ exports[`api > events > when user is "foo" > should subscribe shoots for a singl
 ]
 `;
 
-exports[`api > events > when user is "foo" > should subscribe shoots for a single namespace 2`] = `
-[
-  [
-    {
-      ":authority": "kubernetes:6443",
-      ":method": "post",
-      ":path": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
-      ":scheme": "https",
-      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZvb0BleGFtcGxlLm9yZyIsImlhdCI6MTU3NzgzNjgwMCwiYXVkIjpbImdhcmRlbmVyIl0sImV4cCI6MzE1NTcxNjgwMCwianRpIjoianRpIn0.k3kGjF6AgugJLdwERXEWZPaibFAPFPOnmpT3YM9H0xU",
-    },
-    {
-      "apiVersion": "authorization.k8s.io/v1",
-      "kind": "SelfSubjectAccessReview",
-      "spec": {
-        "nonResourceAttributes": undefined,
-        "resourceAttributes": {
-          "group": "core.gardener.cloud",
-          "namespace": "garden-foo",
-          "resource": "shoots",
-          "verb": "list",
-        },
-      },
-    },
-  ],
-]
-`;
-
 exports[`api > events > when user is "foo" > should subscribe shoots for all namespace 1`] = `
 [
   [
