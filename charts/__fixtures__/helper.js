@@ -4,17 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import testUtils from '@gardener-dashboard/test-utils'
 
-const crypto = require('node:crypto')
-
-function decodeBase64 (data) {
-  return Buffer.from(data, 'base64').toString('utf8')
-}
-
-function encodeBase64 (data) {
-  return Buffer.from(data, 'utf8').toString('base64')
-}
+const { encodeBase64, decodeBase64, randomNumber } = testUtils.helper
 
 function getCertificate (payload = '...') {
   return [
@@ -32,11 +24,7 @@ function getPrivateKey (payload = '...') {
   ].join('\n')
 }
 
-function randomNumber () {
-  return crypto.randomBytes(4).readUInt32LE(0)
-}
-
-module.exports = {
+export {
   encodeBase64,
   decodeBase64,
   getCertificate,

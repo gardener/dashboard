@@ -6,8 +6,8 @@
 
 'use strict'
 
-const yaml = require('js-yaml')
-const { omit } = require('lodash')
+import yaml from 'js-yaml'
+import { omit } from 'lodash-es'
 const { helm } = fixtures
 
 const renderTemplates = helm.renderIdentityTemplates

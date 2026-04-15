@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`identity configmap should render the template w/ defaults values 1`] = `
+exports[`identity > configmap > should render the template w/ defaults values 1`] = `
 {
   "apiVersion": "v1",
   "kind": "ConfigMap",
@@ -11,7 +11,7 @@ exports[`identity configmap should render the template w/ defaults values 1`] = 
 }
 `;
 
-exports[`identity configmap should render the template w/ defaults values 2`] = `
+exports[`identity > configmap > should render the template w/ defaults values 2`] = `
 {
   "connectors": [
     {

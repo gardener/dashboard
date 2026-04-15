@@ -4,18 +4,17 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import os from 'node:os'
+import { vi, beforeAll, afterAll } from 'vitest'
+import fixtures from './__fixtures__/index.js'
 
-const fs = require('fs')
-const path = require('path')
-const os = require('os')
-const fixtures = require('./__fixtures__')
-
-beforeAll(function () {
+beforeAll(() => {
   process.env.HELM_VALUES_DIRNAME = fs.mkdtempSync(path.join(os.tmpdir(), 'helm-'))
 })
 
-afterAll(function () {
+afterAll(() => {
   const dirname = process.env.HELM_VALUES_DIRNAME
   fs.rmSync(dirname, {
     maxRetries: 100,
@@ -23,4 +22,4 @@ afterAll(function () {
   })
 })
 
-global.fixtures = fixtures
+vi.stubGlobal('fixtures', fixtures)

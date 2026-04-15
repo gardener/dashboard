@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
 const defaults = {
   dashboardOrigins: [
     'https://dashboard.garden.example.org',
@@ -14,4 +12,4 @@ const defaults = {
   ],
 }
 
-module.exports = defaults
+export default defaults

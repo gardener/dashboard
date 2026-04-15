@@ -4,9 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
-
-const { getCertificate } = require('./helper')
+import { getCertificate } from './helper.js'
 
 const defaults = {
   global: {
@@ -91,4 +89,4 @@ const defaults = {
   },
 }
 
-module.exports = defaults
+export default defaults

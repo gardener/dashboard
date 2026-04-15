@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`gardener-dashboard clusterrolebinding should render the template with default values 1`] = `
+exports[`gardener-dashboard > clusterrolebinding > should render the template with default values 1`] = `
 {
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "ClusterRoleBinding",
@@ -29,7 +29,7 @@ exports[`gardener-dashboard clusterrolebinding should render the template with d
 }
 `;
 
-exports[`gardener-dashboard clusterrolebinding when virtual garden is enabled should render the template 1`] = `
+exports[`gardener-dashboard > clusterrolebinding > when virtual garden is enabled > should render the template 1`] = `
 {
   "apiVersion": "rbac.authorization.k8s.io/v1",
   "kind": "ClusterRoleBinding",
