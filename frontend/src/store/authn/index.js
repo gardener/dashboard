@@ -65,8 +65,8 @@ export const useAuthnStore = defineStore('authn', () => {
     return user.value?.isAdmin === true
   })
 
-  const canGetManagedSeedAndShootInGardenNs = computed(() => {
-    return user.value?.canGetManagedSeedAndShootInGardenNs === true
+  const canListShootsAllNamespaces = computed(() => {
+    return user.value?.canListShootsAllNamespaces === true
   })
 
   const username = computed(() => {
@@ -92,7 +92,7 @@ export const useAuthnStore = defineStore('authn', () => {
   return {
     user,
     isAdmin,
-    canGetManagedSeedAndShootInGardenNs,
+    canListShootsAllNamespaces,
     username,
     displayName,
     fullDisplayName,

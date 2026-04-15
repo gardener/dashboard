@@ -35,7 +35,7 @@ describe('stores', () => {
     beforeEach(async () => {
       setActivePinia(createPinia())
       authzStore = useAuthzStore()
-      authzStore.setNamespace(namespace)
+      authzStore._setNamespace(namespace)
       configStore = useConfigStore()
       configStore.setConfiguration({
         defaultNodesCIDR: '10.10.0.0/16',

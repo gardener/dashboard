@@ -210,7 +210,7 @@ describe('stores', () => {
         email: 'john.doe@example.org',
       }
       authzStore = useAuthzStore()
-      authzStore.setNamespace('foo')
+      authzStore._setNamespace('foo')
       projectStore = useProjectStore()
       setProjectData({
         shootCustomFields: [

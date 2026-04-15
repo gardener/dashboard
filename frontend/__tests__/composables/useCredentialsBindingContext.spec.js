@@ -22,7 +22,7 @@ describe('composables', () => {
     beforeEach(() => {
       setActivePinia(createPinia())
       const authzStore = useAuthzStore()
-      authzStore.setNamespace(testNamespace)
+      authzStore._setNamespace(testNamespace)
 
       const composable = useCredentialsBindingContext()
       credentialsBindingContext = reactive(composable)

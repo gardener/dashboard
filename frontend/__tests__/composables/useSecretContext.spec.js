@@ -27,7 +27,7 @@ describe('composables', () => {
     beforeEach(() => {
       setActivePinia(createPinia())
       const authzStore = useAuthzStore()
-      authzStore.setNamespace(testNamespace)
+      authzStore._setNamespace(testNamespace)
 
       const composable = createSecretContextComposable()
       secretContext = reactive(composable)

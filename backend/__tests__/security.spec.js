@@ -160,17 +160,14 @@ describe('security', function () {
         isAuthenticated: isAuthenticatedMock,
       }))
       const isAdminMock = vi.fn()
-      const canListManagedSeedsInGardenNamespaceMock = vi.fn()
-      const canListShootsInGardenNamespaceMock = vi.fn()
+      const canListShootsMock = vi.fn()
       vi.doMock('../lib/services/authorization.js', () => ({
         default: {
           isAdmin: isAdminMock,
-          canListManagedSeedsInGardenNamespace: canListManagedSeedsInGardenNamespaceMock,
-          canListShootsInGardenNamespace: canListShootsInGardenNamespaceMock,
+          canListShoots: canListShootsMock,
         },
         isAdmin: isAdminMock,
-        canListManagedSeedsInGardenNamespace: canListManagedSeedsInGardenNamespaceMock,
-        canListShootsInGardenNamespace: canListShootsInGardenNamespaceMock,
+        canListShoots: canListShootsMock,
       }))
 
       const undiciMod = await import('undici')
@@ -380,8 +377,7 @@ describe('security', function () {
 
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
-        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(true)
-        authorization.canListShootsInGardenNamespace.mockResolvedValue(true)
+        authorization.canListShoots.mockResolvedValue(true)
 
         // Create an expired ID token and an access token
         const iat = Math.floor(Date.now() / 1000) - 3600
@@ -480,7 +476,7 @@ describe('security', function () {
             groups: [],
             aud: ['gardener'],
             isAdmin: false,
-            canGetManagedSeedAndShootInGardenNs: true,
+            canListShootsAllNamespaces: true,
           }),
         )
       })
@@ -497,8 +493,7 @@ describe('security', function () {
         })
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
-        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(false)
-        authorization.canListShootsInGardenNamespace.mockResolvedValue(false)
+        authorization.canListShoots.mockResolvedValue(false)
 
         const req = {
           originalUrl: '/auth/callback?code=some-code',
@@ -572,8 +567,7 @@ describe('security', function () {
         discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
-        authorization.canListManagedSeedsInGardenNamespace.mockResolvedValue(false)
-        authorization.canListShootsInGardenNamespace.mockResolvedValue(false)
+        authorization.canListShoots.mockResolvedValue(false)
 
         const req = {
           originalUrl: '/auth/callback?code=some-code',

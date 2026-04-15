@@ -41,7 +41,7 @@ describe('composables', () => {
     appStore.location = 'Europe/Berlin'
     appStore.timezone = '+01:00'
     const authzStore = useAuthzStore()
-    authzStore.setNamespace('garden-test')
+    authzStore._setNamespace('garden-test')
     const configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
     const credentialStore = useCredentialStore()
