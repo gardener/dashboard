@@ -72,7 +72,10 @@ SPDX-License-Identifier: Apache-2.0
             <g-shoot-seed-name />
           </g-list-item-content>
           <template #append>
-            <g-copy-btn :clipboard-text="shootSeedName" />
+            <g-copy-btn
+              v-if="shootSeedName"
+              :clipboard-text="shootSeedName"
+            />
             <g-seed-configuration
               v-if="canPatchShootsBinding"
             />
