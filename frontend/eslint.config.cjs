@@ -35,6 +35,7 @@ const lodashConfig = {
 const importConfig = {
   ignores: [
     'vite.config.js',
+    'vitest.config.js',
   ],
   settings: {
     'import/resolver': {
@@ -222,6 +223,7 @@ module.exports = [
       '**/__mocks__/**',
       '**/__tests__/**',
       'vite.config.js',
+      'vitest.config.js',
     ],
     rules: {
       'vue/one-component-per-file': 'off',

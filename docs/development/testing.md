@@ -1,14 +1,12 @@
 # Testing
 
-## Jest
-We use Jest JavaScript Testing Framework
+## Vitest
+We use [Vitest](https://vitest.dev/) as our testing framework.
 
-<img width="200" src="https://jestjs.io/img/jest.svg">
-
-* Jest can collect code coverage information​
-* Jest support snapshot testing out of the box​
-* All in One solution. Replaces Mocha, Chai, Sinon and Istanbul​
-* It works with Vue.js and Node.js projects​
+* Vitest collects code coverage information via `@vitest/coverage-v8`
+* Vitest supports snapshot testing out of the box
+* It works with Vue.js (jsdom environment) and Node.js projects
+* Each workspace has its own `vitest.config.js`
 
 To execute all tests, simply run
 ```
@@ -24,6 +22,10 @@ You can also run tests for frontend, backend and charts directly inside the resp
 ```
 yarn test
 ```
+
+### VS Code Integration
+We recommend the [Vitest extension](https://marketplace.visualstudio.com/items?itemName=vitest.explorer) for running and debugging tests directly from the editor.
+See `.vscode/extensions.json` for all recommended extensions.
 
 ## Lint
 We use ESLint for static code analyzing.

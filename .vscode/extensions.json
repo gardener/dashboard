@@ -3,7 +3,7 @@
     "arcanis.vscode-zipfs",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
-    "firsttris.vscode-jest-runner",
+    "vitest.explorer",
     "vue.volar",
     "syler.sass-indented"
   ]

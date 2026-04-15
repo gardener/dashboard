@@ -208,38 +208,6 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     }
-
-    if (mode === 'test') {
-      const coverage = {
-        provider: 'v8',
-        exclude: ['**/__fixtures__/**'],
-        all: false,
-        thresholds: {
-          statements: 74,
-          branches: 80,
-          functions: 47,
-          lines: 74,
-        },
-      }
-
-      config.test = {
-        include: ['__tests__/**/*.spec.js'],
-        globals: true,
-        environment: 'jsdom',
-        clearMocks: true,
-        setupFiles: [
-          'vitest.setup.js',
-        ],
-        server: {
-          deps: {
-            inline: [
-              'vuetify',
-            ],
-          },
-        },
-        coverage,
-      }
-    }
   }
 
   if (command === 'build') {
