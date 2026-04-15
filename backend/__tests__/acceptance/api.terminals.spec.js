@@ -15,6 +15,7 @@ import {
 } from 'vitest'
 import { padStart } from 'lodash-es'
 import request from '@gardener-dashboard/request'
+import { seedProjectNamespaceIndex } from '../helpers/cache.js'
 import { converter } from '../../lib/services/terminals/index.js'
 
 const { mockRequest } = request
@@ -32,6 +33,7 @@ describe('api', function () {
 
   beforeAll(async () => {
     agent = await createAgent()
+    seedProjectNamespaceIndex()
   })
 
   afterAll(() => {

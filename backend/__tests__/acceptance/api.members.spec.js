@@ -13,6 +13,7 @@ import {
   beforeEach,
 } from 'vitest'
 import request from '@gardener-dashboard/request'
+import { seedProjectNamespaceIndex } from '../helpers/cache.js'
 
 const { mockRequest } = request
 
@@ -21,6 +22,7 @@ describe('api', function () {
 
   beforeAll(async () => {
     agent = await createAgent()
+    seedProjectNamespaceIndex()
   })
 
   afterAll(() => {

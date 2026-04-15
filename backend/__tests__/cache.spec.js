@@ -120,5 +120,28 @@ describe('cache', function () {
         expect(cache.getTicketCache()).toBe(cache.ticketCache)
       })
     })
+
+    describe('#getShootsBySeedName', function () {
+      it('should return an empty iterable when no shoots are indexed for the seed', function () {
+        expect(Array.from(cache.getShootsBySeedName('missing-seed'))).toEqual([])
+      })
+
+      it('should return indexed shoots for the given seed name', function () {
+        const handlers = new Map()
+        cache.indexShootsBySeedName({
+          on (event, handler) {
+            handlers.set(event, handler)
+          },
+        })
+
+        const add = handlers.get('add')
+        for (const shoot of fixtures.shoots.list()) {
+          add(shoot)
+        }
+
+        expect(Array.from(cache.getShootsBySeedName('infra1-seed'))).toHaveLength(3)
+        expect(Array.from(cache.getShootsBySeedName('soil-infra1'))).toHaveLength(1)
+      })
+    })
   })
 })

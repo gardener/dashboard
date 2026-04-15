@@ -40,6 +40,9 @@ class LifecycleHooks {
     const informers = this.constructor.createInformers(this.client)
     // initialize cache
     cache.initialize(informers)
+    // build derived indexes
+    cache.indexProjectsByNamespace(informers.projects)
+    cache.indexShootsBySeedName(informers.shoots)
     // run informers
     const untilHasSyncedList = []
     for (const informer of Object.values(informers)) {
