@@ -87,9 +87,7 @@ describe('utils', function () {
           foo: 'bar',
         },
       }
-      // Test case where metadata does not have managedFields or last-applied-configuration
       expect(simplifyObjectMetadata({ metadata })).toEqual({ metadata })
-      // Test case where metadata has managedFields and last-applied-configuration
       const extendedMetadata = merge(metadata, {
         managedFields,
         annotations: {
@@ -114,11 +112,13 @@ describe('utils', function () {
       }
       const project = { metadata, spec }
 
+      // Test case where metadata does not have managedFields or last-applied-configuration
       expect(simplifyProject(cloneDeep(project))).toEqual({
         metadata,
         spec: {},
       })
 
+      // Test case where metadata has managedFields and last-applied-configuration
       const extendedMetadata = merge(cloneDeep(metadata), {
         managedFields,
         annotations: {
