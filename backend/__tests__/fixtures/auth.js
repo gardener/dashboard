@@ -174,11 +174,15 @@ const mocks = {
   },
 }
 
-export { auth, mocks }
-
-export const { createUser, getTokenPayload } = auth
+const { createUser, getTokenPayload } = auth
 
 export default {
   ...auth,
   mocks,
+}
+export {
+  auth,
+  mocks,
+  createUser,
+  getTokenPayload,
 }

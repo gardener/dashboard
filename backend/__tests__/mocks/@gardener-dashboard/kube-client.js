@@ -13,9 +13,7 @@ const mockModule = {
   createDashboardClient: vi.fn().mockImplementation(kubeClient.createDashboardClient),
 }
 
-// Export as both default and named exports so tests can use either pattern
-export default mockModule
-export const {
+const {
   createClient,
   createDashboardClient,
   abortWatcher,
@@ -23,3 +21,14 @@ export const {
   Resources,
   Store,
 } = mockModule
+
+// Export as both default and named exports so tests can use either pattern
+export default mockModule
+export {
+  createClient,
+  createDashboardClient,
+  abortWatcher,
+  dashboardClient,
+  Resources,
+  Store,
+}

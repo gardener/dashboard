@@ -81,6 +81,12 @@ const mockModule = {
   mockRequest,
 }
 
+const { extend, createHttpError, isHttpError } = mockModule
+
 export default mockModule
-export const { extend, createHttpError, isHttpError } = mockModule
-export { mockRequest }
+export {
+  mockRequest,
+  extend,
+  createHttpError,
+  isHttpError,
+}

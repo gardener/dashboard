@@ -26,4 +26,9 @@ const mockModule = {
 }
 
 export default mockModule
-export { monitorResponseTimes, monitorHttpServer, monitorSocketIO, destroy }
+export {
+  monitorResponseTimes,
+  monitorHttpServer,
+  monitorSocketIO,
+  destroy,
+}

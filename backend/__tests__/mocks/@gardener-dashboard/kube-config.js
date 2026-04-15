@@ -25,6 +25,13 @@ const mockModule = {
   mockLoadResult,
 }
 
+const { load } = mockModule
+
 export default mockModule
-export { Config, ClientConfig, mockLoadResult, parseKubeconfig }
-export const load = mockModule.load
+export {
+  Config,
+  ClientConfig,
+  mockLoadResult,
+  parseKubeconfig,
+  load,
+}

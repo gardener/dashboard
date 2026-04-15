@@ -10,7 +10,7 @@ import { pEvent } from 'p-event'
 import ioClient from 'socket.io-client'
 import { createTerminus } from '@godaddy/terminus'
 
-export async function createHttpAgent () {
+async function createHttpAgent () {
   const { default: app } = await import('../../lib/app.js')
   let server = http.createServer(app)
   const healthCheck = app.get('healthCheck')
@@ -41,7 +41,7 @@ export async function createHttpAgent () {
   return agent
 }
 
-export async function createSocketAgent (cache) {
+async function createSocketAgent (cache) {
   const { default: createIo } = await import('../../lib/io/index.js')
   const server = http.createServer()
   const io = createIo(server, cache)
@@ -85,11 +85,17 @@ export async function createSocketAgent (cache) {
   return agent
 }
 
-export async function createAgent (type = 'http', cache) {
+async function createAgent (type = 'http', cache) {
   switch (type) {
     case 'io':
       return createSocketAgent(cache)
     default:
       return createHttpAgent()
   }
+}
+
+export {
+  createHttpAgent,
+  createSocketAgent,
+  createAgent,
 }

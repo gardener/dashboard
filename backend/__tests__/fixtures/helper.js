@@ -18,7 +18,7 @@ import {
   load as yamlLoad,
 } from 'js-yaml'
 
-export function gardenerConfigPath () {
+function gardenerConfigPath () {
   return join(homedir(), '.gardener', 'config.yaml')
 }
 
@@ -28,60 +28,60 @@ function setMetadataUid ({ metadata }, index) {
   }
 }
 
-export function uuidv1 () {
+function uuidv1 () {
   return uuidV1()
 }
 
-export function cloneDeepAndSetUid (list) {
+function cloneDeepAndSetUid (list) {
   return chain(list)
     .cloneDeep()
     .forEach(setMetadataUid)
     .value()
 }
 
-export function hash (...args) {
+function hash (...args) {
   return fnv.hash(args.join('.'), 32).str()
 }
 
-export function toHex (value) {
+function toHex (value) {
   return Buffer.from(value).toString('hex')
 }
 
-export function fromHex (value) {
+function fromHex (value) {
   return Buffer.from(value, 'hex').toString()
 }
 
-export function toBase64 (value) {
+function toBase64 (value) {
   return Buffer.from(value).toString('base64')
 }
 
-export function fromBase64 (value) {
+function fromBase64 (value) {
   return Buffer.from(value, 'base64').toString()
 }
 
-export function toYaml (value) {
+function toYaml (value) {
   return yamlDump(value)
 }
 
-export function fromYaml (value) {
+function fromYaml (value) {
   return yamlLoad(value)
 }
 
-export function formatTime (time) {
+function formatTime (time) {
   return new Date(time).toISOString().replace(/\.\d+Z/, 'Z')
 }
 
-export function nextTick () {
+function nextTick () {
   return new Promise(resolve => process.nextTick(resolve))
 }
 
-export function delay (milliseconds) {
+function delay (milliseconds) {
   return typeof milliseconds === 'number'
     ? new Promise(resolve => setTimeout(resolve, milliseconds))
     : nextTick()
 }
 
-export function createUrl (headers) {
+function createUrl (headers) {
   const {
     ':path': path,
     ':scheme': scheme = 'https',
@@ -119,15 +119,15 @@ function parseSelector (name) {
   }
 }
 
-export const parseLabelSelector = parseSelector('labelSelector')
+const parseLabelSelector = parseSelector('labelSelector')
 
-export function parseFieldSelector (obj) {
+function parseFieldSelector (obj) {
   const fields = parseSelector('fieldSelector')(obj)
   const iteratee = (accumulator, value, key) => set(accumulator, key, value)
   return reduce(fields, iteratee, {})
 }
 
-export function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 'server' }) {
+function createTestKubeconfig (user = { token: 'token' }, cluster = { server: 'server' }) {
   return toBase64(JSON.stringify({
     'current-context': 'default',
     contexts: [{
@@ -146,4 +146,24 @@ export function createTestKubeconfig (user = { token: 'token' }, cluster = { ser
       cluster,
     }],
   }))
+}
+
+export {
+  gardenerConfigPath,
+  uuidv1,
+  cloneDeepAndSetUid,
+  hash,
+  toHex,
+  fromHex,
+  toBase64,
+  fromBase64,
+  toYaml,
+  fromYaml,
+  formatTime,
+  nextTick,
+  delay,
+  createUrl,
+  parseLabelSelector,
+  parseFieldSelector,
+  createTestKubeconfig,
 }
