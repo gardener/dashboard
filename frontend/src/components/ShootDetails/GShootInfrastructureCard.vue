@@ -168,7 +168,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex">
             {{ shootDomain }}
             <g-dns-provider
-              v-if="shootDnsPrimaryProvider"
+              v-if="shootDnsPrimaryProvider?.type"
               class="ml-2"
               primary
               :credential="shootDnsPrimaryProviderCredential"
