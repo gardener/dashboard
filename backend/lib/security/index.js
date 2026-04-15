@@ -245,8 +245,10 @@ async function createAccessToken (payload, idToken) {
   const results = await Promise.allSettled([
     authentication.isAuthenticated({ token: idToken }),
     authorization.isAdmin(user),
-    authorization.canListManagedSeedsInGardenNamespace(user),
-    authorization.canListShootsInGardenNamespace(user),
+    // SSRR cannot distinguish namespace-scoped from cluster-wide bindings for
+    // namespace-scoped resources. Use SSAR here and bake result into the JWT
+    // so the frontend can reliably check cluster-wide "list shoots" permission.
+    authorization.canListShoots(user),
   ])
   // throw an error if any promise has been rejected
   for (const { status, reason: err } of results) {
@@ -257,16 +259,14 @@ async function createAccessToken (payload, idToken) {
   const [
     { value: { username, groups } },
     { value: isAdmin },
-    { value: canListManagedSeeds },
-    { value: canListShoots },
+    { value: canListShootsAllNamespaces },
   ] = results
-  const canGetManagedSeedAndShootInGardenNs = canListManagedSeeds && canListShoots
   Object.assign(payload, {
     id: username,
     groups,
     aud: [GARDENER_AUDIENCE],
     isAdmin,
-    canGetManagedSeedAndShootInGardenNs,
+    canListShootsAllNamespaces,
   })
   const idTokenPayload = decode(idToken)
   if (idTokenPayload) {

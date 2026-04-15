@@ -29,7 +29,7 @@ describe('stores', () => {
     beforeEach(async () => {
       setActivePinia(createPinia())
       authzStore = useAuthzStore()
-      authzStore.setNamespace(namespace)
+      authzStore._setNamespace(namespace)
       quotaStore = useQuotaStore()
       quotaStore.quotas = {}
     })

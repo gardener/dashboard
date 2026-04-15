@@ -91,7 +91,7 @@ describe('stores', () => {
       appStore = useAppStore()
       vi.spyOn(appStore, 'setSuccess')
       authzStore = useAuthzStore()
-      authzStore.setNamespace(testNamespace)
+      authzStore._setNamespace(testNamespace)
       cloudProfileStore = useCloudProfileStore()
       cloudProfileStore.list = fixtures.cloudprofiles
       gardenerExtensionStore = useGardenerExtensionStore()
@@ -280,7 +280,7 @@ describe('stores', () => {
 
     it('store should be resetted in case of a fetch error', async () => {
       const namespace = 'invalid'
-      authzStore.setNamespace(namespace)
+      authzStore._setNamespace(namespace)
 
       expect(credentialStore.infrastructureBindingList.length).toBeGreaterThan(0)
       expect(credentialStore.dnsCredentialList.length).toBeGreaterThan(0)
@@ -290,7 +290,7 @@ describe('stores', () => {
     })
     it('store should be resetted after setting new data', async () => {
       const namespace = 'invalid'
-      authzStore.setNamespace(namespace)
+      authzStore._setNamespace(namespace)
 
       expect(credentialStore.infrastructureBindingList.length).toBeGreaterThan(0)
       expect(credentialStore.dnsCredentialList.length).toBeGreaterThan(0)

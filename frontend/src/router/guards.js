@@ -26,6 +26,7 @@ export function createGlobalBeforeGuards () {
   const logger = useLogger()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
   const configStore = useConfigStore()
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
@@ -74,23 +75,26 @@ export function createGlobalBeforeGuards () {
       }
 
       try {
-        const promises = [
+        // Load garden rules, then conditionally load managed seeds once resolved
+        const gardenRulesAndManagedSeeds = async () => {
+          await ensureGardenRulesLoaded(authzStore)
+          if (authzStore.canGetManagedSeedAndShootInGarden) {
+            await Promise.all([
+              ensureManagedSeedsLoaded(managedSeedStore),
+              ensureManagedSeedShootsLoaded(managedSeedShootStore),
+            ])
+          }
+        }
+
+        await Promise.all([
           ensureConfigLoaded(configStore),
           ensureProjectsLoaded(projectStore),
           ensureCloudProfilesLoaded(cloudProfileStore),
           ensureSeedsLoaded(seedStore),
           ensureGardenerExtensionsLoaded(gardenerExtensionStore),
           ensureKubeconfigLoaded(kubeconfigStore),
-        ]
-
-        if (authnStore.canGetManagedSeedAndShootInGardenNs) {
-          promises.push(
-            ensureManagedSeedsLoaded(managedSeedStore),
-            ensureManagedSeedShootsLoaded(managedSeedShootStore),
-          )
-        }
-
-        await Promise.all(promises)
+          gardenRulesAndManagedSeeds(),
+        ])
       } catch (err) {
         appStore.setRouterError(err)
       }
@@ -261,5 +265,11 @@ function ensureGardenerExtensionsLoaded (store) {
 function ensureKubeconfigLoaded (store) {
   if (store.isInitial) {
     return store.fetchKubeconfig()
+  }
+}
+
+function ensureGardenRulesLoaded (store) {
+  if (store.isGardenInitial) {
+    return store.fetchGardenRules()
   }
 }
