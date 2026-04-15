@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 
 import GGardenctlCommand from '@/components/GGardenctlCommand.vue'
@@ -33,20 +33,28 @@ export default {
     const {
       shootName,
       shootProjectName,
+      seedIsManagedSeed,
     } = useShootItem()
 
     return {
       shootName,
       shootProjectName,
+      seedIsManagedSeed,
     }
   },
   computed: {
     ...mapState(useConfigStore, [
       'clusterIdentity',
     ]),
-    ...mapState(useAuthnStore, [
-      'isAdmin',
+    ...mapState(useAuthzStore, [
+      'canCreateShootsViewerkubeconfigInGarden',
+      'canGetConfigMapsInGarden',
     ]),
+    showControlPlaneCommand () {
+      return this.seedIsManagedSeed
+        ? this.canCreateShootsViewerkubeconfigInGarden
+        : this.canGetConfigMapsInGarden
+    },
     commands () {
       const cmds = [
         {
@@ -56,7 +64,7 @@ export default {
         },
       ]
 
-      if (this.isAdmin) {
+      if (this.showControlPlaneCommand) {
         cmds.unshift({
           title: 'Target Control Plane',
           subtitle: 'Gardenctl command to target the control plane of the shoot cluster',
