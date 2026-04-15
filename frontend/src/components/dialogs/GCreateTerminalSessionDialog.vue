@@ -296,7 +296,9 @@ export default {
       this.targetTab.selectedTarget = value
     },
     'targetTab.selectedTarget' () {
-      this.updateSettings()
+      if (this.newTerminalPrompt) {
+        this.updateSettings()
+      }
     },
   },
   methods: {
