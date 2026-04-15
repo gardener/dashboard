@@ -36,15 +36,7 @@ module.exports = [
     },
     languageOptions: {
       globals: {
-        describe: true,
-        it: true,
-        test: true,
-        expect: true,
-        vi: true,
-        beforeAll: true,
-        beforeEach: true,
-        afterAll: true,
-        afterEach: true,
+        ...pluginVitest.environments.env.globals,
         fixtures: true,
         createAgent: true,
       },
