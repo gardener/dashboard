@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import testUtils from '@gardener-dashboard/test-utils'
+
 import { homedir } from 'os'
 import { join } from 'path'
 import fnv from 'fnv-plus'
@@ -71,15 +73,7 @@ function formatTime (time) {
   return new Date(time).toISOString().replace(/\.\d+Z/, 'Z')
 }
 
-function nextTick () {
-  return new Promise(resolve => process.nextTick(resolve))
-}
-
-function delay (milliseconds) {
-  return typeof milliseconds === 'number'
-    ? new Promise(resolve => setTimeout(resolve, milliseconds))
-    : nextTick()
-}
+const { nextTick, delay } = testUtils.helper
 
 function createUrl (headers) {
   const {
