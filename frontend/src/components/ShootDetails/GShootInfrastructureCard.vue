@@ -72,7 +72,10 @@ SPDX-License-Identifier: Apache-2.0
             <g-shoot-seed-name />
           </g-list-item-content>
           <template #append>
-            <g-copy-btn :clipboard-text="shootSeedName" />
+            <g-copy-btn
+              v-if="shootSeedName"
+              :clipboard-text="shootSeedName"
+            />
             <g-seed-configuration
               v-if="canPatchShootsBinding"
             />
@@ -168,7 +171,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex">
             {{ shootDomain }}
             <g-dns-provider
-              v-if="shootDnsPrimaryProvider"
+              v-if="shootDnsPrimaryProvider?.type"
               class="ml-2"
               primary
               :credential="shootDnsPrimaryProviderCredential"

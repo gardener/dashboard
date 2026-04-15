@@ -57,7 +57,10 @@ SPDX-License-Identifier: Apache-2.0
           <template #activator>
             <g-shoot-seed-name />
           </template>
-          <g-copy-btn :clipboard-text="shootSeedName" />
+          <g-copy-btn
+            v-if="shootSeedName"
+            :clipboard-text="shootSeedName"
+          />
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'technicalId'">

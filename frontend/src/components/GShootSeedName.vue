@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
+    v-if="shootSeedName"
     v-tooltip:top="{
       text: shootLastOperationTypeControlPlaneMigrationMessage,
       disabled: !isShootLastOperationTypeControlPlaneMigrating
