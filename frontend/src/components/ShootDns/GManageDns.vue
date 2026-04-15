@@ -198,7 +198,7 @@ export default {
     const gardenerExtensionStore = useGardenerExtensionStore()
     const cloudProfileStore = useCloudProfileStore()
 
-    const customDomain = ref(!!dnsDomain.value && !!dnsPrimaryProviderType.value)
+    const customDomain = ref(!!dnsDomain.value || !!dnsPrimaryProviderType.value)
     const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
 
     return {
@@ -315,8 +315,10 @@ export default {
         this.v$.dnsDomain.$reset()
       }
     },
-    dnsPrimaryProviderType () {
-      this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+    dnsPrimaryProviderType (value) {
+      if (value) {
+        this.primaryDnsProviderCredential = head(this.availableCredentialsForPrimaryDnsProvider)
+      }
     },
   },
   methods: {
