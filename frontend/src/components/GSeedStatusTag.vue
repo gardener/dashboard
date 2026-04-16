@@ -20,7 +20,6 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props }">
         <v-chip
           v-bind="props"
-          ref="tagChipRef"
           :class="{ 'cursor-pointer': condition.message }"
           :variant="!isError ? 'tonal' : 'flat'"
           :text-color="textColor"
@@ -36,9 +35,10 @@ SPDX-License-Identifier: Apache-2.0
           />
           {{ chipText }}
           <v-tooltip
-            :activator="$refs.tagChipRef"
+            activator="parent"
             location="top"
             max-width="400px"
+            :open-delay="200"
             :disabled="internalValue"
           >
             <div class="font-weight-bold">
