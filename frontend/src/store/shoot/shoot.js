@@ -11,7 +11,6 @@ import {
 import {
   computed,
   reactive,
-  watch,
   markRaw,
   toRaw,
   toRef,
@@ -20,12 +19,12 @@ import {
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { isNotFound } from '@/utils/error'
 
 import { useAppStore } from '../app'
-import { useAuthnStore } from '../authn'
 import { useAuthzStore } from '../authz'
 import { useProjectStore } from '../project'
 import { useCloudProfileStore } from '../cloudProfile'
@@ -50,7 +49,6 @@ import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
-import pick from 'lodash/pick'
 import map from 'lodash/map'
 import unset from 'lodash/unset'
 import set from 'lodash/set'
@@ -61,7 +59,6 @@ const useShootStore = defineStore('shoot', () => {
   const logger = useLogger()
 
   const appStore = useAppStore()
-  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
@@ -75,6 +72,14 @@ const useShootStore = defineStore('shoot', () => {
   const projectItem = toRef(projectStore, 'project')
 
   const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
+  const {
+    shootListFilters,
+    onlyShootsWithIssues,
+  } = useShootListFilters()
+
+  const progressing = computed(() => shootListFilters.value.progressing)
+  const noOperatorAction = computed(() => shootListFilters.value.noOperatorAction)
+  const hideTicketsWithLabel = computed(() => shootListFilters.value.hideTicketsWithLabel)
 
   const context = {
     api,
@@ -90,6 +95,11 @@ const useShootStore = defineStore('shoot', () => {
     socketStore,
     seedStore,
     shootCustomFieldsComposable,
+    shootListFilters,
+    onlyShootsWithIssues,
+    progressing,
+    noOperatorAction,
+    hideTicketsWithLabel,
   }
 
   const state = reactive({
@@ -97,7 +107,6 @@ const useShootStore = defineStore('shoot', () => {
     shootInfos: {},
     staleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
     selection: undefined,
-    shootListFilters: undefined,
     focusMode: false,
     froozenUids: [],
     subscription: null,
@@ -119,10 +128,6 @@ const useShootStore = defineStore('shoot', () => {
 
   const activeUids = computed(() => {
     return getFilteredUids(state, context)
-  })
-
-  const shootListFilters = computed(() => {
-    return state.shootListFilters
   })
 
   const focusMode = computed(() => {
@@ -163,10 +168,6 @@ const useShootStore = defineStore('shoot', () => {
     return state.selectedUid
       ? assignShootInfo(state.shoots[state.selectedUid])
       : null
-  })
-
-  const onlyShootsWithIssues = computed(() => {
-    return get(state.shootListFilters, ['onlyShootsWithIssues'], true)
   })
 
   const loading = computed(() => {
@@ -444,37 +445,6 @@ const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  function initializeShootListFilters () {
-    const isAdmin = authnStore.isAdmin
-    state.shootListFilters = {
-      onlyShootsWithIssues: isAdmin,
-      progressing: true,
-      noOperatorAction: isAdmin,
-      deactivatedReconciliation: isAdmin,
-      hideTicketsWithLabel: isAdmin,
-      ...localStorageStore.allProjectsShootFilter,
-    }
-  }
-
-  function toogleShootListFilter (key) {
-    if (state.shootListFilters) {
-      const value = get(state.shootListFilters, [key])
-      set(state.shootListFilters, [key], !value)
-    }
-  }
-
-  watch(() => state.shootListFilters, value => {
-    localStorageStore.allProjectsShootFilter = pick(value, [
-      'onlyShootsWithIssues',
-      'progressing',
-      'noOperatorAction',
-      'deactivatedReconciliation',
-      'hideTicketsWithLabel',
-    ])
-  }, {
-    deep: true,
-  })
-
   function setFocusMode (value) {
     const shootStore = this
     let uids = []
@@ -604,7 +574,6 @@ const useShootStore = defineStore('shoot', () => {
     // state
     state,
     staleShoots,
-    shootListFilters,
     subscriptionState,
     subscriptionError,
     focusMode,
@@ -613,7 +582,6 @@ const useShootStore = defineStore('shoot', () => {
     activeShoots,
     shootList,
     selectedShoot,
-    onlyShootsWithIssues,
     loading,
     subscribed,
     unsubscribed,
@@ -632,8 +600,6 @@ const useShootStore = defineStore('shoot', () => {
     deleteShoot,
     fetchInfo,
     setSelection,
-    initializeShootListFilters,
-    toogleShootListFilter,
     setFocusMode,
     shootByNamespaceAndName,
     searchItems,

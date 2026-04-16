@@ -56,8 +56,9 @@ export const constants = Object.freeze({
 export function onlyAllShootsWithIssues (state, context) {
   const {
     authzStore,
+    onlyShootsWithIssues,
   } = context
-  return authzStore.namespace === '_all' && get(state.shootListFilters, ['onlyShootsWithIssues'], true)
+  return authzStore.namespace === '_all' && (onlyShootsWithIssues.value ?? true)
 }
 
 export function getFilteredUids (state, context) {
@@ -114,13 +115,19 @@ export function getFilteredUids (state, context) {
   // list of active filter function
   const predicates = []
   if (onlyAllShootsWithIssues(state, context)) {
-    if (get(state, ['shootListFilters', 'progressing'], false)) {
+    const {
+      progressing,
+      noOperatorAction,
+      hideTicketsWithLabel,
+    } = context
+
+    if (progressing.value) {
       predicates.push(notProgressing)
     }
-    if (get(state, ['shootListFilters', 'noOperatorAction'], false)) {
+    if (noOperatorAction.value) {
       predicates.push(noUserError)
     }
-    if (get(state, ['shootListFilters', 'hideTicketsWithLabel'], false)) {
+    if (hideTicketsWithLabel.value) {
       predicates.push(hasTicketsWithoutHideLabel)
     }
   }
@@ -231,7 +238,7 @@ export function getSortVal (state, context, item, sortBy) {
       const conditions = item.status?.conditions ?? []
       const constraints = item.status?.constraints ?? []
       const readinessConditions = [...conditions, ...constraints]
-      const hideProgressingClusters = get(state.shootListFilters, ['progressing'], false)
+      const hideProgressingClusters = context.progressing.value ?? false
       const lastOperationTime = item.status?.lastOperation?.lastUpdateTime
       const creationTime = item.metadata.creationTimestamp
       const isErrorFn = status => status !== 'True' && !(hideProgressingClusters && status === 'Progressing')
