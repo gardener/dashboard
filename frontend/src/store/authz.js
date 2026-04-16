@@ -21,17 +21,31 @@ import { useConfigStore } from './config'
 import { useAuthnStore } from './authn'
 import { useProjectStore } from './project'
 
+const GARDEN_NAMESPACE = 'garden'
+
 export const useAuthzStore = defineStore('authz', () => {
   const api = useApi()
   const authnStore = useAuthnStore()
   const configStore = useConfigStore()
   const projectStore = useProjectStore()
 
-  const spec = ref(null)
-  const status = ref(null)
+  const rulesMap = ref(new Map())
+  const currentNamespace = ref(undefined)
 
   const namespace = computed(() => {
-    return spec.value?.namespace
+    return currentNamespace.value
+  })
+
+  const status = computed(() => {
+    return rulesMap.value.get(currentNamespace.value)
+  })
+
+  const gardenStatus = computed(() => {
+    return rulesMap.value.get(GARDEN_NAMESPACE)
+  })
+
+  const isGardenInitial = computed(() => {
+    return !rulesMap.value.get(GARDEN_NAMESPACE)
   })
 
   const canCreateTerminals = computed(() => {
@@ -131,10 +145,36 @@ export const useAuthzStore = defineStore('authz', () => {
     canCreateServiceAccounts.value
   })
 
+  const canAccessSeedStats = computed(() => {
+    // Seeds are cluster-scoped — SSRR is reliable.
+    // Shoots are namespace-scoped — SSRR can't distinguish namespace-only from
+    // cluster-wide access, so use JWT-based canListShootsAllNamespaces (via SSAR) instead.
+    return canI(status.value, 'list', 'core.gardener.cloud', 'seeds') &&
+      authnStore.canListShootsAllNamespaces
+  })
+
+  // Garden-namespace selectors
+  const canGetManagedSeedAndShootInGarden = computed(() => {
+    return canI(gardenStatus.value, 'get', 'seedmanagement.gardener.cloud', 'managedseeds') &&
+      canI(gardenStatus.value, 'get', 'core.gardener.cloud', 'shoots')
+  })
+
+  const canCreateShootsAdminkubeconfigInGarden = computed(() => {
+    return canI(gardenStatus.value, 'create', 'core.gardener.cloud', 'shoots/adminkubeconfig')
+  })
+
+  const canCreateShootsViewerkubeconfigInGarden = computed(() => {
+    return canI(gardenStatus.value, 'create', 'core.gardener.cloud', 'shoots/viewerkubeconfig')
+  })
+
+  const canGetConfigMapsInGarden = computed(() => {
+    return canI(gardenStatus.value, 'get', '', 'configmaps')
+  })
+
   const hasControlPlaneTerminalAccess = computed(() => {
     return configStore.isTerminalEnabled &&
       canCreateTerminals.value &&
-      authnStore.isAdmin
+      canCreateShootsAdminkubeconfigInGarden.value
   })
 
   const hasShootTerminalAccess = computed(() => {
@@ -142,45 +182,65 @@ export const useAuthzStore = defineStore('authz', () => {
       canCreateTerminals.value
   })
 
-  // reuse function not exported
   async function getRules (namespace) {
     const body = { namespace }
     const response = await api.getSubjectRules(body)
-    status.value = response.data
+    return response.data
   }
 
   async function fetchRules (namespace) {
     /**
-     * The value of `spec.value?.namespace` is:
+     * The value of `currentNamespace` is:
      * - undefined if no rules have been fetched yet
-     * - null if only cluster scoped rules have been fetched
-     * - a non-empty string if both cluster scoped rules and the rules for the namespace have been fetched
+     * - null if only cluster-scoped rules have been fetched
+     * - a non-empty string if both cluster-scoped rules and the rules for the namespace have been fetched
      */
     if (!namespace) {
       namespace = null
     }
-    if (spec.value?.namespace !== namespace) {
-      await getRules(namespace)
-      this.setNamespace(namespace)
+    if (currentNamespace.value !== namespace) {
+      const data = await getRules(namespace)
+      setRules(namespace, data)
     }
   }
 
-  function refreshRules () {
-    return getRules(spec.value?.namespace)
+  async function fetchGardenRules () {
+    const data = await getRules(GARDEN_NAMESPACE)
+    rulesMap.value.set(GARDEN_NAMESPACE, data)
   }
 
-  function setNamespace (namespace) {
-    spec.value = { namespace }
+  // Unconditionally re-fetch rules for the current namespace.
+  // Used after own-role changes (e.g. GMemberDialog) where the namespace
+  // hasn't changed but the permissions have.
+  async function refreshRules () {
+    const namespace = currentNamespace.value
+    const data = await getRules(namespace)
+    setRules(namespace, data)
+  }
+
+  function setRules (namespace, data) {
+    for (const key of rulesMap.value.keys()) {
+      if (key !== GARDEN_NAMESPACE) { // preserve garden rules across project switches
+        rulesMap.value.delete(key)
+      }
+    }
+    rulesMap.value.set(namespace, data)
+    currentNamespace.value = namespace
+  }
+
+  // Test-only helper — production code should use fetchRules instead
+  function _setNamespace (namespace) {
+    currentNamespace.value = namespace
   }
 
   function $reset () {
-    spec.value = null
-    status.value = null
+    rulesMap.value = new Map()
+    currentNamespace.value = undefined
   }
 
   return {
     namespace,
-    setNamespace,
+    _setNamespace,
     canCreateTerminals,
     canCreateShoots,
     canPatchShoots,
@@ -203,10 +263,18 @@ export const useAuthzStore = defineStore('authz', () => {
     canManageServiceAccountMembers,
     canGetProjectTerminalShortcuts,
     canUseProjectTerminalShortcuts,
+    canAccessSeedStats,
     hasGardenTerminalAccess,
     hasControlPlaneTerminalAccess,
     hasShootTerminalAccess,
+    // Garden-namespace selectors
+    canGetManagedSeedAndShootInGarden,
+    canCreateShootsAdminkubeconfigInGarden,
+    canCreateShootsViewerkubeconfigInGarden,
+    canGetConfigMapsInGarden,
+    isGardenInitial,
     fetchRules,
+    fetchGardenRules,
     refreshRules,
     $reset,
   }

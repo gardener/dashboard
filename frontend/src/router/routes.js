@@ -314,7 +314,7 @@ export function createRoutes () {
           title: 'Seeds',
           icon: 'mdi-sprout',
           get hidden () {
-            return !authnStore.isAdmin
+            return !authzStore.canAccessSeedStats
           },
         },
         title: 'Seeds',
@@ -322,7 +322,7 @@ export function createRoutes () {
         breadcrumbs: seedListBreadcrumbs,
       },
       beforeEnter (to, from) {
-        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        const fallbackRedirect = getFallbackRedirectIfNoSeedAccess(to, from)
         if (fallbackRedirect) {
           return fallbackRedirect
         }
@@ -359,7 +359,7 @@ export function createRoutes () {
         tabs: seedItemTabs,
       },
       beforeEnter (to, from) {
-        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        const fallbackRedirect = getFallbackRedirectIfNoSeedAccess(to, from)
         if (fallbackRedirect) {
           return fallbackRedirect
         }
@@ -382,7 +382,7 @@ export function createRoutes () {
         tabs: seedItemTabs,
       },
       beforeEnter (to, from) {
-        const fallbackRedirect = getFallbackRedirectIfNotAdmin(to, from)
+        const fallbackRedirect = getFallbackRedirectIfNoSeedAccess(to, from)
         if (fallbackRedirect) {
           return fallbackRedirect
         }
@@ -544,8 +544,8 @@ export function createRoutes () {
   }
 
   /* Helper functions */
-  function getFallbackRedirectIfNotAdmin (to, from) {
-    if (authnStore.isAdmin) {
+  function getFallbackRedirectIfNoSeedAccess (to, from) {
+    if (authzStore.canAccessSeedStats) {
       return
     }
 

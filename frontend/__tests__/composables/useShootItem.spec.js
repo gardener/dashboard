@@ -63,7 +63,7 @@ describe('composables', () => {
       })
 
       authzStore = useAuthzStore()
-      authzStore.setNamespace(shootItem.value.metadata.namespace)
+      authzStore._setNamespace(shootItem.value.metadata.namespace)
       shootStore = useShootStore()
       projectStore = useProjectStore()
       cloudProfileStore = useCloudProfileStore()
@@ -210,7 +210,7 @@ describe('composables', () => {
     })
 
     it('should compute isStaleShoot correctly', () => {
-      authzStore.setNamespace('_all')
+      authzStore._setNamespace('_all')
       shootStore.state.shootListFilters = {
         onlyShootsWithIssues: true,
         progressing: true,
