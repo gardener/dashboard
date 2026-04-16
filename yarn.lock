@@ -692,7 +692,7 @@ __metadata:
     socket.io: "npm:^4.7.5"
     socket.io-client: "npm:^4.7.5"
     supertest: "npm:^7.0.0"
-    undici: "npm:^7.22.0"
+    undici: "npm:^8.0.0"
     unified: "npm:^11.0.5"
     uuid: "npm:^11.0.0"
     vitest: "npm:^3.0.0"
@@ -9898,10 +9898,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^7.22.0":
-  version: 7.25.0
-  resolution: "undici@npm:7.25.0"
-  checksum: 10c0/02a0b45dc14eb91bc488948750232450fe52f27a6b08086d6ac6736bb47908d600fe3a96d346f12eab24729c782e5c2f693bc8e8eca6696d4e4c09b1ed4cb4ec
+"undici@npm:^8.0.0":
+  version: 8.1.0
+  resolution: "undici@npm:8.1.0"
+  checksum: 10c0/c55ad57f10efb9b55ab683104dde1c6f620496b9facde640ba26cffdc53a53694c12a8c3f7196069017c5c1b5031ef0843e232d9c04dcc834b3baa046d3ea678
   languageName: node
   linkType: hard
 
