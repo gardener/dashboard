@@ -23,7 +23,6 @@ import { parseSearch } from '@/composables/useTableFilter/helper'
 import {
   isTruthyValue,
   isStatusProgressing,
-  isReconciliationDeactivated,
   getCreatedBy,
   getIssueSince,
 } from '@/utils'
@@ -92,10 +91,6 @@ export function getFilteredUids (state, context) {
     return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
   }
 
-  const reconciliationNotDeactivated = item => {
-    return !isReconciliationDeactivated(get(item, ['metadata'], {}))
-  }
-
   const hasTicketsWithoutHideLabel = item => {
     const hideClustersWithLabels = get(configStore.ticket, ['hideClustersWithLabels'])
     if (!hideClustersWithLabels) {
@@ -124,9 +119,6 @@ export function getFilteredUids (state, context) {
     }
     if (get(state, ['shootListFilters', 'noOperatorAction'], false)) {
       predicates.push(noUserError)
-    }
-    if (get(state, ['shootListFilters', 'deactivatedReconciliation'], false)) {
-      predicates.push(reconciliationNotDeactivated)
     }
     if (get(state, ['shootListFilters', 'hideTicketsWithLabel'], false)) {
       predicates.push(hasTicketsWithoutHideLabel)

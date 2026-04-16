@@ -586,13 +586,6 @@ export default {
           disabled: this.changeFiltersDisabled,
         },
         {
-          text: 'Hide clusters with deactivated reconciliation',
-          value: 'deactivatedReconciliation',
-          selected: this.isFilterActive('deactivatedReconciliation'),
-          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
-          disabled: this.changeFiltersDisabled,
-        },
-        {
           text: 'Hide clusters with configured ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
@@ -643,9 +636,6 @@ export default {
         }
         if (this.isFilterActive('noOperatorAction')) {
           subtitle.push('User Errors')
-        }
-        if (this.isFilterActive('deactivatedReconciliation')) {
-          subtitle.push('Deactivated Reconciliation')
         }
         if (this.isFilterActive('hideTicketsWithLabel')) {
           subtitle.push('Tickets with Ignore Labels')
