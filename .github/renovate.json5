@@ -67,6 +67,17 @@
       matchPackageNames: [
         'node',
       ],
+      matchManagers: [
+        'github-actions',
+        'npm',
+        'nvm',
+        'nodenv',
+        'regex',
+      ],
+      matchDatasources: [
+        'node',
+        'node-version',
+      ],
       prTitle: 'chore(node): upgrade Node to {{newVersion}} everywhere',
       separateMinorPatch: false,
     },

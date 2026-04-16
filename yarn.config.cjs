@@ -49,8 +49,6 @@ function enforceFieldsOnAllWorkspaces({ Yarn }, fields) {
   }
 }
 
-const { engines, packageManager } = require('./package.json')
-
 module.exports = {
   async constraints (ctx) {
     enforceConsistentDependencies(ctx)
@@ -58,8 +56,8 @@ module.exports = {
     enforceWorkspaceDependencies(ctx)
     enforceFieldsOnAllWorkspaces(ctx, {
       license: 'Apache-2.0',
-      'engines.node': engines.node,
-      packageManager,
+      'engines.node': '24.14.1',
+      'packageManager': 'yarn@4.12.0',
       'repository.type': 'git',
       'repository.url': 'git+https://github.com/gardener/dashboard.git',
       'repository.directory': workspace => workspace.cwd,
