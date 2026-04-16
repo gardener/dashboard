@@ -67,6 +67,19 @@
       matchPackageNames: [
         'node',
       ],
+      matchManagers: [
+        'github-actions',
+        'dockerfile',
+        'npm',
+        'nvm',
+        'nodenv',
+        'regex',
+      ],
+      matchDatasources: [
+        'docker',
+        'node',
+        'node-version',
+      ],
       prTitle: 'chore(node): upgrade Node to {{newVersion}} everywhere',
       separateMinorPatch: false,
     },
