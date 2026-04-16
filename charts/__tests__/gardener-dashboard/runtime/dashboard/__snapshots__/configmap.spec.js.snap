@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`gardener-dashboard configmap access restrictions should render the template w/ \`item.options\` 1`] = `
+exports[`gardener-dashboard > configmap > access restrictions > should render the template w/ \`item.options\` 1`] = `
 {
   "frontend": {
     "accessRestriction": {
@@ -44,7 +44,7 @@ exports[`gardener-dashboard configmap access restrictions should render the temp
 }
 `;
 
-exports[`gardener-dashboard configmap access restrictions should render the template w/o \`item.options\` 1`] = `
+exports[`gardener-dashboard > configmap > access restrictions > should render the template w/o \`item.options\` 1`] = `
 {
   "frontend": {
     "accessRestriction": {
@@ -65,7 +65,7 @@ exports[`gardener-dashboard configmap access restrictions should render the temp
 }
 `;
 
-exports[`gardener-dashboard configmap alert should render the template w/ \`alert.identifier\` 1`] = `
+exports[`gardener-dashboard > configmap > alert > should render the template w/ \`alert.identifier\` 1`] = `
 {
   "frontend": {
     "alert": {
@@ -77,7 +77,7 @@ exports[`gardener-dashboard configmap alert should render the template w/ \`aler
 }
 `;
 
-exports[`gardener-dashboard configmap alert should render the template w/o \`alert.identifier\` 1`] = `
+exports[`gardener-dashboard > configmap > alert > should render the template w/o \`alert.identifier\` 1`] = `
 {
   "frontend": {
     "alert": {
@@ -88,7 +88,7 @@ exports[`gardener-dashboard configmap alert should render the template w/o \`ale
 }
 `;
 
-exports[`gardener-dashboard configmap avatarSource should render the template with avatarSource 1`] = `
+exports[`gardener-dashboard > configmap > avatarSource > should render the template with avatarSource 1`] = `
 {
   "frontend": {
     "avatarSource": "none",
@@ -96,7 +96,7 @@ exports[`gardener-dashboard configmap avatarSource should render the template wi
 }
 `;
 
-exports[`gardener-dashboard configmap branding should render the template 1`] = `
+exports[`gardener-dashboard > configmap > branding > should render the template 1`] = `
 {
   "frontend": {
     "branding": {
@@ -117,7 +117,7 @@ exports[`gardener-dashboard configmap branding should render the template 1`] = 
 }
 `;
 
-exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with connectSrc containing additional host sources 1`] = `
+exports[`gardener-dashboard > configmap > contentSecurityPolicy > should render the template with connectSrc containing additional host sources 1`] = `
 {
   "contentSecurityPolicy": {
     "connectSrc": [
@@ -129,7 +129,7 @@ exports[`gardener-dashboard configmap contentSecurityPolicy should render the te
 }
 `;
 
-exports[`gardener-dashboard configmap contentSecurityPolicy should render the template with default connectSrc 1`] = `
+exports[`gardener-dashboard > configmap > contentSecurityPolicy > should render the template with default connectSrc 1`] = `
 {
   "contentSecurityPolicy": {
     "connectSrc": [
@@ -139,7 +139,7 @@ exports[`gardener-dashboard configmap contentSecurityPolicy should render the te
 }
 `;
 
-exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
+exports[`gardener-dashboard > configmap > controlPlaneHighAvailabilityHelp > should render the template with controlPlaneHighAvailabilityHelp markdown 1`] = `
 {
   "frontend": {
     "controlPlaneHighAvailabilityHelp": {
@@ -149,7 +149,7 @@ exports[`gardener-dashboard configmap controlPlaneHighAvailabilityHelp should re
 }
 `;
 
-exports[`gardener-dashboard configmap costObjects should render the template with costObjects configuration 1`] = `
+exports[`gardener-dashboard > configmap > costObjects > should render the template with costObjects configuration 1`] = `
 {
   "frontend": {
     "costObjects": [
@@ -165,7 +165,7 @@ exports[`gardener-dashboard configmap costObjects should render the template wit
 }
 `;
 
-exports[`gardener-dashboard configmap experimental should render the template with experimental features 1`] = `
+exports[`gardener-dashboard > configmap > experimental > should render the template with experimental features 1`] = `
 {
   "frontend": {
     "experimental": {
@@ -175,7 +175,7 @@ exports[`gardener-dashboard configmap experimental should render the template wi
 }
 `;
 
-exports[`gardener-dashboard configmap grantTypes should render the template 1`] = `
+exports[`gardener-dashboard > configmap > grantTypes > should render the template 1`] = `
 {
   "frontend": {
     "grantTypes": [
@@ -187,7 +187,7 @@ exports[`gardener-dashboard configmap grantTypes should render the template 1`] 
 }
 `;
 
-exports[`gardener-dashboard configmap knownConditions should render the template with knownConditions markdown 1`] = `
+exports[`gardener-dashboard > configmap > knownConditions > should render the template with knownConditions markdown 1`] = `
 {
   "frontend": {
     "knownConditions": {
@@ -203,7 +203,7 @@ exports[`gardener-dashboard configmap knownConditions should render the template
 }
 `;
 
-exports[`gardener-dashboard configmap kubeconfig download should render the template w/ \`public.client_secret\` 1`] = `
+exports[`gardener-dashboard > configmap > kubeconfig download > should render the template w/ \`public.client_secret\` 1`] = `
 {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
   "oidc": {
@@ -225,7 +225,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap kubeconfig download should render the template w/o \`public.client_secret\` 1`] = `
+exports[`gardener-dashboard > configmap > kubeconfig download > should render the template w/o \`public.client_secret\` 1`] = `
 {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
   "oidc": {
@@ -247,7 +247,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap kubeconfig download should render the template with PKCE flow for the public client 1`] = `
+exports[`gardener-dashboard > configmap > kubeconfig download > should render the template with PKCE flow for the public client 1`] = `
 {
   "apiServerCaData": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCllYQnBVMlZ5ZG1WeVEyRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==",
   "oidc": {
@@ -270,7 +270,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap login-config.json should render login-config with branding and themes 1`] = `
+exports[`gardener-dashboard > configmap > login-config.json > should render login-config with branding and themes 1`] = `
 {
   "branding": {
     "loginHints": [
@@ -304,7 +304,7 @@ exports[`gardener-dashboard configmap login-config.json should render login-conf
 }
 `;
 
-exports[`gardener-dashboard configmap oidc should render the template with PKCE flow for the internal client 1`] = `
+exports[`gardener-dashboard > configmap > oidc > should render the template with PKCE flow for the internal client 1`] = `
 {
   "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
@@ -322,7 +322,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap oidc should render the template with default scope 1`] = `
+exports[`gardener-dashboard > configmap > oidc > should render the template with default scope 1`] = `
 {
   "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
@@ -339,7 +339,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap oidc should render the template with scope containing offline_access 1`] = `
+exports[`gardener-dashboard > configmap > oidc > should render the template with scope containing offline_access 1`] = `
 {
   "oidc": {
     "ca": "-----BEGIN CERTIFICATE-----
@@ -357,7 +357,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap resourceQuotaHelp should render the template with resourceQuotaHelp markdown 1`] = `
+exports[`gardener-dashboard > configmap > resourceQuotaHelp > should render the template with resourceQuotaHelp markdown 1`] = `
 {
   "frontend": {
     "resourceQuotaHelp": {
@@ -367,7 +367,7 @@ exports[`gardener-dashboard configmap resourceQuotaHelp should render the templa
 }
 `;
 
-exports[`gardener-dashboard configmap shootAdminKubeconfig should render the template 1`] = `
+exports[`gardener-dashboard > configmap > shootAdminKubeconfig > should render the template 1`] = `
 {
   "frontend": {
     "shootAdminKubeconfig": {
@@ -378,7 +378,7 @@ exports[`gardener-dashboard configmap shootAdminKubeconfig should render the tem
 }
 `;
 
-exports[`gardener-dashboard configmap should render the template w/ defaults values 1`] = `
+exports[`gardener-dashboard > configmap > should render the template w/ defaults values 1`] = `
 {
   "apiVersion": "v1",
   "kind": "ConfigMap",
@@ -396,7 +396,7 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
 }
 `;
 
-exports[`gardener-dashboard configmap should render the template w/ defaults values 2`] = `
+exports[`gardener-dashboard > configmap > should render the template w/ defaults values 2`] = `
 {
   "landingPageUrl": "https://gardener.cloud/",
   "loginTypes": [
@@ -406,7 +406,7 @@ exports[`gardener-dashboard configmap should render the template w/ defaults val
 }
 `;
 
-exports[`gardener-dashboard configmap should render the template w/ defaults values 3`] = `
+exports[`gardener-dashboard > configmap > should render the template w/ defaults values 3`] = `
 {
   "apiServerUrl": "https://api.garden.example.org",
   "contentSecurityPolicy": {
@@ -510,7 +510,7 @@ Li4u
 }
 `;
 
-exports[`gardener-dashboard configmap sla should render the template with sla description markdown hyperlink 1`] = `
+exports[`gardener-dashboard > configmap > sla > should render the template with sla description markdown hyperlink 1`] = `
 {
   "frontend": {
     "sla": {
@@ -521,7 +521,7 @@ exports[`gardener-dashboard configmap sla should render the template with sla de
 }
 `;
 
-exports[`gardener-dashboard configmap socket io should render the template with default allowed origin 1`] = `
+exports[`gardener-dashboard > configmap > socket io > should render the template with default allowed origin 1`] = `
 {
   "websocketAllowedOrigins": [
     "*",
@@ -529,7 +529,7 @@ exports[`gardener-dashboard configmap socket io should render the template with 
 }
 `;
 
-exports[`gardener-dashboard configmap socket io should render the template with multiple allowed origins 1`] = `
+exports[`gardener-dashboard > configmap > socket io > should render the template with multiple allowed origins 1`] = `
 {
   "websocketAllowedOrigins": [
     "https://foo.example.com",
@@ -538,7 +538,7 @@ exports[`gardener-dashboard configmap socket io should render the template with 
 }
 `;
 
-exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should default apiGroup 1`] = `
+exports[`gardener-dashboard > configmap > terminal config > garden cluster custom rolebBindings > should default apiGroup 1`] = `
 {
   "terminal": {
     "garden": {
@@ -557,7 +557,7 @@ exports[`gardener-dashboard configmap terminal config garden cluster custom role
 }
 `;
 
-exports[`gardener-dashboard configmap terminal config garden cluster custom rolebBindings should render the template 1`] = `
+exports[`gardener-dashboard > configmap > terminal config > garden cluster custom rolebBindings > should render the template 1`] = `
 {
   "terminal": {
     "garden": {
@@ -576,7 +576,7 @@ exports[`gardener-dashboard configmap terminal config garden cluster custom role
 }
 `;
 
-exports[`gardener-dashboard configmap terminal config should render the template 1`] = `
+exports[`gardener-dashboard > configmap > terminal config > should render the template 1`] = `
 {
   "terminal": {
     "container": {
@@ -598,7 +598,7 @@ exports[`gardener-dashboard configmap terminal config should render the template
 }
 `;
 
-exports[`gardener-dashboard configmap terminal shortcuts should render the template 1`] = `
+exports[`gardener-dashboard > configmap > terminal shortcuts > should render the template 1`] = `
 {
   "frontend": {
     "terminal": {
@@ -625,7 +625,7 @@ exports[`gardener-dashboard configmap terminal shortcuts should render the templ
 }
 `;
 
-exports[`gardener-dashboard configmap themes should render the template 1`] = `
+exports[`gardener-dashboard > configmap > themes > should render the template 1`] = `
 {
   "frontend": {
     "themes": {
@@ -642,7 +642,7 @@ exports[`gardener-dashboard configmap themes should render the template 1`] = `
 }
 `;
 
-exports[`gardener-dashboard configmap themes should render the template with light theme values only 1`] = `
+exports[`gardener-dashboard > configmap > themes > should render the template with light theme values only 1`] = `
 {
   "frontend": {
     "themes": {
@@ -655,7 +655,7 @@ exports[`gardener-dashboard configmap themes should render the template with lig
 }
 `;
 
-exports[`gardener-dashboard configmap tickets github app authentication should render the template 1`] = `
+exports[`gardener-dashboard > configmap > tickets > github app authentication > should render the template 1`] = `
 {
   "frontend": {
     "ticket": {
@@ -684,7 +684,7 @@ exports[`gardener-dashboard configmap tickets github app authentication should r
 }
 `;
 
-exports[`gardener-dashboard configmap tickets github app authentication should render the template 2`] = `
+exports[`gardener-dashboard > configmap > tickets > github app authentication > should render the template 2`] = `
 {
   "authentication.appId": "1",
   "authentication.clientId": "clientId",
@@ -695,7 +695,7 @@ exports[`gardener-dashboard configmap tickets github app authentication should r
 }
 `;
 
-exports[`gardener-dashboard configmap tickets token authentication should render the template 1`] = `
+exports[`gardener-dashboard > configmap > tickets > token authentication > should render the template 1`] = `
 {
   "frontend": {
     "ticket": {
@@ -724,14 +724,14 @@ exports[`gardener-dashboard configmap tickets token authentication should render
 }
 `;
 
-exports[`gardener-dashboard configmap tickets token authentication should render the template 2`] = `
+exports[`gardener-dashboard > configmap > tickets > token authentication > should render the template 2`] = `
 {
   "authentication.token": "token",
   "webhookSecret": "webhookSecret",
 }
 `;
 
-exports[`gardener-dashboard configmap token request should render the template 1`] = `
+exports[`gardener-dashboard > configmap > token request > should render the template 1`] = `
 {
   "frontend": {
     "serviceAccountDefaultTokenExpiration": 42,
@@ -743,7 +743,7 @@ exports[`gardener-dashboard configmap token request should render the template 1
 }
 `;
 
-exports[`gardener-dashboard configmap unreachable seeds should render the template 1`] = `
+exports[`gardener-dashboard > configmap > unreachable seeds > should render the template 1`] = `
 {
   "unreachableSeeds": {
     "matchLabels": {
@@ -753,7 +753,7 @@ exports[`gardener-dashboard configmap unreachable seeds should render the templa
 }
 `;
 
-exports[`gardener-dashboard configmap vendorHints should render the template 1`] = `
+exports[`gardener-dashboard > configmap > vendorHints > should render the template 1`] = `
 {
   "frontend": {
     "vendorHints": [

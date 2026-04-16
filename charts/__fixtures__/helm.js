@@ -4,17 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import fs from 'node:fs'
+import path from 'node:path'
+import assert from 'node:assert/strict'
+import childProcess from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import yaml from 'js-yaml'
+import { defaultsDeep } from 'lodash-es'
+import { randomNumber } from './helper.js'
 
-const fs = require('fs')
-const path = require('path')
-const assert = require('assert/strict')
-const childProcess = require('child_process')
-const yaml = require('js-yaml')
-const { defaultsDeep } = require('lodash')
-const { randomNumber } = require('./helper')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-function renderTemplatesFn (...paths) {
+async function renderTemplatesFn (...paths) {
   let cwdPaths, tplPaths
   const index = paths.indexOf('templates')
   if (index !== -1) {
@@ -27,7 +28,8 @@ function renderTemplatesFn (...paths) {
   const cwd = path.resolve(__dirname, '..', ...cwdPaths)
   let defaults
   try {
-    defaults = require('./' + cwdPaths[0])
+    const module = await import('./' + cwdPaths[0] + '.js')
+    defaults = module.default
   } catch (err) {
     assert.fail(err.message)
   }
@@ -90,12 +92,12 @@ function renderTemplatesFn (...paths) {
 const gardenerDashboardRuntimeTemplates = ['gardener-dashboard', 'charts', 'runtime', 'templates']
 const gardenerDashboardApplicationTemplates = ['gardener-dashboard', 'charts', 'application', 'templates']
 
-const renderDashboardRuntimeTemplates = renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'dashboard')
-const renderDashboardApplicationTemplates = renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'dashboard')
+const renderDashboardRuntimeTemplates = await renderTemplatesFn(...gardenerDashboardRuntimeTemplates, 'dashboard')
+const renderDashboardApplicationTemplates = await renderTemplatesFn(...gardenerDashboardApplicationTemplates, 'dashboard')
 
-const renderIdentityTemplates = renderTemplatesFn('identity')
+const renderIdentityTemplates = await renderTemplatesFn('identity')
 
-module.exports = {
+export default {
   renderTemplatesFn,
   renderDashboardRuntimeTemplates,
   renderDashboardApplicationTemplates,

@@ -46,13 +46,6 @@
     "**/coverage": true,
     "**/dist": true
   },
-  "jestrunner.changeDirectoryToWorkspaceRoot": false,
-  "jestrunner.vitestCommand": "./scripts/test.cjs --runner=vitest",
-  "jestrunner.vitestDebugOptions": {
-    "env": { "VS_DEBUG": "1" }
-  },
-  "jestrunner.jestCommand": "./scripts/test.cjs --runner=jest",
-  "jestrunner.debugOptions": {
-    "env": { "VS_DEBUG": "1" }
-  }
+  "vitest.configSearchPatternExclude": "{**/node_modules/**, **/vendor/**, **/.*/**, *.d.ts, **/packages/test-utils/**}",
+  "vitest.nodeExecutable": "./scripts/vitest-node.sh"
 }

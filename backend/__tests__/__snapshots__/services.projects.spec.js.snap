@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`services/projects > #create > should create a project and return it when ready 1`] = `
+{
+  "metadata": {
+    "name": "foo",
+  },
+  "spec": {
+    "namespace": "garden-foo",
+  },
+  "status": {
+    "phase": "Ready",
+  },
+}
+`;

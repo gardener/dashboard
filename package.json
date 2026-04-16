@@ -37,8 +37,9 @@
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
     "eslint": "^9.11.0",
     "husky": "^9.1.7",
-    "jest": "^30.0.0",
-    "node-gyp": "latest"
+    "jsdom": "^26.0.0",
+    "node-gyp": "latest",
+    "vitest": "^3.0.0"
   },
   "bin": {
     "update-prod-install": "./scripts/update-prod-install.cjs"

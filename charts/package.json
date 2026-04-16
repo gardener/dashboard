@@ -2,6 +2,7 @@
   "name": "@gardener-dashboard/charts",
   "version": "1.0.0",
   "description": "Gardener Dashboard Charts",
+  "type": "module",
   "license": "Apache-2.0",
   "contributors": [
     "Koser, Holger <holger.koser@sap.com>",
@@ -21,25 +22,20 @@
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",
-    "test": "jest"
+    "test": "vitest run",
+    "test-coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
+    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^29.0.0",
     "eslint-plugin-lodash": "^8.0.0",
-    "jest": "^30.0.0",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
-    "neostandard": "^0.12.0"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "verbose": true,
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ]
+    "lodash-es": "^4.17.21",
+    "neostandard": "^0.12.0",
+    "vitest": "^3.0.0"
   },
   "packageManager": "yarn@4.12.0",
   "engines": {

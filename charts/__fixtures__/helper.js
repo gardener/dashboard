@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import testUtils from '@gardener-dashboard/test-utils'
 
-const { helper } = require('@gardener-dashboard/test-utils')
+const { encodeBase64, decodeBase64, randomNumber } = testUtils.helper
 
 function getCertificate (payload = '...') {
   return [
     '-----BEGIN CERTIFICATE-----',
-    helper.encodeBase64(payload),
+    encodeBase64(payload),
     '-----END CERTIFICATE-----',
   ].join('\n')
 }
@@ -19,13 +19,15 @@ function getCertificate (payload = '...') {
 function getPrivateKey (payload = '...') {
   return [
     '-----BEGIN RSA PRIVATE KEY-----',
-    helper.encodeBase64(payload),
+    encodeBase64(payload),
     '-----END RSA PRIVATE KEY-----',
   ].join('\n')
 }
 
-module.exports = {
-  ...helper,
+export {
+  encodeBase64,
+  decodeBase64,
   getCertificate,
   getPrivateKey,
+  randomNumber,
 }

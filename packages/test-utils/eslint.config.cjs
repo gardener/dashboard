@@ -25,7 +25,4 @@ module.exports = [
       'lodash/path-style': ['error', 'array'],
     },
   },
-  {
-    ignores: ['dist'],
-  },
 ]

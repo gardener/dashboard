@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`metrics > should create and export the application defined metrics 1`] = `
+[
+  "connectionsCount",
+  "connectionsTotal",
+  "responseTime",
+]
+`;

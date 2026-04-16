@@ -6,8 +6,8 @@
 
 'use strict'
 
-const yaml = require('js-yaml')
-const { omit, pick, mapValues } = require('lodash')
+import yaml from 'js-yaml'
+import { omit, pick, mapValues } from 'lodash-es'
 const { helm, helper } = fixtures
 const {
   getCertificate,

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`gardener-dashboard deployment kubeconfig should render the template 1`] = `
+exports[`gardener-dashboard > deployment > kubeconfig > should render the template 1`] = `
 {
   "name": "gardener-dashboard-secret-kubeconfig",
   "secret": {
@@ -9,7 +9,7 @@ exports[`gardener-dashboard deployment kubeconfig should render the template 1`]
 }
 `;
 
-exports[`gardener-dashboard deployment kubeconfig should render the template 2`] = `
+exports[`gardener-dashboard > deployment > kubeconfig > should render the template 2`] = `
 {
   "mountPath": "/etc/gardener-dashboard/secrets/kubeconfig",
   "name": "gardener-dashboard-secret-kubeconfig",
@@ -17,14 +17,14 @@ exports[`gardener-dashboard deployment kubeconfig should render the template 2`]
 }
 `;
 
-exports[`gardener-dashboard deployment kubeconfig should render the template 3`] = `
+exports[`gardener-dashboard > deployment > kubeconfig > should render the template 3`] = `
 {
   "name": "KUBECONFIG",
   "value": "/etc/gardener-dashboard/secrets/kubeconfig/kubeconfig",
 }
 `;
 
-exports[`gardener-dashboard deployment should not project service account token if disabled 1`] = `
+exports[`gardener-dashboard > deployment > should not project service account token if disabled 1`] = `
 [
   {
     "configMap": {
@@ -67,7 +67,7 @@ exports[`gardener-dashboard deployment should not project service account token 
 ]
 `;
 
-exports[`gardener-dashboard deployment should not project service account token if disabled 2`] = `
+exports[`gardener-dashboard > deployment > should not project service account token if disabled 2`] = `
 [
   {
     "mountPath": "/etc/gardener-dashboard",
@@ -91,7 +91,7 @@ exports[`gardener-dashboard deployment should not project service account token 
 ]
 `;
 
-exports[`gardener-dashboard deployment should render the template w/ \`client_secret\` 1`] = `
+exports[`gardener-dashboard > deployment > should render the template w/ \`client_secret\` 1`] = `
 [
   {
     "name": "GARDENER_CONFIG",
@@ -120,7 +120,7 @@ exports[`gardener-dashboard deployment should render the template w/ \`client_se
 ]
 `;
 
-exports[`gardener-dashboard deployment should render the template w/o \`client_secret\` 1`] = `
+exports[`gardener-dashboard > deployment > should render the template w/o \`client_secret\` 1`] = `
 [
   {
     "name": "GARDENER_CONFIG",
@@ -149,7 +149,7 @@ exports[`gardener-dashboard deployment should render the template w/o \`client_s
 ]
 `;
 
-exports[`gardener-dashboard deployment should render the template with default values 1`] = `
+exports[`gardener-dashboard > deployment > should render the template with default values 1`] = `
 {
   "apiVersion": "apps/v1",
   "kind": "Deployment",
@@ -355,7 +355,7 @@ exports[`gardener-dashboard deployment should render the template with default v
 }
 `;
 
-exports[`gardener-dashboard deployment should render the template with node options 1`] = `
+exports[`gardener-dashboard > deployment > should render the template with node options 1`] = `
 [
   "--max-old-space-size=460",
   "--expose-gc",
@@ -365,7 +365,7 @@ exports[`gardener-dashboard deployment should render the template with node opti
 ]
 `;
 
-exports[`gardener-dashboard deployment when github is configured should render github secret volume and volumeMount 1`] = `
+exports[`gardener-dashboard > deployment > when github is configured > should render github secret volume and volumeMount 1`] = `
 {
   "name": "gardener-dashboard-github",
   "secret": {
@@ -374,7 +374,7 @@ exports[`gardener-dashboard deployment when github is configured should render g
 }
 `;
 
-exports[`gardener-dashboard deployment when github is configured should render github secret volume and volumeMount 2`] = `
+exports[`gardener-dashboard > deployment > when github is configured > should render github secret volume and volumeMount 2`] = `
 {
   "mountPath": "/etc/gardener-dashboard/secrets/github",
   "name": "gardener-dashboard-github",
@@ -382,7 +382,7 @@ exports[`gardener-dashboard deployment when github is configured should render g
 }
 `;
 
-exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 1`] = `
+exports[`gardener-dashboard > deployment > when virtual garden is enabled > should render the template 1`] = `
 {
   "name": "service-account-token",
   "projected": {
@@ -399,7 +399,7 @@ exports[`gardener-dashboard deployment when virtual garden is enabled should ren
 }
 `;
 
-exports[`gardener-dashboard deployment when virtual garden is enabled should render the template 2`] = `
+exports[`gardener-dashboard > deployment > when virtual garden is enabled > should render the template 2`] = `
 {
   "mountPath": "/var/run/secrets/projected/serviceaccount",
   "name": "service-account-token",
@@ -407,7 +407,7 @@ exports[`gardener-dashboard deployment when virtual garden is enabled should ren
 }
 `;
 
-exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 1`] = `
+exports[`gardener-dashboard > deployment > when virtual garden is enabled > should use the volume mount based kubeconfig 1`] = `
 {
   "name": "kubeconfig",
   "projected": {
@@ -441,7 +441,7 @@ exports[`gardener-dashboard deployment when virtual garden is enabled should use
 }
 `;
 
-exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 2`] = `
+exports[`gardener-dashboard > deployment > when virtual garden is enabled > should use the volume mount based kubeconfig 2`] = `
 {
   "mountPath": "/var/run/secrets/gardener.cloud",
   "name": "kubeconfig",
@@ -449,7 +449,7 @@ exports[`gardener-dashboard deployment when virtual garden is enabled should use
 }
 `;
 
-exports[`gardener-dashboard deployment when virtual garden is enabled should use the volume mount based kubeconfig 3`] = `
+exports[`gardener-dashboard > deployment > when virtual garden is enabled > should use the volume mount based kubeconfig 3`] = `
 {
   "name": "KUBECONFIG",
   "value": "/var/run/secrets/gardener.cloud/kubeconfig",

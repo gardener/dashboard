@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-'use strict'
+import * as helper from './helper.js'
+import helm from './helm.js'
+import gardenerDashboard from './gardener-dashboard.js'
+import identity from './identity.js'
 
-const { matchers } = require('@gardener-dashboard/test-utils')
-
-module.exports = {
-  matchers,
-  helper: require('./helper'),
-  helm: require('./helm'),
-  'gardener-dashboard': require('./gardener-dashboard'),
-  identity: require('./identity'),
+export default {
+  helper,
+  helm,
+  'gardener-dashboard': gardenerDashboard,
+  identity,
 }

@@ -5,11 +5,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./lib/index.js",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.cjs"
-    },
+    ".": "./lib/index.js",
     "./package.json": "./package.json"
   },
   "repository": {
@@ -26,9 +22,8 @@
   "scripts": {
     "lint": "eslint . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "node --experimental-vm-modules $(yarn bin jest)",
-    "test-coverage": "yarn test --coverage",
-    "build": "rimraf dist && yarn install && rollup -c rollup.config.js"
+    "test": "vitest run",
+    "test-coverage": "vitest run --coverage"
   },
   "dependencies": {
     "http-errors": "^2.0.0",
@@ -47,48 +42,18 @@
     "@gardener-dashboard/logger": "workspace:^",
     "@gardener-dashboard/request": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
-    "@jest/globals": "^30.0.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "abort-controller": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
     "eslint-import-resolver-pnp": "^0.0.0",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^29.0.0",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
     "express": "^5.0.0",
-    "jest": "^30.0.0",
     "neostandard": "^0.12.0",
-    "rimraf": "^6.0.1",
-    "rollup": "^4.41.1"
-  },
-  "jest": {
-    "restoreMocks": true,
-    "verbose": true,
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "lib/**/*.js"
-    ],
-    "testEnvironment": "node",
-    "transformIgnorePatterns": [
-      "/node_modules/",
-      "\\.pnp\\.[^\\/]+$"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 73,
-        "functions": 97,
-        "lines": 94,
-        "statements": 94
-      }
-    },
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.js"
-    ]
+    "vitest": "^3.0.0"
   },
   "packageManager": "yarn@4.12.0",
   "engines": {

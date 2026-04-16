@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
-
-exports[`metrics should create and export the application defined metrics 1`] = `
-[
-  "connectionsCount",
-  "connectionsTotal",
-  "responseTime",
-]
-`;

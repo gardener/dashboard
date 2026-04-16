@@ -6,7 +6,7 @@
 
 'use strict'
 
-const { mapValues } = require('lodash')
+import { mapValues } from 'lodash-es'
 const { helm, helper } = fixtures
 const {
   getPrivateKey,
