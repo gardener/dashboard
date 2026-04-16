@@ -156,6 +156,7 @@ import GTableSearch from '@/components/GTableSearch.vue'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
+import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
 
 import { mapTableHeader } from '@/utils'
@@ -164,7 +165,6 @@ import upperCase from 'lodash/upperCase'
 import sortBy from 'lodash/sortBy'
 import some from 'lodash/some'
 import map from 'lodash/map'
-import join from 'lodash/join'
 import isEmpty from 'lodash/isEmpty'
 import unset from 'lodash/unset'
 import get from 'lodash/get'
@@ -235,6 +235,13 @@ export default {
       setDebouncedShootSearch()
     }
 
+    const {
+      activeFilterLabels,
+      shootListFilters,
+      onlyShootsWithIssues,
+      toggleShootListFilter,
+    } = useShootListFilters()
+
     return {
       activePopoverKey,
       expandedWorkerGroups,
@@ -244,6 +251,10 @@ export default {
       debouncedShootSearch,
       setShootSearch,
       onUpdateShootSearch,
+      activeFilterLabels,
+      shootListFilters,
+      onlyShootsWithIssues,
+      toggleShootListFilter,
     }
   },
   data () {
@@ -275,10 +286,8 @@ export default {
     ]),
     ...mapState(useShootStore, [
       'shootList',
-      'shootListFilters',
       'loading',
       'selectedShoot',
-      'onlyShootsWithIssues',
       'numberOfNewItemsSinceFreeze',
       'focusMode',
       'sortBy',
@@ -288,7 +297,6 @@ export default {
       'shootSortBy',
       'shootCustomSelectedColumns',
       'shootCustomSortBy',
-      'allProjectsShootFilter',
       'operatorFeatures',
     ]),
     defaultSortBy () {
@@ -628,20 +636,14 @@ export default {
         : ''
     },
     headlineSubtitle () {
-      const subtitle = []
-      if (!this.projectScope && this.showOnlyShootsWithIssues) {
-        subtitle.push('Hide: Healthy Clusters')
-        if (this.isFilterActive('progressing')) {
-          subtitle.push('Progressing Clusters')
-        }
-        if (this.isFilterActive('noOperatorAction')) {
-          subtitle.push('User Errors')
-        }
-        if (this.isFilterActive('hideTicketsWithLabel')) {
-          subtitle.push('Tickets with Ignore Labels')
-        }
+      if (this.projectScope || !this.showOnlyShootsWithIssues) {
+        return ''
       }
-      return join(subtitle, ', ')
+      const all = ['Healthy Clusters', ...this.activeFilterLabels]
+      const shown = all.slice(0, 2).join(', ')
+      const remaining = all.length - 2
+      const suffix = remaining > 0 ? ` & ${remaining} more` : ''
+      return `Excluding: ${shown}${suffix}`
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
@@ -684,7 +686,6 @@ export default {
   },
   methods: {
     ...mapActions(useShootStore, [
-      'toogleShootListFilter',
       'subscribeShoots',
       'sortItems',
       'searchItems',
@@ -728,7 +729,7 @@ export default {
       this.sortByInternal = this.defaultSortBy
     },
     toggleFilter ({ value: key }) {
-      this.toogleShootListFilter(key)
+      this.toggleShootListFilter(key)
       if (key === 'onlyShootsWithIssues') {
         this.subscribeShoots()
       }
