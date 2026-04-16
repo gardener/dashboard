@@ -35,6 +35,7 @@ import { useCredentialStore } from '../credential'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
 import { useSeedStore } from '../seed'
+import { createSynchronizeLock } from '../helper'
 
 import {
   constants,
@@ -45,7 +46,6 @@ import {
   shootHasIssue,
 } from './helper'
 
-import isEqual from 'lodash/isEqual'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
@@ -294,23 +294,7 @@ const useShootStore = defineStore('shoot', () => {
     })(this)
   }
 
-  const synchronizeLock = {
-    expiresAt: 0,
-    options: null,
-    aquire (options) {
-      if (isEqual(this.options, options) && this.expiresAt > Date.now()) {
-        logger.warn('Detected concurrent synchronization attempts for the same shoot subscription')
-        return false
-      }
-      this.expiresAt = Date.now() + 30_000
-      this.options = { ...options }
-      return true
-    },
-    release () {
-      this.expiresAt = 0
-      this.options = null
-    },
-  }
+  const synchronizeLock = createSynchronizeLock('shoot')
 
   function synchronize () {
     const shootStore = this
@@ -376,7 +360,7 @@ const useShootStore = defineStore('shoot', () => {
     const fetchData = async options => {
       let throttleDelay
       // check if a synchronize operation with the same options is already in progress and hasn't expired.
-      if (!synchronizeLock.aquire(options)) {
+      if (!synchronizeLock.acquire(options)) {
         return
       }
       try {
