@@ -48,6 +48,7 @@ export function useSocketEventHandler (useStore, options = {}) {
     socketStore = useSocketStore(),
     visibility = useDocumentVisibility(),
     createOperator = createDefaultOperator,
+    getSynchronizeOptions,
   } = options
 
   const eventMap = new Map([])
@@ -67,7 +68,10 @@ export function useSocketEventHandler (useStore, options = {}) {
           uids.push(uid)
         }
       }
-      const items = await socketStore.synchronize(pluralName, uids)
+      const synchronizeOptions = getSynchronizeOptions
+        ? getSynchronizeOptions(store)
+        : undefined
+      const items = await socketStore.synchronize(pluralName, uids, synchronizeOptions)
       for (const item of items) {
         if (item.kind !== 'Status') {
           uidMap.set(item.metadata.uid, item)

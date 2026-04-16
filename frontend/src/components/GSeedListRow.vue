@@ -31,6 +31,22 @@ SPDX-License-Identifier: Apache-2.0
           hide-unmanaged-chip
         />
       </template>
+      <template v-else-if="header.key === 'shootCount'">
+        <g-seed-capacity-indicator
+          :allocatable-shoots="seedAllocatableShoots"
+          :shoot-count="seedShootCount"
+        />
+      </template>
+      <template v-else-if="header.key === 'unhealthyShoots'">
+        <div class="d-flex align-center justify-center">
+          <g-shoot-health-donut
+            :shoot-count="seedShootCount"
+            :total-unhealthy-shoots="seedTotalUnhealthyShoots"
+            :matching-unhealthy-shoots="seedUnhealthyShoots"
+            :active-filter-labels="activeFilterLabels"
+          />
+        </div>
+      </template>
       <template v-else-if="header.key === 'lastOperation'">
         <div class="d-flex align-center justify-center">
           <g-seed-status />
@@ -99,6 +115,8 @@ import {
 import { useRoute } from 'vue-router'
 
 import GManagedSeedShootLink from '@/components/GManagedSeedShootLink.vue'
+import GSeedCapacityIndicator from '@/components/Seeds/GSeedCapacityIndicator.vue'
+import GShootHealthDonut from '@/components/GShootHealthDonut.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GVendor from '@/components/GVendor.vue'
 import GSeedStatus from '@/components/GSeedStatus.vue'
@@ -110,6 +128,7 @@ import GScrollContainer from '@/components/GScrollContainer'
 
 import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
+import { useShootListFilters } from '@/composables/useShootListFilters'
 
 const props = defineProps({
   modelValue: {
@@ -135,12 +154,18 @@ const {
   seedSchedulingVisible,
   seedKubernetesVersion,
   seedGardenerVersion,
+  seedAllocatableShoots,
+  seedShootCount,
+  seedTotalUnhealthyShoots,
+  seedUnhealthyShoots,
   seedCreationTimestamp,
 } = useProvideSeedItem(seedItem)
 
 const {
   managedSeedShootName,
 } = useProvideManagedSeedShoot(seedName)
+
+const { activeFilterLabels } = useShootListFilters()
 
 const seedItemLink = computed(() => ({
   name: 'SeedItem',

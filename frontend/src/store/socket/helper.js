@@ -19,6 +19,7 @@ export function createSocket (state, context) {
     ticketStore,
     projectStore,
     seedStore,
+    seedStatStore,
     managedSeedStore,
     managedSeedShootStore,
   } = context
@@ -115,6 +116,7 @@ export function createSocket (state, context) {
     state.active = socket.active
     setConnected(socket.connected)
     shootStore.synchronize()
+    seedStatStore.synchronize()
   })
 
   socket.on('disconnect', reason => {
@@ -220,6 +222,10 @@ export function createSocket (state, context) {
 
   socket.on('seeds', event => {
     seedStore.handleEvent(event)
+  })
+
+  socket.on('seedstats', event => {
+    seedStatStore.handleEvent(event)
   })
 
   socket.on('managedseeds', event => {

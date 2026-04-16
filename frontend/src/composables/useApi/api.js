@@ -252,6 +252,19 @@ export function getSeeds () {
   return getResource('/api/seeds')
 }
 
+export function getSeedStats ({ unhealthyFilterMask } = {}) {
+  return getResource(withQuery('/api/seedstats', {
+    unhealthyFilterMask,
+  }))
+}
+
+export function getSeedStat ({ name, unhealthyFilterMask } = {}) {
+  name = encodeURIComponent(name)
+  return getResource(withQuery(`/api/seedstats/${name}`, {
+    unhealthyFilterMask,
+  }))
+}
+
 /* Managed Seeds */
 
 export function getManagedSeedsForGardenNamespace () {
@@ -463,6 +476,8 @@ export default {
   createShootAdminKubeconfig,
   getCloudProfiles,
   getSeeds,
+  getSeedStats,
+  getSeedStat,
   getManagedSeedsForGardenNamespace,
   getManagedSeedShootsForGardenNamespace,
   getProjects,

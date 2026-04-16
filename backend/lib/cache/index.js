@@ -94,6 +94,10 @@ class Cache extends Map {
     informer.on('delete', del)
   }
 
+  getShootsBySeedName (seedName) {
+    return this.#seedNameToShoots.get(seedName)?.values() ?? []
+  }
+
   getCloudProfiles () {
     return this.get('cloudprofiles').list()
   }
@@ -236,6 +240,9 @@ export default {
   },
   getTicketCache () {
     return cache.getTicketCache()
+  },
+  getShootsBySeedName (seedName) {
+    return cache.getShootsBySeedName(seedName)
   },
   getByUid (kind, uid) {
     switch (kind) {

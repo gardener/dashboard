@@ -12,6 +12,7 @@ import openapiRoute from '../openapi/index.js'
 import userRoute from './user.js'
 import cloudprofilesRoute from './cloudprofiles.js'
 import seedsRoute from './seeds.js'
+import seedStatsRoute from './seedstats.js'
 import managedSeedsRoute from './managedseeds.js'
 import managedSeedShootsRoute from './managedseedshoots.js'
 import gardenerExtensionsRoute from './gardenerExtensions.js'
@@ -30,6 +31,7 @@ const routes = {
   '/user': userRoute,
   '/cloudprofiles': cloudprofilesRoute,
   '/seeds': seedsRoute,
+  '/seedstats': seedStatsRoute,
   '/namespaces/:namespace/managedseeds': managedSeedsRoute,
   '/namespaces/:namespace/managedseed-shoots': managedSeedShootsRoute,
   '/gardenerextensions': gardenerExtensionsRoute,
