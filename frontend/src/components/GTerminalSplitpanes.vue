@@ -31,11 +31,15 @@ SPDX-License-Identifier: Apache-2.0
         />
       </template>
     </g-splitpane>
-    <g-create-terminal-session-dialog />
+    <g-create-terminal-session-dialog v-if="hasShootTerminalAccess" />
   </div>
 </template>
 
 <script>
+import { storeToRefs } from 'pinia'
+
+import { useAuthzStore } from '@/store/authz'
+
 import GSplitpane from '@/components/GSplitpane.vue'
 import GTerminal from '@/components/GTerminal.vue'
 import GCreateTerminalSessionDialog from '@/components/dialogs/GCreateTerminalSessionDialog.vue'
@@ -52,6 +56,8 @@ export default {
   },
   inject: ['api'],
   setup () {
+    const authzStore = useAuthzStore()
+    const { hasShootTerminalAccess } = storeToRefs(authzStore)
     const {
       terminalCoordinates,
       hasShootWorkerGroups,
@@ -64,6 +70,7 @@ export default {
     } = useTerminalSplitpanes()
 
     return {
+      hasShootTerminalAccess,
       terminalCoordinates,
       hasShootWorkerGroups,
       splitpaneTree,
