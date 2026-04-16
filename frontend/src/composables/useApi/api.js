@@ -21,6 +21,17 @@ function getResource (url) {
   return request('GET', url)
 }
 
+function withQuery (url, query = {}) {
+  const filteredQueryEntries = Object.entries(query)
+    .filter(([, value]) => typeof value !== 'undefined' && value !== null)
+
+  const search = new URLSearchParams(filteredQueryEntries).toString()
+
+  return search
+    ? `${url}?${search}`
+    : url
+}
+
 function deleteResource (url) {
   return request('DELETE', url)
 }
@@ -98,19 +109,9 @@ export function getIssuesAndComments ({ namespace, name }) {
 
 /* Shoot Clusters */
 
-export function getShoots ({ namespace, labelSelector, useCache }) {
-  const query = {}
-  if (labelSelector) {
-    query.labelSelector = labelSelector
-  }
-  if (useCache) {
-    query.useCache = true
-  }
-  const search = Object.keys(query).length
-    ? '?' + new URLSearchParams(query).toString()
-    : ''
+export function getShoots ({ namespace, labelSelector }) {
   namespace = encodeURIComponent(namespace)
-  return getResource(`/api/namespaces/${namespace}/shoots` + search)
+  return getResource(withQuery(`/api/namespaces/${namespace}/shoots`, { labelSelector }))
 }
 
 export function getShoot ({ namespace, name }) {

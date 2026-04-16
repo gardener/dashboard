@@ -211,11 +211,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
-  const shootListFetchFromCache = useLocalStorage('projects/shoot-list/fetch-from-cache', false, {
-    serializer: StorageSerializers.flag,
-    writeDefaults: false,
-  })
-
   const seedSelectedColumns = useLocalStorage('seeds/seed-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -278,7 +273,6 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     seedSelectedColumns,
     seedSortBy,
     allProjectsShootFilter,
-    shootListFetchFromCache,
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTreeRef,

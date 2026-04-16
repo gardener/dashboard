@@ -13,8 +13,8 @@ import flatMap from 'lodash/flatMap'
 import map from 'lodash/map'
 import some from 'lodash/some'
 
-export function errorCodesFromArray (array) {
-  return uniq(compact(flatMap(array, 'codes')))
+export function errorCodesFromArray (items) {
+  return uniq(compact(flatMap(items, 'codes')))
 }
 
 export function isUserError (errorCodesArray) {

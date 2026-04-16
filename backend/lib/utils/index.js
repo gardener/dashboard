@@ -262,6 +262,10 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
+function isTruthyValue (value) {
+  return ['1', 't', 'T', 'true', 'TRUE', 'True'].includes(value)
+}
+
 function getSeedIngressDomain (seed) {
   return _.get(seed, ['spec', 'ingress', 'domain'])
 }
@@ -292,6 +296,7 @@ export {
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
+  isTruthyValue,
   getSeedIngressDomain,
   isSeedUnreachable,
 }

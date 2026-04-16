@@ -53,3 +53,6 @@ kubeconfig*
 
 # husky managed hooks
 .husky/user-config
+
+# Claude Code local settings
+.claude/settings.local.json
