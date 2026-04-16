@@ -464,6 +464,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@epic-web/invariant", [\
+      ["npm:1.0.0", {\
+        "packageLocation": "./.yarn/cache/@epic-web-invariant-npm-1.0.0-a4ac7c9c5e-72dbeb026e.zip/node_modules/@epic-web/invariant/",\
+        "packageDependencies": [\
+          ["@epic-web/invariant", "npm:1.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@esbuild/aix-ppc64", [\
       ["npm:0.25.1", {\
         "packageLocation": "./.yarn/unplugged/@esbuild-aix-ppc64-npm-0.25.1-01938a271f/node_modules/@esbuild/aix-ppc64/",\
@@ -900,7 +909,7 @@ const RAW_RUNTIME_STATE =
           ["body-parser", "npm:2.2.2"],\
           ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
-          ["cross-env", "npm:7.0.3"],\
+          ["cross-env", "npm:10.1.0"],\
           ["dockerfile-ast", "npm:0.7.1"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.32.0"],\
           ["eslint-plugin-import", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:2.32.0"],\
@@ -5080,10 +5089,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["cross-env", [\
-      ["npm:7.0.3", {\
-        "packageLocation": "./.yarn/cache/cross-env-npm-7.0.3-96d81820f4-f3765c2574.zip/node_modules/cross-env/",\
+      ["npm:10.1.0", {\
+        "packageLocation": "./.yarn/cache/cross-env-npm-10.1.0-d2d02f62e5-834a862db4.zip/node_modules/cross-env/",\
         "packageDependencies": [\
-          ["cross-env", "npm:7.0.3"],\
+          ["@epic-web/invariant", "npm:1.0.0"],\
+          ["cross-env", "npm:10.1.0"],\
           ["cross-spawn", "npm:7.0.6"]\
         ],\
         "linkType": "HARD"\
