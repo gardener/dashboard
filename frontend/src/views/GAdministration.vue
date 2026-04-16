@@ -446,6 +446,7 @@ SPDX-License-Identifier: Apache-2.0
                             :model-value="resourceQuota.percentage"
                             :color="resourceQuota.progressColor"
                             :height="8"
+                            rounded
                           />
                         </div>
                       </td>

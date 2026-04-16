@@ -37,7 +37,7 @@ async function subscribe (socket, { namespace, name, labelSelector }) {
   const user = helper.getUserFromSocket(socket)
 
   const joinRoom = room => {
-    logger.debug('User %s joined rooms [%s]', user.id, room)
+    logger.debug('User %s joined room [%s]', user.id, room)
     return socket.join(room)
   }
 
