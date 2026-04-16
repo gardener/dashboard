@@ -1557,7 +1557,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@eslint-eslintrc-npm-2.1.4-1ff4b5f908-32f67052b8.zip/node_modules/@eslint/eslintrc/",\
         "packageDependencies": [\
           ["@eslint/eslintrc", "npm:2.1.4"],\
-          ["ajv", "npm:6.12.6"],\
+          ["ajv", "npm:6.14.0"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
           ["espree", "npm:9.6.1"],\
           ["globals", "npm:13.24.0"],\
@@ -1573,7 +1573,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@eslint-eslintrc-npm-3.3.1-c3967fc0c3-b0e63f3bc5.zip/node_modules/@eslint/eslintrc/",\
         "packageDependencies": [\
           ["@eslint/eslintrc", "npm:3.3.1"],\
-          ["ajv", "npm:6.12.6"],\
+          ["ajv", "npm:6.14.0"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
           ["espree", "npm:10.4.0"],\
           ["globals", "npm:14.0.0"],\
@@ -5597,10 +5597,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["ajv", [\
-      ["npm:6.12.6", {\
-        "packageLocation": "./.yarn/cache/ajv-npm-6.12.6-4b5105e2b2-41e23642cb.zip/node_modules/ajv/",\
+      ["npm:6.14.0", {\
+        "packageLocation": "./.yarn/cache/ajv-npm-6.14.0-41f32f2ba8-a2bc39b055.zip/node_modules/ajv/",\
         "packageDependencies": [\
-          ["ajv", "npm:6.12.6"],\
+          ["ajv", "npm:6.14.0"],\
           ["fast-deep-equal", "npm:3.1.3"],\
           ["fast-json-stable-stringify", "npm:2.1.0"],\
           ["json-schema-traverse", "npm:0.4.1"],\
@@ -7762,7 +7762,7 @@ const RAW_RUNTIME_STATE =
           ["@humanwhocodes/module-importer", "npm:1.0.1"],\
           ["@nodelib/fs.walk", "npm:1.2.8"],\
           ["@ungap/structured-clone", "npm:1.3.0"],\
-          ["ajv", "npm:6.12.6"],\
+          ["ajv", "npm:6.14.0"],\
           ["chalk", "npm:4.1.2"],\
           ["cross-spawn", "npm:7.0.6"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
@@ -7820,7 +7820,7 @@ const RAW_RUNTIME_STATE =
           ["@types/estree", "npm:1.0.8"],\
           ["@types/jiti", null],\
           ["@types/json-schema", "npm:7.0.15"],\
-          ["ajv", "npm:6.12.6"],\
+          ["ajv", "npm:6.14.0"],\
           ["chalk", "npm:4.1.2"],\
           ["cross-spawn", "npm:7.0.6"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
