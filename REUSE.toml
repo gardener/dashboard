@@ -37,8 +37,6 @@ path = [
   ".pnp.loader.mjs",
   "yarn.lock",
   "REUSE.toml",
-  ".dependency-cruiser.mjs",
-  "diagram/**",
   ".husky/**",
   ".ocm/branch-info.yaml",
   "frontend/public/robots.txt"
