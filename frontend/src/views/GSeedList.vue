@@ -72,10 +72,14 @@ import {
   computed,
   reactive,
   provide,
+  onUnmounted,
+  watch,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 
+import { useAppStore } from '@/store/app'
 import { useSeedStore } from '@/store/seed'
+import { useSeedStatStore } from '@/store/seedStat'
 import { useManagedSeedStore } from '@/store/managedSeed'
 import { useSocketStore } from '@/store/socket'
 import { useLocalStorageStore } from '@/store/localStorage'
@@ -96,10 +100,13 @@ import { errorCodesFromArray } from '@/utils/errorCodes'
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
+import find from 'lodash/find'
 import map from 'lodash/map'
 import join from 'lodash/join'
 
+const appStore = useAppStore()
 const seedStore = useSeedStore()
+const seedStatStore = useSeedStatStore()
 const managedSeedStore = useManagedSeedStore()
 const socketStore = useSocketStore()
 const localStorageStore = useLocalStorageStore()
@@ -164,6 +171,33 @@ const allHeaders = computed(() => [
     defaultSelected: true,
     hidden: false,
     value: item => item,
+  },
+  {
+    title: 'CAPACITY',
+    key: 'shootCount',
+    sortable: true,
+    align: 'center',
+    defaultSelected: true,
+    hidden: false,
+    value: item => {
+      const shootCount = seedStatStore.shootCountForSeed(get(item, ['metadata', 'name'])) ?? 0
+      const allocatableShoots = Number(get(item, ['status', 'allocatable', 'shoots']))
+
+      if (Number.isFinite(allocatableShoots) && allocatableShoots > 0) {
+        return shootCount / allocatableShoots
+      }
+
+      return shootCount
+    },
+  },
+  {
+    title: 'SHOOT HEALTH',
+    key: 'unhealthyShoots',
+    sortable: true,
+    align: 'center',
+    defaultSelected: true,
+    hidden: false,
+    value: item => seedStatStore.unhealthyShootsForSeed(get(item, ['metadata', 'name'])) ?? 0,
   },
   {
     title: 'ACCESS RESTRICTIONS',
@@ -279,4 +313,42 @@ function resetTableSettings () {
 function getItemKey (item, fallback) {
   return get(item, ['metadata', 'uid'], fallback)
 }
+
+function isHeaderSelected (key) {
+  const header = find(headers.value, ['key', key])
+  return header?.selected ?? false
+}
+
+const seedStatsSubscriptionOptions = computed(() => {
+  const shouldSubscribeToSeedStats = isHeaderSelected('unhealthyShoots') || isHeaderSelected('shootCount')
+  if (!shouldSubscribeToSeedStats) {
+    return null
+  }
+
+  return {
+    unhealthyFilterMask: seedStatStore.currentUnhealthyFilterMask,
+  }
+})
+
+watch(seedStatsSubscriptionOptions, async options => {
+  try {
+    if (options) {
+      await seedStatStore.subscribe(options)
+    } else {
+      await seedStatStore.unsubscribe()
+    }
+  } catch (err) {
+    appStore.setError(err)
+  }
+}, {
+  immediate: true,
+})
+
+onUnmounted(async () => {
+  try {
+    await seedStatStore.unsubscribe()
+  } catch (err) {
+    appStore.setError(err)
+  }
+})
 </script>

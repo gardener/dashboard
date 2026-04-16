@@ -11,6 +11,8 @@ import {
   provide,
 } from 'vue'
 
+import { useSeedStatStore } from '@/store/seedStat'
+
 import { useSeedMetadata } from '@/composables/useSeedMetadata'
 
 import { isFailureToleranceTypeZoneSupported } from './helper'
@@ -61,6 +63,11 @@ export function createSeedItemComposable (seedItem) {
   const seedKubernetesVersion = useSeedKubernetesVersion(seedItem)
   const seedGardenerVersion = useSeedGardenerVersion(seedItem)
   const seedAllocatableShoots = useSeedAllocatableShoots(seedItem)
+  const {
+    seedShootCount,
+    seedTotalUnhealthyShoots,
+    seedUnhealthyShoots,
+  } = useSeedStats(seedItem)
   const seedLastOperation = useSeedLastOperation(seedItem)
 
   return {
@@ -101,6 +108,9 @@ export function createSeedItemComposable (seedItem) {
     seedKubernetesVersion,
     seedGardenerVersion,
     seedAllocatableShoots,
+    seedShootCount,
+    seedTotalUnhealthyShoots,
+    seedUnhealthyShoots,
     seedLastOperation,
   }
 }
@@ -229,8 +239,30 @@ export function useSeedGardenerVersion (seedItem) {
 
 export function useSeedAllocatableShoots (seedItem) {
   return computed(() => {
-    return get(seedItem.value, ['status', 'allocatable', 'shoots'])
+    const value = get(seedItem.value, ['status', 'allocatable', 'shoots'])
+    return value == null ? undefined : Number(value)
   })
+}
+
+export function useSeedStats (seedItem) {
+  if (!isRef(seedItem)) {
+    throw new TypeError('First argument `seedItem` must be a ref object')
+  }
+
+  const seedStatStore = useSeedStatStore()
+
+  const seedName = computed(() => get(seedItem.value, ['metadata', 'name']))
+  const seedStat = computed(() => seedStatStore.statByName(seedName.value))
+
+  const seedShootCount = computed(() => seedStat.value?.counts?.shootCount ?? 0)
+  const seedTotalUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.total ?? 0)
+  const seedUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.matching ?? 0)
+
+  return {
+    seedShootCount,
+    seedTotalUnhealthyShoots,
+    seedUnhealthyShoots,
+  }
 }
 
 export function useSeedLastOperation (seedItem) {

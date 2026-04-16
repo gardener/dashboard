@@ -5,15 +5,20 @@
 //
 
 import { get } from 'lodash-es'
+import { getJoinedRooms } from '../io/seedstats.js'
 
 export default (io, informer) => {
   const nsp = io.of('/')
 
-  const handleEvent = (type, newObject, oldObject) => {
-    const path = ['metadata', 'uid']
-    const uid = get(newObject, path, get(oldObject, path))
+  const handleEvent = (type, newObject) => {
+    const uid = get(newObject, ['metadata', 'uid'])
+    const seedName = get(newObject, ['metadata', 'name'])
     const event = { uid, type }
     nsp.to('seeds').emit('seeds', event)
+
+    for (const room of getJoinedRooms(nsp, { seedName })) {
+      nsp.to(room.room).emit('seedstats', event)
+    }
   }
 
   informer.on('add', object => handleEvent('ADDED', object))

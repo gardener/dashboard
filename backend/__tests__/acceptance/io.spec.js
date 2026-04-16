@@ -88,6 +88,19 @@ function createStore (items) {
   return store
 }
 
+function seedShootsBySeedNameIndex (shoots = fixtures.shoots.list()) {
+  const handlers = new Map()
+  cache.indexShootsBySeedName({
+    on (event, handler) {
+      handlers.set(event, handler)
+    },
+  })
+  const add = handlers.get('add')
+  for (const shoot of shoots) {
+    add(shoot)
+  }
+}
+
 function notFoundStatus ({ group, kind, uid }) {
   return {
     kind: 'Status',
@@ -111,23 +124,27 @@ describe('api', function () {
 
   beforeAll(async () => {
     cache.cache.resetTicketCache()
+    const shoots = [
+      ...fixtures.shoots.list(),
+      fixtures.shoots.create({
+        uid: 5,
+        name: 'orphan-shoot',
+        namespace: 'garden',
+        project: 'garden',
+        createdBy: 'admin@example.org',
+        secretBindingName: 'soil-orphan',
+        seed: 'soil-orphan',
+      }),
+    ]
     cache.initialize({
       projects: {
         store: createStore(fixtures.projects.list()),
       },
+      seeds: {
+        store: createStore(fixtures.seeds.list()),
+      },
       shoots: {
-        store: createStore([
-          ...fixtures.shoots.list(),
-          fixtures.shoots.create({
-            uid: 5,
-            name: 'orphan-shoot',
-            namespace: 'garden',
-            project: 'garden',
-            createdBy: 'admin@example.org',
-            secretBindingName: 'soil-orphan',
-            seed: 'soil-orphan',
-          }),
-        ]),
+        store: createStore(shoots),
       },
       managedseeds: {
         store: createStore([
@@ -148,6 +165,7 @@ describe('api', function () {
         ]),
       },
     })
+    seedShootsBySeedNameIndex(shoots)
     agent = await createAgent('io', cache)
     nsp = agent.io.sockets
   })
@@ -185,9 +203,10 @@ describe('api', function () {
       let args
 
       beforeEach(async () => {
-        // authorization check for `canListProjects`, `canListSeeds`,
+        // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
         // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
         mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -198,11 +217,36 @@ describe('api', function () {
         defaultRooms = [
           socket.id,
           ioHelper.sha256(username),
+          'seeds',
           'managedseeds;garden',
           'managedseed-shoots;garden',
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(4)
+        expect(mockRequest).toHaveBeenCalledTimes(5)
         mockRequest.mockClear()
+      })
+
+      it('should subscribe seedstats for all seeds', async function () {
+        await subscribe(socket, 'seedstats', { unhealthyFilterMask: 0 })
+
+        expect(mockRequest).not.toHaveBeenCalled()
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          ...defaultRooms,
+          'seedstats;uf=0',
+        ]))
+
+        await unsubscribe(socket, 'seedstats')
+        expect(getRooms(socket, nsp)).toEqual(new Set(defaultRooms))
+      })
+
+      it('should re-subscribe seedstats for a single seed', async function () {
+        await subscribe(socket, 'seedstats', { unhealthyFilterMask: 0 })
+        await subscribe(socket, 'seedstats', { name: 'infra1-seed', unhealthyFilterMask: 7 })
+
+        expect(mockRequest).not.toHaveBeenCalled()
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          ...defaultRooms,
+          'seedstats;seed=infra1-seed;uf=7',
+        ]))
       })
 
       it('should subscribe shoots for a single cluster', async function () {
@@ -355,6 +399,7 @@ describe('api', function () {
         mockRequest
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
@@ -378,6 +423,7 @@ describe('api', function () {
 
       it('should fail to synchronize managed seed shoots without garden access', async function () {
         mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
@@ -410,9 +456,10 @@ describe('api', function () {
       let defaultRooms
 
       beforeEach(async () => {
-        // authorization check for `canListProjects`, `canListSeeds`,
+        // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
         // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
         mockRequest
+          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
           .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -423,11 +470,22 @@ describe('api', function () {
         defaultRooms = [
           socket.id,
           ioHelper.sha256(username),
+          'seeds',
           'managedseeds;garden',
           'managedseed-shoots;garden',
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(4)
+        expect(mockRequest).toHaveBeenCalledTimes(5)
         mockRequest.mockClear()
+      })
+
+      it('should subscribe seedstats for all seeds', async function () {
+        await subscribe(socket, 'seedstats', { unhealthyFilterMask: 2 })
+
+        expect(mockRequest).not.toHaveBeenCalled()
+        expect(getRooms(socket, nsp)).toEqual(new Set([
+          ...defaultRooms,
+          'seedstats;uf=2',
+        ]))
       })
 
       it('should subscribe shoots for a single cluster', async function () {
@@ -547,6 +605,27 @@ describe('api', function () {
         const items = await synchronize(socket, 'projects', [2])
         expect(items).toMatchSnapshot()
       })
+
+      it('should synchronize seed stats', async function () {
+        const items = await synchronize(socket, 'seedstats', ['seed--infra1-seed'], { unhealthyFilterMask: 0 })
+        expect(items).toEqual([
+          {
+            apiVersion: 'dashboard.gardener.cloud/v1alpha1',
+            kind: 'SeedStat',
+            metadata: {
+              name: 'infra1-seed',
+              uid: 'seed--infra1-seed',
+            },
+            counts: {
+              shootCount: 3,
+              unhealthyShoots: {
+                total: 0,
+                matching: 0,
+              },
+            },
+          },
+        ])
+      })
     })
   })
 
@@ -622,8 +701,10 @@ describe('api', function () {
         refresh_at: Math.ceil(Date.now() / 1000) + 4,
       }
       const user = fixtures.auth.createUser(options)
-      // authorization check for `canListProjects` and `canListSeeds`
+      // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
+      // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
       mockRequest
+        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
         .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -631,7 +712,7 @@ describe('api', function () {
       socket = await agent.connect({
         cookie: await user.cookie,
       })
-      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest).toHaveBeenCalledTimes(5)
       expect(mockSetDisconnectTimeout).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
         expect.objectContaining({

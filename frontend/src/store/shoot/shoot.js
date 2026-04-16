@@ -514,7 +514,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
-      await socketStore.emitSubscribe(value)
+      await socketStore.emitSubscribe('shoots', value)
       setSubscriptionState(state, constants.OPEN)
     } catch (err) {
       logger.error('Failed to open subscription: %s', err.message)
@@ -534,7 +534,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = undefined
     })
     try {
-      await socketStore.emitUnsubscribe()
+      await socketStore.emitUnsubscribe('shoots')
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
       logger.error('Failed to close subscription: %s', err.message)

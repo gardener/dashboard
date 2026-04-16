@@ -121,5 +121,21 @@ describe('composables', () => {
         'error',
       ])
     })
+
+    it('should sort shoot count numerically', () => {
+      const { customKeySort } = useSeedTableSorting()
+
+      expect(customKeySort.shootCount(2, 10)).toBeLessThan(0)
+      expect(customKeySort.shootCount(10, 2)).toBeGreaterThan(0)
+      expect(customKeySort.shootCount(4, 4)).toBe(0)
+    })
+
+    it('should sort unhealthy shoots numerically', () => {
+      const { customKeySort } = useSeedTableSorting()
+
+      expect(customKeySort.unhealthyShoots(0, 1)).toBeLessThan(0)
+      expect(customKeySort.unhealthyShoots(3, 1)).toBeGreaterThan(0)
+      expect(customKeySort.unhealthyShoots(1, 1)).toBe(0)
+    })
   })
 })
