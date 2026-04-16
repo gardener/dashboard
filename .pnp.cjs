@@ -962,7 +962,7 @@ const RAW_RUNTIME_STATE =
           ["supertest", "npm:7.1.4"],\
           ["undici", "npm:7.24.6"],\
           ["unified", "npm:11.0.5"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:13.0.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
         "linkType": "SOFT"\
@@ -1059,7 +1059,7 @@ const RAW_RUNTIME_STATE =
           ["universal-cookie", "npm:7.2.2"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.4.0"],\
           ["url-template", "npm:3.1.1"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:13.0.0"],\
           ["vite", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:7.3.2"],\
           ["vite-plugin-compression", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.5.1"],\
           ["vite-plugin-vuetify", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.1.2"],\
@@ -1100,7 +1100,7 @@ const RAW_RUNTIME_STATE =
           ["lodash-es", "npm:4.18.1"],\
           ["mixwith", "npm:0.1.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:13.0.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
         "packagePeers": [\
@@ -1136,7 +1136,7 @@ const RAW_RUNTIME_STATE =
           ["lodash-es", "npm:4.18.1"],\
           ["mixwith", "npm:0.1.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
-          ["uuid", "npm:11.1.0"],\
+          ["uuid", "npm:13.0.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
         "linkType": "SOFT"\
@@ -12436,10 +12436,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["uuid", [\
-      ["npm:11.1.0", {\
-        "packageLocation": "./.yarn/cache/uuid-npm-11.1.0-61d0d08928-34aa51b987.zip/node_modules/uuid/",\
+      ["npm:13.0.0", {\
+        "packageLocation": "./.yarn/cache/uuid-npm-13.0.0-29831a4f1f-950e4c18d5.zip/node_modules/uuid/",\
         "packageDependencies": [\
-          ["uuid", "npm:11.1.0"]\
+          ["uuid", "npm:13.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
