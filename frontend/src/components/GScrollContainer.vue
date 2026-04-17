@@ -43,7 +43,7 @@ const { width, height } = useElementSize(scrollRef)
 
 const isVertical = computed(() => props.direction === 'y')
 
-const fadeHeight = computed(() => {
+const fadeLength = computed(() => {
   const size = isVertical.value ? height.value : width.value
   return Math.max(40, size / 2)
 })
@@ -58,7 +58,7 @@ const fadeSize = computed(() => {
     ? el.scrollHeight - (y.value + height.value)
     : el.scrollWidth - (x.value + width.value)
 
-  return Math.min(fadeHeight.value, Math.max(0, remaining))
+  return Math.min(fadeLength.value, Math.max(0, remaining))
 })
 
 const containerStyle = computed(() => {
