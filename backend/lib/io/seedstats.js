@@ -76,7 +76,12 @@ function parseRoomName (room) {
   throw new TypeError(`Invalid seedstats room: ${room}`)
 }
 
-function getJoinedRooms (nsp, { seedName } = {}) {
+function getJoinedRooms (nsp, { seedName }) {
+  if (!seedName) {
+    logger.warn('getJoinedRooms called without seedName')
+    return []
+  }
+
   const adapterRooms = nsp?.adapter?.rooms
   if (!adapterRooms) {
     return []

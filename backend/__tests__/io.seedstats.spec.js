@@ -61,7 +61,7 @@ describe('io/seedstats', () => {
       },
     }
 
-    expect(() => getJoinedRooms(nsp)).toThrow(new TypeError('Invalid seedstats room: invalid-room'))
+    expect(() => getJoinedRooms(nsp, { seedName: 'seed-1' })).toThrow(new TypeError('Invalid seedstats room: invalid-room'))
   })
 
   it('should reject unauthorized seedstats subscriptions', async () => {

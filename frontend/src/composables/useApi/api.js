@@ -259,6 +259,9 @@ export function getSeedStats ({ unhealthyFilterMask } = {}) {
 }
 
 export function getSeedStat ({ name, unhealthyFilterMask } = {}) {
+  if (!name) {
+    throw new TypeError('getSeedStat requires a name parameter')
+  }
   name = encodeURIComponent(name)
   return getResource(withQuery(`/api/seedstats/${name}`, {
     unhealthyFilterMask,
