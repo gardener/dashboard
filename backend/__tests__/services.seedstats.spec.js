@@ -113,12 +113,16 @@ describe('services/seedstats', () => {
   ]
 
   const ticketCache = {
-    getIssues: vi.fn(() => issues),
+    getIssuesForShoot: vi.fn(({ name, projectName }) =>
+      issues.filter(issue => issue.metadata.projectName === projectName && issue.metadata.name === name),
+    ),
   }
 
   beforeEach(() => {
     vi.resetAllMocks()
-    ticketCache.getIssues.mockReturnValue(issues)
+    ticketCache.getIssuesForShoot.mockImplementation(({ name, projectName }) =>
+      issues.filter(issue => issue.metadata.projectName === projectName && issue.metadata.name === name),
+    )
     config.frontend.ticket = {
       hideClustersWithLabels: ['suppress'],
     }

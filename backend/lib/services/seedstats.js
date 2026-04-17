@@ -251,8 +251,7 @@ function getTicketsForShoot (shoot) {
 
   return cache
     .getTicketCache()
-    .getIssues()
-    .filter(issue => issue?.metadata?.projectName === projectName && issue?.metadata?.name === shootName)
+    .getIssuesForShoot({ projectName, name: shootName })
 }
 
 function getProjectNameForShoot (shoot) {

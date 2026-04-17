@@ -254,9 +254,9 @@ export function useSeedStats (seedItem) {
   const seedName = computed(() => get(seedItem.value, ['metadata', 'name']))
   const seedStat = computed(() => seedStatStore.statByName(seedName.value))
 
-  const seedShootCount = computed(() => seedStat.value?.counts?.shootCount ?? 0)
-  const seedTotalUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.total ?? 0)
-  const seedUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.matching ?? 0)
+  const seedShootCount = computed(() => seedStat.value?.counts?.shootCount)
+  const seedTotalUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.total)
+  const seedUnhealthyShoots = computed(() => seedStat.value?.counts?.unhealthyShoots?.matching)
 
   return {
     seedShootCount,

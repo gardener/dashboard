@@ -186,6 +186,39 @@ describe('cache', function () {
       })
     })
 
+    describe('#getIssuesForShoot', function () {
+      it('should return issues matching projectName and name', function () {
+        const result = cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })
+        expect(result).toEqual([firstIssue, secondIssue])
+        expect(emitSpy).not.toHaveBeenCalled()
+      })
+
+      it('should return empty array for unknown shoot', function () {
+        const result = cache.getIssuesForShoot({ projectName: 'test', name: 'unknown' })
+        expect(result).toEqual([])
+      })
+
+      it('should update index when issue is removed', function () {
+        cache.removeIssue({ issue: firstIssue })
+        const result = cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })
+        expect(result).toEqual([secondIssue])
+      })
+
+      it('should update index when issue is updated with new shoot', function () {
+        const updatedIssue = {
+          metadata: {
+            number: 1,
+            updated_at: new Date(Date.now() + 60000).toISOString(),
+            name: 'bar',
+            projectName: 'test',
+          },
+        }
+        cache.addOrUpdateIssue({ issue: updatedIssue })
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toEqual([secondIssue])
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'bar' })).toEqual([thirdIssue, updatedIssue])
+      })
+    })
+
     describe('#getCommentsForIssue', function () {
       it('should return the all comments for the first issue', function () {
         const comments = cache.getCommentsForIssue({ issueNumber: 1 })

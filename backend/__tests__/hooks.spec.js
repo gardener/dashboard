@@ -112,6 +112,7 @@ describe('hooks', () => {
         hooks.constructor.createInformers = mockCreateInformers = vi.fn(() => informers)
         cache.initialize = vi.fn()
         cache.indexProjectsByNamespace = vi.fn()
+        cache.indexShootsBySeedName = vi.fn()
         cache.getTicketCache = vi.fn(() => ticketCache)
         io.mockReturnValue(ioInstance)
       })
@@ -135,6 +136,9 @@ describe('hooks', () => {
 
         expect(cache.indexProjectsByNamespace).toHaveBeenCalledTimes(1)
         expect(cache.indexProjectsByNamespace.mock.calls[0]).toEqual([informers.projects])
+
+        expect(cache.indexShootsBySeedName).toHaveBeenCalledTimes(1)
+        expect(cache.indexShootsBySeedName.mock.calls[0]).toEqual([informers.shoots])
 
         expect(io).toHaveBeenCalledTimes(1)
         expect(io.mock.calls[0]).toEqual([server, expect.anything()])
