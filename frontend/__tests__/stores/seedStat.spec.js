@@ -123,7 +123,9 @@ describe('stores', () => {
 
     it('should cancel in-flight subscribe on unsubscribe', async () => {
       let fetchResolve
-      const fetchPromise = new Promise(resolve => { fetchResolve = resolve })
+      const fetchPromise = new Promise(resolve => {
+        fetchResolve = resolve
+      })
       vi.spyOn(api, 'getSeedStats').mockReturnValue(fetchPromise)
       vi.spyOn(socketStore, 'connected', 'get').mockReturnValue(true)
       const emitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockResolvedValue()
@@ -148,7 +150,9 @@ describe('stores', () => {
 
     it('should cancel in-flight subscribe(A) when subscribe(B) is called', async () => {
       let fetchResolveA
-      const fetchPromiseA = new Promise(resolve => { fetchResolveA = resolve })
+      const fetchPromiseA = new Promise(resolve => {
+        fetchResolveA = resolve
+      })
       const fetchResultB = { data: [{ metadata: { name: 'seed-b' } }] }
 
       vi.spyOn(api, 'getSeedStats')
