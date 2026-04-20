@@ -105,7 +105,6 @@ import {
   watch,
 } from 'vue'
 
-import { useAppStore } from '@/store/app'
 import { useSeedStatStore } from '@/store/seedStat'
 
 import GSeedCapacityIndicator from '@/components/Seeds/GSeedCapacityIndicator.vue'
@@ -115,7 +114,6 @@ import GVendor from '@/components/GVendor.vue'
 import { useSeedItem } from '@/composables/useSeedItem/index'
 import { useShootListFilters } from '@/composables/useShootListFilters'
 
-const appStore = useAppStore()
 const seedStatStore = useSeedStatStore()
 
 const {
@@ -152,25 +150,17 @@ const seedStatsSubscriptionOptions = computed(() => {
   }
 })
 
-watch(seedStatsSubscriptionOptions, async options => {
-  try {
-    if (options) {
-      await seedStatStore.subscribe(options)
-    } else {
-      await seedStatStore.unsubscribe()
-    }
-  } catch (err) {
-    appStore.setError(err)
+watch(seedStatsSubscriptionOptions, options => {
+  if (options) {
+    seedStatStore.subscribe(options)
+  } else {
+    seedStatStore.unsubscribe()
   }
 }, {
   immediate: true,
 })
 
-onUnmounted(async () => {
-  try {
-    await seedStatStore.unsubscribe()
-  } catch (err) {
-    appStore.setError(err)
-  }
+onUnmounted(() => {
+  seedStatStore.unsubscribe()
 })
 </script>

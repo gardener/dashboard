@@ -11,11 +11,11 @@ import {
 import {
   ref,
   computed,
+  watch,
 } from 'vue'
 
 import { useAppStore } from '@/store/app'
 import { useSocketStore } from '@/store/socket'
-import { createSynchronizeLock } from '@/store/helper'
 
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
@@ -36,8 +36,7 @@ export const useSeedStatStore = defineStore('seedstat', () => {
 
   const list = ref(null)
   const subscription = ref(null)
-
-  const synchronizeLock = createSynchronizeLock('seedstat')
+  const refreshNonce = ref(0)
   const subscribed = ref(false)
 
   const isInitial = computed(() => {
@@ -58,10 +57,10 @@ export const useSeedStatStore = defineStore('seedstat', () => {
     const response = options.name
       ? await api.getSeedStat(options)
       : await api.getSeedStats(options)
-    list.value = options.name
+    const data = options.name
       ? [response.data]
       : response.data
-    return list.value
+    return data
   }
 
   async function openSubscription (options) {
@@ -79,47 +78,57 @@ export const useSeedStatStore = defineStore('seedstat', () => {
     subscribed.value = false
   }
 
-  async function subscribe (options = {}) {
-    const sameSubscription = isEqual(subscription.value, options)
-    if (sameSubscription && list.value !== null) {
-      if (!subscribed.value && socketStore.connected) {
-        await openSubscription(options)
+  watch(
+    [subscription, refreshNonce],
+    async ([newSub], [oldSub], onCleanup) => {
+      let cancelled = false
+      onCleanup(() => {
+        cancelled = true
+      })
+
+      const subChanged = !isEqual(newSub, oldSub)
+      if (subChanged && oldSub) {
+        await closeSubscription()
+        if (cancelled) {
+          return
+        }
       }
-      return
-    }
 
-    if (subscribed.value || subscription.value) {
-      await closeSubscription()
-    }
+      if (!newSub) {
+        list.value = null
+        subscribed.value = false
+        return
+      }
 
+      try {
+        const data = await fetchSeedStats(newSub)
+        if (cancelled) {
+          return
+        }
+        list.value = data
+        await openSubscription(newSub)
+      } catch (err) {
+        if (!cancelled) {
+          appStore.setError(err)
+        }
+      }
+    },
+    { deep: true },
+  )
+
+  function subscribe (options = {}) {
     subscription.value = options
-    await fetchSeedStats(options)
-    await openSubscription(options)
   }
 
-  async function unsubscribe () {
-    if (subscribed.value || subscription.value) {
-      await closeSubscription()
-    }
+  function unsubscribe () {
     subscription.value = null
-    list.value = null
   }
 
-  async function synchronize () {
+  function synchronize () {
     if (!subscription.value) {
       return
     }
-    if (!synchronizeLock.acquire(subscription.value)) {
-      return
-    }
-    try {
-      await fetchSeedStats(subscription.value)
-      await openSubscription(subscription.value)
-    } catch (err) {
-      appStore.setError(err)
-    } finally {
-      synchronizeLock.release()
-    }
+    refreshNonce.value++
   }
 
   function statByName (name) {
