@@ -37,11 +37,14 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-else-if="header.key === 'readiness'">
-        <div class="d-flex">
+        <g-scroll-container
+          direction="x"
+          hide-scrollbar
+        >
           <g-seed-status-tags
             :identifier="seedName"
           />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-else-if="header.key === 'accessRestrictions'">
         <g-scroll-container class="d-flex flex-wrap justify-center large-container">

@@ -8,7 +8,8 @@ SPDX-License-Identifier: Apache-2.0
   <div
     ref="scrollRef"
     class="scrollable-container"
-    :style="{ '--fadeOpacity': fadeOpacity, '--fadeHeight': `${fadeHeight}px` }"
+    :class="[directionClass, { 'hide-scrollbar': hideScrollbar }]"
+    :style="containerStyle"
   >
     <slot />
   </div>
@@ -24,43 +25,78 @@ import {
   useElementSize,
 } from '@vueuse/core'
 
-const scrollRef = ref(null)
-const { y } = useScroll(scrollRef)
-const { height } = useElementSize(scrollRef)
-
-const fadeHeight = Math.max(40, height.value / 2)
-
-const fadeOpacity = computed(() => {
-  const el = scrollRef.value
-  if (!el) {
-    return false
-  }
-
-  const remainingY = el.scrollHeight - (y.value + height.value)
-  if (remainingY >= fadeHeight) {
-    return 1
-  }
-
-  return remainingY / fadeHeight
+const props = defineProps({
+  direction: {
+    type: String,
+    default: 'y',
+    validator: v => ['x', 'y'].includes(v),
+  },
+  hideScrollbar: {
+    type: Boolean,
+    default: false,
+  },
 })
 
+const scrollRef = ref(null)
+const { x, y } = useScroll(scrollRef)
+const { width, height } = useElementSize(scrollRef)
+
+const isVertical = computed(() => props.direction === 'y')
+
+const fadeLength = computed(() => {
+  const size = isVertical.value ? height.value : width.value
+  return Math.max(40, size / 2)
+})
+
+const fadeSize = computed(() => {
+  const el = scrollRef.value
+  if (!el) {
+    return 0
+  }
+
+  const remaining = isVertical.value
+    ? el.scrollHeight - (y.value + height.value)
+    : el.scrollWidth - (x.value + width.value)
+
+  return Math.min(fadeLength.value, Math.max(0, remaining))
+})
+
+const containerStyle = computed(() => {
+  if (fadeSize.value <= 0) {
+    return {}
+  }
+
+  const gradientDir = isVertical.value ? 'to bottom' : 'to right'
+  const mask = `linear-gradient(${gradientDir}, black calc(100% - ${fadeSize.value}px), transparent)`
+  return {
+    maskImage: mask,
+    WebkitMaskImage: mask,
+  }
+})
+
+const directionClass = computed(() => {
+  return isVertical.value ? 'scroll-y' : 'scroll-x'
+})
 </script>
 
 <style scoped>
-.scrollable-container {
+.scroll-y {
   overflow-y: auto;
 }
 
-.scrollable-container::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: var(--fadeHeight);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(var(--v-theme-surface)));
-  pointer-events: none;
-  opacity: var(--fadeOpacity);
+.scroll-x {
+  overflow-x: auto;
 }
 
+.scroll-x :slotted(*) {
+  min-width: max-content;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 </style>

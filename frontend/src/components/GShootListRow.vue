@@ -113,17 +113,23 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </template>
       <template v-if="cell.header.key === 'readiness'">
-        <div class="d-flex">
+        <g-scroll-container
+          direction="x"
+          hide-scrollbar
+        >
           <g-status-tags />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'seedReadiness'">
-        <div class="d-flex">
+        <g-scroll-container
+          direction="x"
+          hide-scrollbar
+        >
           <g-seed-status-tags
             :identifier="shootUid"
             :is-stale-shoot="isStaleShoot"
           />
-        </div>
+        </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'controlPlaneHighAvailability'">
         <div class="d-flex justify-center">
