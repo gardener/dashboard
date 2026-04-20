@@ -219,9 +219,8 @@ export default {
     const isHibernationPreventingRotation = computed(() => {
       return isShootStatusHibernated.value &&
         includes(['rotate-credentials-start',
-          'rotate-etcd-encryption-key-start',
           'rotate-credentials-complete',
-          'rotate-etcd-encryption-key-complete',
+          'rotate-etcd-encryption-key',
           'rotate-serviceaccount-key-start',
           'rotate-serviceaccount-key-complete'],
         operation.value)
@@ -305,7 +304,7 @@ export default {
             'The current observability passwords will be invalidated',
             'New observability passwords will be generated',
             authnStore.isAdmin
-              ? 'Note Operator: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually'
+              ? 'Operator Note: This will invalidate the user observability passwords. Operator passwords will be rotated automatically. There is no way to trigger the rotation manually'
               : undefined,
           ]),
         },
@@ -317,31 +316,21 @@ export default {
           successMessage: `Rotation of SSH key pair started for ${shootName.value}`,
           heading: 'Do you want to start the rotation of SSH key pair for worker nodes?',
           actions: [
-            'The current SSH key pair will be revoked.',
+            'The current SSH key pair will be revoked',
             'A new SSH key pair will be generated',
           ],
         },
-        'rotate-etcd-encryption-key-start': {
+        'rotate-etcd-encryption-key': {
           caption: showLoadingIndicator.value
-            ? 'Preparing etcd encryption key rotation'
-            : 'Prepare ETCD Encryption Key Rotation',
-          errorMessage: 'Could not prepare the rotation of etcd encryption key',
-          successMessage: `Preparing rotation of etcd encryption key for ${shootName.value}`,
-          heading: 'Do you want to prepare the rotation of etcd encryption key?',
+            ? 'Rotating ETCD encryption key'
+            : 'Start ETCD Encryption Key Rotation',
+          errorMessage: 'Could not start the rotation of ETCD encryption key',
+          successMessage: `Rotation of ETCD encryption key started for ${shootName.value}`,
+          heading: 'Do you want to start the rotation of ETCD encryption key?',
           actions: [
-            'A new encryption key will be created and added to the bundle (old encryption key will remain in the bundle).',
-            'All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key.',
-          ],
-        },
-        'rotate-etcd-encryption-key-complete': {
-          caption: showLoadingIndicator.value
-            ? 'Completing etcd encryption key rotation'
-            : 'Complete ETCD Encryption Key Rotation',
-          errorMessage: 'Could not complete the rotation of etcd encryption key',
-          successMessage: `Completing rotation of etcd encryption key for ${shootName.value}`,
-          heading: 'Do you want to complete the rotation of etcd encryption key?',
-          actions: [
-            'The old encryption will be dropped from the bundle.',
+            'A new encryption key will be created and added to the bundle',
+            'All Secrets in the cluster will be rewritten by the kube-apiserver so that they become encrypted with the new encryption key',
+            'The old encryption key will be dropped from the bundle',
           ],
         },
         'rotate-serviceaccount-key-start': {
@@ -382,7 +371,7 @@ export default {
           ...hasShootWorkerGroups.value && sshAccessEnabled.value
             ? allComponentTexts['rotate-ssh-keypair'].actions
             : [],
-          ...allComponentTexts['rotate-etcd-encryption-key-start'].actions,
+          ...allComponentTexts['rotate-etcd-encryption-key'].actions,
           ...allComponentTexts['rotate-serviceaccount-key-start'].actions,
         ],
       }
@@ -398,7 +387,6 @@ export default {
         heading: 'Do you want to complete the rotation of all credentials?',
         actions: [
           ...allComponentTexts['rotate-ca-complete'].actions,
-          ...allComponentTexts['rotate-etcd-encryption-key-complete'].actions,
           ...allComponentTexts['rotate-serviceaccount-key-complete'].actions,
         ],
       }

@@ -37,9 +37,8 @@ export const rotationTypes = Object.freeze([
   {
     type: 'etcdEncryptionKey',
     hasRotationStatus: true,
-    startOperation: 'rotate-etcd-encryption-key-start',
-    completionOperation: 'rotate-etcd-encryption-key-complete',
-    twoStep: true,
+    startOperation: 'rotate-etcd-encryption-key',
+    twoStep: false,
     title: 'ETCD Encryption Key',
   },
   {

@@ -31,9 +31,6 @@ describe('composables', () => {
                 certificateAuthorities: {
                   phase: 'Prepared',
                 },
-                etcdEncryptionKey: {
-                  phase: 'Completing',
-                },
                 serviceAccountKey: {
                   phase: 'Completed',
                 },
@@ -44,6 +41,7 @@ describe('composables', () => {
       })
 
       it('should return progressing phase', () => {
+        set(shootItem.value, ['status', 'credentials', 'rotation', 'serviceAccountKey', 'phase'], 'Completing')
         expect(reactiveShootItem.shootCredentialsRotationAggregatedPhase).toEqual({
           type: 'Completing',
           caption: 'Completing',
@@ -74,10 +72,9 @@ describe('composables', () => {
 
         expect(reactiveShootItem.shootCredentialsRotationAggregatedPhase).toEqual({
           type: 'Prepared',
-          caption: 'Prepared 1/3',
+          caption: 'Prepared 1/2',
           incomplete: true,
           unpreparedRotations: [
-            find(rotationTypes, ['type', 'etcdEncryptionKey']),
             find(rotationTypes, ['type', 'serviceAccountKey']),
           ],
         })
