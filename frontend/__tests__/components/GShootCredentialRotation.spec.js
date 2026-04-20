@@ -94,12 +94,11 @@ describe('components', () => {
                 lastCompletionTime: '2022-07-05T10:01:42Z',
               },
               etcdEncryptionKey: {
-                phase: 'Completing',
                 lastInitiationTime: '2022-07-05T09:22:33Z',
                 lastCompletionTime: '2022-06-27T08:25:58Z',
               },
               serviceAccountKey: {
-                phase: 'Completed',
+                phase: 'Completing',
                 lastInitiationTime: '2022-07-05T09:22:33Z',
                 lastCompletionTime: '2022-07-05T09:47:32Z',
               },
@@ -162,11 +161,11 @@ describe('components', () => {
         expect(certificateAuthoritiesWrapper.vm.phase).toEqual({ type: 'Prepared' })
         expect(certificateAuthoritiesWrapper.vm.phaseColor).toBe('primary')
 
-        expect(etcdEncryptionKeyWrapper.vm.phase).toEqual({ type: 'Completing' })
+        expect(etcdEncryptionKeyWrapper.vm.phase).toEqual({ type: undefined })
         expect(etcdEncryptionKeyWrapper.vm.phaseColor).toBe('info')
 
-        expect(serviceAccountKeyWrapper.vm.phase).toEqual({ type: 'Completed' })
-        expect(serviceAccountKeyWrapper.vm.phaseColor).toBe('primary')
+        expect(serviceAccountKeyWrapper.vm.phase).toEqual({ type: 'Completing' })
+        expect(serviceAccountKeyWrapper.vm.phaseColor).toBe('info')
 
         expect(allWrapper.vm.phase).toEqual({ caption: 'Completing', type: 'Completing' })
         expect(allWrapper.vm.phaseCaption).toBe('Completing')
@@ -281,16 +280,16 @@ describe('components', () => {
       it('should compute operation', () => {
         expect(allRotationWrapper.vm.operation).toBe(allRotationWrapper.vm.completionOperation)
         expect(certificateAuthoritiesRotationWrapper.vm.operation).toBe(certificateAuthoritiesRotationWrapper.vm.completionOperation)
-        expect(etcdEncryptionKeyRotationWrapper.vm.operation).toBe(etcdEncryptionKeyRotationWrapper.vm.completionOperation)
-        expect(serviceAccountKeyRotationWrapper.vm.operation).toBe(serviceAccountKeyRotationWrapper.vm.startOperation)
+        expect(etcdEncryptionKeyRotationWrapper.vm.operation).toBe(etcdEncryptionKeyRotationWrapper.vm.startOperation)
+        expect(serviceAccountKeyRotationWrapper.vm.operation).toBe(serviceAccountKeyRotationWrapper.vm.completionOperation)
       })
 
       it('should compute mode', () => {
         expect(allRotationWrapper.vm.mode).toBe('COMPLETE')
         expect(certificateAuthoritiesRotationWrapper.vm.mode).toBe('COMPLETE')
         expect(observabilityRotationWrapper.vm.mode).toBe('ROTATE')
-        expect(etcdEncryptionKeyRotationWrapper.vm.mode).toBe('COMPLETE')
-        expect(serviceAccountKeyRotationWrapper.vm.mode).toBe('START')
+        expect(etcdEncryptionKeyRotationWrapper.vm.mode).toBe('ROTATE')
+        expect(serviceAccountKeyRotationWrapper.vm.mode).toBe('COMPLETE')
       })
     })
   })
