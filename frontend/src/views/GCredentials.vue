@@ -6,12 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
-    ref="container"
     fluid
-    class="container-size"
+    class="d-flex flex-column h-100 overflow-hidden min-height-800"
     @click="resetHighlighted"
   >
-    <v-card class="ma-3">
+    <v-card
+      class="ma-3 d-flex flex-column overflow-hidden flex-card"
+    >
       <g-toolbar
         prepend-icon="mdi-key"
         :height="64"
@@ -108,8 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="infraCredentialFilter"
         density="compact"
-        class="g-table"
-        :style="infraCredentialTableStyles"
+        class="g-table flex-grow-1 min-height-0"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -134,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-card
       v-if="dnsProviderTypes.length"
-      class="ma-3 mt-6"
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden flex-card"
     >
       <g-toolbar
         prepend-icon="mdi-key"
@@ -224,8 +224,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="dnsCredentialFilter"
         density="compact"
-        class="g-table"
-        :style="dnsCredentialTableStyles"
+        class="g-table flex-grow-1 min-height-0"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -267,7 +266,6 @@ import { useUrlSearchParams } from '@vueuse/core'
 import {
   toRef,
   unref,
-  computed,
 } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -286,7 +284,6 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
-import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
@@ -331,17 +328,6 @@ export default {
     } = storeToRefs(credentialStore)
 
     const itemHeight = 58
-    const firstTableItemCount = computed(() => infrastructureBindingList.value.length)
-    const secondTableItemCount = computed(() => dnsCredentialList.value.length)
-
-    const {
-      firstTableStyles: infraCredentialTableStyles,
-      secondTableStyles: dnsCredentialTableStyles,
-    } = useTwoTableLayout({
-      firstTableItemCount,
-      secondTableItemCount,
-      itemHeight,
-    })
 
     return {
       highlightedCredentialUid,
@@ -349,8 +335,6 @@ export default {
       infrastructureBindingList,
       dnsCredentialList,
       itemHeight,
-      infraCredentialTableStyles,
-      dnsCredentialTableStyles,
     }
   },
   data () {
@@ -707,10 +691,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.container-size {
-  height: 100%;
-  min-height: 800px; //ensure readability on small devices
+.min-height-800 {
+  min-height: 800px;
 }
 
+.flex-card {
+  flex: 1 1 0;
+  max-height: fit-content;
+}
+
+.min-height-0 {
+  min-height: 0;
+}
 </style>

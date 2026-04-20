@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-container fluid class="d-flex flex-column h-100 overflow-hidden">
+  <v-container
+    fluid
+    class="d-flex flex-column h-100 overflow-hidden"
+  >
     <v-card class="ma-3 d-flex flex-column flex-grow-1 overflow-hidden">
       <g-toolbar
         prepend-icon="mdi-hexagon-multiple"

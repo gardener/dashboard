@@ -7,11 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
-    ref="container"
     fluid
-    class="container-size"
+    class="d-flex flex-column h-100 overflow-hidden min-height-800"
   >
-    <v-card class="ma-3">
+    <v-card
+      class="ma-3 d-flex flex-column overflow-hidden flex-card"
+    >
       <g-toolbar
         prepend-icon="mdi-account-multiple"
         :height="64"
@@ -81,9 +82,8 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="userFilter"
         density="compact"
-        class="g-table"
+        class="g-table flex-grow-1 min-height-0"
         :item-height="itemHeight"
-        :style="userTableStyles"
         fixed-header
       >
         <template #item="{ item }">
@@ -104,7 +104,9 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table-virtual>
     </v-card>
 
-    <v-card class="ma-3 mt-6">
+    <v-card
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden flex-card"
+    >
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
         :height="64"
@@ -167,9 +169,8 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="serviceAccountFilter"
         density="compact"
-        class="g-table"
+        class="g-table flex-grow-1 min-height-0"
         :item-height="itemHeight"
-        :style="serviceAccountTableStyles"
         fixed-header
       >
         <template #item="{ item }">
@@ -289,7 +290,6 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
-import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   displayName,
@@ -513,17 +513,6 @@ const visibleServiceAccountTableHeaders = computed(() => {
 })
 
 const itemHeight = 48
-const firstTableItemCount = computed(() => userList.value.length)
-const secondTableItemCount = computed(() => serviceAccountList.value.length)
-
-const {
-  firstTableStyles: userTableStyles,
-  secondTableStyles: serviceAccountTableStyles,
-} = useTwoTableLayout({
-  firstTableItemCount,
-  secondTableItemCount,
-  itemHeight,
-})
 
 watch(namespace, () => {
   reset()
@@ -776,10 +765,16 @@ function disableCustomKeySort (tableHeaders) {
 </script>
 
 <style lang="scss" scoped>
-
-.container-size {
-  height: 100%;
-  min-height: 800px; //ensure readability on small devices
+.min-height-800 {
+  min-height: 800px;
 }
 
+.flex-card {
+  flex: 1 1 0;
+  max-height: fit-content;
+}
+
+.min-height-0 {
+  min-height: 0;
+}
 </style>
