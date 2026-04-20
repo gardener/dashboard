@@ -77,7 +77,6 @@ import {
 } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useAppStore } from '@/store/app'
 import { useSeedStore } from '@/store/seed'
 import { useSeedStatStore } from '@/store/seedStat'
 import { useManagedSeedStore } from '@/store/managedSeed'
@@ -104,7 +103,6 @@ import find from 'lodash/find'
 import map from 'lodash/map'
 import join from 'lodash/join'
 
-const appStore = useAppStore()
 const seedStore = useSeedStore()
 const seedStatStore = useSeedStatStore()
 const managedSeedStore = useManagedSeedStore()
@@ -330,25 +328,17 @@ const seedStatsSubscriptionOptions = computed(() => {
   }
 })
 
-watch(seedStatsSubscriptionOptions, async options => {
-  try {
-    if (options) {
-      await seedStatStore.subscribe(options)
-    } else {
-      await seedStatStore.unsubscribe()
-    }
-  } catch (err) {
-    appStore.setError(err)
+watch(seedStatsSubscriptionOptions, options => {
+  if (options) {
+    seedStatStore.subscribe(options)
+  } else {
+    seedStatStore.unsubscribe()
   }
 }, {
   immediate: true,
 })
 
 onUnmounted(async () => {
-  try {
-    await seedStatStore.unsubscribe()
-  } catch (err) {
-    appStore.setError(err)
-  }
+  await seedStatStore.unsubscribe()
 })
 </script>
