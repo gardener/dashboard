@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container
     fluid
-    class="d-flex flex-column h-100 overflow-hidden"
+    class="d-flex flex-column overflow-hidden max-height-100"
   >
     <v-card class="ma-3 d-flex flex-column flex-grow-1 overflow-hidden">
       <g-toolbar
@@ -759,5 +759,9 @@ export default {
 <style lang="scss" scoped>
 .min-height-0 {
   min-height: 0;
+}
+
+.max-height-100 {
+  max-height: 100%;
 }
 </style>
