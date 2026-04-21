@@ -70,6 +70,7 @@ import {
   computed,
   reactive,
   provide,
+  watch,
   onMounted,
 } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -304,8 +305,9 @@ function getItemKey (item, fallback) {
   return get(item, ['metadata', 'uid'], fallback)
 }
 
+watch(seedSelectedColumns, updateTableSettings, { deep: true, immediate: true })
+
 onMounted(() => {
-  updateTableSettings()
   if (seedSortBy.value?.length) {
     sortBy.value = [...seedSortBy.value]
   }

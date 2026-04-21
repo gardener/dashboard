@@ -180,16 +180,10 @@ export default {
     GTableSearch,
   },
   inject: ['logger'],
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.updateTableSettings()
-    })
-  },
   beforeRouteUpdate (to, from, next) {
     if (to.path !== from.path) {
       this.setShootSearch('')
     }
-    this.updateTableSettings()
     this.focusModeInternal = false
 
     // Reset expanded state in case project changes
@@ -677,6 +671,16 @@ export default {
     },
   },
   watch: {
+    shootCustomSelectedColumns: {
+      handler: 'updateTableSettings',
+      deep: true,
+      immediate: true,
+    },
+    shootCustomSortBy: {
+      handler: 'updateTableSettings',
+      deep: true,
+      immediate: true,
+    },
     sortBy (sortBy) {
       if (some(sortBy, value => isCustomField(value.key))) {
         this.shootCustomSortBy = sortBy
