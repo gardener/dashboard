@@ -11,7 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex flex-column h-100 overflow-hidden min-h-800px"
   >
     <v-card
-      class="ma-3 d-flex flex-column overflow-hidden flex-card"
+      class="ma-3 d-flex flex-column overflow-hidden"
+      :style="userCardStyle"
     >
       <g-toolbar
         prepend-icon="mdi-account-multiple"
@@ -105,7 +106,8 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
 
     <v-card
-      class="ma-3 mt-6 d-flex flex-column overflow-hidden flex-card"
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden"
+      :style="serviceAccountCardStyle"
     >
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
@@ -290,6 +292,7 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
+import { useTwoCardLayout } from '@/composables/useTwoCardLayout'
 
 import {
   displayName,
@@ -513,6 +516,15 @@ const visibleServiceAccountTableHeaders = computed(() => {
 })
 
 const itemHeight = 48
+
+const {
+  firstCardStyle: userCardStyle,
+  secondCardStyle: serviceAccountCardStyle,
+} = useTwoCardLayout({
+  firstItemCount: computed(() => userList.value.length),
+  secondItemCount: computed(() => serviceAccountList.value.length),
+  itemHeight,
+})
 
 watch(namespace, () => {
   reset()
@@ -767,9 +779,5 @@ function disableCustomKeySort (tableHeaders) {
 <style lang="scss" scoped>
 .min-h-800px {
   min-height: 800px;
-}
-
-.flex-card {
-  flex: 0 1 auto;
 }
 </style>

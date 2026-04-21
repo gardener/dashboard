@@ -11,7 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     @click="resetHighlighted"
   >
     <v-card
-      class="ma-3 d-flex flex-column overflow-hidden flex-card"
+      class="ma-3 d-flex flex-column overflow-hidden"
+      :style="infraCardStyle"
     >
       <g-toolbar
         prepend-icon="mdi-key"
@@ -134,7 +135,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-card
       v-if="dnsProviderTypes.length"
-      class="ma-3 mt-6 d-flex flex-column overflow-hidden flex-card"
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden"
+      :style="dnsCardStyle"
     >
       <g-toolbar
         prepend-icon="mdi-key"
@@ -266,6 +268,7 @@ import { useUrlSearchParams } from '@vueuse/core'
 import {
   toRef,
   unref,
+  computed,
 } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -292,6 +295,7 @@ import {
   credentialProviderType,
   bindingProviderType,
 } from '@/composables/credential/helper'
+import { useTwoCardLayout } from '@/composables/useTwoCardLayout'
 
 import { mapTableHeader } from '@/utils'
 
@@ -329,12 +333,26 @@ export default {
 
     const itemHeight = 58
 
+    const firstItemCount = computed(() => infrastructureBindingList.value.length)
+    const secondItemCount = computed(() => dnsCredentialList.value.length)
+
+    const {
+      firstCardStyle: infraCardStyle,
+      secondCardStyle: dnsCardStyle,
+    } = useTwoCardLayout({
+      firstItemCount,
+      secondItemCount,
+      itemHeight,
+    })
+
     return {
       highlightedCredentialUid,
       highlightedBindingUid,
       infrastructureBindingList,
       dnsCredentialList,
       itemHeight,
+      infraCardStyle,
+      dnsCardStyle,
     }
   },
   data () {
@@ -693,9 +711,5 @@ export default {
 <style lang="scss" scoped>
 .min-h-800px {
   min-height: 800px;
-}
-
-.flex-card {
-  flex: 0 1 auto;
 }
 </style>
