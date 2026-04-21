@@ -696,8 +696,7 @@ export default {
 }
 
 .flex-card {
-  flex: 1 1 0;
-  max-height: fit-content;
+  flex: 0 1 auto;
 }
 
 .min-height-0 {
