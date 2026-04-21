@@ -1,3 +1,20 @@
+<!--
+Please select area, kind, and priority for this pull request. This helps the community categorizing it.
+Replace below TODOs or exchange the existing identifiers with those that fit best in your opinion.
+If multiple identifiers make sense you can also state the commands multiple times, e.g.
+  /area authentication
+  /area usability
+  ...
+
+If the PR affects cryptography or security mechanisms (encryption, keys, ciphers, hashes, signatures, etc.), mark it as crypto relevant.
+/label crypto
+
+"/area" identifiers:     audit-logging|authentication|auto-scaling|backup|compliance|cost|dev-productivity|documentation|high-availability|logging|monitoring|networking|open-source|ops-productivity|performance|quality|robustness|scalability|security|storage|testing|usability|user-management
+"/kind" identifiers:     api-change|bug|cleanup|discussion|enhancement|epic|flake|impediment|poc|post-mortem|question|regression|task|technical-debt|test
+-->
+/area TODO
+/kind TODO
+
 <!-- Please ensure that you do not include company internal information. -->
 
 **What this PR does / why we need it**:
