@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container
     fluid
-    class="d-flex flex-column h-100 overflow-hidden min-height-800"
+    class="d-flex flex-column h-100 overflow-hidden min-h-800px"
     @click="resetHighlighted"
   >
     <v-card
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="infraCredentialFilter"
         density="compact"
-        class="g-table flex-grow-1 min-height-0"
+        class="g-table flex-grow-1 min-h-0px"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -224,7 +224,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="dnsCredentialFilter"
         density="compact"
-        class="g-table flex-grow-1 min-height-0"
+        class="g-table flex-grow-1 min-h-0px"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -691,15 +691,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.min-height-800 {
+.min-h-800px {
   min-height: 800px;
 }
 
 .flex-card {
   flex: 0 1 auto;
-}
-
-.min-height-0 {
-  min-height: 0;
 }
 </style>

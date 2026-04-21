@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container
     fluid
-    class="d-flex flex-column overflow-hidden max-height-100"
+    class="d-flex flex-column overflow-hidden max-h-100"
   >
     <v-card class="ma-3 d-flex flex-column flex-grow-1 overflow-hidden">
       <g-toolbar
@@ -94,7 +94,7 @@ SPDX-License-Identifier: Apache-2.0
         :item-key="getItemKey"
         must-sort
         fixed-header
-        class="g-table flex-grow-1 min-height-0"
+        class="g-table flex-grow-1 min-h-0px"
       >
         <template #progress>
           <g-shoot-list-progress />
@@ -755,13 +755,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-.min-height-0 {
-  min-height: 0;
-}
-
-.max-height-100 {
-  max-height: 100%;
-}
-</style>

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-container
     fluid
-    class="d-flex flex-column h-100 overflow-hidden min-height-800"
+    class="d-flex flex-column h-100 overflow-hidden min-h-800px"
   >
     <v-card
       class="ma-3 d-flex flex-column overflow-hidden flex-card"
@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="userFilter"
         density="compact"
-        class="g-table flex-grow-1 min-height-0"
+        class="g-table flex-grow-1 min-h-0px"
         :item-height="itemHeight"
         fixed-header
       >
@@ -169,7 +169,7 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="serviceAccountFilter"
         density="compact"
-        class="g-table flex-grow-1 min-height-0"
+        class="g-table flex-grow-1 min-h-0px"
         :item-height="itemHeight"
         fixed-header
       >
@@ -765,15 +765,11 @@ function disableCustomKeySort (tableHeaders) {
 </script>
 
 <style lang="scss" scoped>
-.min-height-800 {
+.min-h-800px {
   min-height: 800px;
 }
 
 .flex-card {
   flex: 0 1 auto;
-}
-
-.min-height-0 {
-  min-height: 0;
 }
 </style>
