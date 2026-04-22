@@ -335,7 +335,8 @@ export default {
     const itemHeight = 58
 
     const firstItemCount = computed(() => infrastructureBindingList.value.length)
-    const secondItemCount = computed(() => dnsCredentialList.value.length)
+    const { dnsProviderTypes } = storeToRefs(useGardenerExtensionStore())
+    const secondItemCount = computed(() => dnsProviderTypes.value.length ? dnsCredentialList.value.length : 0)
 
     const {
       firstTableStyle: infraCardStyle,
