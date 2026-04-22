@@ -266,6 +266,7 @@ import {
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
 import {
+  inject,
   toRef,
   unref,
   computed,
@@ -295,7 +296,7 @@ import {
   credentialProviderType,
   bindingProviderType,
 } from '@/composables/credential/helper'
-import { useTwoCardLayout } from '@/composables/useTwoCardLayout'
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import { mapTableHeader } from '@/utils'
 
@@ -337,12 +338,14 @@ export default {
     const secondItemCount = computed(() => dnsCredentialList.value.length)
 
     const {
-      firstCardStyle: infraCardStyle,
-      secondCardStyle: dnsCardStyle,
-    } = useTwoCardLayout({
+      firstTableStyle: infraCardStyle,
+      secondTableStyle: dnsCardStyle,
+    } = useTwoTableLayout({
+      container: inject('mainContainer', null),
       firstItemCount,
       secondItemCount,
       itemHeight,
+      staticOffset: 64 + 40 + 37, // toolbar + table header + table footer
     })
 
     return {

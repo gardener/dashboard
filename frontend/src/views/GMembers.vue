@@ -292,7 +292,7 @@ import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
 import { useProvideProjectItem } from '@/composables/useProjectItem'
-import { useTwoCardLayout } from '@/composables/useTwoCardLayout'
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
   displayName,
@@ -518,12 +518,14 @@ const visibleServiceAccountTableHeaders = computed(() => {
 const itemHeight = 48
 
 const {
-  firstCardStyle: userCardStyle,
-  secondCardStyle: serviceAccountCardStyle,
-} = useTwoCardLayout({
+  firstTableStyle: userCardStyle,
+  secondTableStyle: serviceAccountCardStyle,
+} = useTwoTableLayout({
+  container: inject('mainContainer', null),
   firstItemCount: computed(() => userList.value.length),
   secondItemCount: computed(() => serviceAccountList.value.length),
   itemHeight,
+  staticOffset: 64 + 40 + 37, // toolbar + table header + table footer
 })
 
 watch(namespace, () => {
