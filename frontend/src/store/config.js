@@ -469,7 +469,7 @@ export const useConfigStore = defineStore('config', () => {
     },
     {
       name: 'metal',
-      displayName: 'Metal',
+      displayName: 'metal-stack',
       weight: 600,
       icon: 'metal.svg',
     },
