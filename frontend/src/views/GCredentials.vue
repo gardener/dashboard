@@ -641,7 +641,7 @@ export default {
         case 'dnsProvider':
           return item.providerType
         case 'kind':
-          return `${credential.kind} (${credentialKind.value})`
+          return `${(binding ?? credential).kind} (${credentialKind.value})`
         case 'credentialUsageCount':
           return credentialUsageCount.value
       }
