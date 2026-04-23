@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  toValue,
+} from 'vue'
 import { useElementSize } from '@vueuse/core'
 
 export function useTwoTableLayout ({
@@ -21,7 +24,7 @@ export function useTwoTableLayout ({
   const { height: containerHeight } = useElementSize(container)
 
   function estimatedTableHeight (itemCount) {
-    return staticOffset + itemCount * itemHeight
+    return toValue(staticOffset) + itemCount * itemHeight
   }
 
   const firstExceedsHalf = computed(() => {

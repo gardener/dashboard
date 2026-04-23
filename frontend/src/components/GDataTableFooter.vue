@@ -5,18 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-divider />
-  <div class="v-data-table-footer">
-    <div
-      class="v-data-table-footer__info"
-    >
-      {{ itemsLength }} {{ itemsLabel }}
+  <div :style="{ height: `${footerHeight}px` }">
+    <v-divider />
+    <div class="v-data-table-footer">
+      <div
+        class="v-data-table-footer__info"
+      >
+        {{ itemsLength }} {{ itemsLabel }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { toRefs } from 'vue'
+
+const footerHeight = 37
 
 const props = defineProps({
   itemsLength: {
@@ -30,4 +34,6 @@ const props = defineProps({
 })
 
 const { itemsLength, itemsLabel } = toRefs(props)
+
+defineExpose({ footerHeight })
 </script>

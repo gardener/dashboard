@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-key"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Infrastructure Credentials
@@ -126,6 +126,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
+            ref="infraFooter"
             :items-length="infrastructureBindingList.length"
             items-label="Infrastructure Credentials"
           />
@@ -140,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-key"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           DNS Credentials
@@ -270,6 +271,7 @@ import {
   toRef,
   unref,
   computed,
+  useTemplateRef,
 } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -332,11 +334,22 @@ export default {
       dnsCredentialList,
     } = storeToRefs(credentialStore)
 
+    const toolbarHeight = 64
+    const tableHeaderHeight = 40
     const itemHeight = 58
 
     const firstItemCount = computed(() => infrastructureBindingList.value.length)
     const { dnsProviderTypes } = storeToRefs(useGardenerExtensionStore())
     const secondItemCount = computed(() => dnsProviderTypes.value.length ? dnsCredentialList.value.length : 0)
+
+    const infraFooter = useTemplateRef('infraFooter')
+
+    // Card margins are intentionally excluded from the offset. Over-estimating
+    // table height avoids unused space in the container and in edge cases only
+    // makes the larger scrollable table slightly smaller than the smaller static one.
+    const staticOffset = computed(() => {
+      return toolbarHeight + tableHeaderHeight + (infraFooter.value?.footerHeight ?? 0)
+    })
 
     const {
       firstTableStyle: infraCardStyle,
@@ -346,10 +359,11 @@ export default {
       firstItemCount,
       secondItemCount,
       itemHeight,
-      staticOffset: 64 + 40 + 37, // toolbar + table header + table footer
+      staticOffset,
     })
 
     return {
+      toolbarHeight,
       highlightedCredentialUid,
       highlightedBindingUid,
       infrastructureBindingList,

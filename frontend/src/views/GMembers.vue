@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-account-multiple"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Project Users
@@ -98,6 +98,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
+            ref="userFooter"
             :items-length="userList.length"
             items-label="Users"
           />
@@ -111,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Service Accounts
@@ -264,6 +265,7 @@ import {
   computed,
   inject,
   watch,
+  useTemplateRef,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -515,7 +517,18 @@ const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
 
+const toolbarHeight = 64
+const tableHeaderHeight = 40
 const itemHeight = 48
+
+const userFooter = useTemplateRef('userFooter')
+
+// Card margins are intentionally excluded from the offset. Over-estimating
+// table height avoids unused space in the container and in edge cases only
+// makes the larger scrollable table slightly smaller than the smaller static one.
+const staticOffset = computed(() => {
+  return toolbarHeight + tableHeaderHeight + (userFooter.value?.footerHeight ?? 0)
+})
 
 const {
   firstTableStyle: userCardStyle,
@@ -525,7 +538,7 @@ const {
   firstItemCount: computed(() => userList.value.length),
   secondItemCount: computed(() => serviceAccountList.value.length),
   itemHeight,
-  staticOffset: 64 + 40 + 37, // toolbar + table header + table footer
+  staticOffset,
 })
 
 watch(namespace, () => {
