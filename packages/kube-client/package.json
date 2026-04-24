@@ -30,7 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash-es": "^4.17.21",
     "mixwith": "^0.1.1",
-    "uuid": "^11.0.0"
+    "uuid": "^14.0.0"
   },
   "peerDependencies": {
     "@gardener-dashboard/kube-config": "workspace:^",
