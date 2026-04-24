@@ -660,7 +660,7 @@ __metadata:
     jose: "npm:^5.2.3"
     js-yaml: "npm:^4.1.0"
     jsonwebtoken: "npm:^9.0.2"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.18.1"
     lodash-es: "npm:^4.17.21"
     morgan: "npm:^1.10.0"
     neostandard: "npm:^0.12.0"
@@ -763,7 +763,7 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     jsdom: "npm:^26.0.0"
     jwt-decode: "npm:^4.0.0"
-    lodash: "npm:^4.17.21"
+    lodash: "npm:^4.18.1"
     md5: "npm:^2.3.0"
     mitt: "npm:^3.0.1"
     neostandard: "npm:^0.12.0"
@@ -6728,6 +6728,13 @@ __metadata:
   version: 4.17.23
   resolution: "lodash@npm:4.17.23"
   checksum: 10c0/1264a90469f5bb95d4739c43eb6277d15b6d9e186df4ac68c3620443160fc669e2f14c11e7d8b2ccf078b81d06147c01a8ccced9aab9f9f63d50dcf8cace6bf6
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.18.1":
+  version: 4.18.1
+  resolution: "lodash@npm:4.18.1"
+  checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
   languageName: node
   linkType: hard
 
