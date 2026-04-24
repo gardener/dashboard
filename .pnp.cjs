@@ -937,7 +937,7 @@ const RAW_RUNTIME_STATE =
           ["p-limit", "npm:3.1.0"],\
           ["p-retry", "npm:4.6.2"],\
           ["p-timeout", "npm:4.1.0"],\
-          ["path-to-regexp", "npm:8.2.0"],\
+          ["path-to-regexp", "npm:8.4.2"],\
           ["rehype-external-links", "npm:3.0.0"],\
           ["rehype-stringify", "npm:10.0.1"],\
           ["remark-breaks", "npm:4.0.0"],\
@@ -10133,10 +10133,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["path-to-regexp", [\
-      ["npm:8.2.0", {\
-        "packageLocation": "./.yarn/cache/path-to-regexp-npm-8.2.0-71c92fc0c6-ef7d0a887b.zip/node_modules/path-to-regexp/",\
+      ["npm:8.4.2", {\
+        "packageLocation": "./.yarn/cache/path-to-regexp-npm-8.4.2-5602ed344b-05b115c49b.zip/node_modules/path-to-regexp/",\
         "packageDependencies": [\
-          ["path-to-regexp", "npm:8.2.0"]\
+          ["path-to-regexp", "npm:8.4.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10824,7 +10824,7 @@ const RAW_RUNTIME_STATE =
           ["depd", "npm:2.0.0"],\
           ["is-promise", "npm:4.0.0"],\
           ["parseurl", "npm:1.3.3"],\
-          ["path-to-regexp", "npm:8.2.0"],\
+          ["path-to-regexp", "npm:8.4.2"],\
           ["router", "npm:2.2.0"]\
         ],\
         "linkType": "HARD"\
