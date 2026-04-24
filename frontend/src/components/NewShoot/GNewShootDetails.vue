@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           <template #item="{ item, props }">
             <v-list-item
               v-bind="props"
-              :subtitle="versionItemDescription(item.raw)"
+              :subtitle="versionItemDescription(item)"
             />
           </template>
           <template #message="{ message }">
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         <label>{{ slaTitle }}</label>
         <!-- eslint-disable vue/no-v-html -->
         <p
-          class="text-subtitle-1"
+          class="text-body-large"
           v-html="slaDescriptionHtml"
         />
       </v-col>

@@ -67,19 +67,19 @@ SPDX-License-Identifier: Apache-2.0
         class="pr-0 ma-0"
       >
         <v-row
-          no-gutters
+          density="compact"
           class="ml-2"
         >
           <v-col
             align-self="center"
             class="grow mr-3"
           >
-            <div class="text-body-2">
+            <div class="text-body-medium">
               {{ message }}
             </div>
             <div
               v-if="hint"
-              class="text-caption"
+              class="text-body-small"
             >
               {{ hint }}
             </div>

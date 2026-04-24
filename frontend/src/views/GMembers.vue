@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-account-multiple"
         :height="toolbarHeight"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           Project Users
         </div>
         <template #append>
@@ -65,10 +65,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-toolbar>
 
       <v-card-text v-if="!userList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">
+        <div class="text-title-large text-grey-darken-1 my-4">
           Add users to your project.
         </div>
-        <p class="text-body-1">
+        <p class="text-body-large">
           Adding users to your project allows you to collaborate across your team.
           Access to resources within your project can be configured by assigning roles.
         </p>
@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-monitor-multiple"
         :height="toolbarHeight"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           Service Accounts
         </div>
         <template #append>
@@ -154,10 +154,10 @@ SPDX-License-Identifier: Apache-2.0
       </g-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
-        <div class="text-h6 text-grey-darken-1 my-4">
+        <div class="text-title-large text-grey-darken-1 my-4">
           Add service accounts to your project.
         </div>
-        <p class="text-body-1">
+        <p class="text-body-large">
           Adding service accounts to your project allows you to automate processes in your project.
           Access to resources within your project can be configured by assigning roles.
         </p>
@@ -238,7 +238,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-card>
         <v-card-title class="bg-toolbar-background text-toolbar-title d-flex">
-          <div class="text-h5">
+          <div class="text-headline-small">
             Kubeconfig <code class="bg-toolbar-background-lighten-1">{{ currentServiceAccountDisplayName }}</code>
           </div>
           <v-spacer />

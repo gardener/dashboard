@@ -98,10 +98,10 @@ SPDX-License-Identifier: Apache-2.0
                   icon="mdi-file"
                 />
               </template>
-              <div class="text-body-1">
+              <div class="text-body-large">
                 Kubeconfig
               </div>
-              <div class="text-body-2 text-medium-emphasis line-clamp-2">
+              <div class="text-body-medium text-medium-emphasis line-clamp-2">
                 Personalized command line interface access (requires <span class="font-family-monospace">kubelogin</span> kubectl plugin)
               </div>
               <template #append>

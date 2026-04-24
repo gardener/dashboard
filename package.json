@@ -50,5 +50,8 @@
   },
   "dependencies": {
     "lodash-es": "^4.17.21"
+  },
+  "resolutions": {
+    "@vue/server-renderer": "3.5.33"
   }
 }

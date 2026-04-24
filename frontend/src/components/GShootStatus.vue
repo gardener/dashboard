@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                   <span
                     v-else
-                    class="text-caption"
+                    class="text-body-small"
                   >
                     {{ shootLastOperation.progress }}
                   </span>

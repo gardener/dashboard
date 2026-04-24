@@ -20,7 +20,7 @@ import {
   blue,
   green,
   shades,
-} from 'vuetify/lib/util/colors'
+} from 'vuetify/util/colors'
 
 const gardenerGreen = '#0b8062'
 

@@ -24,16 +24,16 @@ SPDX-License-Identifier: Apache-2.0
     >
       <template #item="{ item, props }">
         <v-list-subheader
-          v-if="item.raw.type === 'subheader'"
+          v-if="item.type === 'subheader'"
           :title="item.title"
         />
         <v-list-item
           v-else
           v-bind="props"
-          :subtitle="versionItemDescription(item.raw)"
+          :subtitle="versionItemDescription(item)"
         >
           <template #subtitle="{ subtitle }">
-            <div :class="item.raw.subtitleClass">
+            <div :class="item.subtitleClass">
               {{ subtitle }}
             </div>
           </template>

@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
             @mousedown.stop="$refs.wildCardStart.focus()"
             @input="onInput"
           />
-          <span>{{ item.raw.value }}</span>
+          <span>{{ item.value }}</span>
           <v-text-field
             v-if="wildcardSelectedValue.endsWithWildcard"
             ref="wildCardEnd"
@@ -58,10 +58,10 @@ SPDX-License-Identifier: Apache-2.0
           v-bind="props"
           :title="undefined"
         >
-          <template v-if="item.raw.value.length">
-            <span v-if="item.raw.startsWithWildcard">&lt;prefix&gt;</span>
-            <span>{{ item.raw.value }}</span>
-            <span v-if="item.raw.endsWithWildcard">&lt;suffix&gt;</span>
+          <template v-if="item.value.length">
+            <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
+            <span>{{ item.value }}</span>
+            <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
           </template>
           <template v-else>
             Custom {{ wildcardSelectLabel }}

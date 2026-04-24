@@ -7,18 +7,18 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="slots.label || props.label"
-    class="text-body-2 text-medium-emphasis pb-1"
+    class="text-body-medium text-medium-emphasis pb-1"
   >
     <slot name="label">
       {{ props.label }}
     </slot>
   </div>
-  <div class="text-body-1">
+  <div class="text-body-large">
     <slot />
   </div>
   <div
     v-if="slots.description || props.description"
-    class="text-body-2 text-medium-emphasis pt-1"
+    class="text-body-medium text-medium-emphasis pt-1"
   >
     <slot name="description">
       {{ props.description }}

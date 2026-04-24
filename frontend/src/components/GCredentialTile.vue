@@ -193,9 +193,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss">
-.no-padding {
-  padding: 0px !important;
-}
-</style>

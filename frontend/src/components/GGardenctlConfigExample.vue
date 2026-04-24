@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div>
-    <div class="text-h6 text-grey-darken-1 my-4">
+    <div class="text-title-large text-grey-darken-1 my-4">
       Configuration
     </div>
     The following is a sample configuration for

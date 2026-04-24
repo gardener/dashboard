@@ -6,7 +6,7 @@
 
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { grey } from 'vuetify/lib/util/colors'
+import { grey } from 'vuetify/util/colors'
 
 import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'

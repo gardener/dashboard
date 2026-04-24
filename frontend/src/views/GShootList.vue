@@ -14,10 +14,10 @@ SPDX-License-Identifier: Apache-2.0
         prepend-icon="mdi-hexagon-multiple"
         :height="64"
       >
-        <div class="text-h6">
+        <div class="text-title-large">
           Kubernetes Clusters
         </div>
-        <div class="text-caption">
+        <div class="text-body-small">
           {{ headlineSubtitle }}
         </div>
         <template #append>
@@ -40,7 +40,7 @@ SPDX-License-Identifier: Apache-2.0
                     hide-details
                   >
                     <template #label>
-                      <span class="text-subtitle-1 text-toolbar-title">Focus</span>
+                      <span class="text-body-large text-toolbar-title">Focus</span>
                     </template>
                   </v-switch>
                 </v-badge>
