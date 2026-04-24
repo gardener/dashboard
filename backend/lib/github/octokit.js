@@ -11,11 +11,11 @@ import { createAppAuth } from '@octokit/auth-app'
 import { requestLog } from '@octokit/plugin-request-log'
 import { legacyRestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods'
 import { paginateRest } from '@octokit/plugin-paginate-rest'
-import { paginateGraphql } from '@octokit/plugin-paginate-graphql'
+import { paginateGraphQL } from '@octokit/plugin-paginate-graphql'
 import config from '../config/index.js'
 import logger from '../logger/index.js'
 
-const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest, paginateGraphql)
+const Octokit = Core.plugin(requestLog, legacyRestEndpointMethods, paginateRest, paginateGraphQL)
 
 class OctokitLog {
   static debug (...args) {
