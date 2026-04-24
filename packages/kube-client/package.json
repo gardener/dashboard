@@ -30,7 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash-es": "^4.17.21",
     "mixwith": "^0.1.1",
-    "uuid": "^11.0.0"
+    "uuid": "^14.0.0"
   },
   "peerDependencies": {
     "@gardener-dashboard/kube-config": "workspace:^",
@@ -46,10 +46,7 @@
     "@vitest/coverage-v8": "^3.0.0",
     "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
-    "eslint-import-resolver-pnp": "^0.0.0",
-    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-lodash": "^8.0.0",
-    "eslint-plugin-require-node-import-prefix": "^0.0.2",
     "eslint-plugin-security": "^3.0.1",
     "express": "^5.0.0",
     "neostandard": "^0.12.0",

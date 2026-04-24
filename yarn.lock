@@ -653,6 +653,7 @@ __metadata:
     cross-env: "npm:^10.0.0"
     dockerfile-ast: "npm:^0.7.0"
     eslint: "npm:^9.11.0"
+    eslint-import-resolver-alias: "npm:^1.1.2"
     eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-import-newlines: "npm:^1.4.0"
     eslint-plugin-lodash: "npm:^8.0.0"
@@ -694,7 +695,7 @@ __metadata:
     supertest: "npm:^7.0.0"
     undici: "npm:^8.0.0"
     unified: "npm:^11.0.5"
-    uuid: "npm:^11.0.0"
+    uuid: "npm:^14.0.0"
     vitest: "npm:^3.0.0"
   languageName: unknown
   linkType: soft
@@ -787,7 +788,7 @@ __metadata:
     universal-cookie: "npm:^7.0.0"
     unplugin-fonts: "npm:^1.1.1"
     url-template: "npm:^3.1.1"
-    uuid: "npm:^11.0.0"
+    uuid: "npm:^14.0.0"
     vite: "npm:^7.0.0"
     vite-plugin-compression: "npm:^0.5.1"
     vite-plugin-vuetify: "npm:^2.0.4"
@@ -812,10 +813,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.0.0"
     "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     express: "npm:^5.0.0"
     http-errors: "npm:^2.0.0"
@@ -823,7 +821,7 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     mixwith: "npm:^0.1.1"
     neostandard: "npm:^0.12.0"
-    uuid: "npm:^11.0.0"
+    uuid: "npm:^14.0.0"
     vitest: "npm:^3.0.0"
   peerDependencies:
     "@gardener-dashboard/kube-config": "workspace:^"
@@ -842,10 +840,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.0.0"
     "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     gtoken: "npm:^8.0.0"
     js-yaml: "npm:^4.1.0"
@@ -864,10 +859,7 @@ __metadata:
     "@vitest/eslint-plugin": "npm:^1.6.15"
     chalk: "npm:^5.0.0"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     neostandard: "npm:^0.12.0"
     vitest: "npm:^3.0.0"
@@ -884,10 +876,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.0.0"
     "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     express: "npm:^5.0.0"
     http-errors: "npm:^2.0.0"
@@ -911,10 +900,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.0.0"
     "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     neostandard: "npm:^0.12.0"
     vitest: "npm:^3.0.0"
@@ -933,10 +919,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^3.0.0"
     "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     http-errors: "npm:^2.0.0"
     lodash-es: "npm:^4.17.21"
@@ -954,10 +937,7 @@ __metadata:
   dependencies:
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
     eslint: "npm:^9.11.0"
-    eslint-import-resolver-pnp: "npm:^0.0.0"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-lodash: "npm:^8.0.0"
-    eslint-plugin-require-node-import-prefix: "npm:^0.0.2"
     eslint-plugin-security: "npm:^3.0.1"
     neostandard: "npm:^0.12.0"
   languageName: unknown
@@ -4590,13 +4570,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-pnp@npm:^0.0.0":
-  version: 0.0.0
-  resolution: "eslint-import-resolver-pnp@npm:0.0.0"
-  checksum: 10c0/429150fb086b75e8274b2e0f8b6c91580cd1eafd8ee6e2474d57395a0d1a1586510d51e5b88ae4fe3eb355fc9ed70e772b9b4c0435de2fd1ac3fd3e5ca240f67
-  languageName: node
-  linkType: hard
-
 "eslint-import-resolver-typescript@npm:^3.10.1":
   version: 3.10.1
   resolution: "eslint-import-resolver-typescript@npm:3.10.1"
@@ -4781,15 +4754,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-require-node-import-prefix@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "eslint-plugin-require-node-import-prefix@npm:0.0.2"
-  dependencies:
-    eslint: "npm:^8.39.0"
-  checksum: 10c0/b9c958019ece8feb765dda96af06c99dfdbce6ac9002e546b3697180bfac019831a006a382a93b14160be151f7c8e5b536a96f977424faaea1330fd0e619fe3e
-  languageName: node
-  linkType: hard
-
 "eslint-plugin-security@npm:^3.0.1":
   version: 3.0.1
   resolution: "eslint-plugin-security@npm:3.0.1"
@@ -4861,7 +4825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.39.0, eslint@npm:^8.9.0":
+"eslint@npm:^8.9.0":
   version: 8.57.1
   resolution: "eslint@npm:8.57.1"
   dependencies:
@@ -10186,12 +10150,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^11.0.0":
-  version: 11.1.0
-  resolution: "uuid@npm:11.1.0"
+"uuid@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "uuid@npm:14.0.0"
   bin:
-    uuid: dist/esm/bin/uuid
-  checksum: 10c0/34aa51b9874ae398c2b799c88a127701408cd581ee89ec3baa53509dd8728cbb25826f2a038f9465f8b7be446f0fbf11558862965b18d21c993684297628d4d3
+    uuid: dist-node/bin/uuid
+  checksum: 10c0/a57ae7794c45005c1a9208989196c5baf79a7679c30f43c1bee9033a2c4d113a2cea216fa6fcc9663b08b0d55635df1a7c6eb7e7f3d21c3e50688c698fa39a50
   languageName: node
   linkType: hard
 
