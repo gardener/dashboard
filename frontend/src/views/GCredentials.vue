@@ -6,15 +6,17 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
-    ref="container"
     fluid
-    class="container-size"
+    class="d-flex flex-column h-100 overflow-hidden min-h-800px"
     @click="resetHighlighted"
   >
-    <v-card class="ma-3">
+    <v-card
+      class="ma-3 d-flex flex-column overflow-hidden"
+      :style="infraCardStyle"
+    >
       <g-toolbar
         prepend-icon="mdi-key"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Infrastructure Credentials
@@ -108,8 +110,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="infraCredentialFilter"
         density="compact"
-        class="g-table"
-        :style="infraCredentialTableStyles"
+        class="g-table flex-grow-1 min-h-0px"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -125,6 +126,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
+            ref="infraFooter"
             :items-length="infrastructureBindingList.length"
             items-label="Infrastructure Credentials"
           />
@@ -134,11 +136,12 @@ SPDX-License-Identifier: Apache-2.0
 
     <v-card
       v-if="dnsProviderTypes.length"
-      class="ma-3 mt-6"
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden"
+      :style="dnsCardStyle"
     >
       <g-toolbar
         prepend-icon="mdi-key"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           DNS Credentials
@@ -224,8 +227,7 @@ SPDX-License-Identifier: Apache-2.0
         :custom-filter="customFilter"
         :search="dnsCredentialFilter"
         density="compact"
-        class="g-table"
-        :style="dnsCredentialTableStyles"
+        class="g-table flex-grow-1 min-h-0px"
         fixed-header
       >
         <template #item="{ item, itemRef }">
@@ -265,9 +267,11 @@ import {
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
 import {
+  inject,
   toRef,
   unref,
   computed,
+  useTemplateRef,
 } from 'vue'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
@@ -286,7 +290,6 @@ import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
-import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
 import {
@@ -295,6 +298,7 @@ import {
   credentialProviderType,
   bindingProviderType,
 } from '@/composables/credential/helper'
+import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import { mapTableHeader } from '@/utils'
 
@@ -330,27 +334,43 @@ export default {
       dnsCredentialList,
     } = storeToRefs(credentialStore)
 
+    const toolbarHeight = 64
+    const tableHeaderHeight = 40
     const itemHeight = 58
-    const firstTableItemCount = computed(() => infrastructureBindingList.value.length)
-    const secondTableItemCount = computed(() => dnsCredentialList.value.length)
+
+    const firstItemCount = computed(() => infrastructureBindingList.value.length)
+    const { dnsProviderTypes } = storeToRefs(useGardenerExtensionStore())
+    const secondItemCount = computed(() => dnsProviderTypes.value.length ? dnsCredentialList.value.length : 0)
+
+    const infraFooter = useTemplateRef('infraFooter')
+
+    // Card margins are intentionally excluded from the offset. Over-estimating
+    // table height avoids unused space in the container and in edge cases only
+    // makes the larger scrollable table slightly smaller than the smaller static one.
+    const staticOffset = computed(() => {
+      return toolbarHeight + tableHeaderHeight + (infraFooter.value?.footerHeight ?? 0)
+    })
 
     const {
-      firstTableStyles: infraCredentialTableStyles,
-      secondTableStyles: dnsCredentialTableStyles,
+      firstTableStyle: infraCardStyle,
+      secondTableStyle: dnsCardStyle,
     } = useTwoTableLayout({
-      firstTableItemCount,
-      secondTableItemCount,
+      container: inject('mainContainer', null),
+      firstItemCount,
+      secondItemCount,
       itemHeight,
+      staticOffset,
     })
 
     return {
+      toolbarHeight,
       highlightedCredentialUid,
       highlightedBindingUid,
       infrastructureBindingList,
       dnsCredentialList,
       itemHeight,
-      infraCredentialTableStyles,
-      dnsCredentialTableStyles,
+      infraCardStyle,
+      dnsCardStyle,
     }
   },
   data () {
@@ -707,10 +727,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.container-size {
-  height: 100%;
-  min-height: 800px; //ensure readability on small devices
+.min-h-800px {
+  min-height: 800px;
 }
-
 </style>

@@ -215,7 +215,7 @@ const containerStyles = computed(() => {
   return {
     flex: '1 1 auto',
     minHeight: `${lineHeight.value * 3}px`,
-    overflow: 'scroll',
+    overflow: 'hidden',
   }
 })
 

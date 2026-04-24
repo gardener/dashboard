@@ -7,14 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-container
-    ref="container"
     fluid
-    class="container-size"
+    class="d-flex flex-column h-100 overflow-hidden min-h-800px"
   >
-    <v-card class="ma-3">
+    <v-card
+      class="ma-3 d-flex flex-column overflow-hidden"
+      :style="userCardStyle"
+    >
       <g-toolbar
         prepend-icon="mdi-account-multiple"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Project Users
@@ -81,9 +83,8 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="userFilter"
         density="compact"
-        class="g-table"
+        class="g-table flex-grow-1 min-h-0px"
         :item-height="itemHeight"
-        :style="userTableStyles"
         fixed-header
       >
         <template #item="{ item }">
@@ -97,6 +98,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <template #bottom>
           <g-data-table-footer
+            ref="userFooter"
             :items-length="userList.length"
             items-label="Users"
           />
@@ -104,10 +106,13 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table-virtual>
     </v-card>
 
-    <v-card class="ma-3 mt-6">
+    <v-card
+      class="ma-3 mt-6 d-flex flex-column overflow-hidden"
+      :style="serviceAccountCardStyle"
+    >
       <g-toolbar
         prepend-icon="mdi-monitor-multiple"
-        :height="64"
+        :height="toolbarHeight"
       >
         <div class="text-h6">
           Service Accounts
@@ -167,9 +172,8 @@ SPDX-License-Identifier: Apache-2.0
         hover
         :search="serviceAccountFilter"
         density="compact"
-        class="g-table"
+        class="g-table flex-grow-1 min-h-0px"
         :item-height="itemHeight"
-        :style="serviceAccountTableStyles"
         fixed-header
       >
         <template #item="{ item }">
@@ -261,6 +265,7 @@ import {
   computed,
   inject,
   watch,
+  useTemplateRef,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -512,17 +517,28 @@ const visibleServiceAccountTableHeaders = computed(() => {
   return filter(serviceAccountTableHeaders.value, ['selected', true])
 })
 
+const toolbarHeight = 64
+const tableHeaderHeight = 40
 const itemHeight = 48
-const firstTableItemCount = computed(() => userList.value.length)
-const secondTableItemCount = computed(() => serviceAccountList.value.length)
+
+const userFooter = useTemplateRef('userFooter')
+
+// Card margins are intentionally excluded from the offset. Over-estimating
+// table height avoids unused space in the container and in edge cases only
+// makes the larger scrollable table slightly smaller than the smaller static one.
+const staticOffset = computed(() => {
+  return toolbarHeight + tableHeaderHeight + (userFooter.value?.footerHeight ?? 0)
+})
 
 const {
-  firstTableStyles: userTableStyles,
-  secondTableStyles: serviceAccountTableStyles,
+  firstTableStyle: userCardStyle,
+  secondTableStyle: serviceAccountCardStyle,
 } = useTwoTableLayout({
-  firstTableItemCount,
-  secondTableItemCount,
+  container: inject('mainContainer', null),
+  firstItemCount: computed(() => userList.value.length),
+  secondItemCount: computed(() => serviceAccountList.value.length),
   itemHeight,
+  staticOffset,
 })
 
 watch(namespace, () => {
@@ -776,10 +792,7 @@ function disableCustomKeySort (tableHeaders) {
 </script>
 
 <style lang="scss" scoped>
-
-.container-size {
-  height: 100%;
-  min-height: 800px; //ensure readability on small devices
+.min-h-800px {
+  min-height: 800px;
 }
-
 </style>

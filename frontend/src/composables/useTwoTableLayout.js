@@ -1,71 +1,63 @@
 //
-// SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 import {
   computed,
-  useTemplateRef,
+  toValue,
 } from 'vue'
 import { useElementSize } from '@vueuse/core'
 
 export function useTwoTableLayout ({
-  containerRefName = 'container', // Element containing two vuetify data tables
-  itemHeight, // height of table items
-  tableHeaderHeight = 40,
-  tableFooterHeight = 37,
-  yMargins = 90, // combined vertical margins
-  noDataHeight = 120, // reserved space in case of no data
-  firstTableItemCount,
-  secondTableItemCount,
+  container,
+  firstItemCount,
+  secondItemCount,
+  itemHeight,
+  staticOffset = 0,
 }) {
-  const containerRef = useTemplateRef(containerRefName)
-  const { height: containerHeight } = useElementSize(containerRef)
-
-  const desiredFirstTableHeight = computed(() => {
-    return desiredHeight(firstTableItemCount)
-  })
-
-  const desiredSecondTableHeight = computed(() => {
-    return desiredHeight(secondTableItemCount)
-  })
-
-  const halfAvailableHeight = computed(() => {
-    return containerHeight.value / 2 - yMargins
-  })
-
-  const firstTableStyles = computed(() => {
-    return tableStyles(desiredFirstTableHeight, desiredSecondTableHeight)
-  })
-
-  const secondTableStyles = computed(() => {
-    return tableStyles(desiredSecondTableHeight, desiredFirstTableHeight)
-  })
-
-  function desiredHeight (itemCount) {
-    const contentHeight = itemCount.value * itemHeight
-    if (contentHeight === 0) {
-      return noDataHeight
-    }
-    return contentHeight + tableHeaderHeight + tableFooterHeight
+  if (!container) {
+    throw new Error('useTwoTableLayout requires a "container" ref')
   }
 
-  function tableStyles (desiredHeight, otherTableDesiredHeight) {
-    const additionalHeight = halfAvailableHeight.value - otherTableDesiredHeight.value
-    let availableHeight = halfAvailableHeight.value
-    if (additionalHeight > 0) {
-      availableHeight = availableHeight + additionalHeight
-    }
-    const height = Math.min(desiredHeight.value, availableHeight)
+  const { height: containerHeight } = useElementSize(container)
 
-    return {
-      height: `${height}px`,
-    }
+  function estimatedTableHeight (itemCount) {
+    return toValue(staticOffset) + itemCount * itemHeight
   }
+
+  const firstExceedsHalf = computed(() => {
+    return estimatedTableHeight(firstItemCount.value) > containerHeight.value / 2
+  })
+
+  const secondExceedsHalf = computed(() => {
+    return estimatedTableHeight(secondItemCount.value) > containerHeight.value / 2
+  })
+
+  function computeStyle (selfExceedsHalf, otherExceedsHalf) {
+    if (!containerHeight.value) {
+      return { flex: '0 1 auto' }
+    }
+    if (selfExceedsHalf && otherExceedsHalf) {
+      return { flex: '0 1 auto', maxHeight: '50%' }
+    }
+    if (otherExceedsHalf) {
+      return { flex: '0 0 auto' }
+    }
+    return { flex: '0 1 auto' }
+  }
+
+  const firstTableStyle = computed(() => {
+    return computeStyle(firstExceedsHalf.value, secondExceedsHalf.value)
+  })
+
+  const secondTableStyle = computed(() => {
+    return computeStyle(secondExceedsHalf.value, firstExceedsHalf.value)
+  })
 
   return {
-    firstTableStyles,
-    secondTableStyles,
+    firstTableStyle,
+    secondTableStyle,
   }
 }
