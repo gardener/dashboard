@@ -64,13 +64,13 @@ export function useSeedTableSorting () {
   } = useTableSorting()
 
   const customKeySort = {
-    name: (a, b) => compareValues(a, b),
-    infrastructure: (a, b) => compareValues(a, b),
+    name: compareValues,
+    infrastructure: compareValues,
     lastOperation: (a, b) => compareLastOperation(a, b, compareValues),
-    kubernetesVersion: (a, b) => compareSemanticVersions(a, b),
-    gardenerVersion: (a, b) => compareSemanticVersions(a, b),
-    shoot: (a, b) => compareValues(a, b),
-    createdAt: (a, b) => compareValues(a, b),
+    kubernetesVersion: compareSemanticVersions,
+    gardenerVersion: compareSemanticVersions,
+    shoot: compareValues,
+    createdAt: compareValues,
     readiness: (a, b) => compareReadiness(a, b, configStore),
   }
 
