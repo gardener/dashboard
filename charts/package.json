@@ -33,7 +33,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-lodash": "^8.0.0",
     "js-yaml": "^4.1.0",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "neostandard": "^0.12.0",
     "vitest": "^3.0.0"
   },

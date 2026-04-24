@@ -83,7 +83,7 @@ const RAW_RUNTIME_STATE =
           ["gardener-dashboard", "workspace:."],\
           ["husky", "npm:9.1.7"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["node-gyp", "npm:11.1.0"],\
           ["vitest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:3.2.4"]\
         ],\
@@ -927,7 +927,7 @@ const RAW_RUNTIME_STATE =
           ["js-yaml", "npm:4.1.1"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["morgan", "npm:1.10.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["object-hash", "npm:3.0.0"],\
@@ -972,7 +972,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-import", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:2.32.0"],\
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["js-yaml", "npm:4.1.1"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
@@ -1086,7 +1086,7 @@ const RAW_RUNTIME_STATE =
           ["express", "npm:5.2.1"],\
           ["http-errors", "npm:2.0.1"],\
           ["jsonwebtoken", "npm:9.0.3"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["mixwith", "npm:0.1.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["uuid", "npm:14.0.0"],\
@@ -1119,7 +1119,7 @@ const RAW_RUNTIME_STATE =
           ["express", "npm:5.2.1"],\
           ["http-errors", "npm:2.0.1"],\
           ["jsonwebtoken", "npm:9.0.3"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["mixwith", "npm:0.1.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["uuid", "npm:14.0.0"],\
@@ -1143,7 +1143,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["gtoken", "npm:8.0.0"],\
           ["js-yaml", "npm:4.1.1"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
@@ -1274,7 +1274,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["http-errors", "npm:2.0.1"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["type-is", "npm:2.0.1"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
@@ -1298,7 +1298,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["http-errors", "npm:2.0.1"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
           ["type-is", "npm:2.0.1"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
@@ -7138,7 +7138,7 @@ const RAW_RUNTIME_STATE =
           ["gardener-dashboard", "workspace:."],\
           ["husky", "npm:9.1.7"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
-          ["lodash-es", "npm:4.17.23"],\
+          ["lodash-es", "npm:4.18.1"],\
           ["node-gyp", "npm:11.1.0"],\
           ["vitest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:3.2.4"]\
         ],\
@@ -8534,10 +8534,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["lodash-es", [\
-      ["npm:4.17.23", {\
-        "packageLocation": "./.yarn/cache/lodash-es-npm-4.17.23-b4279789e6-3150fb6660.zip/node_modules/lodash-es/",\
+      ["npm:4.18.1", {\
+        "packageLocation": "./.yarn/cache/lodash-es-npm-4.18.1-02cf41b912-35d4dcf87e.zip/node_modules/lodash-es/",\
         "packageDependencies": [\
-          ["lodash-es", "npm:4.17.23"]\
+          ["lodash-es", "npm:4.18.1"]\
         ],\
         "linkType": "HARD"\
       }]\

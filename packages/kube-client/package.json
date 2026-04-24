@@ -28,7 +28,7 @@
   "dependencies": {
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "mixwith": "^0.1.1",
     "uuid": "^14.0.0"
   },
