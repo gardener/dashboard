@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
       </g-toolbar>
       <v-data-table-virtual
-        v-model:sort-by="sortBy"
+        v-model:sort-by="seedSortBy"
         :headers="visibleHeaders"
         :items="filteredSeeds"
         :loading="loading || !connected"
@@ -70,8 +70,6 @@ import {
   computed,
   reactive,
   provide,
-  watch,
-  onMounted,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 
@@ -116,8 +114,6 @@ provide('activePopoverKey', activePopoverKey)
 
 const expandedAccessRestrictions = reactive({ default: false })
 provide('expandedAccessRestrictions', expandedAccessRestrictions)
-
-const selectedColumns = ref({})
 
 const { search: searchQuery } = useUrlSearchSync()
 
@@ -218,7 +214,7 @@ const headers = computed(() => {
   return map(allHeaders.value, header => ({
     ...header,
     class: 'nowrap',
-    selected: get(selectedColumns.value, header.key, header.defaultSelected),
+    selected: get(seedSelectedColumns.value, header.key, header.defaultSelected),
   }))
 })
 
@@ -228,10 +224,6 @@ const selectableHeaders = computed(() => {
 
 const visibleHeaders = computed(() => {
   return filter(selectableHeaders.value, ['selected', true])
-})
-
-const currentSelectedColumns = computed(() => {
-  return mapTableHeader(headers.value, 'selected')
 })
 
 const defaultSelectedColumns = computed(() => {
@@ -271,45 +263,18 @@ const { filteredItems: filteredSeeds } = useTableFilter({
   filterFn: seedFilterFn,
 })
 
-const {
-  sortBy,
-  customKeySort,
-} = useSeedTableSorting({
-  defaultSortBy: seedSortBy.value,
-  onSortChange: newSortBy => {
-    seedSortBy.value = newSortBy
-  },
-})
+const { customKeySort } = useSeedTableSorting()
 
 function setSelectedHeader (header) {
-  selectedColumns.value[header.key] = !header.selected
-  saveSelectedColumns()
-}
-
-function saveSelectedColumns () {
-  seedSelectedColumns.value = currentSelectedColumns.value
+  seedSelectedColumns.value[header.key] = !header.selected
 }
 
 function resetTableSettings () {
-  selectedColumns.value = { ...defaultSelectedColumns.value }
-  saveSelectedColumns()
-  sortBy.value = [{ key: 'name', order: 'asc' }]
-  seedSortBy.value = sortBy.value
-}
-
-function updateTableSettings () {
-  selectedColumns.value = { ...seedSelectedColumns.value }
+  seedSelectedColumns.value = defaultSelectedColumns.value
+  seedSortBy.value = [{ key: 'name', order: 'asc' }]
 }
 
 function getItemKey (item, fallback) {
   return get(item, ['metadata', 'uid'], fallback)
 }
-
-watch(seedSelectedColumns, updateTableSettings, { deep: true, immediate: true })
-
-onMounted(() => {
-  if (seedSortBy.value?.length) {
-    sortBy.value = [...seedSortBy.value]
-  }
-})
 </script>

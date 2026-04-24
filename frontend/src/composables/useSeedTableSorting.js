@@ -55,22 +55,13 @@ function compareLastOperation (a, b, compareValues) {
   return compareValues(getSeedLastOperationSortVal(a), getSeedLastOperationSortVal(b))
 }
 
-export function useSeedTableSorting (options = {}) {
-  const {
-    defaultSortBy = [{ key: 'name', order: 'asc' }],
-    onSortChange,
-  } = options
-
+export function useSeedTableSorting () {
   const configStore = useConfigStore()
 
   const {
-    sortBy,
     compareValues,
     compareSemanticVersions,
-  } = useTableSorting({
-    defaultSortBy,
-    onSortChange,
-  })
+  } = useTableSorting()
 
   const customKeySort = {
     name: (a, b) => compareValues(a, b),
@@ -84,7 +75,6 @@ export function useSeedTableSorting (options = {}) {
   }
 
   return {
-    sortBy,
     customKeySort,
   }
 }
