@@ -55,36 +55,26 @@ function compareLastOperation (a, b, compareValues) {
   return compareValues(getSeedLastOperationSortVal(a), getSeedLastOperationSortVal(b))
 }
 
-export function useSeedTableSorting (options = {}) {
-  const {
-    defaultSortBy = [{ key: 'name', order: 'asc' }],
-    onSortChange,
-  } = options
-
+export function useSeedTableSorting () {
   const configStore = useConfigStore()
 
   const {
-    sortBy,
     compareValues,
     compareSemanticVersions,
-  } = useTableSorting({
-    defaultSortBy,
-    onSortChange,
-  })
+  } = useTableSorting()
 
   const customKeySort = {
-    name: (a, b) => compareValues(a, b),
-    infrastructure: (a, b) => compareValues(a, b),
+    name: compareValues,
+    infrastructure: compareValues,
     lastOperation: (a, b) => compareLastOperation(a, b, compareValues),
-    kubernetesVersion: (a, b) => compareSemanticVersions(a, b),
-    gardenerVersion: (a, b) => compareSemanticVersions(a, b),
-    shoot: (a, b) => compareValues(a, b),
-    createdAt: (a, b) => compareValues(a, b),
+    kubernetesVersion: compareSemanticVersions,
+    gardenerVersion: compareSemanticVersions,
+    shoot: compareValues,
+    createdAt: compareValues,
     readiness: (a, b) => compareReadiness(a, b, configStore),
   }
 
   return {
-    sortBy,
     customKeySort,
   }
 }

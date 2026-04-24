@@ -4,42 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { nextTick } from 'vue'
-
 import { useTableSorting } from '@/composables/useTableSorting'
 import { getLastOperationSortVal } from '@/composables/useTableSorting/helper'
 
 describe('composables', () => {
   describe('useTableSorting', () => {
-    describe('sortBy', () => {
-      it('should use default sort by name ascending', () => {
-        const { sortBy } = useTableSorting()
-
-        expect(sortBy.value).toEqual([{ key: 'name', order: 'asc' }])
-      })
-
-      it('should use provided default sort config', () => {
-        const defaultSortBy = [{ key: 'createdAt', order: 'desc' }]
-        const { sortBy } = useTableSorting({ defaultSortBy })
-
-        expect(sortBy.value).toEqual(defaultSortBy)
-      })
-
-      it('should call onSortChange when sorting changes', async () => {
-        const onSortChange = vi.fn()
-        const { sortBy } = useTableSorting({ onSortChange })
-
-        sortBy.value = [{ key: 'createdAt', order: 'desc' }]
-        await nextTick()
-
-        expect(onSortChange).toHaveBeenCalledWith([{ key: 'createdAt', order: 'desc' }])
-      })
-
-      it('should throw if onSortChange is not a function', () => {
-        expect(() => useTableSorting({ onSortChange: 'invalid' })).toThrow(TypeError)
-      })
-    })
-
     describe('compareValues', () => {
       it('should compare strings case-insensitively', () => {
         const { compareValues } = useTableSorting()

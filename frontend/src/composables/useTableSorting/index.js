@@ -4,24 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  ref,
-  watch,
-} from 'vue'
 import semver from 'semver'
 
-export function useTableSorting (options = {}) {
-  const {
-    defaultSortBy = [{ key: 'name', order: 'asc' }],
-    onSortChange,
-  } = options
-
-  if (onSortChange && typeof onSortChange !== 'function') {
-    throw new TypeError('onSortChange must be a function')
-  }
-
-  const sortBy = ref(defaultSortBy)
-
+export function useTableSorting () {
   function compareValues (aVal, bVal) {
     if (aVal == null && bVal == null) {
       return 0
@@ -82,14 +67,7 @@ export function useTableSorting (options = {}) {
     })
   }
 
-  if (onSortChange) {
-    watch(sortBy, newValue => {
-      onSortChange(newValue)
-    }, { deep: true })
-  }
-
   return {
-    sortBy,
     compareValues,
     compareSemanticVersions,
   }
