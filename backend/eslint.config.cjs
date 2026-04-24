@@ -60,7 +60,7 @@ module.exports = [
             ['@gardener-dashboard/test-utils', '../packages/test-utils'],
           ],
         },
-        node: {
+        alias: {
           extensions: ['.js', '.cjs', '.mjs'],
         },
       },
