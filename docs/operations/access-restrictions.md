@@ -15,6 +15,10 @@ The Dashboard can be installed and configured in two ways:
 
 #### 1. Installing via Helm Chart
 
+> [!CAUTION]
+> The Helm chart installation method has been deprecated and will be removed earliest 6 months after deprecation (around November 2026).
+> We urge you to switch to a [`gardener-operator`](https://github.com/gardener/gardener/blob/master/docs/concepts/operator.md)-based installation.
+
 When installing the Dashboard via Helm chart, access restrictions are configured in the `values.yaml` file.
 
 **Example `values.yaml`:**

@@ -1,5 +1,10 @@
 # Theming and Branding
 
+> [!CAUTION]
+> The Helm chart installation method has been deprecated and will be removed earliest 6 months after deprecation (around November 2026).
+> We urge you to switch to a [`gardener-operator`](https://github.com/gardener/gardener/blob/master/docs/concepts/operator.md)-based installation.
+> When deploying the dashboard using the Gardener Operator, you can configure theming and branding via a `ConfigMap` referenced by `.spec.virtualCluster.gardener.gardenerDashboard.frontendConfigMapRef` within the `Garden` resource.
+
 ## Motivation
 Gardener landscape administrators should have the possibility to change the appearance and the branding of the Gardener Dashboard via configuration without the need to touch the code.
 
