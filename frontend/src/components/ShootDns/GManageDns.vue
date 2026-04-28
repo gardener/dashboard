@@ -202,7 +202,9 @@ export default {
     const cloudProfileStore = useCloudProfileStore()
 
     const customDomainEnabled = ref(
-      !!dnsDomain.value || !!dnsPrimaryProviderType.value || !!dnsPrimaryProviderCredentialsRef.value,
+      isNewCluster.value
+        ? (!!dnsDomain.value || !!dnsPrimaryProviderType.value || !!dnsPrimaryProviderCredentialsRef.value)
+        : !!dnsPrimaryProviderType.value,
     )
 
     const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
