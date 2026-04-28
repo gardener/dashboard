@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-container class="px-0 mx-0">
+  <div>
     <v-row>
       <v-checkbox
         v-model="customDomainEnabled"
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         persistent-hint
         :hint="domainCheckboxHint"
         max-width="50%"
-        class="mb-3 mx-3"
+        class="mb-2"
       />
     </v-row>
     <template v-if="customDomainEnabled">
@@ -144,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-row>
       </div>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script>

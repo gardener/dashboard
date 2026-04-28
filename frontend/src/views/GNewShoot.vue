@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="Control Plane High Availability" />
-        <v-card-text class="pt-2">
+        <v-card-text class="py-1">
           <g-manage-control-plane-high-availability />
         </v-card-text>
       </v-card>

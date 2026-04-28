@@ -73,12 +73,12 @@ SPDX-License-Identifier: Apache-2.0
         @update:model-value="v$.internalValue.$touch"
         @blur="v$.internalValue.$touch"
       >
-        <template #item="{ item, props: itemProps }">
+        <template #item="{ internalItem, props: itemProps }">
           <v-list-item
             v-bind="{ ...itemProps, title: undefined }"
           >
             <g-account-avatar
-              :account-name="item.value"
+              :account-name="internalItem.value"
               :size="24"
             />
           </v-list-item>
