@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #title="{ item }">
-      <span :class="{ 'text-title-large': !item.to }">
+      <span :class="{ 'text-title-large ml-3': !item.to }">
         {{ item.title || item }}
       </span>
     </template>
