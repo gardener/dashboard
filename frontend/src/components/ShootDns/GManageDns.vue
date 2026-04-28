@@ -54,13 +54,13 @@ SPDX-License-Identifier: Apache-2.0
                 </template>
               </v-list-item>
             </template>
-            <template #selection="{ item }">
+            <template #selection="{ internalItem }">
               <div class="d-flex">
                 <g-vendor-icon
-                  :name="item.value"
+                  :name="internalItem.value"
                   class="mr-2"
                 />
-                {{ item.value }}
+                {{ internalItem.value }}
               </div>
             </template>
           </v-select>
