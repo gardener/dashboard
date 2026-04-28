@@ -14,6 +14,7 @@ import { useShootStore } from '@/store/shoot'
 
 import {
   isSecret as _isSecret,
+  isWorkloadIdentity as _isWorkloadIdentity,
   secretDetails as _secretDetails,
   credentialProviderType as _credentialProviderType,
 } from './helper'
@@ -30,6 +31,8 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   const { shootList } = storeToRefs(shootStore)
 
   const isSecret = computed(() => _isSecret(credential.value))
+  const isWorkloadIdentity = computed(() => _isWorkloadIdentity(credential.value))
+  const hasOwnWorkloadIdentity = computed(() => isWorkloadIdentity.value && credential.value !== undefined)
 
   const credentialNamespace = computed(() => credential.value?.metadata?.namespace)
   const credentialName = computed(() => credential.value?.metadata?.name)
@@ -82,6 +85,7 @@ export const useCloudProviderCredential = (credential, options = {}) => {
     credentialDetails,
     credentialUsageCount,
     isMarkedForDeletion,
+    hasOwnWorkloadIdentity,
     providerType,
   }
 }
