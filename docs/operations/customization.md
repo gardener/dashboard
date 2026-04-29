@@ -31,8 +31,6 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 
 ## Vendor Branding
 
-Here’s a polished and clearer version of your sentence:
-
 You can customize the appearance of built-in vendors displayed in the dashboard. This includes overriding the display name, icon, sorting, and order of *cloud provider vendors* and *machine image vendors*. In addition, you can configure custom vendors.
 
 
