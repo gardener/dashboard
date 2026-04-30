@@ -36,6 +36,7 @@ runs:
         echo "callback-path=../prepare-hotfix-callback-action" >> $GITHUB_OUTPUT
 
     - name: Compute and validate branch names
+      id: branches
       shell: bash
       env:
         TAG: ${{ inputs.tag }}
@@ -46,20 +47,22 @@ runs:
           exit 1
         fi
         BASE_VERSION="${TAG%.*}"
-        HOTFIX_BRANCH="hotfix-${BASE_VERSION}"
-        if [[ ! "$HOTFIX_BRANCH" =~ ^hotfix-[a-zA-Z0-9.-]+$ ]]; then
-          echo "Invalid hotfix branch name derived from tag: $HOTFIX_BRANCH"
+        if [[ ! "$BASE_VERSION" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+          echo "Invalid base version derived from tag: $BASE_VERSION"
           exit 1
         fi
+        HOTFIX_BRANCH="hotfix-${BASE_VERSION}"
         PREPARE_BRANCH="hotfix-prepare-${BASE_VERSION}"
-        echo "HOTFIX_BRANCH=$HOTFIX_BRANCH" >> "$GITHUB_ENV"
-        echo "PREPARE_BRANCH=$PREPARE_BRANCH" >> "$GITHUB_ENV"
+        printf 'hotfix-branch=%s\n' "$HOTFIX_BRANCH" >> "$GITHUB_OUTPUT"
+        printf 'prepare-branch=%s\n' "$PREPARE_BRANCH" >> "$GITHUB_OUTPUT"
         echo "Computed branches: $HOTFIX_BRANCH and $PREPARE_BRANCH"
 
     - name: Check and create branches (base on tag)
       shell: bash
       env:
         TAG: ${{ inputs.tag }}
+        HOTFIX_BRANCH: ${{ steps.branches.outputs.hotfix-branch }}
+        PREPARE_BRANCH: ${{ steps.branches.outputs.prepare-branch }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         set -euo pipefail
@@ -111,6 +114,8 @@ runs:
     - name: Push prepare branch and create Pull Request
       shell: bash
       env:
+        HOTFIX_BRANCH: ${{ steps.branches.outputs.hotfix-branch }}
+        PREPARE_BRANCH: ${{ steps.branches.outputs.prepare-branch }}
         GH_TOKEN: ${{ inputs.github-token }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
