@@ -60,27 +60,42 @@ runs:
       shell: bash
       env:
         TAG: ${{ inputs.tag }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         set -euo pipefail
-        git fetch --tags origin
+        BASIC_AUTH="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+        AUTH_HEADER="AUTHORIZATION: basic $BASIC_AUTH"
+
+        echo "::add-mask::$GITHUB_TOKEN"
+        echo "::add-mask::$BASIC_AUTH"
+        echo "::add-mask::$AUTH_HEADER"
+
+        git_with_auth() {
+          GIT_CONFIG_COUNT=1 \
+          GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
+          GIT_CONFIG_VALUE_0="$AUTH_HEADER" \
+          git "$@"
+        }
+
+        git_with_auth fetch --tags origin
 
         if ! git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
           echo "Tag not found: $TAG"
           exit 1
         fi
 
-        if git ls-remote --exit-code origin "$HOTFIX_BRANCH" >/dev/null 2>&1; then
+        if git_with_auth ls-remote --exit-code origin "$HOTFIX_BRANCH" >/dev/null 2>&1; then
           echo "Hotfix branch $HOTFIX_BRANCH already exists"
           exit 1
         fi
-        if git ls-remote --exit-code origin "$PREPARE_BRANCH" >/dev/null 2>&1; then
+        if git_with_auth ls-remote --exit-code origin "$PREPARE_BRANCH" >/dev/null 2>&1; then
           echo "Prepare branch $PREPARE_BRANCH already exists"
           exit 1
         fi
 
         # Create the hotfix branch from the tag, push it, then create the prepare branch from hotfix
         git checkout -b "$HOTFIX_BRANCH" "$TAG"
-        git push origin "$HOTFIX_BRANCH"
+        git_with_auth push origin "$HOTFIX_BRANCH"
         git checkout -b "$PREPARE_BRANCH" "$HOTFIX_BRANCH"
         echo "Created branches: $HOTFIX_BRANCH and $PREPARE_BRANCH"
 
@@ -97,9 +112,25 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         set -euo pipefail
-        git push origin "$PREPARE_BRANCH"
+        BASIC_AUTH="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
+        AUTH_HEADER="AUTHORIZATION: basic $BASIC_AUTH"
+
+        echo "::add-mask::$GITHUB_TOKEN"
+        echo "::add-mask::$BASIC_AUTH"
+        echo "::add-mask::$AUTH_HEADER"
+
+        git_with_auth() {
+          GIT_CONFIG_COUNT=1 \
+          GIT_CONFIG_KEY_0="http.https://github.com/.extraheader" \
+          GIT_CONFIG_VALUE_0="$AUTH_HEADER" \
+          git "$@"
+        }
+
+        git_with_auth push origin "$PREPARE_BRANCH"
+
         gh pr create \
           --base "$HOTFIX_BRANCH" \
           --head "$PREPARE_BRANCH" \
