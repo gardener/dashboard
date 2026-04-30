@@ -29,6 +29,17 @@ scripts/bin
 # GitGuardian
 .cache_ggshield
 
+# Ignore AI assistant workspace config unless explicitly reviewed
+# To whitelist specific files use: !.claude/CLAUDE.md
+.aider/
+.claude/
+.cline/
+.codeium/
+.continue/
+.copilot/
+.cursor/
+.windsurf/
+
 # other files to ignore
 .DS_Store
 node_modules/
