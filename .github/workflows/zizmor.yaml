@@ -27,3 +27,7 @@ jobs:
         with:
           # renovate: datasource=github-releases depName=zizmorcore/zizmor
           version: v1.24.1
+          min-severity: low
+          min-confidence: low
+          advanced-security: false
+          annotations: true
