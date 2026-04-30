@@ -10,6 +10,11 @@ on:
         description: |
           the mode to use. either `snapshot` or `release`. Will affect effective version, as well
           as target-oci-registry.
+    secrets:
+      dockerhub-auth-token:
+        required: false
+        description: |
+          Docker Hub read token used by the OCI build workflow for pull authentication.
 
 permissions: {}
 
@@ -31,7 +36,8 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    secrets: inherit
+    secrets:
+      dockerhub-auth-token: ${{ secrets.dockerhub-auth-token }}
     uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     strategy:
       matrix:

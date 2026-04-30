@@ -24,7 +24,8 @@ jobs:
     uses: ./.github/workflows/build.yaml
     with:
       mode: snapshot
-    secrets: inherit
+    secrets:
+      dockerhub-auth-token: ${{ secrets.DOCKERHUB_RO_AUTH }}
     permissions:
       contents: read
       packages: write
