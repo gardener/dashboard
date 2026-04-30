@@ -34,7 +34,7 @@ jobs:
       TAG: ${{ inputs.tag }}
     steps:
       - name: Create GitHub App token
-        uses: gardener/cc-utils/.github/actions/github-auth@v1
+        uses: gardener/cc-utils/.github/actions/github-auth@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         id: app-token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
 
       - name: Prepare hotfix branch
-        uses: gardener/dashboard/.github/actions/prepare-hotfix-branch@master
+        uses: gardener/dashboard/.github/actions/prepare-hotfix-branch@master # zizmor: ignore[unpinned-uses] -- same-repo action; intentionally tracks master as the trusted source for the latest hotfix preparation logic
         with:
           tag: ${{ env.TAG }}
           github-token: ${{ steps.app-token.outputs.token }}

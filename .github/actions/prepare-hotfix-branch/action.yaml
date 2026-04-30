@@ -18,7 +18,7 @@ runs:
   using: composite
   steps:
     - name: Setup Git Identity
-      uses: gardener/cc-utils/.github/actions/setup-git-identity@v1
+      uses: gardener/cc-utils/.github/actions/setup-git-identity@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
 
     - name: Stage callback action outside repo (if provided)
       id: stage-callback
@@ -103,7 +103,7 @@ runs:
         echo "Created branches: $HOTFIX_BRANCH and $PREPARE_BRANCH"
 
     - name: Bump patch version
-      uses: gardener/cc-utils/.github/actions/version@v1
+      uses: gardener/cc-utils/.github/actions/version@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
       with:
         version-operation: bump-patch
         prerelease: dev

@@ -10,7 +10,7 @@ permissions: {}
 
 jobs:
   validate-release-notes:
-    uses: gardener/cc-utils/.github/workflows/validate-release-notes.yaml@v1
+    uses: gardener/cc-utils/.github/workflows/validate-release-notes.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     permissions:
       pull-requests: read
     with:

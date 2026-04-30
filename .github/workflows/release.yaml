@@ -22,7 +22,7 @@ jobs:
       mode: release
 
   release-to-github-and-bump:
-    uses: gardener/cc-utils/.github/workflows/release.yaml@v1
+    uses: gardener/cc-utils/.github/workflows/release.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     needs:
       - build
     secrets: inherit
