@@ -22,12 +22,14 @@ on:
         type: string
         default: .github/actions/prepare-hotfix
 
-permissions:
-  id-token: write # required for GitHub OIDC Federation Service token
+permissions: {}
 
 jobs:
   prepare-hotfix:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     env:
       TAG: ${{ inputs.tag }}
     steps:
