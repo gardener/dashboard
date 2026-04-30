@@ -10,6 +10,7 @@ on:
     - edited
     - reopened
     - synchronize
+  # zizmor: ignore[dangerous-triggers] -- intentional: triggers build only when ok-to-test label is added to external PRs, gated by label check in job condition
   pull_request_target:
     types:
     - labeled
