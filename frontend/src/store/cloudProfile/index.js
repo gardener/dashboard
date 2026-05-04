@@ -15,10 +15,12 @@ import {
 import { patch as jsondiffpatchPatch } from 'jsondiffpatch'
 
 import { useConfigStore } from '@/store/config'
+import { useAppStore } from '@/store/app'
 
 import { useApi } from '@/composables/useApi'
 
 import { getCloudProfileSpec } from '@/utils'
+import { computeSpecHash } from '@/utils/crypto'
 
 import cloneDeep from 'lodash/cloneDeep'
 import filter from 'lodash/filter'
@@ -32,6 +34,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   const api = useApi()
 
   const configStore = useConfigStore()
+  const appStore = useAppStore()
 
   const list = ref(null)
   const namespacedList = ref(null)
@@ -63,7 +66,7 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
       return
     }
     const response = await api.getNamespacedCloudProfiles({ namespace })
-    setNamespacedCloudProfiles(response.data, namespace)
+    await setNamespacedCloudProfiles(response.data, namespace)
   }
 
   async function fetchNamespacedCloudProfilesForNamespaces (namespaces = []) {
@@ -78,43 +81,147 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     list.value = cloudProfiles
   }
 
-  function rehydrateNamespacedProfiles (profiles) {
-    if (!profiles) {
-      return profiles
+  async function fetchCloudProfile (name) {
+    const response = await api.getCloudProfile({ name })
+    const updatedProfile = response.data
+    const index = list.value?.findIndex(p => p.metadata.name === name) ?? -1
+    if (index !== -1) {
+      // eslint-disable-next-line security/detect-object-injection
+      list.value[index] = updatedProfile
+    } else {
+      list.value = [...(list.value ?? []), updatedProfile]
     }
-    return profiles.map(profile => {
-      const { cloudProfileSpecDiff } = profile.status ?? {}
+    return updatedProfile
+  }
+
+  function applyDiff (parentSpec, diff) {
+    if (diff === null) {
+      return cloneDeep(parentSpec)
+    }
+    return jsondiffpatchPatch(cloneDeep(parentSpec), diff)
+  }
+
+  async function rehydrateNamespacedProfiles (profiles) {
+    if (!profiles) {
+      return { profiles, droppedCount: 0 }
+    }
+
+    const rehydrated = []
+    const refetchedParents = new Set()
+    let droppedCount = 0
+
+    for (const profile of profiles) {
+      const {
+        cloudProfileSpecDiff,
+        parentCloudProfileResourceVersion,
+        cloudProfileSpecHash: expectedHash,
+      } = profile.status ?? {}
+
       if (!('cloudProfileSpecDiff' in (profile.status ?? {}))) {
-        // Already has cloudProfileSpec (non-diff response) — pass through unchanged
-        return profile
+        rehydrated.push(profile)
+        continue
       }
+
       const parentName = profile.spec?.parent?.name
       const parent = find(list.value, ['metadata.name', parentName])
       if (!parent) {
-        return profile
+        rehydrated.push(profile)
+        continue
       }
-      if (cloudProfileSpecDiff === null) {
-        // No changes from parent — spec is identical
-        profile.status.cloudProfileSpec = cloneDeep(parent.spec)
-      } else {
-        // Apply delta on top of parent spec
-        profile.status.cloudProfileSpec = jsondiffpatchPatch(cloneDeep(parent.spec), cloudProfileSpecDiff)
+
+      let rehydratedSpec = applyDiff(parent.spec, cloudProfileSpecDiff)
+
+      if (expectedHash) {
+        const actualHash = await computeSpecHash(rehydratedSpec)
+        if (actualHash !== expectedHash) {
+          const parentDrifted = parentCloudProfileResourceVersion &&
+            parent.metadata?.resourceVersion !== parentCloudProfileResourceVersion
+
+          if (!parentDrifted) {
+            // eslint-disable-next-line no-console
+            console.error(
+              `Hash mismatch for NamespacedCloudProfile '${profile.metadata?.name}': ` +
+              `rehydrated hash '${actualHash}' !== expected hash '${expectedHash}'. ` +
+              'ResourceVersion matches, so re-fetch will not help. ' +
+              'Dropping profile to prevent incorrect data.',
+            )
+            droppedCount++
+            continue
+          }
+
+          let freshParent
+          if (!refetchedParents.has(parentName)) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `CloudProfile drift detected for parent '${parentName}': ` +
+              `local resourceVersion '${parent.metadata?.resourceVersion}' !== ` +
+              `backend resourceVersion '${parentCloudProfileResourceVersion}'. Re-fetching.`,
+            )
+            refetchedParents.add(parentName)
+            try {
+              freshParent = await fetchCloudProfile(parentName)
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error(
+                `Failed to re-fetch CloudProfile '${parentName}'. ` +
+                `Dropping NamespacedCloudProfile '${profile.metadata?.name}' to prevent incorrect data.`,
+                err,
+              )
+              droppedCount++
+              continue
+            }
+          } else {
+            freshParent = find(list.value, ['metadata.name', parentName])
+          }
+
+          if (!freshParent) {
+            droppedCount++
+            continue
+          }
+
+          rehydratedSpec = applyDiff(freshParent.spec, cloudProfileSpecDiff)
+          const retryHash = await computeSpecHash(rehydratedSpec)
+          if (retryHash !== expectedHash) {
+            // eslint-disable-next-line no-console
+            console.error(
+              `Hash mismatch for NamespacedCloudProfile '${profile.metadata?.name}' ` +
+              'persists after parent re-fetch: ' +
+              `rehydrated hash '${retryHash}' !== expected hash '${expectedHash}'. ` +
+              'Dropping profile to prevent incorrect data.',
+            )
+            droppedCount++
+            continue
+          }
+        }
       }
+
+      profile.status.cloudProfileSpec = rehydratedSpec
       delete profile.status.cloudProfileSpecDiff
-      return profile
-    })
+      delete profile.status.parentCloudProfileResourceVersion
+      delete profile.status.cloudProfileSpecHash
+      rehydrated.push(profile)
+    }
+
+    return { profiles: rehydrated, droppedCount }
   }
 
-  function setNamespacedCloudProfiles (namespacedCloudProfiles, namespace) {
+  async function setNamespacedCloudProfiles (namespacedCloudProfiles, namespace) {
     if (!namespace) {
       throw new TypeError('namespace is required')
     }
-    const rehydrated = rehydrateNamespacedProfiles(namespacedCloudProfiles)
+    const { profiles: rehydrated, droppedCount } = await rehydrateNamespacedProfiles(namespacedCloudProfiles)
     namespacedListsByNamespace.value = {
       ...namespacedListsByNamespace.value,
       [namespace]: rehydrated,
     }
     namespacedList.value = flatten(Object.values(namespacedListsByNamespace.value))
+
+    if (droppedCount > 0) {
+      appStore.setError({
+        title: 'Cloud Profile Sync Error',
+        text: `${droppedCount} namespaced cloud profile(s) were excluded due to data inconsistency. Try refreshing the page.`,
+      })
+    }
   }
 
   function hasNamespacedCloudProfilesForNamespace (namespace) {
@@ -150,18 +257,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
     )
   }
 
-  /**
-   * Resolves a cloudProfileRef to its full cloud profile object.
-   *
-   * Handles both:
-   * - `{ kind: 'CloudProfile', name }` — looks up in the regular CloudProfile list
-   * - `{ kind: 'NamespacedCloudProfile', name, namespace }` — looks up in the namespaced list
-   *   by both name and namespace. If no namespace is provided in the ref, falls back to
-   *   matching by name only (first match across all namespaces).
-   *
-   * @param {Object|null} cloudProfileRef
-   * @returns {Object|null} The matching cloud profile object, or null if not found
-   */
   function cloudProfileByRef (cloudProfileRef) {
     if (!cloudProfileRef) {
       return null
@@ -173,7 +268,6 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
           item.metadata.namespace === cloudProfileRef.namespace,
         ) ?? null
       }
-      // Fallback: only return when name is unique across namespaces
       const matches = filter(namespacedList.value, ['metadata.name', cloudProfileRef.name])
       return matches.length === 1 ? matches[0] : null
     }

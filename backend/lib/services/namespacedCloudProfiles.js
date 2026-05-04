@@ -9,7 +9,10 @@ import httpErrors from 'http-errors'
 import * as jsondiffpatch from 'jsondiffpatch'
 import * as authorization from './authorization.js'
 import cache from '../cache/index.js'
-import { simplifyCloudProfile } from '../utils/index.js'
+import {
+  simplifyCloudProfile,
+  computeSpecHash,
+} from '../utils/index.js'
 const { Forbidden } = httpErrors
 const { getNamespacedCloudProfiles, getCloudProfile } = cache
 
@@ -26,16 +29,20 @@ function computeDiff (namespacedCloudProfile) {
   const parentCloudProfile = getCloudProfile(parentName)
 
   if (!parentCloudProfile) {
-    return null
+    return { diff: null, parentResourceVersion: null, cloudProfileSpecHash: null }
   }
 
-  // parentCloudProfile is already cloned by cache.getCloudProfile(name)
+  const parentResourceVersion = _.get(parentCloudProfile, ['metadata', 'resourceVersion'])
   const simplifiedParent = simplifyCloudProfile(parentCloudProfile)
 
   const parentSpec = _.get(simplifiedParent, ['spec'], {})
   const namespacedSpec = _.get(namespacedCloudProfile, ['status', 'cloudProfileSpec'], {})
 
-  return jsondiffpatch.diff(parentSpec, namespacedSpec)
+  return {
+    diff: jsondiffpatch.diff(parentSpec, namespacedSpec),
+    parentResourceVersion,
+    cloudProfileSpecHash: computeSpecHash(namespacedSpec),
+  }
 }
 
 /**
@@ -46,12 +53,14 @@ function computeDiff (namespacedCloudProfile) {
  * @returns {Object} The profile with diff instead of full cloudProfileSpec
  */
 function transformToDiff (profile) {
-  const diff = computeDiff(profile)
+  const { diff, parentResourceVersion, cloudProfileSpecHash } = computeDiff(profile)
 
   const result = _.cloneDeep(profile)
   result.status = {
     ...result.status,
     cloudProfileSpecDiff: diff || null,
+    parentCloudProfileResourceVersion: parentResourceVersion,
+    cloudProfileSpecHash,
   }
   delete result.status.cloudProfileSpec
 
@@ -68,7 +77,7 @@ export async function listForNamespace ({ user, namespace, diff = false }) {
   const simplifiedItems = items.map(simplifyCloudProfile)
 
   if (diff) {
-    return simplifiedItems.map(simplified => transformToDiff(simplified))
+    return simplifiedItems.map(transformToDiff)
   }
 
   return simplifiedItems

@@ -31,6 +31,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra1-profileName",
+      "resourceVersion": "100",
       "uid": 1,
     },
     "spec": {
@@ -51,6 +52,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra1-profileName2",
+      "resourceVersion": "200",
       "uid": 2,
     },
     "spec": {
@@ -76,6 +78,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra2-profileName",
+      "resourceVersion": "300",
       "uid": 3,
     },
     "spec": {
@@ -96,6 +99,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra3-profileName",
+      "resourceVersion": "400",
       "uid": 4,
     },
     "spec": {
@@ -120,6 +124,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra3-profileName2",
+      "resourceVersion": "500",
       "uid": 5,
     },
     "spec": {
@@ -140,6 +145,7 @@ exports[`api cloudprofiles should return all cloudprofiles 2`] = `
   {
     "metadata": {
       "name": "infra4-profileName",
+      "resourceVersion": "600",
       "uid": 6,
     },
     "spec": {

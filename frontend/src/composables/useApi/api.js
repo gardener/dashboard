@@ -234,6 +234,11 @@ export function getCloudProfiles () {
   return getResource('/api/cloudprofiles')
 }
 
+export function getCloudProfile ({ name }) {
+  name = encodeURIComponent(name)
+  return getResource(`/api/cloudprofiles/${name}`)
+}
+
 /* Namespaced Cloud Profiles */
 
 export function getNamespacedCloudProfiles ({ namespace }) {
@@ -443,6 +448,7 @@ export default {
   updateShootSeedName,
   createShootAdminKubeconfig,
   getCloudProfiles,
+  getCloudProfile,
   getNamespacedCloudProfiles,
   getSeeds,
   getProjects,

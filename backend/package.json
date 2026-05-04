@@ -48,6 +48,7 @@
     "@octokit/plugin-rest-endpoint-methods": "^10.4.1",
     "base64url": "^3.0.1",
     "body-parser": "^2.0.0",
+    "canonicalize": "^2.0.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "express": "^5.0.0",

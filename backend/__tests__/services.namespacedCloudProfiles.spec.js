@@ -15,11 +15,16 @@ import {
 import { cloneDeep } from 'lodash-es'
 import * as jsondiffpatch from 'jsondiffpatch'
 
+vi.mock('../lib/config/index.js', () => ({
+  default: {},
+}))
+
 const cloudProfileList = [
   {
     metadata: {
       name: 'local',
       uid: 1,
+      resourceVersion: '100',
     },
     spec: {
       type: 'local',
@@ -41,6 +46,7 @@ const cloudProfileList = [
     metadata: {
       name: 'infra1-profileName',
       uid: 2,
+      resourceVersion: '200',
     },
     spec: {
       type: 'infra1',
@@ -61,6 +67,7 @@ const cloudProfileList = [
     metadata: {
       name: 'infra2-profileName',
       uid: 3,
+      resourceVersion: '300',
     },
     spec: {
       type: 'infra2',
@@ -92,7 +99,7 @@ const namespacedCloudProfileList = [
         type: 'local',
         kubernetes: {
           versions: [
-            { version: '1.31.1' },  // Added version compared to parent
+            { version: '1.31.1' },
             { version: '1.30.0' },
             { version: '1.29.0' },
           ],
@@ -124,12 +131,12 @@ const namespacedCloudProfileList = [
         type: 'infra1',
         kubernetes: {
           versions: [
-            { version: '1.31.1' },  // Changed version compared to parent
+            { version: '1.31.1' },
           ],
         },
         machineTypes: [
           { name: 'm5.large', cpu: '2', memory: '8Gi' },
-          { name: 'm5.xlarge', cpu: '4', memory: '16Gi' },  // Added machine type
+          { name: 'm5.xlarge', cpu: '4', memory: '16Gi' },
         ],
         providerConfig: {
           anotherProviderField: 'other-value',
@@ -352,6 +359,102 @@ describe('services/namespacedCloudProfiles', () => {
       const expected = fullResult[0].status.cloudProfileSpec
 
       expect(reconstructed).toEqual(expected)
+    })
+
+    it('should include parentCloudProfileResourceVersion in diff response', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const result = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: true })
+
+      expect(result).toHaveLength(2)
+      for (const profile of result) {
+        expect(profile.status.parentCloudProfileResourceVersion).toBeDefined()
+        expect(typeof profile.status.parentCloudProfileResourceVersion).toBe('string')
+      }
+    })
+
+    it('should return the resourceVersion of the parent used for diff computation', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const result = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: true })
+
+      const profile1 = result[0]
+      expect(profile1.spec.parent.name).toBe('local')
+      expect(profile1.status.parentCloudProfileResourceVersion).toBe('100')
+
+      const profile2 = result[1]
+      expect(profile2.spec.parent.name).toBe('infra1-profileName')
+      expect(profile2.status.parentCloudProfileResourceVersion).toBe('200')
+    })
+
+    it('should include cloudProfileSpecHash in diff response', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const result = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: true })
+
+      expect(result).toHaveLength(2)
+      for (const profile of result) {
+        expect(profile.status.cloudProfileSpecHash).toBeDefined()
+        expect(typeof profile.status.cloudProfileSpecHash).toBe('string')
+        expect(profile.status.cloudProfileSpecHash).toMatch(/^[0-9a-f]{64}$/)
+      }
+    })
+
+    it('should return a hash that matches the full NSCP spec', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      const { computeSpecHash } = await import('../lib/utils/index.js')
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const fullResult = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: false })
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const diffResult = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: true })
+
+      for (let i = 0; i < fullResult.length; i++) {
+        const fullSpec = fullResult[i].status.cloudProfileSpec
+        const hash = diffResult[i].status.cloudProfileSpecHash
+        expect(hash).toBe(computeSpecHash(fullSpec))
+      }
+    })
+
+    it('should not include parentCloudProfileResourceVersion when diff=false', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const result = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: false })
+
+      for (const profile of result) {
+        expect(profile.status.parentCloudProfileResourceVersion).toBeUndefined()
+        expect(profile.status.cloudProfileSpecHash).toBeUndefined()
+      }
+    })
+
+    it('should return null parentCloudProfileResourceVersion and cloudProfileSpecHash when parent is not found', async () => {
+      const user = createUser('foo@example.org')
+      const namespace = 'garden-local'
+
+      cache.getNamespacedCloudProfiles.mockReturnValueOnce([
+        cloneDeep({
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'orphan', namespace: 'garden-local', uid: 9999 },
+          spec: { parent: { kind: 'CloudProfile', name: 'nonexistent' } },
+          status: { cloudProfileSpec: { type: 'test' } },
+        }),
+      ])
+      authorization.canListNamespacedCloudProfiles.mockResolvedValueOnce(true)
+      const result = await namespacedCloudProfiles.listForNamespace({ user, namespace, diff: true })
+
+      expect(result[0].status.parentCloudProfileResourceVersion).toBeNull()
+      expect(result[0].status.cloudProfileSpecHash).toBeNull()
     })
   })
 })

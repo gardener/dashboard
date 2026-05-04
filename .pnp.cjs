@@ -1688,6 +1688,7 @@ const RAW_RUNTIME_STATE =
           ["abort-controller", "npm:3.0.0"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:2.2.2"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:10.0.0"],\
@@ -1799,6 +1800,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-web-links", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:0.11.0"],\
           ["@xterm/xterm", "npm:5.5.0"],\
           ["ansi-html", "npm:0.0.9"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["dayjs", "npm:1.11.19"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.32.0"],\
@@ -6338,6 +6340,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001699-aed268ac86-e87b3a0602.zip/node_modules/caniuse-lite/",\
         "packageDependencies": [\
           ["caniuse-lite", "npm:1.0.30001699"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["canonicalize", [\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/canonicalize-npm-2.1.0-8ea3fe50f0-3b1ec61276.zip/node_modules/canonicalize/",\
+        "packageDependencies": [\
+          ["canonicalize", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\

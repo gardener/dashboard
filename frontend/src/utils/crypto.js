@@ -7,11 +7,19 @@
 'use strict'
 
 import md5 from 'md5'
+import canonicalize from 'canonicalize'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
 
 export { md5 }
+
+export async function sha256 (message) {
+  const msgBuffer = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 export function normalizeObject (obj) {
   if (!obj) {
@@ -46,4 +54,11 @@ export function normalizeValue (value) {
 export function hash (value) {
   value = normalizeValue(value)
   return md5(typeof value !== 'undefined' ? JSON.stringify(value) : '')
+}
+
+export async function computeSpecHash (spec) {
+  if (!spec) {
+    return null
+  }
+  return sha256(canonicalize(spec))
 }
