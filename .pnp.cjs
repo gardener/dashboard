@@ -946,6 +946,7 @@ const RAW_RUNTIME_STATE =
           ["@vitest/eslint-plugin", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.6.26"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:2.3.0"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:10.1.0"],\
@@ -1057,6 +1058,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-webgl", "npm:0.19.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["dayjs", "npm:1.11.21"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
@@ -5267,6 +5269,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/callsites-npm-3.1.0-268f989910-fff9227740.zip/node_modules/callsites/",\
         "packageDependencies": [\
           ["callsites", "npm:3.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["canonicalize", [\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/canonicalize-npm-2.1.0-8ea3fe50f0-3b1ec61276.zip/node_modules/canonicalize/",\
+        "packageDependencies": [\
+          ["canonicalize", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\

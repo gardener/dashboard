@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import crypto from 'crypto'
 import _ from 'lodash-es'
+import canonicalize from 'canonicalize'
 import config from '../config/index.js'
 import assert from 'assert/strict'
 
@@ -345,6 +347,13 @@ function isSeedUnreachable (seed) {
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
+function computeSpecHash (spec) {
+  if (!spec) {
+    return null
+  }
+  return crypto.createHash('sha256').update(canonicalize(spec)).digest('hex')
+}
+
 export {
   constants,
   decodeBase64,
@@ -368,4 +377,5 @@ export {
   isTruthyValue,
   getSeedIngressDomain,
   isSeedUnreachable,
+  computeSpecHash,
 }

@@ -683,6 +683,7 @@ __metadata:
     "@vitest/eslint-plugin": "npm:^1.6.15"
     base64url: "npm:^3.0.1"
     body-parser: "npm:^2.0.0"
+    canonicalize: "npm:^2.0.0"
     compression: "npm:^1.7.4"
     cookie-parser: "npm:^1.4.6"
     cross-env: "npm:^10.0.0"
@@ -790,6 +791,7 @@ __metadata:
     "@xterm/addon-webgl": "npm:^0.19.0"
     "@xterm/xterm": "npm:^6.0.0"
     ansi-html: "npm:^0.0.9"
+    canonicalize: "npm:^2.0.0"
     dayjs: "npm:^1.11.10"
     downloadjs: "npm:^1.4.7"
     eslint: "npm:^9.11.0"
@@ -3384,6 +3386,15 @@ __metadata:
   version: 3.1.0
   resolution: "callsites@npm:3.1.0"
   checksum: 10c0/fff92277400eb06c3079f9e74f3af120db9f8ea03bad0e84d9aede54bbe2d44a56cccb5f6cf12211f93f52306df87077ecec5b712794c5a9b5dac6d615a3f301
+  languageName: node
+  linkType: hard
+
+"canonicalize@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "canonicalize@npm:2.1.0"
+  bin:
+    canonicalize: bin/canonicalize.js
+  checksum: 10c0/3b1ec612765851e71eeff2868f5ccbf0a06ffd8db8deef36efda89167527f96803b555c4ca8b5f5230f0a13badeeac5541c9244c8996fea97d00cee8dca2bf35
   languageName: node
   linkType: hard
 

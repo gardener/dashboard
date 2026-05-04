@@ -13,9 +13,12 @@ import { diff as jsondiffpatchDiff } from 'jsondiffpatch'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useAppStore } from '@/store/app'
 
+import { useApi } from '@/composables/useApi'
 import { firstItemMatchingVersionClassification } from '@/composables/helper'
 
+import { computeSpecHash } from '@/utils/crypto'
 import { getCloudProfileSpec } from '@/utils'
 
 describe('stores', () => {
@@ -53,7 +56,7 @@ describe('stores', () => {
     })
 
     describe('cloudProfileByRef', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         cloudProfileStore.setCloudProfiles([
           {
             kind: 'CloudProfile',
@@ -66,7 +69,7 @@ describe('stores', () => {
             spec: { type: 'gcp' },
           },
         ])
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-aws', namespace: 'garden-local' },
@@ -74,7 +77,7 @@ describe('stores', () => {
             status: { cloudProfileSpec: { type: 'aws' } },
           },
         ], 'garden-local')
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-dev' },
@@ -110,8 +113,8 @@ describe('stores', () => {
         expect(result.metadata.name).toBe('custom-gcp')
       })
 
-      it('should return null for ambiguous NamespacedCloudProfile ref without namespace', () => {
-        cloudProfileStore.setNamespacedCloudProfiles([
+      it('should return null for ambiguous NamespacedCloudProfile ref without namespace', async () => {
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-local' },
@@ -119,7 +122,7 @@ describe('stores', () => {
             status: { cloudProfileSpec: { type: 'gcp' } },
           },
         ], 'garden-local')
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-dev' },
@@ -166,8 +169,8 @@ describe('stores', () => {
         ])
       })
 
-      it('should aggregate namespaced cloud profiles across multiple namespaces', () => {
-        cloudProfileStore.setNamespacedCloudProfiles([
+      it('should aggregate namespaced cloud profiles across multiple namespaces', async () => {
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-aws', namespace: 'garden-local' },
@@ -176,7 +179,7 @@ describe('stores', () => {
           },
         ], 'garden-local')
 
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-dev' },
@@ -190,8 +193,8 @@ describe('stores', () => {
         expect(cloudProfileStore.hasNamespacedCloudProfilesForNamespace('garden-dev')).toBe(true)
       })
 
-      it('should resolve namespaced cloud profile refs across multiple cached namespaces', () => {
-        cloudProfileStore.setNamespacedCloudProfiles([
+      it('should resolve namespaced cloud profile refs across multiple cached namespaces', async () => {
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-aws', namespace: 'garden-local' },
@@ -199,7 +202,7 @@ describe('stores', () => {
             status: { cloudProfileSpec: { type: 'aws' } },
           },
         ], 'garden-local')
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-dev' },
@@ -217,7 +220,7 @@ describe('stores', () => {
     })
 
     describe('cloudProfilesByProviderType', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         cloudProfileStore.setCloudProfiles([
           {
             kind: 'CloudProfile',
@@ -225,7 +228,7 @@ describe('stores', () => {
             spec: { type: 'aws' },
           },
         ])
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-aws', namespace: 'garden-local' },
@@ -233,7 +236,7 @@ describe('stores', () => {
             status: { cloudProfileSpec: { type: 'aws' } },
           },
         ], 'garden-local')
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-dev' },
@@ -263,7 +266,7 @@ describe('stores', () => {
     })
 
     describe('sortedInfraProviderTypeList', () => {
-      it('should include provider types from both regular and namespaced profiles', () => {
+      it('should include provider types from both regular and namespaced profiles', async () => {
         cloudProfileStore.setCloudProfiles([
           {
             kind: 'CloudProfile',
@@ -271,7 +274,7 @@ describe('stores', () => {
             spec: { type: 'aws' },
           },
         ])
-        cloudProfileStore.setNamespacedCloudProfiles([
+        await cloudProfileStore.setNamespacedCloudProfiles([
           {
             kind: 'NamespacedCloudProfile',
             metadata: { name: 'custom-gcp', namespace: 'garden-local' },
@@ -286,7 +289,7 @@ describe('stores', () => {
     })
 
     describe('setNamespacedCloudProfiles with rehydration', () => {
-      it('should pass through profiles that already have cloudProfileSpec', () => {
+      it('should pass through profiles that already have cloudProfileSpec', async () => {
         cloudProfileStore.setCloudProfiles([
           {
             kind: 'CloudProfile',
@@ -302,12 +305,12 @@ describe('stores', () => {
             cloudProfileSpec: { type: 'aws', kubernetes: { versions: [{ version: '1.31.0' }] } },
           },
         }
-        cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
         const stored = cloudProfileStore.namespacedCloudProfileList[0]
         expect(getCloudProfileSpec(stored).kubernetes.versions[0].version).toBe('1.31.0')
       })
 
-      it('should rehydrate profiles with cloudProfileSpecDiff from parent', () => {
+      it('should rehydrate profiles with cloudProfileSpecDiff from parent', async () => {
         const parentSpec = {
           type: 'aws',
           kubernetes: { versions: [{ version: '1.30.0' }] },
@@ -319,7 +322,6 @@ describe('stores', () => {
             spec: parentSpec,
           },
         ])
-        // null diff means spec is identical to parent
         const namespacedProfile = {
           kind: 'NamespacedCloudProfile',
           metadata: { name: 'custom', namespace: 'garden-local' },
@@ -328,13 +330,13 @@ describe('stores', () => {
             cloudProfileSpecDiff: null,
           },
         }
-        cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
         const stored = cloudProfileStore.namespacedCloudProfileList[0]
         expect(stored.status.cloudProfileSpec).toEqual(parentSpec)
         expect(stored.status.cloudProfileSpecDiff).toBeUndefined()
       })
 
-      it('should rehydrate profiles with non-null cloudProfileSpecDiff from parent', () => {
+      it('should rehydrate profiles with non-null cloudProfileSpecDiff from parent', async () => {
         const parentSpec = {
           type: 'aws',
           kubernetes: { versions: [{ version: '1.30.0' }] },
@@ -364,13 +366,13 @@ describe('stores', () => {
             cloudProfileSpecDiff,
           },
         }
-        cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
         const stored = cloudProfileStore.namespacedCloudProfileList[0]
         expect(stored.status.cloudProfileSpec).toEqual(namespacedSpec)
         expect(stored.status.cloudProfileSpecDiff).toBeUndefined()
       })
 
-      it('should skip rehydration when parent is not found', () => {
+      it('should skip rehydration when parent is not found', async () => {
         cloudProfileStore.setCloudProfiles([])
         const namespacedProfile = {
           kind: 'NamespacedCloudProfile',
@@ -380,10 +382,391 @@ describe('stores', () => {
             cloudProfileSpecDiff: null,
           },
         }
-        cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
         const stored = cloudProfileStore.namespacedCloudProfileList[0]
-        // Profile should be passed through unchanged (no cloudProfileSpec added)
         expect(stored.status.cloudProfileSpec).toBeUndefined()
+      })
+
+      it('should rehydrate when hash validates regardless of resourceVersion', async () => {
+        const parentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: parentSpec,
+          },
+        ])
+        const expectedHash = await computeSpecHash(parentSpec)
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: expectedHash,
+          },
+        }
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+        const stored = cloudProfileStore.namespacedCloudProfileList[0]
+        expect(stored.status.cloudProfileSpec).toEqual(parentSpec)
+        expect(stored.status.parentCloudProfileResourceVersion).toBeUndefined()
+        expect(stored.status.cloudProfileSpecHash).toBeUndefined()
+      })
+
+      it('should not re-fetch parent when hash matches even if resourceVersion differs', async () => {
+        const parentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: parentSpec,
+          },
+        ])
+        const expectedHash = await computeSpecHash(parentSpec)
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn()
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: expectedHash,
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(api.getCloudProfile).not.toHaveBeenCalled()
+        const stored = cloudProfileStore.namespacedCloudProfileList[0]
+        expect(stored.status.cloudProfileSpec).toEqual(parentSpec)
+      })
+
+      it('should re-fetch parent on hash mismatch when resourceVersion differs and recover', async () => {
+        const staleParentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.29.0' }] },
+        }
+        const freshParentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: staleParentSpec,
+          },
+        ])
+
+        const expectedHash = await computeSpecHash(freshParentSpec)
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn().mockResolvedValueOnce({
+          data: {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: freshParentSpec,
+          },
+        })
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: expectedHash,
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(api.getCloudProfile).toHaveBeenCalledWith({ name: 'aws' })
+        const stored = cloudProfileStore.namespacedCloudProfileList[0]
+        expect(stored.status.cloudProfileSpec).toEqual(freshParentSpec)
+      })
+
+      it('should drop profile when parent re-fetch fails and show notification', async () => {
+        const staleParentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.29.0' }] },
+        }
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: staleParentSpec,
+          },
+        ])
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn().mockRejectedValueOnce(new Error('Network error'))
+
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const appStore = useAppStore()
+        const setErrorSpy = vi.spyOn(appStore, 'setError')
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: 'deliberately-wrong-hash',
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(0)
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to re-fetch CloudProfile'),
+          expect.any(Error),
+        )
+        expect(setErrorSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Cloud Profile Sync Error',
+            text: expect.stringContaining('1 namespaced cloud profile(s)'),
+          }),
+        )
+
+        consoleErrorSpy.mockRestore()
+      })
+
+      it('should drop profile when hash still mismatches after parent re-fetch', async () => {
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: { type: 'aws' },
+          },
+        ])
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn().mockResolvedValueOnce({
+          data: {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: { type: 'aws', kubernetes: { versions: [{ version: '1.31.0' }] } },
+          },
+        })
+
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const appStore = useAppStore()
+        const setErrorSpy = vi.spyOn(appStore, 'setError')
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: 'deliberately-wrong-hash',
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(0)
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Hash mismatch'),
+        )
+        expect(setErrorSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Cloud Profile Sync Error',
+          }),
+        )
+
+        consoleErrorSpy.mockRestore()
+      })
+
+      it('should drop profile immediately when hash mismatches and resourceVersion matches', async () => {
+        const parentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: parentSpec,
+          },
+        ])
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn()
+
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const appStore = useAppStore()
+        const setErrorSpy = vi.spyOn(appStore, 'setError')
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: 'deliberately-wrong-hash',
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(api.getCloudProfile).not.toHaveBeenCalled()
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(0)
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          expect.stringContaining('ResourceVersion matches, so re-fetch will not help'),
+        )
+        expect(setErrorSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Cloud Profile Sync Error',
+          }),
+        )
+
+        consoleErrorSpy.mockRestore()
+      })
+
+      it('should re-fetch a stale parent only once when multiple profiles share it', async () => {
+        const freshParentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: { type: 'aws', kubernetes: { versions: [{ version: '1.29.0' }] } },
+          },
+        ])
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn().mockResolvedValueOnce({
+          data: {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: freshParentSpec,
+          },
+        })
+
+        const diff1 = jsondiffpatchDiff(freshParentSpec, {
+          ...freshParentSpec,
+          machineTypes: [{ name: 'm5.large' }],
+        })
+        const diff2 = jsondiffpatchDiff(freshParentSpec, {
+          ...freshParentSpec,
+          machineTypes: [{ name: 'm5.xlarge' }],
+        })
+
+        const spec1 = { ...freshParentSpec, machineTypes: [{ name: 'm5.large' }] }
+        const spec2 = { ...freshParentSpec, machineTypes: [{ name: 'm5.xlarge' }] }
+        const hash1 = await computeSpecHash(spec1)
+        const hash2 = await computeSpecHash(spec2)
+
+        const profiles = [
+          {
+            kind: 'NamespacedCloudProfile',
+            metadata: { name: 'custom-1', namespace: 'garden-local' },
+            spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+            status: {
+              cloudProfileSpecDiff: diff1,
+              parentCloudProfileResourceVersion: '42',
+              cloudProfileSpecHash: hash1,
+            },
+          },
+          {
+            kind: 'NamespacedCloudProfile',
+            metadata: { name: 'custom-2', namespace: 'garden-local' },
+            spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+            status: {
+              cloudProfileSpecDiff: diff2,
+              parentCloudProfileResourceVersion: '42',
+              cloudProfileSpecHash: hash2,
+            },
+          },
+        ]
+
+        await cloudProfileStore.setNamespacedCloudProfiles(profiles, 'garden-local')
+
+        expect(api.getCloudProfile).toHaveBeenCalledTimes(1)
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(2)
+      })
+
+      it('should not trigger validation for profiles without cloudProfileSpecDiff', async () => {
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '41' },
+            spec: { type: 'aws' },
+          },
+        ])
+
+        const api = useApi()
+        api.getCloudProfile = vi.fn()
+
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpec: { type: 'aws', kubernetes: { versions: [{ version: '1.31.0' }] } },
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(api.getCloudProfile).not.toHaveBeenCalled()
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(1)
+      })
+
+      it('should not show notification when all profiles rehydrate successfully', async () => {
+        const parentSpec = {
+          type: 'aws',
+          kubernetes: { versions: [{ version: '1.30.0' }] },
+        }
+        cloudProfileStore.setCloudProfiles([
+          {
+            kind: 'CloudProfile',
+            metadata: { name: 'aws', resourceVersion: '42' },
+            spec: parentSpec,
+          },
+        ])
+
+        const appStore = useAppStore()
+        const setErrorSpy = vi.spyOn(appStore, 'setError')
+
+        const expectedHash = await computeSpecHash(parentSpec)
+        const namespacedProfile = {
+          kind: 'NamespacedCloudProfile',
+          metadata: { name: 'custom', namespace: 'garden-local' },
+          spec: { parent: { kind: 'CloudProfile', name: 'aws' } },
+          status: {
+            cloudProfileSpecDiff: null,
+            parentCloudProfileResourceVersion: '42',
+            cloudProfileSpecHash: expectedHash,
+          },
+        }
+
+        await cloudProfileStore.setNamespacedCloudProfiles([namespacedProfile], 'garden-local')
+
+        expect(cloudProfileStore.namespacedCloudProfileList).toHaveLength(1)
+        expect(setErrorSpy).not.toHaveBeenCalled()
       })
     })
 

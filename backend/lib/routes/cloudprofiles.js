@@ -24,4 +24,16 @@ router.route('/')
     }
   })
 
+router.route('/:name')
+  .all(metricsMiddleware)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.name
+      res.send(await cloudprofiles.read({ user, name }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 export default router

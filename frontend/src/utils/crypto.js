@@ -7,6 +7,7 @@
 'use strict'
 
 import md5 from 'md5'
+import canonicalize from 'canonicalize'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -54,4 +55,11 @@ export function normalizeValue (value) {
 export function hash (value) {
   value = normalizeValue(value)
   return md5(typeof value !== 'undefined' ? JSON.stringify(value) : '')
+}
+
+export async function computeSpecHash (spec) {
+  if (!spec) {
+    return null
+  }
+  return sha256(canonicalize(spec))
 }
