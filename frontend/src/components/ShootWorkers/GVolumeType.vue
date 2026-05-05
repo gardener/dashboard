@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-text-field
-      v-if="isAWS"
+      v-if="isAWS && worker.volume.type !== 'gp2'"
       v-model.number="workerIops"
       class="ml-1"
       color="primary"
@@ -107,7 +107,7 @@ export default {
       },
       workerIops: withFieldName(() => `${this.fieldName} IOPS`, {
         required: requiredIf(() => {
-          return this.isAWS && this.worker.volume.type === 'io1'
+          return this.isAWS && (this.worker.volume.type === 'io1' || this.worker.volume.type === 'io2')
         }),
         minValue: minValue(100),
       }),
@@ -135,7 +135,7 @@ export default {
     },
     isAWS () {
       const cloudProfile = this.cloudProfileByRef(this.cloudProfileRef)
-      return get(cloudProfile, ['metadata', 'providerType']) === 'aws'
+      return get(cloudProfile, ['spec', 'type']) === 'aws'
     },
   },
   mounted () {
