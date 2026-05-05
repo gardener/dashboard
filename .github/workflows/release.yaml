@@ -8,6 +8,7 @@ on:
           - bump-minor
           - bump-patch
 
+permissions: {}
 
 jobs:
   build:

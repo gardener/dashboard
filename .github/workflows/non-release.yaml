@@ -15,6 +15,8 @@ on:
     - labeled
   merge_group:
 
+permissions: {}
+
 jobs:
   build:
     if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == vars.DEFAULT_LABEL_OK_TO_TEST && vars.DEFAULT_LABEL_OK_TO_TEST != '') }}
