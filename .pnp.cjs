@@ -1046,7 +1046,7 @@ const RAW_RUNTIME_STATE =
           ["md5", "npm:2.3.0"],\
           ["mitt", "npm:3.0.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
-          ["netmask", "npm:2.0.2"],\
+          ["netmask", "npm:2.1.1"],\
           ["pinia", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.0.4"],\
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:6.0.3"],\
           ["sass", "npm:1.79.6"],\
@@ -9623,10 +9623,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["netmask", [\
-      ["npm:2.0.2", {\
-        "packageLocation": "./.yarn/cache/netmask-npm-2.0.2-2299510a4d-cafd28388e.zip/node_modules/netmask/",\
+      ["npm:2.1.1", {\
+        "packageLocation": "./.yarn/cache/netmask-npm-2.1.1-eace0c3dfd-c78e31869b.zip/node_modules/netmask/",\
         "packageDependencies": [\
-          ["netmask", "npm:2.0.2"]\
+          ["netmask", "npm:2.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
