@@ -507,8 +507,14 @@ export default {
       return !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'
     },
   },
-  created () {
-    this.updateWorkerGroupYaml(this.workerGroup)
+  watch: {
+    workerGroup: {
+      handler (value) {
+        this.updateWorkerGroupYaml(value)
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   methods: {
     updateWorkerGroupYaml (value) {
