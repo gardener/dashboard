@@ -10,12 +10,17 @@ on:
         description: |
           the mode to use. either `snapshot` or `release`. Will affect effective version, as well
           as target-oci-registry.
+    secrets:
+      dockerhub-auth-token:
+        required: false
+        description: |
+          Docker Hub read token used by the OCI build workflow for pull authentication.
 
 permissions: {}
 
 jobs:
   prepare:
-    uses: gardener/cc-utils/.github/workflows/prepare.yaml@v1
+    uses: gardener/cc-utils/.github/workflows/prepare.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     with:
       mode: ${{ inputs.mode }}
       version-commit-callback-action-path: .github/actions/prepare-release
@@ -31,8 +36,9 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    secrets: inherit
-    uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@v1
+    secrets:
+      dockerhub-auth-token: ${{ secrets.dockerhub-auth-token }}
+    uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     strategy:
       matrix:
         args:
@@ -81,7 +87,7 @@ jobs:
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: '24.14.1'
-      - uses: gardener/cc-utils/.github/actions/trusted-checkout@v1
+      - uses: gardener/cc-utils/.github/actions/trusted-checkout@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
       - name: run-verify
         shell: bash
         run: |
@@ -90,7 +96,7 @@ jobs:
           .ci/verify |& tee /tmp/blobs.d/verify-log.txt
           tar czf /tmp/blobs.d/verify-log.tar.gz -C/tmp/blobs.d verify-log.txt
       - name: add-verify-results-to-component-descriptor
-        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@v1
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         with:
           blobs-directory: /tmp/blobs.d
           ocm-resources: |
@@ -112,6 +118,8 @@ jobs:
         with:
           node-version: '24.14.1'
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: run-eslint
         run: |
           set -eu
@@ -130,7 +138,7 @@ jobs:
             dashboard-frontend.sarif \
             dashboard-backend.sarif
       - name: add-sast-report-to-component-descriptor
-        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@v1
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         with:
           blobs-directory: /tmp/blobs.d
           ocm-resources: |
