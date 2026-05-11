@@ -32,7 +32,7 @@ const props = defineProps({
   },
   message: {
     type: String,
-    default: 'The project you are looking for doesn\'t exist or an other error occurred!',
+    default: 'The project you are looking for doesn\'t exist or another error occurred!',
   },
   buttonText: {
     type: String,
