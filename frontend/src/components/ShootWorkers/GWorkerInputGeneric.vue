@@ -499,11 +499,9 @@ export default {
   watch: {
     'worker.volume.size': {
       handler (volumeSize) {
-        if (volumeSize) {
-          this.volumeSize = volumeSize
-          this.hasCustomStorageSize = !this.volumeInCloudProfile
-        }
-        this.onInputVolumeSize()
+        this.volumeSize = volumeSize
+        this.hasCustomStorageSize = Boolean(volumeSize) && !this.volumeInCloudProfile
+        this.v$.volumeSize?.$touch()
       },
       immediate: true,
     },

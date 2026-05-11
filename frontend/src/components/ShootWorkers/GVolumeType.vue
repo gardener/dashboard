@@ -142,7 +142,7 @@ export default {
     'worker.providerConfig.volume.iops': {
       handler (iops) {
         this.workerIops = iops
-        this.v$.$touch?.()
+        this.v$.workerIops?.$touch()
       },
       immediate: true,
     },

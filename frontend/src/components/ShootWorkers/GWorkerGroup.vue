@@ -429,11 +429,6 @@ export default {
       volumeTypes,
     }
   },
-  data () {
-    return {
-      workerGroupYaml: undefined,
-    }
-  },
   computed: {
     popoverKey () {
       return `g-worker-group[${this.workerGroup.name}]:${this.shootMetadata.uid}`
@@ -503,22 +498,11 @@ export default {
       }
       return 'mdi-information-outline'
     },
+    workerGroupYaml () {
+      return yaml.dump(this.workerGroup)
+    },
     chipColor () {
       return !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'
-    },
-  },
-  watch: {
-    workerGroup: {
-      handler (value) {
-        this.updateWorkerGroupYaml(value)
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  methods: {
-    updateWorkerGroupYaml (value) {
-      this.workerGroupYaml = yaml.dump(value)
     },
   },
 }
