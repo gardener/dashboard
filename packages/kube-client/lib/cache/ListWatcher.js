@@ -37,6 +37,9 @@ class ListWatcher {
   list (query) {
     const searchParams = this.mergeSearchParams(query)
     const options = { searchParams }
+    if (this.signal) {
+      options.signal = this.signal
+    }
     return this.listFunc(options)
   }
 }
