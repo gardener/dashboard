@@ -47,6 +47,17 @@ describe('kube-client', () => {
         }])
       })
 
+      it('#list with signal', () => {
+        const signal = {}
+        listWatcher.setAbortSignal(signal)
+        expect(listWatcher.list({ b: 2 })).toBe(body)
+        expect(listFunc).toHaveBeenCalledTimes(1)
+        expect(listFunc.mock.calls[0]).toEqual([{
+          signal,
+          searchParams: new URLSearchParams({ a: 1, b: 2 }),
+        }])
+      })
+
       it('#watch', () => {
         const signal = {}
         listWatcher.setAbortSignal(signal)
