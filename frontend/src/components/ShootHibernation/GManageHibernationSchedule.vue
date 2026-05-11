@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0
         type="warning"
         variant="tonal"
       >
-        One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br>
+        One or more errors occurred while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br>
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-row>
