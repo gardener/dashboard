@@ -99,19 +99,11 @@ async function getOpenIdClientModule () {
 }
 
 export let discoveryPromise
-let discoveryAbortController
-
-// Exported only for test teardown — not intended for production use.
-export function resetDiscoveryForTesting () {
-  if (discoveryAbortController) {
-    discoveryAbortController.abort()
-  }
-  discoveryAbortController = null
-  discoveryPromise = null
-}
+// Exported for test teardown to abort in-flight retries.
+export let discoveryAbortController
 
 async function getConfiguration () {
-  if (!discoveryPromise) {
+  if (!discoveryPromise || discoveryAbortController?.signal.aborted) {
     discoveryAbortController = new AbortController()
     discoveryPromise = pRetry(async () => {
       const {

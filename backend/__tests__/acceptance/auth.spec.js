@@ -52,7 +52,6 @@ const {
   sign,
   decrypt,
   decode,
-  resetDiscoveryForTesting,
 } = security
 
 async function getCookieValue (tokenSet) {
@@ -125,7 +124,7 @@ describe('auth', function () {
   })
 
   afterEach(() => {
-    resetDiscoveryForTesting()
+    security.discoveryAbortController?.abort()
   })
 
   beforeEach(() => {
