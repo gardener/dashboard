@@ -4977,13 +4977,13 @@ __metadata:
   linkType: hard
 
 "express-static-gzip@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "express-static-gzip@npm:3.0.0"
+  version: 3.0.1
+  resolution: "express-static-gzip@npm:3.0.1"
   dependencies:
     mime-types: "npm:^3.0.1"
     parseurl: "npm:^1.3.3"
     serve-static: "npm:^2.2.0"
-  checksum: 10c0/f1d6b2441689615bd2d9453826cbcc43d778ac8c9d4dcb57282dcdbf698311fbc3389a7f04d40922399b62377130f2ecaa12455ba7f7431a76c3513ad3453db2
+  checksum: 10c0/16b1ce625ad2354bb16425c186e5fbf14dd256c6cb7829cefd22139ecff92b54d12f3c8d75d6a084cc6f78d4fe9742eb7b482327864f86e70bf6164f20921c94
   languageName: node
   linkType: hard
 
