@@ -52,6 +52,15 @@ export function useSocketEventHandler (useStore, options = {}) {
 
   const eventMap = new Map([])
 
+  function restoreEvents (events) {
+    for (const event of events) {
+      const { uid } = event
+      if (!eventMap.has(uid)) {
+        eventMap.set(uid, event)
+      }
+    }
+  }
+
   async function handleEvents (store) {
     const pluralName = store.$id + 's'
     const events = Array.from(eventMap.values())
@@ -109,12 +118,7 @@ export function useSocketEventHandler (useStore, options = {}) {
       })
       if (patchResult === 'uninitialized') {
         logger.debug('Skipped synchronization of %s: store not yet initialized', pluralName)
-        for (const event of events) {
-          const { uid } = event
-          if (!eventMap.has(uid)) {
-            eventMap.set(uid, event)
-          }
-        }
+        restoreEvents(events)
       } else if (patchResult === 'invalid') {
         logger.error('Failed to synchronize %s: operator could not be created for current store state', pluralName)
       }
@@ -125,12 +129,7 @@ export function useSocketEventHandler (useStore, options = {}) {
         logger.error('Failed to synchronize modified %s: %s', pluralName, err.message)
       }
       // Synchronization failed -> Rollback events
-      for (const event of events) {
-        const { uid } = event
-        if (!eventMap.has(uid)) {
-          eventMap.set(uid, event)
-        }
-      }
+      restoreEvents(events)
     }
   }
 
