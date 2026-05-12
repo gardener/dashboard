@@ -91,8 +91,13 @@ export function useSocketEventHandler (useStore, options = {}) {
 
         uidMap.set(uid, false)
       }
+      let patchResult = 'applied'
       store.$patch(state => {
         const operator = createOperator(state)
+        if (!operator) {
+          patchResult = state.list === null ? 'uninitialized' : 'invalid'
+          return
+        }
         // Delete items first
         for (const [uid, item] of uidMap) {
           if (typeof item === 'boolean' && !item) {
@@ -106,6 +111,17 @@ export function useSocketEventHandler (useStore, options = {}) {
           }
         }
       })
+      if (patchResult === 'uninitialized') {
+        logger.debug('Skipped synchronization of %s: store not yet initialized', pluralName)
+        for (const event of events) {
+          const { uid } = event
+          if (!eventMap.has(uid)) {
+            eventMap.set(uid, event)
+          }
+        }
+      } else if (patchResult === 'invalid') {
+        logger.error('Failed to synchronize %s: operator could not be created for current store state', pluralName)
+      }
     } catch (err) {
       if (isTooManyRequestsError(err)) {
         logger.info('Skipped synchronization of modified %s: %s', pluralName, err.message)
