@@ -496,13 +496,15 @@ export default {
       return get(this.selectedMachineType, ['storage', 'size'])
     },
   },
-  mounted () {
-    const volumeSize = get(this.worker, ['volume', 'size'])
-    if (volumeSize) {
-      this.volumeSize = volumeSize
-      this.hasCustomStorageSize = !this.volumeInCloudProfile
-    }
-    this.onInputVolumeSize()
+  watch: {
+    'worker.volume.size': {
+      handler (volumeSize) {
+        this.volumeSize = volumeSize
+        this.hasCustomStorageSize = Boolean(volumeSize) && !this.volumeInCloudProfile
+        this.v$.volumeSize?.$touch()
+      },
+      immediate: true,
+    },
   },
   methods: {
     onInputVolumeSize () {
@@ -512,7 +514,7 @@ export default {
         // default size, must not write to shoot spec
         delete this.worker.volume
       }
-      this.v$.volumeSize.$touch()
+      this.v$.volumeSize?.$touch()
     },
     onInputZones () {
       this.v$.selectedZones.$touch()

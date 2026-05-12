@@ -138,9 +138,14 @@ export default {
       return get(cloudProfile, ['spec', 'type']) === 'aws'
     },
   },
-  mounted () {
-    this.workerIops = get(this.worker, ['providerConfig', 'volume', 'iops'])
-    this.v$.$touch()
+  watch: {
+    'worker.providerConfig.volume.iops': {
+      handler (iops) {
+        this.workerIops = iops
+        this.v$.workerIops?.$touch()
+      },
+      immediate: true,
+    },
   },
   methods: {
     ...mapActions(useCloudProfileStore, [

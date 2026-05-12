@@ -139,16 +139,16 @@ export default {
     },
   },
   watch: {
-    modelValue (value) {
-      this.setInternalValue(value)
+    modelValue: {
+      handler (value) {
+        this.setInternalValue(value)
+      },
+      immediate: true,
     },
-  },
-  mounted () {
-    this.setInternalValue(this.modelValue)
   },
   methods: {
     onInput () {
-      this.v$.wildcardSelectedValue.$touch()
+      this.v$.wildcardSelectedValue?.$touch()
       this.$emit('update:modelValue', this.internalValue)
     },
     setInternalValue (newValue) {
