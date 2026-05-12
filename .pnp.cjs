@@ -927,7 +927,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["express", "npm:5.2.1"],\
-          ["express-static-gzip", "npm:3.0.0"],\
+          ["express-static-gzip", "npm:3.0.1"],\
           ["fast-json-patch", "npm:3.1.1"],\
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:8.1.0"],\
@@ -6650,10 +6650,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["express-static-gzip", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/express-static-gzip-npm-3.0.0-90f275839c-f1d6b24416.zip/node_modules/express-static-gzip/",\
+      ["npm:3.0.1", {\
+        "packageLocation": "./.yarn/cache/express-static-gzip-npm-3.0.1-99370027c3-16b1ce625a.zip/node_modules/express-static-gzip/",\
         "packageDependencies": [\
-          ["express-static-gzip", "npm:3.0.0"],\
+          ["express-static-gzip", "npm:3.0.1"],\
           ["mime-types", "npm:3.0.1"],\
           ["parseurl", "npm:1.3.3"],\
           ["serve-static", "npm:2.2.0"]\
