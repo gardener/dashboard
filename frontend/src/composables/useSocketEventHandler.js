@@ -177,7 +177,7 @@ export function useSocketEventHandler (useStore, options = {}) {
   }
 
   let throttledHandleEvents
-  let stopInitializationWatcher
+  let unwatchInitialization
 
   function cancelTrailingInvocation () {
     if (typeof throttledHandleEvents?.cancel === 'function') {
@@ -185,23 +185,23 @@ export function useSocketEventHandler (useStore, options = {}) {
     }
   }
 
-  function stopWatchingInitialization () {
-    if (typeof stopInitializationWatcher === 'function') {
-      stopInitializationWatcher()
-      stopInitializationWatcher = undefined
+  function teardownInitializationWatch () {
+    if (typeof unwatchInitialization === 'function') {
+      unwatchInitialization()
+      unwatchInitialization = undefined
     }
   }
 
   function start (wait = 500) {
     cancelTrailingInvocation()
-    stopWatchingInitialization()
+    teardownInitializationWatch()
     eventMap.clear()
     const store = useStore()
     const handleEventsWithParams = partial(handleEvents, store)
     throttledHandleEvents = wait > 0
       ? throttle(handleEventsWithParams, wait)
       : handleEventsWithParams
-    stopInitializationWatcher = watch(() => isInitialized(store), value => {
+    unwatchInitialization = watch(() => isInitialized(store), value => {
       if (value) {
         flushEvents(store)
       }
@@ -211,7 +211,7 @@ export function useSocketEventHandler (useStore, options = {}) {
 
   function stop () {
     cancelTrailingInvocation()
-    stopWatchingInitialization()
+    teardownInitializationWatch()
     eventMap.clear()
     throttledHandleEvents = undefined
   }
