@@ -111,6 +111,7 @@ describe('auth', function () {
   const user = fixtures.user.create({ id })
 
   let agent
+  let abortController
 
   beforeAll(async () => {
     // The discovery mock must be set before the agent is created,
@@ -124,10 +125,13 @@ describe('auth', function () {
   })
 
   afterEach(() => {
-    security.discoveryAbortController?.abort()
+    abortController.abort()
+    security._setDiscoveryPromise(null)
   })
 
   beforeEach(() => {
+    abortController = new AbortController()
+    security._setDiscoveryAbortController(abortController)
     vi.clearAllMocks()
 
     // Re-set the persistent discovery mock (clearAllMocks clears call history

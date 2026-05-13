@@ -98,13 +98,19 @@ async function getOpenIdClientModule () {
   return openidClientPromise
 }
 
-export let discoveryPromise
-// Exported for test teardown to abort in-flight retries.
-export let discoveryAbortController
+let discoveryPromise
+let discoveryAbortController
+
+export function _setDiscoveryAbortController (controller) {
+  discoveryAbortController = controller
+}
+
+export function _setDiscoveryPromise (promise) {
+  discoveryPromise = promise
+}
 
 async function getConfiguration () {
-  if (!discoveryPromise || discoveryAbortController?.signal.aborted) {
-    discoveryAbortController = new AbortController()
+  if (!discoveryPromise) {
     discoveryPromise = pRetry(async () => {
       const {
         discovery,
@@ -143,7 +149,7 @@ async function getConfiguration () {
       minTimeout: 1000,
       maxTimeout: 60 * 1000,
       randomize: true,
-      signal: discoveryAbortController.signal,
+      signal: discoveryAbortController?.signal,
     })
   }
   return pTimeout(discoveryPromise, 1000, 'Issuer not available')
