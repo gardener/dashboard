@@ -127,6 +127,7 @@ describe('auth', function () {
   afterEach(() => {
     abortController.abort()
     security._setDiscoveryPromise(null)
+    security._setDiscoveryAbortController(null)
   })
 
   beforeEach(() => {
