@@ -33,5 +33,3 @@ export async function pTimeout (promise, milliseconds, message = `Promise timed 
     clearTimeout(timeoutId)
   }
 }
-
-export default pTimeout

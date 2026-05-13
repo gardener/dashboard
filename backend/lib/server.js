@@ -5,7 +5,7 @@
 //
 
 import http from 'http'
-import pTimeout from './utils/p-timeout.js'
+import { pTimeout } from './utils/p-timeout.js'
 import terminus from '@godaddy/terminus'
 
 function toMilliseconds (seconds) {

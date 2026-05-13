@@ -19,7 +19,7 @@ import {
   pick,
 } from 'lodash-es'
 import pRetry from 'p-retry'
-import pTimeout from '../utils/p-timeout.js'
+import { pTimeout } from '../utils/p-timeout.js'
 import services from '../services/index.js'
 import createError from 'http-errors'
 import logger from '../logger/index.js'
