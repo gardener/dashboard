@@ -15,7 +15,7 @@ export class TimeoutError extends Error {
 
 export async function pTimeout (promise, milliseconds, message = `Promise timed out after ${milliseconds} milliseconds`) {
   if (typeof milliseconds !== 'number' || milliseconds < 0) {
-    throw new TypeError('Milliseconds must be a positive number')
+    throw new TypeError('Milliseconds must be a non-negative number')
   }
 
   let timeoutId
