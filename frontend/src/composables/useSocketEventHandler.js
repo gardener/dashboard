@@ -17,13 +17,28 @@ import partial from 'lodash/partial'
 import throttle from 'lodash/throttle'
 import findIndex from 'lodash/findIndex'
 
-export function createDefaultOperator (state) {
-  if (Array.isArray(state.list)) {
-    return createListOperator(state.list)
+class StoreNotInitializedError extends Error {
+  constructor () {
+    super('store not yet initialized')
+    this.name = 'StoreNotInitializedError'
   }
 }
 
+function isStoreNotInitializedError (err) {
+  return err instanceof StoreNotInitializedError
+}
+
+export function createDefaultOperator (state) {
+  if (state.list === null) {
+    throw new StoreNotInitializedError()
+  }
+  return createListOperator(state.list)
+}
+
 export function createListOperator (list) {
+  if (!Array.isArray(list)) {
+    throw new TypeError('Argument `list` must be an array')
+  }
   return {
     delete (uid) {
       const index = findIndex(list, ['metadata.uid', uid])
@@ -42,12 +57,17 @@ export function createListOperator (list) {
   }
 }
 
+function isStoreInitialized (store) {
+  return store.isInitial !== true
+}
+
 export function useSocketEventHandler (useStore, options = {}) {
   const {
     logger = useLogger(),
     socketStore = useSocketStore(),
     visibility = useDocumentVisibility(),
     createOperator = createDefaultOperator,
+    isInitialized = isStoreInitialized,
   } = options
 
   const eventMap = new Map([])
@@ -61,48 +81,78 @@ export function useSocketEventHandler (useStore, options = {}) {
     }
   }
 
+  function flushEvents (store) {
+    if (!eventMap.size) {
+      return
+    }
+    if (!isInitialized(store)) {
+      return
+    }
+    if (visibility.value !== 'visible') {
+      return
+    }
+    throttledHandleEvents()
+  }
+
   async function handleEvents (store) {
+    if (!isInitialized(store)) {
+      return
+    }
     const pluralName = store.$id + 's'
     const events = Array.from(eventMap.values())
+    if (!events.length) {
+      return
+    }
     eventMap.clear()
-    try {
-      const uidMap = new Map()
-      const uids = []
-      for (const { type, uid } of events) {
-        if (type === 'DELETED') {
-          uidMap.set(uid, false)
-        } else {
-          uidMap.set(uid, true)
-          uids.push(uid)
-        }
-      }
-      const items = await socketStore.synchronize(pluralName, uids)
-      for (const item of items) {
-        if (item.kind !== 'Status') {
-          uidMap.set(item.metadata.uid, item)
-          continue
-        }
-
-        logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
-
-        if (item.code !== 404) {
-          continue
-        }
-
-        const uid = item.details?.uid
-        if (!uid) {
-          continue
-        }
-
+    const uidMap = new Map()
+    const uids = []
+    for (const { type, uid } of events) {
+      if (type === 'DELETED') {
         uidMap.set(uid, false)
+      } else {
+        uidMap.set(uid, true)
+        uids.push(uid)
       }
-      let patchResult = 'applied'
+    }
+    let items
+    try {
+      items = await socketStore.synchronize(pluralName, uids)
+    } catch (err) {
+      if (isTooManyRequestsError(err)) {
+        logger.info('Skipped synchronization of modified %s: %s', pluralName, err.message)
+      } else {
+        logger.error('Failed to synchronize modified %s: %s', pluralName, err.message)
+      }
+      // Synchronization failed -> Rollback events
+      restoreEvents(events)
+      return
+    }
+    if (!isInitialized(store)) {
+      restoreEvents(events)
+      return
+    }
+    for (const item of items) {
+      if (item.kind !== 'Status') {
+        uidMap.set(item.metadata.uid, item)
+        continue
+      }
+
+      logger.info('Failed to synchronize a single %s: %s', store.$id, item.message)
+
+      if (item.code !== 404) {
+        continue
+      }
+
+      const uid = item.details?.uid
+      if (!uid) {
+        continue
+      }
+
+      uidMap.set(uid, false)
+    }
+    try {
       store.$patch(state => {
         const operator = createOperator(state)
-        if (!operator) {
-          patchResult = state.list === null ? 'uninitialized' : 'invalid'
-          return
-        }
         // Delete items first
         for (const [uid, item] of uidMap) {
           if (typeof item === 'boolean' && !item) {
@@ -116,24 +166,18 @@ export function useSocketEventHandler (useStore, options = {}) {
           }
         }
       })
-      if (patchResult === 'uninitialized') {
+    } catch (err) {
+      if (isStoreNotInitializedError(err)) {
         logger.debug('Skipped synchronization of %s: store not yet initialized', pluralName)
         restoreEvents(events)
-      } else if (patchResult === 'invalid') {
-        logger.error('Failed to synchronize %s: operator could not be created for current store state', pluralName)
+        return
       }
-    } catch (err) {
-      if (isTooManyRequestsError(err)) {
-        logger.info('Skipped synchronization of modified %s: %s', pluralName, err.message)
-      } else {
-        logger.error('Failed to synchronize modified %s: %s', pluralName, err.message)
-      }
-      // Synchronization failed -> Rollback events
-      restoreEvents(events)
+      logger.error('Failed to apply synchronized %s: %s', pluralName, err.message)
     }
   }
 
   let throttledHandleEvents
+  let stopInitializationWatcher
 
   function cancelTrailingInvocation () {
     if (typeof throttledHandleEvents?.cancel === 'function') {
@@ -141,19 +185,33 @@ export function useSocketEventHandler (useStore, options = {}) {
     }
   }
 
+  function stopWatchingInitialization () {
+    if (typeof stopInitializationWatcher === 'function') {
+      stopInitializationWatcher()
+      stopInitializationWatcher = undefined
+    }
+  }
+
   function start (wait = 500) {
     cancelTrailingInvocation()
+    stopWatchingInitialization()
     eventMap.clear()
     const store = useStore()
     const handleEventsWithParams = partial(handleEvents, store)
     throttledHandleEvents = wait > 0
       ? throttle(handleEventsWithParams, wait)
       : handleEventsWithParams
+    stopInitializationWatcher = watch(() => isInitialized(store), value => {
+      if (value) {
+        flushEvents(store)
+      }
+    })
     return throttledHandleEvents
   }
 
   function stop () {
     cancelTrailingInvocation()
+    stopWatchingInitialization()
     eventMap.clear()
     throttledHandleEvents = undefined
   }
@@ -168,10 +226,7 @@ export function useSocketEventHandler (useStore, options = {}) {
       return
     }
     eventMap.set(uid, event)
-    if (visibility.value !== 'visible') {
-      return
-    }
-    throttledHandleEvents()
+    flushEvents(useStore())
   }
 
   watch(visibility, (current, previous) => {
@@ -179,7 +234,7 @@ export function useSocketEventHandler (useStore, options = {}) {
       return
     }
     if (current === 'visible' && previous === 'hidden') {
-      throttledHandleEvents()
+      flushEvents(useStore())
     }
   })
 
