@@ -218,7 +218,7 @@ describe('auth', function () {
       .redirects(0)
       .expect(302)
 
-    expect(discovery).toHaveBeenCalled()
+    expect(discovery).toHaveBeenCalledTimes(1)
     expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
   })
 
