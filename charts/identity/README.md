@@ -2,4 +2,4 @@
 
 > [!CAUTION]
 > This Helm chart has been deprecated.
-> It will be removed without replacement earliest 6 months after deprecation (around November 2026).
+> It will be removed without replacement earliest around November 2026.
