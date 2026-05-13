@@ -98,7 +98,16 @@ async function getOpenIdClientModule () {
   return openidClientPromise
 }
 
-export let discoveryPromise
+let discoveryPromise
+let discoveryAbortController
+
+export function _setDiscoveryAbortController (controller) {
+  discoveryAbortController = controller
+}
+
+export function _setDiscoveryPromise (promise) {
+  discoveryPromise = promise
+}
 
 async function getConfiguration () {
   if (!discoveryPromise) {
@@ -136,10 +145,11 @@ async function getConfiguration () {
         options,
       )
     }, {
-      forever: true,
+      retries: Infinity,
       minTimeout: 1000,
       maxTimeout: 60 * 1000,
       randomize: true,
+      signal: discoveryAbortController?.signal,
     })
   }
   return pTimeout(discoveryPromise, 1000, 'Issuer not available')

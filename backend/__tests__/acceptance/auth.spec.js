@@ -12,6 +12,7 @@ import {
   beforeAll,
   afterAll,
   beforeEach,
+  afterEach,
 } from 'vitest'
 import {
   pick,
@@ -110,6 +111,7 @@ describe('auth', function () {
   const user = fixtures.user.create({ id })
 
   let agent
+  let abortController
 
   beforeAll(async () => {
     // The discovery mock must be set before the agent is created,
@@ -122,7 +124,15 @@ describe('auth', function () {
     return agent.close()
   })
 
+  afterEach(() => {
+    abortController.abort()
+    security._setDiscoveryPromise(null)
+    security._setDiscoveryAbortController(null)
+  })
+
   beforeEach(() => {
+    abortController = new AbortController()
+    security._setDiscoveryAbortController(abortController)
     vi.clearAllMocks()
 
     // Re-set the persistent discovery mock (clearAllMocks clears call history
@@ -199,11 +209,9 @@ describe('auth', function () {
     expect(url.searchParams.get('state')).toEqual('state')
   })
 
-  // TODO migrate to latest pRetry version and use abort signal in afterEach hook to ensure that the retry is aborted. Then this test can be enabled again.
-  // eslint-disable-next-line vitest/no-disabled-tests
-  it.skip('should fail to redirect to authorization url', async function () {
+  it('should fail to redirect to authorization url', async function () {
     const message = 'Issuer not available'
-    discovery.mockRejectedValueOnce(new Error(message))
+    discovery.mockRejectedValue(new Error('Discovery failed'))
 
     const res = await agent
       .get('/auth')
