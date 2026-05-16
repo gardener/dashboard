@@ -1284,7 +1284,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
-          ["type-is", "npm:2.0.1"],\
+          ["type-is", "npm:2.1.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
         "packagePeers": [\
@@ -1308,7 +1308,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.12.2"],\
-          ["type-is", "npm:2.0.1"],\
+          ["type-is", "npm:2.1.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:3.2.4"]\
         ],\
         "linkType": "SOFT"\
@@ -4487,7 +4487,7 @@ const RAW_RUNTIME_STATE =
           ["on-finished", "npm:2.4.1"],\
           ["qs", "npm:6.14.2"],\
           ["raw-body", "npm:3.0.2"],\
-          ["type-is", "npm:2.0.1"]\
+          ["type-is", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4915,6 +4915,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/content-type-npm-1.0.5-3e037bf9ab-b76ebed15c.zip/node_modules/content-type/",\
         "packageDependencies": [\
           ["content-type", "npm:1.0.5"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:2.0.0", {\
+        "packageLocation": "./.yarn/cache/content-type-npm-2.0.0-c790197c3d-491539fff7.zip/node_modules/content-type/",\
+        "packageDependencies": [\
+          ["content-type", "npm:2.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6633,7 +6640,7 @@ const RAW_RUNTIME_STATE =
           ["send", "npm:1.2.0"],\
           ["serve-static", "npm:2.2.0"],\
           ["statuses", "npm:2.0.2"],\
-          ["type-is", "npm:2.0.1"],\
+          ["type-is", "npm:2.1.0"],\
           ["vary", "npm:1.1.2"]\
         ],\
         "linkType": "HARD"\
@@ -11896,13 +11903,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["type-is", [\
-      ["npm:2.0.1", {\
-        "packageLocation": "./.yarn/cache/type-is-npm-2.0.1-8ef194d26e-7f7ec0a060.zip/node_modules/type-is/",\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/type-is-npm-2.1.0-fff4b7485f-a6018f8f50.zip/node_modules/type-is/",\
         "packageDependencies": [\
-          ["content-type", "npm:1.0.5"],\
+          ["content-type", "npm:2.0.0"],\
           ["media-typer", "npm:1.1.0"],\
           ["mime-types", "npm:3.0.1"],\
-          ["type-is", "npm:2.0.1"]\
+          ["type-is", "npm:2.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
