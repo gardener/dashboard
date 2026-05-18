@@ -24,6 +24,7 @@ import { useShootStore } from '../shoot'
 import { useTicketStore } from '../ticket'
 import { useProjectStore } from '../project'
 import { useSeedStore } from '../seed'
+import { useSeedStatStore } from '../seedStat'
 import { useManagedSeedStore } from '../managedSeed'
 import { useManagedSeedShootStore } from '../managedSeedShoot'
 
@@ -39,6 +40,7 @@ export const useSocketStore = defineStore('socket', () => {
   const ticketStore = useTicketStore()
   const projectStore = useProjectStore()
   const seedStore = useSeedStore()
+  const seedStatStore = useSeedStatStore()
   const managedSeedStore = useManagedSeedStore()
   const managedSeedShootStore = useManagedSeedShootStore()
 
@@ -62,6 +64,7 @@ export const useSocketStore = defineStore('socket', () => {
     ['shoots', false],
     ['projects', false],
     ['seeds', false],
+    ['seedstats', false],
     ['managedseeds', false],
     ['managedseed-shoots', false],
   ])
@@ -73,6 +76,7 @@ export const useSocketStore = defineStore('socket', () => {
     ticketStore,
     projectStore,
     seedStore,
+    seedStatStore,
     managedSeedStore,
     managedSeedShootStore,
   })
@@ -112,14 +116,14 @@ export const useSocketStore = defineStore('socket', () => {
     socket.disconnect()
   }
 
-  async function emitSubscribe (options) {
+  async function emitSubscribe (key, options) {
     if (!socket.connected) {
       return
     }
     const {
       statusCode = 500,
-      message = 'Failed to subscribe shoots',
-    } = await socket.timeout(acknowledgementTimeout).emitWithAck('subscribe', 'shoots', options)
+      message = `Failed to subscribe ${key}`,
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('subscribe', key, options)
     if (statusCode !== 200) {
       logger.debug('Subscribe Error: %s', message)
       throw createError(statusCode, message, {
@@ -128,11 +132,14 @@ export const useSocketStore = defineStore('socket', () => {
     }
   }
 
-  async function emitUnsubscribe () {
+  async function emitUnsubscribe (key) {
+    if (!socket.connected) {
+      return
+    }
     const {
       statusCode = 500,
-      message = 'Failed to unsubscribe shoots',
-    } = await socket.timeout(acknowledgementTimeout).emitWithAck('unsubscribe', 'shoots')
+      message = `Failed to unsubscribe ${key}`,
+    } = await socket.timeout(acknowledgementTimeout).emitWithAck('unsubscribe', key)
     if (statusCode !== 200) {
       logger.debug('Unsubscribe Error: %s', message)
       throw createError(statusCode, message, {
@@ -141,7 +148,7 @@ export const useSocketStore = defineStore('socket', () => {
     }
   }
 
-  async function synchronize (key, uids) {
+  async function synchronize (key, uids, options) {
     if (!uids.length) {
       return []
     }
@@ -155,7 +162,7 @@ export const useSocketStore = defineStore('socket', () => {
         name = 'InternalError',
         message = `Failed to synchronize ${key}`,
         items = [],
-      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', key, uids)
+      } = await socket.timeout(acknowledgementTimeout).emitWithAck('synchronize', key, uids, options)
       if (statusCode === 200) {
         return items
       }

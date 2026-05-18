@@ -9,6 +9,8 @@ import logger from '../logger/index.js'
 import config from '../config/index.js'
 import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
+import { getJoinedRooms } from '../io/seedstats.js'
+import { FILTER_HIDE_TICKETS } from '../services/seedstats.js'
 import SyncManager from '../github/SyncManager.js'
 
 // exported for testing
@@ -35,7 +37,10 @@ export default (io, informer, { signal }) => {
   const ticketCache = cache.getTicketCache()
   const nsp = io.of('/')
 
-  ticketCache.on('issue', event => nsp.emit('issues', event))
+  ticketCache.on('issue', event => {
+    nsp.emit('issues', event)
+    publishSeedStats(event)
+  })
   ticketCache.on('comment', event => {
     const { projectName, name } = event.object.metadata
     const namespace = cache.getProjectNamespace(projectName)
@@ -57,4 +62,33 @@ export default (io, informer, { signal }) => {
 
   const handleEvent = event => syncManager.sync()
   informer.on('update', object => handleEvent({ type: 'MODIFIED', object }))
+
+  function publishSeedStats (event) {
+    const { projectName, name } = event.object?.metadata ?? {}
+    if (!projectName || !name) {
+      return
+    }
+
+    const namespace = cache.getProjectNamespace(projectName)
+    if (!namespace) {
+      return
+    }
+
+    const seedName = cache.getShoot(namespace, name)?.spec?.seedName
+    if (!seedName) {
+      return
+    }
+
+    const seedUid = cache.getSeed(seedName)?.metadata?.uid
+    if (!seedUid) {
+      return
+    }
+
+    const hasHideTicketsFilterEnabled = room => (room.unhealthyFilterMask & FILTER_HIDE_TICKETS) !== 0
+    const joinedRooms = getJoinedRooms(nsp, { seedName })
+      .filter(hasHideTicketsFilterEnabled)
+    for (const room of joinedRooms) {
+      nsp.to(room.room).emit('seedstats', { type: 'MODIFIED', uid: seedUid })
+    }
+  }
 }

@@ -163,8 +163,6 @@ export function createGlobalResolveGuards () {
             break
           }
           case 'ShootList': {
-            // filter has to be set before subscribing shoots
-            shootStore.initializeShootListFilters()
             shootStore.subscribeShoots()
             const promises = []
             if (authzStore.canUseProjectTerminalShortcuts) {

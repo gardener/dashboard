@@ -43,6 +43,7 @@ describe('cors', () => {
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     await expect(createAgent('io', cache))
       .rejects.toThrow('WebSocket allowed origins configuration is required')
   })
@@ -50,6 +51,7 @@ describe('cors', () => {
   it('should reject connections from disallowed origins', async () => {
     Object.defineProperty(config, 'websocketAllowedOrigins', { value: ['https://allowed.example.org'] })
     mockRequest
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -68,6 +70,7 @@ describe('cors', () => {
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     agent = await createAgent('io', cache)
     const cookie = await user.cookie
     await expect(
@@ -82,6 +85,7 @@ describe('cors', () => {
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
     agent = await createAgent('io', cache)
     const cookie = await user.cookie
     socket = await agent.connect({ cookie, originHeader: 'https://allowed.example.org' })
@@ -91,6 +95,7 @@ describe('cors', () => {
   it('should allow connections when "*" is configured', async () => {
     Object.defineProperty(config, 'websocketAllowedOrigins', { value: ['*'] })
     mockRequest
+      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())

@@ -35,6 +35,7 @@ import {
 } from '../lib/services/terminals/utils.js'
 
 import kubeClientModule from '@gardener-dashboard/kube-client'
+import { seedProjectNamespaceIndex } from './helpers/cache.js'
 
 const { cache } = cacheModule
 const { dashboardClient } = kubeClientModule
@@ -132,6 +133,7 @@ describe('services', function () {
       Object.defineProperty(config, 'terminal', { get: terminalStub })
       seedList = fixtures.seeds.list()
       vi.spyOn(cache, 'getSeeds').mockReturnValue(seedList)
+      seedProjectNamespaceIndex()
     })
 
     afterEach(function () {

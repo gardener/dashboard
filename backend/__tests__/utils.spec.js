@@ -18,6 +18,7 @@ import {
   encodeBase64,
   decodeBase64,
   getConfigValue,
+  isTruthyValue,
   shootHasIssue,
   getSeedNameFromShoot,
   parseSelectors,
@@ -62,6 +63,15 @@ describe('utils', function () {
       expect(shootHasIssue(shoot)).toBe(false)
       shoot.metadata.labels['shoot.gardener.cloud/status'] = 'unhealthy'
       expect(shootHasIssue(shoot)).toBe(true)
+    })
+
+    it('should detect truthy values', function () {
+      expect(isTruthyValue('1')).toBe(true)
+      expect(isTruthyValue('true')).toBe(true)
+      expect(isTruthyValue('TRUE')).toBe(true)
+      expect(isTruthyValue('false')).toBe(false)
+      expect(isTruthyValue('')).toBe(false)
+      expect(isTruthyValue(undefined)).toBe(false)
     })
 
     it('should return the seed name for a shoot resource', function () {

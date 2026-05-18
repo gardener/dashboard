@@ -395,8 +395,7 @@ export function isReconciliationDeactivated (metadata) {
 }
 
 export function isTruthyValue (value) {
-  const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
-  return includes(truthyValues, value)
+  return ['1', 't', 'T', 'true', 'TRUE', 'True'].includes(value)
 }
 
 export function isStatusProgressing (metadata) {

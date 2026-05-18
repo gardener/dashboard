@@ -19,6 +19,7 @@ import {
   mockListIssues,
   mockListComments,
 } from '@octokit/core'
+import { seedProjectNamespaceIndex } from '../helpers/cache.js'
 import * as tickets from '../../lib/services/tickets.js'
 
 const { mockRequest } = request
@@ -28,6 +29,7 @@ describe('api', function () {
 
   beforeAll(async () => {
     agent = await createAgent()
+    seedProjectNamespaceIndex()
   })
 
   afterAll(() => {

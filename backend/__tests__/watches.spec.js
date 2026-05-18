@@ -33,6 +33,11 @@ const { sha256 } = helper
 const flushPromises = () => new Promise(setImmediate)
 
 const rooms = new Map()
+const adapterRooms = new Map()
+
+function joinRoom (name, members = ['socket-1']) {
+  adapterRooms.set(name, new Set(members))
+}
 
 function getRoom (name) {
   if (!rooms.has(name)) {
@@ -44,6 +49,9 @@ function getRoom (name) {
 }
 
 const nsp = {
+  adapter: {
+    rooms: adapterRooms,
+  },
   to: vi.fn().mockImplementation(name => {
     if (Array.isArray(name)) {
       return {
@@ -114,6 +122,7 @@ describe('watches', function () {
   beforeEach(function () {
     informer = new EventEmitter()
     rooms.clear()
+    adapterRooms.clear()
     vi.clearAllMocks()
   })
 
@@ -133,6 +142,22 @@ describe('watches', function () {
     beforeEach(() => {
       shootsWithIssues = new Set()
       vi.spyOn(cache, 'getManagedSeedForShootInGardenNamespace').mockReturnValue(undefined)
+      vi.spyOn(cache, 'getSeed').mockImplementation(name => {
+        if (name === 'infra1-seed') {
+          return {
+            metadata: {
+              uid: 'seed-1',
+            },
+          }
+        }
+        if (name === 'infra1-seed2') {
+          return {
+            metadata: {
+              uid: 'seed-2',
+            },
+          }
+        }
+      })
     })
 
     it('should watch shoots without issues', async function () {
@@ -256,6 +281,197 @@ describe('watches', function () {
         ['managedseed-shoots', { type: 'DELETED', uid: gardenManagedSeedShoot.metadata.uid }],
       ])
     })
+
+    it('should emit seedstats updates for joined rooms whose total or filtered counts changed', async function () {
+      const oldShoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: {
+            'shoot.gardener.cloud/status': 'healthy',
+          },
+        },
+        spec: {
+          seedName: 'infra1-seed',
+        },
+      }
+      const updatedShoot = cloneDeep(oldShoot)
+      updatedShoot.metadata.labels['shoot.gardener.cloud/status'] = 'progressing'
+
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;uf=1')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+      joinRoom('seedstats;seed=infra1-seed;uf=1')
+
+      watches.shoots(io, informer)
+
+      informer.emit('update', updatedShoot, oldShoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;uf=1').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;uf=1').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=1').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=1').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+    })
+
+    it('should emit seedstats for ADDED shoot', async function () {
+      const newShoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: { 'shoot.gardener.cloud/status': 'healthy' },
+        },
+        spec: { seedName: 'infra1-seed' },
+      }
+
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+
+      watches.shoots(io, informer)
+
+      informer.emit('add', newShoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+    })
+
+    it('should emit seedstats for DELETED shoot', async function () {
+      const shoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: { 'shoot.gardener.cloud/status': 'healthy' },
+        },
+        spec: { seedName: 'infra1-seed' },
+      }
+
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+
+      watches.shoots(io, informer)
+
+      informer.emit('delete', shoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+    })
+
+    it('should not emit seedstats when shoot MODIFIED but health state unchanged', async function () {
+      const oldShoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: { 'shoot.gardener.cloud/status': 'healthy' },
+        },
+        spec: { seedName: 'infra1-seed' },
+      }
+      // Same health state, different field that doesn't affect seedstats
+      const updatedShoot = cloneDeep(oldShoot)
+      updatedShoot.metadata.resourceVersion = '999'
+
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+
+      watches.shoots(io, informer)
+
+      informer.emit('update', updatedShoot, oldShoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0')).toBeUndefined()
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0')).toBeUndefined()
+    })
+
+    it('should not emit seedstats when seed is not found in cache', async function () {
+      const shoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: { 'shoot.gardener.cloud/status': 'healthy' },
+        },
+        spec: { seedName: 'unknown-seed' },
+      }
+
+      joinRoom('seedstats;uf=0')
+
+      watches.shoots(io, informer)
+
+      informer.emit('add', shoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0')).toBeUndefined()
+    })
+
+    it('should emit seedstats updates for list and single-seed rooms when a shoot changes seeds', async function () {
+      const oldShoot = {
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'fooShoot',
+          uid: 9,
+          labels: {
+            'shoot.gardener.cloud/status': 'healthy',
+          },
+        },
+        spec: {
+          seedName: 'infra1-seed',
+        },
+      }
+      const updatedShoot = cloneDeep(oldShoot)
+      updatedShoot.spec.seedName = 'infra1-seed2'
+      updatedShoot.metadata.labels['shoot.gardener.cloud/status'] = 'unhealthy'
+
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+      joinRoom('seedstats;seed=infra1-seed2;uf=0')
+
+      watches.shoots(io, informer)
+
+      informer.emit('update', updatedShoot, oldShoot)
+
+      await flushPromises()
+
+      expect(rooms.get('seedstats;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-2' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-1' }],
+      ])
+      expect(rooms.get('seedstats;seed=infra1-seed2;uf=0').emit.mock.calls).toEqual([
+        ['seedstats', { type: 'MODIFIED', uid: 'seed-2' }],
+      ])
+    })
   })
 
   describe('projects', function () {
@@ -315,7 +531,7 @@ describe('watches', function () {
   })
 
   describe('seeds', function () {
-    it('should watch seeds', async function () {
+    it('should watch seeds only for joined seedstats rooms', async function () {
       watches.seeds(io, informer)
 
       const uid = 7
@@ -326,23 +542,54 @@ describe('watches', function () {
         },
       }
 
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;seed=seed-foo;uf=7')
+      joinRoom('seedstats;seed=other-seed;uf=7')
+
       informer.emit('add', seed)
       informer.emit('update', seed)
       informer.emit('delete', seed)
 
       await flushPromises()
 
-      const ids = ['seeds']
+      const ids = ['seeds', 'seedstats;uf=0', 'seedstats;seed=seed-foo;uf=7']
 
       expect(Array.from(rooms.keys())).toEqual(ids)
-      expect(nsp.to).toHaveBeenCalledTimes(3)
+      expect(nsp.to).toHaveBeenCalledTimes(9)
+      expect(nsp.to.mock.calls).toEqual([
+        ['seeds'],
+        ['seedstats;uf=0'],
+        ['seedstats;seed=seed-foo;uf=7'],
+        ['seeds'],
+        ['seedstats;uf=0'],
+        ['seedstats;seed=seed-foo;uf=7'],
+        ['seeds'],
+        ['seedstats;uf=0'],
+        ['seedstats;seed=seed-foo;uf=7'],
+      ])
 
-      const seedsRoom = rooms.get(ids[0])
+      const seedsRoom = rooms.get('seeds')
       expect(seedsRoom.emit).toHaveBeenCalledTimes(3)
       expect(seedsRoom.emit.mock.calls).toEqual([
         ['seeds', { type: 'ADDED', uid }],
         ['seeds', { type: 'MODIFIED', uid }],
         ['seeds', { type: 'DELETED', uid }],
+      ])
+
+      const seedStatsListRoom = rooms.get('seedstats;uf=0')
+      expect(seedStatsListRoom.emit).toHaveBeenCalledTimes(3)
+      expect(seedStatsListRoom.emit.mock.calls).toEqual([
+        ['seedstats', { type: 'ADDED', uid }],
+        ['seedstats', { type: 'MODIFIED', uid }],
+        ['seedstats', { type: 'DELETED', uid }],
+      ])
+
+      const seedStatsSeedRoom = rooms.get('seedstats;seed=seed-foo;uf=7')
+      expect(seedStatsSeedRoom.emit).toHaveBeenCalledTimes(3)
+      expect(seedStatsSeedRoom.emit.mock.calls).toEqual([
+        ['seedstats', { type: 'ADDED', uid }],
+        ['seedstats', { type: 'MODIFIED', uid }],
+        ['seedstats', { type: 'DELETED', uid }],
       ])
     })
   })
@@ -488,6 +735,16 @@ describe('watches', function () {
       signal = abortController.signal
 
       vi.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
+      vi.spyOn(cache, 'getShoot').mockReturnValue({
+        spec: {
+          seedName: 'infra1-seed',
+        },
+      })
+      vi.spyOn(cache, 'getSeed').mockReturnValue({
+        metadata: {
+          uid: 'seed-1',
+        },
+      })
     })
 
     it('should log a warning if gitHub config is missing and not continue', async function () {
@@ -569,7 +826,11 @@ describe('watches', function () {
       expect(pLimit).toHaveBeenCalledWith(42)
     })
 
-    it('should emit ticket cache events to socket io', async () => {
+    it('should emit ticket cache events to socket io and seedstats only for bit-2 rooms', async () => {
+      joinRoom('seedstats;uf=4')
+      joinRoom('seedstats;seed=infra1-seed;uf=4')
+      joinRoom('seedstats;uf=0')
+
       watches.leases(io, informer, { signal })
 
       expect(nsp.emit).toHaveBeenCalledTimes(1)
@@ -580,6 +841,62 @@ describe('watches', function () {
       expect(nsp.to).toHaveBeenCalledWith([room])
       expect(mockRoom.emit).toHaveBeenCalledTimes(1)
       expect(mockRoom.emit).toHaveBeenCalledWith('comments', issueEvent)
+
+      expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledWith('seedstats', { type: 'MODIFIED', uid: 'seed-1' })
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=4').emit).toHaveBeenCalledTimes(1)
+      expect(rooms.get('seedstats;seed=infra1-seed;uf=4').emit).toHaveBeenCalledWith('seedstats', { type: 'MODIFIED', uid: 'seed-1' })
+      expect(rooms.has('seedstats;uf=0')).toBe(false)
+    })
+
+    it('should not emit seedstats for issue events when no joined rooms have FILTER_HIDE_TICKETS bit set', async () => {
+      joinRoom('seedstats;uf=0')
+      joinRoom('seedstats;uf=1')
+      joinRoom('seedstats;seed=infra1-seed;uf=0')
+
+      watches.leases(io, informer, { signal })
+
+      expect(rooms.has('seedstats;uf=0')).toBe(false)
+      expect(rooms.has('seedstats;uf=1')).toBe(false)
+      expect(rooms.has('seedstats;seed=infra1-seed;uf=0')).toBe(false)
+    })
+
+    it('should not emit seedstats for issue events when shoot is not found in cache', async () => {
+      cache.getShoot.mockReturnValue(undefined)
+
+      joinRoom('seedstats;uf=4')
+
+      watches.leases(io, informer, { signal })
+
+      expect(rooms.has('seedstats;uf=4')).toBe(false)
+    })
+
+    it('should not emit seedstats for issue events when seed is not found in cache', async () => {
+      cache.getSeed.mockReturnValue(undefined)
+
+      joinRoom('seedstats;uf=4')
+
+      watches.leases(io, informer, { signal })
+
+      expect(rooms.has('seedstats;uf=4')).toBe(false)
+    })
+
+    it('should not emit seedstats for issue events with missing metadata', async () => {
+      const badEvent = { object: { metadata: {} } }
+      const ticketCacheWithBadEvent = {
+        on (eventName, handler) {
+          if (eventName === 'issue') {
+            handler(badEvent)
+          }
+        },
+      }
+      cache.getTicketCache.mockReturnValue(ticketCacheWithBadEvent)
+
+      joinRoom('seedstats;uf=4')
+
+      watches.leases(io, informer, { signal })
+
+      expect(rooms.has('seedstats;uf=4')).toBe(false)
     })
 
     it('should listen to informer update events', async function () {

@@ -52,22 +52,24 @@ function init (httpServer, cache) {
   io.use(helper.authenticationMiddleware())
 
   // handle connections (see https://socket.io/docs/v4/server-application-structure)
-  io.on('connection', socket => {
+  io.on('connection', async socket => {
     const socketId = socket.id
     const timeoutId = socket.data.timeoutId
     delete socket.data.timeoutId
 
-    helper.joinPrivateRoom(socket)
+    await helper.joinPrivateRoom(socket)
 
     const user = helper.getUserFromSocket(socket)
     if (_.get(user, ['profiles', 'canListSeeds'], false)) {
-      socket.join('seeds')
+      await socket.join('seeds')
       logger.debug('Socket %s auto-joined seeds room', socket.id)
     }
 
     if (_.get(user, ['profiles', 'canGetManagedSeedAndShootInGardenNs'], false)) {
-      socket.join('managedseeds;garden')
-      socket.join('managedseed-shoots;garden')
+      await Promise.all([
+        socket.join('managedseeds;garden'),
+        socket.join('managedseed-shoots;garden'),
+      ])
       logger.debug('Socket %s auto-joined managed seed garden rooms', socket.id)
     }
 

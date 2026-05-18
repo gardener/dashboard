@@ -7,6 +7,7 @@
 import _ from 'lodash-es'
 import httpErrors from 'http-errors'
 import createTicketCache from './tickets.js'
+import logger from '../logger/index.js'
 import {
   parseSelectors,
   filterBySelectors,
@@ -20,9 +21,81 @@ const { NotFound } = httpErrors
 */
 
 class Cache extends Map {
+  #namespaceToProject = new Map()
+  #seedNameToShoots = new Map()
+
   constructor () {
     super()
     this.ticketCache = createTicketCache()
+  }
+
+  indexProjectsByNamespace (informer) {
+    const set = obj => {
+      const ns = obj?.spec?.namespace
+      if (!ns) {
+        return
+      }
+      const existing = this.#namespaceToProject.get(ns)
+      if (existing && existing.metadata.uid !== obj.metadata.uid) {
+        logger.warn('Two projects claim namespace %s: %s and %s — namespace index may be inconsistent', ns, existing.metadata.name, obj.metadata.name)
+      }
+      this.#namespaceToProject.set(ns, obj)
+    }
+    const del = obj => {
+      const ns = obj?.spec?.namespace
+      if (ns) {
+        this.#namespaceToProject.delete(ns)
+      }
+    }
+    informer.on('add', set)
+    informer.on('update', (obj, old) => {
+      del(old)
+      set(obj)
+    })
+    informer.on('delete', del)
+  }
+
+  indexShootsBySeedName (informer) {
+    const add = shoot => {
+      const seedName = shoot?.spec?.seedName
+      if (!seedName) {
+        return
+      }
+      const uid = shoot?.metadata?.uid
+      if (!uid) {
+        return
+      }
+      let set = this.#seedNameToShoots.get(seedName)
+      if (!set) {
+        set = new Map()
+        this.#seedNameToShoots.set(seedName, set)
+      }
+      set.set(uid, shoot)
+    }
+    const del = shoot => {
+      const seedName = shoot?.spec?.seedName
+      const uid = shoot?.metadata?.uid
+      if (!seedName || !uid) {
+        return
+      }
+      const set = this.#seedNameToShoots.get(seedName)
+      if (set) {
+        set.delete(uid)
+        if (set.size === 0) {
+          this.#seedNameToShoots.delete(seedName)
+        }
+      }
+    }
+    informer.on('add', add)
+    informer.on('update', (obj, old) => {
+      del(old)
+      add(obj)
+    })
+    informer.on('delete', del)
+  }
+
+  getShootsBySeedName (seedName) {
+    return this.#seedNameToShoots.get(seedName)?.values() ?? []
   }
 
   getCloudProfiles () {
@@ -62,6 +135,14 @@ class Cache extends Map {
 
   getTicketCache () {
     return this.ticketCache
+  }
+
+  findProjectByNamespace (namespace) {
+    const project = this.#namespaceToProject.get(namespace)
+    if (!project) {
+      throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+    }
+    return project
   }
 }
 
@@ -140,11 +221,7 @@ export default {
     return cache.getResourceQuotas()
   },
   findProjectByNamespace (namespace) {
-    const project = cache.get('projects').find(['spec.namespace', namespace])
-    if (!project) {
-      throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
-    }
-    return project
+    return cache.findProjectByNamespace(namespace)
   },
   getManagedSeedsInGardenNamespace () {
     return cache.getManagedSeedsInGardenNamespace()
@@ -164,6 +241,9 @@ export default {
   getTicketCache () {
     return cache.getTicketCache()
   },
+  getShootsBySeedName (seedName) {
+    return cache.getShootsBySeedName(seedName)
+  },
   getByUid (kind, uid) {
     switch (kind) {
       case 'Project':
@@ -177,5 +257,11 @@ export default {
       default:
         throw new TypeError(`Kind '${kind}' not supported`)
     }
+  },
+  indexProjectsByNamespace (informer) {
+    cache.indexProjectsByNamespace(informer)
+  },
+  indexShootsBySeedName (informer) {
+    cache.indexShootsBySeedName(informer)
   },
 }

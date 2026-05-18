@@ -20,12 +20,22 @@ import { useProjectStore } from '@/store/project'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
 import { useCredentialStore } from '@/store/credential'
+import { useLocalStorageStore } from '@/store/localStorage'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
 
 import set from 'lodash/set'
 import cloneDeep from 'lodash/cloneDeep'
 import unset from 'lodash/unset'
+
+// Disable createSharedComposable so each test gets a fresh composable instance
+vi.mock('@vueuse/core', async importOriginal => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    createSharedComposable: fn => fn,
+  }
+})
 
 describe('composables', () => {
   describe('useProvideShootItem', () => {
@@ -211,7 +221,8 @@ describe('composables', () => {
 
     it('should compute isStaleShoot correctly', () => {
       authzStore._setNamespace('_all')
-      shootStore.state.shootListFilters = {
+      const localStorageStore = useLocalStorageStore()
+      localStorageStore.allProjectsShootFilter = {
         onlyShootsWithIssues: true,
         progressing: true,
       }
