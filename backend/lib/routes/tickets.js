@@ -5,6 +5,7 @@
 //
 
 import express from 'express'
+import createError from 'http-errors'
 import _ from 'lodash-es'
 import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
@@ -38,11 +39,25 @@ async function getIssuesAndComments (namespace, name) {
   return [issues, comments]
 }
 
+async function authorize (req, namespace) {
+  if (namespace === '_all') {
+    if (!await req.user.canListIssues()) {
+      throw createError(403, 'Forbidden')
+    }
+    return
+  }
+  const projectName = getProjectName(namespace)
+  if (!await req.user.canGetProject({ name: projectName })) {
+    throw createError(403, 'Forbidden')
+  }
+}
+
 router.route('/')
   .all(metricsMiddleware)
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
     try {
       const namespace = req.params.namespace
+      await authorize(req, namespace)
       const issues = getIssues(namespace)
       res.send({ issues })
     } catch (err) {
@@ -55,6 +70,7 @@ router.route('/:name')
   .get(async (req, res, next) => {
     try {
       const namespace = req.params.namespace
+      await authorize(req, namespace)
       const name = req.params.name
       const [issues, comments] = await getIssuesAndComments(namespace, name)
       res.send({ issues, comments })
