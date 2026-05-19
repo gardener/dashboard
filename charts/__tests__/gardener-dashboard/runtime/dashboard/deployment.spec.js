@@ -68,6 +68,46 @@ describe('gardener-dashboard', function () {
       expect(dashboardContainer.env).toMatchSnapshot()
     })
 
+    it('should render the kube client request timeout environment variable', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            kubeClient: {
+              requestTimeout: 30000,
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.env).toEqual(expect.arrayContaining([{
+        name: 'KUBE_CLIENT_REQUEST_TIMEOUT',
+        value: '30000',
+      }]))
+    })
+
+    it('should render kube client request timeout 0', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            kubeClient: {
+              requestTimeout: 0,
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.env).toEqual(expect.arrayContaining([{
+        name: 'KUBE_CLIENT_REQUEST_TIMEOUT',
+        value: '0',
+      }]))
+    })
+
     it('should render the template with a sha256 tag', async function () {
       const tag = 'sha256:4d529c1'
       const values = {

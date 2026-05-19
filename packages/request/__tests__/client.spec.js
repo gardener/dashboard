@@ -9,6 +9,7 @@ import http2 from 'http2'
 import zlib from 'zlib'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import client from '../lib/index.js'
+import { isRequestTimeoutAbort, mapTimeoutAbortError } from '../lib/Client.js'
 
 const { Client, extend } = client
 
@@ -35,14 +36,6 @@ describe('Client', () => {
   let agent
   let client
   let stream
-
-  beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true })
-  })
-
-  afterAll(() => {
-    vi.useRealTimers()
-  })
 
   beforeEach(() => {
     const mockBody = vi.fn().mockReturnValue({
@@ -98,7 +91,6 @@ describe('Client', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
       expect(client.baseUrl.href).toBe(url.href)
-      expect(client.responseTimeout).toBe(15000)
     })
 
     it('should throw a type error', () => {
@@ -244,6 +236,107 @@ describe('Client', () => {
       expect(body).toEqual(stream.mockBody())
     })
 
+    it('should timeout when a request exceeds its deadline before headers arrive', async () => {
+      const requestTimeout = 10
+      const message = `Request exceeded ${requestTimeout} ms for GET /test/foo/bar`
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      let signal
+      let resolveGetHeadersCalled
+      const getHeadersCalled = new Promise(resolve => {
+        resolveGetHeadersCalled = resolve
+      })
+      agent.request.mockImplementation(async (headers, options) => {
+        signal = options.signal
+        signal.addEventListener('abort', () => {
+          const err = new Error('The operation was aborted')
+          err.name = 'AbortError'
+          err.code = 'ABORT_ERR'
+          err.cause = signal.reason
+          stream.destroy(err)
+        }, { once: true })
+        return stream
+      })
+      stream.getHeaders = vi.fn(() => {
+        resolveGetHeadersCalled()
+        return new Promise((resolve, reject) => {
+          stream.destroy.mockImplementation(reject)
+        })
+      })
+
+      const promise = client.fetch('foo/bar?token=secret')
+      await getHeadersCalled
+      const err = await promise.catch(err => err)
+
+      expect(err).toMatchObject({
+        name: 'TimeoutError',
+        code: 'ETIMEDOUT',
+        message,
+      })
+      expect(err.cause).toMatchObject({
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+      })
+      expect(stream.getHeaders).toHaveBeenCalledTimes(1)
+      expect(stream.destroy).toHaveBeenCalledTimes(1)
+      expect(stream.destroy).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+      }))
+    })
+
+    it('should not create a timeout signal when requestTimeout is 0', async () => {
+      await client.fetch('foo/bar', { requestTimeout: 0 })
+
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(agent.request.mock.calls[0][1].signal).toBeUndefined()
+    })
+
+    it('should surface a caller-triggered abort as AbortError, not TimeoutError', async () => {
+      const requestTimeout = 60_000
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      const abortController = new AbortController()
+      let resolveGetHeadersCalled
+      const getHeadersCalled = new Promise(resolve => {
+        resolveGetHeadersCalled = resolve
+      })
+      agent.request.mockImplementation(async (headers, options) => {
+        const signal = options.signal
+        signal.addEventListener('abort', () => {
+          const err = new Error('The operation was aborted')
+          err.name = 'AbortError'
+          err.code = 'ABORT_ERR'
+          err.cause = signal.reason
+          stream.destroy(err)
+        }, { once: true })
+        return stream
+      })
+      stream.getHeaders = vi.fn(() => {
+        resolveGetHeadersCalled()
+        return new Promise((resolve, reject) => {
+          stream.destroy.mockImplementation(reject)
+        })
+      })
+
+      const promise = client.fetch('foo/bar', { signal: abortController.signal })
+      await getHeadersCalled
+      abortController.abort()
+      const err = await promise.catch(err => err)
+
+      expect(err).toMatchObject({
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+      })
+      expect(err.name).not.toBe('TimeoutError')
+    })
+
     describe('when the server returns plain text for a JSON endpoint', () => {
       const contentType = 'text/plain'
       const chunks = ['foo', '-', 'bar']
@@ -317,6 +410,17 @@ describe('Client', () => {
       }
       client.fetch = vi.fn().mockResolvedValue(response)
       await expect(client.stream()).resolves.toBe(response)
+      expect(client.fetch).toHaveBeenCalledWith(undefined, { requestTimeout: 0 })
+    })
+
+    it('should allow direct stream callers to override requestTimeout', async () => {
+      const statusCode = 200
+      const response = {
+        statusCode,
+      }
+      client.fetch = vi.fn().mockResolvedValue(response)
+      await expect(client.stream('events', { requestTimeout: 100 })).resolves.toBe(response)
+      expect(client.fetch).toHaveBeenCalledWith('events', { requestTimeout: 100 })
     })
 
     it('should throw a NotFound error', async () => {
@@ -373,6 +477,99 @@ describe('Client', () => {
       const buffer = Client.transformFactory(false)(data)
       expect(Buffer.isBuffer(buffer)).toBe(true)
       expect(buffer.toString('utf8')).toBe(data)
+    })
+  })
+
+  describe('isRequestTimeoutAbort', () => {
+    it('should return false when timeoutSignal is undefined', () => {
+      expect(isRequestTimeoutAbort(new Error('boom'), undefined)).toBe(false)
+    })
+
+    it('should return false when timeout has not fired (reason is undefined)', () => {
+      const signal = AbortSignal.timeout(60_000)
+      expect(signal.reason).toBeUndefined()
+      expect(isRequestTimeoutAbort(new Error('boom'), signal)).toBe(false)
+    })
+
+    it('should return false when reason is not a TimeoutError (e.g. caller AbortError)', () => {
+      const controller = new AbortController()
+      controller.abort()
+      expect(controller.signal.reason).toBeDefined()
+      expect(controller.signal.reason.name).not.toBe('TimeoutError')
+      expect(isRequestTimeoutAbort(new Error('boom'), controller.signal)).toBe(false)
+    })
+
+    it('should return true when err is the timeout reason itself (direct case)', async () => {
+      const signal = AbortSignal.timeout(1)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      expect(signal.reason?.name).toBe('TimeoutError')
+      expect(isRequestTimeoutAbort(signal.reason, signal)).toBe(true)
+    })
+
+    it('should return true when err wraps the timeout reason as cause (ABORT_ERR case)', async () => {
+      const signal = AbortSignal.timeout(1)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      const wrapped = new Error('The operation was aborted')
+      wrapped.name = 'AbortError'
+      wrapped.code = 'ABORT_ERR'
+      wrapped.cause = signal.reason
+      expect(isRequestTimeoutAbort(wrapped, signal)).toBe(true)
+    })
+
+    it('should return false when err has ABORT_ERR code but cause is a different reason', async () => {
+      const signal = AbortSignal.timeout(1)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      const otherReason = new DOMException('other', 'TimeoutError')
+      const wrapped = new Error('The operation was aborted')
+      wrapped.name = 'AbortError'
+      wrapped.code = 'ABORT_ERR'
+      wrapped.cause = otherReason
+      expect(isRequestTimeoutAbort(wrapped, signal)).toBe(false)
+    })
+
+    it('should return false for unrelated errors when timeout has fired', async () => {
+      const signal = AbortSignal.timeout(1)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      const networkErr = Object.assign(new Error('socket reset'), { code: 'ECONNRESET' })
+      expect(isRequestTimeoutAbort(networkErr, signal)).toBe(false)
+    })
+  })
+
+  describe('mapTimeoutAbortError', () => {
+    const requestOptions = { method: 'GET', url: new URL('https://example.org/foo/bar') }
+
+    it('should rewrite a timeout-triggered error as TimeoutError with descriptive message', async () => {
+      const signal = AbortSignal.timeout(1)
+      await new Promise(resolve => setTimeout(resolve, 5))
+      const wrapped = Object.assign(new Error('The operation was aborted'), {
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+        cause: signal.reason,
+      })
+      const mapped = mapTimeoutAbortError(wrapped, requestOptions, 1, signal)
+      expect(mapped).toMatchObject({
+        name: 'TimeoutError',
+        message: 'Request exceeded 1 ms for GET /foo/bar',
+      })
+      expect(mapped.cause).toBe(wrapped)
+    })
+
+    it('should pass through caller AbortError unchanged', () => {
+      const controller = new AbortController()
+      controller.abort()
+      const timeoutSignal = AbortSignal.timeout(60_000)
+      const callerErr = Object.assign(new Error('aborted'), {
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+        cause: controller.signal.reason,
+      })
+      expect(mapTimeoutAbortError(callerErr, requestOptions, 60_000, timeoutSignal)).toBe(callerErr)
+    })
+
+    it('should pass through unrelated errors unchanged', () => {
+      const timeoutSignal = AbortSignal.timeout(60_000)
+      const err = new Error('boom')
+      expect(mapTimeoutAbortError(err, requestOptions, 60_000, timeoutSignal)).toBe(err)
     })
   })
 })

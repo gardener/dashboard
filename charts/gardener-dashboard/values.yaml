@@ -29,6 +29,11 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+    kubeClient:
+      # Optional total request timeout in milliseconds for Kubernetes API requests.
+      # Defaults to 60000 when unset. Set to 0 to disable.
+      requestTimeout: ~
+
   # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
   # projectedKubeconfig:
   #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.
