@@ -60,11 +60,12 @@ ClusterScoped.Readable = superclass => class extends superclass {
   get (name, { searchParams, signal, ...options } = {}) {
     assertName(name)
     assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
     const method = 'get'
     const url = clusterScopedUrl(this.constructor.names, name)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams })
+    return this[http.request](url, { method, searchParams, signal })
   }
 
   list ({ searchParams, signal, ...options } = {}) {
@@ -84,11 +85,12 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     assertNamespace(namespace)
     assertName(name)
     assertSearchParams(searchParams)
+    assertSignal(signal)
     assertOptions(options)
     const method = 'get'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams })
+    return this[http.request](url, { method, searchParams, signal })
   }
 
   list (namespace, { searchParams, signal, ...options } = {}) {

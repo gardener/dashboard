@@ -94,10 +94,19 @@ describe('kube-client', () => {
       describe('Readable', () => {
         it('should get a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('name', {})
+          const signal = new AbortController().signal
+          const [url, { method, searchParams, signal: forwardedSignal }] = testObject.get('name', { signal })
           expect(url).toBe('dummies/name')
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
+          expect(forwardedSignal).toBe(signal)
+        })
+
+        it('should reject invalid get signals', () => {
+          const testObject = new TestObject()
+          expect(() => testObject.get('name', { signal: {} })).toThrow(
+            'The parameter "signal" must be empty or an instance of AbortSignal',
+          )
         })
 
         it('should list a resource', async () => {
@@ -272,10 +281,19 @@ describe('kube-client', () => {
       describe('Readable', () => {
         it('should get a resource', () => {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('namespace', 'name', {})
+          const signal = new AbortController().signal
+          const [url, { method, searchParams, signal: forwardedSignal }] = testObject.get('namespace', 'name', { signal })
           expect(url).toBe('namespaces/namespace/dummies/name')
           expect(method).toBe('get')
           expect(searchParams.toString()).toBe('')
+          expect(forwardedSignal).toBe(signal)
+        })
+
+        it('should reject invalid get signals', () => {
+          const testObject = new TestObject()
+          expect(() => testObject.get('namespace', 'name', { signal: {} })).toThrow(
+            'The parameter "signal" must be empty or an instance of AbortSignal',
+          )
         })
 
         it('should list a resource', async () => {
