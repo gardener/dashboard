@@ -36,14 +36,6 @@ describe('Client', () => {
   let client
   let stream
 
-  beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true })
-  })
-
-  afterAll(() => {
-    vi.useRealTimers()
-  })
-
   beforeEach(() => {
     const mockBody = vi.fn().mockReturnValue({
       foo: 'bar',
@@ -98,7 +90,6 @@ describe('Client', () => {
     it('should create a new object', () => {
       expect(client).toBeInstanceOf(Client)
       expect(client.baseUrl.href).toBe(url.href)
-      expect(client.responseTimeout).toBe(15000)
     })
 
     it('should throw a type error', () => {
@@ -244,6 +235,65 @@ describe('Client', () => {
       expect(body).toEqual(stream.mockBody())
     })
 
+    it('should timeout when a request exceeds its deadline before headers arrive', async () => {
+      const requestTimeout = 10
+      const message = `Request exceeded ${requestTimeout} ms for GET /test/foo/bar`
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      let signal
+      let resolveGetHeadersCalled
+      const getHeadersCalled = new Promise(resolve => {
+        resolveGetHeadersCalled = resolve
+      })
+      agent.request.mockImplementation(async (headers, options) => {
+        signal = options.signal
+        signal.addEventListener('abort', () => {
+          const err = new Error('The operation was aborted')
+          err.name = 'AbortError'
+          err.code = 'ABORT_ERR'
+          err.cause = signal.reason
+          stream.destroy(err)
+        }, { once: true })
+        return stream
+      })
+      stream.getHeaders = vi.fn(() => {
+        resolveGetHeadersCalled()
+        return new Promise((resolve, reject) => {
+          stream.destroy.mockImplementation(reject)
+        })
+      })
+
+      const promise = client.fetch('foo/bar?token=secret')
+      await getHeadersCalled
+      const err = await promise.catch(err => err)
+
+      expect(err).toMatchObject({
+        name: 'TimeoutError',
+        code: 'ETIMEDOUT',
+        message,
+      })
+      expect(err.cause).toMatchObject({
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+      })
+      expect(stream.getHeaders).toHaveBeenCalledTimes(1)
+      expect(stream.destroy).toHaveBeenCalledTimes(1)
+      expect(stream.destroy).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'AbortError',
+        code: 'ABORT_ERR',
+      }))
+    })
+
+    it('should not create a timeout signal when requestTimeout is 0', async () => {
+      await client.fetch('foo/bar', { requestTimeout: 0 })
+
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(agent.request.mock.calls[0][1].signal).toBeUndefined()
+    })
+
     describe('when the server returns plain text for a JSON endpoint', () => {
       const contentType = 'text/plain'
       const chunks = ['foo', '-', 'bar']
@@ -317,6 +367,17 @@ describe('Client', () => {
       }
       client.fetch = vi.fn().mockResolvedValue(response)
       await expect(client.stream()).resolves.toBe(response)
+      expect(client.fetch).toHaveBeenCalledWith(undefined, { requestTimeout: 0 })
+    })
+
+    it('should allow direct stream callers to override requestTimeout', async () => {
+      const statusCode = 200
+      const response = {
+        statusCode,
+      }
+      client.fetch = vi.fn().mockResolvedValue(response)
+      await expect(client.stream('events', { requestTimeout: 100 })).resolves.toBe(response)
+      expect(client.fetch).toHaveBeenCalledWith('events', { requestTimeout: 100 })
     })
 
     it('should throw a NotFound error', async () => {

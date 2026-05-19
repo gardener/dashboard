@@ -12,7 +12,7 @@ import zlib from 'zlib'
 import typeis from 'type-is/index.js'
 import { pick, omit } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
-import { createHttpError, ParseError } from './errors.js'
+import { createHttpError, ParseError, TimeoutError } from './errors.js'
 import agent from './Agent.js'
 import { pipeline } from 'stream'
 
@@ -41,6 +41,50 @@ function setHeader (headers, key, value) {
 }
 
 const EOL = '\n'
+const MAX_TIMEOUT = 2_147_483_647 // Node.js TIMEOUT_MAX (2^31 - 1)
+
+function combineSignals (a, b) {
+  if (!a) {
+    return b
+  }
+  if (!b) {
+    return a
+  }
+  return AbortSignal.any([a, b])
+}
+
+function createTimeoutSignal (requestTimeout) {
+  if (requestTimeout === 0) {
+    return undefined
+  }
+  if (
+    !Number.isInteger(requestTimeout) ||
+    requestTimeout < 0 ||
+    requestTimeout > MAX_TIMEOUT
+  ) {
+    throw new TypeError(`requestTimeout must be a non-negative integer <= ${MAX_TIMEOUT}`)
+  }
+  return AbortSignal.timeout(requestTimeout)
+}
+
+function isRequestTimeoutAbort (err, timeoutSignal) {
+  const reason = timeoutSignal?.reason
+  if (!reason || reason.name !== 'TimeoutError') {
+    return false
+  }
+  return err === reason ||
+    (err?.code === 'ABORT_ERR' && err.cause === reason)
+}
+
+function mapTimeoutAbortError (err, { method, url } = {}, requestTimeout, timeoutSignal) {
+  if (isRequestTimeoutAbort(err, timeoutSignal)) {
+    return new TimeoutError(
+      `Request exceeded ${requestTimeout} ms for ${method} ${url?.pathname ?? ''}`,
+      { cause: err },
+    )
+  }
+  return err
+}
 
 class Client {
   #options
@@ -63,10 +107,6 @@ class Client {
     return relativeUrl
       ? new URL(relativeUrl, url.endsWith('/') ? url : url + '/')
       : new URL(url)
-  }
-
-  get responseTimeout () {
-    return this.#options.responseTimeout || 15 * 1000
   }
 
   get responseType () {
@@ -163,7 +203,16 @@ class Client {
     )
   }
 
-  async fetch (path, { method, searchParams, headers, body, responseType = this.responseType, signal, ...options } = {}) {
+  async fetch (path, {
+    method,
+    searchParams,
+    headers,
+    body,
+    responseType = this.responseType,
+    signal,
+    requestTimeout = this.#options.requestTimeout ?? 60 * 1000,
+    ...options
+  } = {}) {
     headers = this.getRequestHeaders(path, {
       method,
       searchParams,
@@ -180,117 +229,129 @@ class Client {
     }
     this.executeHooks('beforeRequest', requestOptions)
 
-    const stream = await this.#agent.request(headers, {
-      ...this.#defaultOptions,
-      ...options,
-      signal,
-    })
-    if (body) {
-      stream.write(body)
-    }
-    stream.end()
+    const timeoutSignal = createTimeoutSignal(requestTimeout)
+    const effectiveSignal = combineSignals(signal, timeoutSignal)
+    const mapError = err => mapTimeoutAbortError(err, requestOptions, requestTimeout, timeoutSignal)
 
-    const { createDecompressor, concat, transformFactory } = this.constructor
+    try {
+      const stream = await this.#agent.request(headers, {
+        ...this.#defaultOptions,
+        ...options,
+        signal: effectiveSignal,
+      })
+      if (body) {
+        stream.write(body)
+      }
+      stream.end()
 
-    headers = await stream.getHeaders()
-    const decompressor = createDecompressor(getHeader(headers, HTTP2_HEADER_CONTENT_ENCODING))
+      const { createDecompressor, concat, transformFactory } = this.constructor
 
-    return {
-      request: { options: requestOptions },
-      headers,
-      get statusCode () {
-        return getHeader(this.headers, HTTP2_HEADER_STATUS)
-      },
-      get ok () {
-        return this.statusCode >= 200 && this.statusCode < 300
-      },
-      get redirected () {
-        return this.statusCode >= 300 && this.statusCode < 400
-      },
-      get contentType () {
-        return getHeader(this.headers, HTTP2_HEADER_CONTENT_TYPE)
-      },
-      get contentLength () {
-        return getHeader(this.headers, HTTP2_HEADER_CONTENT_LENGTH)
-      },
-      get type () {
-        if (['json', 'text'].includes(responseType)) {
-          return responseType
-        }
-        return typeis.is(this.contentType, ['json', 'text'])
-      },
-      destroy (error) {
-        stream.destroy(error)
-      },
-      body () {
-        const streams = [
-          stream,
-          async source => {
-            const text = await concat(source)
-            switch (this.type) {
-              case 'text':
-                return text
-              case 'json':
-                try {
-                  return JSON.parse(text)
-                } catch (err) {
-                  logger.error('Failed to parse response body: %s', text)
-                  if (this.ok) {
-                    throw new ParseError(err.message, {
-                      headers,
-                      rawBody: text,
-                    })
-                  }
-                  // return the raw body text if the response status is not ok (keep the original http error in this case)
-                  return text
-                }
-              default:
-                return Buffer.from(text, 'utf8')
-            }
-          },
-        ]
-        if (decompressor) {
-          streams.splice(1, 0, decompressor)
-        }
-        return new Promise((resolve, reject) => {
-          pipeline(streams, (err, body) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(body)
-            }
-          })
-        })
-      },
-      async * [Symbol.asyncIterator] () {
-        let data = ''
-        const transform = transformFactory(this.type)
-        let readable = stream
-        if (decompressor) {
-          readable = pipeline(stream, decompressor, err => {
-            if (err) {
-              logger.debug('Stream decompress pipeline error: %s', err.message)
-            }
-          })
-        }
-        readable.setEncoding('utf8')
-        for await (const chunk of readable) {
-          data += chunk
-          let index
-          while ((index = data.indexOf(EOL)) !== -1) {
-            yield transform(data.slice(0, index))
-            data = data.slice(index + 1)
+      headers = await stream.getHeaders()
+      const decompressor = createDecompressor(getHeader(headers, HTTP2_HEADER_CONTENT_ENCODING))
+
+      return {
+        request: { options: requestOptions },
+        headers,
+        get statusCode () {
+          return getHeader(this.headers, HTTP2_HEADER_STATUS)
+        },
+        get ok () {
+          return this.statusCode >= 200 && this.statusCode < 300
+        },
+        get redirected () {
+          return this.statusCode >= 300 && this.statusCode < 400
+        },
+        get contentType () {
+          return getHeader(this.headers, HTTP2_HEADER_CONTENT_TYPE)
+        },
+        get contentLength () {
+          return getHeader(this.headers, HTTP2_HEADER_CONTENT_LENGTH)
+        },
+        get type () {
+          if (['json', 'text'].includes(responseType)) {
+            return responseType
           }
-        }
-        if (data && data.length) {
-          yield transform(data)
-        }
-      },
+          return typeis.is(this.contentType, ['json', 'text'])
+        },
+        destroy (error) {
+          stream.destroy(error)
+        },
+        body () {
+          const streams = [
+            stream,
+            async source => {
+              const text = await concat(source)
+              switch (this.type) {
+                case 'text':
+                  return text
+                case 'json':
+                  try {
+                    return JSON.parse(text)
+                  } catch (err) {
+                    logger.error('Failed to parse response body: %s', text)
+                    if (this.ok) {
+                      throw new ParseError(err.message, {
+                        headers,
+                        rawBody: text,
+                      })
+                    }
+                    // return the raw body text if the response status is not ok (keep the original http error in this case)
+                    return text
+                  }
+                default:
+                  return Buffer.from(text, 'utf8')
+              }
+            },
+          ]
+          if (decompressor) {
+            streams.splice(1, 0, decompressor)
+          }
+          return new Promise((resolve, reject) => {
+            pipeline(streams, (err, body) => {
+              if (err) {
+                reject(mapError(err))
+              } else {
+                resolve(body)
+              }
+            })
+          })
+        },
+        async * [Symbol.asyncIterator] () {
+          let data = ''
+          const transform = transformFactory(this.type)
+          let readable = stream
+          if (decompressor) {
+            readable = pipeline(stream, decompressor, err => {
+              if (err) {
+                logger.debug('Stream decompress pipeline error: %s', err.message)
+              }
+            })
+          }
+          readable.setEncoding('utf8')
+          try {
+            for await (const chunk of readable) {
+              data += chunk
+              let index
+              while ((index = data.indexOf(EOL)) !== -1) {
+                yield transform(data.slice(0, index))
+                data = data.slice(index + 1)
+              }
+            }
+            if (data && data.length) {
+              yield transform(data)
+            }
+          } catch (err) {
+            throw mapError(err)
+          }
+        },
+      }
+    } catch (err) {
+      throw mapError(err)
     }
   }
 
   async stream (path, options) {
-    const response = await this.fetch(path, options)
+    const response = await this.fetch(path, { requestTimeout: 0, ...options })
     const statusCode = response.statusCode
     if (statusCode >= 400) {
       throw createHttpError({

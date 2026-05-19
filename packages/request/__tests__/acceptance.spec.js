@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { vi } from 'vitest'
 import http from 'http'
 import http2 from 'http2'
 import zlib from 'zlib'
@@ -148,6 +147,18 @@ function createSecureServer ({ cert, key }) {
         }
         stream.respond(headers)
         await pipeline(streams)
+      } else if (path === '/delay') {
+        // Never respond — used to test requestTimeout with a real connection.
+      } else if (path === '/stall-body') {
+        stream.respond({
+          [HTTP2_HEADER_STATUS]: statusCode,
+          [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
+        })
+      } else if (path === '/stall-events') {
+        stream.respond({
+          [HTTP2_HEADER_STATUS]: statusCode,
+          [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
+        })
       } else {
         body = JSON.stringify({
           headers,
@@ -173,14 +184,6 @@ describe('Acceptance Tests', function () {
   let agent
   let client
   let server
-
-  beforeAll(() => {
-    vi.useFakeTimers({ legacyFakeTimers: true })
-  })
-
-  afterAll(() => {
-    vi.useRealTimers()
-  })
 
   beforeEach(async () => {
     server = await createSecureServer({ cert, key })
@@ -293,6 +296,66 @@ describe('Acceptance Tests', function () {
             'x-requested-with': 'XmlHttpRequest',
             [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
           },
+        })
+      })
+    })
+
+    describe('#request with requestTimeout', function () {
+      it('should timeout when response headers are not received in time', async function () {
+        const requestTimeout = 100
+        const timeoutClient = new Client({
+          url: server.origin,
+          agent,
+          ca: cert,
+          requestTimeout,
+        })
+
+        await expect(timeoutClient.request('delay')).rejects.toMatchObject({
+          name: 'TimeoutError',
+          code: 'ETIMEDOUT',
+          message: `Request exceeded ${requestTimeout} ms for GET /delay`,
+        })
+      })
+
+      it('should timeout when response body stalls', async function () {
+        const requestTimeout = 100
+        const timeoutClient = new Client({
+          url: server.origin,
+          agent,
+          ca: cert,
+          requestTimeout,
+        })
+
+        const response = await timeoutClient.fetch('stall-body')
+
+        await expect(response.body()).rejects.toMatchObject({
+          name: 'TimeoutError',
+          code: 'ETIMEDOUT',
+          message: `Request exceeded ${requestTimeout} ms for GET /stall-body`,
+        })
+      })
+
+      it('should timeout when the response iterator stalls', async function () {
+        const requestTimeout = 100
+        const timeoutClient = new Client({
+          url: server.origin,
+          agent,
+          ca: cert,
+          requestTimeout,
+        })
+
+        const response = await timeoutClient.fetch('stall-events')
+
+        const eventsPromise = (async () => {
+          for await (const event of response) {
+            expect(event).toBeDefined()
+          }
+        })()
+
+        await expect(eventsPromise).rejects.toMatchObject({
+          name: 'TimeoutError',
+          code: 'ETIMEDOUT',
+          message: `Request exceeded ${requestTimeout} ms for GET /stall-events`,
         })
       })
     })
