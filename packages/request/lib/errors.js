@@ -9,8 +9,8 @@ import createError from 'http-errors'
 import { get } from 'lodash-es'
 
 class TimeoutError extends Error {
-  constructor (message) {
-    super(message)
+  constructor (message, options) {
+    super(message, options)
     this.name = this.constructor.name
     this.code = 'ETIMEDOUT'
     Error.captureStackTrace(this, this.constructor)
