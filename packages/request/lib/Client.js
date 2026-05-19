@@ -67,11 +67,28 @@ function createTimeoutSignal (requestTimeout) {
   return AbortSignal.timeout(requestTimeout)
 }
 
+/**
+ * Detects whether an error originated from our requestTimeout firing,
+ * as opposed to a caller-supplied abort or unrelated failure.
+ *
+ * Used by mapTimeoutAbortError to decide whether to rewrite the error
+ * as a domain-level TimeoutError. Caller aborts stay as AbortError so
+ * consumers can distinguish "I cancelled" from "server too slow".
+ */
 function isRequestTimeoutAbort (err, timeoutSignal) {
+  // AbortSignal.timeout() sets signal.reason to a TimeoutError DOMException
+  // only after firing. Undefined reason or non-TimeoutError name means our
+  // timeout never triggered — the error must be from something else.
   const reason = timeoutSignal?.reason
   if (!reason || reason.name !== 'TimeoutError') {
     return false
   }
+
+  // Node delivers timeout-triggered aborts in two shapes depending on which
+  // await throws (stream creation vs getHeaders vs body read):
+  //   1. The promise rejects with signal.reason directly.
+  //   2. Node wraps it in an AbortError with code 'ABORT_ERR' and cause=reason.
+  // Match both forms.
   return err === reason ||
     (err?.code === 'ABORT_ERR' && err.cause === reason)
 }
@@ -454,3 +471,4 @@ class Client {
 }
 
 export default Client
+export { isRequestTimeoutAbort, mapTimeoutAbortError }
