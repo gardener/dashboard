@@ -9,6 +9,7 @@ import { vi } from 'vitest'
 const ENV_NAMES = {
   readIdleTimeout: 'KUBE_CLIENT_READ_IDLE_TIMEOUT',
   pingTimeout: 'KUBE_CLIENT_PING_TIMEOUT',
+  requestTimeout: 'KUBE_CLIENT_REQUEST_TIMEOUT',
 }
 const originalEnv = Object.fromEntries(
   Object.values(ENV_NAMES).map(envName => [envName, process.env[envName]]),
@@ -17,10 +18,12 @@ const originalEnv = Object.fromEntries(
 async function importKubeClientWithEnv ({
   readIdleTimeout,
   pingTimeout,
+  requestTimeout,
 } = {}) {
   vi.resetModules()
   setEnv(ENV_NAMES.readIdleTimeout, readIdleTimeout)
   setEnv(ENV_NAMES.pingTimeout, pingTimeout)
+  setEnv(ENV_NAMES.requestTimeout, requestTimeout)
 
   const { default: kubeClient } = await import('../lib/index.js')
   const { default: request } = await import('@gardener-dashboard/request')
@@ -45,6 +48,7 @@ function transportOptionsFromExtendCalls (request) {
   return request.extend.mock.calls.map(([clientConfig]) => ({
     readIdleTimeout: clientConfig.readIdleTimeout,
     pingTimeout: clientConfig.pingTimeout,
+    requestTimeout: clientConfig.requestTimeout,
   }))
 }
 
@@ -67,16 +71,18 @@ describe('kube-client package defaults', () => {
     const { request } = await importKubeClientWithEnv()
 
     expectAllClientsToUseTransportOptions(request, {
-      readIdleTimeout: 30000,
-      pingTimeout: 15000,
+      readIdleTimeout: 30_000,
+      pingTimeout: 15_000,
+      requestTimeout: 5 * 60 * 1_000,
     })
   })
 
-  it('should apply kube client heartbeat environment variables to user clients', async () => {
+  it('should apply kube client environment variables to user clients', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '1234',
       pingTimeout: '5678',
+      requestTimeout: '9012',
     })
 
     request.extend.mockClear()
@@ -85,14 +91,16 @@ describe('kube-client package defaults', () => {
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 1234,
       pingTimeout: 5678,
+      requestTimeout: 9012,
     })
   })
 
-  it('should apply kube client heartbeat environment variables to dashboard clients', async () => {
+  it('should apply kube client environment variables to dashboard clients', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '2345',
       pingTimeout: '6789',
+      requestTimeout: '1023',
     })
 
     request.extend.mockClear()
@@ -101,80 +109,92 @@ describe('kube-client package defaults', () => {
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 2345,
       pingTimeout: 6789,
+      requestTimeout: 1023,
     })
   })
 
-  it('should allow per-client options to override kube client heartbeat environment variables', async () => {
+  it('should allow per-client options to override kube client environment variables', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '3456',
       pingTimeout: '7890',
+      requestTimeout: '1234',
     })
 
     request.extend.mockClear()
     kubeClient.createDashboardClient({
       readIdleTimeout: 6543,
       pingTimeout: 9870,
+      requestTimeout: 4321,
     })
 
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 6543,
       pingTimeout: 9870,
+      requestTimeout: 4321,
     })
   })
 
-  it('should allow per-client heartbeat option 0 to override kube client heartbeat environment variables', async () => {
+  it('should allow per-client option 0 to override kube client environment variables', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '4567',
       pingTimeout: '8901',
+      requestTimeout: '2345',
     })
 
     request.extend.mockClear()
     kubeClient.createDashboardClient({
       readIdleTimeout: 0,
       pingTimeout: 0,
+      requestTimeout: 0,
     })
 
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 0,
       pingTimeout: 0,
+      requestTimeout: 0,
     })
   })
 
-  it('should allow kube client heartbeat environment variable 0 to disable heartbeat timers', async () => {
+  it('should allow kube client environment variable 0 to disable the corresponding timer', async () => {
     expect.hasAssertions()
     const { request } = await importKubeClientWithEnv({
       readIdleTimeout: '0',
       pingTimeout: '0',
+      requestTimeout: '0',
     })
 
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 0,
       pingTimeout: 0,
+      requestTimeout: 0,
     })
   })
 
-  it('should ignore explicit undefined heartbeat options when applying kube client heartbeat defaults', async () => {
+  it('should ignore explicit undefined options when applying kube client defaults', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '5678',
       pingTimeout: '9012',
+      requestTimeout: '3456',
     })
 
     request.extend.mockClear()
     kubeClient.createDashboardClient({
       readIdleTimeout: undefined,
       pingTimeout: undefined,
+      requestTimeout: undefined,
     })
 
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 5678,
       pingTimeout: 9012,
+      requestTimeout: 3456,
     })
   })
 
-  it.each(['readIdleTimeout', 'pingTimeout'])('should fail fast for invalid per-client %s option', async optionName => {
+  it.each(['readIdleTimeout', 'pingTimeout', 'requestTimeout'])('should fail fast for invalid per-client %s option', async optionName => {
     expect.hasAssertions()
     const { kubeClient } = await importKubeClientWithEnv()
 
@@ -185,11 +205,12 @@ describe('kube-client package defaults', () => {
     }
   })
 
-  it('should apply kube client heartbeat defaults to derived kubeconfig clients', async () => {
+  it('should apply kube client defaults to derived kubeconfig clients', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
       readIdleTimeout: '6789',
       pingTimeout: '1234',
+      requestTimeout: '5432',
     })
     const { default: helper } = await import('./fixtures/helper.js')
     const client = kubeClient.createDashboardClient()
@@ -207,6 +228,7 @@ describe('kube-client package defaults', () => {
     expectAllClientsToUseTransportOptions(request, {
       readIdleTimeout: 6789,
       pingTimeout: 1234,
+      requestTimeout: 5432,
     })
   })
 
