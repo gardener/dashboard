@@ -59,7 +59,7 @@
     "get-contrast": "^3.0.0",
     "highlight.js": "^11.9.0",
     "js-base64": "^3.7.6",
-    "js-cookie": "^3.0.5",
+    "js-cookie": "^3.0.7",
     "js-yaml": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",

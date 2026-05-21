@@ -1037,7 +1037,7 @@ const RAW_RUNTIME_STATE =
           ["get-contrast", "npm:3.0.0"],\
           ["highlight.js", "npm:11.11.1"],\
           ["js-base64", "npm:3.7.8"],\
-          ["js-cookie", "npm:3.0.5"],\
+          ["js-cookie", "npm:3.0.7"],\
           ["js-yaml", "npm:4.1.1"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["jwt-decode", "npm:4.0.0"],\
@@ -8211,6 +8211,13 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/js-cookie-npm-3.0.5-8fc8fcc9b4-04a0e56040.zip/node_modules/js-cookie/",\
         "packageDependencies": [\
           ["js-cookie", "npm:3.0.5"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:3.0.7", {\
+        "packageLocation": "./.yarn/cache/js-cookie-npm-3.0.7-a7a36a5505-c921c43014.zip/node_modules/js-cookie/",\
+        "packageDependencies": [\
+          ["js-cookie", "npm:3.0.7"]\
         ],\
         "linkType": "HARD"\
       }]\
