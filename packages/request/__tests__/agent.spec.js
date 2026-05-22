@@ -64,7 +64,8 @@ describe('Agent', () => {
         peerMaxConcurrentStreams: 100,
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
-        pingInterval: 0,
+        readIdleTimeout: 0,
+        pingTimeout: 15000,
         ...options,
       })
       expect(agent.sessionPools.size).toBe(0)
@@ -76,7 +77,8 @@ describe('Agent', () => {
         maxOutstandingPings: 2,
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
-        pingInterval: 30000,
+        readIdleTimeout: 30000,
+        pingTimeout: 15000,
         foo: 'bar',
       }
       const agent = new Agent(options)

@@ -187,7 +187,7 @@ describe('Acceptance Tests', function () {
     agent = new Agent({
       keepAliveTimeout: 3000,
       connectTimeout: 1500,
-      pingInterval: false,
+      readIdleTimeout: false,
     })
     client = new Client({
       url: server.origin,

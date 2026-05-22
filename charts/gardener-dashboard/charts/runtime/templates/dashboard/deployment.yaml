@@ -194,6 +194,16 @@ spec:
           - name: KUBECONFIG
             value: {{ required ".Values.global.dashboard.projectedKubeconfig.baseMountPath is required" .Values.global.dashboard.projectedKubeconfig.baseMountPath }}/kubeconfig
           {{- end }}
+          {{- with .Values.global.dashboard.kubeClient }}
+          {{- if ne .readIdleTimeout nil }}
+          - name: KUBE_CLIENT_READ_IDLE_TIMEOUT
+            value: {{ quote .readIdleTimeout }}
+          {{- end }}
+          {{- if ne .pingTimeout nil }}
+          - name: KUBE_CLIENT_PING_TIMEOUT
+            value: {{ quote .pingTimeout }}
+          {{- end }}
+          {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}
           - name: POD_NAME
