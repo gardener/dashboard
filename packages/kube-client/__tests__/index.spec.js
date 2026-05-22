@@ -174,6 +174,17 @@ describe('kube-client package defaults', () => {
     })
   })
 
+  it.each(['readIdleTimeout', 'pingTimeout'])('should fail fast for invalid per-client %s option', async optionName => {
+    expect.hasAssertions()
+    const { kubeClient } = await importKubeClientWithEnv()
+
+    for (const value of ['foo', -1, 1.5, 2147483648, '']) {
+      expect(() => kubeClient.createDashboardClient({
+        [optionName]: value,
+      })).toThrow(`${optionName} must be a non-negative integer <= 2147483647`)
+    }
+  })
+
   it('should apply kube client heartbeat defaults to derived kubeconfig clients', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({

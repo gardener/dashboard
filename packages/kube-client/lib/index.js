@@ -15,24 +15,30 @@ const MAX_TIMEOUT = 2_147_483_647 // Node.js TIMEOUT_MAX (2^31 - 1)
 const KUBE_CLIENT_DEFAULT_READ_IDLE_TIMEOUT = 30000
 const KUBE_CLIENT_DEFAULT_PING_TIMEOUT = 15000
 
-function parseTimeout (value, envName, defaultValue) {
-  if (value === undefined || value === '') {
-    return defaultValue
-  }
-  const timeout = /^\d+$/.test(value) ? Number(value) : NaN
-  if (!Number.isFinite(timeout) || timeout > MAX_TIMEOUT) {
-    throw TypeError(`${envName} must be a non-negative integer <= ${MAX_TIMEOUT}`)
+function parseTimeoutValue (value, name) {
+  const timeout = typeof value === 'string' && /^\d+$/.test(value)
+    ? Number(value)
+    : value
+  if (!Number.isInteger(timeout) || timeout < 0 || timeout > MAX_TIMEOUT) {
+    throw TypeError(`${name} must be a non-negative integer <= ${MAX_TIMEOUT}`)
   }
   return timeout
 }
 
+function parseEnvTimeoutValue (value, envName, defaultValue) {
+  if (value === undefined || value === '') {
+    return defaultValue
+  }
+  return parseTimeoutValue(value, envName)
+}
+
 const defaultOptions = {
-  readIdleTimeout: parseTimeout(
+  readIdleTimeout: parseEnvTimeoutValue(
     process.env.KUBE_CLIENT_READ_IDLE_TIMEOUT,
     'KUBE_CLIENT_READ_IDLE_TIMEOUT',
     KUBE_CLIENT_DEFAULT_READ_IDLE_TIMEOUT,
   ),
-  pingTimeout: parseTimeout(
+  pingTimeout: parseEnvTimeoutValue(
     process.env.KUBE_CLIENT_PING_TIMEOUT,
     'KUBE_CLIENT_PING_TIMEOUT',
     KUBE_CLIENT_DEFAULT_PING_TIMEOUT,
@@ -53,10 +59,10 @@ class Client extends BaseClient {
     }
 
     if (readIdleTimeout !== undefined) {
-      resolvedOptions.readIdleTimeout = readIdleTimeout
+      resolvedOptions.readIdleTimeout = parseTimeoutValue(readIdleTimeout, 'readIdleTimeout')
     }
     if (pingTimeout !== undefined) {
-      resolvedOptions.pingTimeout = pingTimeout
+      resolvedOptions.pingTimeout = parseTimeoutValue(pingTimeout, 'pingTimeout')
     }
 
     super(clientConfig, resolvedOptions)
