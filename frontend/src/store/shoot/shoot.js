@@ -11,6 +11,7 @@ import {
 import {
   computed,
   reactive,
+  ref,
   markRaw,
   toRaw,
   toRef,
@@ -118,6 +119,10 @@ const useShootStore = defineStore('shoot', () => {
   })
   const shootEvents = new Map()
 
+  const initializedNamespace = ref(null)
+
+  const isInitial = computed(() => initializedNamespace.value === null)
+
   // state
   const staleShoots = computed(() => {
     return state.staleShoots
@@ -221,6 +226,7 @@ const useShootStore = defineStore('shoot', () => {
       state.froozenUids = []
       state.focusMode = false
     })
+    initializedNamespace.value = null
     shootEvents.clear()
     ticketStore.clearIssues()
     ticketStore.clearComments()
@@ -510,6 +516,7 @@ const useShootStore = defineStore('shoot', () => {
       }
       state.shoots = shoots
     })
+    initializedNamespace.value = state.subscription?.namespace ?? null
   }
 
   async function openSubscription (value, throttleDelay) {
@@ -578,6 +585,7 @@ const useShootStore = defineStore('shoot', () => {
   return {
     // state
     state,
+    isInitial,
     staleShoots,
     subscriptionState,
     subscriptionError,
