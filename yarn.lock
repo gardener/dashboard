@@ -5387,7 +5387,6 @@ __metadata:
     husky: "npm:^9.1.7"
     jsdom: "npm:^26.0.0"
     lodash-es: "npm:^4.17.21"
-    node-gyp: "npm:latest"
     vitest: "npm:^3.0.0"
   dependenciesMeta:
     deasync:

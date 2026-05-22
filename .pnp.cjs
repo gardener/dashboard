@@ -84,7 +84,6 @@ const RAW_RUNTIME_STATE =
           ["husky", "npm:9.1.7"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["lodash-es", "npm:4.18.1"],\
-          ["node-gyp", "npm:11.1.0"],\
           ["vitest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:3.2.4"]\
         ],\
         "linkType": "SOFT"\
@@ -7085,7 +7084,6 @@ const RAW_RUNTIME_STATE =
           ["husky", "npm:9.1.7"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["lodash-es", "npm:4.18.1"],\
-          ["node-gyp", "npm:11.1.0"],\
           ["vitest", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:3.2.4"]\
         ],\
         "linkType": "SOFT"\
