@@ -29,6 +29,14 @@ global:
       expirationSeconds: 43200 # 12 hours
       audience: ''
 
+    kubeClient:
+      # Optional HTTP/2 read-idle timeout in milliseconds.
+      # Defaults to 30000 when unset. Set to 0 to disable PING health checks.
+      readIdleTimeout: ~
+      # Optional HTTP/2 PING response timeout in milliseconds.
+      # Defaults to 15000 when unset.
+      pingTimeout: ~
+
   # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
   # projectedKubeconfig:
   #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.
