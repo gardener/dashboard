@@ -34,7 +34,7 @@ fi
 # the lockfile was to be modified or
 # the cache folder was to be modified or
 # the checksums of the packages are not consistent
-yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
+YARN_ENABLE_SCRIPTS=0 YARN_ENABLE_HARDENED_MODE=1 yarn install --immutable --check-cache --refresh-lockfile
 
 # check and report found duplicate dependencies
 yarn dedupe --check

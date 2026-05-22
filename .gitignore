@@ -6,9 +6,8 @@
 *.sln
 *.sw?
 
-# yarn zero-installs
+# yarn
 .yarn/*
-!.yarn/cache
 !.yarn/releases
 !.yarn/plugins
 !.yarn/sdks

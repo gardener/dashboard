@@ -123,7 +123,7 @@ jobs:
       - name: run-eslint
         run: |
           set -eu
-          YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache --check-cache --refresh-lockfile
+          YARN_ENABLE_SCRIPTS=0 YARN_ENABLE_HARDENED_MODE=1 yarn install --immutable --check-cache --refresh-lockfile
           (
             cd frontend
             yarn lint --format=@microsoft/eslint-formatter-sarif -o ../dashboard-frontend.sarif
