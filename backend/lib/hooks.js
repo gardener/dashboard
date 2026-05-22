@@ -94,7 +94,6 @@ class LifecycleHooks {
 export default () => {
   const client = createDashboardClient({
     id: 'watch',
-    maxOutstandingPings: 2,
   })
   return new LifecycleHooks(client)
 }
