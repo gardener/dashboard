@@ -32,9 +32,8 @@ WORKDIR /app
 
 COPY . .
 
-# Validate zero-installs project and disable network.
-# --check-cache is omitted (requires network) and runs in the CI verify job instead.
-# This assumes pushed images are not consumed from failed workflows.
+# Fetch and verify dependencies before disabling network for the rest of the build.
+RUN YARN_ENABLE_SCRIPTS=0 YARN_ENABLE_HARDENED_MODE=1 yarn install --immutable --check-cache --refresh-lockfile
 RUN yarn config set enableNetwork false
 RUN YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache
 

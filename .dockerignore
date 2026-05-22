@@ -1,8 +1,7 @@
 # Ignore everything
 **
 
-# include Yarn 4 configuration, cache, releases and plugins
-!.yarn/cache
+# include Yarn 4 configuration, releases and plugins
 !.yarn/releases
 !.yarn/plugins
 !.yarn/versions
