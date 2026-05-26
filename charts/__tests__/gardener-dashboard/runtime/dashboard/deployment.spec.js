@@ -68,6 +68,54 @@ describe('gardener-dashboard', function () {
       expect(dashboardContainer.env).toMatchSnapshot()
     })
 
+    it('should render the kube client heartbeat environment variables', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            kubeClient: {
+              readIdleTimeout: 30000,
+              pingTimeout: 15000,
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.env).toEqual(expect.arrayContaining([{
+        name: 'KUBE_CLIENT_READ_IDLE_TIMEOUT',
+        value: '30000',
+      }, {
+        name: 'KUBE_CLIENT_PING_TIMEOUT',
+        value: '15000',
+      }]))
+    })
+
+    it('should render kube client heartbeat option 0', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            kubeClient: {
+              readIdleTimeout: 0,
+              pingTimeout: 0,
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      expect(documents).toHaveLength(1)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.env).toEqual(expect.arrayContaining([{
+        name: 'KUBE_CLIENT_READ_IDLE_TIMEOUT',
+        value: '0',
+      }, {
+        name: 'KUBE_CLIENT_PING_TIMEOUT',
+        value: '0',
+      }]))
+    })
+
     it('should render the template with a sha256 tag', async function () {
       const tag = 'sha256:4d529c1'
       const values = {

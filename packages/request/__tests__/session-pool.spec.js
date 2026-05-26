@@ -36,7 +36,12 @@ class MockEmitter {
   }
 }
 
-class MockTLSSocket extends MockEmitter {}
+class MockTLSSocket extends MockEmitter {
+  constructor () {
+    super()
+    this.bytesRead = 0
+  }
+}
 
 class MockHttp2Stream extends MockEmitter {}
 
@@ -90,9 +95,7 @@ describe('SessionPool', () => {
   beforeAll(() => {
     vi.useFakeTimers()
     vi.spyOn(globalThis, 'setTimeout')
-    vi.spyOn(globalThis, 'setInterval')
     vi.spyOn(globalThis, 'clearTimeout')
-    vi.spyOn(globalThis, 'clearInterval')
   })
 
   afterAll(() => {
@@ -109,7 +112,8 @@ describe('SessionPool', () => {
       maxOutstandingPings: 2,
       keepAliveTimeout: 60000,
       connectTimeout: 15000,
-      pingInterval: false,
+      readIdleTimeout: false,
+      pingTimeout: 15000,
     }
     sid = new SessionId(authority, options)
     sid.getOptions = vi.fn().mockReturnValue(options)
@@ -128,7 +132,8 @@ describe('SessionPool', () => {
       expect(pool.options).toBe(options)
       expect(pool.keepAliveTimeout).toBe(options.keepAliveTimeout)
       expect(pool.connectTimeout).toBe(options.connectTimeout)
-      expect(pool.pingInterval).toBe(options.pingInterval)
+      expect(pool.readIdleTimeout).toBe(options.readIdleTimeout)
+      expect(pool.pingTimeout).toBe(options.pingTimeout)
       expect(pool.sessions).toBeInstanceOf(Set)
       expect(pool.sessions.size).toBe(0)
       expect(pool.queue).toBeInstanceOf(Array)
@@ -336,30 +341,54 @@ describe('SessionPool', () => {
 
   describe('#setSessionHeartbeat', () => {
     beforeEach(() => {
-      options.pingInterval = 100
+      options.readIdleTimeout = 100
+      options.pingTimeout = 50
     })
-    it('should initialize the session heartbeat', () => {
+
+    it('should rearm the heartbeat when bytes have been read', () => {
       const session = new MockHttp2Session()
       pool.sessions.add(session)
       pool.setSessionHeartbeat(session)
-      // heartbeat interval
-      expect(setInterval).toHaveBeenCalledTimes(1)
-      expect(setInterval.mock.calls[0]).toEqual([
-        expect.any(Function), pool.pingInterval,
-      ])
-      const intervalId = setInterval.mock.results[0].value
-      setInterval.mockClear()
 
-      vi.advanceTimersByTime(2 * options.pingInterval + 10)
+      session.socket.bytesRead = 42
+      vi.advanceTimersByTime(options.readIdleTimeout)
+
+      expect(session.ping).not.toHaveBeenCalled()
+      expect(pool.sessions.size).toBe(1)
+
+      pool.clearSessionHeartbeat(session)
+      expect(clearTimeout).toHaveBeenCalled()
+    })
+
+    it('should cancel the session when a ping times out', () => {
+      const session = new MockHttp2Session()
+      session.ping.mockImplementation(() => {})
+      pool.sessions.add(session)
+      pool.setSessionHeartbeat(session)
+
+      vi.advanceTimersByTime(options.readIdleTimeout)
+      expect(session.ping).toHaveBeenCalledTimes(1)
+
+      vi.advanceTimersByTime(options.pingTimeout)
+      expect(pool.sessions.size).toBe(0)
+      expect(session.destroy).toHaveBeenCalledTimes(1)
+      expect(session.destroy.mock.calls[0]).toEqual([
+        expect.objectContaining({
+          code: 'ETIMEDOUT',
+          message: `PING not answered within ${options.pingTimeout} ms`,
+        }),
+        NGHTTP2_CANCEL,
+      ])
+    })
+
+    it('should rearm the heartbeat after a successful ping', () => {
+      const session = new MockHttp2Session()
+      pool.sessions.add(session)
+      pool.setSessionHeartbeat(session)
+
+      vi.advanceTimersByTime(2 * options.readIdleTimeout)
       expect(session.ping).toHaveBeenCalledTimes(2)
       expect(session.pong).toHaveBeenCalledTimes(2)
-
-      // clear keep-alive timeout
-      expect(clearInterval).toHaveBeenCalledTimes(1)
-      expect(clearInterval.mock.calls[0]).toEqual([
-        intervalId,
-      ])
-      clearInterval.mockClear()
 
       expect(pool.sessions.size).toBe(0)
       expect(session.destroy).toHaveBeenCalledTimes(1)

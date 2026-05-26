@@ -19,7 +19,7 @@ const {
 
 const kSemaphore = Symbol('semaphore')
 const kTimeoutId = Symbol('timeoutId')
-const kIntervalId = Symbol('intervalId')
+const kHeartbeatCleanup = Symbol('heartbeatCleanup')
 
 function setSemaphore (session, value) {
   session[kSemaphore] = value // eslint-disable-line security/detect-object-injection
@@ -29,8 +29,8 @@ function setTimeoutId (session, value) {
   session[kTimeoutId] = value // eslint-disable-line security/detect-object-injection
 }
 
-function setIntervalId (session, value) {
-  session[kIntervalId] = value // eslint-disable-line security/detect-object-injection
+function setHeartbeatCleanup (session, value) {
+  session[kHeartbeatCleanup] = value // eslint-disable-line security/detect-object-injection
 }
 
 class Timer {
@@ -58,8 +58,12 @@ class SessionPool {
     return this.id.getOptions()
   }
 
-  get pingInterval () {
-    return this.options.pingInterval
+  get readIdleTimeout () {
+    return this.options.readIdleTimeout
+  }
+
+  get pingTimeout () {
+    return this.options.pingTimeout
   }
 
   get keepAliveTimeout () {
@@ -189,44 +193,100 @@ class SessionPool {
   }
 
   setSessionHeartbeat (session) {
+    const pool = this
     let canceled = false
+    let idleTimeoutId
+    let pongTimeoutId
+    let lastBytesRead = session.socket.bytesRead ?? 0
+
+    function clearIdleTimer () {
+      if (idleTimeoutId) {
+        clearTimeout(idleTimeoutId)
+        idleTimeoutId = undefined
+      }
+    }
+
+    function clearPongTimer () {
+      if (pongTimeoutId) {
+        clearTimeout(pongTimeoutId)
+        pongTimeoutId = undefined
+      }
+    }
+
+    const cleanup = () => {
+      canceled = true
+      clearIdleTimer()
+      clearPongTimer()
+      session.removeListener('close', cleanup)
+      setHeartbeatCleanup(session, undefined)
+    }
     const cancel = err => {
       if (!canceled) {
         canceled = true
-        logger.debug('Session %s - canceled: %s', this.id, err.message)
-        this.deleteSession(session, err, NGHTTP2_CANCEL)
+        cleanup()
+        logger.debug('Session %s - canceled: %s', pool.id, err.message)
+        pool.deleteSession(session, err, NGHTTP2_CANCEL)
       }
     }
-    const ping = () => {
+    function armIdleTimer () {
+      clearIdleTimer()
+      idleTimeoutId = setTimeout(onIdle, pool.readIdleTimeout)
+    }
+
+    function onIdle () {
+      const bytesRead = session.socket.bytesRead ?? 0
+      if (bytesRead > lastBytesRead) {
+        lastBytesRead = bytesRead
+        armIdleTimer()
+      } else {
+        ping()
+      }
+    }
+
+    function ping () {
+      clearPongTimer()
+      pongTimeoutId = setTimeout(() => {
+        cancel(new TimeoutError(`PING not answered within ${pool.pingTimeout} ms`))
+      }, pool.pingTimeout)
       try {
         session.ping(pong)
       } catch (err) {
-        logger.error('Session %s - heartbeat error: %s', this.id, err.message)
-        this.deleteSession(session, err, NGHTTP2_INTERNAL_ERROR)
+        clearPongTimer()
+        logger.error('Session %s - heartbeat error: %s', pool.id, err.message)
+        pool.deleteSession(session, err, NGHTTP2_INTERNAL_ERROR)
       }
     }
-    const pong = (err, duration) => {
+
+    function pong (err, duration) {
+      clearPongTimer()
+      if (canceled) {
+        return
+      }
       if (err) {
         cancel(err)
       } else {
-        logger.trace('Session %s - ping %d ms', this.id, Math.round(duration))
+        lastBytesRead = session.socket.bytesRead ?? lastBytesRead
+        logger.trace('Session %s - ping %d ms', pool.id, Math.round(duration))
+        armIdleTimer()
       }
     }
-    logger.debug('Session %s - starting heartbeat with %ds ping interval', this.id, Math.floor(this.pingInterval / 1000))
-    setIntervalId(session, setInterval(ping, this.pingInterval))
+
+    setHeartbeatCleanup(session, cleanup)
+    session.once('close', cleanup)
+    logger.debug('Session %s - starting heartbeat with %ds read idle timeout and %ds ping timeout', this.id, Math.floor(this.readIdleTimeout / 1000), Math.floor(this.pingTimeout / 1000))
+    armIdleTimer()
   }
 
   clearSessionHeartbeat (session) {
-    const { [kIntervalId]: intervalId } = session
-    if (intervalId) {
-      clearInterval(intervalId)
-      setIntervalId(session, undefined)
+    const { [kHeartbeatCleanup]: cleanup } = session
+    if (cleanup) {
+      cleanup()
     }
   }
 
   createSession () {
     const { origin, hostname } = this.id
-    const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'pingInterval'])
+    const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'readIdleTimeout', 'pingTimeout'])
     Object.assign(options, {
       maxSessionMemory: 20,
       servername: !net.isIP(hostname) ? hostname : '',
@@ -283,7 +343,7 @@ class SessionPool {
       })
       setMaxConcurrency(session.remoteSettings)
       this.setSessionTimeout(session)
-      if (this.pingInterval) {
+      if (this.readIdleTimeout) {
         this.setSessionHeartbeat(session)
       }
     })
