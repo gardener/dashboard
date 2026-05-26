@@ -94,8 +94,6 @@ class LifecycleHooks {
 export default () => {
   const client = createDashboardClient({
     id: 'watch',
-    pingInterval: 30000,
-    maxOutstandingPings: 2,
   })
   return new LifecycleHooks(client)
 }

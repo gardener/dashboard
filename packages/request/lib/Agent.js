@@ -23,7 +23,8 @@ class Agent {
         peerMaxConcurrentStreams: 100,
         keepAliveTimeout: 60000,
         connectTimeout: 15000,
-        pingInterval: 0,
+        readIdleTimeout: 0,
+        pingTimeout: 15000,
         ...options,
       },
     }

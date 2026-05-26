@@ -148,6 +148,8 @@ describe('kube-client', () => {
         expect(clientConfig.constructor.name).toBe('ClientConfig')
         expect(clientConfig.url).toBe(url)
         expect(clientConfig.auth).toBe(auth)
+        expect(clientConfig.readIdleTimeout).toBe(30000)
+        expect(clientConfig.pingTimeout).toBe(15000)
         // all endpoints except healthz have json responseType
         const healthzEnpointIndex = resourceEndpointNames.length + nonResourceEndpointNames.indexOf('healthz')
         const responseType = i !== healthzEnpointIndex ? 'json' : undefined
