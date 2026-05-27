@@ -400,4 +400,37 @@ describe('SessionPool', () => {
       ])
     })
   })
+
+  describe('#deleteSession', () => {
+    // When deleteSession() is invoked imperatively (e.g. error path), the
+    // 'close' listener registered in createSession() can still fire later.
+    // The late delete must not emit another "(scaled down)" log for the
+    // current pool size.
+    it('should ignore a late close after imperative delete', () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      session.destroy.mockImplementation(() => {
+        session.destroyed = true
+      })
+      expect(pool.sessions.size).toBe(1)
+
+      // Imperative delete (simulates error-path branch).
+      pool.deleteSession(session)
+      expect(pool.sessions.size).toBe(0)
+      expect(session.destroy).toHaveBeenCalledTimes(1)
+
+      // A second, unrelated session enters the pool.
+      const otherSession = pool.getSession()
+      otherSession.emit('connect')
+      expect(pool.sessions.size).toBe(1)
+
+      // Late 'close' from the first session must be tolerated.
+      session.emit('close')
+
+      expect(pool.sessions.size).toBe(1)
+      expect(pool.sessions.has(otherSession)).toBe(true)
+      expect(otherSession.destroy).not.toHaveBeenCalled()
+      expect(session.destroy).toHaveBeenCalledTimes(1)
+    })
+  })
 })
