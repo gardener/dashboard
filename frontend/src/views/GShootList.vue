@@ -688,9 +688,6 @@ export default {
       }
     },
   },
-  mounted () {
-    this.updateTableSettings()
-  },
   methods: {
     ...mapActions(useShootStore, [
       'toogleShootListFilter',

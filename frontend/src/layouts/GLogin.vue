@@ -171,8 +171,10 @@ export default {
       return false
     }
 
-    if (err && err.message !== 'NoAutoLogin') {
-      loginStore.loginError = err
+    if (err) {
+      if (err.message !== 'NoAutoLogin') {
+        loginStore.loginError = err
+      }
       return { path: '/login', replace: true }
     }
   },
