@@ -358,10 +358,12 @@ class SessionPool {
     // stop heartbeat interval
     this.clearSessionHeartbeat(session)
     // remove session
-    this.sessions.delete(session)
-    logger.debug('Session %s - pool size is %d (scaled down)', this.id, this.sessions.size)
-    // destory session
-    session.destroy(...args)
+    if (this.sessions.delete(session)) {
+      logger.debug('Session %s - pool size is %d (scaled down)', this.id, this.sessions.size)
+    }
+    if (!session.destroyed) {
+      session.destroy(...args)
+    }
   }
 }
 
