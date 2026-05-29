@@ -961,7 +961,7 @@ const RAW_RUNTIME_STATE =
           ["express-static-gzip", "npm:3.0.1"],\
           ["fast-json-patch", "npm:3.1.1"],\
           ["fnv-plus", "npm:1.3.1"],\
-          ["helmet", "npm:8.1.0"],\
+          ["helmet", "npm:8.2.0"],\
           ["http-errors", "npm:2.0.1"],\
           ["jose", "npm:5.10.0"],\
           ["js-yaml", "npm:4.1.1"],\
@@ -7440,10 +7440,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["helmet", [\
-      ["npm:8.1.0", {\
-        "packageLocation": "./.yarn/cache/helmet-npm-8.1.0-a2193b660c-94d3a7ebc8.zip/node_modules/helmet/",\
+      ["npm:8.2.0", {\
+        "packageLocation": "./.yarn/cache/helmet-npm-8.2.0-04ebb5e2f9-3aff1bb041.zip/node_modules/helmet/",\
         "packageDependencies": [\
-          ["helmet", "npm:8.1.0"]\
+          ["helmet", "npm:8.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
