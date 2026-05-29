@@ -1054,7 +1054,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-web-links", "npm:0.12.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
-          ["dayjs", "npm:1.11.20"],\
+          ["dayjs", "npm:1.11.21"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.32.0"],\
           ["eslint-import-resolver-alias", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.1.2"],\
@@ -5181,10 +5181,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["dayjs", [\
-      ["npm:1.11.20", {\
-        "packageLocation": "./.yarn/cache/dayjs-npm-1.11.20-98d80a1c92-8af525e2aa.zip/node_modules/dayjs/",\
+      ["npm:1.11.21", {\
+        "packageLocation": "./.yarn/cache/dayjs-npm-1.11.21-4094f6afc1-bd97dfdc4b.zip/node_modules/dayjs/",\
         "packageDependencies": [\
-          ["dayjs", "npm:1.11.20"]\
+          ["dayjs", "npm:1.11.21"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8494,7 +8494,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.7.1", {\
         "packageLocation": "./.yarn/cache/launder-npm-1.7.1-8f3056904f-c4884c08cc.zip/node_modules/launder/",\
         "packageDependencies": [\
-          ["dayjs", "npm:1.11.20"],\
+          ["dayjs", "npm:1.11.21"],\
           ["launder", "npm:1.7.1"]\
         ],\
         "linkType": "HARD"\
