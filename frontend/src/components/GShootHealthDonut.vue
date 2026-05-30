@@ -8,118 +8,127 @@ SPDX-License-Identifier: Apache-2.0
   <div
     class="d-inline-flex align-center justify-center"
     :style="{ minWidth: `${donut.size}px`, minHeight: `${donut.size}px` }"
+    tabindex="0"
+    role="img"
+    :aria-label="ariaLabel"
   >
     <span
       v-if="shootCount === 0"
       class="empty text-medium-emphasis"
-      aria-label="No shoots assigned to this seed"
+      aria-hidden="true"
     >-</span>
-    <v-tooltip
+    <svg
       v-else
+      xmlns="http://www.w3.org/2000/svg"
+      :width="donut.size"
+      :height="donut.size"
+      :viewBox="donut.viewBox"
+      aria-hidden="true"
+    >
+      <g :transform="donut.rotateTransform">
+        <circle
+          v-for="seg in donutVisibleSegments"
+          :key="seg.key"
+          :class="['segment', seg.key]"
+          :cx="donut.center"
+          :cy="donut.center"
+          :r="donut.radius"
+          fill="none"
+          :stroke-width="donut.strokeWidth"
+          :stroke-dasharray="seg.dasharray"
+          :stroke-dashoffset="seg.dashoffset"
+        />
+        <circle
+          v-for="seg in overlayVisibleSegments"
+          :key="seg.key"
+          :class="['segment', seg.key]"
+          :cx="donut.center"
+          :cy="donut.center"
+          :r="donut.radius"
+          fill="none"
+          :stroke-width="donut.strokeWidth"
+          :stroke-dasharray="seg.dasharray"
+          :stroke-dashoffset="seg.dashoffset"
+        />
+      </g>
+      <text
+        :class="['center-text', centerTextSizeClass, { error: matchingUnhealthy > 0 }]"
+        :x="donut.center"
+        :y="donut.center"
+        text-anchor="middle"
+        dominant-baseline="central"
+        aria-hidden="true"
+      >{{ centerText }}</text>
+    </svg>
+    <v-tooltip
+      activator="parent"
       location="top"
       :open-delay="200"
       content-class="pa-0"
       :content-props="{ style: { background: 'transparent' } }"
     >
-      <template #activator="{ props: tooltipProps }">
-        <span
-          v-bind="tooltipProps"
-          class="activator"
-          tabindex="0"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            :width="donut.size"
-            :height="donut.size"
-            :viewBox="donut.viewBox"
-            role="img"
-            :aria-label="ariaLabel"
-          >
-            <g :transform="donut.rotateTransform">
-              <circle
-                v-for="seg in donutVisibleSegments"
-                :key="seg.key"
-                :class="['segment', seg.key]"
-                :cx="donut.center"
-                :cy="donut.center"
-                :r="donut.radius"
-                fill="none"
-                :stroke-width="donut.strokeWidth"
-                :stroke-dasharray="seg.dasharray"
-                :stroke-dashoffset="seg.dashoffset"
-              />
-              <circle
-                v-for="seg in overlayVisibleSegments"
-                :key="seg.key"
-                :class="['segment', seg.key]"
-                :cx="donut.center"
-                :cy="donut.center"
-                :r="donut.radius"
-                fill="none"
-                :stroke-width="donut.strokeWidth"
-                :stroke-dasharray="seg.dasharray"
-                :stroke-dashoffset="seg.dashoffset"
-              />
-            </g>
-            <text
-              :class="['center-text', centerTextSizeClass, { error: matchingUnhealthy > 0 }]"
-              :x="donut.center"
-              :y="donut.center"
-              text-anchor="middle"
-              dominant-baseline="central"
-              aria-hidden="true"
-            >{{ centerText }}</text>
-          </svg>
-        </span>
-      </template>
       <v-card
         class="tooltip-card"
         elevation="12"
       >
         <g-list class="tooltip-list">
-          <g-list-item>
-            <template #prepend>
-              <v-icon
-                color="error"
-                icon="mdi-alert-circle-outline"
-                size="28"
-              />
+          <template v-if="shootCount === 0">
+            <g-list-item>
+              <template #prepend>
+                <v-icon
+                  icon="mdi-information-outline"
+                  size="28"
+                  class="text-medium-emphasis"
+                />
+              </template>
+              <g-list-item-content label="No shoots assigned" />
+            </g-list-item>
+          </template>
+          <template v-else>
+            <g-list-item>
+              <template #prepend>
+                <v-icon
+                  color="error"
+                  icon="mdi-alert-circle-outline"
+                  size="28"
+                />
+              </template>
+              <g-list-item-content label="Unhealthy">
+                {{ matchingUnhealthy }}
+              </g-list-item-content>
+            </g-list-item>
+            <template v-if="hiddenUnhealthy > 0">
+              <v-divider inset />
+              <g-list-item>
+                <template #prepend>
+                  <v-icon
+                    icon="mdi-filter-outline"
+                    size="28"
+                    class="text-error-lighten-3"
+                  />
+                </template>
+                <g-list-item-content
+                  label="Excluded"
+                  :description="filterDescription"
+                >
+                  {{ hiddenUnhealthy }}
+                </g-list-item-content>
+              </g-list-item>
             </template>
-            <g-list-item-content label="Unhealthy">
-              {{ matchingUnhealthy }}
-            </g-list-item-content>
-          </g-list-item>
-          <template v-if="hiddenUnhealthy > 0">
             <v-divider inset />
             <g-list-item>
               <template #prepend>
                 <v-icon
-                  icon="mdi-filter-outline"
+                  color="success"
+                  icon="mdi-check-circle-outline"
                   size="28"
-                  class="text-error-lighten-3"
                 />
               </template>
-              <g-list-item-content
-                label="Excluded"
-                :description="filterDescription"
-              >
-                {{ hiddenUnhealthy }}
+              <g-list-item-content label="Healthy">
+                {{ healthyShoots }}
               </g-list-item-content>
             </g-list-item>
           </template>
-          <v-divider inset />
-          <g-list-item>
-            <template #prepend>
-              <v-icon
-                color="success"
-                icon="mdi-check-circle-outline"
-                size="28"
-              />
-            </template>
-            <g-list-item-content label="Healthy">
-              {{ healthyShoots }}
-            </g-list-item-content>
-          </g-list-item>
         </g-list>
       </v-card>
     </v-tooltip>
@@ -241,6 +250,9 @@ const centerTextSizeClass = computed(() => {
 // --- accessibility ---
 
 const ariaLabel = computed(() => {
+  if (shootCount.value === 0) {
+    return 'No shoots assigned to this seed.'
+  }
   const parts = [
     'Shoot health distribution',
     `${shootCount.value} shoots`,
@@ -258,14 +270,6 @@ const ariaLabel = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  .activator {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 0;
-    border-radius: 50%;
-  }
-
   .empty {
     font-size: 0.875rem;
   }
