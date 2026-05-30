@@ -97,9 +97,8 @@ function onClick () {
 }
 
 // hooks
-onBeforeRouteUpdate((to, from, next) => {
+onBeforeRouteUpdate(() => {
   mainContent.value?.setScrollTop(0)
-  next()
 })
 
 onMounted(() => {

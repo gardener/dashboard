@@ -151,7 +151,7 @@ export default {
     GNotify,
   },
   inject: ['api'],
-  async beforeRouteEnter (to, from, next) {
+  async beforeRouteEnter (to) {
     let err
     if (/^#.+/.test(to.hash)) {
       const searchParams = new URLSearchParams(to.hash.substring(1))
@@ -168,31 +168,20 @@ export default {
       const redirectPath = get(to.query, ['redirectPath'], '/')
       const authnStore = useAuthnStore()
       authnStore.signinWithOidc(redirectPath)
-      return next(false)
+      return false
     }
 
-    next(vm => {
-      if (err) {
-        if (err.message !== 'NoAutoLogin') {
-          vm.error = err
-        }
-        vm.$router.replace('/login')
+    if (err) {
+      if (err.message !== 'NoAutoLogin') {
+        loginStore.loginError = err
       }
-    })
-  },
-  beforeRouteUpdate (to, from, next) {
-    if (this.error) {
-      const err = this.error
-      this.error = null
-      this.setError(err)
+      return { path: '/login', replace: true }
     }
-    next()
   },
   data () {
     return {
       showToken: false,
       token: '',
-      error: null,
     }
   },
   computed: {
@@ -203,6 +192,7 @@ export default {
     ]),
     ...mapWritableState(useLoginStore, [
       'loginType',
+      'loginError',
     ]),
     breakpointName () {
       return this.$vuetify.display.name
@@ -280,6 +270,13 @@ export default {
       },
       immediate: true,
     },
+  },
+  mounted () {
+    if (this.loginError) {
+      const err = this.loginError
+      this.loginError = null
+      this.setError(err)
+    }
   },
   methods: {
     ...mapActions(useAppStore, [
