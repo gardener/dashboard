@@ -22,18 +22,26 @@ describe('components', () => {
               template: '<div><slot /></div>',
             },
             'v-icon': true,
-            'g-list': {
-              template: '<div class="g-list-stub"><slot /></div>',
+            'v-list': {
+              template: '<div class="v-list-stub"><slot /></div>',
             },
-            'g-list-item': {
-              template: '<div class="g-list-item-stub"><slot name="prepend" /><slot /></div>',
+            'v-list-item': {
+              template: '<div class="v-list-item-stub"><slot name="prepend" /><slot /></div>',
             },
-            'g-list-item-content': {
-              props: ['label', 'description'],
-              template: '<span class="g-list-item-content-stub" :data-label="label" :data-description="description"><slot /></span>',
+            'v-list-item-title': {
+              template: '<span class="v-list-item-title-stub"><slot /></span>',
+            },
+            'v-list-item-subtitle': {
+              template: '<span class="v-list-item-subtitle-stub"><slot /></span>',
             },
           },
         },
+      })
+    }
+
+    function findRow (wrapper, label) {
+      return wrapper.findAll('.v-list-item-stub').find(item => {
+        return item.find('.v-list-item-subtitle-stub').text().startsWith(label)
       })
     }
 
@@ -207,12 +215,12 @@ describe('components', () => {
           matchingUnhealthyShoots: 5,
         })
 
-        const unhealthy = wrapper.find('.g-list-item-content-stub[data-label="Unhealthy"]')
-        expect(unhealthy.exists()).toBe(true)
-        expect(unhealthy.text()).toBe('5')
+        const unhealthy = findRow(wrapper, 'Unhealthy')
+        expect(unhealthy).toBeDefined()
+        expect(unhealthy.find('.v-list-item-title-stub').text()).toBe('5')
 
-        const excluded = wrapper.find('.g-list-item-content-stub[data-label="Excluded"]')
-        expect(excluded.exists()).toBe(false)
+        const excluded = findRow(wrapper, 'Excluded')
+        expect(excluded).toBeUndefined()
       })
 
       it('should show excluded row when matching differs from total', () => {
@@ -223,14 +231,13 @@ describe('components', () => {
           activeFilterLabels: ['User Errors', 'Progressing Clusters'],
         })
 
-        const unhealthy = wrapper.find('.g-list-item-content-stub[data-label="Unhealthy"]')
-        expect(unhealthy.text()).toBe('2')
-        expect(unhealthy.attributes('data-description')).toBeUndefined()
+        const unhealthy = findRow(wrapper, 'Unhealthy')
+        expect(unhealthy.find('.v-list-item-title-stub').text()).toBe('2')
 
-        const excluded = wrapper.find('.g-list-item-content-stub[data-label="Excluded"]')
-        expect(excluded.exists()).toBe(true)
-        expect(excluded.text()).toBe('3')
-        expect(excluded.attributes('data-description')).toBe('User Errors, Progressing Clusters')
+        const excluded = findRow(wrapper, 'Excluded')
+        expect(excluded).toBeDefined()
+        expect(excluded.find('.v-list-item-title-stub').text()).toBe('3')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('User Errors, Progressing Clusters')
       })
 
       it('should truncate filter labels after 2 with "& N more"', () => {
@@ -241,9 +248,9 @@ describe('components', () => {
           activeFilterLabels: ['Progressing Clusters', 'User Errors', 'Deactivated Reconciliation', 'Tickets with Ignore Labels'],
         })
 
-        const excluded = wrapper.find('.g-list-item-content-stub[data-label="Excluded"]')
-        expect(excluded.text()).toBe('6')
-        expect(excluded.attributes('data-description')).toBe('Progressing Clusters, User Errors & 2 more')
+        const excluded = findRow(wrapper, 'Excluded')
+        expect(excluded.find('.v-list-item-title-stub').text()).toBe('6')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing Clusters, User Errors & 2 more')
       })
 
       it('should show excluded row without description when no filter labels provided', () => {
@@ -253,10 +260,10 @@ describe('components', () => {
           matchingUnhealthyShoots: 2,
         })
 
-        const excluded = wrapper.find('.g-list-item-content-stub[data-label="Excluded"]')
-        expect(excluded.exists()).toBe(true)
-        expect(excluded.text()).toBe('3')
-        expect(excluded.attributes('data-description')).toBeUndefined()
+        const excluded = findRow(wrapper, 'Excluded')
+        expect(excluded).toBeDefined()
+        expect(excluded.find('.v-list-item-title-stub').text()).toBe('3')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).not.toContain('—')
       })
 
       it('should show healthy legend when there are healthy shoots', () => {
@@ -266,14 +273,14 @@ describe('components', () => {
           matchingUnhealthyShoots: 1,
         })
 
-        const content = wrapper.find('.g-list-item-content-stub[data-label="Healthy"]')
-        expect(content.exists()).toBe(true)
-        expect(content.text()).toBe('7')
+        const healthy = findRow(wrapper, 'Healthy')
+        expect(healthy).toBeDefined()
+        expect(healthy.find('.v-list-item-title-stub').text()).toBe('7')
       })
     })
 
     describe('accessibility', () => {
-      it('should have a descriptive aria-label on the SVG', () => {
+      it('should have a descriptive aria-label on the root', () => {
         const wrapper = mountComponent({
           shootCount: 10,
           totalUnhealthyShoots: 3,
@@ -281,8 +288,7 @@ describe('components', () => {
           activeFilterLabels: ['User Errors'],
         })
 
-        const svg = wrapper.find('svg')
-        const label = svg.attributes('aria-label')
+        const label = wrapper.attributes('aria-label')
 
         expect(label).toContain('Shoot health distribution')
         expect(label).toContain('10 shoots')

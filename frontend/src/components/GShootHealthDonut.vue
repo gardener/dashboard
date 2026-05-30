@@ -71,65 +71,59 @@ SPDX-License-Identifier: Apache-2.0
         class="tooltip-card"
         elevation="12"
       >
-        <g-list class="tooltip-list">
+        <v-list class="tooltip-list">
           <template v-if="shootCount === 0">
-            <g-list-item>
+            <v-list-item>
               <template #prepend>
                 <v-icon
                   icon="mdi-information-outline"
-                  size="28"
-                  class="text-medium-emphasis"
+                  class="text-medium-emphasis mr-3"
                 />
               </template>
-              <g-list-item-content label="No shoots assigned" />
-            </g-list-item>
+              <v-list-item-title>No shoots assigned</v-list-item-title>
+            </v-list-item>
           </template>
           <template v-else>
-            <g-list-item>
+            <v-list-item>
               <template #prepend>
                 <v-icon
                   color="error"
                   icon="mdi-alert-circle-outline"
-                  size="28"
+                  class="mr-3"
                 />
               </template>
-              <g-list-item-content label="Unhealthy">
-                {{ matchingUnhealthy }}
-              </g-list-item-content>
-            </g-list-item>
+              <v-list-item-subtitle>Unhealthy</v-list-item-subtitle>
+              <v-list-item-title>{{ matchingUnhealthy }}</v-list-item-title>
+            </v-list-item>
             <template v-if="hiddenUnhealthy > 0">
-              <v-divider inset />
-              <g-list-item>
+              <v-list-item>
                 <template #prepend>
                   <v-icon
                     icon="mdi-filter-outline"
-                    size="28"
-                    class="text-error-lighten-3"
+                    class="text-error-lighten-3 mr-3"
                   />
                 </template>
-                <g-list-item-content
-                  label="Excluded"
-                  :description="filterDescription"
-                >
-                  {{ hiddenUnhealthy }}
-                </g-list-item-content>
-              </g-list-item>
+                <v-list-item-subtitle>
+                  Excluded<template v-if="filterDescription">
+                    — {{ filterDescription }}
+                  </template>
+                </v-list-item-subtitle>
+                <v-list-item-title>{{ hiddenUnhealthy }}</v-list-item-title>
+              </v-list-item>
             </template>
-            <v-divider inset />
-            <g-list-item>
+            <v-list-item>
               <template #prepend>
                 <v-icon
                   color="success"
                   icon="mdi-check-circle-outline"
-                  size="28"
+                  class="mr-3"
                 />
               </template>
-              <g-list-item-content label="Healthy">
-                {{ healthyShoots }}
-              </g-list-item-content>
-            </g-list-item>
+              <v-list-item-subtitle>Healthy</v-list-item-subtitle>
+              <v-list-item-title>{{ healthyShoots }}</v-list-item-title>
+            </v-list-item>
           </template>
-        </g-list>
+        </v-list>
       </v-card>
     </v-tooltip>
   </div>

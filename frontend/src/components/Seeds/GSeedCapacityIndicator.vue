@@ -32,56 +32,45 @@ SPDX-License-Identifier: Apache-2.0
         class="tooltip-card"
         elevation="12"
       >
-        <g-list class="tooltip-list">
-          <g-list-item>
+        <v-list class="tooltip-list">
+          <v-list-item>
             <template #prepend>
               <v-icon
                 color="primary"
                 icon="mdi-vector-link"
-                size="28"
+                class="mr-3"
               />
             </template>
-            <g-list-item-content label="Assigned">
-              {{ props.shootCount }}
-            </g-list-item-content>
-          </g-list-item>
-          <template v-if="hasKnownCapacity">
-            <v-divider inset />
-            <g-list-item>
-              <template #prepend>
-                <v-icon
-                  color="primary"
-                  icon="mdi-chart-box-outline"
-                  size="28"
-                />
+            <v-list-item-subtitle>Assigned</v-list-item-subtitle>
+            <v-list-item-title>{{ props.shootCount }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <template #prepend>
+              <v-icon
+                color="primary"
+                :icon="hasKnownCapacity ? 'mdi-chart-box-outline' : 'mdi-information-outline'"
+                class="mr-3"
+              />
+            </template>
+            <v-list-item-subtitle>
+              <template v-if="hasKnownCapacity">
+                Allocatable — Total allocatable shoots for this seed
               </template>
-              <g-list-item-content
-                label="Allocatable"
-                description="Total allocatable shoots for this seed"
-              >
+              <template v-else>
+                Allocatable — This seed does not report allocatable shoot capacity
+              </template>
+            </v-list-item-subtitle>
+            <v-list-item-title>
+              <template v-if="hasKnownCapacity">
                 {{ props.allocatableShoots }}
-              </g-list-item-content>
-            </g-list-item>
-          </template>
-          <template v-else>
-            <v-divider inset />
-            <g-list-item>
-              <template #prepend>
-                <v-icon
-                  color="primary"
-                  icon="mdi-information-outline"
-                  size="28"
-                />
               </template>
-              <g-list-item-content
-                label="Allocatable"
-                description="This seed does not report allocatable shoot capacity"
-              >
-                <span class="text-medium-emphasis">Unknown</span>
-              </g-list-item-content>
-            </g-list-item>
-          </template>
-        </g-list>
+              <span
+                v-else
+                class="text-medium-emphasis"
+              >Unknown</span>
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
       </v-card>
     </v-tooltip>
   </div>
