@@ -98,7 +98,7 @@
     "set-cookie-parser": "^2.6.0",
     "socket.io-client": "^4.7.5",
     "supertest": "^7.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.0.0"
   },
   "packageManager": "yarn@4.15.0",
   "engines": {

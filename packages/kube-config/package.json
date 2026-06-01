@@ -41,7 +41,7 @@
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
     "neostandard": "^0.12.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.0.0"
   },
   "packageManager": "yarn@4.15.0",
   "engines": {
