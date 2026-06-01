@@ -16,7 +16,6 @@ import get from 'lodash/get'
 import map from 'lodash/map'
 import isEqual from 'lodash/isEqual'
 import includes from 'lodash/includes'
-import lowerCase from 'lodash/lowerCase'
 
 export function cleanup (obj) {
   const cleanupObject = obj => {
@@ -71,26 +70,6 @@ export function matchesPropertyOrEmpty (path, srcValue) {
     }
     return isEqual(objValue, srcValue)
   }
-}
-
-export function getDistroFromImageName (imageName) {
-  const lowerCaseName = lowerCase(imageName)
-  if (lowerCaseName.includes('coreos')) {
-    return 'coreos'
-  } else if (lowerCaseName.includes('ubuntu')) {
-    return 'ubuntu'
-  } else if (lowerCaseName.includes('gardenlinux')) {
-    return 'gardenlinux'
-  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
-    return 'suse-jeos'
-  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
-    return 'suse-chost'
-  } else if (lowerCaseName.includes('flatcar')) {
-    return 'flatcar'
-  } else if (lowerCaseName.includes('memoryone') || lowerCaseName.includes('vsmp')) {
-    return 'memoryone-chost'
-  }
-  return imageName
 }
 
 export function findVendorHint (vendorHints, vendorName) {

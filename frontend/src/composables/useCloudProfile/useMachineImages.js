@@ -15,7 +15,6 @@ import { useConfigStore } from '@/store/config'
 import {
   addClassificationHelpers,
   firstItemMatchingVersionClassification,
-  getDistroFromImageName,
   findVendorHint,
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
@@ -61,8 +60,7 @@ export function useMachineImages (cloudProfile) {
    */
   function flattenAndSortMachineImages (machineImages) {
     const machineImagesWithVendors = map(machineImages, machineImage => {
-      const imageDistro = getDistroFromImageName(machineImage.name)
-      const vendor = configStore.vendorDetails(imageDistro)
+      const vendor = configStore.vendorDetails(machineImage.name)
       return {
         ...machineImage,
         vendor,
