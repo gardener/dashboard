@@ -590,6 +590,12 @@ export const useConfigStore = defineStore('config', () => {
       icon: 'gardenlinux.svg',
     },
     {
+      name: 'gardenlinux-fips',
+      displayName: 'Garden Linux (FIPS)',
+      weight: 101,
+      icon: 'gardenlinux.svg',
+    },
+    {
       name: 'ubuntu',
       displayName: 'Ubuntu',
       weight: 200,
@@ -624,6 +630,12 @@ export const useConfigStore = defineStore('config', () => {
       displayName: 'MemoryOne Container Host configuration (Chost)',
       weight: 700,
       icon: 'suse.svg',
+    },
+    {
+      name: 'memoryone-gardenlinux',
+      displayName: 'MemoryOne Garden Linux',
+      weight: 701,
+      icon: 'gardenlinux.svg',
     },
   ]
 
