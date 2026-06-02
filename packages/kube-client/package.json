@@ -43,7 +43,7 @@
     "@gardener-dashboard/request": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@vitest/coverage-v8": "^3.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
     "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
     "eslint-plugin-lodash": "^8.0.0",
