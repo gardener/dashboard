@@ -137,7 +137,9 @@ describe('security', function () {
 
       vi.resetModules()
 
-      const AgentMock = vi.fn().mockImplementation(function (options) { return { options } })
+      const AgentMock = vi.fn().mockImplementation(function (options) {
+        return { options }
+      })
       vi.doMock('undici', () => ({
         default: {
           Agent: AgentMock,
