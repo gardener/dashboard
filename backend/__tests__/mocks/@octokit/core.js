@@ -95,7 +95,7 @@ function getIssueComments (number) {
   return Promise.resolve(comments)
 }
 
-const Octokit = vi.fn().mockImplementation(options => {
+const Octokit = vi.fn().mockImplementation(function (options) {
   const OctokitWithRestEndpointMethods = Core.plugin(legacyRestEndpointMethods)
   const octokit = new OctokitWithRestEndpointMethods(options)
   octokit.paginate = mockOctokitPaginateREST

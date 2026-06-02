@@ -427,7 +427,6 @@ exports[`gardener-dashboard > configmap > should render the template w/ defaults
           "start": "00 17 * * 1,2,3,4,5",
         },
       ],
-      "production": null,
     },
     "defaultNodesCIDR": "10.250.0.0/16",
     "experimental": {
