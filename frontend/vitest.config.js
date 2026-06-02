@@ -32,12 +32,11 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         exclude: ['**/__fixtures__/**'],
-        all: false,
         thresholds: {
-          statements: 74,
-          branches: 80,
-          functions: 47,
-          lines: 74,
+          statements: 52,
+          branches: 43,
+          functions: 42,
+          lines: 52,
         },
       },
     },

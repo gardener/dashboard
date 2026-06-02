@@ -7,7 +7,7 @@
 import { vi } from 'vitest'
 import http2 from 'http2'
 
-const sessionPoolInstanceMock = vi.fn().mockImplementation(() => {
+const sessionPoolInstanceMock = vi.fn().mockImplementation(function () {
   return {
     destroy: vi.fn(),
     getSession: vi.fn(),
