@@ -32,13 +32,16 @@ SPDX-License-Identifier: Apache-2.0
         class="tooltip-card"
         elevation="12"
       >
-        <v-list class="tooltip-list">
+        <v-list
+          class="tooltip-list"
+          density="compact"
+        >
           <v-list-item>
             <template #prepend>
               <v-icon
                 color="primary"
                 icon="mdi-vector-link"
-                class="mr-3"
+                class="mr-2"
               />
             </template>
             <v-list-item-subtitle>Assigned</v-list-item-subtitle>
@@ -49,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-icon
                 color="primary"
                 :icon="hasKnownCapacity ? 'mdi-chart-box-outline' : 'mdi-information-outline'"
-                class="mr-3"
+                class="mr-2"
               />
             </template>
             <v-list-item-subtitle>

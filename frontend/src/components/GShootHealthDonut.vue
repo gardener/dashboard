@@ -71,13 +71,16 @@ SPDX-License-Identifier: Apache-2.0
         class="tooltip-card"
         elevation="12"
       >
-        <v-list class="tooltip-list">
+        <v-list
+          class="tooltip-list"
+          density="compact"
+        >
           <template v-if="shootCount === 0">
             <v-list-item>
               <template #prepend>
                 <v-icon
                   icon="mdi-information-outline"
-                  class="text-medium-emphasis mr-3"
+                  class="text-medium-emphasis mr-2"
                 />
               </template>
               <v-list-item-title>No shoots assigned</v-list-item-title>
@@ -89,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon
                   color="error"
                   icon="mdi-alert-circle-outline"
-                  class="mr-3"
+                  class="mr-2"
                 />
               </template>
               <v-list-item-subtitle>Unhealthy</v-list-item-subtitle>
@@ -100,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
                 <template #prepend>
                   <v-icon
                     icon="mdi-filter-outline"
-                    class="text-error-lighten-3 mr-3"
+                    class="text-error-lighten-3 mr-2"
                   />
                 </template>
                 <v-list-item-subtitle>
@@ -116,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-icon
                   color="success"
                   icon="mdi-check-circle-outline"
-                  class="mr-3"
+                  class="mr-2"
                 />
               </template>
               <v-list-item-subtitle>Healthy</v-list-item-subtitle>
