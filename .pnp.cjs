@@ -255,10 +255,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@codemirror/autocomplete", [\
-      ["npm:6.20.2", {\
-        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.20.2-aef79d9a93-13d4fd642c.zip/node_modules/@codemirror/autocomplete/",\
+      ["npm:6.20.3", {\
+        "packageLocation": "./.yarn/cache/@codemirror-autocomplete-npm-6.20.3-d40be4126b-c8aa358d25.zip/node_modules/@codemirror/autocomplete/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.20.2"],\
+          ["@codemirror/autocomplete", "npm:6.20.3"],\
           ["@codemirror/language", "npm:6.12.3"],\
           ["@codemirror/state", "npm:6.6.0"],\
           ["@codemirror/view", "npm:6.43.0"],\
@@ -284,7 +284,7 @@ const RAW_RUNTIME_STATE =
       ["npm:6.1.3", {\
         "packageLocation": "./.yarn/cache/@codemirror-lang-yaml-npm-6.1.3-60a9433698-ed09b77ca1.zip/node_modules/@codemirror/lang-yaml/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.20.2"],\
+          ["@codemirror/autocomplete", "npm:6.20.3"],\
           ["@codemirror/lang-yaml", "npm:6.1.3"],\
           ["@codemirror/language", "npm:6.12.3"],\
           ["@codemirror/state", "npm:6.6.0"],\
@@ -1012,7 +1012,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:frontend", {\
         "packageLocation": "./frontend/",\
         "packageDependencies": [\
-          ["@codemirror/autocomplete", "npm:6.20.2"],\
+          ["@codemirror/autocomplete", "npm:6.20.3"],\
           ["@codemirror/commands", "npm:6.10.3"],\
           ["@codemirror/lang-yaml", "npm:6.1.3"],\
           ["@codemirror/language", "npm:6.12.3"],\
