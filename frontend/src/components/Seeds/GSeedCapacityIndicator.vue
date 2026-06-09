@@ -36,23 +36,21 @@ SPDX-License-Identifier: Apache-2.0
           class="tooltip-list"
           density="compact"
         >
-          <v-list-item>
+          <v-list-item :prepend-gap="8">
             <template #prepend>
               <v-icon
                 color="primary"
                 icon="mdi-vector-link"
-                class="mr-2"
               />
             </template>
             <v-list-item-subtitle>Assigned</v-list-item-subtitle>
             <v-list-item-title>{{ props.shootCount }}</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item :prepend-gap="8">
             <template #prepend>
               <v-icon
                 color="primary"
                 :icon="hasKnownCapacity ? 'mdi-chart-box-outline' : 'mdi-information-outline'"
-                class="mr-2"
               />
             </template>
             <v-list-item-subtitle>

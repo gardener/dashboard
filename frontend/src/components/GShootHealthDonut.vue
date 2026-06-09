@@ -76,34 +76,33 @@ SPDX-License-Identifier: Apache-2.0
           density="compact"
         >
           <template v-if="shootCount === 0">
-            <v-list-item>
+            <v-list-item :prepend-gap="8">
               <template #prepend>
                 <v-icon
                   icon="mdi-information-outline"
-                  class="text-medium-emphasis mr-2"
+                  class="text-medium-emphasis"
                 />
               </template>
               <v-list-item-title>No shoots assigned</v-list-item-title>
             </v-list-item>
           </template>
           <template v-else>
-            <v-list-item>
+            <v-list-item :prepend-gap="8">
               <template #prepend>
                 <v-icon
                   color="error"
                   icon="mdi-alert-circle-outline"
-                  class="mr-2"
                 />
               </template>
               <v-list-item-subtitle>Unhealthy</v-list-item-subtitle>
               <v-list-item-title>{{ matchingUnhealthy }}</v-list-item-title>
             </v-list-item>
             <template v-if="hiddenUnhealthy > 0">
-              <v-list-item>
+              <v-list-item :prepend-gap="8">
                 <template #prepend>
                   <v-icon
                     icon="mdi-filter-outline"
-                    class="text-error-lighten-3 mr-2"
+                    class="text-error-lighten-3"
                   />
                 </template>
                 <v-list-item-subtitle>
@@ -114,12 +113,11 @@ SPDX-License-Identifier: Apache-2.0
                 <v-list-item-title>{{ hiddenUnhealthy }}</v-list-item-title>
               </v-list-item>
             </template>
-            <v-list-item>
+            <v-list-item :prepend-gap="8">
               <template #prepend>
                 <v-icon
                   color="success"
                   icon="mdi-check-circle-outline"
-                  class="mr-2"
                 />
               </template>
               <v-list-item-subtitle>Healthy</v-list-item-subtitle>
