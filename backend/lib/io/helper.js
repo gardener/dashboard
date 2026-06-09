@@ -67,17 +67,20 @@ async function userProfiles (req, res, next) {
     const [
       canListProjects,
       canListSeeds,
+      canListShoots,
       canListManagedSeedsInGardenNamespace,
       canListShootsInGardenNamespace,
     ] = await Promise.all([
       authorization.canListProjects(req.user),
       authorization.canListSeeds(req.user),
+      authorization.canListShoots(req.user),
       authorization.canListManagedSeedsInGardenNamespace(req.user),
       authorization.canListShootsInGardenNamespace(req.user),
     ])
     const profiles = Object.freeze({
       canListProjects,
       canListSeeds,
+      canListShoots,
       canGetManagedSeedAndShootInGardenNs: canListManagedSeedsInGardenNamespace && canListShootsInGardenNamespace,
     })
     Object.defineProperty(req.user, 'profiles', {

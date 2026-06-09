@@ -11,7 +11,6 @@ import {
 import {
   computed,
   reactive,
-  watch,
   markRaw,
   toRaw,
   toRef,
@@ -20,12 +19,12 @@ import {
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
+import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { isNotFound } from '@/utils/error'
 
 import { useAppStore } from '../app'
-import { useAuthnStore } from '../authn'
 import { useAuthzStore } from '../authz'
 import { useProjectStore } from '../project'
 import { useCloudProfileStore } from '../cloudProfile'
@@ -35,7 +34,7 @@ import { useCredentialStore } from '../credential'
 import { useSocketStore } from '../socket'
 import { useTicketStore } from '../ticket'
 import { useSeedStore } from '../seed'
-import { useLocalStorageStore } from '../localStorage'
+import { createSynchronizeLock } from '../helper'
 
 import {
   constants,
@@ -46,12 +45,10 @@ import {
   shootHasIssue,
 } from './helper'
 
-import isEqual from 'lodash/isEqual'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
-import pick from 'lodash/pick'
 import map from 'lodash/map'
 import unset from 'lodash/unset'
 import set from 'lodash/set'
@@ -62,7 +59,6 @@ const useShootStore = defineStore('shoot', () => {
   const logger = useLogger()
 
   const appStore = useAppStore()
-  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
   const cloudProfileStore = useCloudProfileStore()
@@ -72,11 +68,18 @@ const useShootStore = defineStore('shoot', () => {
   const ticketStore = useTicketStore()
   const socketStore = useSocketStore()
   const seedStore = useSeedStore()
-  const localStorageStore = useLocalStorageStore()
 
   const projectItem = toRef(projectStore, 'project')
 
   const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
+  const {
+    shootListFilters,
+    onlyShootsWithIssues,
+  } = useShootListFilters()
+
+  const progressing = computed(() => shootListFilters.value.progressing)
+  const noOperatorAction = computed(() => shootListFilters.value.noOperatorAction)
+  const hideTicketsWithLabel = computed(() => shootListFilters.value.hideTicketsWithLabel)
 
   const context = {
     api,
@@ -92,6 +95,11 @@ const useShootStore = defineStore('shoot', () => {
     socketStore,
     seedStore,
     shootCustomFieldsComposable,
+    shootListFilters,
+    onlyShootsWithIssues,
+    progressing,
+    noOperatorAction,
+    hideTicketsWithLabel,
   }
 
   const state = reactive({
@@ -99,7 +107,6 @@ const useShootStore = defineStore('shoot', () => {
     shootInfos: {},
     staleShoots: {}, // shoots will be moved here when they are removed in case focus mode is active
     selection: undefined,
-    shootListFilters: undefined,
     focusMode: false,
     froozenUids: [],
     subscription: null,
@@ -121,10 +128,6 @@ const useShootStore = defineStore('shoot', () => {
 
   const activeUids = computed(() => {
     return getFilteredUids(state, context)
-  })
-
-  const shootListFilters = computed(() => {
-    return state.shootListFilters
   })
 
   const focusMode = computed(() => {
@@ -165,10 +168,6 @@ const useShootStore = defineStore('shoot', () => {
     return state.selectedUid
       ? assignShootInfo(state.shoots[state.selectedUid])
       : null
-  })
-
-  const onlyShootsWithIssues = computed(() => {
-    return get(state.shootListFilters, ['onlyShootsWithIssues'], true)
   })
 
   const loading = computed(() => {
@@ -296,23 +295,7 @@ const useShootStore = defineStore('shoot', () => {
     })(this)
   }
 
-  const synchronizeLock = {
-    expiresAt: 0,
-    options: null,
-    aquire (options) {
-      if (isEqual(this.options, options) && this.expiresAt > Date.now()) {
-        logger.warn('Detected concurrent synchronization attempts for the same shoot subscription')
-        return false
-      }
-      this.expiresAt = Date.now() + 30_000
-      this.options = { ...options }
-      return true
-    },
-    release () {
-      this.expiresAt = 0
-      this.options = null
-    },
-  }
+  const synchronizeLock = createSynchronizeLock('shoot')
 
   function synchronize () {
     const shootStore = this
@@ -378,17 +361,14 @@ const useShootStore = defineStore('shoot', () => {
     const fetchData = async options => {
       let throttleDelay
       // check if a synchronize operation with the same options is already in progress and hasn't expired.
-      if (!synchronizeLock.aquire(options)) {
+      if (!synchronizeLock.acquire(options)) {
         return
       }
       try {
         setSubscriptionState(state, constants.LOADING)
         const promise = options.name
           ? fetchShoot(options)
-          : fetchShoots({
-            useCache: localStorageStore.shootListFetchFromCache,
-            ...options,
-          })
+          : fetchShoots(options)
         const { shoots, issues, comments } = await promise
         shootStore.receive(shoots)
         ticketStore.receiveIssues(issues)
@@ -465,37 +445,6 @@ const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  function initializeShootListFilters () {
-    const isAdmin = authnStore.isAdmin
-    state.shootListFilters = {
-      onlyShootsWithIssues: isAdmin,
-      progressing: true,
-      noOperatorAction: isAdmin,
-      deactivatedReconciliation: isAdmin,
-      hideTicketsWithLabel: isAdmin,
-      ...localStorageStore.allProjectsShootFilter,
-    }
-  }
-
-  function toogleShootListFilter (key) {
-    if (state.shootListFilters) {
-      const value = get(state.shootListFilters, [key])
-      set(state.shootListFilters, [key], !value)
-    }
-  }
-
-  watch(() => state.shootListFilters, value => {
-    localStorageStore.allProjectsShootFilter = pick(value, [
-      'onlyShootsWithIssues',
-      'progressing',
-      'noOperatorAction',
-      'deactivatedReconciliation',
-      'hideTicketsWithLabel',
-    ])
-  }, {
-    deep: true,
-  })
-
   function setFocusMode (value) {
     const shootStore = this
     let uids = []
@@ -565,7 +514,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
-      await socketStore.emitSubscribe(value)
+      await socketStore.emitSubscribe('shoots', value)
       setSubscriptionState(state, constants.OPEN)
     } catch (err) {
       logger.error('Failed to open subscription: %s', err.message)
@@ -585,7 +534,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = undefined
     })
     try {
-      await socketStore.emitUnsubscribe()
+      await socketStore.emitUnsubscribe('shoots')
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
       logger.error('Failed to close subscription: %s', err.message)
@@ -625,7 +574,6 @@ const useShootStore = defineStore('shoot', () => {
     // state
     state,
     staleShoots,
-    shootListFilters,
     subscriptionState,
     subscriptionError,
     focusMode,
@@ -634,7 +582,6 @@ const useShootStore = defineStore('shoot', () => {
     activeShoots,
     shootList,
     selectedShoot,
-    onlyShootsWithIssues,
     loading,
     subscribed,
     unsubscribed,
@@ -653,8 +600,6 @@ const useShootStore = defineStore('shoot', () => {
     deleteShoot,
     fetchInfo,
     setSelection,
-    initializeShootListFilters,
-    toogleShootListFilter,
     setFocusMode,
     shootByNamespaceAndName,
     searchItems,

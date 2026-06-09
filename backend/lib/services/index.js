@@ -6,6 +6,7 @@
 
 import * as cloudprofiles from './cloudprofiles.js'
 import * as seeds from './seeds.js'
+import * as seedstats from './seedstats.js'
 import * as managedseeds from './managedseeds.js'
 import * as managedseedshoots from './managedseedshoots.js'
 import * as projects from './projects.js'
@@ -24,6 +25,7 @@ const terminals = terminalsModule
 export default {
   cloudprofiles,
   seeds,
+  seedstats,
   managedseeds,
   managedseedshoots,
   projects,

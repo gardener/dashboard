@@ -8,8 +8,13 @@ import EventEmitter from 'events'
 import _ from 'lodash-es'
 import logger from '../logger/index.js'
 
+function shootKey (projectName, name) {
+  return JSON.stringify([projectName, name])
+}
+
 function init () {
   const issues = new Map()
+  const issuesByShoot = new Map() // Map<shootKey, Map<issueNumber, issue>>
   const commentsForIssues = new Map() // we could also think of getting rid of the comments cache
   const emitter = new EventEmitter()
 
@@ -55,11 +60,19 @@ function init () {
   }
 
   function getIssueNumbersForNameAndProjectName ({ name, projectName }) {
-    return _
-      .chain(getIssues())
-      .filter(_.matches({ metadata: { name, projectName } }))
-      .map('metadata.number')
-      .value()
+    const map = issuesByShoot.get(shootKey(projectName, name))
+    if (!map) {
+      return []
+    }
+    return Array.from(map.keys())
+  }
+
+  function getIssuesForShoot ({ name, projectName }) {
+    const map = issuesByShoot.get(shootKey(projectName, name))
+    if (!map) {
+      return []
+    }
+    return Array.from(map.values())
   }
 
   function getCommentsForIssueCache ({ issueNumber }) {
@@ -76,7 +89,14 @@ function init () {
   }
 
   function addOrUpdateIssue ({ issue }) {
+    const number = issue.metadata.number
+    const oldIssue = issues.get(number)
+    if (oldIssue) {
+      removeFromShootIndex(oldIssue)
+    }
     updateIfNewer('issue', issues, issue)
+    // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
+    addToShootIndex(issues.get(number))
   }
 
   function addOrUpdateComment ({ issueNumber, comment }) {
@@ -87,6 +107,11 @@ function init () {
   function removeIssue ({ issue }) {
     const issueNumber = issue.metadata.number
     logger.trace('removing issue', issueNumber, 'and comments')
+
+    const cachedIssue = issues.get(issueNumber)
+    if (cachedIssue) {
+      removeFromShootIndex(cachedIssue)
+    }
 
     const comments = getCommentsForIssueCache({ issueNumber })
 
@@ -105,6 +130,36 @@ function init () {
     const commentsForIssuesCache = getCommentsForIssueCache({ issueNumber })
     commentsForIssuesCache.delete(identifier)
     emitCommmentDeleted(comment)
+  }
+
+  function addToShootIndex (issue) {
+    const { projectName, name, number } = issue?.metadata ?? {}
+    if (!projectName || !name) {
+      return
+    }
+    const key = shootKey(projectName, name)
+    let map = issuesByShoot.get(key)
+    if (!map) {
+      map = new Map()
+      issuesByShoot.set(key, map)
+    }
+    map.set(number, issue)
+  }
+
+  function removeFromShootIndex (issue) {
+    const { projectName, name, number } = issue?.metadata ?? {}
+    if (!projectName || !name) {
+      return
+    }
+    const key = shootKey(projectName, name)
+    const map = issuesByShoot.get(key)
+    if (!map) {
+      return
+    }
+    map.delete(number)
+    if (map.size === 0) {
+      issuesByShoot.delete(key)
+    }
   }
 
   function updateIfNewer (kind, cachedMap, item) {
@@ -142,6 +197,7 @@ function init () {
     getCommentsForIssue,
     getIssueNumbers,
     getIssueNumbersForNameAndProjectName,
+    getIssuesForShoot,
     addOrUpdateIssues,
     addOrUpdateIssue,
     addOrUpdateComment,

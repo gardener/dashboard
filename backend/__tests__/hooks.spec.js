@@ -101,6 +101,7 @@ describe('hooks', () => {
         informers = keys.reduce((acc, key) => {
           return Object.assign(acc, {
             [key]: {
+              on: vi.fn(),
               run: vi.fn(),
               store: {
                 untilHasSynced: Promise.resolve(key),
@@ -110,6 +111,8 @@ describe('hooks', () => {
         }, {})
         hooks.constructor.createInformers = mockCreateInformers = vi.fn(() => informers)
         cache.initialize = vi.fn()
+        cache.indexProjectsByNamespace = vi.fn()
+        cache.indexShootsBySeedName = vi.fn()
         cache.getTicketCache = vi.fn(() => ticketCache)
         io.mockReturnValue(ioInstance)
       })
@@ -130,6 +133,12 @@ describe('hooks', () => {
         expect(cache.initialize).toHaveBeenCalledTimes(1)
         expect(cache.initialize.mock.calls[0]).toHaveLength(1)
         expect(cache.initialize.mock.calls[0][0]).toBe(informers)
+
+        expect(cache.indexProjectsByNamespace).toHaveBeenCalledTimes(1)
+        expect(cache.indexProjectsByNamespace.mock.calls[0]).toEqual([informers.projects])
+
+        expect(cache.indexShootsBySeedName).toHaveBeenCalledTimes(1)
+        expect(cache.indexShootsBySeedName.mock.calls[0]).toEqual([informers.shoots])
 
         expect(io).toHaveBeenCalledTimes(1)
         expect(io.mock.calls[0]).toEqual([server, expect.anything()])

@@ -66,6 +66,8 @@ export function useSeedTableSorting () {
   const customKeySort = {
     name: compareValues,
     infrastructure: compareValues,
+    shootCount: compareValues,
+    unhealthyShoots: compareValues,
     lastOperation: (a, b) => compareLastOperation(a, b, compareValues),
     kubernetesVersion: compareSemanticVersions,
     gardenerVersion: compareSemanticVersions,
