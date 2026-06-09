@@ -381,6 +381,21 @@ describe('SessionPool', () => {
       ])
     })
 
+    it('should tolerate a missing socket when checking idle reads', () => {
+      const session = new MockHttp2Session()
+      session.ping.mockImplementation(() => {})
+      pool.sessions.add(session)
+      pool.setSessionHeartbeat(session)
+
+      session.socket = undefined
+      expect(() => vi.advanceTimersByTime(options.readIdleTimeout)).not.toThrow()
+
+      expect(session.ping).toHaveBeenCalledTimes(1)
+      expect(pool.sessions.size).toBe(1)
+
+      pool.clearSessionHeartbeat(session)
+    })
+
     it('should rearm the heartbeat after a successful ping', () => {
       const session = new MockHttp2Session()
       pool.sessions.add(session)
