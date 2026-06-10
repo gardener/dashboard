@@ -197,7 +197,7 @@ class SessionPool {
     let canceled = false
     let idleTimeoutId
     let pongTimeoutId
-    let lastBytesRead = session.socket.bytesRead ?? 0
+    let lastBytesRead = session.socket?.bytesRead ?? 0
 
     function clearIdleTimer () {
       if (idleTimeoutId) {
@@ -234,7 +234,7 @@ class SessionPool {
     }
 
     function onIdle () {
-      const bytesRead = session.socket.bytesRead ?? 0
+      const bytesRead = session.socket?.bytesRead ?? 0
       if (bytesRead > lastBytesRead) {
         lastBytesRead = bytesRead
         armIdleTimer()
@@ -265,7 +265,7 @@ class SessionPool {
       if (err) {
         cancel(err)
       } else {
-        lastBytesRead = session.socket.bytesRead ?? lastBytesRead
+        lastBytesRead = session.socket?.bytesRead ?? lastBytesRead
         logger.trace('Session %s - ping %d ms', pool.id, Math.round(duration))
         armIdleTimer()
       }
