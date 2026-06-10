@@ -47,6 +47,7 @@ import {
 
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
+import isEqual from 'lodash/isEqual'
 import find from 'lodash/find'
 import difference from 'lodash/difference'
 import map from 'lodash/map'
@@ -259,11 +260,15 @@ const useShootStore = defineStore('shoot', () => {
       namespace = authzStore.namespace,
       name,
     } = metadata
+    const nextSubscription = { namespace, name }
+    if (isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
+      return
+    }
     if (state.subscription) {
       await shootStore.unsubscribe()
     }
     shootStore.$patch(({ state }) => {
-      state.subscription = { namespace, name }
+      state.subscription = nextSubscription
       setSubscriptionState(state, constants.DEFINED)
     })
     await shootStore.synchronize()
