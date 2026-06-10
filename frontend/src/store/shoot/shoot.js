@@ -261,7 +261,7 @@ const useShootStore = defineStore('shoot', () => {
       name,
     } = metadata
     const nextSubscription = { namespace, name }
-    if (isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
+    if (name && isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
       return
     }
     if (state.subscription) {
