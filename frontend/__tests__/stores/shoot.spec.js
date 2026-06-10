@@ -415,5 +415,31 @@ describe('stores', () => {
         ])
       })
     })
+
+    describe('#subscribe', () => {
+      it('should not clear and resubscribe when the subscription target is unchanged', async () => {
+        const metadata = {
+          namespace: 'foo',
+          name: 'shoot2',
+        }
+
+        await shootStore.subscribe(metadata)
+
+        expect(shootStore.shootByNamespaceAndName(metadata)).toEqual(expect.objectContaining({
+          metadata: expect.objectContaining(metadata),
+        }))
+
+        vi.clearAllMocks()
+
+        await shootStore.subscribe({ ...metadata })
+
+        expect(mockEmitUnsubscribe).not.toHaveBeenCalled()
+        expect(mockEmitSubscribe).not.toHaveBeenCalled()
+        expect(mockGetShoot).not.toHaveBeenCalled()
+        expect(shootStore.shootByNamespaceAndName(metadata)).toEqual(expect.objectContaining({
+          metadata: expect.objectContaining(metadata),
+        }))
+      })
+    })
   })
 })
