@@ -57,7 +57,7 @@ describe('stores', () => {
     let shootStore
 
     const flushEvents = () => {
-      shootStore.state.subscriptionEventHandler.flush()
+      shootStore.state.subscriptionEventHandler.flush?.()
       return new Promise(resolve => globalSetImmediate(resolve))
     }
 
@@ -307,6 +307,68 @@ describe('stores', () => {
         }]
         const sortedShoots = shootStore.sortItems(items, sortBy)
         expect(map(sortedShoots, 'metadata.name')).toEqual(['shoot3', 'shoot1', 'shoot2'])
+      })
+    })
+
+    describe('subscription initialization', () => {
+      it('should mark store initialized and process events when initial single-shoot fetch returns 404', async () => {
+        mockGetShoot.mockRejectedValueOnce(notFound)
+
+        await expect(shootStore.subscribe({
+          namespace: 'foo',
+          name: 'missing',
+        })).rejects.toThrow('Not found')
+
+        expect(shootStore.isInitial).toBe(false)
+
+        shootStore.handleEvent({
+          type: 'ADDED',
+          uid: '4',
+        })
+        await flushEvents()
+
+        expect(mockSynchronize).toHaveBeenCalledWith('shoots', ['4'])
+        expect(shootStore.shootByNamespaceAndName({
+          namespace: 'foo',
+          name: 'shoot4',
+        })).toEqual(expect.objectContaining({
+          metadata: expect.objectContaining({
+            uid: '4',
+          }),
+        }))
+      })
+
+      it('should reset initialization when unsubscribing after an initial single-shoot 404', async () => {
+        mockGetShoot.mockRejectedValueOnce(notFound)
+
+        await expect(shootStore.subscribe({
+          namespace: 'foo',
+          name: 'missing',
+        })).rejects.toThrow('Not found')
+
+        expect(shootStore.isInitial).toBe(false)
+
+        await shootStore.unsubscribe()
+
+        expect(shootStore.isInitial).toBe(true)
+      })
+
+      it('should remain initial when the initial single-shoot fetch fails permanently', async () => {
+        mockGetShoot.mockRejectedValueOnce(new Error('boom'))
+
+        await expect(shootStore.subscribe({
+          namespace: 'foo',
+          name: 'broken',
+        })).rejects.toThrow('boom')
+
+        expect(shootStore.isInitial).toBe(true)
+
+        shootStore.handleEvent({
+          type: 'ADDED',
+          uid: '4',
+        })
+
+        expect(mockSynchronize).not.toHaveBeenCalled()
       })
     })
 
