@@ -218,6 +218,13 @@ export default {
       assert.fail('Configuration value \'websocketAllowedOrigins\' must not be empty')
     }
 
+    if (config.tls) {
+      const { certFile, privateKeyFile } = config.tls
+      if (!certFile || !privateKeyFile) {
+        assert.fail("Both 'tls.certFile' and 'tls.privateKeyFile' must be configured for TLS")
+      }
+    }
+
     const sessionSecrets = [config.sessionSecret]
     if (config.sessionSecretPrevious) {
       sessionSecrets.push(config.sessionSecretPrevious)

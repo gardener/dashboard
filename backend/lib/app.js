@@ -72,6 +72,7 @@ if (gitHubRepoUrl) {
 const app = express()
 app.set('port', port)
 app.set('metricsPort', metricsPort)
+app.set('tls', config.tls)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
 app.set('periodSeconds', periodSeconds)

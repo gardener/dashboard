@@ -14,11 +14,13 @@ import {
   beforeEach,
 } from 'vitest'
 import http from 'http'
+import https from 'https'
+import fs from 'fs'
 import terminus from '@godaddy/terminus'
 import metricsApp from '@gardener-dashboard/monitor'
 import createServer from '../lib/server.js'
 
-function createApplication (port, metricsPort) {
+function createApplication (port, metricsPort, { tls } = {}) {
   const app = (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
@@ -26,6 +28,7 @@ function createApplication (port, metricsPort) {
   const map = new Map()
   map.set('port', port)
   map.set('metricsPort', metricsPort)
+  map.set('tls', tls)
   map.set('periodSeconds', 1)
   map.set('healthCheck', vi.fn())
   map.set('hooks', {
@@ -107,7 +110,7 @@ describe('server', () => {
     expect(logger.log.mock.calls).toEqual([
       ['info', 'Metrics server listening on port %d', metricsPort],
       ['debug', 'Before listen hook succeeded after %d ms', expect.any(Number)],
-      ['info', 'Server listening on port %d', 1234],
+      ['info', '%s server listening on port %d', 'HTTP', 1234],
     ])
   })
 
@@ -142,5 +145,74 @@ describe('server', () => {
     error('Failed')
     expect(logger.log).toHaveBeenCalledTimes(1)
     expect(logger.log.mock.calls).toEqual([['error', 'Failed']])
+  })
+})
+
+describe('server (https)', () => {
+  const port = 1234
+  const metricsPort = 5678
+  const tls = {
+    certFile: '/path/to/cert.pem',
+    privateKeyFile: '/path/to/key.pem',
+  }
+  const mockServer = {
+    listen: vi.fn((_, callback) => setImmediate(callback)),
+  }
+  let app
+  let logger
+  let server
+  let mockHttpCreateServer
+  let mockHttpsCreateServer
+  let readFileSyncSpy
+
+  let setTimeoutSpy
+
+  beforeAll(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ['setTimeout', 'clearTimeout'] })
+    setTimeoutSpy = vi.spyOn(global, 'setTimeout')
+  })
+
+  afterAll(() => {
+    vi.useRealTimers()
+  })
+
+  beforeEach(() => {
+    setTimeoutSpy.mockClear()
+    mockHttpCreateServer = vi.spyOn(http, 'createServer').mockReturnValue(mockServer)
+    mockHttpsCreateServer = vi.spyOn(https, 'createServer').mockReturnValue(mockServer)
+    readFileSyncSpy = vi.spyOn(fs, 'readFileSync').mockImplementation(path => {
+      if (path === tls.certFile) {
+        return 'mock-cert-content'
+      }
+      if (path === tls.privateKeyFile) {
+        return 'mock-key-content'
+      }
+      throw new Error(`Unexpected readFileSync call: ${path}`)
+    })
+    app = createApplication(port, metricsPort, { tls })
+    logger = app.get('logger')
+    server = createServer(app, metricsApp)
+  })
+
+  it('should create an HTTPS server when TLS is configured', async () => {
+    expect(mockHttpsCreateServer).toHaveBeenCalledTimes(1)
+    expect(mockHttpsCreateServer.mock.calls[0][0]).toEqual({
+      cert: 'mock-cert-content',
+      key: 'mock-key-content',
+    })
+    expect(mockHttpsCreateServer.mock.calls[0][1]).toBe(app)
+    expect(mockHttpCreateServer).toHaveBeenCalledTimes(1)
+    expect(mockHttpCreateServer.mock.calls[0][0]).toBe(metricsApp)
+    expect(readFileSyncSpy).toHaveBeenCalledWith(tls.certFile)
+    expect(readFileSyncSpy).toHaveBeenCalledWith(tls.privateKeyFile)
+  })
+
+  it('should log HTTPS protocol on startup', async () => {
+    await server.run()
+    expect(logger.log.mock.calls).toEqual([
+      ['info', 'Metrics server listening on port %d', metricsPort],
+      ['debug', 'Before listen hook succeeded after %d ms', expect.any(Number)],
+      ['info', '%s server listening on port %d', 'HTTPS', port],
+    ])
   })
 })

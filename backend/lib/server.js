@@ -5,6 +5,8 @@
 //
 
 import http from 'http'
+import https from 'https'
+import fs from 'fs'
 import { pTimeout } from './utils/p-timeout.js'
 import terminus from '@godaddy/terminus'
 
@@ -19,13 +21,23 @@ function toMilliseconds (seconds) {
 function createServer (app, metricsApp) {
   const port = app.get('port')
   const metricsPort = app.get('metricsPort')
+  const tls = app.get('tls')
   const periodSeconds = app.get('periodSeconds')
   const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
 
   // create server
-  const server = http.createServer(app)
+  let server
+  if (tls?.certFile && tls?.privateKeyFile) {
+    const tlsOptions = {
+      cert: fs.readFileSync(tls.certFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
+      key: fs.readFileSync(tls.privateKeyFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
+    }
+    server = https.createServer(tlsOptions, app)
+  } else {
+    server = http.createServer(app)
+  }
   const metricsServer = http.createServer(metricsApp)
 
   // create terminus
@@ -73,7 +85,7 @@ function createServer (app, metricsApp) {
         logger.warn('Before listen hook timed out: %s', err.message)
       }
       await new Promise(resolve => server.listen(port, resolve))
-      logger.info('Server listening on port %d', port)
+      logger.info('%s server listening on port %d', tls ? 'HTTPS' : 'HTTP', port)
     },
   }
 }
