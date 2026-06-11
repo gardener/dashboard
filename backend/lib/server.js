@@ -26,10 +26,11 @@ function createServer (app, metricsApp) {
   const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
+  const isHttps = Boolean(tls?.certFile && tls?.privateKeyFile)
 
   // create server
   let server
-  if (tls?.certFile && tls?.privateKeyFile) {
+  if (isHttps) {
     const tlsOptions = {
       cert: fs.readFileSync(tls.certFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
       key: fs.readFileSync(tls.privateKeyFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
@@ -85,7 +86,7 @@ function createServer (app, metricsApp) {
         logger.warn('Before listen hook timed out: %s', err.message)
       }
       await new Promise(resolve => server.listen(port, resolve))
-      logger.info('%s server listening on port %d', tls ? 'HTTPS' : 'HTTP', port)
+      logger.info('%s server listening on port %d', isHttps ? 'HTTPS' : 'HTTP', port)
     },
   }
 }

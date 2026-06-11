@@ -114,6 +114,22 @@ describe('server', () => {
     ])
   })
 
+  it('should use HTTP when the TLS configuration is incomplete', async () => {
+    const app = createApplication(port, metricsPort, {
+      tls: { certFile: '/path/to/cert.pem' },
+    })
+    const logger = app.get('logger')
+    const server = createServer(app, metricsApp)
+
+    await server.run()
+
+    expect(logger.log.mock.calls).toEqual([
+      ['info', 'Metrics server listening on port %d', metricsPort],
+      ['debug', 'Before listen hook succeeded after %d ms', expect.any(Number)],
+      ['info', '%s server listening on port %d', 'HTTP', port],
+    ])
+  })
+
   it('should initialize terminus', async () => {
     expect(terminus.createTerminus).toHaveBeenCalledTimes(1)
     expect(terminus.createTerminus.mock.calls[0]).toHaveLength(2)
