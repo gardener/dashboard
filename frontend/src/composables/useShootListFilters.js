@@ -7,7 +7,7 @@
 import { computed } from 'vue'
 import { createSharedComposable } from '@vueuse/core'
 
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
 
@@ -26,12 +26,12 @@ const FILTER_KEYS = [
   'hideTicketsWithLabel',
 ]
 
-function getDefaultAllProjectsShootFilters (isAdmin) {
+function getDefaultAllProjectsShootFilters (canViewLandscape) {
   return {
-    onlyShootsWithIssues: isAdmin,
+    onlyShootsWithIssues: canViewLandscape,
     progressing: true,
-    noOperatorAction: isAdmin,
-    hideTicketsWithLabel: isAdmin,
+    noOperatorAction: canViewLandscape,
+    hideTicketsWithLabel: canViewLandscape,
   }
 }
 
@@ -54,14 +54,14 @@ export function getUnhealthyFilterMaskFromShootListFilters (shootListFilters = {
 }
 
 export const useShootListFilters = createSharedComposable(function useShootListFilters () {
-  const authnStore = useAuthnStore()
+  const authzStore = useAuthzStore()
   const configStore = useConfigStore()
   const localStorageStore = useLocalStorageStore()
 
   const shootListFilters = computed({
     get () {
       const filters = {
-        ...getDefaultAllProjectsShootFilters(authnStore.isAdmin),
+        ...getDefaultAllProjectsShootFilters(authzStore.canViewLandscape),
         ...localStorageStore.allProjectsShootFilter,
       }
 

@@ -8,17 +8,31 @@ import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 
 import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 
 import GStatusTag from '@/components/GStatusTag.vue'
 
+import { useApi } from '@/composables/useApi'
+
 const { createVuetifyPlugin } = global.fixtures.helper
+
+function createRulesResponse (resourceRules = []) {
+  return {
+    data: {
+      resourceRules,
+    },
+  }
+}
 
 describe('components', () => {
   describe('g-status-tag', () => {
     const vuetifyPlugin = createVuetifyPlugin()
+    const api = useApi()
 
     let pinia
     let authnStore
+    let authzStore
+    let mockGetSubjectRules
 
     function mountStatusTag (condition) {
       return mount(GStatusTag, {
@@ -34,13 +48,23 @@ describe('components', () => {
       })
     }
 
+    async function grantLandscapeAccess () {
+      authnStore.user = { canListShootsAllNamespaces: true }
+      const clusterRules = [{
+        apiGroups: ['core.gardener.cloud'],
+        resources: ['seeds'],
+        verbs: ['list'],
+      }]
+      mockGetSubjectRules.mockResolvedValueOnce(createRulesResponse(clusterRules))
+      await authzStore.fetchRules()
+    }
+
     beforeEach(() => {
       pinia = createPinia()
       authnStore = useAuthnStore(pinia)
-      authnStore.user = {
-        email: 'test@example.org',
-        isAdmin: false,
-      }
+      authzStore = useAuthzStore(pinia)
+      mockGetSubjectRules = vi.spyOn(api, 'getSubjectRules')
+      mockGetSubjectRules.mockResolvedValue(createRulesResponse())
     })
 
     it('should render healthy condition object', () => {
@@ -49,7 +73,6 @@ describe('components', () => {
         name: 'foo-bar',
         status: 'True',
       })
-      authnStore.user.isAdmin = true
       const vm = wrapper.vm
       expect(vm.chipText).toBe('foo')
       expect(vm.chipStatus).toBe('Healthy')
@@ -79,12 +102,12 @@ describe('components', () => {
       expect(vm.visible).toBe(true)
     })
 
-    it('should render condition for a user without admin role', () => {
+    it('should hide landscape-viewer-only condition without landscape access', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
         status: 'Progressing',
-        showAdminOnly: true,
+        showLandscapeViewerOnly: true,
       })
       const vm = wrapper.vm
       expect(vm.visible).toBe(false)
@@ -94,14 +117,14 @@ describe('components', () => {
       expect(vm.chipIcon).toBe('')
     })
 
-    it('should render condition for a user with admin role', () => {
+    it('should render landscape-viewer-only condition with landscape access', async () => {
+      await grantLandscapeAccess()
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
         status: 'Progressing',
-        showAdminOnly: true,
+        showLandscapeViewerOnly: true,
       })
-      authnStore.user.isAdmin = true
       const vm = wrapper.vm
       expect(vm.visible).toBe(true)
       expect(vm.isProgressing).toBe(true)

@@ -41,7 +41,7 @@ const wellKnownConditions = {
     name: 'Control Plane',
     shortName: 'CP',
     description: 'Indicates whether all control plane components are up and running.',
-    showAdminOnly: true,
+    showLandscapeViewerOnly: true,
     sortOrder: '1',
   },
   SystemComponentsHealthy: {

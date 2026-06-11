@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </g-list-item-content>
     </g-list-item>
-    <g-list-item v-if="isAdmin">
+    <g-list-item v-if="canViewLandscape">
       <g-list-item-content label="Seed Readiness">
         <div class="d-flex align-center pt-1">
           <span v-if="!shootConditions.length">-</span>
@@ -66,7 +66,6 @@ import { storeToRefs } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
-import { useAuthnStore } from '@/store/authn'
 
 import GShootStatus from '@/components/GShootStatus'
 import GStatusTags from '@/components/GStatusTags'
@@ -74,13 +73,10 @@ import GSeedStatusTags from '@/components/GSeedStatusTags'
 import GClusterMetrics from '@/components/GClusterMetrics'
 
 import { useShootItem } from '@/composables/useShootItem'
-const authnStore = useAuthnStore()
-const {
-  isAdmin,
-} = storeToRefs(authnStore)
 const authzStore = useAuthzStore()
 
 const {
+  canViewLandscape,
   canGetCloudProviderCredentials,
 } = storeToRefs(authzStore)
 
@@ -95,7 +91,7 @@ const {
 } = shootItem
 
 const showMetricsSection = computed(() => {
-  return isAdmin.value ||
+  return canViewLandscape.value ||
     isOidcObservabilityUrlsEnabled ||
     canGetCloudProviderCredentials.value
 })

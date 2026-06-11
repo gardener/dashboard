@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
           <div v-if="!!dashboardVersion">
             Dashboard<span class="ml-1 font-weight-bold">{{ dashboardVersion }}</span>
           </div>
-          <template v-if="isAdmin">
+          <template v-if="canViewLandscape">
             <div v-if="!!gardenerVersion">
               Gardener API<span class="ml-1 font-weight-bold">{{ gardenerVersion }}</span>
             </div>
@@ -76,7 +76,7 @@ import {
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 
 import GDialog from './GDialog.vue'
@@ -106,8 +106,8 @@ export default {
     ...mapState(useGardenerExtensionStore, [
       'gardenerExtensionList',
     ]),
-    ...mapState(useAuthnStore, [
-      'isAdmin',
+    ...mapState(useAuthzStore, [
+      'canViewLandscape',
     ]),
     ...mapState(useConfigStore, [
       'branding',
