@@ -12,8 +12,9 @@ import kubeConfig from '@gardener-dashboard/kube-config'
 
 const { load } = kubeConfig
 const MAX_TIMEOUT = 2_147_483_647 // Node.js TIMEOUT_MAX (2^31 - 1)
-const KUBE_CLIENT_DEFAULT_READ_IDLE_TIMEOUT = 30000
-const KUBE_CLIENT_DEFAULT_PING_TIMEOUT = 15000
+const KUBE_CLIENT_DEFAULT_READ_IDLE_TIMEOUT = 30_000
+const KUBE_CLIENT_DEFAULT_PING_TIMEOUT = 15_000
+const KUBE_CLIENT_DEFAULT_REQUEST_TIMEOUT = 5 * 60 * 1_000
 
 function parseTimeoutValue (value, name) {
   const timeout = typeof value === 'string' && /^\d+$/.test(value)
@@ -43,6 +44,11 @@ const defaultOptions = {
     'KUBE_CLIENT_PING_TIMEOUT',
     KUBE_CLIENT_DEFAULT_PING_TIMEOUT,
   ),
+  requestTimeout: parseEnvTimeoutValue(
+    process.env.KUBE_CLIENT_REQUEST_TIMEOUT,
+    'KUBE_CLIENT_REQUEST_TIMEOUT',
+    KUBE_CLIENT_DEFAULT_REQUEST_TIMEOUT,
+  ),
 }
 
 class Client extends BaseClient {
@@ -50,6 +56,7 @@ class Client extends BaseClient {
     const {
       readIdleTimeout,
       pingTimeout,
+      requestTimeout,
       ...rest
     } = options
 
@@ -63,6 +70,9 @@ class Client extends BaseClient {
     }
     if (pingTimeout !== undefined) {
       resolvedOptions.pingTimeout = parseTimeoutValue(pingTimeout, 'pingTimeout')
+    }
+    if (requestTimeout !== undefined) {
+      resolvedOptions.requestTimeout = parseTimeoutValue(requestTimeout, 'requestTimeout')
     }
 
     super(clientConfig, resolvedOptions)

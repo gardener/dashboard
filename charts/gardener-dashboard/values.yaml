@@ -36,6 +36,9 @@ global:
       # Optional HTTP/2 PING response timeout in milliseconds.
       # Defaults to 15000 when unset.
       pingTimeout: ~
+      # Optional total request timeout in milliseconds for Kubernetes API requests.
+      # Defaults to 300000 (5 minutes) when unset. Set to 0 to disable.
+      requestTimeout: ~
 
   # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
   # projectedKubeconfig:

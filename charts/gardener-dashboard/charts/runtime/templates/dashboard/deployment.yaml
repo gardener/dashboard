@@ -203,6 +203,10 @@ spec:
           - name: KUBE_CLIENT_PING_TIMEOUT
             value: {{ quote .pingTimeout }}
           {{- end }}
+          {{- if ne .requestTimeout nil }}
+          - name: KUBE_CLIENT_REQUEST_TIMEOUT
+            value: {{ quote .requestTimeout }}
+          {{- end }}
           {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}
