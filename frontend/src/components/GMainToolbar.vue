@@ -114,10 +114,10 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #activator="{ props }">
           <v-badge
-            v-if="isAdmin"
-            color="primary"
+            v-if="avatarRole"
+            :color="avatarRole.color"
             location="bottom right"
-            icon="mdi-account-supervisor"
+            :icon="avatarRole.icon"
           >
             <g-avatar
               v-bind="props"
@@ -132,18 +132,18 @@ SPDX-License-Identifier: Apache-2.0
             :alt="`avatar of ${avatarTitle}`"
           />
         </template>
-        <span v-if="isAdmin">
+        <span v-if="avatarRole">
           {{ avatarTitle }}
           <v-chip
             size="small"
-            color="primary"
+            :color="avatarRole.color"
             variant="elevated"
           >
             <v-icon
               start
-              icon="mdi-account-supervisor"
+              :icon="avatarRole.icon"
             />
-            <span class="operator">Operator</span>
+            <span class="role-label">{{ avatarRole.title }}</span>
           </v-chip>
         </span>
         <span v-else>{{ avatarTitle }}</span>
@@ -169,10 +169,10 @@ SPDX-License-Identifier: Apache-2.0
               {{ username }}
             </div>
             <div
-              v-if="isAdmin"
+              v-if="avatarRole"
               class="text-body-small"
             >
-              Operator
+              {{ avatarRole.title }}
             </div>
             <v-btn-toggle
               v-model="colorMode"
@@ -304,6 +304,7 @@ import { useRoute } from 'vue-router'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
 
@@ -321,6 +322,7 @@ const route = useRoute()
 
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
+const authzStore = useAuthzStore()
 const configStore = useConfigStore()
 const localStorageStore = useLocalStorageStore()
 
@@ -337,9 +339,30 @@ const autoLogin = toRef(localStorageStore, 'autoLogin')
 const colorMode = toRef(localStorageStore, 'colorScheme')
 
 const { isAdmin, username, displayName } = storeToRefs(authnStore)
+const { canViewLandscape: isLandscapeViewer } = storeToRefs(authzStore)
 
 const avatarTitle = computed(() => {
   return `${displayName.value} (${username.value})`
+})
+
+const avatarRole = computed(() => {
+  if (isAdmin.value) {
+    return {
+      title: 'Operator',
+      icon: 'mdi-account-supervisor',
+      color: 'primary',
+    }
+  }
+
+  if (isLandscapeViewer.value) {
+    return {
+      title: 'Landscape Viewer',
+      icon: 'mdi-eye-outline',
+      color: 'primary',
+    }
+  }
+
+  return null
 })
 
 const tabs = computed(() => {
@@ -397,7 +420,7 @@ function helpTarget (item) {
     padding-left: 4px;
   }
 
-  .operator {
+  .role-label {
     color: white;
     font-weight: bold;
   }
