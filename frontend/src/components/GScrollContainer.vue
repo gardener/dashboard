@@ -19,6 +19,8 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
+  nextTick,
+  onMounted,
 } from 'vue'
 import {
   useScroll,
@@ -35,9 +37,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  pinWidth: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const scrollRef = ref(null)
+const pinnedWidth = ref(null)
 const { x, y } = useScroll(scrollRef)
 const { width, height } = useElementSize(scrollRef)
 
@@ -62,20 +69,40 @@ const fadeSize = computed(() => {
 })
 
 const containerStyle = computed(() => {
+  const style = {}
+
+  if (pinnedWidth.value !== null) {
+    const width = `${pinnedWidth.value}px`
+    style.width = width
+    style.minWidth = width
+    style.maxWidth = width
+  }
+
   if (fadeSize.value <= 0) {
-    return {}
+    return style
   }
 
   const gradientDir = isVertical.value ? 'to bottom' : 'to right'
   const mask = `linear-gradient(${gradientDir}, black calc(100% - ${fadeSize.value}px), transparent)`
-  return {
-    maskImage: mask,
-    WebkitMaskImage: mask,
-  }
+  style.maskImage = mask
+  style.WebkitMaskImage = mask
+  return style
 })
 
 const directionClass = computed(() => {
   return isVertical.value ? 'scroll-y' : 'scroll-x'
+})
+
+onMounted(async () => {
+  if (!props.pinWidth) {
+    return
+  }
+
+  await nextTick()
+  const width = scrollRef.value?.getBoundingClientRect().width
+  if (width > 0) {
+    pinnedWidth.value = Math.ceil(width)
+  }
 })
 </script>
 

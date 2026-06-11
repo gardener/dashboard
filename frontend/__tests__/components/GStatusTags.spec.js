@@ -85,6 +85,7 @@ describe('components', () => {
     })
 
     afterEach(() => {
+      vi.useRealTimers()
       window.requestAnimationFrame = originalRequestAnimationFrame
       window.cancelAnimationFrame = originalCancelAnimationFrame
     })
@@ -237,6 +238,27 @@ describe('components', () => {
       await wrapper.vm.$nextTick()
 
       expect(scrollContainer.scrollLeft).toBe(10)
+    })
+
+    it('should scroll back to the start when the chips collapse', async () => {
+      vi.useFakeTimers()
+      const wrapper = mountStatusTags(['APIServerAvailable'])
+      const scrollContainer = document.createElement('div')
+      scrollContainer.scrollTo = vi.fn()
+
+      wrapper.vm.containerRef = wrapper.element
+      wrapper.vm.containerRef.closest = vi.fn().mockReturnValue(scrollContainer)
+
+      wrapper.vm.onMouseEnter()
+      wrapper.vm.onMouseLeave()
+      await vi.advanceTimersByTimeAsync(1500)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.hovered).toBe(false)
+
+      expect(scrollContainer.scrollTo).toHaveBeenCalledWith({
+        left: 0,
+        behavior: 'smooth',
+      })
     })
   })
 })

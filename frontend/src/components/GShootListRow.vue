@@ -116,6 +116,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-scroll-container
           direction="x"
           hide-scrollbar
+          pin-width
           class="readiness-container"
         >
           <g-status-tags />
@@ -125,6 +126,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-scroll-container
           direction="x"
           hide-scrollbar
+          pin-width
           class="readiness-container"
         >
           <g-seed-status-tags

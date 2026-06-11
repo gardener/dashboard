@@ -192,8 +192,13 @@ function onMouseMove (event) {
 
 function onMouseLeave () {
   stopAutoScroll()
+  const scrollContainer = getScrollContainer()
   collapseTimer = setTimeout(() => {
     hovered.value = false
+    scrollContainer?.scrollTo({
+      left: 0,
+      behavior: 'smooth',
+    })
   }, 1500)
 }
 
