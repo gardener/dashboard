@@ -16,6 +16,7 @@ import { useProjectStore } from '@/store/project'
 import { useSocketStore } from '@/store/socket'
 
 import { useApi } from '@/composables/useApi'
+import { useShootListFilters } from '@/composables/useShootListFilters'
 
 import cloneDeep from 'lodash/cloneDeep'
 import map from 'lodash/map'
@@ -52,6 +53,7 @@ describe('stores', () => {
     let authzStore
     let projectStore
     let socketStore
+    let shootListFilters
     let shootStore
 
     const flushEvents = () => {
@@ -221,6 +223,9 @@ describe('stores', () => {
         ],
       })
       socketStore = useSocketStore()
+      const shootListFiltersComposable = useShootListFilters()
+      shootListFilters = shootListFiltersComposable.shootListFilters
+      shootListFilters.value = {}
       shootStore = useShootStore()
 
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
@@ -439,6 +444,34 @@ describe('stores', () => {
         expect(shootStore.shootByNamespaceAndName(metadata)).toEqual(expect.objectContaining({
           metadata: expect.objectContaining(metadata),
         }))
+      })
+
+      it('should resubscribe when all-projects issue filter changes the subscription options', async () => {
+        authzStore._setNamespace('_all')
+        shootListFilters.value = {
+          onlyShootsWithIssues: true,
+        }
+
+        await shootStore.subscribe()
+
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+
+        vi.clearAllMocks()
+
+        shootListFilters.value = {
+          onlyShootsWithIssues: false,
+        }
+
+        await shootStore.subscribe()
+
+        expect(mockEmitUnsubscribe).toHaveBeenCalledWith('shoots')
+        expect(mockGetShoots).toHaveBeenCalledTimes(1)
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+        })
       })
     })
   })
