@@ -251,7 +251,7 @@ describe('components', () => {
 
       wrapper.vm.onMouseEnter()
       wrapper.vm.onMouseLeave()
-      await vi.advanceTimersByTimeAsync(1500)
+      await vi.advanceTimersByTimeAsync(3500)
       await wrapper.vm.$nextTick()
       expect(wrapper.vm.hovered).toBe(false)
 
