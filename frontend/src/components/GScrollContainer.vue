@@ -25,6 +25,8 @@ import {
 import {
   useScroll,
   useElementSize,
+  useResizeObserver,
+  useMutationObserver,
 } from '@vueuse/core'
 
 const props = defineProps({
@@ -45,14 +47,31 @@ const props = defineProps({
 
 const scrollRef = ref(null)
 const pinnedWidth = ref(null)
+const scrollSize = ref({ width: 0, height: 0 })
 const { x, y } = useScroll(scrollRef)
 const { width, height } = useElementSize(scrollRef)
+
+const updateScrollSize = () => {
+  const el = scrollRef.value
+  if (!el) {
+    return
+  }
+  scrollSize.value = { width: el.scrollWidth, height: el.scrollHeight }
+}
+
+useResizeObserver(scrollRef, updateScrollSize)
+useMutationObserver(scrollRef, updateScrollSize, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  characterData: true,
+})
 
 const isVertical = computed(() => props.direction === 'y')
 
 const fadeLength = computed(() => {
   const size = isVertical.value ? height.value : width.value
-  return Math.max(40, size / 2)
+  return Math.min(60, Math.max(40, size / 2))
 })
 
 const fadeSize = computed(() => {
@@ -62,8 +81,8 @@ const fadeSize = computed(() => {
   }
 
   const remaining = isVertical.value
-    ? el.scrollHeight - (y.value + height.value)
-    : el.scrollWidth - (x.value + width.value)
+    ? scrollSize.value.height - (y.value + height.value)
+    : scrollSize.value.width - (x.value + width.value)
 
   return Math.min(fadeLength.value, Math.max(0, remaining))
 })
