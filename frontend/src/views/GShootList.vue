@@ -137,7 +137,6 @@ import {
   mapActions,
 } from 'pinia'
 
-import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useSocketStore } from '@/store/socket'
@@ -260,15 +259,13 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAuthnStore, [
-      'isAdmin',
-    ]),
     ...mapState(useAuthzStore, [
       'namespace',
       'canPatchShoots',
       'canDeleteShoots',
       'canCreateShoots',
       'canGetCloudProviderCredentials',
+      'canViewLandscape',
     ]),
     ...mapState(useConfigStore, {
       accessRestrictionConfig: 'accessRestriction',
@@ -371,7 +368,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: !this.isAdmin,
+          hidden: !this.canViewLandscape,
         },
         {
           title: 'WORKERS',
@@ -446,7 +443,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: true,
-          hidden: !this.isAdmin,
+          hidden: !this.canViewLandscape,
           stalePointerEvents: true,
         },
         {
@@ -471,7 +468,7 @@ export default {
           sortable: false,
           align: 'start',
           defaultSelected: false,
-          hidden: !this.accessRestrictionConfig || !this.isAdmin,
+          hidden: !this.accessRestrictionConfig || !this.canViewLandscape,
         },
         {
           title: 'TICKET',
@@ -479,7 +476,7 @@ export default {
           sortable: isSortable(true),
           align: 'start',
           defaultSelected: false,
-          hidden: !this.gitHubRepoUrl || !this.isAdmin,
+          hidden: !this.gitHubRepoUrl || !this.canViewLandscape,
         },
         {
           title: 'TICKET LABELS',
@@ -487,7 +484,7 @@ export default {
           sortable: false,
           align: 'start',
           defaultSelected: true,
-          hidden: !this.gitHubRepoUrl || !this.isAdmin,
+          hidden: !this.gitHubRepoUrl || !this.canViewLandscape,
         },
         {
           title: 'ACTIONS',
@@ -573,14 +570,14 @@ export default {
           text: 'Hide progressing clusters',
           value: 'progressing',
           selected: this.isFilterActive('progressing'),
-          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
           disabled: this.changeFiltersDisabled,
         },
         {
           text: 'Hide no operator action required issues',
           value: 'noOperatorAction',
           selected: this.isFilterActive('noOperatorAction'),
-          hidden: this.projectScope || !this.isAdmin || this.showAllShoots,
+          hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
             '- Clusters with user issues',
@@ -593,7 +590,7 @@ export default {
           text: 'Hide clusters with configured ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
-          hidden: this.projectScope || !this.isAdmin || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
+          hidden: this.projectScope || !this.canViewLandscape || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
           helpTooltip: this.hideTicketsWithLabelTooltip,
           disabled: this.changeFiltersDisabled,
         },
@@ -657,7 +654,7 @@ export default {
       return this.sortItems(this.filteredItems, this.sortByInternal)
     },
     issueSinceColumnVisible () {
-      return this.operatorFeatures || (!this.projectScope && this.isAdmin)
+      return this.operatorFeatures || (!this.projectScope && this.canViewLandscape)
     },
   },
   watch: {

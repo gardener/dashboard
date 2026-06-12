@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 
@@ -103,8 +103,8 @@ export default {
     },
   },
   computed: {
-    ...mapState(useAuthnStore, [
-      'isAdmin',
+    ...mapState(useAuthzStore, [
+      'canViewLandscape',
     ]),
     popoverKey () {
       return `g-seed-status-tag[${this.condition.type}]:${this.identifier}`
@@ -147,7 +147,7 @@ export default {
       if (this.isUnknown) {
         return 'mdi-help-circle-outline'
       }
-      if (this.isProgressing && this.isAdmin) {
+      if (this.isProgressing && this.canViewLandscape) {
         return 'mdi-progress-alert'
       }
 
@@ -201,7 +201,7 @@ export default {
       if (this.isError) {
         return 'error'
       }
-      if (this.isProgressing && this.isAdmin) {
+      if (this.isProgressing && this.canViewLandscape) {
         return 'info'
       }
       return 'primary'
@@ -213,8 +213,8 @@ export default {
       return this.color
     },
     visible () {
-      if (!this.isAdmin) {
-        return !get(this.condition, ['showAdminOnly'], false)
+      if (!this.canViewLandscape) {
+        return !get(this.condition, ['showLandscapeViewerOnly'], false)
       }
       return true
     },

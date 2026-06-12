@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     </g-list-item>
     <template v-else>
       <g-link-list-tile
-        v-if="isAdmin"
+        v-if="canViewLandscape"
         icon="mdi-developer-board"
         app-title="Seed Plutono"
         :url="seedPlutonoUrl"
@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0
 import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 
 import GUsernamePassword from '@/components/GUsernamePasswordListTile'
 import GLinkListTile from '@/components/GLinkListTile'
@@ -98,10 +98,10 @@ export default {
     GLinkListTile,
   },
   setup () {
-    const authnStore = useAuthnStore()
+    const authzStore = useAuthzStore()
     const {
-      isAdmin,
-    } = storeToRefs(authnStore)
+      canViewLandscape,
+    } = storeToRefs(authzStore)
 
     const {
       isOidcObservabilityUrlsEnabled,
@@ -129,14 +129,14 @@ export default {
       seedIngressDomain,
       shootTechnicalId,
       isOidcObservabilityUrlsEnabled,
-      isAdmin,
+      canViewLandscape,
       isTestingCluster,
     }
   },
   computed: {
     plutonoIcon () {
-      // Avoid duplicate icon when Seed Plutono tile is also shown for admins
-      return this.isAdmin
+      // Avoid duplicate icon when Seed Plutono tile is also shown
+      return this.canViewLandscape
         ? undefined
         : 'mdi-developer-board'
     },

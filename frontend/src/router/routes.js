@@ -314,7 +314,7 @@ export function createRoutes () {
           title: 'Seeds',
           icon: 'mdi-sprout',
           get hidden () {
-            return !authzStore.canAccessSeedStats
+            return !authzStore.canViewLandscape
           },
         },
         title: 'Seeds',
@@ -545,7 +545,7 @@ export function createRoutes () {
 
   /* Helper functions */
   function getFallbackRedirectIfNoSeedAccess (to, from) {
-    if (authzStore.canAccessSeedStats) {
+    if (authzStore.canViewLandscape) {
       return
     }
 

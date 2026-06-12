@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       class="mr-1"
     />
     <g-text-router-link
-      v-if="isAdmin"
+      v-if="canViewLandscape"
       :to="seedItemLink"
       :text="shootSeedName"
     />
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
@@ -45,8 +45,8 @@ const {
   shootLastOperationTypeControlPlaneMigrationMessage,
 } = useShootItem()
 
-const authnStore = useAuthnStore()
-const { isAdmin } = storeToRefs(authnStore)
+const authzStore = useAuthzStore()
+const { canViewLandscape } = storeToRefs(authzStore)
 
 const seedItemLink = computed(() => ({
   name: 'SeedItem',

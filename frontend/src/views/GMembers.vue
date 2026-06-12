@@ -351,13 +351,13 @@ const {
 } = storeToRefs(projectStore)
 const {
   namespace,
+  canViewLandscape,
   canManageMembers,
   canManageServiceAccountMembers,
   canCreateServiceAccounts,
 } = storeToRefs(authzStore)
 const {
   username: currentUsername,
-  isAdmin,
 } = storeToRefs(authnStore)
 const { list: memberList } = storeToRefs(memberStore)
 const {
@@ -621,7 +621,7 @@ async function onRemoveUser ({ username }) {
     return
   }
   await memberStore.deleteMember(username)
-  if (isCurrentUser(username) && !isAdmin.value) {
+  if (isCurrentUser(username) && !canViewLandscape.value) {
     if (projectsNotMarkedForDeletion.value.length > 0) {
       const project = projectsNotMarkedForDeletion.value[0]
       const namespace = project.spec.namespace
