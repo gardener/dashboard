@@ -201,7 +201,7 @@ function onMouseLeave () {
       left: 0,
       behavior: 'smooth',
     })
-  }, 1500)
+  }, 3000)
 }
 
 function scrollFocusedIntoView (target) {
