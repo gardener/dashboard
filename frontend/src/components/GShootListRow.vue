@@ -467,7 +467,7 @@ const hasShootWorkerGroupWarning = computed(() => {
   }
 
   .readiness-container {
-    max-width: 120px;
+    max-width: 200px;
   }
 
   .small-container {
