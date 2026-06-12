@@ -112,6 +112,41 @@ describe('composables', () => {
       expect(state.list).toEqual([item])
     })
 
+    it('logs when handling queued events is deferred', async () => {
+      const { state, store } = createListStore('seed')
+      const item = {
+        kind: 'Seed',
+        metadata: {
+          uid: 'uid-1',
+        },
+      }
+      socketStore.synchronize.mockResolvedValue([item])
+      const socketEventHandler = useSocketEventHandler(() => store, {
+        logger,
+        socketStore,
+        visibility,
+      })
+
+      const handleEvents = socketEventHandler.start(0)
+      socketEventHandler.listener({
+        type: 'MODIFIED',
+        uid: 'uid-1',
+      })
+      await handleEvents()
+
+      expect(logger.debug).toBeCalledWith(
+        'Deferred synchronization of %s: store not yet initialized',
+        'seeds',
+      )
+      expect(socketStore.synchronize).not.toBeCalled()
+
+      state.list = []
+      await flushEvents()
+
+      expect(socketStore.synchronize).toBeCalledTimes(1)
+      expect(state.list).toEqual([item])
+    })
+
     it('does not apply synchronized events when the store was reset before the response arrives', async () => {
       const { state, store } = createListStore('seed', [])
       const item = {

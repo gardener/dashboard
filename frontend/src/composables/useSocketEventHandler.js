@@ -96,10 +96,11 @@ export function useSocketEventHandler (useStore, options = {}) {
   }
 
   async function handleEvents (store) {
+    const pluralName = store.$id + 's'
     if (!isInitialized(store)) {
+      logger.debug('Deferred synchronization of %s: store not yet initialized', pluralName)
       return
     }
-    const pluralName = store.$id + 's'
     const events = Array.from(eventMap.values())
     if (!events.length) {
       return
