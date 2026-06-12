@@ -11,6 +11,7 @@ import {
 import {
   computed,
   reactive,
+  ref,
   markRaw,
   toRaw,
   toRef,
@@ -118,6 +119,11 @@ const useShootStore = defineStore('shoot', () => {
   })
   const shootEvents = new Map()
 
+  // Unlike list-based stores, shoots are kept in reactive maps; track init explicitly.
+  const initialSnapshotLoaded = ref(false)
+
+  const isInitial = computed(() => !initialSnapshotLoaded.value)
+
   // state
   const staleShoots = computed(() => {
     return state.staleShoots
@@ -221,6 +227,7 @@ const useShootStore = defineStore('shoot', () => {
       state.froozenUids = []
       state.focusMode = false
     })
+    initialSnapshotLoaded.value = false
     shootEvents.clear()
     ticketStore.clearIssues()
     ticketStore.clearComments()
@@ -383,6 +390,7 @@ const useShootStore = defineStore('shoot', () => {
       } catch (err) {
         shootStore.clearAll()
         if (isNotFound(err) && options.name) {
+          initialSnapshotLoaded.value = true
           setSubscriptionState(state, constants.LOADED)
           throttleDelay = getThrottleDelay(options, 1)
         } else {
@@ -510,6 +518,7 @@ const useShootStore = defineStore('shoot', () => {
       }
       state.shoots = shoots
     })
+    initialSnapshotLoaded.value = true
   }
 
   async function openSubscription (value, throttleDelay) {
@@ -578,6 +587,7 @@ const useShootStore = defineStore('shoot', () => {
   return {
     // state
     state,
+    isInitial,
     staleShoots,
     subscriptionState,
     subscriptionError,
