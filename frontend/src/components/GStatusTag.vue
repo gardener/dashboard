@@ -307,7 +307,10 @@ export default {
     onMouseLeave () {
       clearTimeout(this.expandTimer)
     },
-    onFocus () {
+    onFocus (event) {
+      if (!event.target?.matches?.(':focus-visible')) {
+        return
+      }
       clearTimeout(this.expandTimer)
       this.selfExpanded = true
     },

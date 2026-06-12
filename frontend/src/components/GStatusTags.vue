@@ -211,6 +211,9 @@ function scrollFocusedIntoView (target) {
 }
 
 function onFocusIn (event) {
+  if (!event.target?.matches?.(':focus-visible')) {
+    return
+  }
   clearTimeout(collapseTimer)
   hovered.value = true
   // wait for chip expand transition (0.3s) before scrolling
