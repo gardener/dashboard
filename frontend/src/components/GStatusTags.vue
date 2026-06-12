@@ -49,7 +49,9 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  inject,
   ref,
+  watch,
   onBeforeUnmount,
   toRefs,
 } from 'vue'
@@ -91,11 +93,24 @@ const isStaleShoot = computed(() => {
   return !shootStore.isShootActive(shootUid.value)
 })
 
+const activePopoverKey = inject('activePopoverKey', ref(''))
+const popoverOpenInContainer = computed(() => {
+  const key = activePopoverKey.value
+  if (!key) {
+    return false
+  }
+  const uid = shootMetadata.value?.uid
+  return uid ? key.startsWith('g-status-tag[') && key.endsWith(`:${uid}`) : false
+})
+
 const EDGE_THRESHOLD = 12
 const SCROLL_STEP = 2
+const COLLAPSE_DELAY = 3_000
 
 const containerRef = ref(null)
 const hovered = ref(false)
+const pointerInside = ref(false)
+const focusInside = ref(false)
 let collapseTimer = null
 let animationFrameId = null
 let scrollDirection = 0
@@ -155,6 +170,7 @@ function startAutoScroll (direction) {
 
 function onMouseEnter () {
   clearTimeout(collapseTimer)
+  pointerInside.value = true
   hovered.value = true
 }
 
@@ -182,8 +198,11 @@ function onMouseMove (event) {
   stopAutoScroll()
 }
 
-function onMouseLeave () {
-  stopAutoScroll()
+function scheduleCollapse () {
+  clearTimeout(collapseTimer)
+  if (pointerInside.value || focusInside.value || popoverOpenInContainer.value) {
+    return
+  }
   const scrollContainer = getScrollContainer()
   collapseTimer = setTimeout(() => {
     hovered.value = false
@@ -191,7 +210,13 @@ function onMouseLeave () {
       left: 0,
       behavior: 'smooth',
     })
-  }, 3000)
+  }, COLLAPSE_DELAY)
+}
+
+function onMouseLeave () {
+  stopAutoScroll()
+  pointerInside.value = false
+  scheduleCollapse()
 }
 
 function scrollFocusedIntoView (target) {
@@ -215,6 +240,7 @@ function onFocusIn (event) {
     return
   }
   clearTimeout(collapseTimer)
+  focusInside.value = true
   hovered.value = true
   // wait for chip expand transition (0.3s) before scrolling
   const target = event.target
@@ -226,8 +252,18 @@ function onFocusOut (event) {
   if (containerRef.value?.contains(event.relatedTarget)) {
     return
   }
-  onMouseLeave()
+  focusInside.value = false
+  scheduleCollapse()
 }
+
+watch(popoverOpenInContainer, open => {
+  if (open) {
+    clearTimeout(collapseTimer)
+    hovered.value = true
+  } else {
+    scheduleCollapse()
+  }
+})
 
 onBeforeUnmount(() => {
   clearTimeout(collapseTimer)
