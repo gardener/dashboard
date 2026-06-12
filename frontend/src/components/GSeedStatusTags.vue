@@ -11,6 +11,8 @@ SPDX-License-Identifier: Apache-2.0
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
     @mousemove="onMouseMove"
+    @focusin="onFocusIn"
+    @focusout="onFocusOut"
   >
     <g-seed-status-tag
       v-for="condition in conditions"
@@ -200,6 +202,38 @@ function onMouseLeave () {
       behavior: 'smooth',
     })
   }, 1500)
+}
+
+function scrollFocusedIntoView (target) {
+  const scrollContainer = getScrollContainer()
+  if (!scrollContainer || !(target instanceof Element)) {
+    return
+  }
+
+  const containerRect = scrollContainer.getBoundingClientRect()
+  const targetRect = target.getBoundingClientRect()
+
+  if (targetRect.left < containerRect.left) {
+    scrollContainer.scrollLeft -= containerRect.left - targetRect.left + EDGE_THRESHOLD
+  } else if (targetRect.right > containerRect.right) {
+    scrollContainer.scrollLeft += targetRect.right - containerRect.right + EDGE_THRESHOLD
+  }
+}
+
+function onFocusIn (event) {
+  clearTimeout(collapseTimer)
+  hovered.value = true
+  // wait for chip expand transition (0.3s) before scrolling
+  const target = event.target
+  setTimeout(() => scrollFocusedIntoView(target), 320)
+}
+
+function onFocusOut (event) {
+  // collapse only when focus leaves the container entirely
+  if (containerRef.value?.contains(event.relatedTarget)) {
+    return
+  }
+  onMouseLeave()
 }
 
 onBeforeUnmount(() => {

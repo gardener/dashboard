@@ -31,17 +31,17 @@ SPDX-License-Identifier: Apache-2.0
           size="small"
           :color="color"
           class="status-tag"
+          :aria-label="ariaLabel"
+          @focus="onFocus"
         >
           <v-icon
-            v-if="chipIcon && !isCollapsed"
+            v-if="chipIcon"
             :icon="chipIcon"
             size="x-small"
             class="chip-icon"
+            aria-hidden="true"
           />
-          <span
-            v-if="!isCollapsed"
-            class="chip-label"
-          >{{ chipText }}</span>
+          <span class="chip-label">{{ chipText }}</span>
           <v-tooltip
             activator="parent"
             location="top"
@@ -135,6 +135,15 @@ export default {
         'cursor-pointer': this.condition.message,
         'status-tag--collapsed': this.isCollapsed,
       }
+    },
+    ariaLabel () {
+      const status = this.chipStatus
+      const name = this.condition.name || this.chipText
+      const seed = this.seedName ? ` (${this.seedName})` : ''
+      if (this.condition.message) {
+        return `${name}${seed}: ${status}. ${this.condition.message}`
+      }
+      return `${name}${seed}: ${status}`
     },
     popoverKey () {
       return `g-seed-status-tag[${this.condition.type}]:${this.identifier}`
@@ -276,6 +285,10 @@ export default {
     onMouseLeave () {
       clearTimeout(this.expandTimer)
     },
+    onFocus () {
+      clearTimeout(this.expandTimer)
+      this.selfExpanded = true
+    },
   },
 }
 </script>
@@ -316,7 +329,30 @@ export default {
         margin: 0;
         padding: 0;
       }
+
+      .chip-icon {
+        display: none;
+      }
+
+      .chip-label {
+        // visually hidden but available to screen readers
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
     }
 
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-tag {
+      transition: none;
+    }
   }
 </style>
