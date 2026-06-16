@@ -6,6 +6,9 @@
 
 import {
   splitCIDR,
+  getProviderTemplate,
+  getNetworkingTemplate,
+  getDefaultNetworkConfigurationForAllZones,
   getZonesNetworkConfiguration,
   findFreeNetworks,
 } from '@/utils/shoot'
@@ -140,6 +143,42 @@ describe('utils', () => {
         const freeNetworks = findFreeNetworks(undefined, workerCIDR, 'aws', 4)
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(4)
+      })
+    })
+
+    describe('#getDefaultNetworkConfigurationForAllZones', () => {
+      it('should create GDCH zone CIDRs', () => {
+        expect(getDefaultNetworkConfigurationForAllZones(2, 'gdch', '10.250.0.0/16')).toEqual([
+          { CIDR: '10.250.0.0/17' },
+          { CIDR: '10.250.128.0/17' },
+        ])
+      })
+    })
+
+    describe('GDCH templates', () => {
+      it('should create matching infrastructure and networking node CIDRs', () => {
+        const provider = getProviderTemplate('gdch', '10.250.0.0/16')
+        const networking = getNetworkingTemplate('gdch', '10.250.0.0/16')
+
+        expect(provider).toMatchObject({
+          type: 'gdch',
+          infrastructureConfig: {
+            apiVersion: 'gdch.provider.extensions.gardener.gdc.goog/v1alpha1',
+            enableEgress: true,
+            networks: {
+              nodeCIDR: '10.250.0.0/16',
+              parentReference: {
+                name: '',
+                type: 'SingleSubnet',
+              },
+            },
+          },
+        })
+        expect(networking).toMatchObject({
+          type: 'calico',
+          nodes: '10.250.0.0/16',
+          ipFamilies: ['IPv4'],
+        })
       })
     })
 
