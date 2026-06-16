@@ -10,6 +10,7 @@ import onmetal from './onmetal'
 import ironcore from './ironcore'
 import ironcoreMetal from './ironcore-metal'
 import stackit from './stackit'
+import gdch from './gdch'
 import local from './local'
 
 export default [
@@ -25,5 +26,6 @@ export default [
   ironcore,
   ironcoreMetal,
   stackit,
+  gdch,
   local,
 ]
