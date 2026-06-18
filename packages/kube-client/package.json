@@ -52,7 +52,7 @@
     "neostandard": "^0.13.0",
     "vitest": "^4.0.0"
   },
-  "packageManager": "yarn@4.16.0",
+  "packageManager": "yarn@4.17.0",
   "engines": {
     "node": "24.16.0"
   }
