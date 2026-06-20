@@ -74,7 +74,7 @@
     "sanitize-html": "^2.17.0",
     "semver": "^7.6.0",
     "socket.io": "^4.7.5",
-    "undici": "^8.0.0",
+    "undici": "^8.5.0",
     "unified": "^11.0.5",
     "uuid": "^14.0.0"
   },
