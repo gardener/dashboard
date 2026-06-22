@@ -337,11 +337,21 @@ describe('config', function () {
           },
         })
 
+        readFileSyncSpy.mockImplementation(filePath => {
+          if (filePath === '/etc/gardener-dashboard/secrets/tls/tls.crt') {
+            return 'mock-cert-content'
+          }
+          if (filePath === '/etc/gardener-dashboard/secrets/tls/tls.key') {
+            return 'mock-key-content'
+          }
+          throw new Error(filePath + ': not found')
+        })
+
         const env = { NODE_ENV: 'test' }
         const config = gardener.loadConfig(filename, { env })
         expect(config.tls).toEqual({
-          certFile: '/etc/gardener-dashboard/secrets/tls/tls.crt',
-          privateKeyFile: '/etc/gardener-dashboard/secrets/tls/tls.key',
+          cert: 'mock-cert-content',
+          key: 'mock-key-content',
         })
       })
 

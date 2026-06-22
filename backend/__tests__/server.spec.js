@@ -15,7 +15,6 @@ import {
 } from 'vitest'
 import http from 'http'
 import https from 'https'
-import fs from 'fs'
 import terminus from '@godaddy/terminus'
 import metricsApp from '@gardener-dashboard/monitor'
 import createServer from '../lib/server.js'
@@ -116,7 +115,7 @@ describe('server', () => {
 
   it('should use HTTP when the TLS configuration is incomplete', async () => {
     const app = createApplication(port, metricsPort, {
-      tls: { certFile: '/path/to/cert.pem' },
+      tls: { cert: 'mock-cert-content' },
     })
     const logger = app.get('logger')
     const server = createServer(app, metricsApp)
@@ -168,8 +167,8 @@ describe('server (https)', () => {
   const port = 1234
   const metricsPort = 5678
   const tls = {
-    certFile: '/path/to/cert.pem',
-    privateKeyFile: '/path/to/key.pem',
+    cert: 'mock-cert-content',
+    key: 'mock-key-content',
   }
   const mockServer = {
     listen: vi.fn((_, callback) => setImmediate(callback)),
@@ -179,7 +178,6 @@ describe('server (https)', () => {
   let server
   let mockHttpCreateServer
   let mockHttpsCreateServer
-  let readFileSyncSpy
 
   let setTimeoutSpy
 
@@ -196,15 +194,6 @@ describe('server (https)', () => {
     setTimeoutSpy.mockClear()
     mockHttpCreateServer = vi.spyOn(http, 'createServer').mockReturnValue(mockServer)
     mockHttpsCreateServer = vi.spyOn(https, 'createServer').mockReturnValue(mockServer)
-    readFileSyncSpy = vi.spyOn(fs, 'readFileSync').mockImplementation(path => {
-      if (path === tls.certFile) {
-        return 'mock-cert-content'
-      }
-      if (path === tls.privateKeyFile) {
-        return 'mock-key-content'
-      }
-      throw new Error(`Unexpected readFileSync call: ${path}`)
-    })
     app = createApplication(port, metricsPort, { tls })
     logger = app.get('logger')
     server = createServer(app, metricsApp)
@@ -219,8 +208,6 @@ describe('server (https)', () => {
     expect(mockHttpsCreateServer.mock.calls[0][1]).toBe(app)
     expect(mockHttpCreateServer).toHaveBeenCalledTimes(1)
     expect(mockHttpCreateServer.mock.calls[0][0]).toBe(metricsApp)
-    expect(readFileSyncSpy).toHaveBeenCalledWith(tls.certFile)
-    expect(readFileSyncSpy).toHaveBeenCalledWith(tls.privateKeyFile)
   })
 
   it('should log HTTPS protocol on startup', async () => {

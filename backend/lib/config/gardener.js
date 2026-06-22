@@ -223,6 +223,10 @@ export default {
       if (!certFile || !privateKeyFile) {
         assert.fail("Both 'tls.certFile' and 'tls.privateKeyFile' must be configured for TLS")
       }
+      config.tls = {
+        cert: fs.readFileSync(certFile), // eslint-disable-line security/detect-non-literal-fs-filename
+        key: fs.readFileSync(privateKeyFile), // eslint-disable-line security/detect-non-literal-fs-filename
+      }
     }
 
     const sessionSecrets = [config.sessionSecret]

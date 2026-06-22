@@ -6,7 +6,6 @@
 
 import http from 'http'
 import https from 'https'
-import fs from 'fs'
 import { pTimeout } from './utils/p-timeout.js'
 import terminus from '@godaddy/terminus'
 
@@ -26,16 +25,12 @@ function createServer (app, metricsApp) {
   const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
-  const isHttps = Boolean(tls?.certFile && tls?.privateKeyFile)
+  const isHttps = Boolean(tls?.cert && tls?.key)
 
   // create server
   let server
   if (isHttps) {
-    const tlsOptions = {
-      cert: fs.readFileSync(tls.certFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
-      key: fs.readFileSync(tls.privateKeyFile), // eslint-disable-line security/detect-non-literal-fs-filename -- path from validated config
-    }
-    server = https.createServer(tlsOptions, app)
+    server = https.createServer(tls, app)
   } else {
     server = http.createServer(app)
   }
