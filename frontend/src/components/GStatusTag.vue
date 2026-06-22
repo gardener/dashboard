@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
             activator="parent"
             location="top"
             max-width="400px"
-            :open-delay="200"
+            :open-delay="750"
             :disabled="internalValue"
           >
             <div class="font-weight-bold">
