@@ -5,6 +5,7 @@
 //
 
 import http from 'http'
+import https from 'https'
 import { pTimeout } from './utils/p-timeout.js'
 import terminus from '@godaddy/terminus'
 
@@ -19,13 +20,20 @@ function toMilliseconds (seconds) {
 function createServer (app, metricsApp) {
   const port = app.get('port')
   const metricsPort = app.get('metricsPort')
+  const tls = app.get('tls')
   const periodSeconds = app.get('periodSeconds')
   const healthCheckFunc = app.get('healthCheck')
   const logger = app.get('logger')
   const hooks = app.get('hooks')
+  const isHttps = Boolean(tls?.cert && tls?.key)
 
   // create server
-  const server = http.createServer(app)
+  let server
+  if (isHttps) {
+    server = https.createServer(tls, app)
+  } else {
+    server = http.createServer(app)
+  }
   const metricsServer = http.createServer(metricsApp)
 
   // create terminus
@@ -73,7 +81,7 @@ function createServer (app, metricsApp) {
         logger.warn('Before listen hook timed out: %s', err.message)
       }
       await new Promise(resolve => server.listen(port, resolve))
-      logger.info('Server listening on port %d', port)
+      logger.info('%s server listening on port %d', isHttps ? 'HTTPS' : 'HTTP', port)
     },
   }
 }

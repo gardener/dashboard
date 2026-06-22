@@ -324,6 +324,68 @@ describe('config', function () {
         expect(() => gardener.loadConfig(filename, { env }))
           .toThrow("Configuration value 'frontend.ticket.avatarSource' must be one of: gravatar, none, github")
       })
+
+      it('should set tls config from YAML config file', function () {
+        const filename = '/etc/gardener/config-with-tls.yaml'
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          tls: {
+            certFile: '/etc/gardener-dashboard/secrets/tls/tls.crt',
+            privateKeyFile: '/etc/gardener-dashboard/secrets/tls/tls.key',
+          },
+        })
+
+        readFileSyncSpy.mockImplementation(filePath => {
+          if (filePath === '/etc/gardener-dashboard/secrets/tls/tls.crt') {
+            return 'mock-cert-content'
+          }
+          if (filePath === '/etc/gardener-dashboard/secrets/tls/tls.key') {
+            return 'mock-key-content'
+          }
+          throw new Error(filePath + ': not found')
+        })
+
+        const env = { NODE_ENV: 'test' }
+        const config = gardener.loadConfig(filename, { env })
+        expect(config.tls).toEqual({
+          cert: 'mock-cert-content',
+          key: 'mock-key-content',
+        })
+      })
+
+      it('should throw when YAML config has tls with only certFile', function () {
+        const filename = '/etc/gardener/config-with-tls.yaml'
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          tls: {
+            certFile: '/path/to/cert.pem',
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        expect(() => gardener.loadConfig(filename, { env }))
+          .toThrow("Both 'tls.certFile' and 'tls.privateKeyFile' must be configured for TLS")
+      })
+
+      it('should throw when YAML config has tls with only privateKeyFile', function () {
+        const filename = '/etc/gardener/config-with-tls.yaml'
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          tls: {
+            privateKeyFile: '/path/to/key.pem',
+          },
+        })
+
+        const env = { NODE_ENV: 'test' }
+        expect(() => gardener.loadConfig(filename, { env }))
+          .toThrow("Both 'tls.certFile' and 'tls.privateKeyFile' must be configured for TLS")
+      })
     })
   })
 })
