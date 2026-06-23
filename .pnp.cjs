@@ -954,7 +954,7 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:8.2.0"],\
           ["http-errors", "npm:2.0.1"],\
           ["jose", "npm:5.10.0"],\
-          ["js-yaml", "npm:4.2.0"],\
+          ["js-yaml", "npm:5.0.0"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
           ["lodash-es", "npm:4.18.1"],\
@@ -1059,7 +1059,7 @@ const RAW_RUNTIME_STATE =
           ["highlight.js", "npm:11.11.1"],\
           ["js-base64", "npm:3.7.8"],\
           ["js-cookie", "npm:3.0.8"],\
-          ["js-yaml", "npm:4.2.0"],\
+          ["js-yaml", "npm:5.0.0"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["jwt-decode", "npm:4.0.0"],\
           ["lodash", "npm:4.18.1"],\
@@ -1171,7 +1171,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
           ["gtoken", "npm:8.0.0"],\
-          ["js-yaml", "npm:4.2.0"],\
+          ["js-yaml", "npm:5.0.0"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.13.0"],\
           ["vitest", "virtual:2c923f59c4675c87278ce3aa7d501b2831091130d417bde2a24ce2608345e7844c4d71578f103362589eb4d651e2514ad746bccd32508a2feda0d63dda053573#npm:4.1.7"]\
@@ -8639,6 +8639,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["argparse", "npm:2.0.1"],\
           ["js-yaml", "npm:4.2.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:5.0.0", {\
+        "packageLocation": "./.yarn/cache/js-yaml-npm-5.0.0-bec432382b-06899cf94a.zip/node_modules/js-yaml/",\
+        "packageDependencies": [\
+          ["argparse", "npm:2.0.1"],\
+          ["js-yaml", "npm:5.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
