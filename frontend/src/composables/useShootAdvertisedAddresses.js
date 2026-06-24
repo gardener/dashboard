@@ -46,13 +46,19 @@ export function useShootAdvertisedAddresses (shootItem) {
     advertisedAddresses: shootPrometheusAdvertisedAddresses,
     url: shootPrometheusUrl,
   } = useAdvertisedAddressesForApplication('prometheus--prometheus')
+  const {
+    advertisedAddresses: shootVictoriaLogsAdvertisedAddresses,
+    url: shootVictoriaLogsUrl,
+  } = useAdvertisedAddressesForApplication('victoria-metrics--victoria-logs')
 
   return {
     shootAdvertisedAddresses,
     shootPlutonoAdvertisedAddresses,
     shootPrometheusAdvertisedAddresses,
+    shootVictoriaLogsAdvertisedAddresses,
     shootPlutonoUrl,
     shootPrometheusUrl,
+    shootVictoriaLogsUrl,
     useAdvertisedAddressesForApplication,
   }
 }
