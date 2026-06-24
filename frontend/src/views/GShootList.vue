@@ -560,7 +560,7 @@ export default {
     allFilters () {
       return [
         {
-          text: 'Show only clusters with issues',
+          text: 'Hide healthy clusters',
           value: 'onlyShootsWithIssues',
           selected: this.onlyShootsWithIssues,
           hidden: this.projectScope,
@@ -574,7 +574,7 @@ export default {
           disabled: this.changeFiltersDisabled,
         },
         {
-          text: 'Hide no operator action required issues',
+          text: 'Hide clusters without operator action needed',
           value: 'noOperatorAction',
           selected: this.isFilterActive('noOperatorAction'),
           hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
@@ -587,7 +587,7 @@ export default {
           disabled: this.changeFiltersDisabled,
         },
         {
-          text: 'Hide clusters with configured ticket labels',
+          text: 'Hide clusters with ignored ticket labels',
           value: 'hideTicketsWithLabel',
           selected: this.isFilterActive('hideTicketsWithLabel'),
           hidden: this.projectScope || !this.canViewLandscape || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
