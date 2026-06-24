@@ -14,9 +14,9 @@ import { useLocalStorageStore } from '@/store/localStorage'
 import pick from 'lodash/pick'
 
 const FILTER_LABELS = [
-  { key: 'progressing', label: 'Progressing Clusters' },
+  { key: 'progressing', label: 'Progressing' },
   { key: 'noOperatorAction', label: 'User Errors' },
-  { key: 'ignoredTickets', label: 'Tickets with Ignore Labels' },
+  { key: 'ignoredTickets', label: 'Ignored Ticket Labels' },
 ]
 
 const FILTER_KEYS = [

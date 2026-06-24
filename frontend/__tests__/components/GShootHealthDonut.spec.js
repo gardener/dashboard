@@ -228,7 +228,7 @@ describe('components', () => {
           shootCount: 10,
           totalUnhealthyShoots: 5,
           matchingUnhealthyShoots: 2,
-          activeFilterLabels: ['User Errors', 'Progressing Clusters'],
+          activeFilterLabels: ['User Errors', 'Progressing'],
         })
 
         const unhealthy = findRow(wrapper, 'Unhealthy')
@@ -237,7 +237,7 @@ describe('components', () => {
         const excluded = findRow(wrapper, 'Excluded')
         expect(excluded).toBeDefined()
         expect(excluded.find('.v-list-item-title-stub').text()).toBe('3')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('User Errors, Progressing Clusters')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('User Errors, Progressing')
       })
 
       it('should truncate filter labels after 2 with "& N more"', () => {
@@ -245,12 +245,12 @@ describe('components', () => {
           shootCount: 20,
           totalUnhealthyShoots: 10,
           matchingUnhealthyShoots: 4,
-          activeFilterLabels: ['Progressing Clusters', 'User Errors', 'Deactivated Reconciliation', 'Tickets with Ignore Labels'],
+          activeFilterLabels: ['Progressing', 'User Errors', 'Deactivated Reconciliation', 'Ignored Ticket Labels'],
         })
 
         const excluded = findRow(wrapper, 'Excluded')
         expect(excluded.find('.v-list-item-title-stub').text()).toBe('6')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing Clusters, User Errors & 2 more')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing, User Errors & 2 more')
       })
 
       it('should show excluded row without description when no filter labels provided', () => {

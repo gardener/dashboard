@@ -83,9 +83,9 @@ describe('composables', () => {
 
       const { activeFilterLabels } = useShootListFilters()
       expect(activeFilterLabels.value).toEqual([
-        'Progressing Clusters',
+        'Progressing',
         'User Errors',
-        'Tickets with Ignore Labels',
+        'Ignored Ticket Labels',
       ])
     })
 
@@ -105,7 +105,7 @@ describe('composables', () => {
 
       const { activeFilterLabels } = useShootListFilters()
       expect(activeFilterLabels.value).toEqual([
-        'Progressing Clusters',
+        'Progressing',
       ])
     })
 
@@ -140,7 +140,7 @@ describe('composables', () => {
 
       const { activeFilterLabels } = useShootListFilters()
       expect(activeFilterLabels.value).toEqual([
-        'Tickets with Ignore Labels',
+        'Ignored Ticket Labels',
       ])
     })
   })
