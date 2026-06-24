@@ -223,7 +223,7 @@ describe('composables', () => {
       authzStore._setNamespace('_all')
       const localStorageStore = useLocalStorageStore()
       localStorageStore.allProjectsShootFilter = {
-        onlyShootsWithIssues: true,
+        healthy: true,
         progressing: true,
       }
       setShootItem('metadata.labels["shoot.gardener.cloud/status"]', 'progressing')

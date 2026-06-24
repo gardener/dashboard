@@ -511,7 +511,7 @@ describe('stores', () => {
       it('should resubscribe when all-projects issue filter changes the subscription options', async () => {
         authzStore._setNamespace('_all')
         shootListFilters.value = {
-          onlyShootsWithIssues: true,
+          healthy: true,
         }
 
         await shootStore.subscribe()
@@ -524,7 +524,7 @@ describe('stores', () => {
         vi.clearAllMocks()
 
         shootListFilters.value = {
-          onlyShootsWithIssues: false,
+          healthy: false,
         }
 
         await shootStore.subscribe()

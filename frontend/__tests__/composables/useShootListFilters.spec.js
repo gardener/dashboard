@@ -66,10 +66,10 @@ describe('composables', () => {
       await authzStore.fetchRules()
     }
 
-    it('should return empty labels when onlyShootsWithIssues is false', async () => {
+    it('should return empty labels when healthy is false', async () => {
       await grantLandscapeAccess()
       localStorageStore.allProjectsShootFilter = {
-        onlyShootsWithIssues: false,
+        healthy: false,
         progressing: true,
         noOperatorAction: true,
       }
@@ -97,10 +97,10 @@ describe('composables', () => {
     it('should return labels matching locally stored filters', async () => {
       await grantLandscapeAccess()
       localStorageStore.allProjectsShootFilter = {
-        onlyShootsWithIssues: true,
+        healthy: true,
         progressing: true,
         noOperatorAction: false,
-        hideTicketsWithLabel: false,
+        ignoredTickets: false,
       }
 
       const { activeFilterLabels } = useShootListFilters()
@@ -109,21 +109,21 @@ describe('composables', () => {
       ])
     })
 
-    it('should exclude hideTicketsWithLabel when ticket config is missing', async () => {
+    it('should exclude ignoredTickets when ticket config is missing', async () => {
       await grantLandscapeAccess()
       configStore.setConfiguration({ ticket: {} })
       localStorageStore.allProjectsShootFilter = {
-        onlyShootsWithIssues: true,
+        healthy: true,
         progressing: false,
         noOperatorAction: false,
-        hideTicketsWithLabel: true,
+        ignoredTickets: true,
       }
 
       const { activeFilterLabels } = useShootListFilters()
       expect(activeFilterLabels.value).toEqual([])
     })
 
-    it('should include hideTicketsWithLabel when ticket config is present', async () => {
+    it('should include ignoredTickets when ticket config is present', async () => {
       await grantLandscapeAccess()
       configStore.setConfiguration({
         ticket: {
@@ -132,10 +132,10 @@ describe('composables', () => {
         },
       })
       localStorageStore.allProjectsShootFilter = {
-        onlyShootsWithIssues: true,
+        healthy: true,
         progressing: false,
         noOperatorAction: false,
-        hideTicketsWithLabel: true,
+        ignoredTickets: true,
       }
 
       const { activeFilterLabels } = useShootListFilters()

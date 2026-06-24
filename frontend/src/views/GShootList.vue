@@ -233,7 +233,7 @@ export default {
     const {
       activeFilterLabels,
       shootListFilters,
-      onlyShootsWithIssues,
+      healthy,
       toggleShootListFilter,
     } = useShootListFilters()
 
@@ -248,7 +248,7 @@ export default {
       onUpdateShootSearch,
       activeFilterLabels,
       shootListFilters,
-      onlyShootsWithIssues,
+      healthy,
       toggleShootListFilter,
     }
   },
@@ -561,8 +561,8 @@ export default {
       return [
         {
           text: 'Hide healthy clusters',
-          value: 'onlyShootsWithIssues',
-          selected: this.onlyShootsWithIssues,
+          value: 'healthy',
+          selected: this.healthy,
           hidden: this.projectScope,
           disabled: this.changeFiltersDisabled,
         },
@@ -588,10 +588,10 @@ export default {
         },
         {
           text: 'Hide clusters with ignored ticket labels',
-          value: 'hideTicketsWithLabel',
-          selected: this.isFilterActive('hideTicketsWithLabel'),
+          value: 'ignoredTickets',
+          selected: this.isFilterActive('ignoredTickets'),
           hidden: this.projectScope || !this.canViewLandscape || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
-          helpTooltip: this.hideTicketsWithLabelTooltip,
+          helpTooltip: this.ignoredTicketsTooltip,
           disabled: this.changeFiltersDisabled,
         },
       ]
@@ -599,19 +599,19 @@ export default {
     selectableFilters () {
       return filter(this.allFilters, ['hidden', false])
     },
-    hideTicketsWithLabelTooltip () {
-      const labels = map(this.hideClustersWithLabels, label => (`- ${label}`))
-      return ['Configured Labels', ...labels]
+    ignoredTicketsTooltip () {
+      const labels = this.hideClustersWithLabels.map(label => `- ${label}`)
+      return ['Labels', ...labels]
     },
     projectScope () {
       return this.namespace !== '_all'
     },
-    showOnlyShootsWithIssues: {
+    hideHealthyShoots: {
       get () {
-        return this.onlyShootsWithIssues
+        return this.healthy
       },
       set (value) {
-        this.toggleFilter('onlyShootsWithIssues')
+        this.toggleFilter('healthy')
       },
     },
     items () {
@@ -621,7 +621,7 @@ export default {
       return this.focusModeInternal
     },
     showAllShoots () {
-      return !this.showOnlyShootsWithIssues
+      return !this.hideHealthyShoots
     },
     filterTooltip () {
       return this.focusModeInternal
@@ -629,14 +629,14 @@ export default {
         : ''
     },
     headlineSubtitle () {
-      if (this.projectScope || !this.showOnlyShootsWithIssues) {
+      if (this.projectScope || !this.hideHealthyShoots) {
         return ''
       }
-      const all = ['Healthy Clusters', ...this.activeFilterLabels]
+      const all = ['Healthy', ...this.activeFilterLabels]
       const shown = all.slice(0, 2).join(', ')
       const remaining = all.length - 2
       const suffix = remaining > 0 ? ` & ${remaining} more` : ''
-      return `Excluding: ${shown}${suffix}`
+      return `Excluding Clusters: ${shown}${suffix}`
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
@@ -723,7 +723,7 @@ export default {
     },
     toggleFilter ({ value: key }) {
       this.toggleShootListFilter(key)
-      if (key === 'onlyShootsWithIssues') {
+      if (key === 'healthy') {
         this.subscribeShoots()
       }
     },

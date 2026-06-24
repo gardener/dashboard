@@ -53,12 +53,12 @@ export const constants = Object.freeze({
   CLOSED: 6,
 })
 
-export function onlyAllShootsWithIssues (state, context) {
+export function isHealthyFilterActive (state, context) {
   const {
     authzStore,
-    onlyShootsWithIssues,
+    healthy,
   } = context
-  return authzStore.namespace === '_all' && (onlyShootsWithIssues.value ?? true)
+  return authzStore.namespace === '_all' && (healthy.value ?? true)
 }
 
 export function getFilteredUids (state, context) {
@@ -114,11 +114,11 @@ export function getFilteredUids (state, context) {
 
   // list of active filter function
   const predicates = []
-  if (onlyAllShootsWithIssues(state, context)) {
+  if (isHealthyFilterActive(state, context)) {
     const {
       progressing,
       noOperatorAction,
-      hideTicketsWithLabel,
+      ignoredTickets,
     } = context
 
     if (progressing.value) {
@@ -127,7 +127,7 @@ export function getFilteredUids (state, context) {
     if (noOperatorAction.value) {
       predicates.push(noUserError)
     }
-    if (hideTicketsWithLabel.value) {
+    if (ignoredTickets.value) {
       predicates.push(hasTicketsWithoutHideLabel)
     }
   }

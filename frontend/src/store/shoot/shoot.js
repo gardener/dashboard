@@ -39,7 +39,7 @@ import { createSynchronizeLock } from '../helper'
 
 import {
   constants,
-  onlyAllShootsWithIssues,
+  isHealthyFilterActive,
   getFilteredUids,
   searchItemsFn,
   sortItemsFn,
@@ -76,12 +76,12 @@ const useShootStore = defineStore('shoot', () => {
   const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
   const {
     shootListFilters,
-    onlyShootsWithIssues,
+    healthy,
   } = useShootListFilters()
 
   const progressing = computed(() => shootListFilters.value.progressing)
   const noOperatorAction = computed(() => shootListFilters.value.noOperatorAction)
-  const hideTicketsWithLabel = computed(() => shootListFilters.value.hideTicketsWithLabel)
+  const ignoredTickets = computed(() => shootListFilters.value.ignoredTickets)
 
   const context = {
     api,
@@ -98,10 +98,10 @@ const useShootStore = defineStore('shoot', () => {
     seedStore,
     shootCustomFieldsComposable,
     shootListFilters,
-    onlyShootsWithIssues,
+    healthy,
     progressing,
     noOperatorAction,
-    hideTicketsWithLabel,
+    ignoredTickets,
   }
 
   const state = reactive({
@@ -204,7 +204,7 @@ const useShootStore = defineStore('shoot', () => {
     if (name) {
       return { namespace, name }
     }
-    if (namespace === '_all' && onlyShootsWithIssues.value) {
+    if (isHealthyFilterActive(state, context)) {
       return { namespace, labelSelector: 'shoot.gardener.cloud/status!=healthy' }
     }
     return { namespace }
@@ -492,11 +492,11 @@ const useShootStore = defineStore('shoot', () => {
 
   function receive (items) {
     const shootStore = this
-    const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
+    const showAllShoots = !isHealthyFilterActive(state, context)
 
     const shoots = {}
     for (const item of items) {
-      if (notOnlyShootsWithIssues || shootHasIssue(item)) {
+      if (showAllShoots || shootHasIssue(item)) {
         const uid = item.metadata.uid
         set(shoots, [uid], markRaw(item))
       }
@@ -563,10 +563,10 @@ const useShootStore = defineStore('shoot', () => {
   const socketEventHandler = useSocketEventHandler(useShootStore, {
     logger,
     createOperator ({ state }) {
-      const notOnlyShootsWithIssues = !onlyAllShootsWithIssues(state, context)
+      const showAllShoots = !isHealthyFilterActive(state, context)
       return {
         set (uid, item) {
-          if (notOnlyShootsWithIssues || shootHasIssue(item)) {
+          if (showAllShoots || shootHasIssue(item)) {
             if (state.focusMode) {
               unset(state.staleShoots, [uid])
             }
