@@ -97,22 +97,38 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-small text-medium-emphasis py-2">
           Filter Selection
         </div>
-        <v-checkbox-btn
+        <div
           v-for="filter in filters"
           :key="filter.value"
-          :model-value="filter.selected"
-          :color="checkboxColor(filter.selected)"
-          :disabled="filter.disabled"
-          density="compact"
-          class="text-body-medium"
-          @update:model-value="onToggleFilter(filter)"
         >
-          <template #label>
-            <span class="text-body-small">
-              {{ filter.text }}
-            </span>
-          </template>
-        </v-checkbox-btn>
+          <v-checkbox-btn
+            :model-value="filter.selected"
+            :color="checkboxColor(filter.selected)"
+            :disabled="filter.disabled"
+            density="compact"
+            class="text-body-medium"
+            @update:model-value="onToggleFilter(filter)"
+          >
+            <template #label>
+              <span class="text-body-small">
+                {{ filter.text }}
+              </span>
+            </template>
+          </v-checkbox-btn>
+          <v-tooltip
+            activator="parent"
+            :disabled="!filter.helpTooltip?.length"
+            :open-delay="200"
+            location="right"
+          >
+            <div
+              v-for="(line, index) in filter.helpTooltip"
+              :key="index"
+            >
+              {{ line }}
+            </div>
+          </v-tooltip>
+        </div>
       </v-card-text>
     </v-card>
   </v-menu>
