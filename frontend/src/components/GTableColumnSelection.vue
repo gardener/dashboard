@@ -16,9 +16,9 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props: menuProps }">
       <v-btn
-        v-tooltip:top="'Table Options'"
+        v-tooltip:top="'Column Selection'"
         v-bind="menuProps"
-        icon="mdi-dots-vertical"
+        icon="mdi-view-column"
       />
     </template>
     <v-card>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <v-checkbox-btn
           v-for="header in headers"
-          :key="header.value"
+          :key="header.key"
           :model-value="header.selected"
           :color="checkboxColor(header.selected)"
           density="compact"
@@ -67,49 +67,66 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-checkbox-btn>
       </v-card-text>
-      <template v-if="filters && filters.length">
-        <v-divider />
-        <v-card-text
-          v-tooltip:bottom="{
-            text: filterTooltip,
-            disabled: !filterTooltip, maxWidth: 300
-          }"
-          class="pt-1"
+    </v-card>
+  </v-menu>
+  <v-menu
+    v-if="hasFilters"
+    v-model="filterSelectionMenu"
+    location="left"
+    offset="5"
+    :close-on-content-click="false"
+    absolute
+    min-width="240"
+    style="max-height: 80%"
+  >
+    <template #activator="{ props: menuProps }">
+      <v-btn
+        v-tooltip:top="'Filter Selection'"
+        v-bind="menuProps"
+        icon="mdi-filter-outline"
+      />
+    </template>
+    <v-card>
+      <v-card-text
+        v-tooltip:bottom="{
+          text: filterTooltip,
+          disabled: !filterTooltip, maxWidth: 300
+        }"
+        class="pt-1"
+      >
+        <div class="text-title-small text-medium-emphasis py-2">
+          Filter Selection
+        </div>
+        <v-checkbox-btn
+          v-for="filter in filters"
+          :key="filter.value"
+          :model-value="filter.selected"
+          :color="checkboxColor(filter.selected)"
+          :disabled="filter.disabled"
+          density="compact"
+          class="text-body-medium"
+          @update:model-value="onToggleFilter(filter)"
         >
-          <div class="text-title-small text-medium-emphasis py-2">
-            Table Filter
-          </div>
-          <v-checkbox-btn
-            v-for="filter in filters"
-            :key="filter.value"
-            :model-value="filter.selected"
-            :color="checkboxColor(filter.selected)"
-            :disabled="filter.disabled"
-            density="compact"
-            class="text-body-medium"
-            @update:model-value="onToggleFilter(filter)"
-          >
-            <template #label>
-              <span
-                class="text-body-small"
-              >
-                {{ filter.text }}
-              </span>
-            </template>
-          </v-checkbox-btn>
-        </v-card-text>
-      </template>
+          <template #label>
+            <span class="text-body-small">
+              {{ filter.text }}
+            </span>
+          </template>
+        </v-checkbox-btn>
+      </v-card-text>
     </v-card>
   </v-menu>
 </template>
 
 <script setup>
 import {
+  computed,
   ref,
   toRefs,
 } from 'vue'
 
 const columnSelectionMenu = ref(false)
+const filterSelectionMenu = ref(false)
 
 // props
 const props = defineProps({
@@ -125,6 +142,8 @@ const props = defineProps({
 })
 
 const { headers, filters, filterTooltip } = toRefs(props)
+
+const hasFilters = computed(() => filters.value?.length > 0)
 
 // emits
 const emit = defineEmits([
