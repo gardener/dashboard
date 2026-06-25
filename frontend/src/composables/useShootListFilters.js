@@ -14,29 +14,29 @@ import { useLocalStorageStore } from '@/store/localStorage'
 import pick from 'lodash/pick'
 
 const FILTER_LABELS = [
-  { key: 'progressing', label: 'Progressing Clusters' },
+  { key: 'progressing', label: 'Progressing' },
   { key: 'noOperatorAction', label: 'User Errors' },
-  { key: 'hideTicketsWithLabel', label: 'Tickets with Ignore Labels' },
+  { key: 'ignoredTickets', label: 'Ignored Ticket Labels' },
 ]
 
 const FILTER_KEYS = [
-  'onlyShootsWithIssues',
+  'healthy',
   'progressing',
   'noOperatorAction',
-  'hideTicketsWithLabel',
+  'ignoredTickets',
 ]
 
 function getDefaultAllProjectsShootFilters (canViewLandscape) {
   return {
-    onlyShootsWithIssues: canViewLandscape,
+    healthy: canViewLandscape,
     progressing: true,
     noOperatorAction: canViewLandscape,
-    hideTicketsWithLabel: canViewLandscape,
+    ignoredTickets: canViewLandscape,
   }
 }
 
 export function getUnhealthyFilterMaskFromShootListFilters (shootListFilters = {}) {
-  if (!shootListFilters.onlyShootsWithIssues) {
+  if (!shootListFilters.healthy) {
     return 0
   }
 
@@ -47,7 +47,7 @@ export function getUnhealthyFilterMaskFromShootListFilters (shootListFilters = {
   if (shootListFilters.noOperatorAction) {
     mask |= 2
   }
-  if (shootListFilters.hideTicketsWithLabel) {
+  if (shootListFilters.ignoredTickets) {
     mask |= 4
   }
   return mask
@@ -62,12 +62,12 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     get () {
       const filters = {
         ...getDefaultAllProjectsShootFilters(authzStore.canViewLandscape),
-        ...localStorageStore.allProjectsShootFilter,
+        ...pick(localStorageStore.allProjectsShootFilter, FILTER_KEYS),
       }
 
       const { ticket } = configStore
       if (ticket && (!ticket.gitHubRepoUrl || !ticket.hideClustersWithLabels?.length)) {
-        filters.hideTicketsWithLabel = false
+        filters.ignoredTickets = false
       }
 
       return filters
@@ -77,8 +77,8 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     },
   })
 
-  const onlyShootsWithIssues = computed(() => {
-    return shootListFilters.value.onlyShootsWithIssues ?? true
+  const healthy = computed(() => {
+    return shootListFilters.value.healthy ?? true
   })
 
   function toggleShootListFilter (key) {
@@ -94,7 +94,7 @@ export const useShootListFilters = createSharedComposable(function useShootListF
 
   const activeFilterLabels = computed(() => {
     const filters = shootListFilters.value
-    if (!filters.onlyShootsWithIssues) {
+    if (!filters.healthy) {
       return []
     }
 
@@ -105,7 +105,7 @@ export const useShootListFilters = createSharedComposable(function useShootListF
 
   return {
     shootListFilters,
-    onlyShootsWithIssues,
+    healthy,
     toggleShootListFilter,
     unhealthyFilterMask,
     activeFilterLabels,

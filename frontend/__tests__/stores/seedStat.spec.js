@@ -203,17 +203,17 @@ describe('stores', () => {
 
     it('should derive the unhealthy filter mask from shoot list filters', () => {
       expect(getUnhealthyFilterMaskFromShootListFilters({
-        onlyShootsWithIssues: true,
+        healthy: true,
         progressing: true,
         noOperatorAction: true,
-        hideTicketsWithLabel: true,
+        ignoredTickets: true,
       })).toBe(7)
 
       expect(getUnhealthyFilterMaskFromShootListFilters({
-        onlyShootsWithIssues: false,
+        healthy: false,
         progressing: true,
         noOperatorAction: true,
-        hideTicketsWithLabel: true,
+        ignoredTickets: true,
       })).toBe(0)
     })
   })
