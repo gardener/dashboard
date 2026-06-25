@@ -45,6 +45,7 @@ export function createManagedSeedShootComposable (seedName) {
   const {
     shootPlutonoUrl: managedSeedShootPlutonoUrl,
     shootPrometheusUrl: managedSeedShootPrometheusUrl,
+    shootVictoriaLogsUrl: managedSeedShootVictoriaLogsUrl,
   } = useShootAdvertisedAddresses(managedSeedShoot)
 
   return {
@@ -53,6 +54,7 @@ export function createManagedSeedShootComposable (seedName) {
     managedSeedShootConditions,
     managedSeedShootPlutonoUrl,
     managedSeedShootPrometheusUrl,
+    managedSeedShootVictoriaLogsUrl,
   }
 }
 
