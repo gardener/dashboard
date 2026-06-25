@@ -253,7 +253,7 @@ describe('components', () => {
         expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing Clusters, User Errors & 2 more')
       })
 
-      it('should show excluded row without description when no filter labels provided', () => {
+      it('should not show excluded row when no filter labels provided', () => {
         const wrapper = mountComponent({
           shootCount: 10,
           totalUnhealthyShoots: 5,
@@ -261,9 +261,21 @@ describe('components', () => {
         })
 
         const excluded = findRow(wrapper, 'Excluded')
+        expect(excluded).toBeUndefined()
+      })
+
+      it('should show excluded row with 0 count when filters active but nothing excluded', () => {
+        const wrapper = mountComponent({
+          shootCount: 10,
+          totalUnhealthyShoots: 5,
+          matchingUnhealthyShoots: 5,
+          activeFilterLabels: ['Progressing'],
+        })
+
+        const excluded = findRow(wrapper, 'Excluded')
         expect(excluded).toBeDefined()
-        expect(excluded.find('.v-list-item-title-stub').text()).toBe('3')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).not.toContain('—')
+        expect(excluded.find('.v-list-item-title-stub').text()).toBe('0')
+        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing')
       })
 
       it('should show healthy legend when there are healthy shoots', () => {

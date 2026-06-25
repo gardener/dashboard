@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-list-item-subtitle>Unhealthy</v-list-item-subtitle>
               <v-list-item-title>{{ matchingUnhealthy }}</v-list-item-title>
             </v-list-item>
-            <template v-if="hiddenUnhealthy > 0">
+            <template v-if="activeFilterLabels.length > 0">
               <v-list-item :prepend-gap="8">
                 <template #prepend>
                   <v-icon
@@ -172,9 +172,6 @@ const hiddenUnhealthy = computed(() => totalUnhealthy.value - matchingUnhealthy.
 const healthyShoots = computed(() => shootCount.value - totalUnhealthy.value)
 
 const filterDescription = computed(() => {
-  if (hiddenUnhealthy.value === 0) {
-    return undefined
-  }
   const labels = activeFilterLabels.value
   if (!labels.length) {
     return undefined
@@ -253,7 +250,7 @@ const ariaLabel = computed(() => {
     `${shootCount.value} shoots`,
     `${matchingUnhealthy.value} unhealthy shoots`,
   ]
-  if (hiddenUnhealthy.value > 0) {
+  if (activeFilterLabels.value.length > 0) {
     const desc = filterDescription.value
       ? ` (${filterDescription.value})`
       : ''
