@@ -5,7 +5,11 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <v-tooltip location="top">
+  <v-tooltip
+    location="top"
+    :open-on-focus="false"
+    :open-delay="500"
+  >
     <template #activator="{ props: tooltipProps }">
       <v-text-field
         v-bind="tooltipProps"
