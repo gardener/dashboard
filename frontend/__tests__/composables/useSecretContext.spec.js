@@ -234,7 +234,7 @@ describe('composables', () => {
       })
     })
 
-    it('should preserve scalar decoded values as strings in secretStringData', () => {
+    it('should preserve decoded values as strings in secretStringData', () => {
       secretContext.setSecretManifest({
         metadata: {
           name: 'my-secret',
@@ -255,9 +255,68 @@ describe('composables', () => {
         bool: 'false',
         nullValue: 'null',
         empty: '',
-        object: { enabled: true },
-        array: [1, 2, 3],
+        object: '{"enabled":true}',
+        array: '[1,2,3]',
       })
+    })
+
+    it('should parse only configured structured fields', () => {
+      secretContext.setSecretManifest({
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          plainJson: encodeBase64('{"enabled":true}'),
+          serviceAccount: encodeBase64('{"project_id":"example","type":"service_account"}'),
+          yamlConfig: encodeBase64('enabled: true\n'),
+          invalidJson: encodeBase64('{"broken":'),
+        },
+      })
+
+      const fields = [
+        { key: 'plainJson', type: 'text' },
+        { key: 'serviceAccount', type: 'json', sensitive: true },
+        { key: 'yamlConfig', type: 'yaml', sensitive: true },
+        { key: 'invalidJson', type: 'json', sensitive: true },
+      ]
+
+      expect(secretContext.secretStringDataForFields(fields)).toEqual({
+        plainJson: '{"enabled":true}',
+        serviceAccount: {
+          project_id: 'example',
+          type: 'service_account',
+        },
+        yamlConfig: {
+          enabled: true,
+        },
+        invalidJson: '{"broken":',
+      })
+    })
+
+    it('should encode structured fields according to their configured type', () => {
+      secretContext.createSecretManifest()
+
+      const fields = [
+        { key: 'plainJson', type: 'text' },
+        { key: 'serviceAccount', type: 'json', sensitive: true },
+        { key: 'yamlConfig', type: 'yaml', sensitive: true },
+      ]
+
+      secretContext.setSecretStringDataForFields(fields, {
+        plainJson: '{"enabled":true}',
+        serviceAccount: {
+          project_id: 'example',
+          type: 'service_account',
+        },
+        yamlConfig: {
+          enabled: true,
+        },
+      })
+
+      expect(decodeBase64(secretContext.secretData.plainJson)).toBe('{"enabled":true}')
+      expect(decodeBase64(secretContext.secretData.serviceAccount)).toBe('{"project_id":"example","type":"service_account"}')
+      expect(decodeBase64(secretContext.secretData.yamlConfig)).toBe('enabled: true\n')
     })
 
     it('should preserve falsy values when encoding secretStringData', () => {

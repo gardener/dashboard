@@ -35,7 +35,7 @@ export default {
     ],
     fields: [
       {
-        key: 'server',
+        key: 'Server',
         label: '<host>:<port> of the authoritative DNS server',
         type: 'text',
         validators: {
@@ -45,7 +45,7 @@ export default {
         },
       },
       {
-        key: 'tsigKeyName',
+        key: 'TSIGKeyName',
         label: 'TSIG Key Name',
         type: 'text',
         validators: {
@@ -60,7 +60,7 @@ export default {
         },
       },
       {
-        key: 'tsigSecret',
+        key: 'TSIGSecret',
         label: 'TSIG Secret',
         type: 'text',
         sensitive: true,
@@ -71,7 +71,7 @@ export default {
         },
       },
       {
-        key: 'zone',
+        key: 'Zone',
         label: 'Zone',
         type: 'text',
         validators: {
@@ -91,7 +91,7 @@ export default {
         },
       },
       {
-        key: 'tsigSecretAlgorithm',
+        key: 'TSIGSecretAlgorithm',
         label: 'TSIG Secret Algorithm',
         type: 'select',
         values: [

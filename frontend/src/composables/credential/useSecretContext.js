@@ -157,28 +157,13 @@ export function createSecretContextComposable (options = {}) {
         if (v == null) {
           return undefined
         }
-        const decoded = decodeBase64(v)
-        const trimmedDecoded = decoded.trim()
-        if (!trimmedDecoded.startsWith('{') && !trimmedDecoded.startsWith('[')) {
-          return decoded
-        }
-        try {
-          return JSON.parse(decoded)
-        } catch (err) {
-          return decoded
-        }
+        return decodeBase64(v)
       })
     },
     set (value) {
       secretData.value = value && typeof value === 'object'
         ? mapValues(value, v => {
-          if (v == null) {
-            return undefined
-          }
-          if (typeof v === 'string') {
-            return encodeBase64(v)
-          }
-          return encodeBase64(JSON.stringify(v))
+          return encodeSecretStringDataValueForField(v)
         })
         : undefined
     },
