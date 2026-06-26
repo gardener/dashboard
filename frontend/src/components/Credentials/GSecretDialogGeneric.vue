@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #secret-slot>
       <g-generic-input-fields
         v-if="providerFields"
-        v-model="secretStringData"
+        v-model="secretStringDataForProviderFields"
         :fields="providerFields"
       />
       <GGenericInputField
@@ -97,10 +97,16 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringData } = useProvideSecretContext()
+    const {
+      secretStringData,
+      secretStringDataForFields,
+      setSecretStringDataForFields,
+    } = useProvideSecretContext()
 
     return {
       secretStringData,
+      secretStringDataForFields,
+      setSecretStringDataForFields,
       v$: useVuelidate(),
     }
   },
@@ -118,6 +124,14 @@ export default {
         return undefined
       }
       return this.vendorSecretConfiguration?.fields
+    },
+    secretStringDataForProviderFields: {
+      get () {
+        return this.secretStringDataForFields(this.providerFields)
+      },
+      set (value) {
+        this.setSecretStringDataForFields(this.providerFields, value)
+      },
     },
     defaultInputField () {
       return {

@@ -83,6 +83,13 @@ import {
   getErrorMessages,
   handleTextFieldDrop,
 } from '@/utils'
+import {
+  isJsonFieldType,
+  isSecretFieldType,
+  isStructuredFieldType,
+  isStructuredSecretFieldType,
+  isYamlFieldType,
+} from '@/utils/inputFieldTypes'
 
 import get from 'lodash/get'
 import forEach from 'lodash/forEach'
@@ -117,20 +124,22 @@ const emit = defineEmits([
 
 const fieldRef = useTemplateRef('fieldRef')
 
-const isYAML = computed(() => props.field.type === 'yaml' || props.field.type === 'yaml-secret')
-const isJSON = computed(() => props.field.type === 'json' || props.field.type === 'json-secret')
-const isStructuredPassword = computed(() => props.field.type === 'yaml-secret' || props.field.type === 'json-secret')
+const fieldType = computed(() => props.field.type)
 
-const isTextLike = computed(() => props.field.type === 'text' || props.field.type === 'password')
-const isSelectLike = computed(() => props.field.type === 'select' || props.field.type === 'select-multiple')
-const isStructuredLike = computed(() => isYAML.value || isJSON.value)
+const isYAML = computed(() => isYamlFieldType(fieldType.value))
+const isJSON = computed(() => isJsonFieldType(fieldType.value))
+const isStructuredPassword = computed(() => isStructuredSecretFieldType(fieldType.value))
+
+const isTextLike = computed(() => fieldType.value === 'text' || fieldType.value === 'password')
+const isSelectLike = computed(() => fieldType.value === 'select' || fieldType.value === 'select-multiple')
+const isStructuredLike = computed(() => isStructuredFieldType(fieldType.value))
 
 const inputAutocomplete = computed(() => {
   if (props.field.autocomplete) {
     return props.field.autocomplete
   }
 
-  if (props.field.type === 'password' || isStructuredPassword.value) {
+  if (isSecretFieldType(fieldType.value)) {
     return 'off'
   }
 
@@ -141,14 +150,14 @@ const inputAutocomplete = computed(() => {
 const showPassword = ref(false)
 
 const appendIcon = computed(() => {
-  if (props.field.type !== 'password' && !isStructuredPassword.value) {
+  if (!isSecretFieldType(fieldType.value)) {
     return undefined
   }
   return showPassword.value ? 'mdi-eye' : 'mdi-eye-off'
 })
 
 const computedTextFieldType = computed(() => {
-  if (props.field.type !== 'password') {
+  if (fieldType.value !== 'password') {
     return 'text'
   }
   return showPassword.value ? 'text' : 'password'
@@ -159,7 +168,7 @@ const hideSecret = computed(() => {
 })
 
 function onClickAppend () {
-  if (props.field.type === 'password' || isStructuredPassword.value) {
+  if (isSecretFieldType(fieldType.value)) {
     showPassword.value = !showPassword.value
   }
 }
@@ -187,7 +196,7 @@ let touched = false
 
 const {
   rawText,
-  setRawTextWithObject,
+  setRawTextWithValue,
   parseRawTextToObject,
 } = useStructuredTextField(computed(() => props.field.type))
 
@@ -198,9 +207,7 @@ const structuredRawText = computed({
     rawText.value = value
 
     const parsed = parseRawTextToObject()
-    if (parsed !== undefined) {
-      emit('update:modelValue', parsed)
-    }
+    emit('update:modelValue', parsed === undefined ? value : parsed)
   },
 })
 
@@ -209,7 +216,7 @@ watch(
   () => props.modelValue,
   value => {
     if (isStructuredLike.value && !touched) {
-      setRawTextWithObject(value)
+      setRawTextWithValue(value)
     }
   },
   { immediate: true },
@@ -239,7 +246,7 @@ const rules = computed(() => {
         set(compiledValidators, [validatorName], minLength(validator.length))
         break
       // structured content validators
-      case 'isValidObject': // TODO need to fix invalid yaml => always update modelValue also on yaml error?
+      case 'isValidObject':
         set(compiledValidators, [validatorName], value => {
           if (isEmpty(value)) {
             return true // empty is valid (unless required validator is also present)
