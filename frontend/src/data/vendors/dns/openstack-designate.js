@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import openstack from '../infra/openstack'
+
 export default {
   name: 'openstack-designate',
   displayName: 'OpenStack Designate',
@@ -20,5 +22,6 @@ export default {
         key: 'tenantName',
       },
     ],
+    fields: openstack.secret.fields,
   },
 }

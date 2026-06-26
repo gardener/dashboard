@@ -43,7 +43,7 @@ export default {
     ],
     fields: [
       {
-        key: 'clientId',
+        key: 'clientID',
         label: 'Client Id',
         type: 'text',
         validators: {
@@ -66,7 +66,7 @@ export default {
         },
       },
       {
-        key: 'tenantId',
+        key: 'tenantID',
         label: 'Tenant Id',
         type: 'text',
         validators: {
@@ -76,7 +76,7 @@ export default {
         },
       },
       {
-        key: 'subscriptionId',
+        key: 'subscriptionID',
         label: 'Subscription Id',
         type: 'text',
         validators: {

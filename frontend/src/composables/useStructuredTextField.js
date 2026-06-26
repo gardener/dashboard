@@ -8,22 +8,34 @@ import {
   ref,
   computed,
 } from 'vue'
-import yaml from 'js-yaml'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
+
+import {
+  isJsonFieldType,
+  isYamlFieldType,
+} from '@/utils/inputFieldTypes'
 
 export function useStructuredTextField (typeRef) {
   const rawText = ref('')
 
-  const isYaml = computed(() => typeRef.value === 'yaml' || typeRef.value === 'yaml-secret')
-  const isJson = computed(() => typeRef.value === 'json' || typeRef.value === 'json-secret')
+  const isYaml = computed(() => isYamlFieldType(typeRef.value))
+  const isJson = computed(() => isJsonFieldType(typeRef.value))
 
-  function setRawTextWithObject (parsedValue) {
+  function setRawTextWithValue (value) {
     try {
-      if (Object.keys(parsedValue).length === 0) {
+      if (!value) {
+        rawText.value = ''
+      } else if (typeof value === 'string') {
+        rawText.value = value
+      } else if (Object.keys(value).length === 0) {
         rawText.value = ''
       } else if (isYaml.value) {
-        rawText.value = yaml.dump(parsedValue)
+        rawText.value = yamlDump(value)
       } else if (isJson.value) {
-        rawText.value = JSON.stringify(parsedValue, null, 2)
+        rawText.value = JSON.stringify(value, null, 2)
       } else {
         rawText.value = ''
       }
@@ -34,7 +46,7 @@ export function useStructuredTextField (typeRef) {
 
   /**
    * Parses current raw.value -> parsed object.
-   * Returns {} on parse errors or non-object results.
+   * Returns undefined on parse errors or non-object results.
    */
   function parseRawTextToObject () {
     let parsed
@@ -45,7 +57,7 @@ export function useStructuredTextField (typeRef) {
 
     try {
       if (isYaml.value) {
-        parsed = yaml.load(rawText.value)
+        parsed = yamlLoad(rawText.value)
       } else if (isJson.value) {
         parsed = JSON.parse(rawText.value)
       }
@@ -54,7 +66,7 @@ export function useStructuredTextField (typeRef) {
     }
 
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      parsed = ''
+      parsed = undefined
     }
 
     return parsed
@@ -62,7 +74,7 @@ export function useStructuredTextField (typeRef) {
 
   return {
     rawText,
-    setRawTextWithObject,
+    setRawTextWithValue,
     parseRawTextToObject,
   }
 }

@@ -21,7 +21,7 @@ export default {
     fields: [
       ...azure.secret.fields,
       {
-        key: 'azureCloud',
+        key: 'AZURE_CLOUD',
         label: 'Azure Cloud',
         type: 'text',
         validators: {
