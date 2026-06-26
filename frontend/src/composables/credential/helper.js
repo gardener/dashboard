@@ -10,15 +10,11 @@ import {
   decodeBase64,
   isTruthyValue,
 } from '@/utils'
-import infraProviders from '@/data/vendors/infra'
-import dnsProviders from '@/data/vendors/dns'
 
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
-
-const cloudProviderConfigs = [...infraProviders, ...dnsProviders]
 
 function decodeSecretValue (secretData, key) {
   const keys = Array.isArray(key) ? key : [key]
@@ -290,9 +286,8 @@ export function isInfrastructureBinding ({ binding, infraProviderTypes }) {
 }
 
 // Secret Details
-export function secretDetails ({ secret, providerType }) {
+export function secretDetails ({ secret, providerConfig }) {
   const secretData = secret?.data || {}
-  const providerConfig = cloudProviderConfigs.find(provider => provider.name === providerType)
   if (!providerConfig) {
     return undefined
   }

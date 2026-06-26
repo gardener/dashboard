@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     :binding="binding"
     :credential="credential"
     :provider-type="providerType"
+    :vendor-type="vendorType"
   >
     <template #secret-slot>
       <g-generic-input-fields
@@ -44,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for <code>{{ vendorDisplayName(providerType) }}</code>.
+          Please enter data required for <code>{{ vendorDisplayName({ type: vendorType, name: providerType }) }}</code>.
         </p>
       </div>
     </template>
@@ -86,6 +87,10 @@ export default {
     },
     providerType: {
       type: String,
+    },
+    vendorType: {
+      type: String,
+      required: true,
     },
   },
   emits: [
@@ -150,7 +155,10 @@ export default {
       return JSON.stringify(this.vendorSecretConfiguration?.helpJSONTemplate, undefined, 2)
     },
     vendorSecretConfiguration () {
-      return this.vendorDetails(this.providerType)?.secret
+      return this.vendorDetails({
+        type: this.vendorType,
+        name: this.providerType,
+      })?.secret
     },
   },
   methods: {

@@ -42,6 +42,9 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  vendorType: {
+    type: String,
+  },
   icon: {
     type: String,
     default: '',
@@ -64,7 +67,13 @@ const iconName = computed(() => {
   if (props.icon) {
     return props.icon
   }
-  const vendor = configStore.vendorDetails(props.name)
+  if (!props.vendorType || !props.name) {
+    return undefined
+  }
+  const vendor = configStore.vendorDetails({
+    type: props.vendorType,
+    name: props.name,
+  })
   return vendor?.icon
 })
 

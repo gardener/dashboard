@@ -63,11 +63,12 @@ SPDX-License-Identifier: Apache-2.0
                 <template #prepend>
                   <g-vendor-icon
                     :name="infrastructure"
+                    vendor-type="infra"
                     :size="24"
                   />
                 </template>
                 <v-list-item-title>
-                  {{ vendorDisplayName(infrastructure) }}
+                  {{ vendorDisplayName({ type: 'infra', name: infrastructure }) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -189,11 +190,12 @@ SPDX-License-Identifier: Apache-2.0
                 <template #prepend>
                   <g-vendor-icon
                     :name="dnsProvider"
+                    vendor-type="dns"
                     :size="24"
                   />
                 </template>
                 <v-list-item-title>
-                  {{ vendorDisplayName(dnsProvider) }}
+                  {{ vendorDisplayName({ type: 'dns', name: dnsProvider }) }}
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -251,6 +253,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <g-secret-dialog-wrapper
       :visible-dialog="visibleCredentialDialog"
+      :visible-dialog-vendor-type="visibleCredentialVendorType"
       :selected-dns-credential="selectedDnsCredential"
       :selected-infra-binding="selectedInfraBinding"
       @dialog-closed="onDialogClosed"
@@ -382,6 +385,7 @@ export default {
       dnsCredentialFilter: '',
       createDnsCredentialMenu: false,
       visibleCredentialDialog: undefined,
+      visibleCredentialVendorType: undefined,
     }
   },
   computed: {
@@ -579,38 +583,45 @@ export default {
       this.selectedInfraBinding = undefined
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
+      this.visibleCredentialVendorType = 'infra'
     },
     onAddDnsCredential (providerType) {
       this.selectedInfraBinding = undefined
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
+      this.visibleCredentialVendorType = 'dns'
     },
     onUpdateInfraBinding (binding) {
       const providerType = bindingProviderType(binding)
       this.selectedInfraBinding = binding
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = providerType
+      this.visibleCredentialVendorType = 'infra'
     },
     onDeleteInfraBinding (binding) {
       this.selectedInfraBinding = binding
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = 'delete'
+      this.visibleCredentialVendorType = 'infra'
     },
     onMigrateSecretBinding (binding) {
       this.selectedInfraBinding = binding
       this.selectedDnsCredential = undefined
       this.visibleCredentialDialog = 'migrate-secret-binding'
+      this.visibleCredentialVendorType = 'infra'
     },
     onUpdateDnsCredential (credential) {
       const providerType = credentialProviderType(credential)
       this.selectedDnsCredential = credential
       this.selectedInfraBinding = undefined
       this.visibleCredentialDialog = providerType
+      this.visibleCredentialVendorType = 'dns'
     },
     onDeleteDnsCredential (credential) {
       this.selectedDnsCredential = credential
       this.selectedInfraBinding = undefined
       this.visibleCredentialDialog = 'delete'
+      this.visibleCredentialVendorType = 'dns'
     },
     setSelectedInfraHeader (header) {
       this.infraCredentialSelectedColumns[header.key] = !header.selected
@@ -633,6 +644,7 @@ export default {
     onDialogClosed () {
       // This forces re-rendering of credential dialogs when re-opened so we don't need to reset them manually
       this.visibleCredentialDialog = undefined
+      this.visibleCredentialVendorType = undefined
     },
     sortItems (items, sortByArr, secondSortCriteria) {
       const sortByObj = head(sortByArr)

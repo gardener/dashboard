@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :is="resolvedComponent"
     v-if="visibleDialog"
     v-model="visibleDialogState"
-    v-bind="{ credential: selectedDnsCredential, binding: selectedInfraBinding, providerType: visibleDialog }"
+    v-bind="{ credential: selectedDnsCredential, binding: selectedInfraBinding, providerType: visibleDialog, vendorType: visibleDialogVendorType }"
   />
 </template>
 
@@ -26,6 +26,7 @@ export default {
     selectedDnsCredential: { type: Object, required: false },
     selectedInfraBinding: { type: Object, required: false },
     visibleDialog: { type: String, required: false },
+    visibleDialogVendorType: { type: String, required: false },
   },
   emits: ['dialog-closed'],
   data () {

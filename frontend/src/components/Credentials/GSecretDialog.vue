@@ -209,6 +209,10 @@ export default {
       type: String,
       required: true,
     },
+    vendorType: {
+      type: String,
+      required: true,
+    },
     binding: {
       type: Object,
     },
@@ -363,7 +367,10 @@ export default {
       }
     },
     displayName () {
-      return this.vendorDisplayName(this.providerType)
+      return this.vendorDisplayName({
+        type: this.vendorType,
+        name: this.providerType,
+      })
     },
     name: {
       get () {

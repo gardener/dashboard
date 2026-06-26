@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-vendor-icon
           :name="providerType"
+          :vendor-type="vendorType"
         />
         <span
           v-if="description"
@@ -38,6 +39,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item-title class="d-flex">
             <g-vendor-icon
               :name="providerType"
+              :vendor-type="vendorType"
               class="mr-2"
             />
             {{ vendorName }}
@@ -82,6 +84,10 @@ export default {
     },
     providerType: {
       type: String,
+    },
+    vendorType: {
+      type: String,
+      required: true,
     },
     region: {
       type: String,
@@ -152,7 +158,13 @@ export default {
       return this.shootCloudProfileRef.name
     },
     vendorName () {
-      return this.vendorDisplayName(this.providerType)
+      if (!this.vendorType || !this.providerType) {
+        return undefined
+      }
+      return this.vendorDisplayName({
+        type: this.vendorType,
+        name: this.providerType,
+      })
     },
   },
   methods: {

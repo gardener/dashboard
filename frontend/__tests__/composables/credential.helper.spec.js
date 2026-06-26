@@ -35,9 +35,9 @@ function createSecretData () {
 }
 
 describe('secretDetails', () => {
-  const providerTypes = [
-    ...infraProviders.map(({ name }) => name),
-    ...dnsProviders.map(({ name }) => name),
+  const providerConfigs = [
+    ...infraProviders,
+    ...dnsProviders,
   ]
 
   it('matches snapshots for all known provider types (including unhandled types)', () => {
@@ -46,8 +46,8 @@ describe('secretDetails', () => {
     }
 
     const detailsByProviderType = Object.fromEntries(
-      providerTypes.map(providerType => {
-        return [providerType, secretDetails({ secret, providerType })]
+      providerConfigs.map(providerConfig => {
+        return [providerConfig.name, secretDetails({ secret, providerConfig })]
       }),
     )
 
@@ -59,11 +59,13 @@ describe('secretDetails', () => {
       data: createSecretData(),
     }
 
-    expect(secretDetails({ secret, providerType: 'unknown-provider' })).toMatchSnapshot()
+    expect(secretDetails({ secret, providerConfig: undefined })).toMatchSnapshot()
   })
 
   it('does not throw when secret is undefined', () => {
-    expect(secretDetails({ secret: undefined, providerType: 'aws' })).toEqual([
+    const providerConfig = infraProviders.find(({ name }) => name === 'aws')
+
+    expect(secretDetails({ secret: undefined, providerConfig })).toEqual([
       {
         label: 'Access Key ID',
         value: undefined,
@@ -80,14 +82,17 @@ describe('secretDetails', () => {
       },
     }
 
-    expect(secretDetails({ secret, providerType: 'gcp' })).toEqual([
+    const gcpProviderConfig = infraProviders.find(({ name }) => name === 'gcp')
+    const googleCloudDnsProviderConfig = dnsProviders.find(({ name }) => name === 'google-clouddns')
+
+    expect(secretDetails({ secret, providerConfig: gcpProviderConfig })).toEqual([
       {
         label: 'Project',
         value: undefined,
       },
     ])
 
-    expect(secretDetails({ secret, providerType: 'google-clouddns' })).toEqual([
+    expect(secretDetails({ secret, providerConfig: googleCloudDnsProviderConfig })).toEqual([
       {
         label: 'Project',
         value: undefined,

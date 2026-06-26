@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :credential="credential"
           :shared="isSharedBinding"
           :provider-type="providerType"
+          :vendor-type="vendorType"
         />
       </v-card>
     </v-tooltip>
@@ -83,6 +84,7 @@ const {
   credentialNamespace,
   isOrphanedBinding,
   providerType,
+  vendorType,
   resourceName,
   resourceNamespace,
   resourceUid,

@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-vendor
         extended
         :provider-type="item.providerType"
+        vendor-type="infra"
       />
     </td>
     <td v-if="selectedHeaders.details">
@@ -37,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         :credential="item.credential"
         :shared="item.isSharedBinding"
         :provider-type="item.providerType"
+        vendor-type="infra"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">

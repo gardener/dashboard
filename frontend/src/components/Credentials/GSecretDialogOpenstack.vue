@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
+    :vendor-type="vendorType"
   >
     <template #secret-slot>
       <GGenericInputField
@@ -127,6 +128,10 @@ export default {
     providerType: {
       type: String,
     },
+    vendorType: {
+      type: String,
+      required: true,
+    },
   },
   emits: [
     'update:modelValue',
@@ -201,7 +206,10 @@ export default {
       return Object.fromEntries(this.providerFields.map(field => [field.key, field]))
     },
     providerFields () {
-      return this.vendorDetails(this.providerType)?.secret?.fields ?? []
+      return this.vendorDetails({
+        type: this.vendorType,
+        name: this.providerType,
+      })?.secret?.fields ?? []
     },
     valid () {
       return !this.v$.$invalid

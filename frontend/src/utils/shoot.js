@@ -6,8 +6,6 @@
 
 import { Netmask } from 'netmask'
 
-import knownInfraVendors from '@/data/vendors/infra'
-
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
@@ -19,15 +17,8 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
-import find from 'lodash/find'
 
 const DEFAULT_WORKER_CIDR_PLACEHOLDER = '__DEFAULT_WORKER_CIDR__'
-
-function resolveShootVendor (providerType) {
-  return find(knownInfraVendors, vendor => {
-    return vendor?.name === providerType
-  })
-}
 
 function replacePlaceholderInTemplate (value, defaultWorkerCIDR) {
   if (typeof value === 'string') {
@@ -46,20 +37,20 @@ function replacePlaceholderInTemplate (value, defaultWorkerCIDR) {
   return value
 }
 
-export function getSpecTemplate (providerType, defaultWorkerCIDR) {
+export function getSpecTemplate (providerType, defaultWorkerCIDR, shootVendor) {
   const spec = {
-    provider: getProviderTemplate(providerType, defaultWorkerCIDR),
-    networking: getNetworkingTemplate(providerType, defaultWorkerCIDR),
+    provider: getProviderTemplate(providerType, defaultWorkerCIDR, shootVendor),
+    networking: getNetworkingTemplate(providerType, defaultWorkerCIDR, shootVendor),
   }
-  const kubernetes = getKubernetesTemplate(providerType)
+  const kubernetes = getKubernetesTemplate(shootVendor)
   if (!isEmpty(kubernetes)) {
     spec.kubernetes = kubernetes
   }
   return spec
 }
 
-export function getProviderTemplate (providerType, defaultWorkerCIDR) {
-  const template = resolveShootVendor(providerType)?.shoot?.templates?.provider
+export function getProviderTemplate (providerType, defaultWorkerCIDR, shootVendor) {
+  const template = shootVendor?.shoot?.templates?.provider
   if (!template) {
     return {
       type: providerType,
@@ -69,8 +60,8 @@ export function getProviderTemplate (providerType, defaultWorkerCIDR) {
   return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
-export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
-  const template = resolveShootVendor(providerType)?.shoot?.templates?.networking
+export function getNetworkingTemplate (providerType, defaultWorkerCIDR, shootVendor) {
+  const template = shootVendor?.shoot?.templates?.networking
   if (!template) {
     return {
       nodes: defaultWorkerCIDR,
@@ -80,8 +71,8 @@ export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
   return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
-export function getKubernetesTemplate (providerType) {
-  return resolveShootVendor(providerType)?.shoot?.templates?.kubernetes
+export function getKubernetesTemplate (shootVendor) {
+  return shootVendor?.shoot?.templates?.kubernetes
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
@@ -102,8 +93,8 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   return cidrArray
 }
 
-export function getDefaultNetworkConfigurationForAllZones (numberOfZones, providerType, workerCIDR) {
-  switch (resolveShootVendor(providerType)?.shoot?.zoneNetworking?.strategy) {
+export function getDefaultNetworkConfigurationForAllZones (numberOfZones, workerCIDR, shootVendor) {
+  switch (shootVendor?.shoot?.zoneNetworking?.strategy) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
@@ -132,8 +123,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, provid
   }
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, providerType, maxNumberOfZones, workerCIDR) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
+export function getDefaultZonesNetworkConfiguration (zones, maxNumberOfZones, workerCIDR, shootVendor) {
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, workerCIDR, shootVendor)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -146,12 +137,12 @@ export function getDefaultZonesNetworkConfiguration (zones, providerType, maxNum
   })
 }
 
-export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, providerType, maxNumberOfZones) {
+export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, maxNumberOfZones, shootVendor) {
   if (!existingZonesNetworkConfiguration) {
-    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
+    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, workerCIDR, shootVendor)
   }
   for (let numberOfZones = maxNumberOfZones; numberOfZones >= existingZonesNetworkConfiguration.length; numberOfZones--) {
-    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, providerType, workerCIDR)
+    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, workerCIDR, shootVendor)
     const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
       return !some(existingZonesNetworkConfiguration, networkConfiguration)
     })
@@ -163,15 +154,15 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, providerType, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
-  if (isEmpty(workers) || !providerType || !maxNumberOfZones) {
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR, shootVendor) {
+  if (isEmpty(workers) || !maxNumberOfZones) {
     return
   }
 
   const usedZones = uniq(flatMap(workers, 'zones'))
 
   const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, providerType, maxNumberOfZones, workerCIDR)
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, maxNumberOfZones, workerCIDR, shootVendor)
   if (!defaultZonesNetworkConfiguration) {
     return
   }
@@ -179,7 +170,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   const existingZonesNetworkConfiguration = filter(oldZonesNetworkConfiguration, ({ name }) => includes(usedZones, name))
 
   if (existingShootWorkerCIDR) {
-    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, providerType, maxNumberOfZones)
+    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, maxNumberOfZones, shootVendor)
     const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
     if (availableNetworksLength < usedZones.length) {
       return
@@ -211,9 +202,9 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
     : existingZonesNetworkConfiguration
 }
 
-export function getControlPlaneZone (workers, providerType, oldControlPlaneZone) {
+export function getControlPlaneZone (workers, shootVendor, oldControlPlaneZone) {
   const workerZones = uniq(flatMap(workers, 'zones'))
-  switch (resolveShootVendor(providerType)?.shoot?.controlPlane?.zoneStrategy) {
+  switch (shootVendor?.shoot?.controlPlane?.zoneStrategy) {
     case 'worker-zones':
       if (includes(workerZones, oldControlPlaneZone)) {
         return oldControlPlaneZone
@@ -224,6 +215,6 @@ export function getControlPlaneZone (workers, providerType, oldControlPlaneZone)
   }
 }
 
-export function getWorkerProviderConfig (providerType) {
-  return resolveShootVendor(providerType)?.shoot?.workerProviderConfig
+export function getWorkerProviderConfig (shootVendor) {
+  return shootVendor?.shoot?.workerProviderConfig
 }

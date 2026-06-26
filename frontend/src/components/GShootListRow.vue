@@ -48,6 +48,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'infrastructure'">
         <g-vendor
           :provider-type="shootProviderType"
+          vendor-type="infra"
           :region="shootRegion"
           :zones="shootZones"
         />

@@ -34,6 +34,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
+import { mapActions } from 'pinia'
+
+import { useConfigStore } from '@/store/config'
+
 import {
   secretDetails,
   isSecret,
@@ -53,6 +57,9 @@ export default {
     providerType: {
       type: String,
     },
+    vendorType: {
+      type: String,
+    },
     detailsTitle: {
       type: Boolean,
       default: false,
@@ -69,7 +76,23 @@ export default {
           },
         ]
       } else if (isSecret(this.credential)) {
-        const details = secretDetails({ secret: this.credential, providerType: this.providerType })
+        if (!this.vendorType || !this.providerType) {
+          return [
+            {
+              label: this.credential?.kind || 'Unknown',
+              value: 'Details not available',
+              disabledText: true,
+            },
+          ]
+        }
+        const providerConfig = this.vendorDetails({
+          type: this.vendorType,
+          name: this.providerType,
+        })
+        const details = secretDetails({
+          secret: this.credential,
+          providerConfig,
+        })
         if (details) {
           return details
         }
@@ -90,6 +113,9 @@ export default {
         },
       ]
     },
+  },
+  methods: {
+    ...mapActions(useConfigStore, ['vendorDetails']),
   },
 }
 </script>
