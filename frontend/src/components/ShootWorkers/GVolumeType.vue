@@ -56,6 +56,7 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
 
 import { getErrorMessages } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/shoot'
@@ -151,6 +152,9 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByRef',
     ]),
+    ...mapActions(useConfigStore, [
+      'vendorDetails',
+    ]),
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
       this.$emit('updateVolumeType')
@@ -159,7 +163,10 @@ export default {
       const iopsValue = parseInt(value)
       if (value && iopsValue > 0) {
         if (!this.worker.providerConfig) {
-          this.worker.providerConfig = getWorkerProviderConfig('aws')
+          this.worker.providerConfig = getWorkerProviderConfig(this.vendorDetails({
+            type: 'infra',
+            name: 'aws',
+          }))
         }
         set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
       } else {

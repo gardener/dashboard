@@ -9,6 +9,11 @@ import {
   getZonesNetworkConfiguration,
   findFreeNetworks,
 } from '@/utils/shoot'
+import infraProviders from '@/data/vendors/infra'
+
+function infraVendor (name) {
+  return infraProviders.find(vendor => vendor.name === name)
+}
 
 describe('utils', () => {
   describe('createShoot', () => {
@@ -79,7 +84,7 @@ describe('utils', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 'aws', 4)
+        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, infraVendor('aws'))
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(2)
       })
@@ -113,7 +118,7 @@ describe('utils', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 'aws', 4)
+        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, infraVendor('aws'))
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(0)
       })
@@ -129,7 +134,7 @@ describe('utils', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 'aws', 4)
+        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, infraVendor('aws'))
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(0)
       })
@@ -137,7 +142,7 @@ describe('utils', () => {
       it('should return networks for all zones if existingZonesNetworkConfiguration is undefined', () => {
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(undefined, workerCIDR, 'aws', 4)
+        const freeNetworks = findFreeNetworks(undefined, workerCIDR, 4, infraVendor('aws'))
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(4)
       })
@@ -185,23 +190,23 @@ describe('utils', () => {
       ]
 
       it('should return undefined for infrastructures that do not require network config for zones (new cluster)', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'azure', 3, undefined, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, undefined, nodeCIDR, infraVendor('azure'))
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
 
       it('should return undefined for infrastructures that do not require network config for zones (existing cluster)', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'azure', 3, nodeCIDR, undefined)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, nodeCIDR, undefined, infraVendor('azure'))
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
 
       it('should return initial network config', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 'aws', 3, undefined, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, undefined, nodeCIDR, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
       })
 
       it('should keep network config if zones are the same', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3, undefined, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 3, undefined, nodeCIDR, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -225,7 +230,7 @@ describe('utils', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3, undefined, newNodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 3, undefined, newNodeCIDR, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(newCustomZonesNetworkConfiguration)
@@ -245,7 +250,7 @@ describe('utils', () => {
             ],
           },
         ]
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, undefined, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 3, undefined, nodeCIDR, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).not.toEqual(customZonesNetworkConfiguration)
@@ -260,7 +265,7 @@ describe('utils', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, nodeCIDR, undefined)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 3, nodeCIDR, undefined, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -298,7 +303,7 @@ describe('utils', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR, undefined)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 3, nodeCIDR, undefined, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(3)
         expect(zonesNetworkConfiguration).toEqual(newZonesNetworkConfiguration)
@@ -320,7 +325,7 @@ describe('utils', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 'aws', 3, nodeCIDR, undefined)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 3, nodeCIDR, undefined, infraVendor('aws'))
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
     })
