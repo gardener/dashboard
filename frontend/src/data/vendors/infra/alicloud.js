@@ -94,7 +94,7 @@ export default {
         },
       },
       {
-        key: 'secretAccessKey',
+        key: 'accessKeySecret',
         label: 'Access Key Secret',
         hint: 'e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz',
         type: 'text',
