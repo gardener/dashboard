@@ -35,7 +35,8 @@ export function useTableFilter (options = {}) {
       return items.value
     }
 
-    return items.value.filter(item => filterFn(item, query))
+    const predicate = filterFn(query)
+    return items.value.filter(predicate)
   })
 
   return {

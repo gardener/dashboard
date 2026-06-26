@@ -21,7 +21,7 @@ describe('composables/useTableFilter', () => {
         { id: 2, name: 'Bob' },
       ])
       const searchQuery = ref('')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 
@@ -35,7 +35,7 @@ describe('composables/useTableFilter', () => {
         { id: 2, name: 'Bob' },
       ])
       const searchQuery = ref('   ')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 
@@ -49,7 +49,7 @@ describe('composables/useTableFilter', () => {
         { id: 3, name: 'Charlie' },
       ])
       const searchQuery = ref('ali')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 
@@ -63,7 +63,7 @@ describe('composables/useTableFilter', () => {
         { id: 2, name: 'Bob' },
       ])
       const searchQuery = ref('ALICE')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 
@@ -78,7 +78,7 @@ describe('composables/useTableFilter', () => {
         { id: 3, name: 'Charlie' },
       ])
       const searchQuery = ref('ali')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 
@@ -98,7 +98,7 @@ describe('composables/useTableFilter', () => {
         { id: 2, name: 'Bob' },
       ])
       const searchQuery = ref('ali')
-      const filterFn = (item, query) => item.name.toLowerCase().includes(query.toLowerCase())
+      const filterFn = query => item => item.name.toLowerCase().includes(query.toLowerCase())
 
       const { filteredItems } = useTableFilter({ items, searchQuery, filterFn })
 

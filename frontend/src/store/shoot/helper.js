@@ -171,6 +171,10 @@ export function getRawVal (context, item, column) {
       return get(spec, ['kubernetes', 'version'])
     case 'infrastructure':
       return `${get(spec, ['provider', 'type'])} ${get(spec, ['region'])}`
+    case 'provider':
+      return get(spec, ['provider', 'type'])
+    case 'region':
+      return get(spec, ['region'])
     case 'seed':
       return get(item, ['spec', 'seedName'])
     case 'ticketLabels': {
@@ -286,6 +290,19 @@ export function getSortVal (state, context, item, sortBy) {
   }
 }
 
+// Built-in fields addressable with `field:value` in the search.
+const QUALIFIED_SEARCH_FIELDS = Object.freeze([
+  'name',
+  'project',
+  'seed',
+  'purpose',
+  'infrastructure',
+  'provider',
+  'region',
+  'k8sVersion',
+  'createdBy',
+])
+
 export function searchItemsFn (state, context) {
   const {
     shootCustomFieldsComposable,
@@ -299,38 +316,29 @@ export function searchItemsFn (state, context) {
     return filter(shootCustomFields.value, ['searchable', true])
   })
 
-  let searchQuery
-  let searchQueryTerms = []
-  let lastSearch
+  return search => {
+    const searchQuery = parseSearch(search, QUALIFIED_SEARCH_FIELDS)
 
-  return (search, item) => {
-    if (search !== lastSearch) {
-      lastSearch = search
-      searchQuery = parseSearch(search)
-      searchQueryTerms = map(searchQuery.terms, 'value')
-    }
-
-    if (searchQueryTerms.includes('workerless')) {
-      if (getRawVal(context, item, 'workers') === 0) {
-        return true
+    return item => {
+      const fields = {
+        name: getRawVal(context, item, 'name'),
+        provider: getRawVal(context, item, 'provider'),
+        region: getRawVal(context, item, 'region'),
+        seed: getRawVal(context, item, 'seed'),
+        project: getRawVal(context, item, 'project'),
+        createdBy: getRawVal(context, item, 'createdBy'),
+        purpose: getRawVal(context, item, 'purpose'),
+        k8sVersion: getRawVal(context, item, 'k8sVersion'),
+        ticketLabels: getRawVal(context, item, 'ticketLabels'),
+        errorCodes: getRawVal(context, item, 'errorCodes'),
+        controlPlaneHighAvailability: getRawVal(context, item, 'controlPlaneHighAvailability'),
       }
+      Object.assign(fields, Object.fromEntries(
+        searchableCustomFields.value.map(({ key }) => [key, getRawVal(context, item, key)]),
+      ))
+
+      return searchQuery.matches(fields)
     }
-
-    const values = [
-      getRawVal(context, item, 'name'),
-      getRawVal(context, item, 'infrastructure'),
-      getRawVal(context, item, 'seed'),
-      getRawVal(context, item, 'project'),
-      getRawVal(context, item, 'createdBy'),
-      getRawVal(context, item, 'purpose'),
-      getRawVal(context, item, 'k8sVersion'),
-      getRawVal(context, item, 'ticketLabels'),
-      getRawVal(context, item, 'errorCodes'),
-      getRawVal(context, item, 'controlPlaneHighAvailability'),
-      ...map(searchableCustomFields.value, ({ key }) => getRawVal(context, item, key)),
-    ]
-
-    return searchQuery.matches(values)
   }
 }
 

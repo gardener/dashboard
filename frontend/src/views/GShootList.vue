@@ -647,7 +647,7 @@ export default {
     filteredItems () {
       const query = this.debouncedShootSearch
       return query
-        ? filter(this.items, item => this.searchItems(query, item))
+        ? filter(this.items, this.searchItems(query))
         : [...this.items]
     },
     sortedAndFilteredItems () {
