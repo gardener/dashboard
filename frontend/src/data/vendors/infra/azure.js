@@ -91,6 +91,9 @@ export default {
         nodes: '__DEFAULT_WORKER_CIDR__',
       },
     },
+    zones: {
+      mode: 'infrastructure-config-zoned',
+    },
   },
   secret: {
     details: [
