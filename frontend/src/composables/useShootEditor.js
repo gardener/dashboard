@@ -157,7 +157,7 @@ export function useShootEditor (initialValue, options = {}) {
 
   function getEditorValue () {
     const value = cm?.getDocValue()
-    return value
+    return value?.trim()
       ? yamlLoad(value)
       : null
   }
