@@ -43,6 +43,9 @@ export default {
         },
       },
     },
+    zones: {
+      mode: 'never',
+    },
   },
   secret: {
     details: [
