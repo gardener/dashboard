@@ -75,6 +75,9 @@ export default {
           required: {
             type: 'required',
           },
+          guid: {
+            type: 'guid',
+          },
         },
       },
       {
@@ -84,6 +87,9 @@ export default {
         validators: {
           required: {
             type: 'required',
+          },
+          guid: {
+            type: 'guid',
           },
         },
       },

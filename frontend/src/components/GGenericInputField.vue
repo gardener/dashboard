@@ -73,11 +73,14 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useStructuredTextField } from '@/composables/useStructuredTextField'
+import { useLogger } from '@/composables/useLogger'
 
 import {
   withFieldName,
   withMessage,
   guid,
+  alphaNumUnderscore,
+  base64,
 } from '@/utils/validators'
 import {
   getErrorMessages,
@@ -123,6 +126,7 @@ const emit = defineEmits([
 ])
 
 const fieldRef = useTemplateRef('fieldRef')
+const logger = useLogger()
 
 const fieldType = computed(() => props.field.type)
 
@@ -236,6 +240,12 @@ const rules = computed(() => {
       case 'guid':
         set(compiledValidators, [validatorName], guid)
         break
+      case 'alphaNumUnderscore':
+        set(compiledValidators, [validatorName], alphaNumUnderscore)
+        break
+      case 'base64':
+        set(compiledValidators, [validatorName], base64)
+        break
       case 'url':
         set(compiledValidators, [validatorName], url)
         break
@@ -284,9 +294,13 @@ const rules = computed(() => {
           }
         }
         break
+      default:
+        logger.warn(`Ignoring unsupported validator type '${validator.type}' for field '${props.field.key}'`)
+        break
     }
-    if (validator.message) {
-      set(compiledValidators, [validatorName], withMessage(validator.message, get(compiledValidators, [validatorName])))
+    const compiledValidator = get(compiledValidators, [validatorName])
+    if (validator.message && compiledValidator) {
+      set(compiledValidators, [validatorName], withMessage(validator.message, compiledValidator))
     }
   })
   return {
