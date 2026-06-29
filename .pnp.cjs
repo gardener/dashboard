@@ -1057,7 +1057,7 @@ const RAW_RUNTIME_STATE =
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
           ["get-contrast", "npm:3.0.0"],\
           ["highlight.js", "npm:11.11.1"],\
-          ["js-base64", "npm:3.7.8"],\
+          ["js-base64", "npm:3.8.0"],\
           ["js-cookie", "npm:3.0.8"],\
           ["js-yaml", "npm:4.2.0"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
@@ -8586,10 +8586,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["js-base64", [\
-      ["npm:3.7.8", {\
-        "packageLocation": "./.yarn/cache/js-base64-npm-3.7.8-9f909e04ee-a4452a7e7f.zip/node_modules/js-base64/",\
+      ["npm:3.8.0", {\
+        "packageLocation": "./.yarn/cache/js-base64-npm-3.8.0-3c769de0ff-f04b51fef1.zip/node_modules/js-base64/",\
         "packageDependencies": [\
-          ["js-base64", "npm:3.7.8"]\
+          ["js-base64", "npm:3.8.0"]\
         ],\
         "linkType": "HARD"\
       }]\
