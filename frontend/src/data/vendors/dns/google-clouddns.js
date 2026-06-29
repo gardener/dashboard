@@ -15,7 +15,16 @@ export default {
     details: [
       {
         label: 'Project',
-        valueFrom: 'gcpDnsProject',
+        valueFrom: [
+          {
+            key: 'project',
+          },
+          {
+            key: 'serviceaccount.json',
+            parse: 'json',
+            path: 'project_id',
+          },
+        ],
       },
     ],
     fields: gcp.secret.fields,

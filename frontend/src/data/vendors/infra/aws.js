@@ -32,7 +32,14 @@ export default {
       },
     },
     zoneNetworking: {
-      strategy: 'aws',
+      strategy: 'split-workers-public-internal',
+    },
+    workerVolume: {
+      iops: {
+        min: 100,
+        hiddenForVolumeTypes: ['gp2'],
+        requiredForVolumeTypes: ['io1', 'io2'],
+      },
     },
     workerProviderConfig: {
       apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',

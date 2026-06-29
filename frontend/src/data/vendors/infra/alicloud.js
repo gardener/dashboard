@@ -32,7 +32,7 @@ export default {
       },
     },
     zoneNetworking: {
-      strategy: 'alicloud',
+      strategy: 'split-workers',
     },
   },
   secret: {

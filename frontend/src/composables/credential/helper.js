@@ -29,27 +29,70 @@ function decodeSecretValue (secretData, key) {
   return decodeBase64(value)
 }
 
-function getGCPProjectId (secretData) {
-  const serviceAccount = get(secretData, ['serviceaccount.json'])
-  if (!serviceAccount) {
-    return undefined
-  }
-
-  try {
-    return get(JSON.parse(decodeBase64(serviceAccount)), ['project_id'])
-  } catch {
-    return undefined
+function parseSecretDetailValue (value, parse) {
+  switch (parse) {
+    case 'json':
+      try {
+        return JSON.parse(value)
+      } catch {
+        return undefined
+      }
+    default:
+      return value
   }
 }
 
-function getGCPDNSProject (secretData) {
-  return decodeSecretValue(secretData, 'project') || getGCPProjectId(secretData)
+function resolveSecretDetailValueFromSource (secretData, source) {
+  if (!source) {
+    return undefined
+  }
+
+  if (typeof source === 'string') {
+    return decodeSecretValue(secretData, source)
+  }
+
+  const {
+    key,
+    decode = true,
+    parse,
+    path,
+  } = source
+
+  if (!key) {
+    return undefined
+  }
+
+  let value = decode
+    ? decodeSecretValue(secretData, key)
+    : get(secretData, [key])
+
+  if (value === undefined) {
+    return undefined
+  }
+
+  value = parseSecretDetailValue(value, parse)
+
+  if (path) {
+    return get(value, path)
+  }
+
+  return value
 }
 
-const detailValueResolver = new Map([
-  ['gcpProjectId', getGCPProjectId],
-  ['gcpDnsProject', getGCPDNSProject],
-])
+function resolveSecretDetailValue (secretData, valueFrom) {
+  const sources = Array.isArray(valueFrom)
+    ? valueFrom
+    : [valueFrom]
+
+  for (const source of sources) {
+    const value = resolveSecretDetailValueFromSource(secretData, source)
+    if (value !== undefined) {
+      return value
+    }
+  }
+
+  return undefined
+}
 
 function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
   const detailDefinitions = get(providerConfig, ['secret', 'details'])
@@ -71,10 +114,9 @@ function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
     }
 
     if (valueFrom) {
-      const resolver = detailValueResolver.get(valueFrom)
       return {
         label,
-        value: resolver?.(secretData),
+        value: resolveSecretDetailValue(secretData, valueFrom),
       }
     }
 

@@ -37,7 +37,11 @@ export default {
     details: [
       {
         label: 'Project',
-        valueFrom: 'gcpProjectId',
+        valueFrom: {
+          key: 'serviceaccount.json',
+          parse: 'json',
+          path: 'project_id',
+        },
       },
     ],
     fields: [

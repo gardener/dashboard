@@ -641,16 +641,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   const isZonedCluster = computed(() => {
-    switch (providerType.value) {
-      case 'azure':
-        if (isNewCluster.value) {
-          return true // new clusters are always created as zoned clusters by the dashboard
-        }
+    switch (providerVendor.value?.shoot?.zones?.mode) {
+      case 'infrastructure-config-zoned':
         return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
-      case 'metal':
-        return false // metal clusters do not support zones for worker groups
-      case 'local':
-        return false // local development provider does not support zones
+      case 'never':
+        return false
+      case 'always':
       default:
         return true
     }

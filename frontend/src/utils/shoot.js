@@ -95,10 +95,10 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 
 export function getDefaultNetworkConfigurationForAllZones (numberOfZones, workerCIDR, shootVendor) {
   switch (shootVendor?.shoot?.zoneNetworking?.strategy) {
-    case 'aws': {
-      const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
+    case 'split-workers-public-internal': {
+      const zoneNetworks = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
-        const zoneNetwork = zoneNetworksAws[index] // eslint-disable-line security/detect-object-injection
+        const zoneNetwork = zoneNetworks[index] // eslint-disable-line security/detect-object-injection
         const bigNetWorks = splitCIDR(zoneNetwork, 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
@@ -111,10 +111,10 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, worker
         }
       })
     }
-    case 'alicloud': {
-      const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
+    case 'split-workers': {
+      const zoneNetworks = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
-        const zoneNetwork = zoneNetworksAli[index] // eslint-disable-line security/detect-object-injection
+        const zoneNetwork = zoneNetworks[index] // eslint-disable-line security/detect-object-injection
         return {
           workers: zoneNetwork,
         }
