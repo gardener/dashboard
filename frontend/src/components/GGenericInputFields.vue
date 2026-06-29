@@ -29,6 +29,7 @@ import {
 import GGenericInputField from '@/components/GGenericInputField'
 
 import isEmpty from 'lodash/isEmpty'
+import fromPairs from 'lodash/fromPairs'
 
 const props = defineProps({
   fields: {
@@ -59,16 +60,27 @@ const emit = defineEmits([
 
 const fieldData = ref({})
 
+function defaultFieldData (fields = []) {
+  return fromPairs(
+    fields
+      .filter(field => Object.prototype.hasOwnProperty.call(field, 'defaultValue'))
+      .map(field => [field.key, field.defaultValue]),
+  )
+}
+
 watch(() => fieldData.value, () => {
   emit('update:modelValue', fieldData.value)
 }, {
   deep: true,
 })
 
-watch(() => props.modelValue, value => {
-  if (isEmpty(fieldData.value) && !isEmpty(value)) {
-    // set initial data
-    fieldData.value = value
+watch([() => props.fields, () => props.modelValue], ([fields, value]) => {
+  if (isEmpty(fieldData.value)) {
+    // set initial data, including configured defaults
+    fieldData.value = {
+      ...defaultFieldData(fields),
+      ...(value ?? {}),
+    }
   }
 }, {
   immediate: true,

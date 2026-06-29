@@ -60,7 +60,7 @@ export default {
           projectID: {
             type: 'hasObjectProp',
             key: 'project_id',
-            pattern: /^[a-z][a-z0-9-]{4,28}[a-z0-9]+$/,
+            pattern: /^[a-z][a-z0-9-]{4,28}[a-z0-9]$/,
           },
           type: {
             type: 'hasObjectProp',

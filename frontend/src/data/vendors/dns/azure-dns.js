@@ -23,12 +23,21 @@ export default {
       {
         key: 'AZURE_CLOUD',
         label: 'Azure Cloud',
-        type: 'text',
-        validators: {
-          required: {
-            type: 'required',
+        type: 'select',
+        values: [
+          {
+            title: 'AzurePublic',
+            value: 'AzurePublic',
           },
-        },
+          {
+            title: 'AzureChina',
+            value: 'AzureChina',
+          },
+          {
+            title: 'AzureGovernment',
+            value: 'AzureGovernment',
+          },
+        ],
       },
     ],
     help: `

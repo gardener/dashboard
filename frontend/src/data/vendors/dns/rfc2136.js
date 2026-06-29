@@ -84,6 +84,7 @@ export default {
         key: 'TSIGSecretAlgorithm',
         label: 'TSIG Secret Algorithm',
         type: 'select',
+        defaultValue: 'hmac-sha256',
         values: [
           {
             title: 'HMAC-SHA256 (default)',
@@ -110,11 +111,6 @@ export default {
             value: 'hmac-md5',
           },
         ],
-        validators: {
-          required: {
-            type: 'required',
-          },
-        },
       },
     ],
     help: `

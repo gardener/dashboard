@@ -52,6 +52,14 @@ export default {
           required: {
             type: 'required',
           },
+          minLength: {
+            type: 'minLength',
+            length: 16,
+          },
+          maxLength: {
+            type: 'maxLength',
+            length: 128,
+          },
         },
       },
       {
@@ -62,6 +70,10 @@ export default {
         validators: {
           required: {
             type: 'required',
+          },
+          minLength: {
+            type: 'minLength',
+            length: 30,
           },
         },
       },
