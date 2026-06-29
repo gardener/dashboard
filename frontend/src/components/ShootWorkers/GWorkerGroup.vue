@@ -375,7 +375,7 @@ import {
   computed,
   ref,
 } from 'vue'
-import yaml from 'js-yaml'
+import { dump as yamlDump } from 'js-yaml'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
@@ -499,7 +499,7 @@ export default {
       return 'mdi-information-outline'
     },
     workerGroupYaml () {
-      return yaml.dump(this.workerGroup)
+      return yamlDump(this.workerGroup)
     },
     chipColor () {
       return !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'

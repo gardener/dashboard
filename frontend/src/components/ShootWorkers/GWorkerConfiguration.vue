@@ -105,7 +105,7 @@ import {
   provide,
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import yaml from 'js-yaml'
+import { dump as yamlDump } from 'js-yaml'
 
 import GActionButtonDialog from '@/components/dialogs/GActionButtonDialog'
 import GCodeBlock from '@/components/GCodeBlock'
@@ -169,7 +169,7 @@ export default {
     const newZonesYaml = computed(() => {
       return isEmpty(newZoneNetworks.value)
         ? undefined
-        : yaml.dump(newZoneNetworks.value)
+        : yamlDump(newZoneNetworks.value)
     })
 
     const editorData = computed({

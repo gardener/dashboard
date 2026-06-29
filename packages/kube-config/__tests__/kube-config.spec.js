@@ -9,7 +9,7 @@ import fs from 'fs'
 import fsp from 'fs/promises'
 import path from 'path'
 import os from 'os'
-import yaml from 'js-yaml'
+import { dump as yamlDump, load as yamlLoad } from 'js-yaml'
 import { cloneDeep } from 'lodash-es'
 import Config from '../lib/Config.js'
 import config from '../lib/index.js'
@@ -132,7 +132,7 @@ describe('kube-config', () => {
 
     it('should return the config from the users homedir', async () => {
       const defaultKubeconfigPath = path.join(os.homedir(), '.kube', 'config')
-      const kubeconfig = yaml.dump({
+      const kubeconfig = yamlDump({
         apiVersion: 'v1',
         kind: 'Config',
         clusters: [{
@@ -212,7 +212,7 @@ describe('kube-config', () => {
           'certificate-authority': '/path/to/ca.crt',
         },
       })
-      kubeconfig = yaml.dump(kubeconfig)
+      kubeconfig = yamlDump(kubeconfig)
       fs.readFileSync.mockImplementation(path => {
         switch (path) {
           case '/path/to/ca.crt':
@@ -419,7 +419,7 @@ describe('kube-config', () => {
 
   describe('#dumpKubeconfig', () => {
     it('should dump KUBECONFIG without providing a ca', () => {
-      const kubeconfig = yaml.load(dumpKubeconfig({
+      const kubeconfig = yamlLoad(dumpKubeconfig({
         userName: user,
         namespace,
         token,

@@ -6,7 +6,10 @@
 
 import _ from 'lodash-es'
 import { GoogleToken } from 'gtoken'
-import yaml from 'js-yaml'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
 
 const PROPERTY_NAMES = ['apiVersion', 'kind', 'current-context', 'contexts', 'clusters', 'users']
 
@@ -16,7 +19,7 @@ class Config {
       throw new TypeError('Kubeconfig must not be empty')
     }
     if (typeof input === 'string') {
-      input = yaml.load(input)
+      input = yamlLoad(input)
     }
     input = _
       .chain(input)
@@ -70,7 +73,7 @@ class Config {
   }
 
   toYAML () {
-    return yaml.dump(this.toJSON())
+    return yamlDump(this.toJSON())
   }
 
   clean () {

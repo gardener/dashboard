@@ -14,7 +14,7 @@ import {
   watch,
 } from 'vue'
 import { useTheme } from 'vuetify'
-import yaml from 'js-yaml'
+import { dump as yamlDump } from 'js-yaml'
 
 import { useLocalStorageStore } from '@/store/localStorage'
 
@@ -95,7 +95,7 @@ export function useSeedEditor (initialValue, options = {}) {
       cm = useCodemirror(element, {
         ...options,
         schemaDefinition,
-        doc: yaml.dump(seedItem.value),
+        doc: yamlDump(seedItem.value),
         onDocChanged ({ modified, undoDepth, redoDepth }) {
           if (!touched.value && modified) {
             touched.value = true
@@ -128,7 +128,7 @@ export function useSeedEditor (initialValue, options = {}) {
 
   function setEditorValue (value) {
     if (value) {
-      cm?.setDocValue(yaml.dump(value))
+      cm?.setDocValue(yamlDump(value))
     }
   }
 

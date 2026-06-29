@@ -1000,7 +1000,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.4"],\
           ["eslint-plugin-import", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:2.32.0"],\
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
-          ["js-yaml", "npm:4.2.0"],\
+          ["js-yaml", "npm:5.0.0"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:0.13.0"],\
           ["vitest", "virtual:dee42bbf2b8a9fdc35f5ff723774d473a27fbd01ca23e57b4dfc5e6f05027029778468ff50260c9f7c32df316ded00563e6ff4412b3cc55fa5cf2903cb91f445#npm:4.1.7"]\
