@@ -17,6 +17,7 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
+import cloneDeep from 'lodash/cloneDeep'
 
 const DEFAULT_WORKER_CIDR_PLACEHOLDER = '__DEFAULT_WORKER_CIDR__'
 
@@ -72,7 +73,7 @@ export function getNetworkingTemplate (providerType, defaultWorkerCIDR, shootVen
 }
 
 export function getKubernetesTemplate (shootVendor) {
-  return shootVendor?.shoot?.templates?.kubernetes
+  return cloneDeep(shootVendor?.shoot?.templates?.kubernetes)
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
@@ -216,5 +217,5 @@ export function getControlPlaneZone (workers, shootVendor, oldControlPlaneZone) 
 }
 
 export function getWorkerProviderConfig (shootVendor) {
-  return shootVendor?.shoot?.workerProviderConfig
+  return cloneDeep(shootVendor?.shoot?.workerProviderConfig)
 }

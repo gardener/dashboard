@@ -66,7 +66,6 @@ import find from 'lodash/find'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
-import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   props: {
@@ -193,7 +192,7 @@ export default {
       const iopsValue = parseInt(value)
       if (value && iopsValue > 0) {
         if (!this.worker.providerConfig) {
-          this.worker.providerConfig = cloneDeep(getWorkerProviderConfig(this.providerVendor)) ?? {}
+          this.worker.providerConfig = getWorkerProviderConfig(this.providerVendor) ?? {}
         }
         set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
       } else {
