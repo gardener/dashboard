@@ -7,7 +7,7 @@
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import yaml from 'js-yaml'
+import { load as yamlLoad } from 'js-yaml'
 import Config from './Config.js'
 import ClientConfig from './ClientConfig.js'
 import {
@@ -27,7 +27,7 @@ function readKubeconfig (filename) {
     filename = filename.shift()
   }
   const dirname = path.dirname(filename)
-  const kubeconfig = yaml.load(
+  const kubeconfig = yamlLoad(
     fs.readFileSync(filename, 'utf8'), // eslint-disable-line security/detect-non-literal-fs-filename
   )
   const resolvePath = (object, key) => {

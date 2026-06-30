@@ -6,7 +6,7 @@
 
 'use strict'
 
-import yaml from 'js-yaml'
+import { load as yamlLoad } from 'js-yaml'
 import { omit } from 'lodash-es'
 const { helm } = fixtures
 
@@ -28,7 +28,7 @@ describe('identity', function () {
       const [configMap] = documents
       expect(omit(configMap, ['data'])).toMatchSnapshot()
       expect(Object.keys(configMap.data)).toEqual(['config.yaml'])
-      const config = yaml.load(configMap.data['config.yaml'])
+      const config = yamlLoad(configMap.data['config.yaml'])
       expect(config).toMatchSnapshot()
     })
   })

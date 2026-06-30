@@ -14,7 +14,10 @@ import {
   watch,
 } from 'vue'
 import { useTheme } from 'vuetify'
-import yaml from 'js-yaml'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
 
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useProjectStore } from '@/store/project'
@@ -120,7 +123,7 @@ export function useShootEditor (initialValue, options = {}) {
       cm = useCodemirror(element, {
         ...options,
         schemaDefinition,
-        doc: yaml.dump(shootItem.value),
+        doc: yamlDump(shootItem.value),
         onDocChanged ({ modified, undoDepth, redoDepth }) {
           if (!touched.value && modified) {
             touched.value = true
@@ -154,14 +157,14 @@ export function useShootEditor (initialValue, options = {}) {
 
   function getEditorValue () {
     const value = cm?.getDocValue()
-    return value
-      ? yaml.load(value)
+    return value?.trim()
+      ? yamlLoad(value)
       : null
   }
 
   function setEditorValue (value) {
     if (value) {
-      cm?.setDocValue(yaml.dump(value))
+      cm?.setDocValue(yamlDump(value))
       setEditorTouched(false)
       resetEditorHistory()
     }

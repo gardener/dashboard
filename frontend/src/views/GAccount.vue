@@ -234,7 +234,7 @@ import {
   mapState,
   storeToRefs,
 } from 'pinia'
-import yaml from 'js-yaml'
+import { dump as yamlDump } from 'js-yaml'
 
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
@@ -417,7 +417,7 @@ export default {
       }
     },
     kubeconfigYaml () {
-      return yaml.dump(this.kubeconfig)
+      return yamlDump(this.kubeconfig)
     },
   },
   watch: {

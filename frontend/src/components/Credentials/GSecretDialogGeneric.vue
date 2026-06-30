@@ -43,7 +43,10 @@ SPDX-License-Identifier: Apache-2.0
 import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import yaml from 'js-yaml'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
 
 import { useConfigStore } from '@/store/config'
 
@@ -120,7 +123,7 @@ export default {
         this.stringData = {}
 
         try {
-          this.stringData = yaml.load(value)
+          this.stringData = yamlLoad(value)
         } catch (err) {
         /* ignore errors */
         } finally {
@@ -144,7 +147,7 @@ export default {
     stringData (value) {
       if (!this.touched) {
         if (value && Object.keys(value).length > 0) {
-          this.internalYaml = yaml.dump(value)
+          this.internalYaml = yamlDump(value)
         } else {
           this.internalYaml = ''
         }

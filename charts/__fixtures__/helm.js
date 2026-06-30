@@ -9,7 +9,10 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import childProcess from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import yaml from 'js-yaml'
+import {
+  dump as yamlDump,
+  loadAll as yamlLoadAll,
+} from 'js-yaml'
 import { defaultsDeep } from 'lodash-es'
 import { randomNumber } from './helper.js'
 
@@ -69,7 +72,7 @@ async function renderTemplatesFn (...paths) {
             reject(new Error(message))
           }
         } else {
-          resolve(yaml.loadAll(stdout))
+          resolve(yamlLoadAll(stdout))
         }
       })
     })
@@ -80,7 +83,7 @@ async function renderTemplatesFn (...paths) {
     assert.ok(fs.statSync(dirname).isDirectory(), `Invalid helm values directory "${dirname}"`)
     const filename = path.join(dirname, `values-${randomNumber()}.yaml`)
     try {
-      fs.writeFileSync(filename, yaml.dump(values, { skipInvalid: true }))
+      fs.writeFileSync(filename, yamlDump(values, { skipInvalid: true }))
       const documents = await Promise.all(templates.map(template => renderTemplate(template, filename)))
       return documents.flat()
     } finally {

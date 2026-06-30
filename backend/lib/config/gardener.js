@@ -6,7 +6,7 @@
 
 import assert from 'assert'
 import _ from 'lodash-es'
-import { load } from 'js-yaml'
+import { load as yamlLoad } from 'js-yaml'
 import fs from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
@@ -265,6 +265,6 @@ export default {
   },
   readConfig (path) {
     const data = fs.readFileSync(path, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
-    return load(data)
+    return yamlLoad(data)
   },
 }
