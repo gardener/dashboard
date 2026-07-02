@@ -18,6 +18,9 @@ import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 
 import { hash } from '@/utils/crypto'
+import knownInfraVendors from '@/data/vendors/infra'
+import knownDNSVendors from '@/data/vendors/dns'
+import knownMachineImageVendors from '@/data/vendors/machineImage'
 
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -26,7 +29,6 @@ import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash/sortBy'
-import head from 'lodash/head'
 
 const logger = useLogger()
 
@@ -41,7 +43,7 @@ const wellKnownConditions = {
     name: 'Control Plane',
     shortName: 'CP',
     description: 'Indicates whether all control plane components are up and running.',
-    showLandscapeViewerOnly: true,
+    showAdminOnly: true,
     sortOrder: '1',
   },
   SystemComponentsHealthy: {
@@ -436,209 +438,6 @@ export const useConfigStore = defineStore('config', () => {
     return getCondition(type)
   }
 
-  const knownInfraVendors = [
-    {
-      name: 'aws',
-      displayName: 'AWS',
-      weight: 100,
-      icon: 'aws.svg',
-    },
-    {
-      name: 'azure',
-      displayName: 'Azure',
-      weight: 200,
-      icon: 'azure.svg',
-    },
-    {
-      name: 'gcp',
-      displayName: 'Google Cloud',
-      weight: 300,
-      icon: 'gcp.svg',
-    },
-    {
-      name: 'openstack',
-      displayName: 'OpenStack',
-      weight: 400,
-      icon: 'openstack.svg',
-    },
-    {
-      name: 'alicloud',
-      displayName: 'Alibaba Cloud',
-      weight: 500,
-      icon: 'alicloud.svg',
-    },
-    {
-      name: 'metal',
-      displayName: 'metal-stack',
-      weight: 600,
-      icon: 'metal.svg',
-    },
-    {
-      name: 'vsphere',
-      displayName: 'vSphere',
-      weight: 700,
-      icon: 'vsphere.svg',
-    },
-    {
-      name: 'hcloud',
-      displayName: 'Hetzner Cloud',
-      weight: 800,
-      icon: 'hcloud.svg',
-    },
-    {
-      name: 'onMetal',
-      displayName: 'OnMetal',
-      weight: 900,
-      icon: 'onmetal.svg',
-    },
-    {
-      name: 'ironcore',
-      displayName: 'IronCore',
-      weight: 1000,
-      icon: 'ironcore.svg',
-    },
-    {
-      name: 'stackit',
-      displayName: 'stackit',
-      weight: 1100,
-      icon: 'stackit.svg',
-    },
-    {
-      name: 'local',
-      displayName: 'Local',
-      weight: 10100,
-    },
-  ]
-
-  const knownDNSVendors = [
-    {
-      name: 'aws-route53',
-      displayName: 'Amazon Route53',
-      weight: 100,
-      icon: 'aws-route53.svg',
-    },
-    {
-      name: 'azure-dns',
-      displayName: 'Azure DNS',
-      weight: 200,
-      icon: 'azure-dns.svg',
-    },
-    {
-      name: 'azure-private-dns',
-      displayName: 'Azure Private DNS',
-      weight: 300,
-      icon: 'azure-dns.svg',
-    },
-    {
-      name: 'google-clouddns',
-      displayName: 'Google Cloud DNS',
-      weight: 400,
-      icon: 'google-clouddns.svg',
-    },
-    {
-      name: 'openstack-designate',
-      displayName: 'OpenStack Designate',
-      weight: 500,
-      icon: 'openstack.svg',
-    },
-    {
-      name: 'alicloud-dns',
-      displayName: 'Alicloud DNS',
-      weight: 600,
-      icon: 'alicloud-dns.png',
-    },
-
-    // other dns providers
-    {
-      name: 'cloudflare-dns',
-      displayName: 'Cloudflare DNS',
-      weight: 10100,
-      icon: 'cloudflare-dns.svg',
-    },
-    {
-      name: 'infoblox-dns',
-      displayName: 'Infoblox',
-      weight: 10200,
-      icon: 'infoblox-dns.svg',
-    },
-    {
-      name: 'netlify-dns',
-      displayName: 'Netlify DNS',
-      weight: 10300,
-      icon: 'netlify-dns.svg',
-    },
-    {
-      name: 'powerdns',
-      displayName: 'PowerDNS',
-      weight: 10400,
-      icon: 'powerdns.svg',
-    },
-    {
-      name: 'rfc2136',
-      displayName: 'Dynamic DNS (RFC2136)',
-      weight: 10500,
-      icon: 'rfc2136.svg',
-    },
-  ]
-
-  const knownMachineImageVendors = [
-    // os
-    {
-      name: 'gardenlinux',
-      displayName: 'Garden Linux',
-      weight: 100,
-      icon: 'gardenlinux.svg',
-    },
-    {
-      name: 'gardenlinux-fips',
-      displayName: 'Garden Linux (FIPS)',
-      weight: 101,
-      icon: 'gardenlinux.svg',
-    },
-    {
-      name: 'ubuntu',
-      displayName: 'Ubuntu',
-      weight: 200,
-      icon: 'ubuntu.svg',
-    },
-    {
-      name: 'coreos',
-      displayName: 'CoreOS',
-      weight: 300,
-      icon: 'coreos.svg',
-    },
-    {
-      name: 'flatcar',
-      displayName: 'Flatcar',
-      weight: 400,
-      icon: 'flatcar.svg',
-    },
-    {
-      name: 'suse-jeos',
-      displayName: 'SUSE Linux Enterprise Server (JeOS)',
-      weight: 500,
-      icon: 'suse.svg',
-    },
-    {
-      name: 'suse-chost',
-      displayName: 'SUSE Container Host configuration (Chost)',
-      weight: 600,
-      icon: 'suse.svg',
-    },
-    {
-      name: 'memoryone-chost',
-      displayName: 'MemoryOne Container Host configuration (Chost)',
-      weight: 700,
-      icon: 'suse.svg',
-    },
-    {
-      name: 'memoryone-gardenlinux',
-      displayName: 'MemoryOne Garden Linux',
-      weight: 701,
-      icon: 'gardenlinux.svg',
-    },
-  ]
-
   const knownVendors = {
     infra: knownInfraVendors,
     dns: knownDNSVendors,
@@ -683,35 +482,23 @@ export const useConfigStore = defineStore('config', () => {
     return detailsMap
   })
 
-  function vendorDetails (name) {
-    const matches = []
-    for (const t of vendorTypes.value) {
-      const vendor = vendorDetailsMap.value.get(vendorKey(t, name))
-      if (vendor) {
-        matches.push(vendor)
-      }
+  function vendorDetails ({ type, name }) {
+    const vendor = vendorDetailsMap.value.get(vendorKey(type, name))
+    if (vendor) {
+      return vendor
     }
 
-    if (matches.length === 1) {
-      return head(matches)
-    }
-
-    if (matches.length === 0) {
-      logger.warn(`VendorDetails: No vendor found for name='${name}'`)
-    }
-
-    if (matches.length > 1) {
-      logger.warn(`VendorDetails: Multiple vendors found for name='${name}'`)
-    }
+    logger.warn(`VendorDetails: No vendor found for type='${type}' name='${name}'`)
 
     return {
+      type,
       name,
       weight: Number.MAX_SAFE_INTEGER,
     }
   }
 
-  function vendorDisplayName (name) {
-    return get(vendorDetails(name), ['displayName'], name)
+  function vendorDisplayName ({ type, name }) {
+    return get(vendorDetails({ type, name }), ['displayName'], name)
   }
 
   const dnsProviderTypesList = computed(() => {
@@ -722,7 +509,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sortedDnsProviderTypeList = computed(() => {
-    const dnsProviderVendors = map(dnsProviderTypesList.value, vendorDetails)
+    const dnsProviderVendors = map(dnsProviderTypesList.value, name => vendorDetails({ type: 'dns', name }))
     const sortedVisibleDnsVendors = sortBy(dnsProviderVendors, 'weight')
     return map(sortedVisibleDnsVendors, 'name')
   })
@@ -774,7 +561,6 @@ export const useConfigStore = defineStore('config', () => {
     setConfiguration,
     conditionForType,
     vendorDetails,
-    // vendor: vendorDetails,
     vendorDisplayName,
     $reset,
   }

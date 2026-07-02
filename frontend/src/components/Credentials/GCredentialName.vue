@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           class="ma-1"
           :credential="credential"
           :provider-type="providerType"
+          :vendor-type="vendorType"
         />
       </v-card>
     </v-tooltip>
@@ -74,6 +75,7 @@ const {
   resourceName,
   resourceNamespace,
   resourceUid,
+  vendorType,
 } = useCloudProviderCredential(credential)
 
 const resourceHash = computed(() => {

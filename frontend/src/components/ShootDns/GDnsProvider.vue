@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-vendor-icon
           :name="type"
+          vendor-type="dns"
           :size="14"
         />
         <g-credential-name
@@ -57,6 +58,7 @@ SPDX-License-Identifier: Apache-2.0
             class="pb-2"
             :credential="credential"
             :provider-type="type"
+            vendor-type="dns"
             details-title
           />
         </v-list-item>

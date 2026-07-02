@@ -11,6 +11,9 @@ import {
 import { storeToRefs } from 'pinia'
 
 import { useShootStore } from '@/store/shoot'
+import { useGardenerExtensionStore } from '@/store/gardenerExtension'
+import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
 
 import {
   isSecret as _isSecret,
@@ -27,8 +30,13 @@ export const useCloudProviderCredential = (credential, options = {}) => {
 
   const {
     shootStore = useShootStore(),
+    gardenerExtensionStore = useGardenerExtensionStore(),
+    cloudProfileStore = useCloudProfileStore(),
+    configStore = useConfigStore(),
   } = options
   const { shootList } = storeToRefs(shootStore)
+  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
+  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
 
   const isSecret = computed(() => _isSecret(credential.value))
   const isWorkloadIdentity = computed(() => _isWorkloadIdentity(credential.value))
@@ -38,11 +46,32 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   const credentialName = computed(() => credential.value?.metadata?.name)
   const credentialKind = computed(() => credential.value?.kind)
   const providerType = computed(() => _credentialProviderType(credential.value))
+  const vendorType = computed(() => {
+    if (dnsProviderTypes.value.includes(providerType.value)) {
+      return 'dns'
+    }
+    if (sortedInfraProviderTypeList.value.includes(providerType.value)) {
+      return 'infra'
+    }
+    return undefined
+  })
+  const providerConfig = computed(() => {
+    if (!vendorType.value) {
+      return undefined
+    }
+    return configStore.vendorDetails({
+      type: vendorType.value,
+      name: providerType.value,
+    })
+  })
   const resourceUid = computed(() => credential.value?.metadata?.uid)
 
   const credentialDetails = computed(() => {
     if (isSecret.value) {
-      return _secretDetails({ secret: credential.value, providerType: providerType.value })
+      return _secretDetails({
+        secret: credential.value,
+        providerConfig: providerConfig.value,
+      })
     }
     return undefined
   })
@@ -87,5 +116,6 @@ export const useCloudProviderCredential = (credential, options = {}) => {
     isMarkedForDeletion,
     hasOwnWorkloadIdentity,
     providerType,
+    vendorType,
   }
 }

@@ -17,7 +17,10 @@ import { useAuthzStore } from '@/store/authz'
 
 import { createSecretContextComposable } from '@/composables/credential/useSecretContext'
 
-import { encodeBase64 } from '@/utils'
+import {
+  decodeBase64,
+  encodeBase64,
+} from '@/utils'
 
 describe('composables', () => {
   describe('useSecretContext', () => {
@@ -125,6 +128,109 @@ describe('composables', () => {
       expect(secretContext.secretData).toEqual({
         password: encodeBase64('mypassword'),
         token: undefined,
+      })
+    })
+
+    it('should preserve decoded values as strings in secretStringData', () => {
+      secretContext.setSecretManifest({
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          zero: encodeBase64('0'),
+          bool: encodeBase64('false'),
+          nullValue: encodeBase64('null'),
+          empty: encodeBase64(''),
+          object: encodeBase64('{"enabled":true}'),
+          array: encodeBase64('[1,2,3]'),
+        },
+      })
+
+      expect(secretContext.secretStringData).toEqual({
+        zero: '0',
+        bool: 'false',
+        nullValue: 'null',
+        empty: '',
+        object: '{"enabled":true}',
+        array: '[1,2,3]',
+      })
+    })
+
+    it('should parse only configured structured fields', () => {
+      secretContext.setSecretManifest({
+        metadata: {
+          name: 'my-secret',
+          namespace: testNamespace,
+        },
+        data: {
+          plainJson: encodeBase64('{"enabled":true}'),
+          serviceAccount: encodeBase64('{"project_id":"example","type":"service_account"}'),
+          yamlConfig: encodeBase64('enabled: true\n'),
+          invalidJson: encodeBase64('{"broken":'),
+        },
+      })
+
+      const fields = [
+        { key: 'plainJson', type: 'text' },
+        { key: 'serviceAccount', type: 'json-secret' },
+        { key: 'yamlConfig', type: 'yaml-secret' },
+        { key: 'invalidJson', type: 'json-secret' },
+      ]
+
+      expect(secretContext.secretStringDataForFields(fields)).toEqual({
+        plainJson: '{"enabled":true}',
+        serviceAccount: {
+          project_id: 'example',
+          type: 'service_account',
+        },
+        yamlConfig: {
+          enabled: true,
+        },
+        invalidJson: '{"broken":',
+      })
+    })
+
+    it('should encode structured fields according to their configured type', () => {
+      secretContext.createSecretManifest()
+
+      const fields = [
+        { key: 'plainJson', type: 'text' },
+        { key: 'serviceAccount', type: 'json-secret' },
+        { key: 'yamlConfig', type: 'yaml-secret' },
+      ]
+
+      secretContext.setSecretStringDataForFields(fields, {
+        plainJson: '{"enabled":true}',
+        serviceAccount: {
+          project_id: 'example',
+          type: 'service_account',
+        },
+        yamlConfig: {
+          enabled: true,
+        },
+      })
+
+      expect(decodeBase64(secretContext.secretData.plainJson)).toBe('{"enabled":true}')
+      expect(decodeBase64(secretContext.secretData.serviceAccount)).toBe('{"project_id":"example","type":"service_account"}')
+      expect(decodeBase64(secretContext.secretData.yamlConfig)).toBe('enabled: true\n')
+    })
+
+    it('should preserve falsy values when encoding secretStringData', () => {
+      secretContext.createSecretManifest()
+
+      secretContext.secretStringData = {
+        zero: 0,
+        bool: false,
+        empty: '',
+        nullValue: null,
+      }
+
+      expect(secretContext.secretData).toEqual({
+        zero: encodeBase64('0'),
+        bool: encodeBase64('false'),
+        empty: encodeBase64(''),
+        nullValue: undefined,
       })
     })
 

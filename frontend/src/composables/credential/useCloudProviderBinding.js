@@ -13,6 +13,7 @@ import { storeToRefs } from 'pinia'
 import { useShootStore } from '@/store/shoot'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useCredentialStore } from '@/store/credential'
+import { useConfigStore } from '@/store/config'
 
 import { decodeBase64 } from '@/utils'
 
@@ -41,6 +42,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     shootStore = useShootStore(),
     cloudProfileStore = useCloudProfileStore(),
     credentialStore = useCredentialStore(),
+    configStore = useConfigStore(),
   } = options
   const { shootList } = storeToRefs(shootStore)
   const { infrastructureBindingList } = storeToRefs(credentialStore)
@@ -86,6 +88,16 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   const providerType = computed(() => {
     return _bindingProviderType(binding.value)
   })
+  const vendorType = computed(() => 'infra')
+  const providerConfig = computed(() => {
+    if (!providerType.value) {
+      return undefined
+    }
+    return configStore.vendorDetails({
+      type: vendorType.value,
+      name: providerType.value,
+    })
+  })
 
   // Credential References
   const bindingCredentialRef = computed(() => {
@@ -118,7 +130,10 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
   const credentialDetails = computed(() => {
     if (hasSecret.value && credential.value) {
-      return _secretDetails({ secret: credential.value, providerType: providerType.value })
+      return _secretDetails({
+        secret: credential.value,
+        providerConfig: providerConfig.value,
+      })
     }
     return undefined
   })
@@ -236,6 +251,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
     isInfrastructureBinding,
     isMarkedForDeletion,
     providerType,
+    vendorType,
 
     // References & resolved credential
     bindingCredentialRef,
