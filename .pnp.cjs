@@ -5072,7 +5072,7 @@ const RAW_RUNTIME_STATE =
           ["minipass-pipeline", "npm:1.2.4"],\
           ["p-map", "npm:7.0.3"],\
           ["ssri", "npm:12.0.0"],\
-          ["tar", "npm:7.5.9"],\
+          ["tar", "npm:7.5.19"],\
           ["unique-filename", "npm:4.0.0"]\
         ],\
         "linkType": "HARD"\
@@ -10222,7 +10222,7 @@ const RAW_RUNTIME_STATE =
           ["nopt", "npm:8.1.0"],\
           ["proc-log", "npm:5.0.0"],\
           ["semver", "npm:7.8.5"],\
-          ["tar", "npm:7.5.9"],\
+          ["tar", "npm:7.5.19"],\
           ["which", "npm:5.0.0"]\
         ],\
         "linkType": "HARD"\
@@ -12135,14 +12135,14 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["tar", [\
-      ["npm:7.5.9", {\
-        "packageLocation": "./.yarn/cache/tar-npm-7.5.9-dd42dd386e-e870beb1b2.zip/node_modules/tar/",\
+      ["npm:7.5.19", {\
+        "packageLocation": "./.yarn/cache/tar-npm-7.5.19-667b5539a6-7022e8cb04.zip/node_modules/tar/",\
         "packageDependencies": [\
           ["@isaacs/fs-minipass", "npm:4.0.1"],\
           ["chownr", "npm:3.0.0"],\
           ["minipass", "npm:7.1.2"],\
           ["minizlib", "npm:3.1.0"],\
-          ["tar", "npm:7.5.9"],\
+          ["tar", "npm:7.5.19"],\
           ["yallist", "npm:5.0.0"]\
         ],\
         "linkType": "HARD"\
