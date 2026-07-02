@@ -22,14 +22,12 @@ SPDX-License-Identifier: Apache-2.0
       >
         <v-tab
           value="target-tab"
-          href="#target-tab"
         >
           Terminal
         </v-tab>
         <v-tab
           v-if="isTerminalShortcutsFeatureEnabled"
           value="shortcut-tab"
-          href="#shortcut-tab"
         >
           Terminal Shortcuts
         </v-tab>

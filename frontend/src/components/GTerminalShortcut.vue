@@ -203,7 +203,8 @@ export default {
     },
     updateShortcutYaml (value) {
       try {
-        this.shortcutYaml = yamlDump(value)
+        // value is a Shortcut class instance but we convert it to a plain object as js-yaml v5 can only handle plain objects
+        this.shortcutYaml = yamlDump(Object.assign({}, value))
       } catch (err) {
         this.logger.error(err)
       }
