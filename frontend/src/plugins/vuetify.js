@@ -73,6 +73,7 @@ const variations = {
     'info',
     'success',
     'warning',
+    'unknown',
     'main-background',
     'toolbar-background',
   ],
