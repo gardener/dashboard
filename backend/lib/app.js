@@ -70,6 +70,10 @@ if (gitHubRepoUrl) {
 
 // configure app
 const app = express()
+const apiApp = express()
+apiApp.set('etag', false)
+apiApp.use(apiRouter)
+
 app.set('port', port)
 app.set('metricsPort', metricsPort)
 app.set('logger', logger)
@@ -77,7 +81,7 @@ app.set('healthCheck', healthCheck)
 app.set('periodSeconds', periodSeconds)
 app.set('hooks', apiHooks)
 app.set('trust proxy', 1)
-app.set('etag', false)
+app.set('etag', 'weak')
 app.set('x-powered-by', false)
 
 app.use(helmet.xDnsPrefetchControl())
@@ -88,7 +92,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 app.use('/auth', authRouter)
 app.use('/webhook', githubWebhookRouter)
-app.use('/api', apiRouter)
+app.use('/api', apiApp)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
