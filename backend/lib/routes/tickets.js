@@ -6,9 +6,12 @@
 
 import express from 'express'
 import _ from 'lodash-es'
+import createError from 'http-errors'
 import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import { metricsRoute } from '../middleware.js'
+import * as authorization from '../services/authorization.js'
+import { projectFilter } from '../utils/index.js'
 
 const router = express.Router({
   mergeParams: true,
@@ -22,12 +25,24 @@ function getProjectName (namespace = '_all') {
     return cache.findProjectByNamespace(namespace).metadata.name
   }
 }
-function getIssues (namespace) {
-  const projectName = getProjectName(namespace)
-  const predicate = projectName
-    ? ['metadata.projectName', projectName]
-    : () => true
-  return _.filter(ticketCache.getIssues(), predicate)
+
+async function getIssues(namespace, user) {
+  const canListProjects = await authorization.canListProjects(user)
+  let allowedProjectNames = cache.getProjects()
+    .filter(projectFilter(user, canListProjects))
+    .map(project => project.metadata.name)
+
+  if (namespace !== '_all') {
+    const projectName = getProjectName(namespace)
+    if (!allowedProjectNames.includes(projectName)) {
+      throw createError(403, `No authorization to list tickets in namespace ${namespace}`)
+    }
+    allowedProjectNames = [projectName]
+  }
+
+  return ticketCache.getIssues().filter(issue =>
+    allowedProjectNames.includes(issue.metadata.projectName),
+  )
 }
 
 async function getIssuesAndComments (namespace, name) {
@@ -40,10 +55,10 @@ async function getIssuesAndComments (namespace, name) {
 
 router.route('/')
   .all(metricsMiddleware)
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
     try {
       const namespace = req.params.namespace
-      const issues = getIssues(namespace)
+      const issues = await getIssues(namespace, req.user)
       res.send({ issues })
     } catch (err) {
       next(err)
