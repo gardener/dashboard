@@ -118,6 +118,7 @@ describe('api', function () {
     it('should fetch open issues and comments for shoot cluster test in namespace bar', async () => {
       const namespace = 'garden-bar'
       const name = 'test'
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(true)
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/tickets/${name}`)
@@ -126,6 +127,17 @@ describe('api', function () {
         .expect(200)
 
       expect(res.body).toMatchSnapshot()
+    })
+
+    it('should return 403 for /:name when user is not a member of the namespace', async () => {
+      const namespace = 'garden-GroupMember1'
+      const name = 'test'
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+
+      const result = await agent
+        .get(`/api/namespaces/${namespace}/tickets/${name}`)
+        .set('cookie', await user.cookie)
+      expect(result.status).toEqual(403)
     })
   })
 })

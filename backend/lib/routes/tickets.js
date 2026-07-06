@@ -20,12 +20,6 @@ const router = express.Router({
 const ticketCache = cache.getTicketCache()
 const metricsMiddleware = metricsRoute('tickets')
 
-function getProjectName (namespace = '_all') {
-  if (namespace !== '_all') {
-    return cache.findProjectByNamespace(namespace).metadata.name
-  }
-}
-
 async function getIssues (namespace, user) {
   const canListProjects = await authorization.canListProjects(user)
   let allowedProjectNames = cache.getProjects()
@@ -33,7 +27,7 @@ async function getIssues (namespace, user) {
     .map(project => project.metadata.name)
 
   if (namespace !== '_all') {
-    const projectName = getProjectName(namespace)
+    const projectName = cache.findProjectByNamespace(namespace).metadata.name
     if (!allowedProjectNames.includes(projectName)) {
       throw createError(403, `No authorization to list tickets in namespace ${namespace}`)
     }
@@ -45,9 +39,9 @@ async function getIssues (namespace, user) {
   )
 }
 
-async function getIssuesAndComments (namespace, name) {
-  const projectName = getProjectName(namespace)
-  const issues = _.filter(ticketCache.getIssues(), { metadata: { projectName, name } })
+async function getIssuesAndComments (namespace, name, user) {
+  const issues = (await getIssues(namespace, user))
+    .filter(issue => issue.metadata.name === name)
   const promises = _.map(issues, issue => tickets.getIssueComments({ number: issue.metadata.number }))
   const comments = _.flatten(await Promise.all(promises))
   return [issues, comments]
@@ -71,7 +65,7 @@ router.route('/:name')
     try {
       const namespace = req.params.namespace
       const name = req.params.name
-      const [issues, comments] = await getIssuesAndComments(namespace, name)
+      const [issues, comments] = await getIssuesAndComments(namespace, name, req.user)
       res.send({ issues, comments })
     } catch (err) {
       next(err)
