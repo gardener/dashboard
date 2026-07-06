@@ -26,7 +26,7 @@ function getProjectName (namespace = '_all') {
   }
 }
 
-async function getIssues(namespace, user) {
+async function getIssues (namespace, user) {
   const canListProjects = await authorization.canListProjects(user)
   let allowedProjectNames = cache.getProjects()
     .filter(projectFilter(user, canListProjects))

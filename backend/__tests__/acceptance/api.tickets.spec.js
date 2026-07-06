@@ -109,10 +109,10 @@ describe('api', function () {
       const namespace = 'garden-GroupMember1'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
 
-      await agent
+      const result = await agent
         .get(`/api/namespaces/${namespace}/tickets`)
         .set('cookie', await user.cookie)
-        .expect(403)
+      expect(result.status).toEqual(403)
     })
 
     it('should fetch open issues and comments for shoot cluster test in namespace bar', async () => {
@@ -129,4 +129,3 @@ describe('api', function () {
     })
   })
 })
-
