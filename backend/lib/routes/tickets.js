@@ -22,18 +22,18 @@ const metricsMiddleware = metricsRoute('tickets')
 
 async function getIssues (namespace, user) {
   const canListProjects = await authorization.canListProjects(user)
-  let allowedProjectNames = cache.getProjects()
+  let allowedProjects = cache.getProjects()
     .filter(projectFilter(user, canListProjects))
-    .map(project => project.metadata.name)
 
   if (namespace !== '_all') {
-    const projectName = cache.findProjectByNamespace(namespace).metadata.name
-    if (!allowedProjectNames.includes(projectName)) {
-      throw createError(403, `No authorization to list tickets in namespace ${namespace}`)
+    const project = allowedProjects.find(project => project.spec.namespace === namespace)
+    if (!project) {
+      throw createError(403, `Forbidden to list tickets in namespace ${namespace}`)
     }
-    allowedProjectNames = [projectName]
+    allowedProjects = [project]
   }
 
+  const allowedProjectNames = allowedProjects.map(project => project.metadata.name)
   return ticketCache.getIssues().filter(issue =>
     allowedProjectNames.includes(issue.metadata.projectName),
   )

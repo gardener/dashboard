@@ -71,7 +71,17 @@ describe('io/tickets', () => {
     const socket = createSocket(user)
     await expect(subscribe(socket, { namespace: 'garden-GroupMember1' })).rejects.toMatchObject({
       statusCode: 403,
-      message: 'Insufficient authorization for ticket subscription',
+      message: 'Forbidden to subscribe to tickets in namespace garden-GroupMember1',
+    })
+    expect(socket.join).not.toHaveBeenCalled()
+  })
+
+  it('should throw when the requested namespace does not exist', async () => {
+    vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
+    const socket = createSocket(user)
+    await expect(subscribe(socket, { namespace: 'garden-nonexistent' })).rejects.toMatchObject({
+      statusCode: 403,
+      message: 'Forbidden to subscribe to tickets in namespace garden-nonexistent',
     })
     expect(socket.join).not.toHaveBeenCalled()
   })

@@ -115,6 +115,16 @@ describe('api', function () {
       expect(result.status).toEqual(403)
     })
 
+    it('should return 403 for a namespace that does not exist', async () => {
+      const namespace = 'garden-nonexistent'
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+
+      const result = await agent
+        .get(`/api/namespaces/${namespace}/tickets`)
+        .set('cookie', await user.cookie)
+      expect(result.status).toEqual(403)
+    })
+
     it('should fetch open issues and comments for shoot cluster test in namespace bar', async () => {
       const namespace = 'garden-bar'
       const name = 'test'

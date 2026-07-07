@@ -20,16 +20,16 @@ function joinRoom (socket, namespace, shootName) {
 export async function subscribe (socket, { namespace, shootName } = {}) {
   const user = helper.getUserFromSocket(socket)
   const canListProjects = await authorization.canListProjects(user)
+  const allowedProjects = cache.getProjects().filter(projectFilter(user, canListProjects))
 
   if (namespace === '_all') {
-    const projects = cache.getProjects().filter(projectFilter(user, canListProjects))
-    await Promise.all(projects.map(project => joinRoom(socket, project.spec.namespace)))
+    await Promise.all(allowedProjects.map(project => joinRoom(socket, project.spec.namespace)))
     return
   }
 
-  const project = cache.findProjectByNamespace(namespace)
-  if (!projectFilter(user, canListProjects)(project)) {
-    throw createError(403, 'Insufficient authorization for ticket subscription')
+  const project = allowedProjects.find(proj => proj.spec.namespace === namespace)
+  if (!project) {
+    throw createError(403, `Forbidden to subscribe to tickets in namespace ${namespace}`)
   }
   await joinRoom(socket, namespace, shootName)
 }
