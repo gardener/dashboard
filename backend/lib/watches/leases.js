@@ -39,15 +39,26 @@ export default (io, informer, { signal }) => {
 
   ticketCache.on('issue', event => {
     const projectName = event.object?.metadata?.projectName
+    const shootName = event.object?.metadata?.name
     if (projectName) {
-      nsp.to(`issues;${projectName}`).emit('issues', event)
+      const namespace = cache.getProjectNamespace(projectName)
+      if (namespace) {
+        nsp.to(`issues;${namespace}`).emit('issues', event)
+        if (shootName) {
+          nsp.to(`issues;${namespace}/${shootName}`).emit('issues', event)
+        }
+      }
     }
     publishSeedStats(event)
   })
   ticketCache.on('comment', event => {
     const projectName = event.object?.metadata?.projectName
-    if (projectName) {
-      nsp.to(`issues;${projectName}`).emit('comments', event)
+    const shootName = event.object?.metadata?.name
+    if (projectName && shootName) {
+      const namespace = cache.getProjectNamespace(projectName)
+      if (namespace) {
+        nsp.to(`issues;${namespace}/${shootName}`).emit('comments', event)
+      }
     }
   })
 

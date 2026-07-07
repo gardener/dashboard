@@ -530,7 +530,7 @@ const useShootStore = defineStore('shoot', () => {
     try {
       await socketStore.emitSubscribe('shoots', value)
       try {
-        await socketStore.emitSubscribe('issues', { namespace: value.namespace })
+        await socketStore.emitSubscribe('issues', { namespace: value.namespace, shootName: value.name })
       } catch (err) {
         logger.warn('Failed to open ticket subscription, continuing without live ticket updates: %s', err.message)
       }

@@ -10,17 +10,20 @@ import * as authorization from '../services/authorization.js'
 import helper from './helper.js'
 import { projectFilter } from '../utils/index.js'
 
-function joinRoom (socket, projectName) {
-  return socket.join(`issues;${projectName}`)
+function joinRoom (socket, namespace, shootName) {
+  if (shootName) {
+    return socket.join(`issues;${namespace}/${shootName}`)
+  }
+  return socket.join(`issues;${namespace}`)
 }
 
-export async function subscribe (socket, { namespace } = {}) {
+export async function subscribe (socket, { namespace, shootName } = {}) {
   const user = helper.getUserFromSocket(socket)
   const canListProjects = await authorization.canListProjects(user)
 
   if (namespace === '_all') {
     const projects = cache.getProjects().filter(projectFilter(user, canListProjects))
-    await Promise.all(projects.map(project => joinRoom(socket, project.metadata.name)))
+    await Promise.all(projects.map(project => joinRoom(socket, project.spec.namespace)))
     return
   }
 
@@ -28,7 +31,7 @@ export async function subscribe (socket, { namespace } = {}) {
   if (!projectFilter(user, canListProjects)(project)) {
     throw createError(403, 'Insufficient authorization for ticket subscription')
   }
-  await joinRoom(socket, project.metadata.name)
+  await joinRoom(socket, namespace, shootName)
 }
 
 export async function unsubscribe (socket) {

@@ -44,26 +44,26 @@ describe('io/tickets', () => {
     vi.spyOn(authorization, 'canListProjects').mockResolvedValue(true)
     const socket = createSocket(user)
     await subscribe(socket, { namespace: '_all' })
-    expect(socket.join).toHaveBeenCalledWith('issues;foo')
-    expect(socket.join).toHaveBeenCalledWith('issues;bar')
-    expect(socket.join).toHaveBeenCalledWith('issues;GroupMember1')
-    expect(socket.join).not.toHaveBeenCalledWith('issues;pending')
+    expect(socket.join).toHaveBeenCalledWith('issues;garden-foo')
+    expect(socket.join).toHaveBeenCalledWith('issues;garden-bar')
+    expect(socket.join).toHaveBeenCalledWith('issues;garden-GroupMember1')
+    expect(socket.join).not.toHaveBeenCalledWith('issues;garden-pending')
   })
 
   it('should join only member project rooms when user cannot list projects', async () => {
     vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
     const socket = createSocket(user)
     await subscribe(socket, { namespace: '_all' })
-    expect(socket.join).toHaveBeenCalledWith('issues;foo')
-    expect(socket.join).toHaveBeenCalledWith('issues;bar')
-    expect(socket.join).not.toHaveBeenCalledWith('issues;GroupMember1')
+    expect(socket.join).toHaveBeenCalledWith('issues;garden-foo')
+    expect(socket.join).toHaveBeenCalledWith('issues;garden-bar')
+    expect(socket.join).not.toHaveBeenCalledWith('issues;garden-GroupMember1')
   })
 
   it('should join specific project room when user is a member', async () => {
     vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
     const socket = createSocket(user)
     await subscribe(socket, { namespace: 'garden-foo' })
-    expect(socket.join).toHaveBeenCalledExactlyOnceWith('issues;foo')
+    expect(socket.join).toHaveBeenCalledExactlyOnceWith('issues;garden-foo')
   })
 
   it('should throw when user is not a member of the requested namespace', async () => {
@@ -76,12 +76,19 @@ describe('io/tickets', () => {
     expect(socket.join).not.toHaveBeenCalled()
   })
 
-  it('should leave only issues rooms on unsubscribe', async () => {
+  it('should join specific shoot comment room when namespace and shootName are provided', async () => {
+    vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
     const socket = createSocket(user)
-    socket.rooms = new Set(['issues;foo', 'issues;bar', 'shoots;garden-foo'])
+    await subscribe(socket, { namespace: 'garden-foo', shootName: 'my-shoot' })
+    expect(socket.join).toHaveBeenCalledExactlyOnceWith('issues;garden-foo/my-shoot')
+  })
+
+  it('should leave issues and comments rooms on unsubscribe', async () => {
+    const socket = createSocket(user)
+    socket.rooms = new Set(['issues;garden-foo', 'issues;garden-foo/my-shoot', 'shoots;garden-foo'])
     await unsubscribe(socket)
-    expect(socket.leave).toHaveBeenCalledWith('issues;foo')
-    expect(socket.leave).toHaveBeenCalledWith('issues;bar')
+    expect(socket.leave).toHaveBeenCalledWith('issues;garden-foo')
+    expect(socket.leave).toHaveBeenCalledWith('issues;garden-foo/my-shoot')
     expect(socket.leave).not.toHaveBeenCalledWith('shoots;garden-foo')
   })
 })

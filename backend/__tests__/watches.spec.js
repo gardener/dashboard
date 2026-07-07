@@ -735,6 +735,9 @@ describe('watches', function () {
       signal = abortController.signal
 
       vi.spyOn(cache, 'getTicketCache').mockReturnValue(ticketCache)
+      vi.spyOn(cache, 'getProjectNamespace').mockImplementation(projectName => {
+        return `garden-${projectName}`
+      })
       vi.spyOn(cache, 'getShoot').mockReturnValue({
         spec: {
           seedName: 'infra1-seed',
@@ -834,15 +837,13 @@ describe('watches', function () {
       watches.leases(io, informer, { signal })
 
       expect(nsp.emit).not.toHaveBeenCalled()
-      expect(nsp.to).toHaveBeenCalledWith(`issues;${issueEvent.object.metadata.projectName}`)
-      expect(rooms.get(`issues;${issueEvent.object.metadata.projectName}`).emit).toHaveBeenCalledWith('issues', issueEvent)
+      expect(nsp.to).toHaveBeenCalledWith('issues;garden-foo')
+      expect(rooms.get('issues;garden-foo').emit).toHaveBeenCalledWith('issues', issueEvent)
 
-      const room = `issues;${commentEvent.object.metadata.projectName}`
-      const mockRoom = rooms.get(room)
-      expect(nsp.to).toHaveBeenCalledWith(room)
-      expect(mockRoom.emit).toHaveBeenCalledTimes(2)
-      expect(mockRoom.emit).toHaveBeenCalledWith('issues', issueEvent)
-      expect(mockRoom.emit).toHaveBeenCalledWith('comments', commentEvent)
+      expect(nsp.to).toHaveBeenCalledWith('issues;garden-foo/bar')
+      expect(rooms.get('issues;garden-foo/bar').emit).toHaveBeenCalledTimes(2)
+      expect(rooms.get('issues;garden-foo/bar').emit).toHaveBeenCalledWith('issues', issueEvent)
+      expect(rooms.get('issues;garden-foo/bar').emit).toHaveBeenCalledWith('comments', commentEvent)
 
       expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledTimes(1)
       expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledWith('seedstats', { type: 'MODIFIED', uid: 'seed-1' })
