@@ -18,6 +18,10 @@ import {
 } from './seedstats.js'
 import { synchronize as synchronizeManagedSeeds } from './managedseeds.js'
 import { synchronize as synchronizeManagedSeedShoots } from './managedseedshoots.js'
+import {
+  subscribe as subscribeTickets,
+  unsubscribe as unsubscribeTickets,
+} from './tickets.js'
 
 async function subscribe (socket, key, options = {}) {
   switch (key) {
@@ -27,6 +31,9 @@ async function subscribe (socket, key, options = {}) {
     case 'seedstats':
       await unsubscribeSeedStats(socket)
       return subscribeSeedStats(socket, options)
+    case 'issues':
+      await unsubscribeTickets(socket)
+      return subscribeTickets(socket, options)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }
@@ -38,6 +45,8 @@ async function unsubscribe (socket, key) {
       return unsubscribeShoots(socket)
     case 'seedstats':
       return unsubscribeSeedStats(socket)
+    case 'issues':
+      return unsubscribeTickets(socket)
     default:
       throw new TypeError(`Invalid subscription type - ${key}`)
   }

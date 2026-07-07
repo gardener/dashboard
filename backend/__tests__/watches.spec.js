@@ -833,14 +833,16 @@ describe('watches', function () {
 
       watches.leases(io, informer, { signal })
 
-      expect(nsp.emit).toHaveBeenCalledTimes(1)
-      expect(nsp.emit).toHaveBeenCalledWith('issues', issueEvent)
+      expect(nsp.emit).not.toHaveBeenCalled()
+      expect(nsp.to).toHaveBeenCalledWith(`issues;${issueEvent.object.metadata.projectName}`)
+      expect(rooms.get(`issues;${issueEvent.object.metadata.projectName}`).emit).toHaveBeenCalledWith('issues', issueEvent)
 
-      const room = `shoots;${cache.getProjectNamespace(issueEvent.object.metadata.projectName)}/${issueEvent.object.metadata.name}`
+      const room = `issues;${commentEvent.object.metadata.projectName}`
       const mockRoom = rooms.get(room)
-      expect(nsp.to).toHaveBeenCalledWith([room])
-      expect(mockRoom.emit).toHaveBeenCalledTimes(1)
-      expect(mockRoom.emit).toHaveBeenCalledWith('comments', issueEvent)
+      expect(nsp.to).toHaveBeenCalledWith(room)
+      expect(mockRoom.emit).toHaveBeenCalledTimes(2)
+      expect(mockRoom.emit).toHaveBeenCalledWith('issues', issueEvent)
+      expect(mockRoom.emit).toHaveBeenCalledWith('comments', commentEvent)
 
       expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledTimes(1)
       expect(rooms.get('seedstats;uf=4').emit).toHaveBeenCalledWith('seedstats', { type: 'MODIFIED', uid: 'seed-1' })
