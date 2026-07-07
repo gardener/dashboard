@@ -63,7 +63,7 @@ export function getLastOperationSortVal ({
     metadata,
     status,
   })
-  const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+  const inProgress = operation.state === 'Processing'
 
   if (userError) {
     return inProgress
