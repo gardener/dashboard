@@ -269,26 +269,40 @@ function getManagedSeedShootName (item) {
   return managedSeedStore.shootNameForSeed(seedName)
 }
 
-function seedFilterFn (item, query) {
-  const conditions = get(item, ['status', 'conditions'], [])
-  const errorCodes = join(errorCodesFromArray(conditions), ' ')
-  const accessRestrictionNames = join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')
-  const shootName = getManagedSeedShootName(item) || 'Unmanaged'
+// Built-in fields addressable with `field:value` in the search.
+const QUALIFIED_SEARCH_FIELDS = Object.freeze([
+  'name',
+  'shoot',
+  'provider',
+  'region',
+  'k8sVersion',
+  'gardenerVersion',
+  'visibility',
+])
 
-  const searchableFields = [
-    get(item, ['metadata', 'name']),
-    shootName,
-    get(item, ['spec', 'provider', 'type']),
-    get(item, ['spec', 'provider', 'region']),
-    get(item, ['status', 'kubernetesVersion']),
-    get(item, ['status', 'gardener', 'version']),
-    get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden',
-    errorCodes,
-    accessRestrictionNames,
-  ]
+function seedFilterFn (query) {
+  const searchQuery = parseSearch(query, QUALIFIED_SEARCH_FIELDS)
 
-  const searchQuery = parseSearch(query)
-  return searchQuery.matches(searchableFields)
+  return item => {
+    const conditions = get(item, ['status', 'conditions'], [])
+    const errorCodes = join(errorCodesFromArray(conditions), ' ')
+    const accessRestrictionNames = join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')
+    const shoot = getManagedSeedShootName(item) || 'Unmanaged'
+
+    const fields = {
+      name: get(item, ['metadata', 'name']),
+      shoot,
+      provider: get(item, ['spec', 'provider', 'type']),
+      region: get(item, ['spec', 'provider', 'region']),
+      k8sVersion: get(item, ['status', 'kubernetesVersion']),
+      gardenerVersion: get(item, ['status', 'gardener', 'version']),
+      visibility: get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden',
+      errorCodes,
+      accessRestrictions: accessRestrictionNames,
+    }
+
+    return searchQuery.matches(fields)
+  }
 }
 
 const { filteredItems: filteredSeeds } = useTableFilter({
