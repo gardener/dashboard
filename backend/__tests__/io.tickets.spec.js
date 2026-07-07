@@ -14,7 +14,10 @@ import {
 } from 'vitest'
 import { seedProjectNamespaceIndex } from './helpers/cache.js'
 import * as authorization from '../lib/services/authorization.js'
-import { subscribe, unsubscribe } from '../lib/io/tickets.js'
+import {
+  subscribe,
+  unsubscribe,
+} from '../lib/io/tickets.js'
 
 describe('io/tickets', () => {
   beforeAll(() => {
@@ -60,8 +63,7 @@ describe('io/tickets', () => {
     vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
     const socket = createSocket(user)
     await subscribe(socket, { namespace: 'garden-foo' })
-    expect(socket.join).toHaveBeenCalledOnce()
-    expect(socket.join).toHaveBeenCalledWith('issues;foo')
+    expect(socket.join).toHaveBeenCalledExactlyOnceWith('issues;foo')
   })
 
   it('should throw when user is not a member of the requested namespace', async () => {

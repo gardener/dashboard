@@ -4,11 +4,11 @@ import * as authorization from '../services/authorization.js'
 import helper from './helper.js'
 import { projectFilter } from '../utils/index.js'
 
-function joinRoom(socket, projectName) {
+function joinRoom (socket, projectName) {
   return socket.join(`issues;${projectName}`)
 }
 
-export async function subscribe(socket, { namespace } = {}) {
+export async function subscribe (socket, { namespace } = {}) {
   const user = helper.getUserFromSocket(socket)
   const canListProjects = await authorization.canListProjects(user)
 
@@ -25,7 +25,7 @@ export async function subscribe(socket, { namespace } = {}) {
   await joinRoom(socket, project.metadata.name)
 }
 
-export async function unsubscribe(socket) {
+export async function unsubscribe (socket) {
   const rooms = [...socket.rooms].filter(room => room.startsWith('issues;'))
   await Promise.all(rooms.map(room => socket.leave(room)))
 }
