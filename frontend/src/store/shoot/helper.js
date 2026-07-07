@@ -296,7 +296,6 @@ const QUALIFIED_SEARCH_FIELDS = Object.freeze([
   'project',
   'seed',
   'purpose',
-  'infrastructure',
   'provider',
   'region',
   'k8sVersion',

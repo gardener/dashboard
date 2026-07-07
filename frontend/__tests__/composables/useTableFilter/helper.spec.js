@@ -354,4 +354,30 @@ describe('composables/useTableFilter', () => {
       expect(query.matches({ name: 'aws-ha-cluster', seed: 'gcp-ha' })).toBe(false)
     })
   })
+
+  describe('SearchQuery.matches with non-string values', () => {
+    it('should match numeric field values via substring', () => {
+      const query = parseSearch('42')
+      expect(query.matches({ name: 'cluster', workers: 42 })).toBe(true)
+      expect(query.matches({ name: 'cluster', workers: 142 })).toBe(true)
+      expect(query.matches({ name: 'cluster', workers: 5 })).toBe(false)
+    })
+
+    it('should match numeric field values via exact match', () => {
+      const query = parseSearch('"42"')
+      expect(query.matches({ name: 'cluster', workers: 42 })).toBe(true)
+      expect(query.matches({ name: 'cluster', workers: 142 })).toBe(false)
+    })
+
+    it('should match boolean field values', () => {
+      const query = parseSearch('true')
+      expect(query.matches({ name: 'cluster', enabled: true })).toBe(true)
+      expect(query.matches({ name: 'cluster', enabled: false })).toBe(false)
+    })
+
+    it('should not crash on non-string values when no match', () => {
+      const query = parseSearch('xyz')
+      expect(query.matches({ name: 'cluster', count: 99, flag: false })).toBe(false)
+    })
+  })
 })

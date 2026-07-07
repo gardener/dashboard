@@ -96,7 +96,8 @@ export class SearchQuery {
         if (value == null || value === '') {
           return false
         }
-        return term.exact ? value === term.value : value.includes(term.value)
+        const stringValue = typeof value === 'string' ? value : String(value)
+        return term.exact ? stringValue === term.value : stringValue.includes(term.value)
       }
       const found = values.some(matchesTermValue)
       if ((!found && !term.exclude) || (found && term.exclude)) {
