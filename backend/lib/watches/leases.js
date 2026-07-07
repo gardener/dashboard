@@ -38,16 +38,28 @@ export default (io, informer, { signal }) => {
   const nsp = io.of('/')
 
   ticketCache.on('issue', event => {
-    nsp.emit('issues', event)
+    const projectName = event.object?.metadata?.projectName
+    const shootName = event.object?.metadata?.name
+    if (projectName) {
+      const namespace = cache.getProjectNamespace(projectName)
+      if (namespace) {
+        nsp.to(`issues;${namespace}`).emit('issues', event)
+        if (shootName) {
+          nsp.to(`issues;${namespace}/${shootName}`).emit('issues', event)
+        }
+      }
+    }
     publishSeedStats(event)
   })
   ticketCache.on('comment', event => {
-    const { projectName, name } = event.object.metadata
-    const namespace = cache.getProjectNamespace(projectName)
-    const rooms = [
-      `shoots;${namespace}/${name}`,
-    ]
-    nsp.to(rooms).emit('comments', event)
+    const projectName = event.object?.metadata?.projectName
+    const shootName = event.object?.metadata?.name
+    if (projectName && shootName) {
+      const namespace = cache.getProjectNamespace(projectName)
+      if (namespace) {
+        nsp.to(`issues;${namespace}/${shootName}`).emit('comments', event)
+      }
+    }
   })
 
   const { pollIntervalSeconds, syncThrottleSeconds, syncConcurrency } = config.gitHub

@@ -516,6 +516,9 @@ describe('stores', () => {
 
         await shootStore.subscribe()
 
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('issues', {
+          namespace: '_all',
+        })
         expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
           namespace: '_all',
           labelSelector: 'shoot.gardener.cloud/status!=healthy',
@@ -529,8 +532,12 @@ describe('stores', () => {
 
         await shootStore.subscribe()
 
+        expect(mockEmitUnsubscribe).toHaveBeenCalledWith('issues')
         expect(mockEmitUnsubscribe).toHaveBeenCalledWith('shoots')
         expect(mockGetShoots).toHaveBeenCalledTimes(1)
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('issues', {
+          namespace: '_all',
+        })
         expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
           namespace: '_all',
         })
