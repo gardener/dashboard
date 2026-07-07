@@ -528,6 +528,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
+      await socketStore.emitSubscribe('issues', { namespace: value.namespace })
       await socketStore.emitSubscribe('shoots', value)
       setSubscriptionState(state, constants.OPEN)
     } catch (err) {
@@ -548,6 +549,7 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = undefined
     })
     try {
+      await socketStore.emitUnsubscribe('issues')
       await socketStore.emitUnsubscribe('shoots')
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
