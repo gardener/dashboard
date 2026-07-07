@@ -83,12 +83,15 @@ app.set('healthCheck', healthCheck)
 app.set('periodSeconds', periodSeconds)
 app.set('hooks', apiHooks)
 
-// use a mounted app so /api can opt out of dynamic ETags while the main app keeps them for the SPA fallback
-const apiApp = express()
-apiApp.set('trust proxy', 1)
-apiApp.set('etag', false)
-apiApp.set('x-powered-by', false)
-apiApp.use(apiRouter)
+// use a mounted app so technical routes can opt out of dynamic ETags while the main app keeps them for the SPA fallback
+const technicalApp = express()
+technicalApp.set('trust proxy', 1)
+technicalApp.set('etag', false)
+technicalApp.set('x-powered-by', false)
+technicalApp.use('/auth', authRouter)
+technicalApp.use('/webhook', githubWebhookRouter)
+technicalApp.use('/api', apiRouter)
+technicalApp.use(renderError)
 
 app.use(helmet.xDnsPrefetchControl())
 app.use(helmet.xPermittedCrossDomainPolicies())
@@ -96,9 +99,7 @@ app.use(helmet.xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
-app.use('/auth', authRouter)
-app.use('/webhook', githubWebhookRouter)
-app.use('/api', apiApp)
+app.use(technicalApp)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
