@@ -528,11 +528,15 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = socketEventHandler.start(throttleDelay)
     })
     try {
-      await socketStore.emitSubscribe('issues', { namespace: value.namespace })
       await socketStore.emitSubscribe('shoots', value)
+      try {
+        await socketStore.emitSubscribe('issues', { namespace: value.namespace })
+      } catch (err) {
+        logger.warn('Failed to open ticket subscription, continuing without live ticket updates: %s', err.message)
+      }
       setSubscriptionState(state, constants.OPEN)
     } catch (err) {
-      logger.error('Failed to open subscription: %s', err.message)
+      logger.error('Failed to open shoot subscription: %s', err.message)
       setSubscriptionError(state, err)
     }
   }
@@ -549,11 +553,15 @@ const useShootStore = defineStore('shoot', () => {
       state.subscriptionEventHandler = undefined
     })
     try {
-      await socketStore.emitUnsubscribe('issues')
       await socketStore.emitUnsubscribe('shoots')
+      try {
+        await socketStore.emitUnsubscribe('issues')
+      } catch (err) {
+        logger.warn('Failed to close ticket subscription, continuing without live ticket updates: %s', err.message)
+      }
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
-      logger.error('Failed to close subscription: %s', err.message)
+      logger.error('Failed to close shoot subscription: %s', err.message)
       setSubscriptionError(state, err)
     }
   }
