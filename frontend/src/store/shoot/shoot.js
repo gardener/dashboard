@@ -557,7 +557,7 @@ const useShootStore = defineStore('shoot', () => {
       try {
         await socketStore.emitUnsubscribe('issues')
       } catch (err) {
-        logger.warn('Failed to close ticket subscription, continuing without live ticket updates: %s', err.message)
+        logger.warn('Failed to close ticket subscription: %s', err.message)
       }
       setSubscriptionState(state, constants.CLOSED)
     } catch (err) {
