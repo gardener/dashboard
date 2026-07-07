@@ -118,7 +118,7 @@ describe('stores', () => {
         status: {
           lastOperation: {
             progress: 90,
-            state: 'Succeeded',
+            state: 'Processing',
           },
           conditions: [
             {

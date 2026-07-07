@@ -126,6 +126,18 @@ describe('composables', () => {
         expect(value).toBe(200)
       })
 
+      it('should treat Error state as error', () => {
+        const value = getLastOperationSortVal({
+          operation: {
+            state: 'Error',
+            progress: 100,
+          },
+          lastErrors: [],
+        })
+
+        expect(value).toBe(0)
+      })
+
       it('should allow overriding user-error detection via callback', () => {
         const value = getLastOperationSortVal({
           operation: {

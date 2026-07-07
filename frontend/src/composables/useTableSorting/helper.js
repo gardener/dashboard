@@ -48,7 +48,7 @@ export function getLastOperationSortVal ({
   status = {},
   isUserErrorFn = ({ lastErrors }) => isUserError(errorCodesFromArray(lastErrors)),
 }) {
-  const isError = operation.state === 'Failed' || lastErrors.length
+  const isError = operation.state === 'Failed' || operation.state === 'Error' || lastErrors.length
   const ignoredFromReconciliation = isReconciliationDeactivated(metadata)
 
   if (ignoredFromReconciliation) {
@@ -63,7 +63,7 @@ export function getLastOperationSortVal ({
     metadata,
     status,
   })
-  const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+  const inProgress = operation.state === 'Processing'
 
   if (userError) {
     return inProgress
