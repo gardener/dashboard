@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     :type="computedTextFieldType"
     :autocomplete="inputAutocomplete"
     :append-icon="appendIcon"
-    :error-messages="getErrorMessages(v$.localValue)"
+    :error-messages="inputErrorMessages"
     variant="underlined"
     v-bind="inputProps"
     @click:append="onClickAppend"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0
     :items="items"
     :hint="field.hint"
     :multiple="field.type === 'select-multiple'"
-    :error-messages="getErrorMessages(v$.localValue)"
+    :error-messages="inputErrorMessages"
     variant="underlined"
     v-bind="inputProps"
     @blur="v$.localValue.$touch()"
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
     color="primary"
     :label="field.label"
     :hint="field.hint"
-    :error-messages="getErrorMessages(v$.localValue)"
+    :error-messages="inputErrorMessages"
     :autocomplete="inputAutocomplete"
     :append-icon="appendIcon"
     :class="{ 'hide-secret': hideSecret }"
@@ -62,6 +62,7 @@ import {
   ref,
   watch,
   onMounted,
+  onUnmounted,
   useTemplateRef,
 } from 'vue'
 import {
@@ -114,10 +115,6 @@ const props = defineProps({
   cloudProfileRef: {
     type: Object,
   },
-  errorMessages: {
-    type: Array,
-    default: () => [],
-  },
 })
 
 const emit = defineEmits([
@@ -127,6 +124,7 @@ const emit = defineEmits([
 
 const fieldRef = useTemplateRef('fieldRef')
 const logger = useLogger()
+const dropErrorMessage = ref()
 
 const fieldType = computed(() => props.field.type)
 
@@ -186,6 +184,7 @@ const localValue = computed({
     return props.modelValue
   },
   set: value => {
+    dropErrorMessage.value = undefined
     if (isStructuredLike.value) {
       structuredRawText.value = value
       v$.value.localValue.$touch()
@@ -310,6 +309,13 @@ const rules = computed(() => {
 
 const v$ = useVuelidate(rules, { localValue })
 
+const inputErrorMessages = computed(() => {
+  return [
+    ...(dropErrorMessage.value ? [dropErrorMessage.value] : []),
+    ...getErrorMessages(v$.value.localValue),
+  ]
+})
+
 const items = computed(() => {
   const field = props.field
   let items
@@ -320,18 +326,54 @@ const items = computed(() => {
 })
 
 // ----- handle file drop -----
+const dropFileValidation = computed(() => {
+  if (isYAML.value) {
+    return {
+      acceptedFileDescription: 'a YAML file (.yaml or .yml)',
+      acceptedFileExtensions: ['.yaml', '.yml'],
+      pattern: /yaml|yml/,
+    }
+  }
+
+  if (isJSON.value) {
+    return {
+      acceptedFileDescription: 'a JSON file (.json)',
+      acceptedFileExtensions: ['.json'],
+      pattern: /json/,
+    }
+  }
+
+  return {
+    acceptedFileDescription: 'a text file',
+    acceptedFileExtensions: [],
+    pattern: /.*/,
+  }
+})
+
+let disposeTextFieldDrop
+
 onMounted(() => {
   if (isStructuredLike.value) {
-    let pattern = /.*/
-    if (isYAML.value) {
-      pattern = /yaml/
-    } else if (isJSON.value) {
-      pattern = /json/
-    }
-    handleTextFieldDrop(fieldRef.value, pattern, value => {
+    const {
+      acceptedFileDescription,
+      acceptedFileExtensions,
+      pattern,
+    } = dropFileValidation.value
+    disposeTextFieldDrop = handleTextFieldDrop(fieldRef.value, pattern, value => {
       localValue.value = value
+    }, {
+      acceptedFileDescription,
+      acceptedFileExtensions,
+      onReject: ({ message }) => {
+        dropErrorMessage.value = message
+        v$.value.localValue.$touch()
+      },
     })
   }
+})
+
+onUnmounted(() => {
+  disposeTextFieldDrop?.()
 })
 
 </script>

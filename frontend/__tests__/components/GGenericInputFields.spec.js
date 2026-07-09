@@ -100,6 +100,32 @@ describe('GGenericInputFields', () => {
 
 describe('GGenericInputField', () => {
   let warnSpy
+  const originalFileReader = globalThis.FileReader
+
+  const TextareaStub = {
+    name: 'VTextarea',
+    props: {
+      modelValue: {
+        type: [String, Object, Number, Boolean],
+      },
+      errorMessages: {
+        type: Array,
+        default: () => [],
+      },
+    },
+    emits: [
+      'update:modelValue',
+      'blur',
+      'click:append',
+    ],
+    template: `
+      <textarea
+        :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @blur="$emit('blur')"
+      />
+    `,
+  }
 
   beforeEach(() => {
     warnSpy = vi.spyOn(useLogger(), 'warn').mockImplementation(() => {})
@@ -107,7 +133,39 @@ describe('GGenericInputField', () => {
 
   afterEach(() => {
     warnSpy.mockRestore()
+    vi.stubGlobal('FileReader', originalFileReader)
   })
+
+  function createDropEvent (files) {
+    const event = new Event('drop', {
+      bubbles: true,
+      cancelable: true,
+    })
+    Object.defineProperty(event, 'dataTransfer', {
+      value: { files },
+    })
+    return event
+  }
+
+  function mountStructuredInputField (props = {}) {
+    return shallowMount(GGenericInputField, {
+      props: {
+        modelValue: '',
+        field: {
+          key: 'secret',
+          label: 'Secret',
+          type: 'json-secret',
+          validators: {},
+        },
+        ...props,
+      },
+      global: {
+        stubs: {
+          VTextarea: TextareaStub,
+        },
+      },
+    })
+  }
 
   it('warns for unsupported validator types', async () => {
     shallowMount(GGenericInputField, {
@@ -134,5 +192,84 @@ describe('GGenericInputField', () => {
     await nextTick()
 
     expect(warnSpy).toHaveBeenCalledWith('Ignoring unsupported validator type \'doesNotExist\' for field \'foo\'')
+  })
+
+  it('imports a JSON file dropped by extension when the MIME type is missing', async () => {
+    vi.stubGlobal('FileReader', class {
+      readAsText () {
+        this.onload({
+          target: {
+            result: '{"foo":"bar"}',
+          },
+        })
+      }
+    })
+    const wrapper = mountStructuredInputField()
+
+    await nextTick()
+    wrapper.find('textarea').element.dispatchEvent(createDropEvent([{
+      name: 'secret.json',
+      type: '',
+    }]))
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([
+      [{ foo: 'bar' }],
+    ])
+  })
+
+  it('shows the rejection reason for unsupported dropped files', async () => {
+    const wrapper = mountStructuredInputField()
+
+    await nextTick()
+    wrapper.find('textarea').element.dispatchEvent(createDropEvent([{
+      name: 'secret.txt',
+      type: 'text/plain',
+    }]))
+    await nextTick()
+
+    expect(wrapper.findComponent(TextareaStub).props('errorMessages')).toEqual([
+      'File "secret.txt" was rejected. Expected a JSON file (.json), but received text/plain.',
+    ])
+  })
+
+  it('shows the drop rejection reason before validation errors', async () => {
+    const wrapper = mountStructuredInputField({
+      field: {
+        key: 'secret',
+        label: 'Secret',
+        type: 'json-secret',
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+    })
+
+    await nextTick()
+    wrapper.find('textarea').element.dispatchEvent(createDropEvent([{
+      name: 'secret.txt',
+      type: 'text/plain',
+    }]))
+    await nextTick()
+
+    const errorMessages = wrapper.findComponent(TextareaStub).props('errorMessages')
+    expect(errorMessages[0]).toBe('File "secret.txt" was rejected. Expected a JSON file (.json), but received text/plain.')
+    expect(errorMessages).toContain('Value is required')
+  })
+
+  it('clears the drop rejection reason after the field is edited', async () => {
+    const wrapper = mountStructuredInputField()
+
+    await nextTick()
+    wrapper.find('textarea').element.dispatchEvent(createDropEvent([{
+      name: 'secret.txt',
+      type: 'text/plain',
+    }]))
+    await nextTick()
+
+    await wrapper.find('textarea').setValue('{"foo":"bar"}')
+
+    expect(wrapper.findComponent(TextareaStub).props('errorMessages')).toEqual([])
   })
 })
