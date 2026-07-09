@@ -29,6 +29,7 @@ import {
 import GGenericInputField from '@/components/GGenericInputField'
 
 import isEmpty from 'lodash/isEmpty'
+import isEqual from 'lodash/isEqual'
 import fromPairs from 'lodash/fromPairs'
 
 const props = defineProps({
@@ -68,8 +69,17 @@ function defaultFieldData (fields = []) {
   )
 }
 
-watch(() => fieldData.value, () => {
-  emit('update:modelValue', fieldData.value)
+function initialFieldData (fields, value) {
+  return {
+    ...defaultFieldData(fields),
+    ...(value ?? {}),
+  }
+}
+
+watch(() => fieldData.value, value => {
+  if (!isEqual(value, props.modelValue)) {
+    emit('update:modelValue', value)
+  }
 }, {
   deep: true,
 })
@@ -77,9 +87,9 @@ watch(() => fieldData.value, () => {
 watch([() => props.fields, () => props.modelValue], ([fields, value]) => {
   if (isEmpty(fieldData.value)) {
     // set initial data, including configured defaults
-    fieldData.value = {
-      ...defaultFieldData(fields),
-      ...(value ?? {}),
+    const valueWithDefaults = initialFieldData(fields, value)
+    if (!isEqual(fieldData.value, valueWithDefaults)) {
+      fieldData.value = valueWithDefaults
     }
   }
 }, {

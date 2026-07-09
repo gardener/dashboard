@@ -45,7 +45,7 @@ describe('GGenericInputFields', () => {
     })
   })
 
-  it('keeps existing field data over configured defaults', async () => {
+  it('keeps existing field data over configured defaults without redundant emit', async () => {
     const wrapper = shallowMount(GGenericInputFields, {
       props: {
         fields: [
@@ -69,9 +69,32 @@ describe('GGenericInputFields', () => {
 
     await nextTick()
 
-    expect(lastEmittedValue(wrapper)).toEqual({
-      TSIGSecretAlgorithm: 'hmac-sha512',
+    expect(wrapper.findComponent(GGenericInputField).props('modelValue')).toBe('hmac-sha512')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('does not emit when initialized with empty field data and no defaults', async () => {
+    const wrapper = shallowMount(GGenericInputFields, {
+      props: {
+        fields: [
+          {
+            key: 'accessKeyID',
+            label: 'Access Key ID',
+            type: 'text',
+          },
+        ],
+        modelValue: {},
+      },
+      global: {
+        stubs: {
+          GGenericInputField: true,
+        },
+      },
     })
+
+    await nextTick()
+
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 })
 
