@@ -15,27 +15,22 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <v-card class="mt-4">
-          <v-toolbar
-            flat
-            density="compact"
-            class="bg-toolbar-background text-toolbar-title"
-          >
-            <v-toolbar-title>Global</v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <legend class="text-medium-emphasis">
-                  Color Scheme
-                </legend>
+          <g-toolbar title="Global" />
+          <g-list>
+            <g-list-item>
+              <template #prepend>
+                <v-icon color="primary">
+                  mdi-theme-light-dark
+                </v-icon>
+              </template>
+              <g-list-item-content label="Color Scheme">
                 <v-btn-toggle
                   v-model="colorScheme"
-                  label="Color Scheme"
                   color="primary"
                   mandatory="force"
                   divided
                   density="compact"
-                  class="mt-1 h-75"
+                  class="mt-1"
                 >
                   <v-btn
                     v-tooltip:top="'Light Mode'"
@@ -62,19 +57,23 @@ SPDX-License-Identifier: Apache-2.0
                     <v-icon icon="mdi-brightness-auto" />
                   </v-btn>
                 </v-btn-toggle>
-              </v-col>
-              <v-col cols="12">
-                <legend class="text-medium-emphasis">
-                  Log Level
-                </legend>
+              </g-list-item-content>
+            </g-list-item>
+            <v-divider inset />
+            <g-list-item>
+              <template #prepend>
+                <v-icon color="primary">
+                  mdi-bug
+                </v-icon>
+              </template>
+              <g-list-item-content label="Log Level">
                 <v-btn-toggle
                   v-model="logLevel"
-                  label="Log Level"
                   color="primary"
                   mandatory="force"
                   divided
                   density="compact"
-                  class="mt-1 h-75"
+                  class="mt-1"
                 >
                   <v-btn
                     v-for="{ value, text, icon, color } in logLevels"
@@ -89,36 +88,52 @@ SPDX-License-Identifier: Apache-2.0
                     <span class="text-lowercase text-body-small">{{ text }}</span>
                   </v-btn>
                 </v-btn-toggle>
-              </v-col>
-              <v-col cols="12">
+              </g-list-item-content>
+            </g-list-item>
+            <v-divider inset />
+            <g-list-item>
+              <template #prepend>
+                <v-icon color="primary">
+                  mdi-login
+                </v-icon>
+              </template>
+              <g-list-item-content
+                label="Automatic Login"
+                description="Skip the login screen if no user input is required"
+              />
+              <template #append>
                 <v-switch
                   v-model="autoLogin"
-                  label="Automatic Login"
                   color="primary"
-                  persistent-hint
                   density="compact"
-                  hint="Skip the login screen if no user input is required"
+                  hide-details
                 />
-              </v-col>
-              <v-col
-                v-if="isShootAdminKubeconfigEnabled"
-                cols="12"
-              >
-                <legend class="text-medium-emphasis">
-                  Cluster Time-Limited Kubeconfig Lifetime
-                </legend>
-                <v-select
-                  v-model="shootAdminKubeconfigExpiration"
-                  :items="shootAdminKubeconfigExpirationItems"
-                  variant="solo-filled"
-                  density="compact"
-                  flat
-                  single-line
-                  class="w-25"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
+              </template>
+            </g-list-item>
+            <template v-if="isShootAdminKubeconfigEnabled">
+              <v-divider inset />
+              <g-list-item>
+                <template #prepend>
+                  <v-icon color="primary">
+                    mdi-file-key-outline
+                  </v-icon>
+                </template>
+                <g-list-item-content label="Cluster Time-Limited Kubeconfig Lifetime">
+                  <v-select
+                    v-model="shootAdminKubeconfigExpiration"
+                    :items="shootAdminKubeconfigExpirationItems"
+                    variant="solo-filled"
+                    density="compact"
+                    flat
+                    single-line
+                    hide-details
+                    class="mt-1"
+                    style="max-width: 200px;"
+                  />
+                </g-list-item-content>
+              </g-list-item>
+            </template>
+          </g-list>
         </v-card>
       </v-col>
       <v-col
@@ -126,37 +141,28 @@ SPDX-License-Identifier: Apache-2.0
         md="6"
       >
         <v-card class="mt-4">
-          <v-toolbar
-            flat
-            density="compact"
-            class="bg-toolbar-background text-toolbar-title"
-          >
-            <v-toolbar-title>Advanced</v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
+          <g-toolbar title="Advanced" />
+          <g-list>
+            <g-list-item>
+              <template #prepend>
+                <v-icon color="primary">
+                  mdi-cog-outline
+                </v-icon>
+              </template>
+              <g-list-item-content
+                label="Operator Features"
+                description="Show the Issue Since column and Focus mode in project cluster lists to help identify and triage clusters with issues"
+              />
+              <template #append>
                 <v-switch
                   v-model="operatorFeatures"
-                  label="Operator Features"
                   color="primary"
                   density="compact"
-                  persistent-hint
-                  hint="Enable operator features for project cluster lists"
-                >
-                  <template #message="{ message }">
-                    <div
-                      class="font-weight-bold pb-1"
-                      v-text="message"
-                    />
-                    You can set the focus mode for cluster lists. This mode will freeze the current
-                    list and allows to get an overview of clusters with issues by sorting the list by
-                    the <span class="font-family-monospace">ISSUE SINCE</span> column.
-                  </template>
-                </v-switch>
-              </v-col>
-            </v-row>
-          </v-card-text>
+                  hide-details
+                />
+              </template>
+            </g-list-item>
+          </g-list>
         </v-card>
       </v-col>
     </v-row>
@@ -204,9 +210,3 @@ const shootAdminKubeconfigExpirationItems = computed(() => {
   })
 })
 </script>
-
-<style lang="scss" scoped>
-:deep(.v-messages__message) {
-  line-height: 14px;
-}
-</style>
