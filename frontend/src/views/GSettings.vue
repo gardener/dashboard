@@ -78,14 +78,15 @@ SPDX-License-Identifier: Apache-2.0
                   <v-btn
                     v-for="{ value, text, icon, color } in logLevels"
                     :key="value"
+                    v-tooltip:top="text"
                     :value="value"
                     variant="tonal"
-                    :prepend-icon="icon"
+                    min-width="36"
                   >
-                    <template #prepend>
-                      <v-icon :color="color" />
-                    </template>
-                    <span class="text-lowercase text-body-small">{{ text }}</span>
+                    <v-icon
+                      :icon="icon"
+                      :color="color"
+                    />
                   </v-btn>
                 </v-btn-toggle>
               </g-list-item-content>
@@ -187,11 +188,11 @@ const {
 } = shootAdminKubeconfig
 
 const logLevels = [
-  { value: 'debug', text: 'verbose', icon: 'mdi-bug', color: 'grey darken-4' },
-  { value: 'info', text: 'info', icon: 'mdi-information', color: 'blue darken-2' },
-  { value: 'warn', text: 'warning', icon: 'mdi-alert', color: 'warning' },
-  { value: 'error', text: 'error', icon: 'mdi-close-circle', color: 'error' },
-  { value: 'silent', text: 'silent', icon: 'mdi-pause-octagon', color: 'grey' },
+  { value: 'debug', text: 'Verbose', icon: 'mdi-bug', color: 'grey darken-4' },
+  { value: 'info', text: 'Info', icon: 'mdi-information', color: 'blue darken-2' },
+  { value: 'warn', text: 'Warning', icon: 'mdi-alert', color: 'warning' },
+  { value: 'error', text: 'Error', icon: 'mdi-close-circle', color: 'error' },
+  { value: 'silent', text: 'Silent', icon: 'mdi-pause-octagon', color: 'grey' },
 ]
 
 const {
