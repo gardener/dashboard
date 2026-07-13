@@ -216,6 +216,34 @@ describe('composables', () => {
       expect(decodeBase64(secretContext.secretData.yamlConfig)).toBe('enabled: true\n')
     })
 
+    it('should omit empty configured fields while preserving other empty values', () => {
+      secretContext.createSecretManifest()
+
+      const fields = [
+        { key: 'AWS_REGION', type: 'text', omitWhenEmpty: true },
+        { key: 'AZURE_CLOUD', type: 'select', omitWhenEmpty: true },
+        { key: 'TSIGSecretAlgorithm', type: 'select', omitWhenEmpty: true },
+        { key: 'emptyValue', type: 'text' },
+      ]
+
+      secretContext.setSecretStringDataForFields(fields, {
+        AWS_REGION: '',
+        AZURE_CLOUD: '',
+        TSIGSecretAlgorithm: '',
+        emptyValue: '',
+      })
+
+      expect(secretContext.secretData).toEqual({
+        AWS_REGION: undefined,
+        AZURE_CLOUD: undefined,
+        TSIGSecretAlgorithm: undefined,
+        emptyValue: encodeBase64(''),
+      })
+      expect(secretContext.secretManifest.data).toEqual({
+        emptyValue: encodeBase64(''),
+      })
+    })
+
     it('should preserve falsy values when encoding secretStringData', () => {
       secretContext.createSecretManifest()
 

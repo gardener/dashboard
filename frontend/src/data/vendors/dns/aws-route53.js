@@ -21,6 +21,7 @@ export default {
         label: 'Region (optional)',
         hint: 'Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1',
         type: 'text',
+        omitWhenEmpty: true,
       },
     ],
     help: `

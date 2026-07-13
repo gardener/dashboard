@@ -64,7 +64,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-select>
     <g-secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"
-      :visible-dialog-vendor-type="isDnsProvider ? 'dns' : 'infra'"
+      :visible-dialog-vendor-type="vendorType"
       @dialog-closed="onSecretDialogClosed"
     />
   </div>
@@ -77,12 +77,9 @@ import {
 } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import { storeToRefs } from 'pinia'
 
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
@@ -122,6 +119,11 @@ export default {
     providerType: {
       type: String,
     },
+    vendorType: {
+      type: String,
+      required: true,
+      validator: value => ['infra', 'dns'].includes(value),
+    },
     registerVuelidateAs: {
       type: String,
     },
@@ -145,20 +147,18 @@ export default {
       costObject,
     } = useProjectCostObject(projectItem)
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
-    const cloudProfileStore = useCloudProfileStore()
 
     const v$ = useVuelidate({
       $registerAs: props.registerVuelidateAs,
     })
 
     const providerType = toRef(props, 'providerType')
+    const vendorType = toRef(props, 'vendorType')
     const credential = toRef(props, 'modelValue')
 
-    const cloudProviderEntityList = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const cloudProviderEntityList = useCloudProviderEntityList(providerType, { credentialStore, vendorType })
 
-    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
+    const isDnsProvider = computed(() => vendorType.value === 'dns')
     let composable
     if (isDnsProvider.value) {
       composable = useDnsProviderCredential(credential)

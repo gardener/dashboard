@@ -65,7 +65,7 @@ function parseSecretStringDataValueForField (value, field) {
 }
 
 function encodeSecretStringDataValueForField (value, field) {
-  if (value == null) {
+  if (value == null || (value === '' && field?.omitWhenEmpty)) {
     return undefined
   }
   if (typeof value === 'string') {

@@ -23,7 +23,13 @@ export default {
         key: 'AZURE_CLOUD',
         label: 'Azure Cloud',
         type: 'select',
+        defaultValue: '',
+        omitWhenEmpty: true,
         values: [
+          {
+            title: 'Provider default (Azure Public)',
+            value: '',
+          },
           {
             title: 'AzurePublic',
             value: 'AzurePublic',

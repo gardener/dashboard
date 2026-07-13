@@ -140,7 +140,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
-  storeToRefs,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -153,7 +152,6 @@ import {
 } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 import { useConfigStore } from '@/store/config'
 
@@ -224,11 +222,8 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
-    const { credential, binding, providerType } = toRefs(props)
-    const gardenerExtensionStore = useGardenerExtensionStore()
-    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-
-    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
+    const { credential, binding, vendorType } = toRefs(props)
+    const isDnsProvider = computed(() => vendorType.value === 'dns')
 
     let credentialComposable = {}
 
@@ -324,7 +319,6 @@ export default {
     return rules
   },
   computed: {
-    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
     ...mapState(useCredentialStore, [
       'infrastructureBindingList',

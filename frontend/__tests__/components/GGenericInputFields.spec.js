@@ -5,12 +5,17 @@
 //
 
 import { nextTick } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import {
+  mount,
+  shallowMount,
+} from '@vue/test-utils'
 
 import GGenericInputField from '@/components/GGenericInputField'
 import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { useLogger } from '@/composables/useLogger'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('GGenericInputFields', () => {
   function lastEmittedValue (wrapper) {
@@ -18,7 +23,7 @@ describe('GGenericInputFields', () => {
     return emitted[emitted.length - 1][0]
   }
 
-  it('initializes field data with configured defaults', async () => {
+  it('initializes field data with configured empty defaults', async () => {
     const wrapper = shallowMount(GGenericInputFields, {
       props: {
         fields: [
@@ -26,7 +31,7 @@ describe('GGenericInputFields', () => {
             key: 'TSIGSecretAlgorithm',
             label: 'TSIG Secret Algorithm',
             type: 'select',
-            defaultValue: 'hmac-sha256',
+            defaultValue: '',
           },
         ],
         modelValue: {},
@@ -41,7 +46,7 @@ describe('GGenericInputFields', () => {
     await nextTick()
 
     expect(lastEmittedValue(wrapper)).toEqual({
-      TSIGSecretAlgorithm: 'hmac-sha256',
+      TSIGSecretAlgorithm: '',
     })
   })
 
@@ -71,6 +76,84 @@ describe('GGenericInputFields', () => {
 
     expect(wrapper.findComponent(GGenericInputField).props('modelValue')).toBe('hmac-sha512')
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  it('loads existing field data after initially applying configured defaults', async () => {
+    const wrapper = shallowMount(GGenericInputFields, {
+      props: {
+        fields: [
+          {
+            key: 'AZURE_CLOUD',
+            label: 'Azure Cloud',
+            type: 'select',
+            defaultValue: '',
+          },
+          {
+            key: 'CLIENT_ID',
+            label: 'Client ID',
+            type: 'text',
+          },
+        ],
+        modelValue: {},
+      },
+      global: {
+        stubs: {
+          GGenericInputField: true,
+        },
+      },
+    })
+
+    await nextTick()
+    await wrapper.setProps({
+      modelValue: {
+        AZURE_CLOUD: 'AzureChina',
+        CLIENT_ID: 'client-id',
+      },
+    })
+    await nextTick()
+
+    const fields = wrapper.findAllComponents(GGenericInputField)
+    expect(fields[0].props('modelValue')).toBe('AzureChina')
+    expect(fields[1].props('modelValue')).toBe('client-id')
+    expect(lastEmittedValue(wrapper)).toEqual({
+      AZURE_CLOUD: '',
+    })
+  })
+
+  it('shows the configured empty default as the selected item', async () => {
+    const wrapper = mount(GGenericInputFields, {
+      props: {
+        fields: [
+          {
+            key: 'AZURE_CLOUD',
+            label: 'Azure Cloud',
+            type: 'select',
+            defaultValue: '',
+            values: [
+              {
+                title: 'Provider default (Azure Public)',
+                value: '',
+              },
+              {
+                title: 'AzureChina',
+                value: 'AzureChina',
+              },
+            ],
+          },
+        ],
+        modelValue: {},
+      },
+      global: {
+        plugins: [
+          createVuetifyPlugin(),
+        ],
+      },
+    })
+
+    await nextTick()
+
+    expect(wrapper.findComponent({ name: 'VSelect' }).props('modelValue')).toBe('')
+    expect(wrapper.text()).toContain('Provider default (Azure Public)')
   })
 
   it('does not emit when initialized with empty field data and no defaults', async () => {

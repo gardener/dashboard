@@ -73,6 +73,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-select-credential
             v-model="primaryDnsProviderCredential"
             :provider-type="dnsPrimaryProviderType"
+            vendor-type="dns"
             register-vuelidate-as="dnsProviderCredential"
             label="Primary DNS Provider Credential"
           />
@@ -162,7 +163,6 @@ import {
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GDnsProviderRow from '@/components/ShootDns/GDnsProviderRow'
@@ -202,8 +202,6 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
-    const cloudProfileStore = useCloudProfileStore()
 
     const customDomainEnabled = ref(
       isNewCluster.value
@@ -211,7 +209,7 @@ export default {
         : !!dnsPrimaryProviderType.value,
     )
 
-    const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const availableCredentialsForPrimaryDnsProvider = useCloudProviderEntityList(dnsPrimaryProviderType, { credentialStore, vendorType: 'dns' })
 
     return {
       v$: useVuelidate(),
