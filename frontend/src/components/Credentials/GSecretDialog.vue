@@ -251,7 +251,7 @@ export default {
     let bindingContext = {}
     if (!isDnsProvider.value) {
       const { isSecretBinding } = credentialComposable
-      if (isSecretBinding) {
+      if (isSecretBinding?.value) {
         // Legacy SecretBinding for existing SecrertBindings
         bindingContext = useSecretBindingContext()
       } else {
