@@ -250,9 +250,28 @@ describe('secretDetails', () => {
     expect(secretField('azure', 'subscriptionID').validators.guid).toEqual({ type: 'guid' })
 
     expect(secretField('rfc2136', 'TSIGSecretAlgorithm')).toMatchObject({
-      defaultValue: 'hmac-sha256',
+      defaultValue: '',
+      omitWhenEmpty: true,
+      values: expect.arrayContaining([
+        expect.objectContaining({
+          value: '',
+        }),
+      ]),
     })
     expect(secretField('rfc2136', 'TSIGSecretAlgorithm').validators).toBeUndefined()
+
+    expect(secretField('aws-route53', 'AWS_REGION')).toMatchObject({
+      omitWhenEmpty: true,
+    })
+    expect(secretField('azure-dns', 'AZURE_CLOUD')).toMatchObject({
+      defaultValue: '',
+      omitWhenEmpty: true,
+      values: expect.arrayContaining([
+        expect.objectContaining({
+          value: '',
+        }),
+      ]),
+    })
   })
 
   it('limits GCP project IDs to the documented length', () => {
