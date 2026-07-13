@@ -628,6 +628,11 @@ describe('GGenericInputField', () => {
           key: 'project_id',
           pattern: /^[a-z][a-z0-9-]+$/,
         },
+        accountType: {
+          type: 'hasObjectProp',
+          key: 'type',
+          value: 'service_account',
+        },
       },
     }
 
@@ -636,6 +641,7 @@ describe('GGenericInputField', () => {
 
     expect(field.validators.validObject).not.toHaveProperty('message')
     expect(field.validators.projectID).not.toHaveProperty('message')
+    expect(field.validators.accountType).not.toHaveProperty('message')
   })
 
   it('warns for unsupported validator types', async () => {
