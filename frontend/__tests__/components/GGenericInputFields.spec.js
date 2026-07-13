@@ -277,6 +277,36 @@ describe('GGenericInputField', () => {
     expect(warnSpy).toHaveBeenCalledWith('Ignoring unsupported validator type \'doesNotExist\' for field \'foo\'')
   })
 
+  it('does not mutate validator configuration when deriving default messages', async () => {
+    const field = {
+      key: 'secret',
+      label: 'Secret',
+      type: 'json-secret',
+      validators: {
+        validObject: {
+          type: 'isValidObject',
+        },
+        projectID: {
+          type: 'hasObjectProp',
+          key: 'project_id',
+          pattern: /^[a-z][a-z0-9-]+$/,
+        },
+        accountType: {
+          type: 'hasObjectProp',
+          key: 'type',
+          value: 'service_account',
+        },
+      },
+    }
+
+    mountStructuredInputField({ field })
+    await nextTick()
+
+    expect(field.validators.validObject).not.toHaveProperty('message')
+    expect(field.validators.projectID).not.toHaveProperty('message')
+    expect(field.validators.accountType).not.toHaveProperty('message')
+  })
+
   it('imports a JSON file dropped by extension when the MIME type is missing', async () => {
     vi.stubGlobal('FileReader', class {
       readAsText () {

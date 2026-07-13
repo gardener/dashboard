@@ -229,6 +229,8 @@ watch(
 const rules = computed(() => {
   const compiledValidators = {}
   forEach(props.field.validators, (validator, validatorName) => {
+    let message = validator.message
+
     switch (validator.type) {
       case 'required':
         set(compiledValidators, [validatorName], required)
@@ -263,11 +265,11 @@ const rules = computed(() => {
           // Check if modelValue is a non-empty object (successful parse)
           return typeof props.modelValue === 'object' && props.modelValue !== null && Object.keys(props.modelValue).length > 0
         })
-        if (!validator.message) {
+        if (!message) {
           if (isYAML.value) {
-            validator.message = 'You need to enter secret data as YAML key-value pairs'
+            message = 'You need to enter secret data as YAML key-value pairs'
           } else if (isJSON.value) {
-            validator.message = 'You need to enter secret data as valid JSON object'
+            message = 'You need to enter secret data as valid JSON object'
           }
         }
         break
@@ -285,11 +287,11 @@ const rules = computed(() => {
           }
           return true
         })
-        if (!validator.message) {
+        if (!message) {
           if (validator.value) {
-            validator.message = `Must contain a valid ${validator.key} property with value "${validator.value}"`
+            message = `Must contain a valid ${validator.key} property with value "${validator.value}"`
           } else if (validator.pattern) {
-            validator.message = `Must contain a valid ${validator.key} property matching pattern ${validator.pattern}`
+            message = `Must contain a valid ${validator.key} property matching pattern ${validator.pattern}`
           }
         }
         break
@@ -298,8 +300,8 @@ const rules = computed(() => {
         break
     }
     const compiledValidator = get(compiledValidators, [validatorName])
-    if (validator.message && compiledValidator) {
-      set(compiledValidators, [validatorName], withMessage(validator.message, compiledValidator))
+    if (message && compiledValidator) {
+      set(compiledValidators, [validatorName], withMessage(message, compiledValidator))
     }
   })
   return {
