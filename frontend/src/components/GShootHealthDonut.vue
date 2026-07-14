@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    class="d-inline-flex align-center justify-center"
+    class="activator d-inline-flex align-center justify-center"
     :style="{ minWidth: `${donut.size}px`, minHeight: `${donut.size}px` }"
     tabindex="0"
     role="img"
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <span
       v-if="shootCount === 0"
-      class="empty text-medium-emphasis"
+      class="text-medium-emphasis"
       aria-hidden="true"
     >-</span>
     <svg
@@ -60,73 +60,63 @@ SPDX-License-Identifier: Apache-2.0
         aria-hidden="true"
       >{{ centerText }}</text>
     </svg>
-    <v-tooltip
+    <g-detail-tooltip
       activator="parent"
-      location="top"
-      :open-delay="200"
-      content-class="pa-0"
-      :content-props="{ style: { background: 'transparent' } }"
+      title="Shoot health"
     >
-      <v-card
-        class="tooltip-card"
-        elevation="12"
+      <div
+        v-if="shootCount === 0"
+        class="d-flex align-center text-medium-emphasis"
       >
-        <v-list
-          class="tooltip-list"
-          density="compact"
+        <v-icon
+          class="mr-2"
+          icon="mdi-information-outline"
+          size="small"
+        />
+        <span>No shoots assigned</span>
+      </div>
+      <template v-else>
+        <div class="health-row">
+          <v-icon
+            :color="errorColor"
+            icon="mdi-alert-circle-outline"
+            size="small"
+          />
+          <span>{{ hasActiveFilters ? 'Unhealthy shown' : 'Unhealthy' }}</span>
+          <strong>{{ matchingUnhealthy }}</strong>
+        </div>
+        <div
+          v-if="hasActiveFilters"
+          class="health-row"
         >
-          <template v-if="shootCount === 0">
-            <v-list-item :prepend-gap="8">
-              <template #prepend>
-                <v-icon
-                  icon="mdi-information-outline"
-                  class="text-medium-emphasis"
-                />
-              </template>
-              <v-list-item-title>No shoots assigned</v-list-item-title>
-            </v-list-item>
-          </template>
-          <template v-else>
-            <v-list-item :prepend-gap="8">
-              <template #prepend>
-                <v-icon
-                  color="error"
-                  icon="mdi-alert-circle-outline"
-                />
-              </template>
-              <v-list-item-subtitle>Unhealthy</v-list-item-subtitle>
-              <v-list-item-title>{{ matchingUnhealthy }}</v-list-item-title>
-            </v-list-item>
-            <template v-if="activeFilterLabels.length > 0">
-              <v-list-item :prepend-gap="8">
-                <template #prepend>
-                  <v-icon
-                    icon="mdi-filter-outline"
-                    class="text-error-lighten-3"
-                  />
-                </template>
-                <v-list-item-subtitle>
-                  Excluded<template v-if="filterDescription">
-                    — {{ filterDescription }}
-                  </template>
-                </v-list-item-subtitle>
-                <v-list-item-title>{{ hiddenUnhealthy }}</v-list-item-title>
-              </v-list-item>
-            </template>
-            <v-list-item :prepend-gap="8">
-              <template #prepend>
-                <v-icon
-                  color="success"
-                  icon="mdi-check-circle-outline"
-                />
-              </template>
-              <v-list-item-subtitle>Healthy</v-list-item-subtitle>
-              <v-list-item-title>{{ healthyShoots }}</v-list-item-title>
-            </v-list-item>
-          </template>
-        </v-list>
-      </v-card>
-    </v-tooltip>
+          <v-icon
+            :color="warningColor"
+            icon="mdi-filter-minus-outline"
+            size="small"
+          />
+          <span>Unhealthy filtered out</span>
+          <strong>{{ hiddenUnhealthy }}</strong>
+        </div>
+        <div class="health-row">
+          <v-icon
+            color="success"
+            icon="mdi-check-circle-outline"
+            size="small"
+          />
+          <span>Healthy</span>
+          <strong>{{ healthyShoots }}</strong>
+        </div>
+      </template>
+      <template
+        v-if="hasActiveFilters"
+        #footer
+      >
+        <div class="filter-summary">
+          <span>Cluster Operations excludes</span>
+          <span>{{ filterDescription }}</span>
+        </div>
+      </template>
+    </g-detail-tooltip>
   </div>
 </template>
 
@@ -135,6 +125,9 @@ import {
   computed,
   toRefs,
 } from 'vue'
+import { useTheme } from 'vuetify'
+
+import GDetailTooltip from '@/components/GDetailTooltip.vue'
 
 import { useDonutChart } from '@/composables/useDonutChart'
 
@@ -170,6 +163,12 @@ const {
 
 const hiddenUnhealthy = computed(() => totalUnhealthy.value - matchingUnhealthy.value)
 const healthyShoots = computed(() => shootCount.value - totalUnhealthy.value)
+const hasActiveFilters = computed(() => activeFilterLabels.value.length > 0)
+
+const theme = useTheme()
+const isDark = computed(() => theme.current.value.dark)
+const errorColor = computed(() => isDark.value ? 'error-lighten-2' : 'error')
+const warningColor = computed(() => isDark.value ? 'warning-lighten-2' : 'warning')
 
 const filterDescription = computed(() => {
   const labels = activeFilterLabels.value
@@ -241,6 +240,11 @@ const centerTextSizeClass = computed(() => {
 
 // --- accessibility ---
 
+function formatShootCount (count, qualifier) {
+  const noun = count === 1 ? 'shoot' : 'shoots'
+  return [count, qualifier, noun].filter(value => value !== undefined).join(' ')
+}
+
 const ariaLabel = computed(() => {
   if (shootCount.value === 0) {
     return 'No shoots assigned to this seed.'
@@ -254,22 +258,34 @@ const ariaLabel = computed(() => {
     const desc = filterDescription.value
       ? ` (${filterDescription.value})`
       : ''
-    parts.push(`${hiddenUnhealthy.value} excluded by filter${desc}`)
+    parts.push(`${formatShootCount(hiddenUnhealthy.value, 'unhealthy')} excluded by Cluster Operations filters${desc}`)
   }
-  parts.push(`${healthyShoots.value} healthy shoots`)
+  parts.push(formatShootCount(healthyShoots.value, 'healthy'))
   return parts.join(', ') + '.'
 })
 </script>
 
 <style lang="scss" scoped>
-  .empty {
-    font-size: 0.875rem;
+  .activator {
+    color: inherit;
+    text-decoration: none;
   }
 
-  .tooltip-card,
-  .tooltip-list {
-    background-color: rgb(var(--v-theme-surface));
-    color: rgb(var(--v-theme-on-surface));
+  .health-row {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+
+    strong {
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+  }
+
+  .filter-summary {
+    display: grid;
+    gap: 2px;
   }
 
   .center-text {
@@ -288,7 +304,8 @@ const ariaLabel = computed(() => {
     }
 
     &.error {
-      fill: rgb(var(--v-theme-error));
+      fill: rgba(var(--v-theme-on-surface), 0.92);
+      font-weight: 500;
     }
   }
 

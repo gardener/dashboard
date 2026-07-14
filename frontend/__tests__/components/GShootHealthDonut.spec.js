@@ -8,40 +8,33 @@ import { shallowMount } from '@vue/test-utils'
 
 import GShootHealthDonut from '@/components/GShootHealthDonut.vue'
 
+const { createVuetifyPlugin } = global.fixtures.helper
+
 describe('components', () => {
   describe('g-shoot-health-donut', () => {
+    const vuetifyPlugin = createVuetifyPlugin()
+
     function mountComponent (props = {}) {
       return shallowMount(GShootHealthDonut, {
         props,
         global: {
+          plugins: [vuetifyPlugin],
           stubs: {
-            'v-tooltip': {
-              template: '<div><slot name="activator" :props="{}" /><slot /></div>',
+            GDetailTooltip: {
+              template: '<div><slot /><slot name="footer" /></div>',
             },
             'v-card': {
               template: '<div><slot /></div>',
             },
             'v-icon': true,
-            'v-list': {
-              template: '<div class="v-list-stub"><slot /></div>',
-            },
-            'v-list-item': {
-              template: '<div class="v-list-item-stub"><slot name="prepend" /><slot /></div>',
-            },
-            'v-list-item-title': {
-              template: '<span class="v-list-item-title-stub"><slot /></span>',
-            },
-            'v-list-item-subtitle': {
-              template: '<span class="v-list-item-subtitle-stub"><slot /></span>',
-            },
           },
         },
       })
     }
 
     function findRow (wrapper, label) {
-      return wrapper.findAll('.v-list-item-stub').find(item => {
-        return item.find('.v-list-item-subtitle-stub').text().startsWith(label)
+      return wrapper.findAll('.health-row').find(item => {
+        return item.find('span').text() === label
       })
     }
 
@@ -49,15 +42,15 @@ describe('components', () => {
       it('should show a dash when shootCount is 0', () => {
         const wrapper = mountComponent({ shootCount: 0 })
 
-        expect(wrapper.find('.empty').exists()).toBe(true)
-        expect(wrapper.find('.empty').text()).toBe('-')
+        expect(wrapper.find('.text-medium-emphasis').exists()).toBe(true)
+        expect(wrapper.find('.text-medium-emphasis').text()).toBe('-')
         expect(wrapper.find('svg').exists()).toBe(false)
       })
 
       it('should show a dash when shootCount is not provided', () => {
         const wrapper = mountComponent()
 
-        expect(wrapper.find('.empty').exists()).toBe(true)
+        expect(wrapper.find('.text-medium-emphasis').exists()).toBe(true)
       })
     })
 
@@ -217,9 +210,9 @@ describe('components', () => {
 
         const unhealthy = findRow(wrapper, 'Unhealthy')
         expect(unhealthy).toBeDefined()
-        expect(unhealthy.find('.v-list-item-title-stub').text()).toBe('5')
+        expect(unhealthy.find('strong').text()).toBe('5')
 
-        const excluded = findRow(wrapper, 'Excluded')
+        const excluded = findRow(wrapper, 'Unhealthy filtered out')
         expect(excluded).toBeUndefined()
       })
 
@@ -231,13 +224,13 @@ describe('components', () => {
           activeFilterLabels: ['User Errors', 'Progressing'],
         })
 
-        const unhealthy = findRow(wrapper, 'Unhealthy')
-        expect(unhealthy.find('.v-list-item-title-stub').text()).toBe('2')
+        const unhealthy = findRow(wrapper, 'Unhealthy shown')
+        expect(unhealthy.find('strong').text()).toBe('2')
 
-        const excluded = findRow(wrapper, 'Excluded')
+        const excluded = findRow(wrapper, 'Unhealthy filtered out')
         expect(excluded).toBeDefined()
-        expect(excluded.find('.v-list-item-title-stub').text()).toBe('3')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('User Errors, Progressing')
+        expect(excluded.find('strong').text()).toBe('3')
+        expect(wrapper.find('.filter-summary').text()).toContain('User Errors, Progressing')
       })
 
       it('should truncate filter labels after 2 with "& N more"', () => {
@@ -248,9 +241,9 @@ describe('components', () => {
           activeFilterLabels: ['Progressing', 'User Errors', 'Deactivated Reconciliation', 'Ignored Ticket Labels'],
         })
 
-        const excluded = findRow(wrapper, 'Excluded')
-        expect(excluded.find('.v-list-item-title-stub').text()).toBe('6')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing, User Errors & 2 more')
+        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        expect(excluded.find('strong').text()).toBe('6')
+        expect(wrapper.find('.filter-summary').text()).toContain('Progressing, User Errors & 2 more')
       })
 
       it('should not show excluded row when no filter labels provided', () => {
@@ -260,7 +253,7 @@ describe('components', () => {
           matchingUnhealthyShoots: 2,
         })
 
-        const excluded = findRow(wrapper, 'Excluded')
+        const excluded = findRow(wrapper, 'Unhealthy filtered out')
         expect(excluded).toBeUndefined()
       })
 
@@ -272,10 +265,10 @@ describe('components', () => {
           activeFilterLabels: ['Progressing'],
         })
 
-        const excluded = findRow(wrapper, 'Excluded')
+        const excluded = findRow(wrapper, 'Unhealthy filtered out')
         expect(excluded).toBeDefined()
-        expect(excluded.find('.v-list-item-title-stub').text()).toBe('0')
-        expect(excluded.find('.v-list-item-subtitle-stub').text()).toContain('Progressing')
+        expect(excluded.find('strong').text()).toBe('0')
+        expect(wrapper.find('.filter-summary').text()).toContain('Progressing')
       })
 
       it('should show healthy legend when there are healthy shoots', () => {
@@ -287,7 +280,7 @@ describe('components', () => {
 
         const healthy = findRow(wrapper, 'Healthy')
         expect(healthy).toBeDefined()
-        expect(healthy.find('.v-list-item-title-stub').text()).toBe('7')
+        expect(healthy.find('strong').text()).toBe('7')
       })
     })
 
@@ -304,8 +297,8 @@ describe('components', () => {
 
         expect(label).toContain('Shoot health distribution')
         expect(label).toContain('10 shoots')
-        expect(label).toContain('1 unhealthy shoots')
-        expect(label).toContain('2 excluded by filter (User Errors)')
+        expect(label).toContain('1 unhealthy shoot')
+        expect(label).toContain('2 unhealthy shoots excluded by Cluster Operations filters (User Errors)')
         expect(label).toContain('7 healthy shoots')
       })
     })

@@ -21,64 +21,58 @@ SPDX-License-Identifier: Apache-2.0
         rounded
       />
     </div>
-    <v-tooltip
+    <g-detail-tooltip
       activator="parent"
-      location="top"
-      :open-delay="200"
-      content-class="pa-0"
-      :content-props="{ style: { background: 'transparent' } }"
+      title="Seed capacity"
     >
-      <v-card
-        class="tooltip-card"
-        elevation="12"
+      <div class="metric-row">
+        <v-icon
+          :color="primaryColor"
+          icon="mdi-vector-link"
+          size="small"
+        />
+        <span>Assigned shoots</span>
+        <strong>{{ props.shootCount }}</strong>
+      </div>
+      <div class="metric-row">
+        <v-icon
+          :color="hasKnownCapacity ? primaryColor : undefined"
+          :class="{ 'text-medium-emphasis': !hasKnownCapacity }"
+          :icon="hasKnownCapacity ? 'mdi-chart-box-outline' : 'mdi-information-outline'"
+          size="small"
+        />
+        <span>Allocatable shoots</span>
+        <strong :class="{ 'text-medium-emphasis': !hasKnownCapacity }">
+          {{ hasKnownCapacity ? props.allocatableShoots : 'Unknown' }}
+        </strong>
+      </div>
+      <template v-if="hasCapacityProgress">
+        <v-progress-linear
+          :model-value="capacityUsagePercent"
+          color="primary"
+          :height="6"
+          rounded
+        />
+        <div class="capacity-summary text-medium-emphasis">
+          <span>{{ capacityUsageLabel }} used</span>
+          <span>{{ remainingCapacity }} remaining</span>
+        </div>
+      </template>
+      <template
+        v-if="!hasKnownCapacity"
+        #footer
       >
-        <v-list
-          class="tooltip-list"
-          density="compact"
-        >
-          <v-list-item :prepend-gap="8">
-            <template #prepend>
-              <v-icon
-                color="primary"
-                icon="mdi-vector-link"
-              />
-            </template>
-            <v-list-item-subtitle>Assigned</v-list-item-subtitle>
-            <v-list-item-title>{{ props.shootCount }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item :prepend-gap="8">
-            <template #prepend>
-              <v-icon
-                color="primary"
-                :icon="hasKnownCapacity ? 'mdi-chart-box-outline' : 'mdi-information-outline'"
-              />
-            </template>
-            <v-list-item-subtitle>
-              <template v-if="hasKnownCapacity">
-                Allocatable — Total allocatable shoots for this seed
-              </template>
-              <template v-else>
-                Allocatable — This seed does not report allocatable shoot capacity
-              </template>
-            </v-list-item-subtitle>
-            <v-list-item-title>
-              <template v-if="hasKnownCapacity">
-                {{ props.allocatableShoots }}
-              </template>
-              <span
-                v-else
-                class="text-medium-emphasis"
-              >Unknown</span>
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </v-tooltip>
+        This seed does not report its allocatable shoot capacity.
+      </template>
+    </g-detail-tooltip>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useTheme } from 'vuetify'
+
+import GDetailTooltip from '@/components/GDetailTooltip.vue'
 
 const props = defineProps({
   allocatableShoots: {
@@ -93,6 +87,10 @@ const props = defineProps({
 const hasKnownCapacity = computed(() => {
   return Number.isFinite(props.allocatableShoots)
 })
+
+const theme = useTheme()
+const isDark = computed(() => theme.current.value.dark)
+const primaryColor = computed(() => isDark.value ? 'primary-lighten-2' : 'primary')
 
 const hasCapacityProgress = computed(() => {
   return hasKnownCapacity.value && props.allocatableShoots > 0
@@ -114,6 +112,17 @@ const capacityText = computed(() => {
   return `${props.shootCount} / ${props.allocatableShoots}`
 })
 
+const capacityUsageLabel = computed(() => {
+  return `${Math.round(capacityUsagePercent.value)}%`
+})
+
+const remainingCapacity = computed(() => {
+  if (!hasKnownCapacity.value) {
+    return undefined
+  }
+  return Math.max(props.allocatableShoots - props.shootCount, 0)
+})
+
 const ariaLabel = computed(() => {
   if (!hasKnownCapacity.value) {
     return `Seed capacity: ${props.shootCount} assigned shoots, allocatable capacity unknown`
@@ -125,7 +134,9 @@ const ariaLabel = computed(() => {
 
 <style lang="scss" scoped>
   .activator {
+    color: inherit;
     display: inline-grid;
+    text-decoration: none;
   }
 
   .capacity-indicator {
@@ -134,10 +145,22 @@ const ariaLabel = computed(() => {
     min-width: 88px;
   }
 
-  .tooltip-card,
-  .tooltip-list {
-    background-color: rgb(var(--v-theme-surface));
-    color: rgb(var(--v-theme-on-surface));
+  .metric-row {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+
+    strong {
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+  }
+
+  .capacity-summary {
+    display: flex;
+    font-size: 0.75rem;
+    justify-content: space-between;
   }
 
   .text {

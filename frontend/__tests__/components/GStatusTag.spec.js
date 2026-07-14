@@ -81,6 +81,7 @@ describe('components', () => {
       expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
       expect(vm.color).toBe('primary')
       expect(vm.visible).toBe(true)
+      expect(vm.chipAriaLabel).toBe('foo-bar: Healthy')
     })
 
     it('should render condition with user error', () => {
