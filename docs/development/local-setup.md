@@ -95,7 +95,7 @@ yarn serve
 
 To start the frontend server, you have two options for handling the server certificate:
 
-1. **Recommended Method**: Run `yarn setup` in the frontend directory to generate a new self-signed CA and TLS server certificate before starting the frontend server for the first time. The CA is automatically added to the keychain on macOS. If you prefer not to add it to the keychain, you can use the `--skip-keychain` flag. For other operating systems, you will need to manually add the generated certificates to the local trust store.
+1. **Recommended Method**: Run `yarn setup` in the frontend directory to generate a new self-signed CA and TLS server certificate before starting the frontend server for the first time. The certificates are stored under `${HOME}/.gardener/dashboard/ssl` and shared by all local Gardener Dashboard repositories. The CA is automatically added to the keychain on macOS. If you prefer not to add it to the keychain, you can use the `--skip-keychain` flag. For other operating systems, you will need to manually add the generated certificates to the local trust store. Set `GARDENER_DASHBOARD_SSL_DIR` to an absolute path to use a different certificate directory.
 
 2. **Alternative Method**: If you prefer not to run `yarn setup`, a temporary self-signed certificate will be generated automatically. This certificate will not be added to the keychain. Note that you will need to click through the insecure warning in your browser to access the dashboard.
 
