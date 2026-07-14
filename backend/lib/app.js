@@ -68,17 +68,30 @@ if (gitHubRepoUrl) {
   imgSrc.push(url.origin)
 }
 
-// configure app
 const app = express()
+
+// configure express settings
+app.set('trust proxy', 1)
+app.set('etag', 'weak')
+app.set('x-powered-by', false)
+
+// configure custom app settings used by the server
 app.set('port', port)
 app.set('metricsPort', metricsPort)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
 app.set('periodSeconds', periodSeconds)
 app.set('hooks', apiHooks)
-app.set('trust proxy', 1)
-app.set('etag', false)
-app.set('x-powered-by', false)
+
+// use a mounted app so technical routes can opt out of dynamic ETags while the main app keeps them for the SPA fallback
+const apiApp = express()
+apiApp.set('trust proxy', 1)
+apiApp.set('etag', false)
+apiApp.set('x-powered-by', false)
+apiApp.use('/auth', authRouter)
+apiApp.use('/webhook', githubWebhookRouter)
+apiApp.use('/api', apiRouter)
+apiApp.use(renderError)
 
 app.use(helmet.xDnsPrefetchControl())
 app.use(helmet.xPermittedCrossDomainPolicies())
@@ -86,9 +99,7 @@ app.use(helmet.xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
   app.use(helmet.strictTransportSecurity())
 }
-app.use('/auth', authRouter)
-app.use('/webhook', githubWebhookRouter)
-app.use('/api', apiRouter)
+app.use(apiApp)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
