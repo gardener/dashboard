@@ -36,7 +36,8 @@
     "**/.yarn/sdks/**": true,
     "**/.yarn/unplugged/**": true,
     "**/.yarn/versions/**": true,
-    "**/dist": true
+    "**/dist": true,
+    "**/.yarn": true
   },
   "eslint.nodePath": ".yarn/sdks",
   "files.exclude": {
