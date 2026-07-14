@@ -5,14 +5,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Determine the directory of the script
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Ensure newly generated private keys are not accessible by other users
+umask 077
 
-# Define the SSL directory relative to the script directory
-SSL_DIR="${SCRIPT_DIR}/../frontend/ssl"
+SSL_DIR="${GARDENER_DASHBOARD_SSL_DIR:-${HOME}/.gardener/dashboard/ssl}"
 
 # Create the SSL directory
 mkdir -p "${SSL_DIR}"
+chmod 700 "${SSL_DIR}"
 
 # Create the req.cnf file in the SSL directory
 cat << EOF > "${SSL_DIR}/req.cnf"
@@ -46,6 +46,7 @@ openssl req -x509 -new -nodes -key "${SSL_DIR}/ca-key.pem" -days 3650 -out "${SS
 openssl genrsa -out "${SSL_DIR}/key.pem" 2048
 openssl req -new -key "${SSL_DIR}/key.pem" -out "${SSL_DIR}/csr.pem" -subj "/CN=gardener-dashboard-server" -config "${SSL_DIR}/req.cnf"
 openssl x509 -req -in "${SSL_DIR}/csr.pem" -CA "${SSL_DIR}/ca.pem" -CAkey "${SSL_DIR}/ca-key.pem" -CAcreateserial -out "${SSL_DIR}/cert.pem" -days 3650 -extensions v3_req -extfile "${SSL_DIR}/req.cnf"
+chmod 600 "${SSL_DIR}/ca-key.pem" "${SSL_DIR}/key.pem"
 
 # Parse command line arguments
 SKIP_KEYCHAIN=false

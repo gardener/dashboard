@@ -6,6 +6,8 @@
 
 import zlib from 'node:zlib'
 import { createRequire } from 'node:module'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 import {
   readFileSync,
   existsSync,
@@ -175,8 +177,9 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (command === 'serve') {
-    const keyPath = resolve('./ssl/key.pem')
-    const certPath = resolve('./ssl/cert.pem')
+    const sslDirectory = process.env.GARDENER_DASHBOARD_SSL_DIR || join(homedir(), '.gardener', 'dashboard', 'ssl')
+    const keyPath = join(sslDirectory, 'key.pem')
+    const certPath = join(sslDirectory, 'cert.pem')
     const https = existsSync(keyPath) && existsSync(certPath)
       ? {
           key: readFileSync(keyPath),
@@ -186,7 +189,7 @@ export default defineConfig(({ command, mode }) => {
 
     if (https === true && mode === 'development') {
       // eslint-disable-next-line no-console
-      console.warn(YELLOW + 'WARNING:' + RESET + ' SSL key and certificate files are missing. We recommend running ' + WHITE_BLACK + 'yarn setup' + RESET + ' to generate certificate files and add the CA to the keychain.')
+      console.warn(YELLOW + 'WARNING:' + RESET + ' SSL key and certificate files are missing from ' + sslDirectory + '. We recommend running ' + WHITE_BLACK + 'yarn setup' + RESET + ' to generate shared certificate files and add the CA to the keychain.')
       config.plugins.push(basicSsl({
         name: 'vite-develpment-server',
         domains: ['localhost', '127.0.0.1'],
