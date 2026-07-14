@@ -1,0 +1,6 @@
+export default {
+  name: 'alicloud',
+  displayName: 'Alibaba Cloud',
+  weight: 500,
+  icon: 'alicloud.svg',
+}
