@@ -6283,7 +6283,7 @@ const RAW_RUNTIME_STATE =
           ["has-property-descriptors", "npm:1.0.2"],\
           ["has-proto", "npm:1.2.0"],\
           ["has-symbols", "npm:1.1.0"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["internal-slot", "npm:1.1.0"],\
           ["is-array-buffer", "npm:3.0.5"],\
           ["is-callable", "npm:1.2.7"],\
@@ -6389,7 +6389,7 @@ const RAW_RUNTIME_STATE =
           ["es-set-tostringtag", "npm:2.1.0"],\
           ["get-intrinsic", "npm:1.3.0"],\
           ["has-tostringtag", "npm:1.0.2"],\
-          ["hasown", "npm:2.0.2"]\
+          ["hasown", "npm:2.0.4"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6399,7 +6399,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/es-shim-unscopables-npm-1.1.0-13f1970345-1b9702c8a1.zip/node_modules/es-shim-unscopables/",\
         "packageDependencies": [\
           ["es-shim-unscopables", "npm:1.1.0"],\
-          ["hasown", "npm:2.0.2"]\
+          ["hasown", "npm:2.0.4"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6746,7 +6746,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-import-resolver-node", "npm:0.3.9"],\
           ["eslint-module-utils", "virtual:3ac9fd9bbbdad96a28fdcd4411f4647f555a1db4115eae90eb42a44d45100bea31900b992dcfbd62426e69fd3d557ac8450b927a441e86e49e0d307516b367a0#npm:2.12.1"],\
           ["eslint-plugin-import", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:2.32.0"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["is-core-module", "npm:2.16.1"],\
           ["is-glob", "npm:4.0.3"],\
           ["minimatch", "npm:3.1.5"],\
@@ -6886,7 +6886,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
           ["eslint-plugin-react", "virtual:3425432411246eef340d7f80ca5ba0066bedd24f3d9cfff2446edead87fe038ff137db2ba210f5820a2e1cc71cc10dc26fa703b44653ade6be2ac8c5a29555ae#npm:7.37.5"],\
           ["estraverse", "npm:5.3.0"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["jsx-ast-utils", "npm:3.3.5"],\
           ["minimatch", "npm:3.1.5"],\
           ["object.entries", "npm:1.1.9"],\
@@ -7601,7 +7601,7 @@ const RAW_RUNTIME_STATE =
           ["define-properties", "npm:1.2.1"],\
           ["function.prototype.name", "npm:1.1.8"],\
           ["functions-have-names", "npm:1.2.3"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["is-callable", "npm:1.2.7"]\
         ],\
         "linkType": "HARD"\
@@ -7679,7 +7679,7 @@ const RAW_RUNTIME_STATE =
           ["get-proto", "npm:1.0.1"],\
           ["gopd", "npm:1.2.0"],\
           ["has-symbols", "npm:1.1.0"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["math-intrinsics", "npm:1.1.0"]\
         ],\
         "linkType": "HARD"\
@@ -7911,14 +7911,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["hasown", [\
-      ["npm:2.0.2", {\
-        "packageLocation": "./.yarn/cache/hasown-npm-2.0.2-80fe6c9901-3769d43470.zip/node_modules/hasown/",\
-        "packageDependencies": [\
-          ["function-bind", "npm:1.1.2"],\
-          ["hasown", "npm:2.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:2.0.4", {\
         "packageLocation": "./.yarn/cache/hasown-npm-2.0.4-75e16c9c2a-2d8de939e2.zip/node_modules/hasown/",\
         "packageDependencies": [\
@@ -8187,7 +8179,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/internal-slot-npm-1.1.0-269ac0e8be-03966f5e25.zip/node_modules/internal-slot/",\
         "packageDependencies": [\
           ["es-errors", "npm:1.3.0"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["internal-slot", "npm:1.1.0"],\
           ["side-channel", "npm:1.1.0"]\
         ],\
@@ -8303,7 +8295,7 @@ const RAW_RUNTIME_STATE =
       ["npm:2.16.1", {\
         "packageLocation": "./.yarn/cache/is-core-module-npm-2.16.1-a54837229e-898443c147.zip/node_modules/is-core-module/",\
         "packageDependencies": [\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["is-core-module", "npm:2.16.1"]\
         ],\
         "linkType": "HARD"\
@@ -8510,7 +8502,7 @@ const RAW_RUNTIME_STATE =
           ["call-bound", "npm:1.0.4"],\
           ["gopd", "npm:1.2.0"],\
           ["has-tostringtag", "npm:1.0.2"],\
-          ["hasown", "npm:2.0.2"],\
+          ["hasown", "npm:2.0.4"],\
           ["is-regex", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
