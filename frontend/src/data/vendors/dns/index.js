@@ -1,9 +1,3 @@
-//
-// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 import awsRoute53 from './aws-route53'
 import azureDns from './azure-dns'
 import azurePrivateDns from './azure-private-dns'
