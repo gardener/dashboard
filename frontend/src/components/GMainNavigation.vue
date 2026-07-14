@@ -30,7 +30,6 @@ SPDX-License-Identifier: Apache-2.0
     </template>
 
     <v-list
-      ref="refMainMenu"
       variant="flat"
       class="main-menu"
     >
@@ -155,7 +154,6 @@ const currentRoute = useRoute()
 const { mdAndDown } = useDisplay()
 
 const projectDialog = ref(false)
-const refMainMenu = ref(null)
 
 const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
