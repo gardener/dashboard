@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     </div>
     <div
       v-if="slots.append"
-      class="d-inline-flex align-self-center flex-nowrap ml-3 g-list-item__append"
+      class="d-inline-flex align-self-center flex-nowrap flex-shrink-0 ml-3 g-list-item__append"
     >
       <slot name="append" />
     </div>
