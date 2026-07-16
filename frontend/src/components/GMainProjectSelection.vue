@@ -248,6 +248,16 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 
 const selectedProject = defineModel({ type: Object })
 
+const currentProject = computed(() => {
+  if (isAllProjectsNamespace(namespace.value)) {
+    return allProjectsItem
+  }
+  return find(projectList.value, [
+    'spec.namespace',
+    namespace.value,
+  ])
+})
+
 const projectMenuIcon = computed(() => {
   return projectMenu.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
 })
@@ -348,7 +358,7 @@ function onProjectClick (event, project) {
 function selectProject (project) {
   projectMenu.value = false
 
-  if (project !== selectedProject.value) {
+  if (project?.spec.namespace !== selectedProject.value?.spec.namespace) {
     selectedProject.value = project
     emit('projectSelect', project)
   }
@@ -399,7 +409,11 @@ function isSelectedProject (project) {
 }
 
 function isAllProjectsItem (project) {
-  return project?.spec.namespace === allProjectsItem.spec.namespace
+  return isAllProjectsNamespace(project?.spec.namespace)
+}
+
+function isAllProjectsNamespace (namespace) {
+  return namespace === allProjectsItem.spec.namespace
 }
 
 watch(projectMenu, value => {
@@ -415,16 +429,9 @@ watch(projectMenu, value => {
 })
 
 watch(
-  namespace,
-  () => {
-    if (namespace.value === allProjectsItem.spec.namespace) {
-      selectedProject.value = allProjectsItem
-    } else {
-      selectedProject.value = find(projectList.value, [
-        'spec.namespace',
-        namespace.value,
-      ])
-    }
+  currentProject,
+  project => {
+    selectedProject.value = project
   },
   { immediate: true },
 )
