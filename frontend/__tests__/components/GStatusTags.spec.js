@@ -17,6 +17,9 @@ import { createShootItemComposable } from '@/composables/useShootItem'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
+const originalRequestAnimationFrame = window.requestAnimationFrame
+const originalCancelAnimationFrame = window.cancelAnimationFrame
+
 describe('components', () => {
   describe('g-status-tags', () => {
     const lastTransitionTime = 'last-transition-time'
@@ -51,6 +54,12 @@ describe('components', () => {
     }
 
     beforeEach(() => {
+      window.requestAnimationFrame = callback => {
+        callback()
+        return 1
+      }
+      window.cancelAnimationFrame = () => {}
+
       pinia = createTestingPinia({ stubActions: false })
       const authnStore = useAuthnStore(pinia) // eslint-disable-line no-unused-vars
       const configStore = useConfigStore(pinia)
@@ -73,6 +82,12 @@ describe('components', () => {
           sortOrder: '0',
         },
       }
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      window.requestAnimationFrame = originalRequestAnimationFrame
+      window.cancelAnimationFrame = originalCancelAnimationFrame
     })
 
     it('should generate condition object for simple condition type', () => {
@@ -165,6 +180,85 @@ describe('components', () => {
       ])
       const shortNames = wrapper.vm.conditions.map(condition => condition.shortName)
       expect(shortNames).toEqual(['IC', 'C', 'D', 'CPO'])
+    })
+
+    it('should auto scroll right when hovering near the right edge', async () => {
+      const wrapper = mountStatusTags(['APIServerAvailable'])
+      const scrollContainer = document.createElement('div')
+      Object.defineProperties(scrollContainer, {
+        scrollLeft: {
+          value: 0,
+          writable: true,
+        },
+        scrollWidth: {
+          value: 200,
+        },
+        clientWidth: {
+          value: 100,
+        },
+      })
+      scrollContainer.getBoundingClientRect = () => ({
+        left: 0,
+        right: 100,
+      })
+
+      wrapper.vm.containerRef = wrapper.element
+      wrapper.vm.containerRef.closest = vi.fn().mockReturnValue(scrollContainer)
+
+      wrapper.vm.onMouseMove({ clientX: 95 })
+      await wrapper.vm.$nextTick()
+
+      expect(scrollContainer.scrollLeft).toBeGreaterThan(0)
+    })
+
+    it('should stop auto scroll when cursor moves away from the edge', async () => {
+      const wrapper = mountStatusTags(['APIServerAvailable'])
+      const scrollContainer = document.createElement('div')
+      Object.defineProperties(scrollContainer, {
+        scrollLeft: {
+          value: 10,
+          writable: true,
+        },
+        scrollWidth: {
+          value: 200,
+        },
+        clientWidth: {
+          value: 100,
+        },
+      })
+      scrollContainer.getBoundingClientRect = () => ({
+        left: 0,
+        right: 100,
+      })
+
+      wrapper.vm.containerRef = wrapper.element
+      wrapper.vm.containerRef.closest = vi.fn().mockReturnValue(scrollContainer)
+
+      wrapper.vm.onMouseMove({ clientX: 50 })
+      await wrapper.vm.$nextTick()
+
+      expect(scrollContainer.scrollLeft).toBe(10)
+    })
+
+    it('should scroll back to the start when the chips collapse', async () => {
+      vi.useFakeTimers()
+      const wrapper = mountStatusTags(['APIServerAvailable'])
+      const scrollContainer = document.createElement('div')
+      scrollContainer.scrollTo = vi.fn()
+
+      wrapper.vm.containerRef = wrapper.element
+      wrapper.vm.containerRef.closest = vi.fn().mockReturnValue(scrollContainer)
+
+      wrapper.vm.onMouseEnter()
+      wrapper.vm.onMouseLeave()
+      await vi.advanceTimersByTimeAsync(3500)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.hovered).toBe(false)
+
+      expect(scrollContainer.scrollTo).toHaveBeenCalledWith({
+        left: 0,
+        behavior: 'smooth',
+      })
     })
   })
 })

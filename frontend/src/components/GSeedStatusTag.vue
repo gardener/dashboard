@@ -5,7 +5,12 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="visible">
+  <div
+    v-if="visible"
+    class="status-tag-wrapper"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
+  >
     <g-popover
       v-model="internalValue"
       :placement="popperPlacement"
@@ -20,20 +25,23 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props }">
         <v-chip
           v-bind="props"
-          :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
+          :class="chipClasses"
+          :variant="chipVariant"
           :text-color="textColor"
           size="small"
           :color="color"
           class="status-tag"
+          :aria-label="ariaLabel"
+          @focus="onFocus"
         >
           <v-icon
             v-if="chipIcon"
             :icon="chipIcon"
             size="x-small"
             class="chip-icon"
+            aria-hidden="true"
           />
-          {{ chipText }}
+          <span class="chip-label">{{ chipText }}</span>
           <v-tooltip
             activator="parent"
             location="top"
@@ -101,11 +109,42 @@ export default {
       type: String,
       required: true,
     },
+    containerHovered: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data () {
+    return {
+      selfExpanded: false,
+      expandTimer: null,
+    }
   },
   computed: {
     ...mapState(useAuthzStore, [
       'canViewLandscape',
     ]),
+    isHealthy () {
+      return !this.isError && !this.isUnknown && !this.isProgressing
+    },
+    isCollapsed () {
+      return !this.isError && !this.selfExpanded && !this.internalValue
+    },
+    chipClasses () {
+      return {
+        'cursor-pointer': this.condition.message,
+        'status-tag--collapsed': this.isCollapsed,
+      }
+    },
+    ariaLabel () {
+      const status = this.chipStatus
+      const name = this.condition.name || this.chipText
+      const seed = this.seedName ? ` (${this.seedName})` : ''
+      if (this.condition.message) {
+        return `${name}${seed}: ${status}. ${this.condition.message}`
+      }
+      return `${name}${seed}: ${status}`
+    },
     popoverKey () {
       return `g-seed-status-tag[${this.condition.type}]:${this.identifier}`
     },
@@ -204,13 +243,19 @@ export default {
       if (this.isProgressing && this.canViewLandscape) {
         return 'info'
       }
-      return 'primary'
+      return 'success'
+    },
+    chipVariant () {
+      if (this.isError) {
+        return 'flat'
+      }
+      return 'tonal'
     },
     textColor () {
-      if (this.isError) {
-        return 'white'
+      if (this.isUnknown) {
+        return this.color
       }
-      return this.color
+      return 'white'
     },
     visible () {
       if (!this.canViewLandscape) {
@@ -219,12 +264,48 @@ export default {
       return true
     },
   },
+  watch: {
+    containerHovered (val) {
+      if (!val) {
+        clearTimeout(this.expandTimer)
+        this.selfExpanded = false
+      }
+    },
+  },
+  beforeUnmount () {
+    clearTimeout(this.expandTimer)
+  },
+  methods: {
+    onMouseEnter () {
+      clearTimeout(this.expandTimer)
+      this.expandTimer = setTimeout(() => {
+        this.selfExpanded = true
+      }, 100)
+    },
+    onMouseLeave () {
+      clearTimeout(this.expandTimer)
+    },
+    onFocus (event) {
+      if (!event.target?.matches?.(':focus-visible')) {
+        return
+      }
+      clearTimeout(this.expandTimer)
+      this.selfExpanded = true
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+  .status-tag-wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+
   .status-tag {
     margin: 0 1px;
+    transition: max-width 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
 
     &.cursor-pointer :deep(.v-chip__content) {
       cursor: pointer;
@@ -232,11 +313,49 @@ export default {
 
     :deep(.v-chip__content) {
       margin: -2px;
+      white-space: nowrap;
     }
 
     .chip-icon {
       margin-left: -4px;
       margin-right: 1px;
+    }
+
+    &.status-tag--collapsed {
+      max-width: 8px;
+      min-width: 8px;
+      padding: 0;
+      border-radius: 4px;
+      justify-content: center;
+
+      :deep(.v-chip__content) {
+        margin: 0;
+        padding: 0;
+      }
+
+      .chip-icon {
+        display: none;
+      }
+
+      .chip-label {
+        // visually hidden but available to screen readers
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-tag {
+      transition: none;
     }
   }
 </style>
