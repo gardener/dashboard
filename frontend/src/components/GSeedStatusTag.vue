@@ -113,7 +113,10 @@ export default {
       return this.condition.shortName || ''
     },
     chipAriaLabel () {
-      return `${this.condition.name}: ${this.chipStatus}`
+      const status = this.staleShoot
+        ? `Last status: ${this.chipStatus}`
+        : this.chipStatus
+      return `${this.condition.name}: ${status}`
     },
     chipStatus () {
       if (this.isError) {

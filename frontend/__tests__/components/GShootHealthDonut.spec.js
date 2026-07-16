@@ -295,11 +295,13 @@ describe('components', () => {
 
         const label = wrapper.attributes('aria-label')
 
-        expect(label).toContain('Shoot health distribution')
-        expect(label).toContain('10 shoots')
-        expect(label).toContain('1 unhealthy shoot')
-        expect(label).toContain('2 unhealthy shoots excluded by Cluster Operations filters (User Errors)')
-        expect(label).toContain('7 healthy shoots')
+        expect(label).toBe([
+          'Shoot health distribution',
+          '10 shoots',
+          '1 unhealthy shoot',
+          '2 unhealthy shoots excluded by Cluster Operations filters (User Errors)',
+          '7 healthy shoots.',
+        ].join(', '))
       })
     })
 

@@ -251,8 +251,8 @@ const ariaLabel = computed(() => {
   }
   const parts = [
     'Shoot health distribution',
-    `${shootCount.value} shoots`,
-    `${matchingUnhealthy.value} unhealthy shoots`,
+    formatShootCount(shootCount.value),
+    formatShootCount(matchingUnhealthy.value, 'unhealthy'),
   ]
   if (activeFilterLabels.value.length > 0) {
     const desc = filterDescription.value

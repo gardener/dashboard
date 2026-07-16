@@ -34,7 +34,7 @@ describe('components', () => {
     let authzStore
     let mockGetSubjectRules
 
-    function mountStatusTag (condition) {
+    function mountStatusTag (condition, props = {}) {
       return mount(GStatusTag, {
         global: {
           plugins: [
@@ -44,6 +44,7 @@ describe('components', () => {
         },
         props: {
           condition,
+          ...props,
         },
       })
     }
@@ -82,6 +83,18 @@ describe('components', () => {
       expect(vm.color).toBe('primary')
       expect(vm.visible).toBe(true)
       expect(vm.chipAriaLabel).toBe('foo-bar: Healthy')
+    })
+
+    it('should qualify a stale condition in the accessible label', () => {
+      const wrapper = mountStatusTag({
+        shortName: 'foo',
+        name: 'foo-bar',
+        status: 'True',
+      }, {
+        staleShoot: true,
+      })
+
+      expect(wrapper.vm.chipAriaLabel).toBe('foo-bar: Last status: Healthy')
     })
 
     it('should render condition with user error', () => {
