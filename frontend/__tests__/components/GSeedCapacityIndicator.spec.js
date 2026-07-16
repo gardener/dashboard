@@ -58,14 +58,20 @@ describe('components', () => {
       )
     })
 
-    it('should never report negative remaining capacity', () => {
+    it('should report overcommitment while capping the progress bars', () => {
       const wrapper = mountComponent({
         shootCount: 12,
         allocatableShoots: 10,
       })
 
-      expect(wrapper.find('.capacity-summary').text()).toContain('100% used')
+      expect(wrapper.find('.capacity-summary').text()).toContain('120% used')
       expect(wrapper.find('.capacity-summary').text()).toContain('0 remaining')
+      expect(wrapper.find('.activator').attributes('aria-label')).toContain('(120%)')
+      const progressBars = wrapper.findAll('v-progress-linear-stub')
+      expect(progressBars).toHaveLength(2)
+      for (const progressBar of progressBars) {
+        expect(progressBar.attributes('modelvalue')).toBe('100')
+      }
     })
   })
 })

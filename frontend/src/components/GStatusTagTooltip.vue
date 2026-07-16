@@ -12,26 +12,31 @@ SPDX-License-Identifier: Apache-2.0
     :title="title"
     :width="320"
   >
-    <template v-if="userErrors.length">
+    <template
+      v-if="userErrors.length || description"
+      #default
+    >
+      <template v-if="userErrors.length">
+        <div
+          v-for="({ shortDescription }) in userErrors"
+          :key="shortDescription"
+          class="user-error-row"
+        >
+          <v-icon
+            :color="errorColor"
+            icon="mdi-account-alert-outline"
+            size="small"
+          />
+          <span>{{ shortDescription }}</span>
+        </div>
+      </template>
       <div
-        v-for="({ shortDescription }) in userErrors"
-        :key="shortDescription"
-        class="user-error-row"
+        v-else
+        class="status-description text-medium-emphasis"
       >
-        <v-icon
-          :color="errorColor"
-          icon="mdi-account-alert-outline"
-          size="small"
-        />
-        <span>{{ shortDescription }}</span>
+        {{ description }}
       </div>
     </template>
-    <div
-      v-else-if="description"
-      class="status-description text-medium-emphasis"
-    >
-      {{ description }}
-    </div>
     <template
       v-if="description && userErrors.length"
       #footer

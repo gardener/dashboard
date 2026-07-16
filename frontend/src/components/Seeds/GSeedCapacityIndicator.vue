@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-progress-linear
         v-if="hasCapacityProgress"
         class="progress"
-        :model-value="capacityUsagePercent"
+        :model-value="capacityProgressPercent"
         color="primary"
         :height="8"
         rounded
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
       <template v-if="hasCapacityProgress">
         <v-progress-linear
-          :model-value="capacityUsagePercent"
+          :model-value="capacityProgressPercent"
           color="primary"
           :height="6"
           rounded
@@ -101,7 +101,11 @@ const capacityUsagePercent = computed(() => {
     return 0
   }
 
-  return Math.min(props.shootCount / props.allocatableShoots * 100, 100)
+  return props.shootCount / props.allocatableShoots * 100
+})
+
+const capacityProgressPercent = computed(() => {
+  return Math.min(capacityUsagePercent.value, 100)
 })
 
 const capacityText = computed(() => {

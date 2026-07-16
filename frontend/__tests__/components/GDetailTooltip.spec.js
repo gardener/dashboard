@@ -41,6 +41,13 @@ describe('components', () => {
       expect(wrapper.find('.detail-tooltip-footer').exists()).toBe(false)
     })
 
+    it('should omit the body container when no body content is provided', () => {
+      const wrapper = mountComponent()
+
+      expect(wrapper.find('.detail-tooltip-heading').text()).toBe('Details')
+      expect(wrapper.find('.detail-tooltip-body').exists()).toBe(false)
+    })
+
     it('should render optional activator and footer slots', () => {
       const wrapper = mountComponent({}, {
         activator: '<button class="activator">Open</button>',

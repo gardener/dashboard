@@ -8,9 +8,9 @@ SPDX-License-Identifier: Apache-2.0
   <span v-if="title">{{ titleText }}</span>
   <div
     v-else
-    class="d-flex align-center infrastructure-activator"
+    class="d-flex align-center vendor-activator"
     tabindex="0"
-    :aria-label="infrastructureAriaLabel"
+    :aria-label="vendorAriaLabel"
   >
     <g-vendor-icon
       :name="providerType"
@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     </span>
     <g-detail-tooltip
       activator="parent"
-      title="Infrastructure"
+      :title="tooltipTitle"
     >
       <dl class="tooltip-details">
         <div class="tooltip-row">
@@ -94,6 +94,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    tooltipTitle: {
+      type: String,
+      default: 'Infrastructure',
+    },
     extended: {
       type: Boolean,
       default: false,
@@ -158,7 +162,7 @@ export default {
     vendorName () {
       return this.vendorDisplayName(this.providerType)
     },
-    infrastructureAriaLabel () {
+    vendorAriaLabel () {
       const details = [`Provider ${this.vendorName}`]
       if (this.shootCloudProfileRef) {
         details.push(`cloud profile ${this.cloudProfileRefDisplayValue}`)
@@ -169,7 +173,7 @@ export default {
       if (this.zones.length) {
         details.push(`${this.zoneTitle.toLowerCase()} ${this.zoneText}`)
       }
-      return `Infrastructure: ${details.join(', ')}`
+      return `${this.tooltipTitle}: ${details.join(', ')}`
     },
   },
   methods: {
@@ -179,7 +183,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .infrastructure-activator {
+  .vendor-activator {
     width: fit-content;
   }
 

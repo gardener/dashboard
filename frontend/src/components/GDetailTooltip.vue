@@ -31,7 +31,10 @@ SPDX-License-Identifier: Apache-2.0
       <div class="detail-tooltip-heading">
         {{ title }}
       </div>
-      <div class="detail-tooltip-body">
+      <div
+        v-if="$slots.default"
+        class="detail-tooltip-body"
+      >
         <slot />
       </div>
       <div

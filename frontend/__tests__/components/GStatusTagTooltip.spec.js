@@ -25,8 +25,8 @@ describe('components', () => {
           plugins: [vuetifyPlugin],
           stubs: {
             GDetailTooltip: {
-              props: ['activator'],
-              template: '<div :data-activator="activator"><div class="body"><slot /></div><div class="footer"><slot name="footer" /></div></div>',
+              props: ['activator', 'title'],
+              template: '<div :data-activator="activator"><div class="heading">{{ title }}</div><div v-if="$slots.default" class="body"><slot /></div><div v-if="$slots.footer" class="footer"><slot name="footer" /></div></div>',
             },
             'v-icon': true,
           },
@@ -47,7 +47,15 @@ describe('components', () => {
       })
 
       expect(wrapper.find('.status-description').text()).toBe('The API server is available.')
-      expect(wrapper.find('.footer').text()).toBe('')
+      expect(wrapper.find('.footer').exists()).toBe(false)
+    })
+
+    it('should render only the full condition name when no details are configured', () => {
+      const wrapper = mountComponent()
+
+      expect(wrapper.find('.heading').text()).toBe('API Server')
+      expect(wrapper.find('.body').exists()).toBe(false)
+      expect(wrapper.find('.footer').exists()).toBe(false)
     })
 
     it('should render user error summaries', () => {
