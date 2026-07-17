@@ -50,7 +50,10 @@ SPDX-License-Identifier: Apache-2.0
             <template #item="{ props }">
               <v-list-item v-bind="props">
                 <template #prepend>
-                  <g-vendor-icon :name="props.value" />
+                  <g-vendor-icon
+                    :name="props.value"
+                    vendor-type="dns"
+                  />
                 </template>
               </v-list-item>
             </template>
@@ -58,6 +61,7 @@ SPDX-License-Identifier: Apache-2.0
               <div class="d-flex">
                 <g-vendor-icon
                   :name="item.value"
+                  vendor-type="dns"
                   class="mr-2"
                 />
                 {{ item.value }}

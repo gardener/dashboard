@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       >
         <g-vendor-icon
           :name="type"
+          vendor-type="dns"
           :size="14"
         />
         <g-credential-name

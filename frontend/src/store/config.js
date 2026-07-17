@@ -29,7 +29,6 @@ import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import sortBy from 'lodash/sortBy'
-import head from 'lodash/head'
 
 const logger = useLogger()
 
@@ -445,8 +444,6 @@ export const useConfigStore = defineStore('config', () => {
     machineImage: knownMachineImageVendors,
   }
 
-  const vendorKey = (type, name) => `${type}::${name}`
-
   const vendorTypes = computed(() => {
     return new Set([
       ...Object.keys(knownVendors),
@@ -458,6 +455,7 @@ export const useConfigStore = defineStore('config', () => {
     const detailsMap = new Map()
 
     for (const type of vendorTypes.value) {
+      const detailsByName = new Map()
       const knownArr = get(knownVendors, [type], [])
       const confArr = get(configVendors.value, [type], [])
 
@@ -470,7 +468,7 @@ export const useConfigStore = defineStore('config', () => {
         const knownVendor = find(knownArr, ['name', name])
         const configuredVendor = find(confArr, ['name', name])
 
-        detailsMap.set(vendorKey(type, name), {
+        detailsByName.set(name, {
           type,
           name,
           weight: Number.MAX_SAFE_INTEGER,
@@ -478,40 +476,30 @@ export const useConfigStore = defineStore('config', () => {
           ...configuredVendor,
         })
       }
+
+      detailsMap.set(type, detailsByName)
     }
 
     return detailsMap
   })
 
-  function vendorDetails (name) {
-    const matches = []
-    for (const t of vendorTypes.value) {
-      const vendor = vendorDetailsMap.value.get(vendorKey(t, name))
-      if (vendor) {
-        matches.push(vendor)
-      }
+  function vendorDetails ({ type, name }) {
+    const vendor = vendorDetailsMap.value.get(type)?.get(name)
+    if (vendor) {
+      return vendor
     }
 
-    if (matches.length === 1) {
-      return head(matches)
-    }
-
-    if (matches.length === 0) {
-      logger.warn(`VendorDetails: No vendor found for name='${name}'`)
-    }
-
-    if (matches.length > 1) {
-      logger.warn(`VendorDetails: Multiple vendors found for name='${name}'`)
-    }
+    logger.warn(`VendorDetails: No vendor found for type='${type}' name='${name}'`)
 
     return {
+      type,
       name,
       weight: Number.MAX_SAFE_INTEGER,
     }
   }
 
-  function vendorDisplayName (name) {
-    return get(vendorDetails(name), ['displayName'], name)
+  function vendorDisplayName ({ type, name }) {
+    return get(vendorDetails({ type, name }), ['displayName'], name)
   }
 
   const dnsProviderTypesList = computed(() => {
@@ -522,7 +510,7 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const sortedDnsProviderTypeList = computed(() => {
-    const dnsProviderVendors = map(dnsProviderTypesList.value, vendorDetails)
+    const dnsProviderVendors = map(dnsProviderTypesList.value, name => vendorDetails({ type: 'dns', name }))
     const sortedVisibleDnsVendors = sortBy(dnsProviderVendors, 'weight')
     return map(sortedVisibleDnsVendors, 'name')
   })
@@ -574,7 +562,6 @@ export const useConfigStore = defineStore('config', () => {
     setConfiguration,
     conditionForType,
     vendorDetails,
-    // vendor: vendorDetails,
     vendorDisplayName,
     $reset,
   }

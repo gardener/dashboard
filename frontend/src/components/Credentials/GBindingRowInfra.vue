@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-vendor
         extended
         :provider-type="item.providerType"
+        vendor-type="infra"
       />
     </td>
     <td v-if="selectedHeaders.details">

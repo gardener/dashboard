@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-else-if="header.key === 'infrastructure'">
         <g-vendor
           :provider-type="seedProviderType"
+          vendor-type="infra"
           :region="seedProviderRegion"
           :zones="seedProviderZones"
         />

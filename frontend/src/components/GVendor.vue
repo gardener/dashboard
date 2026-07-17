@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <g-vendor-icon
       :name="providerType"
+      :vendor-type="vendorType"
     />
     <span
       v-if="description"
@@ -31,9 +32,10 @@ SPDX-License-Identifier: Apache-2.0
           <dd class="d-flex align-center">
             <g-vendor-icon
               :name="providerType"
+              :vendor-type="vendorType"
               class="mr-2"
             />
-            {{ vendorName }}
+            {{ displayName }}
           </dd>
         </div>
         <div
@@ -86,6 +88,11 @@ export default {
     },
     providerType: {
       type: String,
+      required: true,
+    },
+    vendorType: {
+      type: String,
+      required: true,
     },
     region: {
       type: String,
@@ -123,8 +130,8 @@ export default {
     },
     description () {
       const description = []
-      if (this.extended && this.providerType) {
-        description.push(this.vendorName)
+      if (this.extended) {
+        description.push(this.displayName)
       }
       if (this.region) {
         description.push(this.region)
@@ -137,7 +144,7 @@ export default {
     },
     titleText () {
       const titles = []
-      if (this.extended && this.providerType) {
+      if (this.extended) {
         titles.push('Provider')
       }
       if (this.region) {
@@ -159,11 +166,14 @@ export default {
 
       return this.shootCloudProfileRef.name
     },
-    vendorName () {
-      return this.vendorDisplayName(this.providerType)
+    displayName () {
+      return this.vendorDisplayName({
+        type: this.vendorType,
+        name: this.providerType,
+      })
     },
     vendorAriaLabel () {
-      const details = [`Provider ${this.vendorName}`]
+      const details = [`Provider ${this.displayName}`]
       if (this.shootCloudProfileRef) {
         details.push(`cloud profile ${this.cloudProfileRefDisplayValue}`)
       }

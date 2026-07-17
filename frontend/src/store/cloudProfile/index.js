@@ -52,7 +52,12 @@ export const useCloudProfileStore = defineStore('cloudProfile', () => {
   })
 
   const sortedInfraProviderTypeList = computed(() => {
-    const infraProviderVendors = map(infraProviderTypesList.value, configStore.vendorDetails)
+    const infraProviderVendors = map(infraProviderTypesList.value, name => {
+      return configStore.vendorDetails({
+        type: 'infra',
+        name,
+      })
+    })
     const sortedVisibleInfraVendors = sortBy(infraProviderVendors, 'weight')
     return map(sortedVisibleInfraVendors, 'name')
   })

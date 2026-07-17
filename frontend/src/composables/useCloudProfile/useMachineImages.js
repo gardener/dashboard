@@ -60,7 +60,10 @@ export function useMachineImages (cloudProfile) {
    */
   function flattenAndSortMachineImages (machineImages) {
     const machineImagesWithVendors = map(machineImages, machineImage => {
-      const vendor = configStore.vendorDetails(machineImage.name)
+      const vendor = configStore.vendorDetails({
+        type: 'machineImage',
+        name: machineImage.name,
+      })
       return {
         ...machineImage,
         vendor,
