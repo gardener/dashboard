@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
               :vendor-type="vendorType"
               class="mr-2"
             />
-            {{ vendorName }}
+            {{ displayName }}
           </dd>
         </div>
         <div
@@ -88,6 +88,7 @@ export default {
     },
     providerType: {
       type: String,
+      required: true,
     },
     vendorType: {
       type: String,
@@ -129,8 +130,8 @@ export default {
     },
     description () {
       const description = []
-      if (this.extended && this.providerType) {
-        description.push(this.vendorName)
+      if (this.extended) {
+        description.push(this.displayName)
       }
       if (this.region) {
         description.push(this.region)
@@ -143,7 +144,7 @@ export default {
     },
     titleText () {
       const titles = []
-      if (this.extended && this.providerType) {
+      if (this.extended) {
         titles.push('Provider')
       }
       if (this.region) {
@@ -165,17 +166,14 @@ export default {
 
       return this.shootCloudProfileRef.name
     },
-    vendorName () {
-      if (!this.providerType) {
-        return undefined
-      }
+    displayName () {
       return this.vendorDisplayName({
         type: this.vendorType,
         name: this.providerType,
       })
     },
     vendorAriaLabel () {
-      const details = [`Provider ${this.vendorName}`]
+      const details = [`Provider ${this.displayName}`]
       if (this.shootCloudProfileRef) {
         details.push(`cloud profile ${this.cloudProfileRefDisplayValue}`)
       }
