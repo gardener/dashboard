@@ -17,12 +17,14 @@ SPDX-License-Identifier: Apache-2.0
         <span v-else>{{ condition.name }} - </span>
         <span class="font-family-monospace font-weight-bold">{{ seedName }}</span>
       </template>
-      <template #activator="{ props }">
+      <template #activator="{ props: popoverActivatorProps }">
         <v-chip
-          v-bind="props"
+          v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
           :variant="!isError ? 'tonal' : 'flat'"
           :text-color="textColor"
+          :aria-label="chipAriaLabel"
+          tabindex="0"
           size="small"
           :color="color"
           class="status-tag"
@@ -34,24 +36,12 @@ SPDX-License-Identifier: Apache-2.0
             class="chip-icon"
           />
           {{ chipText }}
-          <v-tooltip
+          <g-status-tag-tooltip
             activator="parent"
-            location="top"
-            max-width="400px"
-            :open-delay="750"
+            :description="chipTooltip.description"
             :disabled="internalValue"
-          >
-            <div class="font-weight-bold">
-              {{ chipTooltip.title }}
-            </div>
-            <div>Status: {{ chipTooltip.status }}</div>
-            <template v-if="chipTooltip.description">
-              <v-divider color="white" />
-              <div>
-                {{ chipTooltip.description }}
-              </div>
-            </template>
-          </v-tooltip>
+            :title="chipTooltip.title"
+          />
         </v-chip>
       </template>
       <g-shoot-message-details
@@ -70,6 +60,7 @@ import { mapState } from 'pinia'
 import { useAuthzStore } from '@/store/authz'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
+import GStatusTagTooltip from '@/components/GStatusTagTooltip.vue'
 
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -78,6 +69,7 @@ import isEmpty from 'lodash/isEmpty'
 export default {
   components: {
     GShootMessageDetails,
+    GStatusTagTooltip,
   },
   inject: [
     'activePopoverKey',
@@ -119,6 +111,12 @@ export default {
     },
     chipText () {
       return this.condition.shortName || ''
+    },
+    chipAriaLabel () {
+      const status = this.staleShoot
+        ? `Last status: ${this.chipStatus}`
+        : this.chipStatus
+      return `${this.condition.name}: ${status}`
     },
     chipStatus () {
       if (this.isError) {

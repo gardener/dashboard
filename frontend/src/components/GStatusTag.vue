@@ -13,12 +13,14 @@ SPDX-License-Identifier: Apache-2.0
       :toolbar-title="popperTitle"
       :toolbar-color="color"
     >
-      <template #activator="{ props }">
+      <template #activator="{ props: popoverActivatorProps }">
         <v-chip
-          v-bind="props"
+          v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
           :variant="!isError ? 'tonal' : 'flat'"
           :text-color="textColor"
+          :aria-label="chipAriaLabel"
+          tabindex="0"
           size="small"
           :color="color"
           class="status-tag"
@@ -30,37 +32,13 @@ SPDX-License-Identifier: Apache-2.0
             class="chip-icon"
           />
           {{ chipText }}
-          <v-tooltip
+          <g-status-tag-tooltip
             activator="parent"
-            location="top"
-            max-width="400px"
-            :open-delay="750"
+            :description="chipTooltip.description"
             :disabled="internalValue"
-          >
-            <div class="font-weight-bold">
-              {{ chipTooltip.title }}
-            </div>
-            <div>Status: {{ chipTooltip.status }}</div>
-            <div
-              v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects"
-              :key="shortDescription"
-            >
-              <v-icon
-                class="mr-1"
-                color="white"
-                size="small"
-              >
-                mdi-account-alert
-              </v-icon>
-              <span class="font-weight-bold text--lighten-2">{{ shortDescription }}</span>
-            </div>
-            <template v-if="chipTooltip.description">
-              <v-divider color="white" />
-              <div>
-                {{ chipTooltip.description }}
-              </div>
-            </template>
-          </v-tooltip>
+            :title="chipTooltip.title"
+            :user-errors="chipTooltip.userErrorCodeObjects"
+          />
         </v-chip>
       </template>
       <g-shoot-message-details
@@ -80,6 +58,7 @@ import { mapState } from 'pinia'
 import { useAuthzStore } from '@/store/authz'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
+import GStatusTagTooltip from '@/components/GStatusTagTooltip.vue'
 
 import {
   isUserError,
@@ -93,6 +72,7 @@ import filter from 'lodash/filter'
 export default {
   components: {
     GShootMessageDetails,
+    GStatusTagTooltip,
   },
   inject: [
     'activePopoverKey',
@@ -141,6 +121,12 @@ export default {
     },
     chipText () {
       return this.condition.shortName || ''
+    },
+    chipAriaLabel () {
+      const status = this.staleShoot
+        ? `Last status: ${this.chipStatus}`
+        : this.chipStatus
+      return `${this.condition.name}: ${status}`
     },
     chipStatus () {
       if (this.isError) {

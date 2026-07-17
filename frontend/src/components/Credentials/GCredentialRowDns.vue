@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     <td v-if="selectedHeaders.dnsProvider">
       <g-vendor
         extended
+        tooltip-title="DNS"
         :provider-type="item.providerType"
       />
     </td>
