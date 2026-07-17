@@ -444,8 +444,6 @@ export const useConfigStore = defineStore('config', () => {
     machineImage: knownMachineImageVendors,
   }
 
-  const vendorKey = (type, name) => `${type}::${name}`
-
   const vendorTypes = computed(() => {
     return new Set([
       ...Object.keys(knownVendors),
@@ -457,6 +455,7 @@ export const useConfigStore = defineStore('config', () => {
     const detailsMap = new Map()
 
     for (const type of vendorTypes.value) {
+      const detailsByName = new Map()
       const knownArr = get(knownVendors, [type], [])
       const confArr = get(configVendors.value, [type], [])
 
@@ -469,7 +468,7 @@ export const useConfigStore = defineStore('config', () => {
         const knownVendor = find(knownArr, ['name', name])
         const configuredVendor = find(confArr, ['name', name])
 
-        detailsMap.set(vendorKey(type, name), {
+        detailsByName.set(name, {
           type,
           name,
           weight: Number.MAX_SAFE_INTEGER,
@@ -477,13 +476,15 @@ export const useConfigStore = defineStore('config', () => {
           ...configuredVendor,
         })
       }
+
+      detailsMap.set(type, detailsByName)
     }
 
     return detailsMap
   })
 
   function vendorDetails ({ type, name }) {
-    const vendor = vendorDetailsMap.value.get(vendorKey(type, name))
+    const vendor = vendorDetailsMap.value.get(type)?.get(name)
     if (vendor) {
       return vendor
     }
