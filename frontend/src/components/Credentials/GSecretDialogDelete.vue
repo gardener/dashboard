@@ -83,7 +83,7 @@ import GMessage from '@/components/GMessage'
 import GToolbar from '@/components/GToolbar.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -114,7 +114,7 @@ export default {
     if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
     } else if (credential.value) {
-      credentialComposable = useCloudProviderCredential(credential)
+      credentialComposable = useDnsProviderCredential(credential)
     }
 
     const {

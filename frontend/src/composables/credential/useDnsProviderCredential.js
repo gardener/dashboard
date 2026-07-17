@@ -11,6 +11,7 @@ import {
 import { storeToRefs } from 'pinia'
 
 import { useShootStore } from '@/store/shoot'
+import { useConfigStore } from '@/store/config'
 
 import {
   isSecret as _isSecret,
@@ -20,13 +21,14 @@ import {
 } from './helper'
 
 import some from 'lodash/some'
-export const useCloudProviderCredential = (credential, options = {}) => {
+export const useDnsProviderCredential = (credential, options = {}) => {
   if (!isRef(credential)) {
     throw new TypeError('First argument `credential` must be a ref object')
   }
 
   const {
     shootStore = useShootStore(),
+    configStore = useConfigStore(),
   } = options
   const { shootList } = storeToRefs(shootStore)
 
@@ -38,11 +40,23 @@ export const useCloudProviderCredential = (credential, options = {}) => {
   const credentialName = computed(() => credential.value?.metadata?.name)
   const credentialKind = computed(() => credential.value?.kind)
   const providerType = computed(() => _credentialProviderType(credential.value))
+  const providerConfig = computed(() => {
+    if (!providerType.value) {
+      return undefined
+    }
+    return configStore.vendorDetails({
+      type: 'dns',
+      name: providerType.value,
+    })
+  })
   const resourceUid = computed(() => credential.value?.metadata?.uid)
 
   const credentialDetails = computed(() => {
     if (isSecret.value) {
-      return _secretDetails({ secret: credential.value, providerType: providerType.value })
+      return _secretDetails({
+        secret: credential.value,
+        providerConfig: providerConfig.value,
+      })
     }
     return undefined
   })

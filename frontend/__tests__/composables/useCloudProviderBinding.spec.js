@@ -137,6 +137,35 @@ describe('useCloudProviderBinding composable', () => {
     expect(bindingComposable.credential.value).toMatchSnapshot()
   })
 
+  it('resolves secret details using the infra vendor configuration', () => {
+    const secretBindingRef = findBindingRef('aws-secretbinding')
+    const configStore = {
+      vendorDetails: vi.fn(() => ({
+        secret: {
+          details: [
+            {
+              label: 'Secret',
+              key: 'secret',
+            },
+          ],
+        },
+      })),
+    }
+    const bindingComposable = useCloudProviderBinding(secretBindingRef, { configStore })
+
+    expect(bindingComposable.credentialDetails.value).toEqual([
+      {
+        label: 'Secret',
+        value: 's',
+      },
+    ])
+    expect(configStore.vendorDetails).toHaveBeenCalledTimes(1)
+    expect(configStore.vendorDetails).toHaveBeenCalledWith({
+      type: 'infra',
+      name: 'aws',
+    })
+  })
+
   it('counts shoots referencing infra secretbinding', () => {
     const secretBindingRef = findBindingRef('aws-secretbinding')
     const bindingComposable = useCloudProviderBinding(secretBindingRef)

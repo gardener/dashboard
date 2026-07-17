@@ -11,11 +11,11 @@ import {
 import { useShootStore } from '@/store/shoot'
 import { useCredentialStore } from '@/store/credential'
 
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import find from 'lodash/find'
 
-describe('useCloudProviderCredential composable', () => {
+describe('useDnsProviderCredential composable', () => {
   let shootStore
   let credentialStore
 
@@ -58,15 +58,44 @@ describe('useCloudProviderCredential composable', () => {
     credentialStore._setCredentials(fixtures.credentials)
   })
 
-  function findbindingCredentialRef (name) {
+  function findDnsCredentialRef (name) {
     const credential = find(credentialStore.dnsCredentialList, c => c.metadata.name === name)
     return ref(credential)
   }
 
   it('counts shoots referencing dns secret', () => {
-    const bindingCredentialRef = findbindingCredentialRef('aws-route53-secret')
-    const composable = useCloudProviderCredential(bindingCredentialRef)
+    const dnsCredentialRef = findDnsCredentialRef('aws-route53-secret')
+    const composable = useDnsProviderCredential(dnsCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(2)
+  })
+
+  it('resolves secret details using the dns vendor configuration', () => {
+    const dnsCredentialRef = findDnsCredentialRef('aws-route53-secret')
+    const configStore = {
+      vendorDetails: vi.fn(() => ({
+        secret: {
+          details: [
+            {
+              label: 'Secret',
+              key: 'secret',
+            },
+          ],
+        },
+      })),
+    }
+    const composable = useDnsProviderCredential(dnsCredentialRef, { configStore })
+
+    expect(composable.credentialDetails.value).toEqual([
+      {
+        label: 'Secret',
+        value: 's',
+      },
+    ])
+    expect(configStore.vendorDetails).toHaveBeenCalledTimes(1)
+    expect(configStore.vendorDetails).toHaveBeenCalledWith({
+      type: 'dns',
+      name: 'aws-route53',
+    })
   })
 
   it('counts shoots referencing legacy dns provider secretName', () => {
@@ -81,8 +110,8 @@ describe('useCloudProviderCredential composable', () => {
       },
     }
 
-    const bindingCredentialRef = findbindingCredentialRef('aws-route53-secret')
-    const composable = useCloudProviderCredential(bindingCredentialRef)
+    const dnsCredentialRef = findDnsCredentialRef('aws-route53-secret')
+    const composable = useDnsProviderCredential(dnsCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(3)
   })
 })

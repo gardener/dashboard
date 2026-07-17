@@ -294,7 +294,7 @@ import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 import {
   isSecretBinding,
   isCredentialsBinding,
@@ -554,7 +554,7 @@ export default {
       if (isSecretBinding(resource) || isCredentialsBinding(resource)) {
         composable = useCloudProviderBinding(refResource)
       } else {
-        composable = useCloudProviderCredential(refResource)
+        composable = useDnsProviderCredential(refResource)
       }
       const {
         credentialUsageCount,

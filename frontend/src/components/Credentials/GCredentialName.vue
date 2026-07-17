@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           class="ma-1"
           :credential="credential"
           :provider-type="providerType"
+          vendor-type="dns"
         />
       </v-card>
     </v-tooltip>
@@ -56,7 +57,7 @@ import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
 import GCredentialIcon from '@/components/Credentials/GCredentialIcon'
 
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 const props = defineProps({
   credential: Object,
@@ -74,7 +75,7 @@ const {
   resourceName,
   resourceNamespace,
   resourceUid,
-} = useCloudProviderCredential(credential)
+} = useDnsProviderCredential(credential)
 
 const resourceHash = computed(() => {
   const uid = resourceUid.value

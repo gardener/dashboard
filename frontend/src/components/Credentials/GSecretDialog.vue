@@ -163,7 +163,7 @@ import { useSecretContext } from '@/composables/credential/useSecretContext'
 import { useSecretBindingContext } from '@/composables/credential/useSecretBindingContext'
 import { useCredentialsBindingContext } from '@/composables/credential/useCredentialsBindingContext'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import {
   messageFromErrors,
@@ -232,7 +232,7 @@ export default {
     if (binding.value) {
       credentialComposable = useCloudProviderBinding(binding)
     } else if (credential.value) {
-      credentialComposable = useCloudProviderCredential(credential)
+      credentialComposable = useDnsProviderCredential(credential)
     }
 
     const {

@@ -91,7 +91,7 @@ import GBindingName from '@/components/Credentials/GBindingName'
 import { useProjectCostObject } from '@/composables/useProjectCostObject'
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import {
   withParams,
@@ -161,7 +161,7 @@ export default {
     const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
     let composable
     if (isDnsProvider.value) {
-      composable = useCloudProviderCredential(credential)
+      composable = useDnsProviderCredential(credential)
     } else {
       composable = useCloudProviderBinding(credential)
     }

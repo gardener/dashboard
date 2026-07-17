@@ -58,6 +58,7 @@ SPDX-License-Identifier: Apache-2.0
             class="pb-2"
             :credential="credential"
             :provider-type="type"
+            vendor-type="dns"
             details-title
           />
         </v-list-item>
