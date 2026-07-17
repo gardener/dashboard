@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         extended
         tooltip-title="DNS"
         :provider-type="item.providerType"
+        vendor-type="dns"
       />
     </td>
     <td v-if="selectedHeaders.details">

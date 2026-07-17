@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     :secret-validations="v$"
     :binding="binding"
     :provider-type="providerType"
+    :vendor-type="vendorType"
   >
     <template #secret-slot>
       <div>
@@ -77,6 +78,10 @@ export default {
     providerType: {
       type: String,
     },
+    vendorType: {
+      type: String,
+      required: true,
+    },
   },
   emits: [
     'update:modelValue',
@@ -140,7 +145,10 @@ export default {
       return !this.secret
     },
     vendorName () {
-      return this.vendorDisplayName(this.providerType)
+      return this.vendorDisplayName({
+        type: this.vendorType,
+        name: this.providerType,
+      })
     },
   },
   watch: {

@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex flex-column justify-center align-center">
         <g-vendor-icon
           :name="providerType"
+          vendor-type="infra"
           :size="60"
           no-background
           :style="getVendorIconStyles(isHovering)"
@@ -64,7 +65,10 @@ export default {
       return this.modelValue ? 'outlined' : 'elevated'
     },
     vendorName () {
-      return this.vendorDisplayName(this.providerType)
+      return this.vendorDisplayName({
+        type: 'infra',
+        name: this.providerType,
+      })
     },
   },
   methods: {

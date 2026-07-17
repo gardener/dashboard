@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
               title
               extended
               :provider-type="shootProviderType"
+              vendor-type="infra"
               :region="shootRegion"
               :zones="shootZones"
             />
@@ -28,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-vendor
               extended
               :provider-type="shootProviderType"
+              vendor-type="infra"
               :region="shootRegion"
               :zones="shootZones"
             />

@@ -64,6 +64,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-select>
     <g-secret-dialog-wrapper
       :visible-dialog="visibleSecretDialog"
+      :visible-dialog-vendor-type="isDnsProvider ? 'dns' : 'infra'"
       @dialog-closed="onSecretDialogClosed"
     />
   </div>
