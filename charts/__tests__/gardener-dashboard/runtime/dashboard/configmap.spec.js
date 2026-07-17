@@ -819,6 +819,97 @@ describe('gardener-dashboard', function () {
         const config = yamlLoad(configMap.data['config.yaml'])
         expect(pick(config, ['frontend.shootDefaults.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
       })
+
+      it('should require help text when the help configuration is present', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootDefaults: {
+                  controlPlaneHighAvailabilityHelp: {
+                    title: 'Missing text',
+                  },
+                },
+              },
+            },
+          },
+        }
+
+        await expect(renderTemplates(templates, values)).rejects.toThrow('controlPlaneHighAvailabilityHelp.text is required')
+      })
+    })
+
+    describe('shootDefaults', function () {
+      it('should preserve all configured values including false and zero', async function () {
+        const shootDefaults = {
+          hibernationSchedule: {
+            evaluation: null,
+          },
+          nodesCIDR: '10.42.0.0/16',
+          purposes: ['evaluation', 'development', 'production'],
+          workerlessCluster: false,
+          networkingType: 'cilium',
+          floatingPool: 'FloatingIP-external',
+          loadBalancerProvider: 'f5',
+          controlPlaneHighAvailability: false,
+          containerRuntime: 'containerd',
+          autoscalerMin: 0,
+          autoscalerMax: 0,
+          maxSurge: '30%',
+          zonesSelectAll: false,
+          maintenanceHours: ['00'],
+          maintenanceWindowSizeMinutes: 0,
+          autoUpdateOS: false,
+          autoUpdateKubernetes: false,
+        }
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootDefaults,
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config.frontend.shootDefaults).toEqual(shootDefaults)
+      })
+
+      it('should map legacy shoot defaults into the nested configuration', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                defaultHibernationSchedule: {
+                  evaluation: [{
+                    start: '00 20 * * 1,2,3,4,5',
+                  }],
+                },
+                defaultNodesCIDR: '10.84.0.0/16',
+                controlPlaneHighAvailabilityHelp: {
+                  text: 'Legacy help',
+                },
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config.frontend.shootDefaults.hibernationSchedule.evaluation).toEqual([{
+          start: '00 20 * * 1,2,3,4,5',
+        }])
+        expect(config.frontend.shootDefaults.nodesCIDR).toBe('10.84.0.0/16')
+        expect(config.frontend.shootDefaults.controlPlaneHighAvailabilityHelp).toEqual({
+          text: 'Legacy help',
+        })
+      })
     })
 
     describe('knownConditions', function () {

@@ -67,13 +67,14 @@ websocketAllowedOrigins:
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
-  defaultHibernationSchedule:
-    evaluation:
-    - start: 00 17 * * 1,2,3,4,5
-    development:
-    - start: 00 17 * * 1,2,3,4,5
-      end: 00 08 * * 1,2,3,4,5
-    production: ~
+  shootDefaults:
+    hibernationSchedule:
+      evaluation:
+      - start: 00 17 * * 1,2,3,4,5
+      development:
+      - start: 00 17 * * 1,2,3,4,5
+        end: 00 08 * * 1,2,3,4,5
+      production: ~
 ```
 
 The `websocketAllowedOrigins` list restricts which origins may establish socket.io connections. This setting is required; use `"*"` to allow all origins (not recommended for production).

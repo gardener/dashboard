@@ -25,6 +25,7 @@ import get from 'lodash/get'
 import some from 'lodash/some'
 import find from 'lodash/find'
 import sortBy from 'lodash/sortBy'
+import uniq from 'lodash/uniq'
 
 export const useGardenerExtensionStore = defineStore('gardenerExtension', () => {
   const api = useApi()
@@ -80,8 +81,8 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return map(networkingResources, 'type')
   })
 
-  const networkingTypeList = computed(() => {
-    const types = sortBy(networkingTypes.value)
+  const sortedNetworkingTypes = computed(() => {
+    const types = sortBy(uniq(networkingTypes.value))
 
     if (types.includes(configStore.defaultNetworkingType)) {
       const filtered = types.filter(type => type !== configStore.defaultNetworkingType)
@@ -100,7 +101,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     dnsProviderTypesWithPrimarySupport,
     hasDnsServiceExtension,
     networkingTypes,
-    networkingTypeList,
+    sortedNetworkingTypes,
   }
 })
 

@@ -310,8 +310,8 @@ export const useConfigStore = defineStore('config', () => {
     return shootDefaults.value.floatingPool
   })
 
-  const defaultLoadbalancerProvider = computed(() => {
-    return shootDefaults.value.loadbalancerProvider
+  const defaultLoadBalancerProvider = computed(() => {
+    return shootDefaults.value.loadBalancerProvider ?? shootDefaults.value.loadbalancerProvider
   })
 
   const defaultControlPlaneHighAvailability = computed(() => {
@@ -339,7 +339,10 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const defaultMaintenanceHours = computed(() => {
-    return shootDefaults.value.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+    const maintenanceHours = shootDefaults.value.maintenanceHours
+    return Array.isArray(maintenanceHours) && maintenanceHours.length
+      ? maintenanceHours
+      : ['22', '23', '00', '01', '02', '03', '04', '05']
   })
 
   const defaultMaintenanceWindowSizeMinutes = computed(() => {
@@ -610,7 +613,7 @@ export const useConfigStore = defineStore('config', () => {
     defaultContainerRuntime,
     defaultControlPlaneHighAvailability,
     defaultFloatingPool,
-    defaultLoadbalancerProvider,
+    defaultLoadBalancerProvider,
     defaultMaintenanceHours,
     defaultMaintenanceWindowSizeMinutes,
     defaultMaxSurge,

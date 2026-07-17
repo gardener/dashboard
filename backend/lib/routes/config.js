@@ -54,7 +54,7 @@ router.route('/')
     }
   })
 
-async function sanitizeFrontendConfig (frontendConfig) {
+export async function sanitizeFrontendConfig (frontendConfig) {
   const converter = createConverter()
   const tasks = []
 
@@ -77,7 +77,10 @@ async function sanitizeFrontendConfig (frontendConfig) {
     } = {},
     vendorHints = [],
     resourceQuotaHelp = {},
-    controlPlaneHighAvailabilityHelp = {},
+    controlPlaneHighAvailabilityHelp: legacyControlPlaneHighAvailabilityHelp = {},
+    shootDefaults: {
+      controlPlaneHighAvailabilityHelp = {},
+    } = {},
   } = sanitizedFrontendConfig
 
   tasks.push(convertAndSanitize(alert, 'message'))
@@ -89,6 +92,7 @@ async function sanitizeFrontendConfig (frontendConfig) {
   tasks.push(convertAndSanitize(sla, 'description'))
   tasks.push(convertAndSanitize(addonDefinition, 'description'))
   tasks.push(convertAndSanitize(resourceQuotaHelp, 'text'))
+  tasks.push(convertAndSanitize(legacyControlPlaneHighAvailabilityHelp, 'text'))
   tasks.push(convertAndSanitize(controlPlaneHighAvailabilityHelp, 'text'))
 
   for (const item of items) {

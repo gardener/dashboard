@@ -22,33 +22,36 @@ data:
             end: 00 08 * * 1,2,3,4,5
           production: ~
         nodesCIDR: '10.250.0.0/16'
-      # # configure help text for control plane high availability, control plane pricing etc.
-      # controlPlaneHighAvailabilityHelp:
-      #   text: Help text
-      # purposes:
-      #   - 'evaluation'
-      #   - 'development'
-      #   - 'testing'
-      #   - 'production'
-      # workerlessCluster: false
-      # networkingType: cilium
-      # floatingPool: external
-      # loadbalancerProvider: amphora
-      # controlPlaneHighAvailability: false
-      # containerRuntime: containerd
-      # autoscalerMin: 1
-      # autoscalerMax: 2
-      # maxSurge: 1
-      # zonesSelectAll: false
-      # maintenanceHours:
-      #   - '22'
-      #   - '23'
-      #   - '00'
-      #   - '01'
-      #   - '02'
-      #   - '03'
-      #   - '04'
-      #   - '05'
-      # maintenanceWindowSizeMinutes: 60
-      # autoUpdateOS: true
-      # autoUpdateKubernetes: true
+        # # Configure help text for control plane high availability, control plane pricing, etc.
+        # controlPlaneHighAvailabilityHelp:
+        #   text: Help text
+        # Do not remove the built-in purposes evaluation, development, or production.
+        # Dashboard defaulting and help text rely on them. The first entry is the default purpose.
+        # purposes:
+        #   - 'evaluation'
+        #   - 'development'
+        #   - 'testing'
+        #   - 'production'
+        # workerlessCluster: false
+        # networkingType: cilium
+        # The concrete value must match a floating-pool wildcard advertised by the CloudProfile.
+        # floatingPool: FloatingIP-external
+        # loadBalancerProvider: amphora
+        # controlPlaneHighAvailability: false
+        # containerRuntime: containerd
+        # autoscalerMin: 1
+        # autoscalerMax: 2
+        # maxSurge: 1
+        # zonesSelectAll: false
+        # maintenanceHours:
+        #   - '22'
+        #   - '23'
+        #   - '00'
+        #   - '01'
+        #   - '02'
+        #   - '03'
+        #   - '04'
+        #   - '05'
+        # maintenanceWindowSizeMinutes: 60
+        # autoUpdateOS: true
+        # autoUpdateKubernetes: true

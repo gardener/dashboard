@@ -11,8 +11,6 @@ import {
   nextTick,
 } from 'vue'
 
-import { useConfigStore } from '@/store/config'
-
 import { useLogger } from '@/composables/useLogger'
 
 import moment from './moment'
@@ -520,22 +518,13 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
-export function randomMaintenanceBegin () {
+export function randomMaintenanceBegin (hours = ['22', '23', '00', '01', '02', '03', '04', '05']) {
   // randomize maintenance time window
-  const configStore = useConfigStore()
-  const hours = configStore.defaultMaintenanceHours
   const randomHour = sample(hours)
   return `${randomHour}:00`
 }
 
-export function maintenanceWindowWithBeginAndTimezone (
-  beginTime,
-  beginTimezone,
-  windowSize = null,
-) {
-  const configStore = useConfigStore()
-  const effectiveWindowSize = windowSize ?? configStore.defaultMaintenanceWindowSizeMinutes
-
+export function maintenanceWindowWithBeginAndTimezone (beginTime, beginTimezone, windowSize = 60) {
   const maintenanceTimezone = new TimeWithOffset(beginTimezone)
   if (!maintenanceTimezone.isValid()) {
     return
@@ -551,7 +540,7 @@ export function maintenanceWindowWithBeginAndTimezone (
   }
 
   const begin = `${beginMoment.format('HHmm')}00${timezoneString}`
-  const endMoment = beginMoment.add(effectiveWindowSize, 'm')
+  const endMoment = beginMoment.add(windowSize, 'm')
   const end = `${endMoment.format('HHmm')}00${timezoneString}`
   return { begin, end }
 }
