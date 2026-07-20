@@ -21,12 +21,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-chip
           v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
-          :text-color="textColor"
+          :variant="chipVariant"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
-          :color="color"
+          :color="chipColor"
           class="status-tag"
         >
           <v-icon
@@ -204,10 +203,10 @@ export default {
       }
       return 'primary'
     },
-    textColor () {
-      if (this.isError) {
-        return 'white'
-      }
+    chipVariant () {
+      return this.isError ? 'flat' : 'tonal'
+    },
+    chipColor () {
       return this.color
     },
     visible () {

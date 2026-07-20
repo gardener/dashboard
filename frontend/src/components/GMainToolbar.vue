@@ -251,7 +251,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               block
               variant="text"
-              color="pink"
+              color="logout"
               class="justify-start pl-4"
               prepend-icon="mdi-exit-to-app"
               @click.stop="handleLogout"
