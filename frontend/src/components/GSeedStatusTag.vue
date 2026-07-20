@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: 2025 SAP SE or an SAP affiliate company and Gardener contributors
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -10,24 +10,22 @@ SPDX-License-Identifier: Apache-2.0
       v-model="internalValue"
       :placement="popperPlacement"
       :disabled="!condition.message"
-      :toolbar-title="toolbarTitle"
       :toolbar-color="color"
     >
       <template #toolbar-title>
-        <span>{{ toolbarTitle }}</span>
-        <template v-if="resourceName">
-          - <span class="font-family-monospace font-weight-bold">{{ resourceName }}</span>
-        </template>
+        <span v-if="staleShoot">Last Status - </span>
+        <span v-else>{{ condition.name }} - </span>
+        <span class="font-family-monospace font-weight-bold">{{ seedName }}</span>
       </template>
       <template #activator="{ props: popoverActivatorProps }">
         <v-chip
           v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="isError ? 'flat' : 'tonal'"
+          :variant="chipVariant"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
-          :color="color"
+          :color="chipColor"
           class="status-tag"
         >
           <v-icon
@@ -42,7 +40,6 @@ SPDX-License-Identifier: Apache-2.0
             :description="chipTooltip.description"
             :disabled="internalValue"
             :title="chipTooltip.title"
-            :user-errors="chipTooltip.userErrorCodeObjects"
           />
         </v-chip>
       </template>
@@ -51,7 +48,6 @@ SPDX-License-Identifier: Apache-2.0
         :last-message="nonErrorMessage"
         :error-descriptions="errorDescriptions"
         :last-transition-time="condition.lastTransitionTime"
-        :shoot-binding="shootBinding"
       />
     </g-popover>
   </div>
@@ -65,24 +61,9 @@ import { useAuthzStore } from '@/store/authz'
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 import GStatusTagTooltip from '@/components/GStatusTagTooltip.vue'
 
-import {
-  CONDITION_STATES,
-  conditionState,
-} from '@/composables/useStatusConditions'
-
-import {
-  isUserError,
-  objectsFromErrorCodes,
-} from '@/utils/errorCodes'
-
-import filter from 'lodash/filter'
-
-const conditionStateLabels = Object.freeze({
-  [CONDITION_STATES.ERROR]: 'Error',
-  [CONDITION_STATES.UNKNOWN]: 'Unknown',
-  [CONDITION_STATES.PROGRESSING]: 'Progressing',
-  [CONDITION_STATES.HEALTHY]: 'Healthy',
-})
+import map from 'lodash/map'
+import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
@@ -93,29 +74,23 @@ export default {
     'activePopoverKey',
   ],
   props: {
+    seedName: {
+      type: String,
+      required: true,
+    },
     condition: {
       type: Object,
       required: true,
     },
-    identifier: {
-      type: String,
-      required: true,
-    },
-    popoverKeyPrefix: {
-      type: String,
-      required: true,
-    },
-    resourceName: {
-      type: String,
-    },
-    shootBinding: {
-      type: Object,
-    },
     popperPlacement: {
       type: String,
     },
-    stale: {
+    staleShoot: {
       type: Boolean,
+    },
+    identifier: {
+      type: String,
+      required: true,
     },
   },
   computed: {
@@ -123,7 +98,7 @@ export default {
       'canViewLandscape',
     ]),
     popoverKey () {
-      return `${this.popoverKeyPrefix}[${this.condition.type}]:${this.identifier}`
+      return `g-seed-status-tag[${this.condition.type}]:${this.identifier}`
     },
     internalValue: {
       get () {
@@ -133,35 +108,36 @@ export default {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
     },
-    toolbarTitle () {
-      return this.stale ? 'Last Status' : this.condition.name
-    },
     chipText () {
       return this.condition.shortName || ''
     },
     chipAriaLabel () {
-      const status = this.stale
+      const status = this.staleShoot
         ? `Last status: ${this.chipStatus}`
         : this.chipStatus
       return `${this.condition.name}: ${status}`
     },
-    state () {
-      return conditionState(this.condition)
-    },
     chipStatus () {
-      return conditionStateLabels[this.state]
+      if (this.isError) {
+        return 'Error'
+      }
+      if (this.isUnknown) {
+        return 'Unknown'
+      }
+      if (this.isProgressing) {
+        return 'Progressing'
+      }
+
+      return 'Healthy'
     },
     chipTooltip () {
       return {
         title: this.condition.name,
+        status: this.chipStatus,
         description: this.condition.description,
-        userErrorCodeObjects: filter(objectsFromErrorCodes(this.condition.codes), { userError: true }),
       }
     },
     chipIcon () {
-      if (this.hasUserError) {
-        return 'mdi-account-alert-outline'
-      }
       if (this.isError) {
         return 'mdi-alert-circle-outline'
       }
@@ -175,27 +151,39 @@ export default {
       return ''
     },
     isError () {
-      return this.state === CONDITION_STATES.ERROR
+      if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
+        return true
+      }
+      return false
     },
     isUnknown () {
-      return this.state === CONDITION_STATES.UNKNOWN
+      if (this.condition.status === 'Unknown') {
+        return true
+      }
+      return false
     },
     isProgressing () {
-      return this.state === CONDITION_STATES.PROGRESSING
-    },
-    hasUserError () {
-      return isUserError(this.condition.codes)
+      if (this.condition.status === 'Progressing') {
+        return true
+      }
+      return false
     },
     errorDescriptions () {
-      if (!this.isError) {
-        return undefined
+      if (this.isError) {
+        // currently there are no known error codes for seed conditions
+        const dummyErrorCodeObjects = map(this.condition.codes, code => ({
+          code,
+          description: `Error Code: ${code}`,
+        }))
+
+        return [
+          {
+            description: this.condition.message,
+            errorCodeObjects: dummyErrorCodeObjects,
+          },
+        ]
       }
-      return [
-        {
-          description: this.condition.message,
-          errorCodeObjects: objectsFromErrorCodes(this.condition.codes),
-        },
-      ]
+      return undefined
     },
     nonErrorMessage () {
       if (!this.isError) {
@@ -215,8 +203,17 @@ export default {
       }
       return 'chip-ready'
     },
+    chipVariant () {
+      return this.isError ? 'flat' : 'tonal'
+    },
+    chipColor () {
+      return this.color
+    },
     visible () {
-      return this.canViewLandscape || !this.condition.showLandscapeViewerOnly
+      if (!this.canViewLandscape) {
+        return !get(this.condition, ['showLandscapeViewerOnly'], false)
+      }
+      return true
     },
   },
 }
