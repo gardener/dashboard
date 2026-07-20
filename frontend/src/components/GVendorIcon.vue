@@ -109,10 +109,7 @@ const iconStyle = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-  @use 'vuetify/settings' as vuetify;
-  @use 'sass:map';
-
   .v-theme--dark .icon-background {
-    background-color: map.get(vuetify.$grey, 'darken-2');
+    background-color: #e0e0e0;
   }
 </style>
