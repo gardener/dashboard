@@ -246,7 +246,7 @@ global:
       #       ## Anything else we need to know?
 
       # Deprecated compatibility values. Prefer shootDefaults.hibernationSchedule and
-      # shootDefaults.nodesCIDR. Existing overrides are mapped to shootDefaults by the chart.
+      # shootDefaults.nodesCIDR. These values are rendered unchanged and normalized by the frontend.
       defaultHibernationSchedule:
         evaluation:
         - start: 00 17 * * 1,2,3,4,5

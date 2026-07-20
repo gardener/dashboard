@@ -879,7 +879,7 @@ describe('gardener-dashboard', function () {
         expect(config.frontend.shootDefaults).toEqual(shootDefaults)
       })
 
-      it('should map legacy shoot defaults into the nested configuration', async function () {
+      it('should render legacy shoot defaults unchanged', async function () {
         const values = {
           global: {
             dashboard: {
@@ -902,13 +902,14 @@ describe('gardener-dashboard', function () {
         const [configMap] = documents
         const config = yamlLoad(configMap.data['config.yaml'])
 
-        expect(config.frontend.shootDefaults.hibernationSchedule.evaluation).toEqual([{
+        expect(config.frontend.defaultHibernationSchedule.evaluation).toEqual([{
           start: '00 20 * * 1,2,3,4,5',
         }])
-        expect(config.frontend.shootDefaults.nodesCIDR).toBe('10.84.0.0/16')
-        expect(config.frontend.shootDefaults.controlPlaneHighAvailabilityHelp).toEqual({
+        expect(config.frontend.defaultNodesCIDR).toBe('10.84.0.0/16')
+        expect(config.frontend.controlPlaneHighAvailabilityHelp).toEqual({
           text: 'Legacy help',
         })
+        expect(config.frontend.shootDefaults).toBeUndefined()
       })
     })
 

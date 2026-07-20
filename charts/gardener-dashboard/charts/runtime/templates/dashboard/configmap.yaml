@@ -241,16 +241,11 @@ data:
         {{- end }}
         {{- end }}
       {{- end }}
-      {{- $shootDefaults := deepCopy (default (dict) .Values.global.dashboard.frontendConfig.shootDefaults) }}
-      {{- if and (not (hasKey $shootDefaults "hibernationSchedule")) .Values.global.dashboard.frontendConfig.defaultHibernationSchedule }}
-      {{- $_ := set $shootDefaults "hibernationSchedule" .Values.global.dashboard.frontendConfig.defaultHibernationSchedule }}
+      {{- if .Values.global.dashboard.frontendConfig.defaultHibernationSchedule }}
+      defaultHibernationSchedule:
+{{ toYaml .Values.global.dashboard.frontendConfig.defaultHibernationSchedule | trim | nindent 8 }}
       {{- end }}
-      {{- if and (not (hasKey $shootDefaults "nodesCIDR")) .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
-      {{- $_ := set $shootDefaults "nodesCIDR" .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
-      {{- end }}
-      {{- if and (not (hasKey $shootDefaults "controlPlaneHighAvailabilityHelp")) .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp }}
-      {{- $_ := set $shootDefaults "controlPlaneHighAvailabilityHelp" .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp }}
-      {{- end }}
+      {{- $shootDefaults := default (dict) .Values.global.dashboard.frontendConfig.shootDefaults }}
       {{- with get $shootDefaults "controlPlaneHighAvailabilityHelp" }}
       {{- $_ := required ".Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text is required" .text }}
       {{- end }}
@@ -348,6 +343,13 @@ data:
       {{- if .Values.global.dashboard.frontendConfig.resourceQuotaHelp }}
       resourceQuotaHelp:
         text: {{ required ".Values.global.dashboard.frontendConfig.resourceQuotaHelp.text is required" .Values.global.dashboard.frontendConfig.resourceQuotaHelp.text | quote }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp }}
+      controlPlaneHighAvailabilityHelp:
+        text: {{ required ".Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text is required" .Values.global.dashboard.frontendConfig.controlPlaneHighAvailabilityHelp.text | quote }}
+      {{- end }}
+      {{- if .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
+      defaultNodesCIDR: {{ .Values.global.dashboard.frontendConfig.defaultNodesCIDR }}
       {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
       serviceAccountDefaultTokenExpiration: {{ .Values.global.dashboard.frontendConfig.serviceAccountDefaultTokenExpiration }}
