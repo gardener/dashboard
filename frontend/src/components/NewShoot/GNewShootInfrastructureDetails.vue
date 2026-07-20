@@ -136,7 +136,7 @@ SPDX-License-Identifier: Apache-2.0
             :items="firewallSizes"
             :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
-            @blur="v$.firewallImage.$touch()"
+            @blur="v$.firewallSize.$touch()"
           />
         </v-col>
         <v-col cols="3">
@@ -190,7 +190,6 @@ import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import {
-  includesIfAvailable,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
@@ -272,7 +271,6 @@ export default {
     const requiresInfrastructure = providerType => {
       return requiredIf(() => !this.workerless && this.providerType === providerType)
     }
-    const includesDefaultLoadBalancerClass = includesIfAvailable('default', 'allLoadBalancerClassNames')
     return {
       region: withFieldName('Region', {
         required,
@@ -285,8 +283,10 @@ export default {
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
         required: requiresInfrastructure('vsphere'),
-        includesKey: withMessage('Load Balancer Class \'default\' must be selected', (...args) => {
-          return this.workerless || includesDefaultLoadBalancerClass.apply(this, args)
+        includesKey: withMessage('Load Balancer Class \'default\' must be selected', selectedClassNames => {
+          const validationApplies = !this.workerless && this.providerType === 'vsphere'
+          const defaultClassIsAvailable = includes(this.allLoadBalancerClassNames, 'default')
+          return !validationApplies || !defaultClassIsAvailable || includes(selectedClassNames, 'default')
         }),
       }),
       partitionID: withFieldName('Partition ID', {
