@@ -15,7 +15,9 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import {
   grey,
+  green,
   orange,
+  red,
   shades,
 } from 'vuetify/util/colors'
 
@@ -30,8 +32,8 @@ import {
 const light = {
   dark: false,
   colors: {
-    anchor: '#005F4E',
-    primary: '#005F4E',
+    anchor: '#18634A',
+    primary: '#18634A',
     secondary: grey.darken3,
     unknown: '#424242',
     accent: orange.lighten5,
@@ -46,30 +48,32 @@ const light = {
     'action-button': grey.darken4,
     logout: '#880E4F',
     'chip-error': '#FF6B6B',
+    'nav-active': '#545454',
   },
 }
 
 const dark = {
   dark: true,
   colors: {
-    surface: '#121212',
-    background: '#0D0D0D',
-    anchor: '#4DB6AC',
-    primary: '#4DB6AC',
+    // surface: '#121212',
+    // background: '#0D0D0D',
+    anchor: '#60C0A0',
+    primary: '#60C0A0',
     secondary: grey.darken3,
     unknown: '#BDBDBD',
     accent: grey.darken3,
-    error: '#FF7070',
+    error: red.darken2,
     info: '#90CAF9',
-    success: '#8BC34A',
-    warning: '#FF8C00',
+    success: green.base,
+    warning: orange.darken4,
     'main-background': grey.darken3,
     'main-navigation-title': shades.white,
     'toolbar-background': '#005F4E',
     'toolbar-title': shades.white,
     'action-button': grey.lighten4,
-    logout: '#F8BBD0',
-    'chip-error': '#FF7070',
+    logout: red.lighten1,
+    'chip-error': '#FF5757',
+    'nav-active': '#545454',
   },
 }
 
@@ -85,6 +89,7 @@ const variations = {
     'logout',
     'main-background',
     'toolbar-background',
+    'nav-active',
   ],
   lighten: 3,
   darken: 3,

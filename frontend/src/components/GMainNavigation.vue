@@ -271,7 +271,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .main-menu {
   .active-item {
-    background-color: rgba(#fff, .3);
+    background-color: rgb(var(--v-theme-nav-active));
   }
 }
 </style>

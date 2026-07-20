@@ -164,7 +164,6 @@ const hiddenUnhealthy = computed(() => totalUnhealthy.value - matchingUnhealthy.
 const healthyShoots = computed(() => shootCount.value - totalUnhealthy.value)
 const hasActiveFilters = computed(() => activeFilterLabels.value.length > 0)
 
-
 const filterDescription = computed(() => {
   const labels = activeFilterLabels.value
   if (!labels.length) {
