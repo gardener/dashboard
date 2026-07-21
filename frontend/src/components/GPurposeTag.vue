@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-if="!!shortPurpose"
     v-tooltip:top="purpose"
     :variant="!isCritical ? 'tonal' : 'flat'"
-    :color="chipColor"
+    color="primary"
     size="small"
     class="purpose-tag"
   >
@@ -42,9 +42,6 @@ export default {
         default:
           return toUpper(this.purpose)
       }
-    },
-    chipColor () {
-      return this.isCritical ? 'primary' : 'anchor'
     },
     isCritical () {
       return this.purpose === 'production' || this.purpose === 'infrastructure'
