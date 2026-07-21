@@ -21,14 +21,6 @@ import {
   shades,
 } from 'vuetify/util/colors'
 
-// All interactive text and status-label colors are chosen to meet WCAG 2.1 AAA
-// (≥7:1 contrast ratio). Light and dark tokens differ because mid-range teals
-// cannot clear 7:1 on both white (#fff) and the dark surface (#121212).
-//
-// Backgrounds:
-//   Light – surface: #ffffff, app-bar: #f5f5f5 (grey.lighten-4)
-//   Dark  – surface: #121212 (set explicitly below; darker than Vuetify default)
-
 const light = {
   dark: false,
   colors: {
