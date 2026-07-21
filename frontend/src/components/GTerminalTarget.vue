@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-radio-group
     v-model="selectedTarget"
     label="Terminal Target"
-    class="mt-6"
+    class="mt-6 px-4"
     :hint="hint"
     persistent-hint
   >
