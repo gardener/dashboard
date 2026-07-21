@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
             v-bind="{ ...itemProps, title: undefined }"
           >
             <g-account-avatar
-              :account-name="item.value"
+              :account-name="item"
               :size="24"
             />
           </v-list-item>
