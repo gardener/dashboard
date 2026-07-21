@@ -17,8 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-chip
           v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
-          :text-color="textColor"
+          :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
@@ -205,21 +204,15 @@ export default {
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'unknown'
+        return 'chip-unknown'
       }
       if (this.isError) {
-        return 'error'
+        return 'chip-error'
       }
       if (this.isProgressing && this.canViewLandscape) {
-        return 'info'
+        return 'chip-info'
       }
-      return 'primary'
-    },
-    textColor () {
-      if (this.isError) {
-        return 'white'
-      }
-      return this.color
+      return 'chip-ready'
     },
     visible () {
       if (!this.canViewLandscape) {

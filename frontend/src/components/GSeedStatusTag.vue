@@ -193,15 +193,15 @@ export default {
     },
     color () {
       if (this.isUnknown || this.staleShoot) {
-        return 'unknown'
+        return 'chip-unknown'
       }
       if (this.isError) {
-        return 'error'
+        return 'chip-error'
       }
       if (this.isProgressing && this.canViewLandscape) {
-        return 'info'
+        return 'chip-info'
       }
-      return 'primary'
+      return 'chip-ready'
     },
     chipVariant () {
       return this.isError ? 'flat' : 'tonal'
