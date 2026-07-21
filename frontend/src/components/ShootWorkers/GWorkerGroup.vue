@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         class="cursor-pointer"
+        :class="{ 'worker-chip-warning': chipColor === 'warning' }"
         variant="tonal"
         :color="chipColor"
       >
@@ -515,5 +516,10 @@ export default {
 
   .group-window {
     width: 450px;
+  }
+
+  /* Darken warning chip text in light mode to meet WCAG AA contrast standard */
+  .v-theme--light .v-chip.worker-chip-warning {
+    color: #BF360C;
   }
 </style>
