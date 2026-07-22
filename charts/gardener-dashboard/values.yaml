@@ -247,24 +247,24 @@ global:
 
       # Deprecated compatibility values. Prefer shootDefaults.hibernationSchedule and
       # shootDefaults.nodesCIDR. These values are rendered unchanged and normalized by the frontend.
-      defaultHibernationSchedule:
-        evaluation:
-        - start: 00 17 * * 1,2,3,4,5
-        development:
-        - start: 00 17 * * 1,2,3,4,5
-          end: 00 08 * * 1,2,3,4,5
-        production: ~
-      defaultNodesCIDR: '10.250.0.0/16'
+      # defaultHibernationSchedule:
+      #   evaluation:
+      #   - start: 00 17 * * 1,2,3,4,5
+      #   development:
+      #   - start: 00 17 * * 1,2,3,4,5
+      #     end: 00 08 * * 1,2,3,4,5
+      #   production: ~
+      # defaultNodesCIDR: '10.250.0.0/16'
 
       shootDefaults:
-        # hibernationSchedule:
-        #   evaluation:
-        #   - start: 00 17 * * 1,2,3,4,5
-        #   development:
-        #   - start: 00 17 * * 1,2,3,4,5
-        #     end: 00 08 * * 1,2,3,4,5
-        #   production: ~
-        # nodesCIDR: '10.250.0.0/16'
+        hibernationSchedule:
+          evaluation:
+          - start: 00 17 * * 1,2,3,4,5
+          development:
+          - start: 00 17 * * 1,2,3,4,5
+            end: 00 08 * * 1,2,3,4,5
+          production: ~
+        nodesCIDR: '10.250.0.0/16'
         # # Configure help text for control plane high availability, control plane pricing, etc.
         # controlPlaneHighAvailabilityHelp:
         #   text: Help text

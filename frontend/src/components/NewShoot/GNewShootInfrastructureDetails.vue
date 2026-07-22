@@ -190,6 +190,7 @@ import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
 import {
+  includesIfAvailable,
   withMessage,
   withFieldName,
 } from '@/utils/validators'
@@ -283,11 +284,7 @@ export default {
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
         required: requiresInfrastructure('vsphere'),
-        includesKey: withMessage('Load Balancer Class \'default\' must be selected', selectedClassNames => {
-          const validationApplies = !this.workerless && this.providerType === 'vsphere'
-          const defaultClassIsAvailable = includes(this.allLoadBalancerClassNames, 'default')
-          return !validationApplies || !defaultClassIsAvailable || includes(selectedClassNames, 'default')
-        }),
+        includesKey: withMessage('Load Balancer Class \'default\' must be selected', includesIfAvailable('default', 'allLoadBalancerClassNames')),
       }),
       partitionID: withFieldName('Partition ID', {
         required: requiresInfrastructure('metal'),
