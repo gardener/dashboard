@@ -136,7 +136,7 @@ SPDX-License-Identifier: Apache-2.0
             :items="firewallSizes"
             :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
-            @blur="v$.firewallSize.$touch()"
+            @blur="v$.firewallImage.$touch()"
           />
         </v-col>
         <v-col cols="3">
@@ -279,7 +279,7 @@ export default {
       networkingType: withFieldName('Networking Type', {
         required: requiredIf(() => !this.workerless),
       }),
-      loadBalancerProviderName: withFieldName('Load Balancer Provider', {
+      loadBalancerProviderName: withFieldName('Cluster Name', {
         required: requiresInfrastructure('openstack'),
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {

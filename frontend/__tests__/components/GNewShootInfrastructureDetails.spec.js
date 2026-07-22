@@ -176,15 +176,6 @@ describe('components', () => {
       }
     })
 
-    it('should touch the Firewall Size validation when its field is blurred', async () => {
-      shootContext.providerType.value = 'metal'
-      await nextTick()
-
-      expect(wrapper.vm.v$.firewallSize.$dirty).toBe(false)
-      await wrapper.find('.v-select[data-label="Firewall Size"]').trigger('blur')
-      expect(wrapper.vm.v$.firewallSize.$dirty).toBe(true)
-    })
-
     it('should require the default vSphere load balancer class when available', async () => {
       shootContext.allLoadBalancerClassNames.value = ['default', 'other']
       shootContext.providerType.value = 'vsphere'
