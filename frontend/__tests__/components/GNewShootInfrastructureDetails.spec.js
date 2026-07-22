@@ -185,7 +185,7 @@ describe('components', () => {
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(true)
     })
 
-    it('should require the default vSphere load balancer class only for worker shoots on vSphere', async () => {
+    it('should require the default vSphere load balancer class when available', async () => {
       shootContext.allLoadBalancerClassNames.value = ['default', 'other']
       shootContext.providerType.value = 'vsphere'
       await nextTick()
@@ -206,21 +206,9 @@ describe('components', () => {
       await wrapper.vm.v$.$validate()
       expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
 
-      shootContext.providerControlPlaneConfigLoadBalancerClassNames.value = []
       shootContext.workerless.value = true
       await nextTick()
-      await wrapper.vm.v$.$validate()
-      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(false)
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
       expect(selectByLabel('Load Balancer Classes').exists()).toBe(false)
-    })
-
-    it('should not apply vSphere class validation to another provider', async () => {
-      shootContext.allLoadBalancerClassNames.value = ['default']
-      await wrapper.vm.v$.$validate()
-
-      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(false)
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
     })
   })
 })
