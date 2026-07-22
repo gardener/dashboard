@@ -267,11 +267,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style lang="scss" scoped>
-.main-menu {
-  .active-item {
-    background-color: rgb(var(--v-theme-nav-active));
-  }
-}
-</style>
