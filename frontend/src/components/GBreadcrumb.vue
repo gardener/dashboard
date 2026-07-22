@@ -5,24 +5,26 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-breadcrumbs
-    :items="breadcrumbItems"
-    active-color="primary"
-    active-class="text-decoration-none"
-    exact
-  >
-    <template #divider>
-      <v-icon
-        icon="mdi-chevron-right"
-        size="large"
-      />
-    </template>
-    <template #title="{ item }">
-      <span :class="{ 'text-title-large': !item.to }">
-        {{ item.title || item }}
-      </span>
-    </template>
-  </v-breadcrumbs>
+  <div class="ml-3">
+    <v-breadcrumbs
+      :items="breadcrumbItems"
+      active-color="primary"
+      active-class="text-decoration-none"
+      exact
+    >
+      <template #divider>
+        <v-icon
+          icon="mdi-chevron-right"
+          size="large"
+        />
+      </template>
+      <template #title="{ item }">
+        <span :class="{ 'text-title-large': !item.to }">
+          {{ item.title || item }}
+        </span>
+      </template>
+    </v-breadcrumbs>
+  </div>
 </template>
 
 <script setup>
