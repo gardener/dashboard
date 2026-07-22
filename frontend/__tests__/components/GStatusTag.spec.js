@@ -80,7 +80,7 @@ describe('components', () => {
       expect(vm.chipTooltip.title).toBe('foo-bar')
       expect(vm.chipIcon).toBe('')
       expect(vm.isError || vm.isUnknown || vm.isProgressing).toBe(false)
-      expect(vm.color).toBe('chip-ready')
+      expect(vm.color).toBe('primary')
       expect(vm.visible).toBe(true)
       expect(vm.chipAriaLabel).toBe('foo-bar: Healthy')
     })
@@ -112,7 +112,7 @@ describe('components', () => {
       expect(vm.isError).toBe(true)
       expect(vm.isUserError).toBe(true)
       expect(vm.chipIcon).toBe('mdi-account-alert-outline')
-      expect(vm.color).toBe('chip-error')
+      expect(vm.color).toBe('error')
       expect(vm.visible).toBe(true)
     })
 
@@ -126,7 +126,7 @@ describe('components', () => {
       const vm = wrapper.vm
       expect(vm.visible).toBe(false)
       expect(vm.isProgressing).toBe(true)
-      expect(vm.color).toBe('chip-ready')
+      expect(vm.color).toBe('primary')
       expect(vm.chipStatus).toBe('Progressing')
       expect(vm.chipIcon).toBe('')
     })
@@ -142,7 +142,7 @@ describe('components', () => {
       const vm = wrapper.vm
       expect(vm.visible).toBe(true)
       expect(vm.isProgressing).toBe(true)
-      expect(vm.color).toBe('chip-info')
+      expect(vm.color).toBe('info')
       expect(vm.chipStatus).toBe('Progressing')
       expect(vm.chipIcon).toBe('mdi-progress-alert')
     })
