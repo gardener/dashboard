@@ -251,8 +251,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               block
               variant="text"
-              :color="logoutColor"
-              class="justify-start pl-4"
+              class="logout-btn justify-start pl-4"
               prepend-icon="mdi-exit-to-app"
               @click.stop="handleLogout"
             >
@@ -301,7 +300,6 @@ import {
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { useTheme } from 'vuetify'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
@@ -320,9 +318,6 @@ import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 import get from 'lodash/get'
 
 const route = useRoute()
-
-const theme = useTheme()
-const logoutColor = computed(() => theme.current.value.dark ? '#EF5350' : '#C62828')
 
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
@@ -440,11 +435,17 @@ function helpTarget (item) {
     .tabs-bar-background {
       background-color: white !important;
     }
+    .logout-btn {
+      color: #C62828;
+    }
   }
 
   .v-theme--dark {
     .tabs-bar-background {
       background-color: black !important;
+    }
+    .logout-btn {
+      color: #EF5350;
     }
   }
 </style>
