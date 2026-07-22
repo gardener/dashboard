@@ -518,10 +518,8 @@ export default {
     width: 450px;
   }
 
-  /* Orange `warning` is too light as tonal chip text on a light surface (3.25:1).
-     Darken just the worker warning chip's text to meet WCAG AA (#BF360C = 4.66:1).
-     Dark mode already passes, so it is left untouched. */
-  .v-theme--light .worker-chip-warning {
-    color: #BF360C !important;
+  /* Darken warning chip text in light mode to meet WCAG AA contrast standard */
+  .v-theme--light .v-chip.worker-chip-warning {
+    color: #BF360C;
   }
 </style>
