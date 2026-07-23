@@ -23,8 +23,8 @@ const WHITE = '#ffffff'
 const BLACK = '#000000'
 
 export const ERROR_CHIP_CLASS = 'g-error-chip'
-export const ERROR_CHIP_BG_VAR = '--g-error-chip'
-export const ERROR_CHIP_ON_VAR = '--g-error-chip-on'
+export const ERROR_CHIP_BACKGROUND_VAR = '--g-error-chip-background'
+export const ERROR_CHIP_TEXT_VAR = '--g-error-chip-text'
 
 let sharedErrorChipCssVars
 let sharedErrorChipScope
@@ -112,12 +112,12 @@ export function colorToVuetifyRgb (color) {
 function applyErrorChipCssVars (vars) {
   const root = document.documentElement
   if (!vars) {
-    root.style.removeProperty(ERROR_CHIP_BG_VAR)
-    root.style.removeProperty(ERROR_CHIP_ON_VAR)
+    root.style.removeProperty(ERROR_CHIP_BACKGROUND_VAR)
+    root.style.removeProperty(ERROR_CHIP_TEXT_VAR)
     return
   }
-  root.style.setProperty(ERROR_CHIP_BG_VAR, vars[ERROR_CHIP_BG_VAR])
-  root.style.setProperty(ERROR_CHIP_ON_VAR, vars[ERROR_CHIP_ON_VAR])
+  root.style.setProperty(ERROR_CHIP_BACKGROUND_VAR, vars.backgroundRgb)
+  root.style.setProperty(ERROR_CHIP_TEXT_VAR, vars.textRgb)
 }
 
 function createErrorChipCssVars (theme) {
@@ -138,10 +138,7 @@ function createErrorChipCssVars (theme) {
       return undefined
     }
 
-    return {
-      [ERROR_CHIP_BG_VAR]: backgroundRgb,
-      [ERROR_CHIP_ON_VAR]: textRgb,
-    }
+    return { backgroundRgb, textRgb }
   })
 }
 

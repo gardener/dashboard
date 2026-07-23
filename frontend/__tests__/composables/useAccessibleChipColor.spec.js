@@ -24,9 +24,17 @@ const {
   colorToVuetifyRgb,
   useAccessibleErrorChipColors,
   resetErrorChipColorCache,
-  ERROR_CHIP_BG_VAR,
-  ERROR_CHIP_ON_VAR,
+  ERROR_CHIP_BACKGROUND_VAR,
+  ERROR_CHIP_TEXT_VAR,
 } = await import('@/composables/useAccessibleChipColor')
+
+function expectedChipRgbChannels (background) {
+  const accessible = pickAccessibleChipColors(background)
+  return {
+    backgroundRgb: colorToVuetifyRgb(accessible.background),
+    textRgb: colorToVuetifyRgb(accessible.textColor),
+  }
+}
 
 describe('composables', () => {
   describe('useAccessibleChipColor', () => {
@@ -90,13 +98,10 @@ describe('composables', () => {
           error: '#E57373',
         })
         const { errorChipCssVars } = useAccessibleErrorChipColors(theme)
-        const accessible = pickAccessibleChipColors('#E57373')
 
-        expect(errorChipCssVars.value).toEqual({
-          [ERROR_CHIP_BG_VAR]: colorToVuetifyRgb(accessible.background),
-          [ERROR_CHIP_ON_VAR]: colorToVuetifyRgb('#ffffff'),
-        })
-        expect(errorChipCssVars.value[ERROR_CHIP_BG_VAR]).not.toBe(colorToVuetifyRgb('#E57373'))
+        expect(errorChipCssVars.value).toEqual(expectedChipRgbChannels('#E57373'))
+        expect(errorChipCssVars.value.backgroundRgb).not.toBe(colorToVuetifyRgb('#E57373'))
+        expect(errorChipCssVars.value.textRgb).toBe(colorToVuetifyRgb('#ffffff'))
       })
 
       it('should return undefined when the theme has no error color', () => {
@@ -109,13 +114,12 @@ describe('composables', () => {
           error: '#E57373',
         })
         const { errorChipCssVars } = useAccessibleErrorChipColors(theme)
-        const initial = errorChipCssVars.value[ERROR_CHIP_BG_VAR]
+        const initialBackgroundRgb = errorChipCssVars.value.backgroundRgb
 
         theme.current.value.colors.error = '#B71C1C'
 
-        expect(errorChipCssVars.value[ERROR_CHIP_BG_VAR]).toBe(colorToVuetifyRgb('#B71C1C'))
-        expect(errorChipCssVars.value[ERROR_CHIP_ON_VAR]).toBe(colorToVuetifyRgb('#ffffff'))
-        expect(errorChipCssVars.value[ERROR_CHIP_BG_VAR]).not.toBe(initial)
+        expect(errorChipCssVars.value).toEqual(expectedChipRgbChannels('#B71C1C'))
+        expect(errorChipCssVars.value.backgroundRgb).not.toBe(initialBackgroundRgb)
       })
 
       it('should not share css vars across different explicit themes', () => {
@@ -123,8 +127,8 @@ describe('composables', () => {
         const second = useAccessibleErrorChipColors(createTheme({ error: '#B71C1C' }))
 
         expect(first.errorChipCssVars).not.toBe(second.errorChipCssVars)
-        expect(first.errorChipCssVars.value[ERROR_CHIP_BG_VAR])
-          .not.toBe(second.errorChipCssVars.value[ERROR_CHIP_BG_VAR])
+        expect(first.errorChipCssVars.value.backgroundRgb)
+          .not.toBe(second.errorChipCssVars.value.backgroundRgb)
       })
 
       it('should reuse one shared css vars object on the default theme path', () => {
@@ -136,12 +140,12 @@ describe('composables', () => {
 
       it('should sync css variables onto the document element', () => {
         const { errorChipCssVars } = useAccessibleErrorChipColors()
-        const expected = errorChipCssVars.value
+        const { backgroundRgb, textRgb } = errorChipCssVars.value
 
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BG_VAR))
-          .toBe(expected[ERROR_CHIP_BG_VAR])
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_ON_VAR))
-          .toBe(expected[ERROR_CHIP_ON_VAR])
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BACKGROUND_VAR))
+          .toBe(backgroundRgb)
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_TEXT_VAR))
+          .toBe(textRgb)
       })
     })
   })
