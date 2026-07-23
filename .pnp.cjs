@@ -1052,7 +1052,8 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-webgl", "npm:0.19.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
-          ["dayjs", "npm:1.11.23"],\
+          ["culori", "npm:4.0.2"],\
+          ["dayjs", "npm:1.11.21"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
           ["eslint-import-resolver-alias", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.1.2"],\
@@ -1063,9 +1064,10 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:10.10.0"],\
           ["eventemitter3", "npm:5.0.4"],\
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
-          ["get-contrast", "npm:3.0.0"],\
           ["highlight.js", "npm:11.12.0"],\
           ["js-yaml", "npm:5.3.0"],\
+          ["highlight.js", "npm:11.11.1"],\
+          ["js-cookie", "npm:3.0.8"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["jwt-decode", "npm:4.0.0"],\
           ["lodash", "npm:4.18.1"],\
@@ -5605,32 +5607,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["css-color-list", [\
-      ["npm:0.0.1", {\
-        "packageLocation": "./.yarn/cache/css-color-list-npm-0.0.1-8b0e6d1b3d-f513cf3a60.zip/node_modules/css-color-list/",\
-        "packageDependencies": [\
-          ["css-color-list", "npm:0.0.1"],\
-          ["css-color-names", "npm:0.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["css-color-names", [\
-      ["npm:0.0.1", {\
-        "packageLocation": "./.yarn/cache/css-color-names-npm-0.0.1-2711f86e8d-127f9950c5.zip/node_modules/css-color-names/",\
-        "packageDependencies": [\
-          ["css-color-names", "npm:0.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:1.0.1", {\
-        "packageLocation": "./.yarn/cache/css-color-names-npm-1.0.1-4f1d2346fb-e2f4862159.zip/node_modules/css-color-names/",\
-        "packageDependencies": [\
-          ["css-color-names", "npm:1.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["cssesc", [\
       ["npm:3.0.0", {\
         "packageLocation": "./.yarn/cache/cssesc-npm-3.0.0-15ec56f86f-6bcfd89866.zip/node_modules/cssesc/",\
@@ -5656,6 +5632,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/csstype-npm-3.2.3-741053244e-cd29c51e70.zip/node_modules/csstype/",\
         "packageDependencies": [\
           ["csstype", "npm:3.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["culori", [\
+      ["npm:4.0.2", {\
+        "packageLocation": "./.yarn/cache/culori-npm-4.0.2-93824a188c-5d3c952b94.zip/node_modules/culori/",\
+        "packageDependencies": [\
+          ["culori", "npm:4.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -6979,15 +6964,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["esm", [\
-      ["npm:3.2.25", {\
-        "packageLocation": "./.yarn/cache/esm-npm-3.2.25-762b3ebd40-8e60e80755.zip/node_modules/esm/",\
-        "packageDependencies": [\
-          ["esm", "npm:3.2.25"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["espree", [\
       ["npm:10.4.0", {\
         "packageLocation": "./.yarn/cache/espree-npm-10.4.0-9633b00e55-c63fe06131.zip/node_modules/espree/",\
@@ -7619,20 +7595,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["get-contrast", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/get-contrast-npm-3.0.0-69e8944633-6f45e3f6f5.zip/node_modules/get-contrast/",\
-        "packageDependencies": [\
-          ["css-color-names", "npm:1.0.1"],\
-          ["get-contrast", "npm:3.0.0"],\
-          ["is-blank", "npm:2.1.0"],\
-          ["is-named-css-color", "npm:1.0.0"],\
-          ["rgb", "npm:0.1.0"],\
-          ["wcag-contrast", "npm:3.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["get-intrinsic", [\
       ["npm:1.3.0", {\
         "packageLocation": "./.yarn/cache/get-intrinsic-npm-1.3.0-35558f27b6-52c81808af.zip/node_modules/get-intrinsic/",\
@@ -8218,17 +8180,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["is-blank", [\
-      ["npm:2.1.0", {\
-        "packageLocation": "./.yarn/cache/is-blank-npm-2.1.0-76988a6c1e-a1c7545e8a.zip/node_modules/is-blank/",\
-        "packageDependencies": [\
-          ["is-blank", "npm:2.1.0"],\
-          ["is-empty", "npm:1.2.0"],\
-          ["is-whitespace", "npm:0.3.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["is-boolean-object", [\
       ["npm:1.2.2", {\
         "packageLocation": "./.yarn/cache/is-boolean-object-npm-1.2.2-ceb8c82b17-36ff6baf6b.zip/node_modules/is-boolean-object/",\
@@ -8300,15 +8251,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["is-empty", [\
-      ["npm:1.2.0", {\
-        "packageLocation": "./.yarn/cache/is-empty-npm-1.2.0-59697ab4b6-f0dd653471.zip/node_modules/is-empty/",\
-        "packageDependencies": [\
-          ["is-empty", "npm:1.2.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["is-extglob", [\
       ["npm:2.1.1", {\
         "packageLocation": "./.yarn/cache/is-extglob-npm-2.1.1-0870ea68b5-5487da3569.zip/node_modules/is-extglob/",\
@@ -8365,16 +8307,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/is-map-npm-2.0.3-9e061e76e3-2c4d431b74.zip/node_modules/is-map/",\
         "packageDependencies": [\
           ["is-map", "npm:2.0.3"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["is-named-css-color", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/is-named-css-color-npm-1.0.0-683c6eba30-baa65b0b27.zip/node_modules/is-named-css-color/",\
-        "packageDependencies": [\
-          ["css-color-list", "npm:0.0.1"],\
-          ["is-named-css-color", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8557,11 +8489,11 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["is-whitespace", [\
-      ["npm:0.3.0", {\
-        "packageLocation": "./.yarn/cache/is-whitespace-npm-0.3.0-994f2b3b8c-2f4ef13e01.zip/node_modules/is-whitespace/",\
+    ["is-what", [\
+      ["npm:5.5.0", {\
+        "packageLocation": "./.yarn/cache/is-what-npm-5.5.0-d0c4588dc8-065c8a4ac6.zip/node_modules/is-what/",\
         "packageDependencies": [\
-          ["is-whitespace", "npm:0.3.0"]\
+          ["is-what", "npm:5.5.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11103,16 +11035,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["relative-luminance", [\
-      ["npm:2.0.1", {\
-        "packageLocation": "./.yarn/cache/relative-luminance-npm-2.0.1-8f85fb4e48-b65843d017.zip/node_modules/relative-luminance/",\
-        "packageDependencies": [\
-          ["esm", "npm:3.2.25"],\
-          ["relative-luminance", "npm:2.0.1"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["remark-breaks", [\
       ["npm:4.0.0", {\
         "packageLocation": "./.yarn/cache/remark-breaks-npm-4.0.0-962f376971-d7b319a799.zip/node_modules/remark-breaks/",\
@@ -11295,11 +11217,11 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["rgb", [\
-      ["npm:0.1.0", {\
-        "packageLocation": "./.yarn/cache/rgb-npm-0.1.0-39612cbdaa-d09f92de9f.zip/node_modules/rgb/",\
+    ["rfdc", [\
+      ["npm:1.4.1", {\
+        "packageLocation": "./.yarn/cache/rfdc-npm-1.4.1-1a1c63d052-4614e42923.zip/node_modules/rfdc/",\
         "packageDependencies": [\
-          ["rgb", "npm:0.1.0"]\
+          ["rfdc", "npm:1.4.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -14433,16 +14355,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["w3c-xmlserializer", "npm:5.0.0"],\
           ["xml-name-validator", "npm:5.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["wcag-contrast", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/wcag-contrast-npm-3.0.0-ca2db68808-06a042138c.zip/node_modules/wcag-contrast/",\
-        "packageDependencies": [\
-          ["relative-luminance", "npm:2.0.1"],\
-          ["wcag-contrast", "npm:3.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\

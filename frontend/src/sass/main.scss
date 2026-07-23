@@ -52,6 +52,13 @@
   cursor: pointer;
 }
 
+/* Color scheme to ensure contrast on error chips 
+without changing the global theme error color */
+.g-error-chip {
+  --v-theme-error: var(--g-error-chip-background);
+  --v-theme-on-error: var(--g-error-chip-text);
+}
+
 .pointer-events-none {
   pointer-events: none !important;
 }

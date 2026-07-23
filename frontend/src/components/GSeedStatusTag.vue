@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props: popoverActivatorProps }">
         <v-chip
           v-bind="popoverActivatorProps"
-          :class="{ 'cursor-pointer': condition.message, 'error-chip': isError }"
+          :class="{ 'cursor-pointer': condition.message, 'g-error-chip': isError }"
           :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
@@ -230,10 +230,4 @@ export default {
       margin-right: 1px;
     }
   }
-
-  /* Override needed for contrast of error chip */
-    .v-theme--dark .status-tag.error-chip {
-    --v-theme-error: 198, 40, 40;
-  }
-
 </style>
