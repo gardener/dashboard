@@ -91,6 +91,7 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
   }
 
   const original = toOklch(background)
+  // For unparseable colors: keep the input and prefer white text
   if (!original || typeof original.l !== 'number') {
     return { background, textColor: WHITE }
   }
