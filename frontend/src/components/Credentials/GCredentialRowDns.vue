@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         :credential="item.credential"
         :shared="item.isSharedBinding"
         :provider-type="item.providerType"
+        vendor-type="dns"
       />
     </td>
     <td v-if="selectedHeaders.credentialUsageCount">

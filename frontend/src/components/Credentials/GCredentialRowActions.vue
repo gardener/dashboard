@@ -41,7 +41,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GActionButton from '@/components/GActionButton.vue'
 
-import { useCloudProviderCredential } from '@/composables/credential/useCloudProviderCredential'
+import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 const props = defineProps({
   credential: Object,
@@ -57,7 +57,7 @@ const {
   hasOwnWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
-} = useCloudProviderCredential(credential)
+} = useDnsProviderCredential(credential)
 
 function onUpdate () {
   emit('update', credential.value)

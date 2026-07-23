@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           :credential="credential"
           :shared="isSharedBinding"
           :provider-type="providerType"
+          vendor-type="infra"
         />
       </v-card>
     </v-tooltip>

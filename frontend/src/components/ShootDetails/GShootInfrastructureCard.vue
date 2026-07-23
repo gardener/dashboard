@@ -59,6 +59,7 @@ SPDX-License-Identifier: Apache-2.0
           :credential="credential"
           :shared="isSharedBinding"
           :provider-type="shootCloudProviderBinding.provider.type"
+          vendor-type="infra"
           details-title
         />
       </g-list-item>
