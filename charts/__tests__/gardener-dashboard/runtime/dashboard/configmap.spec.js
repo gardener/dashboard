@@ -843,7 +843,14 @@ describe('gardener-dashboard', function () {
       it('should preserve all configured values including false and zero', async function () {
         const shootDefaults = {
           hibernationSchedule: {
-            evaluation: null,
+            evaluation: [{
+              start: '00 20 * * 1,2,3,4,5',
+            }],
+            development: [{
+              start: '00 21 * * 1,2,3,4,5',
+              end: '00 07 * * 1,2,3,4,5',
+            }],
+            production: [],
           },
           nodesCIDR: '10.42.0.0/16',
           purposes: ['evaluation', 'development', 'production'],
@@ -884,6 +891,7 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
+                shootDefaults: null,
                 defaultHibernationSchedule: {
                   evaluation: [{
                     start: '00 20 * * 1,2,3,4,5',

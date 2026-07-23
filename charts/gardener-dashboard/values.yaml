@@ -263,7 +263,6 @@ global:
           development:
           - start: 00 17 * * 1,2,3,4,5
             end: 00 08 * * 1,2,3,4,5
-          production: ~
         nodesCIDR: '10.250.0.0/16'
         # # Configure help text for control plane high availability, control plane pricing, etc.
         # controlPlaneHighAvailabilityHelp:
