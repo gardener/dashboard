@@ -7,7 +7,9 @@ export default {
     details: [
       {
         label: 'Infoblox Username',
-        key: 'USERNAME',
+        valueFrom: {
+          key: ['USERNAME'],
+        },
       },
     ],
   },

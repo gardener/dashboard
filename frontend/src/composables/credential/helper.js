@@ -16,20 +16,48 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
 
-function decodeSecretValue (secretData, key) {
-  const keys = Array.isArray(key) ? key : [key]
-  const selectedKey = keys.find(currentKey => get(secretData, [currentKey]))
-  if (!selectedKey) {
+function isSecretDetailValuePath (path) {
+  return Array.isArray(path) &&
+    path.length > 0 &&
+    path.every(segment => typeof segment === 'string' || typeof segment === 'number')
+}
+
+function normalizeSecretDetailValuePaths ({ key, keys }) {
+  const hasKey = key !== undefined
+  const hasKeys = keys !== undefined
+
+  if (hasKey === hasKeys) {
     return undefined
   }
-  const value = get(secretData, [selectedKey])
-  if (!value) {
+
+  const paths = hasKey ? [key] : keys
+  if (
+    !Array.isArray(paths) ||
+    paths.length === 0 ||
+    paths.some(path => !isSecretDetailValuePath(path))
+  ) {
     return undefined
   }
-  return decodeBase64(value)
+
+  return paths
+}
+
+function secretDetailValueFromPaths (value, paths) {
+  for (const path of paths) {
+    const selectedValue = get(value, path)
+    if (selectedValue) {
+      return selectedValue
+    }
+  }
+
+  return undefined
 }
 
 function parseSecretDetailValue (value, parse) {
+  if (parse === undefined) {
+    return value
+  }
+
   switch (parse) {
     case 'json':
       try {
@@ -38,60 +66,48 @@ function parseSecretDetailValue (value, parse) {
         return undefined
       }
     default:
-      return value
+      return undefined
   }
 }
 
-function resolveSecretDetailValueFromSource (secretData, source) {
-  if (!source) {
+function resolveSecretDetailValue (secretData, valueFrom) {
+  if (!valueFrom || typeof valueFrom !== 'object' || Array.isArray(valueFrom)) {
     return undefined
-  }
-
-  if (typeof source === 'string') {
-    return decodeSecretValue(secretData, source)
   }
 
   const {
     key,
+    keys,
     decode = true,
     parse,
     path,
-  } = source
+  } = valueFrom
 
-  if (!key) {
+  const paths = normalizeSecretDetailValuePaths({ key, keys })
+  if (!paths) {
     return undefined
   }
 
-  let value = decode
-    ? decodeSecretValue(secretData, key)
-    : get(secretData, [key])
+  let value = secretDetailValueFromPaths(secretData, paths)
 
   if (value === undefined) {
     return undefined
   }
 
+  if (decode) {
+    value = decodeBase64(value)
+  }
+
   value = parseSecretDetailValue(value, parse)
 
-  if (path) {
+  if (path !== undefined) {
+    if (!isSecretDetailValuePath(path)) {
+      return undefined
+    }
     return get(value, path)
   }
 
   return value
-}
-
-function resolveSecretDetailValue (secretData, valueFrom) {
-  const sources = Array.isArray(valueFrom)
-    ? valueFrom
-    : [valueFrom]
-
-  for (const source of sources) {
-    const value = resolveSecretDetailValueFromSource(secretData, source)
-    if (value !== undefined) {
-      return value
-    }
-  }
-
-  return undefined
 }
 
 function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
@@ -103,30 +119,21 @@ function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
   return detailDefinitions.map(detail => {
     const {
       label,
-      key,
       hidden,
       valueFrom,
-      decode = true,
     } = detail
 
     if (hidden) {
       return { label, hidden: true }
     }
 
-    if (valueFrom) {
-      return {
-        label,
-        value: resolveSecretDetailValue(secretData, valueFrom),
-      }
-    }
-
-    if (!key) {
+    if (!valueFrom) {
       return { label }
     }
 
     return {
       label,
-      value: decode ? decodeSecretValue(secretData, key) : get(secretData, [key]),
+      value: resolveSecretDetailValue(secretData, valueFrom),
     }
   })
 }

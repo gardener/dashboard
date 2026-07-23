@@ -8,9 +8,9 @@ export default {
       {
         label: 'Project',
         valueFrom: {
-          key: 'serviceaccount.json',
+          key: ['serviceaccount.json'],
           parse: 'json',
-          path: 'project_id',
+          path: ['project_id'],
         },
       },
     ],

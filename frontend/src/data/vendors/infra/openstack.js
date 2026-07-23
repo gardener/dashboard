@@ -7,11 +7,15 @@ export default {
     details: [
       {
         label: 'Domain Name',
-        key: 'domainName',
+        valueFrom: {
+          key: ['domainName'],
+        },
       },
       {
         label: 'Tenant Name',
-        key: 'tenantName',
+        valueFrom: {
+          key: ['tenantName'],
+        },
       },
     ],
   },

@@ -7,7 +7,12 @@ export default {
     details: [
       {
         label: 'Subscription ID',
-        key: ['subscriptionID', 'subscriptionId'],
+        valueFrom: {
+          keys: [
+            ['subscriptionID'],
+            ['subscriptionId'],
+          ],
+        },
       },
     ],
   },

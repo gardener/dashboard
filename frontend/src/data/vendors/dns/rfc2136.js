@@ -7,15 +7,30 @@ export default {
     details: [
       {
         label: 'Server',
-        key: ['Server', 'server'],
+        valueFrom: {
+          keys: [
+            ['Server'],
+            ['server'],
+          ],
+        },
       },
       {
         label: 'TSIG Key Name',
-        key: ['TSIGKeyName', 'tsigKeyName'],
+        valueFrom: {
+          keys: [
+            ['TSIGKeyName'],
+            ['tsigKeyName'],
+          ],
+        },
       },
       {
         label: 'Zone',
-        key: ['Zone', 'zone'],
+        valueFrom: {
+          keys: [
+            ['Zone'],
+            ['zone'],
+          ],
+        },
       },
     ],
   },

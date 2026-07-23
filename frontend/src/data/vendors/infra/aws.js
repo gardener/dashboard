@@ -7,7 +7,9 @@ export default {
     details: [
       {
         label: 'Access Key ID',
-        key: 'accessKeyID',
+        valueFrom: {
+          key: ['accessKeyID'],
+        },
       },
     ],
   },

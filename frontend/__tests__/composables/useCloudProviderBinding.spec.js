@@ -145,7 +145,9 @@ describe('useCloudProviderBinding composable', () => {
           details: [
             {
               label: 'Secret',
-              key: 'secret',
+              valueFrom: {
+                key: ['secret'],
+              },
             },
           ],
         },

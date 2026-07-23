@@ -7,7 +7,9 @@ export default {
     details: [
       {
         label: 'Server',
-        key: 'server',
+        valueFrom: {
+          key: ['server'],
+        },
       },
       {
         label: 'API Key',

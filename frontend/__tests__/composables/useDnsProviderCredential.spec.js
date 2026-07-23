@@ -77,7 +77,9 @@ describe('useDnsProviderCredential composable', () => {
           details: [
             {
               label: 'Secret',
-              key: 'secret',
+              valueFrom: {
+                key: ['secret'],
+              },
             },
           ],
         },

@@ -7,16 +7,11 @@ export default {
     details: [
       {
         label: 'Project',
-        valueFrom: [
-          {
-            key: 'project',
-          },
-          {
-            key: 'serviceaccount.json',
-            parse: 'json',
-            path: 'project_id',
-          },
-        ],
+        valueFrom: {
+          key: ['serviceaccount.json'],
+          parse: 'json',
+          path: ['project_id'],
+        },
       },
     ],
   },

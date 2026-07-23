@@ -7,11 +7,21 @@ export default {
     details: [
       {
         label: 'vSphere Username',
-        key: ['vsphereUsername', 'vSphereUsername'],
+        valueFrom: {
+          keys: [
+            ['vsphereUsername'],
+            ['vSphereUsername'],
+          ],
+        },
       },
       {
         label: 'NSX-T Username',
-        key: ['nsxtUsername', 'NSXTUsername'],
+        valueFrom: {
+          keys: [
+            ['nsxtUsername'],
+            ['NSXTUsername'],
+          ],
+        },
       },
     ],
   },

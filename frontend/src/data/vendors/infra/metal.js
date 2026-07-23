@@ -7,7 +7,9 @@ export default {
     details: [
       {
         label: 'API URL',
-        key: 'metalAPIURL',
+        valueFrom: {
+          key: ['metalAPIURL'],
+        },
       },
     ],
   },
