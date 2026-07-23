@@ -6,29 +6,38 @@
 
 import {
   computed,
-  effectScope,
   watchEffect,
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
-  converter,
+  blend,
   formatHex,
+  formatRgb,
+  modeLrgb,
+  modeOklch,
+  modeRgb,
   toGamut,
+  useMode,
   wcagContrast,
-} from 'culori'
+} from 'culori/fn'
 
-const toOklch = converter('oklch')
+const toRgb = useMode(modeRgb)
+useMode(modeLrgb)
+const toOklch = useMode(modeOklch)
 const toSrgbGamut = toGamut('rgb', 'oklch')
 
 const WHITE = '#ffffff'
 const BLACK = '#000000'
 
-export const ERROR_CHIP_CLASS = 'g-error-chip'
 export const ERROR_CHIP_BACKGROUND_VAR = '--g-error-chip-background'
 export const ERROR_CHIP_TEXT_VAR = '--g-error-chip-text'
 
-let sharedErrorChipCssVars
-let sharedErrorChipScope
+export const WARNING_CHIP_TEXT_VAR = '--g-warning-chip-text'
+export const WARNING_CHIP_BACKGROUND_VAR = '--g-warning-chip-background'
+export const WARNING_CHIP_BACKGROUND_OPACITY_VAR = '--g-warning-chip-background-opacity'
+
+/** Match Vuetify's default tonal chip opacity when calculating its visible background color. */
+const TONAL_BACKGROUND_OPACITY = 0.12
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
@@ -38,12 +47,40 @@ function meetsContrast (background, textColor, targetContrast) {
   }
 }
 
+function createChipColorResult (background, textColor, changedColor) {
+  return {
+    background,
+    textColor,
+    backgroundChanged: changedColor === 'background',
+    textColorChanged: changedColor === 'text',
+  }
+}
+
+function pickHigherContrastTextColor (background) {
+  return wcagContrast(background, WHITE) >= wcagContrast(background, BLACK)
+    ? WHITE
+    : BLACK
+}
+
+function createTonalBackgroundColor (foreground, background, opacity) {
+  try {
+    const foregroundRgb = toRgb(foreground)
+    if (!foregroundRgb) {
+      return undefined
+    }
+    return formatHex(blend([
+      background,
+      { ...foregroundRgb, alpha: opacity },
+    ]))
+  } catch {
+    return undefined
+  }
+}
+
 /**
  * Adjusts OKLCH lightness of `originalColor` toward `targetLightness` until contrast
  * with `textColor` meets `targetContrast`. Returns the closest passing hex color, or null.
  *
- * Contrast is checked on the hex-quantized candidate so 8-bit rounding cannot drop a
- * barely-passing float color below the threshold.
  *
  * @param {object} originalColor Culori OKLCH color object (not a hex string)
  * @param {string} textColor Hex color used as the contrast partner (e.g. `#ffffff`)
@@ -73,131 +110,183 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
 }
 
 /**
- * Chooses a readable text/background pair for a flat-style chip.
- * Prefers white text (darkening the background if needed) so flat chips stay
- * visually “filled”.
- * Uses black text only when white cannot meet the WCAG AA contrast standard.
+ * Chooses readable colors for Vuetify flat or tonal chips.
  *
- * @returns {{ background: string, textColor: string }|undefined}
- *   `background` and `textColor` are hex strings when colors are valid.
+ * Flat chips prefer white text and adjust their background when needed. Tonal
+ * chips preserve the default colors when possible, then change either the
+ * background or the text color.
+ *
+ * @param {string} color Flat background or tonal theme color
+ * @param {object} [options]
+ * @param {'flat'|'tonal'} [options.variant='flat']
+ * @param {string} [options.surface] Surface behind a tonal chip
+ * @param {number} [options.targetContrast=4.5] Minimum WCAG contrast ratio
+ * @returns {{
+ *   background: string,
+ *   textColor: string,
+ *   backgroundChanged: boolean,
+ *   textColorChanged: boolean
+ * }|undefined}
  */
-export function pickAccessibleChipColors (background, targetContrast = 4.5) {
-  if (!background) {
+export function pickAccessibleChipColors (color, {
+  variant = 'flat',
+  surface,
+  targetContrast = 4.5,
+} = {}) {
+  if (!color || (variant === 'tonal' && !surface)) {
     return undefined
   }
 
-  if (meetsContrast(background, WHITE, targetContrast)) {
-    return { background, textColor: WHITE }
-  }
-
-  const original = toOklch(background)
+  const original = toOklch(color)
   if (!original || typeof original.l !== 'number') {
-    return { background, textColor: WHITE }
+    return variant === 'tonal' ? undefined : createChipColorResult(color, WHITE)
   }
 
-  const backgroundForWhiteText = adjustLightnessForContrast(original, WHITE, 0, targetContrast)
-  if (backgroundForWhiteText) {
-    return { background: backgroundForWhiteText, textColor: WHITE }
-  }
+  let background = color
+  let textColor = WHITE
+  let targetBackgroundLightness = 0
 
-  if (meetsContrast(background, BLACK, targetContrast)) {
-    return { background, textColor: BLACK }
-  }
-
-  const backgroundForBlackText = adjustLightnessForContrast(original, BLACK, 1, targetContrast)
-  if (backgroundForBlackText) {
-    return { background: backgroundForBlackText, textColor: BLACK }
-  }
-
-  try {
-    const textColor = wcagContrast(background, WHITE) >= wcagContrast(background, BLACK)
-      ? WHITE
-      : BLACK
-    return { background, textColor }
-  } catch {
-    return { background, textColor: WHITE }
-  }
-}
-
-/** Format a color for Vuetify theme CSS variables (`rgb(var(--v-theme-…))`).
- * Expects the color as hex string, e.g. `#ff0000`.
- */
-export function colorToVuetifyRgb (color) {
-  try {
-    const rgb = toSrgbGamut(toOklch(color))
-    if (!rgb || typeof rgb.r !== 'number') {
-      return undefined
-    }
-    const { r, g, b } = rgb
-    return `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`
-  } catch {
-    return undefined
-  }
-}
-
-function applyErrorChipCssVars (vars) {
-  const root = document.documentElement
-  if (!vars) {
-    root.style.removeProperty(ERROR_CHIP_BACKGROUND_VAR)
-    root.style.removeProperty(ERROR_CHIP_TEXT_VAR)
-    return
-  }
-  root.style.setProperty(ERROR_CHIP_BACKGROUND_VAR, vars.backgroundRgb)
-  root.style.setProperty(ERROR_CHIP_TEXT_VAR, vars.textRgb)
-}
-
-function createErrorChipCssVars (theme) {
-  return computed(() => {
-    const errorColor = theme.current.value?.colors?.error
-    if (!errorColor) {
+  if (variant === 'tonal') {
+    const surfaceColor = toOklch(surface)
+    if (!surfaceColor || typeof surfaceColor.l !== 'number') {
       return undefined
     }
 
-    const accessible = pickAccessibleChipColors(errorColor)
-    if (!accessible) {
+    background = createTonalBackgroundColor(color, surface, TONAL_BACKGROUND_OPACITY)
+    if (!background) {
       return undefined
     }
+    textColor = color
+    targetBackgroundLightness = surfaceColor.l
+  }
 
-    const backgroundRgb = colorToVuetifyRgb(accessible.background)
-    const textRgb = colorToVuetifyRgb(accessible.textColor)
-    if (!backgroundRgb || !textRgb) {
-      return undefined
+  if (meetsContrast(background, textColor, targetContrast)) {
+    return createChipColorResult(background, textColor)
+  }
+
+  const adjustedBackground = adjustLightnessForContrast(
+    original,
+    textColor,
+    targetBackgroundLightness,
+    targetContrast,
+  )
+  if (adjustedBackground) {
+    return createChipColorResult(adjustedBackground, textColor, 'background')
+  }
+
+  if (variant === 'tonal') {
+    const targetTextColor = pickHigherContrastTextColor(background)
+    const targetTextLightness = targetTextColor === WHITE ? 1 : 0
+    const adjustedTextColor = adjustLightnessForContrast(
+      original,
+      background,
+      targetTextLightness,
+      targetContrast,
+    )
+    if (adjustedTextColor) {
+      return createChipColorResult(background, adjustedTextColor, 'text')
     }
+  }
 
-    return { backgroundRgb, textRgb }
-  })
+  return createChipColorResult(background, textColor)
 }
 
 /**
- * Ensure error status chips are readable without changing the global theme `error` color
- * (which would affect buttons, alerts, charts, etc.).
- *
- * Computes an accessible pair of bg and text colors from the current theme and exposes it as CSS
- * custom properties.
- *
+ * Accepts a hex color and formats it as comma-separated RGB channels for Vuetify theme CSS
+ * variables, e.g. `255, 0, 0`. Returns undefined for invalid or transparent colors.
  */
-export function useAccessibleErrorChipColors (theme) {
-  if (theme) {
-    return { errorChipCssVars: createErrorChipCssVars(theme) }
+export function colorToVuetifyRgb (color) {
+  try {
+    const formattedColor = formatRgb(color)
+    if (!formattedColor?.startsWith('rgb(')) {
+      return undefined
+    }
+    return formattedColor.slice(4, -1)
+  } catch {
+    return undefined
   }
-
-  if (!sharedErrorChipCssVars) {
-    sharedErrorChipScope = effectScope(true)
-    sharedErrorChipScope.run(() => {
-      sharedErrorChipCssVars = createErrorChipCssVars(useTheme())
-      watchEffect(() => {
-        applyErrorChipCssVars(sharedErrorChipCssVars.value)
-      })
-    })
-  }
-
-  return { errorChipCssVars: sharedErrorChipCssVars }
 }
 
-/** Util for resetting shared state between tests. */
-export function resetErrorChipColorCache () {
-  sharedErrorChipScope?.stop()
-  sharedErrorChipScope = undefined
-  sharedErrorChipCssVars = undefined
-  applyErrorChipCssVars(undefined)
+function setCssVariable (name, value) {
+  const root = document.documentElement
+  if (value === undefined) {
+    root.style.removeProperty(name)
+    return
+  }
+  root.style.setProperty(name, value)
+}
+
+function applyAccessibleChipCssVars (vars) {
+  setCssVariable(ERROR_CHIP_BACKGROUND_VAR, vars?.error?.backgroundRgb)
+  setCssVariable(ERROR_CHIP_TEXT_VAR, vars?.error?.textRgb)
+  setCssVariable(WARNING_CHIP_BACKGROUND_VAR, vars?.warning?.backgroundRgb)
+  setCssVariable(WARNING_CHIP_BACKGROUND_OPACITY_VAR, vars?.warning?.backgroundOpacity)
+  setCssVariable(WARNING_CHIP_TEXT_VAR, vars?.warning?.textRgb)
+}
+
+function createErrorChipCssVars (themeValue) {
+  const errorChipColors = pickAccessibleChipColors(themeValue?.colors?.error)
+  if (!errorChipColors) {
+    return undefined
+  }
+
+  const backgroundRgb = colorToVuetifyRgb(errorChipColors.background)
+  const textRgb = colorToVuetifyRgb(errorChipColors.textColor)
+  if (!backgroundRgb || !textRgb) {
+    return undefined
+  }
+
+  return { backgroundRgb, textRgb }
+}
+
+function createWarningChipCssVars (themeValue) {
+  const warningColor = themeValue?.colors?.warning
+  if (!warningColor) {
+    return undefined
+  }
+
+  const warningChipColors = pickAccessibleChipColors(warningColor, {
+    variant: 'tonal',
+    surface: themeValue.colors.surface,
+  })
+  if (!warningChipColors) {
+    return undefined
+  }
+
+  const vars = {}
+  if (warningChipColors.backgroundChanged) {
+    const backgroundRgb = colorToVuetifyRgb(warningChipColors.background)
+    if (!backgroundRgb) {
+      return undefined
+    }
+    vars.backgroundRgb = backgroundRgb
+    vars.backgroundOpacity = '1'
+  } else if (warningChipColors.textColorChanged) {
+    const textRgb = colorToVuetifyRgb(warningChipColors.textColor)
+    if (!textRgb) {
+      return undefined
+    }
+    vars.textRgb = textRgb
+  }
+  return vars
+}
+
+function createChipCssVars (theme) {
+  return computed(() => ({
+    error: createErrorChipCssVars(theme.current.value),
+    warning: createWarningChipCssVars(theme.current.value),
+  }))
+}
+
+/**
+ * Ensures error and tonal warning chips remain readable without changing the related
+ * global theme colors by exposing accessible colors as document CSS custom properties.
+ */
+export function useAccessibleChipColors () {
+  const chipCssVars = createChipCssVars(useTheme())
+  watchEffect(() => {
+    applyAccessibleChipCssVars(chipCssVars.value)
+  })
+
+  return { chipCssVars }
 }

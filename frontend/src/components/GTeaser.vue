@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <template>
   <div
-    class="g-teaser bg-main-background-darken-2"
+    class="g-teaser v-theme--dark bg-main-background-darken-2"
     :style="{
       height: `${teaserHeight}px`,
     }"

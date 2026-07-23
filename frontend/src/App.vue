@@ -28,7 +28,7 @@ import { useLoginStore } from '@/store/login'
 import { useLocalStorageStore } from '@/store/localStorage'
 import { useProjectStore } from '@/store/project'
 
-import { useAccessibleErrorChipColors } from '@/composables/useAccessibleChipColor'
+import { useAccessibleChipColors } from '@/composables/useAccessibleChipColor'
 import { useCustomColors } from '@/composables/useCustomColors'
 
 import get from 'lodash/get'
@@ -49,7 +49,7 @@ async function setCustomColors () {
   }
 }
 setCustomColors()
-useAccessibleErrorChipColors()
+useAccessibleChipColors()
 
 const colorScheme = toRef(localStorageStore, 'colorScheme')
 const { system } = useColorMode({

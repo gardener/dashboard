@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
   <!-- eslint-disable vue/no-v-html -->
   <div
     v-else
-    class="d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
+    class="v-theme--dark d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
     :style="{
       minHeight: `${minHeight}px`,
     }"
