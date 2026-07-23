@@ -185,6 +185,7 @@ export function createShootContextComposable (options = {}) {
     workerless.value = get(options, ['workerless'], configStore.defaultWorkerlessCluster)
     const defaultProviderType = head(cloudProfileStore.sortedInfraProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
+    resetControlPlaneHighAvailability()
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
     initialManifest.value = cloneDeep(normalizedManifest.value)
@@ -890,18 +891,11 @@ export function createShootContextComposable (options = {}) {
 
   const controlPlaneHighAvailability = computed({
     get () {
-      if (controlPlaneHighAvailabilityFailureToleranceType.value === undefined) {
-        controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
-          ? 'zone'
-          : 'node'
-        return !!configStore.defaultControlPlaneHighAvailability
-      } else {
-        return !!controlPlaneHighAvailabilityFailureToleranceType.value
-      }
+      return !!controlPlaneHighAvailabilityFailureToleranceType.value
     },
     set (value) {
       if (!value) {
-        controlPlaneHighAvailabilityFailureToleranceType.value = null
+        controlPlaneHighAvailabilityFailureToleranceType.value = undefined
       } else {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'
@@ -909,6 +903,10 @@ export function createShootContextComposable (options = {}) {
       }
     },
   })
+
+  function resetControlPlaneHighAvailability () {
+    controlPlaneHighAvailability.value = configStore.defaultControlPlaneHighAvailability
+  }
 
   /* dns */
   const {
