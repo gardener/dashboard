@@ -20,7 +20,8 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props: popoverActivatorProps }">
         <v-chip
           v-bind="popoverActivatorProps"
-          :class="{ 'cursor-pointer': condition.message, 'error-chip': isError }"
+          :class="{ 'cursor-pointer': condition.message }"
+          :style="isError ? errorChipStyle : undefined"
           :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
@@ -61,6 +62,8 @@ import { useAuthzStore } from '@/store/authz'
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 import GStatusTagTooltip from '@/components/GStatusTagTooltip.vue'
 
+import { useErrorChipColor } from '@/composables/useAccessibleChipColor'
+
 import map from 'lodash/map'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -92,6 +95,10 @@ export default {
       type: String,
       required: true,
     },
+  },
+  setup () {
+    const { errorChipStyle } = useErrorChipColor()
+    return { errorChipStyle }
   },
   computed: {
     ...mapState(useAuthzStore, [
@@ -230,10 +237,4 @@ export default {
       margin-right: 1px;
     }
   }
-
-  /* Override needed for contrast of error chip */
-    .v-theme--dark .status-tag.error-chip {
-    --v-theme-error: 198, 40, 40;
-  }
-
 </style>

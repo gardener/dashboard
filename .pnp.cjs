@@ -1044,6 +1044,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-web-links", "npm:0.12.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
+          ["culori", "npm:4.0.2"],\
           ["dayjs", "npm:1.11.21"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
@@ -5687,6 +5688,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/csstype-npm-3.2.3-741053244e-cd29c51e70.zip/node_modules/csstype/",\
         "packageDependencies": [\
           ["csstype", "npm:3.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["culori", [\
+      ["npm:4.0.2", {\
+        "packageLocation": "./.yarn/cache/culori-npm-4.0.2-93824a188c-5d3c952b94.zip/node_modules/culori/",\
+        "packageDependencies": [\
+          ["culori", "npm:4.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
