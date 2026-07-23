@@ -378,8 +378,8 @@ export default {
   },
   data () {
     return {
-      selectedInfraBinding: {},
-      selectedDnsCredential: {},
+      selectedInfraBinding: undefined,
+      selectedDnsCredential: undefined,
       infraCredentialFilter: '',
       createInfraCredentialMenu: false,
       dnsCredentialFilter: '',

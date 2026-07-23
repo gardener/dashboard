@@ -10,5 +10,30 @@ export default {
         hidden: true,
       },
     ],
+    fields: [
+      {
+        key: 'apiToken',
+        label: 'Netlify API Token',
+        type: 'password',
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+    ],
+    help: `
+      <p>
+        You need to provide an access token for Netlify to allow the dns-controller-manager to authenticate with the Netlify DNS API.
+      </p>
+      <p>
+        Then, base64 encode the token. For example, if the generated token is 1234567890123456789, use
+      </p>
+      <pre>$ echo -n '1234567890123456789' | base64</pre>
+      <p>
+        For details, see
+        <a href="https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui" target="_blank" rel="noopener noreferrer">Netlify Documentation</a>.
+      </p>
+      `,
   },
 }

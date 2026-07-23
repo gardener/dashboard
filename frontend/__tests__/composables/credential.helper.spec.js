@@ -57,6 +57,14 @@ describe('secretDetails', () => {
     ...dnsProviders,
   ]
 
+  function providerConfig (name) {
+    return providerConfigs.find(config => config.name === name)
+  }
+
+  function secretField (providerName, fieldKey) {
+    return providerConfig(providerName).secret.fields.find(field => field.key === fieldKey)
+  }
+
   it('matches snapshots for all known provider types (including unhandled types)', () => {
     const secret = {
       data: createSecretData(),
@@ -212,5 +220,65 @@ describe('secretDetails', () => {
         value: undefined,
       },
     ])
+  })
+
+  it('preserves migrated provider field validators and defaults', () => {
+    expect(secretField('aws', 'accessKeyID').validators).toMatchObject({
+      required: { type: 'required' },
+      minLength: { type: 'minLength', length: 16 },
+      maxLength: { type: 'maxLength', length: 128 },
+      alphaNumUnderscore: { type: 'alphaNumUnderscore' },
+    })
+    expect(secretField('aws', 'secretAccessKey').validators).toMatchObject({
+      required: { type: 'required' },
+      minLength: { type: 'minLength', length: 40 },
+      base64: { type: 'base64' },
+    })
+
+    expect(secretField('alicloud', 'accessKeyID').validators).toMatchObject({
+      required: { type: 'required' },
+      minLength: { type: 'minLength', length: 16 },
+      maxLength: { type: 'maxLength', length: 128 },
+    })
+    expect(secretField('alicloud', 'accessKeySecret').validators).toMatchObject({
+      required: { type: 'required' },
+      minLength: { type: 'minLength', length: 30 },
+    })
+
+    expect(secretField('azure', 'clientID').validators.guid).toEqual({ type: 'guid' })
+    expect(secretField('azure', 'tenantID').validators.guid).toEqual({ type: 'guid' })
+    expect(secretField('azure', 'subscriptionID').validators.guid).toEqual({ type: 'guid' })
+
+    expect(secretField('rfc2136', 'TSIGSecretAlgorithm')).toMatchObject({
+      defaultValue: '',
+      omitWhenEmpty: true,
+      values: expect.arrayContaining([
+        expect.objectContaining({
+          value: '',
+        }),
+      ]),
+    })
+    expect(secretField('rfc2136', 'TSIGSecretAlgorithm').validators).toBeUndefined()
+
+    expect(secretField('aws-route53', 'AWS_REGION')).toMatchObject({
+      omitWhenEmpty: true,
+    })
+    expect(secretField('azure-dns', 'AZURE_CLOUD')).toMatchObject({
+      defaultValue: '',
+      omitWhenEmpty: true,
+      values: expect.arrayContaining([
+        expect.objectContaining({
+          value: '',
+        }),
+      ]),
+    })
+  })
+
+  it('limits GCP project IDs to the documented length', () => {
+    const projectIDValidator = secretField('gcp', 'serviceaccount.json').validators.projectID
+
+    expect(projectIDValidator.pattern.test('abcde1')).toBe(true)
+    expect(projectIDValidator.pattern.test(`a${'b'.repeat(29)}`)).toBe(true)
+    expect(projectIDValidator.pattern.test(`a${'b'.repeat(30)}`)).toBe(false)
   })
 })

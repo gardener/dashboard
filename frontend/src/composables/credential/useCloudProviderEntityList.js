@@ -7,11 +7,10 @@
 import {
   computed,
   isRef,
+  unref,
 } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { getCloudProviderEntityList } from './helper'
 
@@ -22,15 +21,13 @@ export const useCloudProviderEntityList = (providerType, options = {}) => {
 
   const {
     credentialStore = useCredentialStore(),
-    gardenerExtensionStore = useGardenerExtensionStore(),
-    cloudProfileStore = useCloudProfileStore(),
+    vendorType,
   } = options
 
   return computed(() => {
     return getCloudProviderEntityList(providerType.value, {
       credentialStore,
-      gardenerExtensionStore,
-      cloudProfileStore,
+      vendorType: unref(vendorType),
     })
   })
 }

@@ -9,31 +9,43 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :secret-validations="v$"
     :binding="binding"
+    :credential="credential"
     :provider-type="providerType"
     :vendor-type="vendorType"
   >
     <template #secret-slot>
-      <div>
-        <v-textarea
-          v-model="data"
-          color="primary"
-          variant="filled"
-          label="Secret Data"
-          :error-messages="getErrorMessages(v$.data)"
-          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
-          :class="{ 'hide-secret': hideSecret }"
-          @click:append="() => (hideSecret = !hideSecret)"
-          @blur="v$.data.$touch()"
-        />
-      </div>
+      <g-generic-input-fields
+        v-if="providerFields"
+        v-model="secretStringDataForProviderFields"
+        :fields="providerFields"
+      />
+      <GGenericInputField
+        v-else
+        v-model="secretStringData"
+        :field="defaultInputField"
+      />
     </template>
     <template #help-slot>
-      <div class="help-content">
+      <!-- eslint-disable vue/no-v-html -->
+      <template v-if="helpHtml">
+        <div
+          class="markdown"
+          v-html="helpHtml"
+        />
+        <g-code-block
+          v-if="helpJSONTemplate"
+          class="mt-3"
+          max-height="100%"
+          lang="json"
+          :content="helpJSONTemplate"
+        />
+      </template>
+      <div v-else>
         <p>
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for {{ vendorName }}.
+          Please enter data required for <code>{{ vendorName }}</code>.
         </p>
       </div>
     </template>
@@ -43,29 +55,24 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapActions } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
-import {
-  dump as yamlDump,
-  load as yamlLoad,
-} from 'js-yaml'
 
 import { useConfigStore } from '@/store/config'
 
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
+import GGenericInputFields from '@/components/GGenericInputFields'
+import GGenericInputField from '@/components/GGenericInputField'
+import GCodeBlock from '@/components/GCodeBlock'
 
 import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
-import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
-import { getErrorMessages } from '@/utils'
-
-import isObject from 'lodash/isObject'
+import { transformHtml } from '@/utils'
 
 export default {
   components: {
     GSecretDialog,
+    GGenericInputFields,
+    GGenericInputField,
+    GCodeBlock,
   },
   props: {
     modelValue: {
@@ -73,6 +80,9 @@ export default {
       required: true,
     },
     binding: {
+      type: Object,
+    },
+    credential: {
       type: Object,
     },
     providerType: {
@@ -87,26 +97,17 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringData } = useProvideSecretContext()
+    const {
+      secretStringData,
+      secretStringDataForFields,
+      setSecretStringDataForFields,
+    } = useProvideSecretContext()
 
     return {
-      stringData: secretStringData,
+      secretStringData,
+      secretStringDataForFields,
+      setSecretStringDataForFields,
       v$: useVuelidate(),
-    }
-  },
-  data () {
-    return {
-      hideSecret: true,
-      internalYaml: '',
-      touched: false,
-    }
-  },
-  validations () {
-    return {
-      data: withFieldName('Secret Data', {
-        required,
-        isYAML: withMessage('You need to enter secret data as YAML key - value pairs', () => Object.keys(this.stringData).length > 0),
-      }),
     }
   },
   computed: {
@@ -118,31 +119,40 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
-    data: {
+    providerFields () {
+      if (!this.vendorSecretConfiguration?.fields) {
+        return undefined
+      }
+      return this.vendorSecretConfiguration?.fields
+    },
+    secretStringDataForProviderFields: {
       get () {
-        return this.internalYaml
+        return this.secretStringDataForFields(this.providerFields)
       },
       set (value) {
-        this.internalYaml = value
-        this.touched = true
-        this.stringData = {}
-
-        try {
-          this.stringData = yamlLoad(value)
-        } catch (err) {
-        /* ignore errors */
-        } finally {
-          if (!isObject(this.stringData)) {
-            this.stringData = {}
-          }
-        }
+        this.setSecretStringDataForFields(this.providerFields, value)
       },
     },
-    valid () {
-      return !this.v$.$invalid
+    defaultInputField () {
+      return {
+        label: 'Secret Data',
+        hint: 'Provide secret data as YAML key-value pairs',
+        type: 'yaml-secret',
+        validators: {
+          required: {
+            type: 'required',
+          },
+          isYAML: {
+            type: 'isValidObject',
+          },
+        },
+      }
     },
-    isCreateMode () {
-      return !this.secret
+    helpHtml () {
+      return transformHtml(this.vendorSecretConfiguration?.help)
+    },
+    helpJSONTemplate () {
+      return JSON.stringify(this.vendorSecretConfiguration?.helpJSONTemplate, undefined, 2)
     },
     vendorName () {
       return this.vendorDisplayName({
@@ -150,52 +160,25 @@ export default {
         name: this.providerType,
       })
     },
-  },
-  watch: {
-    stringData (value) {
-      if (!this.touched) {
-        if (value && Object.keys(value).length > 0) {
-          this.internalYaml = yamlDump(value)
-        } else {
-          this.internalYaml = ''
-        }
-      }
+    vendorSecretConfiguration () {
+      return this.vendorDetails({
+        type: this.vendorType,
+        name: this.providerType,
+      })?.secret
     },
   },
   methods: {
-    getErrorMessages,
-    ...mapActions(useConfigStore, ['vendorDisplayName']),
-
+    ...mapActions(useConfigStore, ['vendorDetails', 'vendorDisplayName']),
   },
 }
 </script>
 
 <style lang="scss" scoped>
 
-  :deep(.v-input__control textarea) {
-    font-family: monospace;
-    font-size: 14px;
+.markdown {
+  :deep(p) {
+    margin: 0px;
   }
-
-  .help-content {
-    ul {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      list-style-type: none;
-      border-left: 4px solid #318334 !important;
-      margin-left: 20px;
-      padding-left: 24px;
-      li {
-        font-weight: 300;
-        font-size: 16px;
-      }
-    }
-  }
-
-  .hide-secret {
-    :deep(.v-input__control textarea) {
-      -webkit-text-security: disc;
-    }
-  }
+}
 
 </style>

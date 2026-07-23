@@ -5,7 +5,5 @@ export default {
   displayName: 'Azure Private DNS',
   weight: 300,
   icon: 'azure-dns.svg',
-  secret: {
-    details: azureDns.secret.details,
-  },
+  secret: azureDns.secret,
 }

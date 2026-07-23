@@ -52,27 +52,89 @@ export function emailToDisplayName (value) {
   }
 }
 
-export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => {}) {
+function fileExtension (file) {
+  const name = file?.name ?? ''
+  const extensionIndex = name.lastIndexOf('.')
+  if (extensionIndex === -1) {
+    return ''
+  }
+  return name.slice(extensionIndex).toLowerCase()
+}
+
+function normalizedFileExtensions (extensions = []) {
+  return extensions.map(extension => {
+    const normalizedExtension = extension.toLowerCase()
+    return normalizedExtension.startsWith('.') ? normalizedExtension : `.${normalizedExtension}`
+  })
+}
+
+function fileTypeDescription (file) {
+  if (file.type) {
+    return file.type
+  }
+
+  const extension = fileExtension(file)
+  return extension || 'unknown file type'
+}
+
+export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => {}, {
+  acceptedFileDescription = 'a supported file',
+  acceptedFileExtensions = [],
+  onReject = () => {},
+} = {}) {
+  const extensions = normalizedFileExtensions(acceptedFileExtensions)
+
+  function rejectDrop (code, message, file) {
+    onReject({
+      code,
+      file,
+      message,
+    })
+  }
+
+  function isAcceptedFile (file) {
+    fileTypePattern.lastIndex = 0
+    if (file.type && fileTypePattern.test(file.type)) {
+      return true
+    }
+
+    const extension = fileExtension(file)
+    return !!extension && extensions.includes(extension)
+  }
+
   function drop (event) {
     event.stopPropagation()
     event.preventDefault()
 
-    const files = event.dataTransfer.files
-    if (files.length) {
-      const file = files[0]
-      if (fileTypePattern.test(file.type)) {
-        const reader = new FileReader()
-        const onLoaded = event => {
-          try {
-            const result = JSON.parse(event.target.result)
-
-            onDrop(JSON.stringify(result, null, '  '))
-          } catch (err) { /* ignore error */ }
-        }
-        reader.onloadend = onLoaded
-        reader.readAsText(file)
-      }
+    const files = event.dataTransfer?.files ?? []
+    if (!files.length) {
+      rejectDrop('missing-file', `Drop ${acceptedFileDescription} to import its contents.`)
+      return
     }
+
+    if (files.length > 1) {
+      rejectDrop('too-many-files', `Drop only one file at a time. Expected ${acceptedFileDescription}.`)
+      return
+    }
+
+    const file = files[0]
+    if (!isAcceptedFile(file)) {
+      rejectDrop(
+        'unsupported-file-type',
+        `File "${file.name}" was rejected. Expected ${acceptedFileDescription}, but received ${fileTypeDescription(file)}.`,
+        file,
+      )
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = event => {
+      onDrop(event.target.result)
+    }
+    reader.onerror = () => {
+      rejectDrop('read-error', `Could not read file "${file.name}".`, file)
+    }
+    reader.readAsText(file)
   }
 
   function dragOver (event) {
@@ -81,9 +143,14 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = () => 
     event.dataTransfer.dropEffect = 'copy'
   }
 
-  const textarea = textField.$refs['input-slot']
-  textarea.addEventListener('dragover', dragOver, false)
-  textarea.addEventListener('drop', drop, false)
+  const field = textField.$el
+  field.addEventListener('dragover', dragOver, false)
+  field.addEventListener('drop', drop, false)
+
+  return () => {
+    field.removeEventListener('dragover', dragOver, false)
+    field.removeEventListener('drop', drop, false)
+  }
 }
 
 export function getErrorMessages (property) {
@@ -507,7 +574,7 @@ export function transformHtml (html, transformToExternalLinks = true) {
   const linkElements = documentFragment.querySelectorAll('a')
   linkElements.forEach(linkElement => {
     if (transformToExternalLinks) {
-      linkElement.classList.add('text-anchor', 'text-decoration-none')
+      linkElement.classList.add('text-anchor', 'text-decoration-none', 'text-no-wrap')
       linkElement.setAttribute('target', '_blank')
       linkElement.setAttribute('rel', 'noopener')
       const linkText = linkElement.innerHTML

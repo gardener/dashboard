@@ -13,6 +13,10 @@ import {
   inject,
   provide,
 } from 'vue'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
 
 import { useAuthzStore } from '@/store/authz'
 
@@ -24,12 +28,54 @@ import {
   decodeBase64,
   encodeBase64,
 } from '@/utils'
+import {
+  isStructuredFieldType,
+  isYamlFieldType,
+} from '@/utils/inputFieldTypes'
 
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 import mapValues from 'lodash/mapValues'
+
+function fieldByKey (fields = []) {
+  return Object.fromEntries(
+    fields.map(field => [field.key, field]),
+  )
+}
+
+function parseSecretStringDataValueForField (value, field) {
+  if (!isStructuredFieldType(field?.type) || typeof value !== 'string' || !value) {
+    return value
+  }
+
+  try {
+    const parsed = isYamlFieldType(field.type)
+      ? yamlLoad(value)
+      : JSON.parse(value)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed
+    }
+  } catch (err) {
+    // Keep the raw string so the structured input can show and validate it.
+  }
+
+  return value
+}
+
+function encodeSecretStringDataValueForField (value, field) {
+  if (value == null || (value === '' && field?.omitWhenEmpty)) {
+    return undefined
+  }
+  if (typeof value === 'string') {
+    return encodeBase64(value)
+  }
+  if (isYamlFieldType(field?.type)) {
+    return encodeBase64(yamlDump(value))
+  }
+  return encodeBase64(JSON.stringify(value))
+}
 
 export function createSecretContextComposable (options = {}) {
   const {
@@ -110,17 +156,36 @@ export function createSecretContextComposable (options = {}) {
   const secretStringData = computed({
     get () {
       return mapValues(secretData.value, v => {
-        return v ? decodeBase64(v) : undefined
+        if (v == null) {
+          return undefined
+        }
+        return decodeBase64(v)
       })
     },
     set (value) {
       secretData.value = value && typeof value === 'object'
         ? mapValues(value, v => {
-          return v ? encodeBase64(v) : undefined
+          return encodeSecretStringDataValueForField(v)
         })
         : undefined
     },
   })
+
+  function secretStringDataForFields (fields) {
+    const fieldsByKey = fieldByKey(fields)
+    return mapValues(secretStringData.value, (value, key) => {
+      return parseSecretStringDataValueForField(value, get(fieldsByKey, [key]))
+    })
+  }
+
+  function setSecretStringDataForFields (fields, value) {
+    const fieldsByKey = fieldByKey(fields)
+    secretData.value = value && typeof value === 'object'
+      ? mapValues(value, (v, key) => {
+        return encodeSecretStringDataValueForField(v, get(fieldsByKey, [key]))
+      })
+      : undefined
+  }
 
   /**
    * Creates a set of refs for string-based secret data fields. Each key in
@@ -170,6 +235,8 @@ export function createSecretContextComposable (options = {}) {
     secretNamespace,
     secretData,
     secretStringData,
+    secretStringDataForFields,
+    setSecretStringDataForFields,
     secretStringDataRefs,
     dnsSecretProviderType,
   }

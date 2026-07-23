@@ -1,25 +1,25 @@
 import awsRoute53 from './aws-route53'
+import alicloudDns from './alicloud-dns'
 import azureDns from './azure-dns'
 import azurePrivateDns from './azure-private-dns'
-import googleCloudDns from './google-clouddns'
-import openstackDesignate from './openstack-designate'
-import alicloudDns from './alicloud-dns'
 import cloudflareDns from './cloudflare'
-import infobloxDns from './infoblox'
-import netlifyDns from './netlify'
-import powerdns from './powerdns'
 import rfc2136 from './rfc2136'
+import googleCloudDns from './google-clouddns'
+import infoblox from './infoblox'
+import netlify from './netlify'
+import powerdns from './powerdns'
+import openstackDesignate from './openstack-designate'
 
 export default [
   awsRoute53,
+  alicloudDns,
   azureDns,
   azurePrivateDns,
-  googleCloudDns,
-  openstackDesignate,
-  alicloudDns,
   cloudflareDns,
-  infobloxDns,
-  netlifyDns,
-  powerdns,
   rfc2136,
+  googleCloudDns,
+  infoblox,
+  netlify,
+  powerdns,
+  openstackDesignate,
 ]

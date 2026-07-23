@@ -1,6 +1,6 @@
 export default {
-  name: 'onMetal',
+  name: 'onmetal',
   displayName: 'OnMetal',
-  weight: 900,
+  weight: 901,
   icon: 'onmetal.svg',
 }

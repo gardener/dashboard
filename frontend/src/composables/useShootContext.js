@@ -379,12 +379,22 @@ export function createShootContextComposable (options = {}) {
     },
   })
 
+  const providerVendor = computed(() => {
+    if (!providerType.value) {
+      return undefined
+    }
+    return configStore.vendorDetails({
+      type: 'infra',
+      name: providerType.value,
+    })
+  })
+
   function applySpecTemplate (cloudProfileRef) {
     const {
       kubernetes,
       networking,
       provider,
-    } = getSpecTemplate(providerType.value, defaultNodesCIDR.value)
+    } = getSpecTemplate(providerType.value, defaultNodesCIDR.value, providerVendor.value)
     set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
@@ -396,14 +406,14 @@ export function createShootContextComposable (options = {}) {
       const value = get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'])
       return getControlPlaneZone(
         providerWorkers.value,
-        providerType.value,
+        providerVendor.value,
         value,
       )
     },
     set (value) {
       value = getControlPlaneZone(
         providerWorkers.value,
-        providerType.value,
+        providerVendor.value,
         value,
       )
       if (value) {
@@ -608,9 +618,9 @@ export function createShootContextComposable (options = {}) {
       return getZonesNetworkConfiguration(
         value,
         providerWorkers.value,
-        providerType.value,
         size(allZones.value),
         ...args,
+        providerVendor.value,
       )
     },
     set (value) {
@@ -631,16 +641,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   const isZonedCluster = computed(() => {
-    switch (providerType.value) {
-      case 'azure':
-        if (isNewCluster.value) {
-          return true // new clusters are always created as zoned clusters by the dashboard
-        }
+    switch (providerVendor.value?.shoot?.zones?.mode) {
+      case 'infrastructure-config-zoned':
         return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
-      case 'metal':
-        return false // metal clusters do not support zones for worker groups
-      case 'local':
-        return false // local development provider does not support zones
+      case 'never':
+        return false
+      case 'always':
       default:
         return true
     }
@@ -671,8 +677,8 @@ export function createShootContextComposable (options = {}) {
     return findFreeNetworks(
       providerInfrastructureConfigNetworksZones.value,
       networkingNodes.value ?? defaultNodesCIDR.value,
-      providerType.value,
       size(allZones.value),
+      providerVendor.value,
     )
   })
 

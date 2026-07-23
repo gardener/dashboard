@@ -31,26 +31,28 @@ SPDX-License-Identifier: Apache-2.0
             ref="secretDetails"
             class="d-flex flex-column flex-grow-1"
           >
-            <div>
-              <template v-if="isCreateMode">
-                <v-text-field
-                  ref="name"
-                  v-model.trim="name"
-                  color="primary"
-                  label="Secret Name"
-                  :error-messages="getErrorMessages(v$.name)"
-                  variant="underlined"
-                  @update:model-value="v$.name.$touch()"
-                  @blur="v$.name.$touch()"
-                />
-              </template>
-              <template v-else>
-                <div class="text-title-large pb-4">
-                  {{ resourceName }} ({{ resourceKind }})
-                </div>
-              </template>
-            </div>
-            <slot name="secret-slot" />
+            <form @submit.prevent="submit">
+              <div>
+                <template v-if="isCreateMode">
+                  <v-text-field
+                    ref="name"
+                    v-model.trim="name"
+                    color="primary"
+                    label="Secret Name"
+                    :error-messages="getErrorMessages(v$.name)"
+                    variant="underlined"
+                    @update:model-value="v$.name.$touch()"
+                    @blur="v$.name.$touch()"
+                  />
+                </template>
+                <template v-else>
+                  <div class="text-title-large pb-4">
+                    {{ resourceName }} ({{ resourceKind }})
+                  </div>
+                </template>
+              </div>
+              <slot name="secret-slot" />
+            </form>
             <g-message
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"
@@ -138,7 +140,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapActions,
   mapState,
-  storeToRefs,
 } from 'pinia'
 import { useVuelidate } from '@vuelidate/core'
 import {
@@ -151,7 +152,6 @@ import {
 } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
-import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useShootStore } from '@/store/shoot'
 import { useConfigStore } from '@/store/config'
 
@@ -166,6 +166,7 @@ import { useCloudProviderBinding } from '@/composables/credential/useCloudProvid
 import { useDnsProviderCredential } from '@/composables/credential/useDnsProviderCredential'
 
 import {
+  withMessage,
   messageFromErrors,
   withFieldName,
   unique,
@@ -221,11 +222,8 @@ export default {
     'update:modelValue',
   ],
   setup (props) {
-    const { credential, binding, providerType } = toRefs(props)
-    const gardenerExtensionStore = useGardenerExtensionStore()
-    const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-
-    const isDnsProvider = computed(() => dnsProviderTypes.value.includes(providerType.value))
+    const { credential, binding, vendorType } = toRefs(props)
+    const isDnsProvider = computed(() => vendorType.value === 'dns')
 
     let credentialComposable = {}
 
@@ -248,7 +246,7 @@ export default {
     let bindingContext = {}
     if (!isDnsProvider.value) {
       const { isSecretBinding } = credentialComposable
-      if (isSecretBinding) {
+      if (isSecretBinding?.value) {
         // Legacy SecretBinding for existing SecrertBindings
         bindingContext = useSecretBindingContext()
       } else {
@@ -314,14 +312,13 @@ export default {
       maxLength: maxLength(128),
       lowerCaseAlphaNumHyphen,
       noStartEndHyphen,
-      unique: unique('credentialNames'),
+      unique: withMessage('Secret name must be unique', unique('credentialNames')),
     }
     rules.name = withFieldName('Secret Name', nameRules)
 
     return rules
   },
   computed: {
-    ...mapState(useGardenerExtensionStore, ['dnsProviderTypes']),
     ...mapState(useShootStore, ['shootList']),
     ...mapState(useCredentialStore, [
       'infrastructureBindingList',
