@@ -385,6 +385,10 @@ describe('utils', () => {
     })
   })
   describe('randomMaintenanceBegin', () => {
+    it('should use the safe default hours for an explicitly empty list', () => {
+      expect(['22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00']).toContain(randomMaintenanceBegin([]))
+    })
+
     it('should select and format a configured hour', () => {
       expect(randomMaintenanceBegin(['12'])).toBe('12:00')
     })
