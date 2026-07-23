@@ -193,7 +193,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
     }
     return selfTerminationDays.value
       ? ['evaluation']
-      : ['evaluation', 'development', 'testing', 'production']
+      : configStore.defaultPurposes
   })
 
   const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
@@ -212,7 +212,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   const volumeTypes = useFilteredVolumeTypes(region)
 
   const networkingTypes = computed(() => {
-    return gardenerExtensionStore.networkingTypes
+    return gardenerExtensionStore.sortedNetworkingTypes
   })
 
   const showAllRegions = computed(() => {

@@ -55,6 +55,10 @@ import {
   convertToGi,
   defaultCriNameByKubernetesVersion,
 } from '@/utils'
+import {
+  bestMatchForString,
+  wildcardObjectsFromStrings,
+} from '@/utils/wildcard'
 
 import { useShootDns } from './useShootDns'
 import {
@@ -178,9 +182,10 @@ export function createShootContextComposable (options = {}) {
       },
     }
     hibernationSchedules.value = []
-    workerless.value = get(options, ['workerless'], false)
+    workerless.value = get(options, ['workerless'], configStore.defaultWorkerlessCluster)
     const defaultProviderType = head(cloudProfileStore.sortedInfraProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
+    resetControlPlaneHighAvailability()
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
     initialManifest.value = cloneDeep(normalizedManifest.value)
@@ -311,7 +316,7 @@ export function createShootContextComposable (options = {}) {
 
   function resetNetworkingType () {
     if (!networkingType.value) {
-      networkingType.value = head(gardenerExtensionStore.networkingTypes)
+      networkingType.value = head(gardenerExtensionStore.sortedNetworkingTypes)
     }
   }
 
@@ -365,7 +370,7 @@ export function createShootContextComposable (options = {}) {
 
   /* provider */
   const providerState = reactive({
-    workerless: false,
+    workerless: configStore.defaultWorkerlessCluster,
   })
 
   const providerType = computed({
@@ -424,7 +429,10 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderControlPlaneConfigLoadBalancerProviderName () {
-    providerControlPlaneConfigLoadBalancerProviderName.value = head(allLoadBalancerProviderNames.value)
+    const configuredDefault = configStore.defaultLoadBalancerProvider
+    providerControlPlaneConfigLoadBalancerProviderName.value = includes(allLoadBalancerProviderNames.value, configuredDefault)
+      ? configuredDefault
+      : head(allLoadBalancerProviderNames.value)
   }
 
   const providerControlPlaneConfigLoadBalancerClassNames = computed({
@@ -492,7 +500,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFloatingPoolName () {
-    providerInfrastructureConfigFloatingPoolName.value = head(allFloatingPoolNames.value)
+    const configuredDefault = configStore.defaultFloatingPool
+    const floatingPoolPatterns = wildcardObjectsFromStrings(allFloatingPoolNames.value)
+    const configuredDefaultMatches = configuredDefault && bestMatchForString(floatingPoolPatterns, configuredDefault)
+    providerInfrastructureConfigFloatingPoolName.value = configuredDefaultMatches
+      ? configuredDefault
+      : head(allFloatingPoolNames.value)
   }
 
   const providerInfrastructureConfigFirewallImage = computed({
@@ -748,8 +761,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetMaintenanceTimeWindow () {
-    const maintenanceBegin = randomMaintenanceBegin()
-    const timeWindow = maintenanceWindowWithBeginAndTimezone(maintenanceBegin, appStore.timezone)
+    const maintenanceBegin = randomMaintenanceBegin(configStore.defaultMaintenanceHours)
+    const timeWindow = maintenanceWindowWithBeginAndTimezone(
+      maintenanceBegin,
+      appStore.timezone,
+      configStore.defaultMaintenanceWindowSizeMinutes,
+    )
     maintenanceTimeWindowBegin.value = timeWindow.begin
     maintenanceTimeWindowEnd.value = timeWindow.end
   }
@@ -757,7 +774,7 @@ export function createShootContextComposable (options = {}) {
   /* maintenanceAutoUpdateKubernetesVersion */
   const maintenanceAutoUpdateKubernetesVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], configStore.defaultAutoUpdateKubernetes)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'kubernetesVersion'], value)
@@ -766,7 +783,7 @@ export function createShootContextComposable (options = {}) {
 
   const maintenanceAutoUpdateMachineImageVersion = computed({
     get () {
-      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], true)
+      return get(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], configStore.defaultAutoUpdateOS)
     },
     set (value) {
       set(manifest.value, ['spec', 'maintenance', 'autoUpdate', 'machineImageVersion'], value)
@@ -774,8 +791,8 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetMaintenanceAutoUpdate () {
-    maintenanceAutoUpdateKubernetesVersion.value = true
-    maintenanceAutoUpdateMachineImageVersion.value = true
+    maintenanceAutoUpdateKubernetesVersion.value = configStore.defaultAutoUpdateKubernetes
+    maintenanceAutoUpdateMachineImageVersion.value = configStore.defaultAutoUpdateOS
   }
 
   /* hibernation */
@@ -886,6 +903,10 @@ export function createShootContextComposable (options = {}) {
       }
     },
   })
+
+  function resetControlPlaneHighAvailability () {
+    controlPlaneHighAvailability.value = configStore.defaultControlPlaneHighAvailability
+  }
 
   /* dns */
   const {
@@ -1000,17 +1021,27 @@ export function createShootContextComposable (options = {}) {
     const id = uuidv4()
     const name = `worker-${shortRandomString(5)}`
     const criNames = map(machineImage.value?.cri, 'name')
-    const criName = defaultCriNameByKubernetesVersion(criNames, kubernetesVersion.value)
+    const configuredContainerRuntime = configStore.defaultContainerRuntime
+    const criName = includes(criNames, configuredContainerRuntime)
+      ? configuredContainerRuntime
+      : defaultCriNameByKubernetesVersion(criNames, kubernetesVersion.value)
 
-    const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
+    let zones
+    if (!isEmpty(availableZones)) {
+      zones = configStore.defaultZonesSelectAll
+        ? [...availableZones]
+        : [sample(availableZones)]
+    }
+    const minimum = configStore.defaultAutoscalerMin
+    const maximum = Math.max(configStore.defaultAutoscalerMax, minimum, size(zones))
 
     const defaultVolumeSize = convertToGi(minVolumeSize.value) <= convertToGi('50Gi') ? '50Gi' : minVolumeSize.value
     const worker = {
       id,
       name,
-      minimum: 1,
-      maximum: 2,
-      maxSurge: 1,
+      minimum,
+      maximum,
+      maxSurge: configStore.defaultMaxSurge,
       machine: {
         type: machineType.value.name,
         image: pick(machineImage.value, ['name', 'version']),

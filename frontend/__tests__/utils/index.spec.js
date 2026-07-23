@@ -11,6 +11,7 @@ import {
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
   getIssueSince,
+  randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
   getTimeStringTo,
@@ -381,6 +382,11 @@ describe('utils', () => {
 
     it('should return issue since for allIssues', () => {
       expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
+    })
+  })
+  describe('randomMaintenanceBegin', () => {
+    it('should select and format a configured hour', () => {
+      expect(randomMaintenanceBegin(['12'])).toBe('12:00')
     })
   })
   describe('maintenanceWindowWithBeginAndTimezone', () => {

@@ -245,6 +245,14 @@ data:
       defaultHibernationSchedule:
 {{ toYaml .Values.global.dashboard.frontendConfig.defaultHibernationSchedule | trim | nindent 8 }}
       {{- end }}
+      {{- $shootDefaults := default (dict) .Values.global.dashboard.frontendConfig.shootDefaults }}
+      {{- with get $shootDefaults "controlPlaneHighAvailabilityHelp" }}
+      {{- $_ := required ".Values.global.dashboard.frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text is required" .text }}
+      {{- end }}
+      {{- with $shootDefaults }}
+      shootDefaults:
+{{ toYaml . | trim | nindent 8 }}
+      {{- end }}
       {{- if .Values.global.dashboard.frontendConfig.shootAdminKubeconfig }}
       shootAdminKubeconfig:
 {{ toYaml .Values.global.dashboard.frontendConfig.shootAdminKubeconfig | trim | nindent 8 }}

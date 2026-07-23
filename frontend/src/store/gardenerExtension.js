@@ -80,8 +80,15 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     return map(networkingResources, 'type')
   })
 
-  const networkingTypeList = computed(() => {
-    return sortBy(networkingTypes.value)
+  const sortedNetworkingTypes = computed(() => {
+    const types = sortBy(networkingTypes.value)
+
+    if (types.includes(configStore.defaultNetworkingType)) {
+      const filtered = types.filter(type => type !== configStore.defaultNetworkingType)
+      return [configStore.defaultNetworkingType, ...filtered]
+    }
+
+    return types
   })
 
   return {
@@ -93,7 +100,7 @@ export const useGardenerExtensionStore = defineStore('gardenerExtension', () => 
     dnsProviderTypesWithPrimarySupport,
     hasDnsServiceExtension,
     networkingTypes,
-    networkingTypeList,
+    sortedNetworkingTypes,
   }
 })
 

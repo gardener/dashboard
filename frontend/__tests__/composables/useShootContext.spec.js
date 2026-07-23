@@ -16,6 +16,7 @@ import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
+import { useSeedStore } from '@/store/seed'
 
 import { createShootContextComposable } from '@/composables/useShootContext'
 
@@ -23,6 +24,8 @@ import cloneDeep from 'lodash/cloneDeep'
 
 describe('composables', () => {
   let shootContextStore
+  let configStore
+  let seedStore
 
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
 
@@ -42,7 +45,7 @@ describe('composables', () => {
     appStore.timezone = '+01:00'
     const authzStore = useAuthzStore()
     authzStore._setNamespace('garden-test')
-    const configStore = useConfigStore()
+    configStore = useConfigStore()
     configStore.setConfiguration(global.fixtures.config)
     const credentialStore = useCredentialStore()
     credentialStore._setCredentials(global.fixtures.credentials)
@@ -50,6 +53,7 @@ describe('composables', () => {
     cloudProfileStore.setCloudProfiles(cloneDeep(global.fixtures.cloudprofiles))
     const gardenerExtensionStore = useGardenerExtensionStore()
     gardenerExtensionStore.list = global.fixtures.gardenerExtensions
+    seedStore = useSeedStore()
     const composable = createShootContextComposable({
       logger,
       appStore,
@@ -58,9 +62,17 @@ describe('composables', () => {
       configStore,
       gardenerExtensionStore,
       credentialStore,
+      seedStore,
     })
     shootContextStore = reactive(composable)
   })
+
+  function setShootDefaults (shootDefaults) {
+    configStore.setConfiguration({
+      ...cloneDeep(global.fixtures.config),
+      shootDefaults,
+    })
+  }
 
   function createShootManifest (providerType) {
     shootContextStore.createShootManifest({
@@ -143,6 +155,134 @@ describe('composables', () => {
 
     it('should create a default "ironcore" shoot manifest', async () => {
       expect(createShootManifest('ironcore')).toMatchSnapshot()
+    })
+
+    it('should not mutate high availability state when reading or disabling it', () => {
+      createShootManifest('aws')
+
+      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
+      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
+      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
+      expect(shootContextStore.isShootDirty).toBe(false)
+
+      shootContextStore.controlPlaneHighAvailability = true
+      expect(shootContextStore.controlPlaneHighAvailabilityFailureToleranceType).toBe('node')
+
+      shootContextStore.controlPlaneHighAvailability = false
+      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
+      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
+    })
+
+    it('should apply a zone high availability default only when creating a shoot', () => {
+      seedStore.list = [{
+        metadata: {
+          name: 'aws-seed',
+        },
+        spec: {
+          provider: {
+            type: 'aws',
+            zones: ['zone-a', 'zone-b', 'zone-c'],
+          },
+          settings: {
+            scheduling: {
+              visible: true,
+            },
+          },
+        },
+      }]
+      setShootDefaults({
+        controlPlaneHighAvailability: true,
+      })
+
+      shootContextStore.createShootManifest({
+        providerType: 'aws',
+        workerless: false,
+      })
+
+      expect(shootContextStore.isFailureToleranceTypeZoneSupported).toBe(true)
+      expect(shootContextStore.controlPlaneHighAvailabilityFailureToleranceType).toBe('zone')
+      expect(shootContextStore.controlPlaneHighAvailability).toBe(true)
+      expect(shootContextStore.isShootDirty).toBe(false)
+
+      const existingShoot = cloneDeep(shootContextStore.shootManifest)
+      existingShoot.metadata.creationTimestamp = '2024-03-01T12:00:00Z'
+      delete existingShoot.spec.controlPlane
+      shootContextStore.setShootManifest(existingShoot)
+
+      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
+      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
+    })
+
+    it('should honor an explicit workerless option over the configured default', () => {
+      setShootDefaults({
+        workerlessCluster: true,
+      })
+
+      shootContextStore.createShootManifest({
+        providerType: 'aws',
+        workerless: false,
+      })
+
+      expect(shootContextStore.workerless).toBe(false)
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+    })
+
+    it('should apply networking, worker, and maintenance defaults', () => {
+      setShootDefaults({
+        networkingType: 'cilium',
+        autoscalerMin: 3,
+        autoscalerMax: 2,
+        maxSurge: '30%',
+        zonesSelectAll: true,
+        containerRuntime: 'unsupported',
+        maintenanceHours: ['12'],
+        maintenanceWindowSizeMinutes: 120,
+        autoUpdateOS: false,
+        autoUpdateKubernetes: false,
+      })
+
+      const shootManifest = createShootManifest('aws')
+      const worker = shootContextStore.providerWorkers[0]
+
+      expect(shootContextStore.networkingTypes).toEqual(['cilium', 'calico'])
+      expect(shootManifest.spec.networking.type).toBe('cilium')
+      expect(worker.minimum).toBe(3)
+      expect(worker.maximum).toBe(Math.max(3, shootContextStore.allZones.length))
+      expect(worker.maxSurge).toBe('30%')
+      expect(worker.zones).toEqual(shootContextStore.allZones)
+      expect(worker.cri.name).toBe('containerd')
+      expect(shootManifest.spec.maintenance).toEqual({
+        autoUpdate: {
+          kubernetesVersion: false,
+          machineImageVersion: false,
+        },
+        timeWindow: {
+          begin: '120000+0100',
+          end: '140000+0100',
+        },
+      })
+    })
+
+    it('should use a configured container runtime when the machine image supports it', () => {
+      setShootDefaults({
+        containerRuntime: 'docker',
+      })
+
+      createShootManifest('ironcore')
+
+      expect(shootContextStore.providerWorkers[0].cri.name).toBe('docker')
+    })
+
+    it('should apply concrete defaults that match wildcard infrastructure constraints', () => {
+      setShootDefaults({
+        floatingPool: 'FloatingIP-external',
+        loadBalancerProvider: 'f5',
+      })
+
+      const shootManifest = createShootManifest('openstack')
+
+      expect(shootManifest.spec.provider.infrastructureConfig.floatingPoolName).toBe('FloatingIP-external')
+      expect(shootManifest.spec.provider.controlPlaneConfig.loadBalancerProvider).toBe('f5')
     })
 
     it('should change the infrastructure kind', async () => {

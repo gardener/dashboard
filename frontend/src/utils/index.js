@@ -518,9 +518,10 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
-export function randomMaintenanceBegin () {
+const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
+
+export function randomMaintenanceBegin (hours = defaultMaintenanceHours) {
   // randomize maintenance time window
-  const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
   const randomHour = sample(hours)
   return `${randomHour}:00`
 }

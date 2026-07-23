@@ -804,8 +804,10 @@ describe('gardener-dashboard', function () {
           global: {
             dashboard: {
               frontendConfig: {
-                controlPlaneHighAvailabilityHelp: {
-                  text: '[foo](https://bar.baz)',
+                shootDefaults: {
+                  controlPlaneHighAvailabilityHelp: {
+                    text: '[foo](https://bar.baz)',
+                  },
                 },
               },
             },
@@ -815,7 +817,107 @@ describe('gardener-dashboard', function () {
         expect(documents).toHaveLength(1)
         const [configMap] = documents
         const config = yamlLoad(configMap.data['config.yaml'])
-        expect(pick(config, ['frontend.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
+        expect(pick(config, ['frontend.shootDefaults.controlPlaneHighAvailabilityHelp'])).toMatchSnapshot()
+      })
+
+      it('should require help text when the help configuration is present', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootDefaults: {
+                  controlPlaneHighAvailabilityHelp: {
+                    title: 'Missing text',
+                  },
+                },
+              },
+            },
+          },
+        }
+
+        await expect(renderTemplates(templates, values)).rejects.toThrow('controlPlaneHighAvailabilityHelp.text is required')
+      })
+    })
+
+    describe('shootDefaults', function () {
+      it('should preserve all configured values including false and zero', async function () {
+        const shootDefaults = {
+          hibernationSchedule: {
+            evaluation: [{
+              start: '00 20 * * 1,2,3,4,5',
+            }],
+            development: [{
+              start: '00 21 * * 1,2,3,4,5',
+              end: '00 07 * * 1,2,3,4,5',
+            }],
+            production: [],
+          },
+          nodesCIDR: '10.42.0.0/16',
+          purposes: ['evaluation', 'development', 'production'],
+          workerlessCluster: false,
+          networkingType: 'cilium',
+          floatingPool: 'FloatingIP-external',
+          loadBalancerProvider: 'f5',
+          controlPlaneHighAvailability: false,
+          containerRuntime: 'containerd',
+          autoscalerMin: 0,
+          autoscalerMax: 0,
+          maxSurge: '30%',
+          zonesSelectAll: false,
+          maintenanceHours: ['00'],
+          maintenanceWindowSizeMinutes: 0,
+          autoUpdateOS: false,
+          autoUpdateKubernetes: false,
+        }
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootDefaults,
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config.frontend.shootDefaults).toEqual(shootDefaults)
+      })
+
+      it('should render legacy shoot defaults unchanged', async function () {
+        const values = {
+          global: {
+            dashboard: {
+              frontendConfig: {
+                shootDefaults: null,
+                defaultHibernationSchedule: {
+                  evaluation: [{
+                    start: '00 20 * * 1,2,3,4,5',
+                  }],
+                },
+                defaultNodesCIDR: '10.84.0.0/16',
+                controlPlaneHighAvailabilityHelp: {
+                  text: 'Legacy help',
+                },
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config.frontend.defaultHibernationSchedule.evaluation).toEqual([{
+          start: '00 20 * * 1,2,3,4,5',
+        }])
+        expect(config.frontend.defaultNodesCIDR).toBe('10.84.0.0/16')
+        expect(config.frontend.controlPlaneHighAvailabilityHelp).toEqual({
+          text: 'Legacy help',
+        })
+        expect(config.frontend.shootDefaults).toBeUndefined()
       })
     })
 
