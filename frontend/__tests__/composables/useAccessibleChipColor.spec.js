@@ -52,6 +52,7 @@ describe('composables', () => {
         expect(wcagContrast(background, '#ffffff')).toBeLessThan(4.5)
 
         const result = pickAccessibleChipColors(background)
+        expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.background).not.toBe(background)
         expect(result.textColor).toBe('#ffffff')
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
@@ -60,6 +61,7 @@ describe('composables', () => {
       it('should darken a light pastel to keep white text', () => {
         const background = '#FFCDD2'
         const result = pickAccessibleChipColors(background)
+        expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.background).not.toBe(background)
         expect(result.textColor).toBe('#ffffff')
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)

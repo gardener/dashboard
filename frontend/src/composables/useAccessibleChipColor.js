@@ -12,6 +12,7 @@ import {
 import { useTheme } from 'vuetify'
 import {
   converter,
+  formatHex,
   toGamut,
   wcagContrast,
 } from 'culori'
@@ -37,18 +38,31 @@ function meetsContrast (background, textColor, targetContrast) {
   }
 }
 
-function findLightnessCandidate (original, textColor, targetLightness, targetContrast) {
+/**
+ * Adjusts OKLCH lightness of `originalColor` toward `targetLightness` until contrast
+ * with `textColor` meets `targetContrast`. Returns the closest passing hex color, or null.
+ *
+ * Contrast is checked on the hex-quantized candidate so 8-bit rounding cannot drop a
+ * barely-passing float color below the threshold.
+ *
+ * @param {object} originalColor Culori OKLCH color object (not a hex string)
+ * @param {string} textColor Hex color used as the contrast partner (e.g. `#ffffff`)
+ * @param {number} targetLightness Unitless OKLCH lightness (0 = black, 1 = white)
+ * @param {number} targetContrast Minimum WCAG contrast ratio (4.5 = AA, 7 = AAA)
+ * @returns {string|null} Hex color (e.g. `#831723`), or null
+ */
+function adjustLightnessForContrast (originalColor, textColor, targetLightness, targetContrast) {
   let failing = 0
   let passing = 1
   let result = null
 
   for (let i = 0; i < 30; i++) {
     const position = (failing + passing) / 2
-    const lightness = original.l + (targetLightness - original.l) * position
-    const candidate = toSrgbGamut({ ...original, l: lightness })
+    const lightness = originalColor.l + (targetLightness - originalColor.l) * position
+    const candidateHex = formatHex(toSrgbGamut({ ...originalColor, l: lightness }))
 
-    if (meetsContrast(candidate, textColor, targetContrast)) {
-      result = candidate
+    if (candidateHex && meetsContrast(candidateHex, textColor, targetContrast)) {
+      result = candidateHex
       passing = position
     } else {
       failing = position
@@ -58,6 +72,15 @@ function findLightnessCandidate (original, textColor, targetLightness, targetCon
   return result
 }
 
+/**
+ * Chooses a readable text/background pair for a flat-style chip.
+ * Prefers white text (darkening the background if needed) so flat chips stay
+ * visually “filled”.
+ * Uses black text only when white cannot meet the WCAG AA contrast standard.
+ *
+ * @returns {{ background: string, textColor: string }|undefined}
+ *   `background` and `textColor` are hex strings when colors are valid.
+ */
 export function pickAccessibleChipColors (background, targetContrast = 4.5) {
   if (!background) {
     return undefined
@@ -72,18 +95,18 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
     return { background, textColor: WHITE }
   }
 
-  const darkerForWhite = findLightnessCandidate(original, WHITE, 0, targetContrast)
-  if (darkerForWhite) {
-    return { background: darkerForWhite, textColor: WHITE }
+  const backgroundForWhiteText = adjustLightnessForContrast(original, WHITE, 0, targetContrast)
+  if (backgroundForWhiteText) {
+    return { background: backgroundForWhiteText, textColor: WHITE }
   }
 
   if (meetsContrast(background, BLACK, targetContrast)) {
     return { background, textColor: BLACK }
   }
 
-  const lighterForBlack = findLightnessCandidate(original, BLACK, 1, targetContrast)
-  if (lighterForBlack) {
-    return { background: lighterForBlack, textColor: BLACK }
+  const backgroundForBlackText = adjustLightnessForContrast(original, BLACK, 1, targetContrast)
+  if (backgroundForBlackText) {
+    return { background: backgroundForBlackText, textColor: BLACK }
   }
 
   try {
@@ -96,6 +119,9 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
   }
 }
 
+/** Format a color for Vuetify theme CSS variables (`rgb(var(--v-theme-…))`).
+ * Expects the color as hex string, e.g. `#ff0000`.
+ */
 export function colorToVuetifyRgb (color) {
   try {
     const rgb = toSrgbGamut(toOklch(color))
@@ -143,10 +169,12 @@ function createErrorChipCssVars (theme) {
 }
 
 /**
- * Computes accessible error-chip colors and syncs them to document CSS variables.
- * Call once from the app root. Status chips opt in with class {@link ERROR_CHIP_CLASS}.
+ * Ensure error status chips are readable without changing the global theme `error` color
+ * (which would affect buttons, alerts, charts, etc.).
  *
- * Pass an explicit `theme` to compute without syncing (tests).
+ * Computes an accessible pair of bg and text colors from the current theme and exposes it as CSS
+ * custom properties.
+ *
  */
 export function useAccessibleErrorChipColors (theme) {
   if (theme) {
@@ -166,6 +194,7 @@ export function useAccessibleErrorChipColors (theme) {
   return { errorChipCssVars: sharedErrorChipCssVars }
 }
 
+/** Util for resetting shared state between tests. */
 export function resetErrorChipColorCache () {
   sharedErrorChipScope?.stop()
   sharedErrorChipScope = undefined
