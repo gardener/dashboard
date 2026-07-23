@@ -8,36 +8,45 @@ import { ref } from 'vue'
 import { wcagContrast } from 'culori'
 
 import {
-  pickAccessibleBackgroundColor,
+  pickAccessibleChipColors,
   colorToVuetifyRgb,
   useErrorChipColor,
 } from '@/composables/useAccessibleChipColor'
 
 describe('composables', () => {
   describe('useAccessibleChipColor', () => {
-    describe('#pickAccessibleBackgroundColor', () => {
-      it('should return the original color when contrast already meets WCAG AA', () => {
+    describe('#pickAccessibleChipColors', () => {
+      it('should keep a dark background and use white text when contrast already passes', () => {
         const background = '#B71C1C'
-        expect(pickAccessibleBackgroundColor(background)).toBe(background)
+        const result = pickAccessibleChipColors(background)
+        expect(result.background).toBe(background)
+        expect(result.textColor).toBe('#ffffff')
+        expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
-      it('should darken a light pastel background for white text', () => {
+      it('should darken a mid-tone background to keep white text', () => {
+        const background = '#E57373'
+        expect(wcagContrast(background, '#ffffff')).toBeLessThan(4.5)
+
+        const result = pickAccessibleChipColors(background)
+        expect(result.background).not.toBe(background)
+        expect(result.textColor).toBe('#ffffff')
+        expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
+      })
+
+      it('should darken a light pastel to keep white text', () => {
         const background = '#FFCDD2'
-        const accessible = pickAccessibleBackgroundColor(background)
-        expect(accessible).not.toBe(background)
-        expect(wcagContrast(accessible, '#ffffff')).toBeGreaterThanOrEqual(4.5)
-      })
-
-      it('should lighten a dark background for dark text', () => {
-        const background = '#1B5E20'
-        const textColor = '#000000'
-        const accessible = pickAccessibleBackgroundColor(background, textColor)
-        expect(accessible).not.toBe(background)
-        expect(wcagContrast(accessible, textColor)).toBeGreaterThanOrEqual(4.5)
+        const result = pickAccessibleChipColors(background)
+        expect(result.background).not.toBe(background)
+        expect(result.textColor).toBe('#ffffff')
+        expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
       it('should fail open for invalid colors', () => {
-        expect(pickAccessibleBackgroundColor('not-a-color')).toBe('not-a-color')
+        expect(pickAccessibleChipColors('not-a-color')).toEqual({
+          background: 'not-a-color',
+          textColor: '#ffffff',
+        })
       })
     })
 
@@ -52,28 +61,18 @@ describe('composables', () => {
         }
       }
 
-      it('should return an accessible --v-theme-error override', () => {
+      it('should override error and on-error with white text on a darkened background', () => {
         const theme = createTheme({
-          error: '#FFCDD2',
-          'on-error': '#ffffff',
+          error: '#E57373',
         })
         const { errorChipStyle } = useErrorChipColor(theme)
-        const rgb = errorChipStyle.value['--v-theme-error']
-
-        expect(rgb).toMatch(/^\d{1,3}, \d{1,3}, \d{1,3}$/)
-        expect(rgb).not.toBe(colorToVuetifyRgb('#FFCDD2'))
-      })
-
-      it('should respect a custom on-error text color', () => {
-        const theme = createTheme({
-          error: '#FFCDD2',
-          'on-error': '#000000',
-        })
-        const { errorChipStyle } = useErrorChipColor(theme)
+        const accessible = pickAccessibleChipColors('#E57373')
 
         expect(errorChipStyle.value).toEqual({
-          '--v-theme-error': colorToVuetifyRgb('#FFCDD2'),
+          '--v-theme-error': colorToVuetifyRgb(accessible.background),
+          '--v-theme-on-error': colorToVuetifyRgb('#ffffff'),
         })
+        expect(errorChipStyle.value['--v-theme-error']).not.toBe(colorToVuetifyRgb('#E57373'))
       })
 
       it('should return undefined when the theme has no error color', () => {
@@ -83,16 +82,16 @@ describe('composables', () => {
 
       it('should recompute when the theme error color changes', () => {
         const theme = createTheme({
-          error: '#FFCDD2',
-          'on-error': '#ffffff',
+          error: '#E57373',
         })
         const { errorChipStyle } = useErrorChipColor(theme)
-        const initialRgb = errorChipStyle.value['--v-theme-error']
+        const initial = errorChipStyle.value['--v-theme-error']
 
         theme.current.value.colors.error = '#B71C1C'
 
         expect(errorChipStyle.value['--v-theme-error']).toBe(colorToVuetifyRgb('#B71C1C'))
-        expect(errorChipStyle.value['--v-theme-error']).not.toBe(initialRgb)
+        expect(errorChipStyle.value['--v-theme-on-error']).toBe(colorToVuetifyRgb('#ffffff'))
+        expect(errorChipStyle.value['--v-theme-error']).not.toBe(initial)
       })
     })
   })
