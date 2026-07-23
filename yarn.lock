@@ -791,7 +791,6 @@ __metadata:
     eslint-plugin-vue: "npm:^10.0.0"
     eventemitter3: "npm:^5.0.1"
     floating-vue: "npm:^5.2.2"
-    get-contrast: "npm:^3.0.0"
     highlight.js: "npm:^11.9.0"
     js-base64: "npm:^3.7.6"
     js-cookie: "npm:^3.0.5"
@@ -3699,29 +3698,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-color-list@npm:0.0.1":
-  version: 0.0.1
-  resolution: "css-color-list@npm:0.0.1"
-  dependencies:
-    css-color-names: "npm:0.0.1"
-  checksum: 10c0/f513cf3a60f655ba8163a9035b628a8a59f79c8dc85891ff428b0e164d9155168b02e811de7d387275cd4fb828225ab0bce7a7e649ec1d0a04128129e237ad35
-  languageName: node
-  linkType: hard
-
-"css-color-names@npm:0.0.1":
-  version: 0.0.1
-  resolution: "css-color-names@npm:0.0.1"
-  checksum: 10c0/127f9950c5960c159833331777ffd3fe0bb4bce6afc333d213b04fe5867dbabd0a9861c98f586532d73f7cd50704f9e5d8e75b24984c08411b6cca522b9d8cce
-  languageName: node
-  linkType: hard
-
-"css-color-names@npm:1.0.1":
-  version: 1.0.1
-  resolution: "css-color-names@npm:1.0.1"
-  checksum: 10c0/e2f486215994987e46e281490f08288dca45dd17b5e40ead80b60e143e312f06ccd5122e009e740108883f6eb0984a61e926a4ad4e0c1e7d2e8e932dc9073df5
-  languageName: node
-  linkType: hard
-
 "cssesc@npm:^3.0.0":
   version: 3.0.0
   resolution: "cssesc@npm:3.0.0"
@@ -4829,13 +4805,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esm@npm:^3.0.84":
-  version: 3.2.25
-  resolution: "esm@npm:3.2.25"
-  checksum: 10c0/8e60e8075506a7ce28681c30c8f54623fe18a251c364cd481d86719fc77f58aa055b293d80632d9686d5408aaf865ffa434897dc9fd9153c8b3f469fad23f094
-  languageName: node
-  linkType: hard
-
 "espree@npm:^10.0.1, espree@npm:^10.3.0, espree@npm:^10.4.0":
   version: 10.4.0
   resolution: "espree@npm:10.4.0"
@@ -5396,21 +5365,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-contrast@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "get-contrast@npm:3.0.0"
-  dependencies:
-    css-color-names: "npm:1.0.1"
-    is-blank: "npm:2.1.0"
-    is-named-css-color: "npm:1.0.0"
-    rgb: "npm:^0.1.0"
-    wcag-contrast: "npm:3.0.0"
-  bin:
-    contrast: cli.js
-  checksum: 10c0/6f45e3f6f5f7479975d039a2a597511dcf4b65cbf50434043809aeadc13c2385cb37b4f8ba871a6c97290821233aaedf0c3ef34b1664d32dd3fbfa8f7245fe27
-  languageName: node
-  linkType: hard
-
 "get-intrinsic@npm:^1.2.4, get-intrinsic@npm:^1.2.5, get-intrinsic@npm:^1.2.6, get-intrinsic@npm:^1.2.7, get-intrinsic@npm:^1.3.0":
   version: 1.3.0
   resolution: "get-intrinsic@npm:1.3.0"
@@ -5932,16 +5886,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-blank@npm:2.1.0":
-  version: 2.1.0
-  resolution: "is-blank@npm:2.1.0"
-  dependencies:
-    is-empty: "npm:latest"
-    is-whitespace: "npm:latest"
-  checksum: 10c0/a1c7545e8a58ea0259083128b3d7fd0557d0d4f98775e36b4b25f5b6e14bdc6fee878701a3fa87b2372ca14cefdeae5c3611abd8e4ae4f13a047bd5e4c79bdae
-  languageName: node
-  linkType: hard
-
 "is-boolean-object@npm:^1.2.1":
   version: 1.2.2
   resolution: "is-boolean-object@npm:1.2.2"
@@ -6005,13 +5949,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-empty@npm:latest":
-  version: 1.2.0
-  resolution: "is-empty@npm:1.2.0"
-  checksum: 10c0/f0dd6534716f2749586c35f1dcf37a0a5ac31e91d629ae2652b36c7f72c0ce71f0b68f082a6eed95b1af6f84ba31cd757c2343b19507878ed1e532a3383ebaaa
-  languageName: node
-  linkType: hard
-
 "is-extglob@npm:^2.1.1":
   version: 2.1.1
   resolution: "is-extglob@npm:2.1.1"
@@ -6060,15 +5997,6 @@ __metadata:
   version: 2.0.3
   resolution: "is-map@npm:2.0.3"
   checksum: 10c0/2c4d431b74e00fdda7162cd8e4b763d6f6f217edf97d4f8538b94b8702b150610e2c64961340015fe8df5b1fcee33ccd2e9b62619c4a8a3a155f8de6d6d355fc
-  languageName: node
-  linkType: hard
-
-"is-named-css-color@npm:1.0.0":
-  version: 1.0.0
-  resolution: "is-named-css-color@npm:1.0.0"
-  dependencies:
-    css-color-list: "npm:0.0.1"
-  checksum: 10c0/baa65b0b270114dacdcc85dd53322e42f8f9c4414868671727c8ea8101238f20be3325c5a362dd5c86aa156b7145f2b1e93352a8cbe86d0240859988cca62598
   languageName: node
   linkType: hard
 
@@ -6226,13 +6154,6 @@ __metadata:
   version: 5.5.0
   resolution: "is-what@npm:5.5.0"
   checksum: 10c0/065c8a4ac651988a495cc0211c2754c198788383c9fe1bbfdf6d237c423114a0c5f2fc3e26ad7ea43a63cd4169f4503f584305acbac91706d5308cc14dedd1bd
-  languageName: node
-  linkType: hard
-
-"is-whitespace@npm:latest":
-  version: 0.3.0
-  resolution: "is-whitespace@npm:0.3.0"
-  checksum: 10c0/2f4ef13e0195170bbb587437133ef81ed9d6aec1c5e88f4c2b9055a18a1e70f75d9a9376f0cdae64f3c519e05e5f734d6b8f9682e5cb50384843480bade785ae
   languageName: node
   linkType: hard
 
@@ -8505,15 +8426,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"relative-luminance@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "relative-luminance@npm:2.0.1"
-  dependencies:
-    esm: "npm:^3.0.84"
-  checksum: 10c0/b65843d017e11a8a9bd5a6ce0f79623acae40ef432b171e5d6d8b1734c18e7415f141ed72188119de8816655b00cd204a77f5260b6dcf5e180c3cdb72768c093
-  languageName: node
-  linkType: hard
-
 "remark-breaks@npm:^4.0.0":
   version: 4.0.0
   resolution: "remark-breaks@npm:4.0.0"
@@ -8710,15 +8622,6 @@ __metadata:
   version: 1.4.1
   resolution: "rfdc@npm:1.4.1"
   checksum: 10c0/4614e4292356cafade0b6031527eea9bc90f2372a22c012313be1dcc69a3b90c7338158b414539be863fa95bfcb2ddcd0587be696841af4e6679d85e62c060c7
-  languageName: node
-  linkType: hard
-
-"rgb@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "rgb@npm:0.1.0"
-  bin:
-    rgb: ./bin/rgb
-  checksum: 10c0/d09f92de9fc8c3e789d9df24f217f28261780219d385178745f40046f075078fd127099d492199b68ac2a53735ab526ee6e84f26796f448ad4d83f4bf2ef3a14
   languageName: node
   linkType: hard
 
@@ -10571,15 +10474,6 @@ __metadata:
   dependencies:
     xml-name-validator: "npm:^5.0.0"
   checksum: 10c0/8712774c1aeb62dec22928bf1cdfd11426c2c9383a1a63f2bcae18db87ca574165a0fbe96b312b73652149167ac6c7f4cf5409f2eb101d9c805efe0e4bae798b
-  languageName: node
-  linkType: hard
-
-"wcag-contrast@npm:3.0.0":
-  version: 3.0.0
-  resolution: "wcag-contrast@npm:3.0.0"
-  dependencies:
-    relative-luminance: "npm:^2.0.0"
-  checksum: 10c0/06a042138c1e6cbcef8613868b99331812ba9a60a2ae4c711a3c2c5096b1137c835a5588a743d6d0d97b7f11471590d88fb748a2c7bbd2a8ee564da6808dc931
   languageName: node
   linkType: hard
 

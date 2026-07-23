@@ -57,7 +57,6 @@
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.1",
     "floating-vue": "^5.2.2",
-    "get-contrast": "^3.0.0",
     "highlight.js": "^11.9.0",
     "js-base64": "^3.7.6",
     "js-cookie": "^3.0.5",
