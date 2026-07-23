@@ -169,7 +169,9 @@ export function createShootContextComposable (options = {}) {
     initialManifest.value = value
     manifest.value = cloneDeep(initialManifest.value)
     hibernationSchedules.value = get(manifest.value, ['spec', 'hibernation', 'schedules'], [])
-    providerState.workerless = isEmpty(providerWorkers.value)
+    if (shootCreationTimestamp.value) {
+      providerState.workerless = isEmpty(providerWorkers.value)
+    }
   }
 
   function createShootManifest (options) {
@@ -183,7 +185,6 @@ export function createShootContextComposable (options = {}) {
     workerless.value = get(options, ['workerless'], configStore.defaultWorkerlessCluster)
     const defaultProviderType = head(cloudProfileStore.sortedInfraProviderTypeList)
     providerType.value = get(options, ['providerType'], defaultProviderType)
-    resetControlPlaneHighAvailability()
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
     initialManifest.value = cloneDeep(normalizedManifest.value)
@@ -368,7 +369,7 @@ export function createShootContextComposable (options = {}) {
 
   /* provider */
   const providerState = reactive({
-    workerless: false,
+    workerless: configStore.defaultWorkerlessCluster,
   })
 
   const providerType = computed({
@@ -568,9 +569,6 @@ export function createShootContextComposable (options = {}) {
       applySpecTemplate(cloudProfileRef.value)
       resetCloudProfileDependendValues()
     }
-    if (isEmpty(providerWorkers.value)) {
-      resetProviderWorkers()
-    }
   }, {
     flush: 'sync',
   })
@@ -768,9 +766,6 @@ export function createShootContextComposable (options = {}) {
       appStore.timezone,
       configStore.defaultMaintenanceWindowSizeMinutes,
     )
-    if (!timeWindow) {
-      return
-    }
     maintenanceTimeWindowBegin.value = timeWindow.begin
     maintenanceTimeWindowEnd.value = timeWindow.end
   }
@@ -895,11 +890,18 @@ export function createShootContextComposable (options = {}) {
 
   const controlPlaneHighAvailability = computed({
     get () {
-      return !!controlPlaneHighAvailabilityFailureToleranceType.value
+      if (controlPlaneHighAvailabilityFailureToleranceType.value === undefined) {
+        controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
+          ? 'zone'
+          : 'node'
+        return !!configStore.defaultControlPlaneHighAvailability
+      } else {
+        return !!controlPlaneHighAvailabilityFailureToleranceType.value
+      }
     },
     set (value) {
       if (!value) {
-        controlPlaneHighAvailabilityFailureToleranceType.value = undefined
+        controlPlaneHighAvailabilityFailureToleranceType.value = null
       } else {
         controlPlaneHighAvailabilityFailureToleranceType.value = isFailureToleranceTypeZoneSupported.value
           ? 'zone'
@@ -907,10 +909,6 @@ export function createShootContextComposable (options = {}) {
       }
     },
   })
-
-  function resetControlPlaneHighAvailability () {
-    controlPlaneHighAvailability.value = configStore.defaultControlPlaneHighAvailability
-  }
 
   /* dns */
   const {

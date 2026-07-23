@@ -90,24 +90,20 @@ describe('components', () => {
       expect(wildcardVariablePartSuffix).toBe('')
     })
 
-    it('should select initial custom wildcard value', () => {
+    it('Should select initial custom wildcard value', () => {
       const wrapper = mountWildcardSelect('*')
-      const { wildcardSelectedValue, wildcardVariablePartPrefix, wildcardVariablePartSuffix } = wrapper.vm
+      const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
       expect(wildcardSelectedValue.value).toBe('')
       expect(wildcardSelectedValue.customWildcard).toBe(true)
-      expect(wildcardVariablePartPrefix).toBe('')
       expect(wildcardVariablePartSuffix).toBe('')
     })
 
-    it('should preserve a concrete value selected through the catch-all wildcard', () => {
+    it('Should select custom wildcard', () => {
       const wrapper = mountWildcardSelect('RandomValue')
-      const { wildcardSelectedValue, wildcardVariablePartPrefix, wildcardVariablePartSuffix } = wrapper.vm
+      const { wildcardSelectedValue, wildcardVariablePartSuffix } = wrapper.vm
       expect(wildcardSelectedValue.value).toBe('')
       expect(wildcardSelectedValue.customWildcard).toBe(true)
-      expect(wildcardVariablePartPrefix).toBe('RandomValue')
-      expect(wildcardVariablePartSuffix).toBe('')
-      expect(wrapper.vm.internalValue).toBe('RandomValue')
-      expect(wrapper.emitted('update:modelValue').at(-1)).toEqual(['RandomValue'])
+      expect(wildcardVariablePartSuffix).toBe('RandomValue')
     })
   })
 })

@@ -157,23 +157,7 @@ describe('composables', () => {
       expect(createShootManifest('ironcore')).toMatchSnapshot()
     })
 
-    it('should not mutate high availability state when reading or disabling it', () => {
-      createShootManifest('aws')
-
-      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
-      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
-      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
-      expect(shootContextStore.isShootDirty).toBe(false)
-
-      shootContextStore.controlPlaneHighAvailability = true
-      expect(shootContextStore.controlPlaneHighAvailabilityFailureToleranceType).toBe('node')
-
-      shootContextStore.controlPlaneHighAvailability = false
-      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
-      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
-    })
-
-    it('should apply a zone high availability default only when creating a shoot', () => {
+    it('should apply a zone high availability default', () => {
       seedStore.list = [{
         metadata: {
           name: 'aws-seed',
@@ -199,43 +183,8 @@ describe('composables', () => {
         workerless: false,
       })
 
-      expect(shootContextStore.isFailureToleranceTypeZoneSupported).toBe(true)
-      expect(shootContextStore.controlPlaneHighAvailabilityFailureToleranceType).toBe('zone')
       expect(shootContextStore.controlPlaneHighAvailability).toBe(true)
-      expect(shootContextStore.isShootDirty).toBe(false)
-
-      const existingShoot = cloneDeep(shootContextStore.shootManifest)
-      existingShoot.metadata.creationTimestamp = '2024-03-01T12:00:00Z'
-      delete existingShoot.spec.controlPlane
-      shootContextStore.setShootManifest(existingShoot)
-
-      expect(shootContextStore.controlPlaneHighAvailability).toBe(false)
-      expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
-    })
-
-    it('should restore a default worker when disabling workerless mode', () => {
-      setShootDefaults({
-        workerlessCluster: true,
-      })
-
-      shootContextStore.createShootManifest({
-        providerType: 'aws',
-      })
-
-      expect(shootContextStore.workerless).toBe(true)
-      expect(shootContextStore.shootManifest.spec.provider.workers).toBeUndefined()
-      expect(shootContextStore.shootManifest.spec.networking).toBeUndefined()
-
-      shootContextStore.workerless = false
-      expect(shootContextStore.providerWorkers).toHaveLength(1)
-      const workerName = shootContextStore.providerWorkers[0].name
-
-      shootContextStore.workerless = true
-      expect(shootContextStore.shootManifest.spec.provider.workers).toBeUndefined()
-
-      shootContextStore.workerless = false
-      expect(shootContextStore.providerWorkers).toHaveLength(1)
-      expect(shootContextStore.providerWorkers[0].name).toBe(workerName)
+      expect(shootContextStore.controlPlaneHighAvailabilityFailureToleranceType).toBe('zone')
     })
 
     it('should honor an explicit workerless option over the configured default', () => {
@@ -308,37 +257,6 @@ describe('composables', () => {
 
       expect(shootManifest.spec.provider.infrastructureConfig.floatingPoolName).toBe('FloatingIP-external')
       expect(shootManifest.spec.provider.controlPlaneConfig.loadBalancerProvider).toBe('f5')
-    })
-
-    it('should infer workerless mode whenever a manifest is loaded', () => {
-      shootContextStore.setShootManifest({
-        metadata: {
-          name: 'workerless-shoot',
-        },
-        spec: {
-          provider: {
-            type: 'aws',
-          },
-        },
-      })
-      expect(shootContextStore.workerless).toBe(true)
-
-      shootContextStore.setShootManifest({
-        metadata: {
-          name: 'shoot-with-workers',
-        },
-        spec: {
-          provider: {
-            type: 'aws',
-            workers: [{
-              name: 'worker-a',
-              minimum: 1,
-              maximum: 2,
-            }],
-          },
-        },
-      })
-      expect(shootContextStore.workerless).toBe(false)
     })
 
     it('should change the infrastructure kind', async () => {

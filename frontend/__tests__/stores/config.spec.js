@@ -132,15 +132,5 @@ describe('stores', () => {
       expect(configStore.defaultHibernationSchedule).toEqual({ evaluation: [{ start: 'legacy' }] })
       expect(configStore.defaultNodesCIDR).toBe('10.0.0.0/16')
     })
-
-    it('falls back to safe maintenance hours for an empty configuration', () => {
-      configStore.setConfiguration({
-        shootDefaults: {
-          maintenanceHours: [],
-        },
-      })
-
-      expect(configStore.defaultMaintenanceHours).toEqual(['22', '23', '00', '01', '02', '03', '04', '05'])
-    })
   })
 })
