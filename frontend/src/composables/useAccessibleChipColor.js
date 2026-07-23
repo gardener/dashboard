@@ -4,7 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  effectScope,
+  watchEffect,
+} from 'vue'
 import { useTheme } from 'vuetify'
 import {
   converter,
@@ -18,7 +22,12 @@ const toSrgbGamut = toGamut('rgb', 'oklch')
 const WHITE = '#ffffff'
 const BLACK = '#000000'
 
-let sharedErrorChipStyle
+export const ERROR_CHIP_CLASS = 'g-error-chip'
+export const ERROR_CHIP_BG_VAR = '--g-error-chip'
+export const ERROR_CHIP_ON_VAR = '--g-error-chip-on'
+
+let sharedErrorChipCssVars
+let sharedErrorChipScope
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
@@ -100,7 +109,18 @@ export function colorToVuetifyRgb (color) {
   }
 }
 
-function createErrorChipStyle (theme) {
+function applyErrorChipCssVars (vars) {
+  const root = document.documentElement
+  if (!vars) {
+    root.style.removeProperty(ERROR_CHIP_BG_VAR)
+    root.style.removeProperty(ERROR_CHIP_ON_VAR)
+    return
+  }
+  root.style.setProperty(ERROR_CHIP_BG_VAR, vars[ERROR_CHIP_BG_VAR])
+  root.style.setProperty(ERROR_CHIP_ON_VAR, vars[ERROR_CHIP_ON_VAR])
+}
+
+function createErrorChipCssVars (theme) {
   return computed(() => {
     const errorColor = theme.current.value?.colors?.error
     if (!errorColor) {
@@ -119,24 +139,39 @@ function createErrorChipStyle (theme) {
     }
 
     return {
-      '--v-theme-error': backgroundRgb,
-      '--v-theme-on-error': textRgb,
+      [ERROR_CHIP_BG_VAR]: backgroundRgb,
+      [ERROR_CHIP_ON_VAR]: textRgb,
     }
   })
 }
 
-export function useErrorChipColor (theme) {
+/**
+ * Computes accessible error-chip colors and syncs them to document CSS variables.
+ * Call once from the app root. Status chips opt in with class {@link ERROR_CHIP_CLASS}.
+ *
+ * Pass an explicit `theme` to compute without syncing (tests).
+ */
+export function useAccessibleErrorChipColors (theme) {
   if (theme) {
-    return { errorChipStyle: createErrorChipStyle(theme) }
+    return { errorChipCssVars: createErrorChipCssVars(theme) }
   }
 
-  if (!sharedErrorChipStyle) {
-    sharedErrorChipStyle = createErrorChipStyle(useTheme())
+  if (!sharedErrorChipCssVars) {
+    sharedErrorChipScope = effectScope(true)
+    sharedErrorChipScope.run(() => {
+      sharedErrorChipCssVars = createErrorChipCssVars(useTheme())
+      watchEffect(() => {
+        applyErrorChipCssVars(sharedErrorChipCssVars.value)
+      })
+    })
   }
 
-  return { errorChipStyle: sharedErrorChipStyle }
+  return { errorChipCssVars: sharedErrorChipCssVars }
 }
 
 export function resetErrorChipColorCache () {
-  sharedErrorChipStyle = undefined
+  sharedErrorChipScope?.stop()
+  sharedErrorChipScope = undefined
+  sharedErrorChipCssVars = undefined
+  applyErrorChipCssVars(undefined)
 }

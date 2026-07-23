@@ -52,6 +52,12 @@
   cursor: pointer;
 }
 
+/* Accessible error chip pair; values set on :root from useAccessibleErrorChipColors */
+.g-error-chip {
+  --v-theme-error: var(--g-error-chip);
+  --v-theme-on-error: var(--g-error-chip-on);
+}
+
 .pointer-events-none {
   pointer-events: none !important;
 }
