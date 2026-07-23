@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.networkingType.$touch()"
         />
       </v-col>
-      <template v-if="providerType === 'openstack'">
+      <template v-if="!workerless && providerType === 'openstack'">
         <v-col cols="3">
           <g-wildcard-select
             v-model="floatingPoolName"
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="providerType === 'metal'">
+      <template v-else-if="!workerless && providerType === 'metal'">
         <v-col cols="3">
           <v-text-field
             v-model="v$.projectID.$model"
@@ -136,7 +136,7 @@ SPDX-License-Identifier: Apache-2.0
             :items="firewallSizes"
             :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
-            @blur="v$.firewallImage.$touch()"
+            @blur="v$.firewallSize.$touch()"
           />
         </v-col>
         <v-col cols="3">
@@ -155,7 +155,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="providerType === 'vsphere'">
+      <template v-else-if="!workerless && providerType === 'vsphere'">
         <v-col cols="3">
           <v-select
             v-model="v$.loadBalancerClassNames.$model"
@@ -270,16 +270,16 @@ export default {
   },
   validations () {
     const requiresInfrastructure = providerType => {
-      return requiredIf(() => this.providerType === providerType)
+      return requiredIf(() => !this.workerless && this.providerType === providerType)
     }
     return {
       region: withFieldName('Region', {
         required,
       }),
       networkingType: withFieldName('Networking Type', {
-        required: requiredIf(!this.workerless),
+        required: requiredIf(() => !this.workerless),
       }),
-      loadBalancerProviderName: withFieldName('Cluster Name', {
+      loadBalancerProviderName: withFieldName('Load Balancer Provider', {
         required: requiresInfrastructure('openstack'),
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {

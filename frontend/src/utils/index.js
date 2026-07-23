@@ -522,7 +522,7 @@ const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
 
 export function randomMaintenanceBegin (hours = defaultMaintenanceHours) {
   // randomize maintenance time window
-  const randomHour = sample(hours)
+  const randomHour = sample(isEmpty(hours) ? defaultMaintenanceHours : hours)
   return `${randomHour}:00`
 }
 

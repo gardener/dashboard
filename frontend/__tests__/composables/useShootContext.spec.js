@@ -213,6 +213,31 @@ describe('composables', () => {
       expect(shootContextStore.shootManifest.spec.controlPlane).toBeUndefined()
     })
 
+    it('should restore a default worker when disabling workerless mode', () => {
+      setShootDefaults({
+        workerlessCluster: true,
+      })
+
+      shootContextStore.createShootManifest({
+        providerType: 'aws',
+      })
+
+      expect(shootContextStore.workerless).toBe(true)
+      expect(shootContextStore.shootManifest.spec.provider.workers).toBeUndefined()
+      expect(shootContextStore.shootManifest.spec.networking).toBeUndefined()
+
+      shootContextStore.workerless = false
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+      const workerName = shootContextStore.providerWorkers[0].name
+
+      shootContextStore.workerless = true
+      expect(shootContextStore.shootManifest.spec.provider.workers).toBeUndefined()
+
+      shootContextStore.workerless = false
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+      expect(shootContextStore.providerWorkers[0].name).toBe(workerName)
+    })
+
     it('should honor an explicit workerless option over the configured default', () => {
       setShootDefaults({
         workerlessCluster: true,
@@ -283,6 +308,76 @@ describe('composables', () => {
 
       expect(shootManifest.spec.provider.infrastructureConfig.floatingPoolName).toBe('FloatingIP-external')
       expect(shootManifest.spec.provider.controlPlaneConfig.loadBalancerProvider).toBe('f5')
+    })
+
+    it('should infer workerless mode when an existing manifest is loaded', () => {
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'workerless-shoot',
+          creationTimestamp: '2024-03-01T12:00:00Z',
+        },
+        spec: {
+          provider: {
+            type: 'aws',
+          },
+        },
+      })
+      expect(shootContextStore.workerless).toBe(true)
+
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'shoot-with-workers',
+          creationTimestamp: '2024-03-01T12:00:00Z',
+        },
+        spec: {
+          provider: {
+            type: 'aws',
+            workers: [{
+              name: 'worker-a',
+              minimum: 1,
+              maximum: 2,
+            }],
+          },
+        },
+      })
+      expect(shootContextStore.workerless).toBe(false)
+    })
+
+    it('should preserve explicit workerless mode when a new manifest is loaded', () => {
+      shootContextStore.createShootManifest({
+        providerType: 'aws',
+        workerless: false,
+      })
+
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'new-shoot',
+        },
+        spec: {
+          provider: {
+            type: 'aws',
+          },
+        },
+      })
+      expect(shootContextStore.workerless).toBe(false)
+
+      shootContextStore.workerless = true
+      shootContextStore.setShootManifest({
+        metadata: {
+          name: 'new-workerless-shoot',
+        },
+        spec: {
+          provider: {
+            type: 'aws',
+            workers: [{
+              name: 'worker-a',
+              minimum: 1,
+              maximum: 2,
+            }],
+          },
+        },
+      })
+      expect(shootContextStore.workerless).toBe(true)
     })
 
     it('should change the infrastructure kind', async () => {

@@ -339,7 +339,10 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const defaultMaintenanceHours = computed(() => {
-    return shootDefaults.value.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+    const maintenanceHours = shootDefaults.value.maintenanceHours
+    return Array.isArray(maintenanceHours) && maintenanceHours.length
+      ? maintenanceHours
+      : ['22', '23', '00', '01', '02', '03', '04', '05']
   })
 
   const defaultMaintenanceWindowSizeMinutes = computed(() => {
