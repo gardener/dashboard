@@ -7,11 +7,24 @@
 import { ref } from 'vue'
 import { wcagContrast } from 'culori'
 
-import {
+const mockThemeCurrent = ref({
+  colors: {
+    error: '#E57373',
+  },
+})
+
+vi.mock('vuetify', () => ({
+  useTheme: () => ({
+    current: mockThemeCurrent,
+  }),
+}))
+
+const {
   pickAccessibleChipColors,
   colorToVuetifyRgb,
   useErrorChipColor,
-} from '@/composables/useAccessibleChipColor'
+  resetErrorChipColorCache,
+} = await import('@/composables/useAccessibleChipColor')
 
 describe('composables', () => {
   describe('useAccessibleChipColor', () => {
@@ -61,6 +74,15 @@ describe('composables', () => {
         }
       }
 
+      beforeEach(() => {
+        resetErrorChipColorCache()
+        mockThemeCurrent.value = {
+          colors: {
+            error: '#E57373',
+          },
+        }
+      })
+
       it('should override error and on-error with white text on a darkened background', () => {
         const theme = createTheme({
           error: '#E57373',
@@ -92,6 +114,22 @@ describe('composables', () => {
         expect(errorChipStyle.value['--v-theme-error']).toBe(colorToVuetifyRgb('#B71C1C'))
         expect(errorChipStyle.value['--v-theme-on-error']).toBe(colorToVuetifyRgb('#ffffff'))
         expect(errorChipStyle.value['--v-theme-error']).not.toBe(initial)
+      })
+
+      it('should not share style across different explicit themes', () => {
+        const first = useErrorChipColor(createTheme({ error: '#E57373' }))
+        const second = useErrorChipColor(createTheme({ error: '#B71C1C' }))
+
+        expect(first.errorChipStyle).not.toBe(second.errorChipStyle)
+        expect(first.errorChipStyle.value['--v-theme-error'])
+          .not.toBe(second.errorChipStyle.value['--v-theme-error'])
+      })
+
+      it('should reuse one shared style on the default theme path', () => {
+        const first = useErrorChipColor()
+        const second = useErrorChipColor()
+
+        expect(first.errorChipStyle).toBe(second.errorChipStyle)
       })
     })
   })

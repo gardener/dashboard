@@ -18,6 +18,8 @@ const toSrgbGamut = toGamut('rgb', 'oklch')
 const WHITE = '#ffffff'
 const BLACK = '#000000'
 
+let sharedErrorChipStyle
+
 function meetsContrast (background, textColor, targetContrast) {
   try {
     return wcagContrast(background, textColor) >= targetContrast
@@ -47,20 +49,11 @@ function findLightnessCandidate (original, textColor, targetLightness, targetCon
   return result
 }
 
-/**
- * Pick a chip background and text color that meet WCAG AA contrast.
- * Prefers white text (darkening the background if needed); falls back to black text.
- *
- * @param {string} background
- * @param {number} [targetContrast=4.5]
- * @returns {{ background: string|object, textColor: string }|undefined}
- */
 export function pickAccessibleChipColors (background, targetContrast = 4.5) {
   if (!background) {
     return undefined
   }
 
-  // Prefer the classic filled-chip look: white text on the theme color.
   if (meetsContrast(background, WHITE, targetContrast)) {
     return { background, textColor: WHITE }
   }
@@ -75,7 +68,6 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
     return { background: darkerForWhite, textColor: WHITE }
   }
 
-  // White text is unreachable — fall back to black text.
   if (meetsContrast(background, BLACK, targetContrast)) {
     return { background, textColor: BLACK }
   }
@@ -85,7 +77,6 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
     return { background: lighterForBlack, textColor: BLACK }
   }
 
-  // Fail open: keep the original color and the better of black/white text.
   try {
     const textColor = wcagContrast(background, WHITE) >= wcagContrast(background, BLACK)
       ? WHITE
@@ -109,14 +100,8 @@ export function colorToVuetifyRgb (color) {
   }
 }
 
-/**
- * Reactive local `--v-theme-error` / `--v-theme-on-error` overrides for flat
- * error chips so chip text remains readable regardless of the active theme.
- *
- * @param {ReturnType<typeof useTheme>} [theme]
- */
-export function useErrorChipColor (theme = useTheme()) {
-  const errorChipStyle = computed(() => {
+function createErrorChipStyle (theme) {
+  return computed(() => {
     const errorColor = theme.current.value?.colors?.error
     if (!errorColor) {
       return undefined
@@ -138,6 +123,20 @@ export function useErrorChipColor (theme = useTheme()) {
       '--v-theme-on-error': textRgb,
     }
   })
+}
 
-  return { errorChipStyle }
+export function useErrorChipColor (theme) {
+  if (theme) {
+    return { errorChipStyle: createErrorChipStyle(theme) }
+  }
+
+  if (!sharedErrorChipStyle) {
+    sharedErrorChipStyle = createErrorChipStyle(useTheme())
+  }
+
+  return { errorChipStyle: sharedErrorChipStyle }
+}
+
+export function resetErrorChipColorCache () {
+  sharedErrorChipStyle = undefined
 }
