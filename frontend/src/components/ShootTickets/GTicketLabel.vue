@@ -20,7 +20,7 @@ import { wcagContrast } from 'culori'
 
 import get from 'lodash/get'
 
-function accessibleTextColor (background) {
+function getAccessibleTextColor (background) {
   try {
     return wcagContrast(background, '#ffffff') >= 4.5 ? '#fff' : '#000'
   } catch {
@@ -39,7 +39,7 @@ export default {
     labelStyle () {
       return label => {
         const bgColor = `#${get(label, ['color'])}`
-        return `background-color: ${bgColor}; color: ${accessibleTextColor(bgColor)};`
+        return `background-color: ${bgColor}; color: ${getAccessibleTextColor(bgColor)};`
       }
     },
   },

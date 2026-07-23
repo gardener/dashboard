@@ -92,7 +92,7 @@ describe('composables', () => {
         expect(errorChipCssVars.value).toBeUndefined()
       })
 
-      it(`should update the chip colors when the theme's error color changes`, () => {
+      it('should update the chip colors when the theme\'s error color changes', () => {
         const theme = createTheme({
           error: '#E57373',
         })
