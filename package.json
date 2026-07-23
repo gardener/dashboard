@@ -48,6 +48,7 @@
     "node": "24.18.0"
   },
   "dependencies": {
+    "engine.io": "6.6.7",
     "lodash-es": "^4.17.21"
   },
   "resolutions": {
