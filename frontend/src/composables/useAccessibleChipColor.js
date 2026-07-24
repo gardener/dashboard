@@ -191,8 +191,9 @@ export function pickAccessibleChipColors (color, {
   return createChipColorResult(background, textColor)
 }
 
-/** Format a color for Vuetify theme CSS variables (`rgb(var(--v-theme-…))`).
- * Expects the color as hex string, e.g. `#ff0000`.
+/**
+ * Accepts a hex color and formats it as comma-separated RGB channels for Vuetify theme CSS
+ * variables, e.g. `255, 0, 0`. Returns undefined for invalid or transparent colors.
  */
 export function colorToVuetifyRgb (color) {
   try {
