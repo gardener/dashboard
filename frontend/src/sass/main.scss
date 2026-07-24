@@ -59,6 +59,17 @@ without changing the global theme error color */
   --v-theme-on-error: var(--g-error-chip-text);
 }
 
+/* Tonal warning chips: override text and/or background without changing global warning */
+.v-chip.g-warning-chip {
+  color: rgb(var(--g-warning-chip-text, var(--v-theme-warning)));
+
+  /* `.v-chip__underlay` is Vuetify's tonal background layer */
+  &.v-chip--variant-tonal .v-chip__underlay {
+    background: rgb(var(--g-warning-chip-background, var(--v-theme-warning)));
+    opacity: var(--g-warning-chip-background-opacity, var(--v-activated-opacity));
+  }
+}
+
 .pointer-events-none {
   pointer-events: none !important;
 }

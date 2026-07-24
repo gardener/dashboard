@@ -27,14 +27,49 @@ export const ERROR_CHIP_CLASS = 'g-error-chip'
 export const ERROR_CHIP_BACKGROUND_VAR = '--g-error-chip-background'
 export const ERROR_CHIP_TEXT_VAR = '--g-error-chip-text'
 
+export const WARNING_CHIP_CLASS = 'g-warning-chip'
+export const WARNING_CHIP_TEXT_VAR = '--g-warning-chip-text'
+export const WARNING_CHIP_BACKGROUND_VAR = '--g-warning-chip-background'
+export const WARNING_CHIP_BACKGROUND_OPACITY_VAR = '--g-warning-chip-background-opacity'
+
+/** Vuetify tonal chips tint the background at `--v-activated-opacity` (default 0.12). */
+const TONAL_BACKGROUND_OPACITY = 0.12
+
+const LIGHT_SURFACE = '#ffffff'
+const DARK_SURFACE = '#121212'
+
 let sharedErrorChipCssVars
 let sharedErrorChipScope
+let sharedWarningChipCssVars
+let sharedWarningChipScope
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
     return wcagContrast(background, textColor) >= targetContrast
   } catch {
     return false
+  }
+}
+
+/**
+ * Alpha-blend `foreground` over `background` at unitless `opacity` (0–1).
+ * Returns a hex string, or undefined when either color cannot be parsed.
+ */
+function blendOver (foreground, background, opacity) {
+  try {
+    const fg = toSrgbGamut(toOklch(foreground))
+    const bg = toSrgbGamut(toOklch(background))
+    if (!fg || !bg || typeof fg.r !== 'number' || typeof bg.r !== 'number') {
+      return undefined
+    }
+    return formatHex({
+      mode: 'rgb',
+      r: fg.r * opacity + bg.r * (1 - opacity),
+      g: fg.g * opacity + bg.g * (1 - opacity),
+      b: fg.b * opacity + bg.b * (1 - opacity),
+    })
+  } catch {
+    return undefined
   }
 }
 
@@ -120,6 +155,49 @@ export function pickAccessibleChipColors (background, targetContrast = 4.5) {
   }
 }
 
+/**
+ * Chooses colors to fix contrast for a Vuetify tonal chip
+ *
+ * Changes either the background or the text color — never both.
+ * - If default tonal contrast already passes, don't change anything.
+ * - Otherwise try to find the closest suitable background color that meets the contrast requirement.
+ * - If no suitable background color is found, darken/lighten the text color to meet the contrast requirement.
+ *
+ */
+export function pickAccessibleTonalChipColors (color, surface, targetContrast = 4.5) {
+  if (!color || !surface) {
+    return undefined
+  }
+
+  const original = toOklch(color)
+  const surfaceColor = toOklch(surface)
+  if (!original || typeof original.l !== 'number' || !surfaceColor || typeof surfaceColor.l !== 'number') {
+    return { mode: 'none' }
+  }
+
+  const defaultBlend = blendOver(color, surface, TONAL_BACKGROUND_OPACITY)
+  if (!defaultBlend) {
+    return { mode: 'none' }
+  }
+
+  if (meetsContrast(defaultBlend, color, targetContrast)) {
+    return { mode: 'none' }
+  }
+
+  const background = adjustLightnessForContrast(original, color, surfaceColor.l, targetContrast)
+  if (background) {
+    return { mode: 'background', textColor: color, background }
+  }
+
+  const textTargetLightness = surfaceColor.l >= 0.5 ? 0 : 1
+  const textColor = adjustLightnessForContrast(original, defaultBlend, textTargetLightness, targetContrast)
+  if (textColor) {
+    return { mode: 'text', textColor }
+  }
+
+  return { mode: 'none' }
+}
+
 /** Format a color for Vuetify theme CSS variables (`rgb(var(--v-theme-…))`).
  * Expects the color as hex string, e.g. `#ff0000`.
  */
@@ -195,10 +273,105 @@ export function useAccessibleErrorChipColors (theme) {
   return { errorChipCssVars: sharedErrorChipCssVars }
 }
 
+function applyWarningChipCssVars (vars) {
+  const root = document.documentElement
+  root.style.removeProperty(WARNING_CHIP_TEXT_VAR)
+  root.style.removeProperty(WARNING_CHIP_BACKGROUND_VAR)
+  root.style.removeProperty(WARNING_CHIP_BACKGROUND_OPACITY_VAR)
+
+  if (!vars || vars.mode === 'none') {
+    return
+  }
+
+  if (vars.mode === 'background') {
+    root.style.setProperty(WARNING_CHIP_BACKGROUND_VAR, vars.backgroundRgb)
+    root.style.setProperty(WARNING_CHIP_BACKGROUND_OPACITY_VAR, vars.backgroundOpacity)
+    return
+  }
+
+  if (vars.mode === 'text') {
+    root.style.setProperty(WARNING_CHIP_TEXT_VAR, vars.textRgb)
+  }
+}
+
+function createWarningChipCssVars (theme) {
+  return computed(() => {
+    const warningColor = theme.current.value?.colors?.warning
+    if (!warningColor) {
+      return undefined
+    }
+
+    const surface = theme.current.value?.colors?.surface ??
+     (theme.current.value?.dark ? DARK_SURFACE : LIGHT_SURFACE)
+
+    const accessible = pickAccessibleTonalChipColors(warningColor, surface)
+    if (!accessible) {
+      return undefined
+    }
+
+    if (accessible.mode === 'none') {
+      return { mode: 'none' }
+    }
+
+    if (accessible.mode === 'background') {
+      const backgroundRgb = colorToVuetifyRgb(accessible.background)
+      if (!backgroundRgb) {
+        return undefined
+      }
+      return {
+        mode: 'background',
+        backgroundRgb,
+        backgroundOpacity: '1',
+      }
+    }
+
+    const textRgb = colorToVuetifyRgb(accessible.textColor)
+    if (!textRgb) {
+      return undefined
+    }
+    return { mode: 'text', textRgb }
+  })
+}
+
+/**
+ * Ensure tonal warning chips (e.g. worker group) stay readable without changing
+ * the global theme `warning` color.
+ *
+ * Prefers adjusting only the background; otherwise adjusts only the text color.
+ * Exposes the result as document CSS custom properties.
+ */
+export function useAccessibleWarningChipColors (theme) {
+  if (theme) {
+    return { warningChipCssVars: createWarningChipCssVars(theme) }
+  }
+
+  if (!sharedWarningChipCssVars) {
+    sharedWarningChipScope = effectScope(true)
+    sharedWarningChipScope.run(() => {
+      sharedWarningChipCssVars = createWarningChipCssVars(useTheme())
+      watchEffect(() => {
+        applyWarningChipCssVars(sharedWarningChipCssVars.value)
+      })
+    })
+  }
+
+  return { warningChipCssVars: sharedWarningChipCssVars }
+}
+
 /** Util for resetting shared state between tests. */
-export function resetErrorChipColorCache () {
+export function resetAccessibleChipColorCache () {
   sharedErrorChipScope?.stop()
   sharedErrorChipScope = undefined
   sharedErrorChipCssVars = undefined
   applyErrorChipCssVars(undefined)
+
+  sharedWarningChipScope?.stop()
+  sharedWarningChipScope = undefined
+  sharedWarningChipCssVars = undefined
+  applyWarningChipCssVars(undefined)
+}
+
+/** Alias kept for existing tests; resets error and warning chip shared state. */
+export function resetErrorChipColorCache () {
+  resetAccessibleChipColorCache()
 }
