@@ -36,11 +36,8 @@ export const WARNING_CHIP_TEXT_VAR = '--g-warning-chip-text'
 export const WARNING_CHIP_BACKGROUND_VAR = '--g-warning-chip-background'
 export const WARNING_CHIP_BACKGROUND_OPACITY_VAR = '--g-warning-chip-background-opacity'
 
-/** Vuetify tonal chips tint the background at `--v-activated-opacity` (default 0.12). */
+/** Match Vuetify's default tonal chip opacity when calculating its visible background color. */
 const TONAL_BACKGROUND_OPACITY = 0.12
-
-const LIGHT_SURFACE = '#ffffff'
-const DARK_SURFACE = '#121212'
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
@@ -113,7 +110,7 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
 }
 
 /**
- * Chooses readable colors for flat or Vuetify tonal chips.
+ * Chooses readable colors for Vuetify flat or tonal chips.
  *
  * Flat chips prefer white text and adjust their background when needed. Tonal
  * chips preserve the default colors when possible, then change either the
@@ -247,12 +244,9 @@ function createWarningChipCssVars (themeValue) {
     return undefined
   }
 
-  const surface = themeValue?.colors?.surface ??
-    (themeValue?.dark ? DARK_SURFACE : LIGHT_SURFACE)
-
   const accessible = pickAccessibleChipColors(warningColor, {
     variant: 'tonal',
-    surface,
+    surface: themeValue.colors.surface,
   })
   if (!accessible) {
     return undefined

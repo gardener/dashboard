@@ -19,6 +19,7 @@ const mockThemeCurrent = ref({
   colors: {
     error: '#E57373',
     warning: '#E65100',
+    surface: '#ffffff',
   },
   dark: false,
 })
@@ -173,19 +174,17 @@ describe('composables', () => {
         mockThemeCurrent.value = {
           dark,
           colors: {
+            surface: dark ? '#121212' : '#ffffff',
             ...colors,
           },
         }
       }
 
       beforeEach(() => {
-        mockThemeCurrent.value = {
-          dark: false,
-          colors: {
-            error: '#E57373',
-            warning: '#E65100',
-          },
-        }
+        setTheme({
+          error: '#E57373',
+          warning: '#E65100',
+        })
       })
 
       it('should darken a low-contrast theme error color and use white text', () => {
