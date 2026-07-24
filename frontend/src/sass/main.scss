@@ -52,6 +52,20 @@
   cursor: pointer;
 }
 
+.g-error-chip {
+  --v-theme-error: var(--g-error-chip-background);
+  --v-theme-on-error: var(--g-error-chip-text);
+}
+
+.v-chip.g-warning-chip {
+  color: rgb(var(--g-warning-chip-text, var(--v-theme-warning)));
+
+  &.v-chip--variant-tonal .v-chip__underlay {
+    background: rgb(var(--g-warning-chip-background, var(--v-theme-warning)));
+    opacity: var(--g-warning-chip-background-opacity, var(--v-activated-opacity));
+  }
+}
+
 .pointer-events-none {
   pointer-events: none !important;
 }

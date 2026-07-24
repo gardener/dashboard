@@ -29,16 +29,12 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
 
-    <v-list
-      variant="flat"
-      class="main-menu"
-    >
+    <v-list variant="flat">
       <v-list-item
         v-if="hasNoProjects"
         exact
         :to="{ name: 'Home' }"
         class="bg-main-background"
-        active-class="active-item"
       >
         <template #append>
           <v-icon
@@ -61,7 +57,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item
             :to="namespacedMenuRoute(route)"
             class="bg-main-background"
-            active-class="active-item"
           >
             <template #prepend>
               <v-icon
@@ -86,7 +81,6 @@ SPDX-License-Identifier: Apache-2.0
           <v-list-item
             :to="nonNamespacedMenuRoute(route)"
             class="bg-main-background"
-            active-class="active-item"
           >
             <template #prepend>
               <v-icon
@@ -267,11 +261,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style lang="scss" scoped>
-.main-menu {
-  .active-item {
-    background-color: rgba(#fff, .3);
-  }
-}
-</style>
