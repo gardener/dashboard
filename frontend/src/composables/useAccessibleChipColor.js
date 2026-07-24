@@ -10,6 +10,7 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
+  blend,
   formatHex,
   formatRgb,
   modeLrgb,
@@ -20,7 +21,7 @@ import {
   wcagContrast,
 } from 'culori/fn'
 
-useMode(modeRgb)
+const toRgb = useMode(modeRgb)
 useMode(modeLrgb)
 const toOklch = useMode(modeOklch)
 const toSrgbGamut = toGamut('rgb', 'oklch')
@@ -66,17 +67,14 @@ function pickHigherContrastTextColor (background) {
 
 function createTonalBackgroundColor (foreground, background, opacity) {
   try {
-    const fg = toSrgbGamut(toOklch(foreground))
-    const bg = toSrgbGamut(toOklch(background))
-    if (!fg || !bg || typeof fg.r !== 'number' || typeof bg.r !== 'number') {
+    const foregroundRgb = toRgb(foreground)
+    if (!foregroundRgb) {
       return undefined
     }
-    return formatHex({
-      mode: 'rgb',
-      r: fg.r * opacity + bg.r * (1 - opacity),
-      g: fg.g * opacity + bg.g * (1 - opacity),
-      b: fg.b * opacity + bg.b * (1 - opacity),
-    })
+    return formatHex(blend([
+      background,
+      { ...foregroundRgb, alpha: opacity },
+    ]))
   } catch {
     return undefined
   }
