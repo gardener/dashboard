@@ -21,7 +21,6 @@ SPDX-License-Identifier: Apache-2.0
           :name="providerType"
           vendor-type="infra"
           :size="60"
-          no-background
           :style="getVendorIconStyles(isHovering)"
         />
         <div class="mt-2 text-body-large">
