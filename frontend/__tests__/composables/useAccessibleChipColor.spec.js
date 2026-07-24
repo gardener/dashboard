@@ -28,11 +28,9 @@ vi.mock('vuetify', () => ({
 
 const {
   pickAccessibleChipColors,
-  pickAccessibleTonalChipColors,
   colorToVuetifyRgb,
-  useAccessibleErrorChipColors,
-  useAccessibleWarningChipColors,
-  resetErrorChipColorCache,
+  useAccessibleChipColors,
+  resetAccessibleChipColorCache,
   ERROR_CHIP_BACKGROUND_VAR,
   ERROR_CHIP_TEXT_VAR,
   WARNING_CHIP_TEXT_VAR,
@@ -62,6 +60,8 @@ describe('composables', () => {
         const result = pickAccessibleChipColors(background)
         expect(result.background).toBe(background)
         expect(result.textColor).toBe('#ffffff')
+        expect(result.backgroundChanged).toBe(false)
+        expect(result.textColorChanged).toBe(false)
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
@@ -73,25 +73,47 @@ describe('composables', () => {
         expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.background).not.toBe(background)
         expect(result.textColor).toBe('#ffffff')
+        expect(result.backgroundChanged).toBe(true)
+        expect(result.textColorChanged).toBe(false)
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
+      })
+
+      it('should reach the highest possible contrast by darkening the background', () => {
+        const result = pickAccessibleChipColors('#ffffff', {
+          targetContrast: 21,
+        })
+
+        expect(result.background).toBe('#000000')
+        expect(result.textColor).toBe('#ffffff')
+        expect(wcagContrast(result.background, result.textColor)).toBe(21)
       })
 
       it('should fall back to white text when the background color cannot be parsed', () => {
         expect(pickAccessibleChipColors('not-a-color')).toEqual({
           background: 'not-a-color',
           textColor: '#ffffff',
+          backgroundChanged: false,
+          textColorChanged: false,
         })
       })
     })
 
-    describe('#pickAccessibleTonalChipColors', () => {
-      it('should change nothing when default tonal contrast already passes', () => {
+    describe('#pickAccessibleChipColors with a tonal chip', () => {
+      it('should keep the default tonal colors when their contrast already passes', () => {
         const color = '#BF360C'
         const surface = '#ffffff'
         const blend = blendOver(color, surface, 0.12)
         expect(wcagContrast(color, blend)).toBeGreaterThanOrEqual(4.5)
 
-        expect(pickAccessibleTonalChipColors(color, surface)).toEqual({ mode: 'none' })
+        expect(pickAccessibleChipColors(color, {
+          variant: 'tonal',
+          surface,
+        })).toEqual({
+          background: blend,
+          textColor: color,
+          backgroundChanged: false,
+          textColorChanged: false,
+        })
       })
 
       it('should adjust only the background when that is enough for contrast', () => {
@@ -101,11 +123,15 @@ describe('composables', () => {
         expect(wcagContrast(color, blend)).toBeLessThan(4.5)
         expect(wcagContrast(color, surface)).toBeGreaterThanOrEqual(4.5)
 
-        const result = pickAccessibleTonalChipColors(color, surface)
-        expect(result.mode).toBe('background')
+        const result = pickAccessibleChipColors(color, {
+          variant: 'tonal',
+          surface,
+        })
         expect(result.textColor).toBe(color)
         expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.background).not.toBe(color)
+        expect(result.backgroundChanged).toBe(true)
+        expect(result.textColorChanged).toBe(false)
         expect(wcagContrast(result.textColor, result.background)).toBeGreaterThanOrEqual(4.5)
       })
 
@@ -114,24 +140,31 @@ describe('composables', () => {
         const surface = '#ffffff'
         expect(wcagContrast(color, surface)).toBeLessThan(4.5)
 
-        const result = pickAccessibleTonalChipColors(color, surface)
-        expect(result.mode).toBe('text')
+        const result = pickAccessibleChipColors(color, {
+          variant: 'tonal',
+          surface,
+        })
         expect(result.textColor).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.textColor).not.toBe(color)
         expect(result.textColor).not.toBe('#000000')
         expect(result.textColor).not.toBe('#ffffff')
-        expect(result).not.toHaveProperty('background')
+        expect(result.backgroundChanged).toBe(false)
+        expect(result.textColorChanged).toBe(true)
 
         const blend = blendOver(color, surface, 0.12)
+        expect(result.background).toBe(blend)
         expect(wcagContrast(result.textColor, blend)).toBeGreaterThanOrEqual(4.5)
       })
 
-      it('should leave unparseable colors unchanged', () => {
-        expect(pickAccessibleTonalChipColors('not-a-color', '#ffffff')).toEqual({ mode: 'none' })
+      it('should return undefined when tonal colors cannot be parsed', () => {
+        expect(pickAccessibleChipColors('not-a-color', {
+          variant: 'tonal',
+          surface: '#ffffff',
+        })).toBeUndefined()
       })
     })
 
-    describe('#useAccessibleErrorChipColors', () => {
+    describe('#useAccessibleChipColors', () => {
       function createTheme (colors, dark = false) {
         return {
           current: ref({
@@ -144,7 +177,7 @@ describe('composables', () => {
       }
 
       beforeEach(() => {
-        resetErrorChipColorCache()
+        resetAccessibleChipColorCache()
         mockThemeCurrent.value = {
           dark: false,
           colors: {
@@ -155,108 +188,87 @@ describe('composables', () => {
       })
 
       it('should darken a low-contrast theme error color and use white text', () => {
-        const { errorChipCssVars } = useAccessibleErrorChipColors(createTheme({
+        const { chipCssVars } = useAccessibleChipColors(createTheme({
           error: '#E57373',
         }))
 
-        expect(errorChipCssVars.value.backgroundRgb).not.toBe(colorToVuetifyRgb('#E57373'))
-        expect(errorChipCssVars.value.textRgb).toBe(colorToVuetifyRgb('#ffffff'))
+        expect(chipCssVars.value.error.backgroundRgb).not.toBe(colorToVuetifyRgb('#E57373'))
+        expect(chipCssVars.value.error.textRgb).toBe(colorToVuetifyRgb('#ffffff'))
       })
 
       it('should return undefined when the theme has no error color', () => {
-        const { errorChipCssVars } = useAccessibleErrorChipColors(createTheme({}))
-        expect(errorChipCssVars.value).toBeUndefined()
+        const { chipCssVars } = useAccessibleChipColors(createTheme({}))
+        expect(chipCssVars.value.error).toBeUndefined()
       })
 
       it('should update the chip colors when the theme\'s error color changes', () => {
         const theme = createTheme({
           error: '#E57373',
         })
-        const { errorChipCssVars } = useAccessibleErrorChipColors(theme)
-        const initialBackgroundRgb = errorChipCssVars.value.backgroundRgb
+        const { chipCssVars } = useAccessibleChipColors(theme)
+        const initialBackgroundRgb = chipCssVars.value.error.backgroundRgb
 
         theme.current.value.colors.error = '#B71C1C'
 
-        expect(errorChipCssVars.value.backgroundRgb).not.toBe(initialBackgroundRgb)
-        expect(errorChipCssVars.value).toEqual({
+        expect(chipCssVars.value.error.backgroundRgb).not.toBe(initialBackgroundRgb)
+        expect(chipCssVars.value.error).toEqual({
           backgroundRgb: colorToVuetifyRgb('#B71C1C'),
           textRgb: colorToVuetifyRgb('#ffffff'),
         })
       })
 
-      it('should set document-level CSS variables for the accessible chip colors', () => {
-        const { errorChipCssVars } = useAccessibleErrorChipColors()
-        const { backgroundRgb, textRgb } = errorChipCssVars.value
-
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BACKGROUND_VAR))
-          .toBe(backgroundRgb)
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_TEXT_VAR))
-          .toBe(textRgb)
-      })
-    })
-
-    describe('#useAccessibleWarningChipColors', () => {
-      function createTheme (colors, dark = false) {
-        return {
-          current: ref({
-            dark,
-            colors: {
-              ...colors,
-            },
-          }),
-        }
-      }
-
-      beforeEach(() => {
-        resetErrorChipColorCache()
-        mockThemeCurrent.value = {
-          dark: false,
-          colors: {
-            error: '#E57373',
-            warning: '#E65100',
-          },
-        }
-      })
-
       it('should set only the text CSS variable for a low-contrast light warning', () => {
-        const { warningChipCssVars } = useAccessibleWarningChipColors(createTheme({
+        const { chipCssVars } = useAccessibleChipColors(createTheme({
           warning: '#E65100',
         }))
 
-        expect(warningChipCssVars.value.mode).toBe('text')
-        expect(warningChipCssVars.value.textRgb).toBeDefined()
-        expect(warningChipCssVars.value).not.toHaveProperty('backgroundRgb')
+        expect(chipCssVars.value.warning.textRgb).toBeDefined()
+        expect(chipCssVars.value.warning).not.toHaveProperty('backgroundRgb')
       })
 
       it('should set only the background CSS variables when background adjustment is enough', () => {
-        const { warningChipCssVars } = useAccessibleWarningChipColors(createTheme({
+        const { chipCssVars } = useAccessibleChipColors(createTheme({
           warning: '#2e7b19',
         }))
 
-        expect(warningChipCssVars.value.mode).toBe('background')
-        expect(warningChipCssVars.value.backgroundRgb).toBeDefined()
-        expect(warningChipCssVars.value.backgroundOpacity).toBe('1')
-        expect(warningChipCssVars.value).not.toHaveProperty('textRgb')
+        expect(chipCssVars.value.warning.backgroundRgb).toBeDefined()
+        expect(chipCssVars.value.warning.backgroundOpacity).toBe('1')
+        expect(chipCssVars.value.warning).not.toHaveProperty('textRgb')
       })
 
-      it('should report mode none when tonal contrast already passes', () => {
-        const { warningChipCssVars } = useAccessibleWarningChipColors(createTheme({
+      it('should not override tonal colors when their contrast already passes', () => {
+        const { chipCssVars } = useAccessibleChipColors(createTheme({
           warning: '#BF360C',
         }))
 
-        expect(warningChipCssVars.value).toEqual({ mode: 'none' })
+        expect(chipCssVars.value.warning).toEqual({})
       })
 
-      it('should set document-level CSS variables for the text-only warning path', () => {
-        const { warningChipCssVars } = useAccessibleWarningChipColors()
-        expect(warningChipCssVars.value.mode).toBe('text')
+      it('should set document-level CSS variables for both chip variants', () => {
+        const { chipCssVars } = useAccessibleChipColors()
 
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BACKGROUND_VAR))
+          .toBe(chipCssVars.value.error.backgroundRgb)
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_TEXT_VAR))
+          .toBe(chipCssVars.value.error.textRgb)
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_TEXT_VAR))
-          .toBe(warningChipCssVars.value.textRgb)
+          .toBe(chipCssVars.value.warning.textRgb)
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_VAR))
           .toBe('')
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR))
           .toBe('')
+      })
+
+      it('should remove document-level CSS variables when shared state is reset', () => {
+        useAccessibleChipColors()
+
+        resetAccessibleChipColorCache()
+
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BACKGROUND_VAR)).toBe('')
+        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_TEXT_VAR)).toBe('')
+        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_TEXT_VAR)).toBe('')
+        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_VAR)).toBe('')
+        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR)).toBe('')
       })
     })
   })

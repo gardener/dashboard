@@ -16,17 +16,9 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { wcagContrast } from 'culori'
+import { pickAccessibleChipColors } from '@/composables/useAccessibleChipColor'
 
 import get from 'lodash/get'
-
-function getAccessibleTextColor (background) {
-  try {
-    return wcagContrast(background, '#ffffff') >= 4.5 ? '#fff' : '#000'
-  } catch {
-    return '#fff'
-  }
-}
 
 export default {
   props: {
@@ -38,8 +30,9 @@ export default {
   computed: {
     labelStyle () {
       return label => {
-        const bgColor = `#${get(label, ['color'])}`
-        return `background-color: ${bgColor}; color: ${getAccessibleTextColor(bgColor)};`
+        const background = `#${get(label, ['color'])}`
+        const accessible = pickAccessibleChipColors(background)
+        return `background-color: ${accessible.background}; color: ${accessible.textColor};`
       }
     },
   },
