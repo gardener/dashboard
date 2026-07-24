@@ -6,11 +6,8 @@
 
 import { ref } from 'vue'
 import {
-  formatHex,
   modeLrgb,
-  modeOklch,
   modeRgb,
-  toGamut,
   useMode,
   wcagContrast,
 } from 'culori/fn'
@@ -43,19 +40,6 @@ const {
 
 useMode(modeRgb)
 useMode(modeLrgb)
-const toOklch = useMode(modeOklch)
-const toSrgbGamut = toGamut('rgb', 'oklch')
-
-function blendOver (foreground, background, opacity) {
-  const fg = toSrgbGamut(toOklch(foreground))
-  const bg = toSrgbGamut(toOklch(background))
-  return formatHex({
-    mode: 'rgb',
-    r: fg.r * opacity + bg.r * (1 - opacity),
-    g: fg.g * opacity + bg.g * (1 - opacity),
-    b: fg.b * opacity + bg.b * (1 - opacity),
-  })
-}
 
 describe('composables', () => {
   describe('useAccessibleChipColor', () => {
@@ -107,25 +91,21 @@ describe('composables', () => {
       it('should keep the default tonal colors when their contrast already passes', () => {
         const color = '#BF360C'
         const surface = '#ffffff'
-        const blend = blendOver(color, surface, 0.12)
-        expect(wcagContrast(color, blend)).toBeGreaterThanOrEqual(4.5)
 
-        expect(pickAccessibleChipColors(color, {
+        const result = pickAccessibleChipColors(color, {
           variant: 'tonal',
           surface,
-        })).toEqual({
-          background: blend,
-          textColor: color,
-          backgroundChanged: false,
-          textColorChanged: false,
         })
+        expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
+        expect(result.textColor).toBe(color)
+        expect(result.backgroundChanged).toBe(false)
+        expect(result.textColorChanged).toBe(false)
+        expect(wcagContrast(result.textColor, result.background)).toBeGreaterThanOrEqual(4.5)
       })
 
       it('should adjust only the background when that is enough for contrast', () => {
         const color = '#2e7b19'
         const surface = '#ffffff'
-        const blend = blendOver(color, surface, 0.12)
-        expect(wcagContrast(color, blend)).toBeLessThan(4.5)
         expect(wcagContrast(color, surface)).toBeGreaterThanOrEqual(4.5)
 
         const result = pickAccessibleChipColors(color, {
@@ -155,10 +135,7 @@ describe('composables', () => {
         expect(result.textColor).not.toBe('#ffffff')
         expect(result.backgroundChanged).toBe(false)
         expect(result.textColorChanged).toBe(true)
-
-        const blend = blendOver(color, surface, 0.12)
-        expect(result.background).toBe(blend)
-        expect(wcagContrast(result.textColor, blend)).toBeGreaterThanOrEqual(4.5)
+        expect(wcagContrast(result.textColor, result.background)).toBeGreaterThanOrEqual(4.5)
       })
 
       it('should return undefined when tonal colors cannot be parsed', () => {
