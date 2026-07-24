@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="cursor-pointer"
         variant="tonal"
-        :color="color"
+        :color="getTonalColorName(color)"
       >
         <template #prepend>
           <v-icon
@@ -137,6 +137,7 @@ SPDX-License-Identifier: Apache-2.0
 import { ref } from 'vue'
 
 import { isMdiIcon } from '@/utils/mdiIcons'
+import { getTonalColorName } from '@/utils/themeColors'
 
 defineProps({
   color: {

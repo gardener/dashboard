@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="projectPhase !== 'Ready'">
       <div>
         The project phase is <v-chip
-          color="primary"
+          color="tonalPrimary"
           label
           size="x-small"
           class="px-1"

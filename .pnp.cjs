@@ -1053,7 +1053,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
           ["culori", "npm:4.0.2"],\
-          ["dayjs", "npm:1.11.21"],\
+          ["dayjs", "npm:1.11.23"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
           ["eslint-import-resolver-alias", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.1.2"],\
@@ -8489,15 +8489,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["is-what", [\
-      ["npm:5.5.0", {\
-        "packageLocation": "./.yarn/cache/is-what-npm-5.5.0-d0c4588dc8-065c8a4ac6.zip/node_modules/is-what/",\
-        "packageDependencies": [\
-          ["is-what", "npm:5.5.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["is-wsl", [\
       ["npm:2.2.0", {\
         "packageLocation": "./.yarn/cache/is-wsl-npm-2.2.0-2ba10d6393-a6fa2d370d.zip/node_modules/is-wsl/",\
@@ -11213,15 +11204,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/reusify-npm-1.0.4-95ac4aec11-c19ef26e4e.zip/node_modules/reusify/",\
         "packageDependencies": [\
           ["reusify", "npm:1.0.4"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["rfdc", [\
-      ["npm:1.4.1", {\
-        "packageLocation": "./.yarn/cache/rfdc-npm-1.4.1-1a1c63d052-4614e42923.zip/node_modules/rfdc/",\
-        "packageDependencies": [\
-          ["rfdc", "npm:1.4.1"]\
         ],\
         "linkType": "HARD"\
       }]\

@@ -20,12 +20,12 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props: popoverActivatorProps }">
         <v-chip
           v-bind="popoverActivatorProps"
-          :class="{ 'cursor-pointer': condition.message, 'g-error-chip': isError }"
+          :class="{ 'cursor-pointer': condition.message }"
           :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
-          :color="color"
+          :color="chipColor"
           class="status-tag"
         >
           <v-icon
@@ -60,6 +60,11 @@ import { useAuthzStore } from '@/store/authz'
 
 import GShootMessageDetails from '@/components/GShootMessageDetails.vue'
 import GStatusTagTooltip from '@/components/GStatusTagTooltip.vue'
+
+import {
+  getFlatColorName,
+  getTonalColorName,
+} from '@/utils/themeColors'
 
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -202,6 +207,11 @@ export default {
         return 'info'
       }
       return 'primary'
+    },
+    chipColor () {
+      return this.isError
+        ? getFlatColorName(this.color)
+        : getTonalColorName(this.color)
     },
     visible () {
       if (!this.canViewLandscape) {

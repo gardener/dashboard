@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
         border="start"
         :rounded="0"
         min-width="360"
-        :color="color"
+        :color="tonalColor"
         class="pr-0 ma-0"
       >
         <v-row
@@ -129,6 +129,8 @@ import GDisconnected from '@/components/icons/GDisconnected.vue'
 
 import { useShootSubscription } from '@/composables/useShootSubscription'
 
+import { getTonalColorName } from '@/utils/themeColors'
+
 import get from 'lodash/get'
 
 const components = {
@@ -163,6 +165,8 @@ const iconName = computed(() => {
 const btnLoading = computed(() => {
   return kind.value.startsWith('progress')
 })
+
+const tonalColor = computed(() => getTonalColorName(color.value))
 
 function close () {
   modelValue.value = false

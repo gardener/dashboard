@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { pickAccessibleChipColors } from '@/composables/useAccessibleChipColor'
+import { pickAccessibleTextColor } from '@/utils/accessibleColors'
 
 import get from 'lodash/get'
 
@@ -31,8 +31,8 @@ export default {
     labelStyle () {
       return label => {
         const background = `#${get(label, ['color'])}`
-        const accessible = pickAccessibleChipColors(background)
-        return `background-color: ${accessible.background}; color: ${accessible.textColor};`
+        const textColor = pickAccessibleTextColor(background)
+        return `background-color: ${background}; color: ${textColor};`
       }
     },
   },

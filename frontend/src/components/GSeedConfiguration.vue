@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="providerMismatch"
           class="my-2"
           type="info"
+          color="tonalInfo"
           variant="tonal"
         >
           The selected seed cluster has a different provider type than the current seed cluster or the shoot. This may lead to migration issues.

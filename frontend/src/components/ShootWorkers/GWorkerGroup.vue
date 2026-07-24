@@ -15,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="props"
         size="small"
         class="cursor-pointer"
-        :class="{ 'g-warning-chip': chipColor === 'warning' }"
         variant="tonal"
         :color="chipColor"
       >
@@ -503,7 +502,9 @@ export default {
       return yamlDump(this.workerGroup)
     },
     chipColor () {
-      return !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'
+      return !this.machineImage || this.machineImage.isDeprecated
+        ? 'tonalWarning'
+        : 'tonalPrimary'
     },
   },
 }
