@@ -224,13 +224,13 @@ function applyAccessibleChipCssVars (vars) {
 }
 
 function createErrorChipCssVars (themeValue) {
-  const accessible = pickAccessibleChipColors(themeValue?.colors?.error)
-  if (!accessible) {
+  const errorChipColors = pickAccessibleChipColors(themeValue?.colors?.error)
+  if (!errorChipColors) {
     return undefined
   }
 
-  const backgroundRgb = colorToVuetifyRgb(accessible.background)
-  const textRgb = colorToVuetifyRgb(accessible.textColor)
+  const backgroundRgb = colorToVuetifyRgb(errorChipColors.background)
+  const textRgb = colorToVuetifyRgb(errorChipColors.textColor)
   if (!backgroundRgb || !textRgb) {
     return undefined
   }
@@ -244,24 +244,24 @@ function createWarningChipCssVars (themeValue) {
     return undefined
   }
 
-  const accessible = pickAccessibleChipColors(warningColor, {
+  const warningChipColors = pickAccessibleChipColors(warningColor, {
     variant: 'tonal',
     surface: themeValue.colors.surface,
   })
-  if (!accessible) {
+  if (!warningChipColors) {
     return undefined
   }
 
   const vars = {}
-  if (accessible.backgroundChanged) {
-    const backgroundRgb = colorToVuetifyRgb(accessible.background)
+  if (warningChipColors.backgroundChanged) {
+    const backgroundRgb = colorToVuetifyRgb(warningChipColors.background)
     if (!backgroundRgb) {
       return undefined
     }
     vars.backgroundRgb = backgroundRgb
     vars.backgroundOpacity = '1'
-  } else if (accessible.textColorChanged) {
-    const textRgb = colorToVuetifyRgb(accessible.textColor)
+  } else if (warningChipColors.textColorChanged) {
+    const textRgb = colorToVuetifyRgb(warningChipColors.textColor)
     if (!textRgb) {
       return undefined
     }
