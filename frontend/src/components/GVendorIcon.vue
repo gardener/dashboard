@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-avatar
     :size="size"
-    rounded="lg"
     tile
     :class="{ 'icon-background': !noBackground }"
   >
@@ -16,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
       :src="iconSrc"
       :style="iconStyle"
       :alt="`${icon} logo`"
-      class="rounded-0"
     >
     <v-icon
       v-else
@@ -111,5 +109,6 @@ const iconStyle = computed(() => {
 <style lang="scss" scoped>
   .v-theme--dark .icon-background {
     background-color: #e0e0e0;
+    border-radius: 7px !important;
   }
 </style>
