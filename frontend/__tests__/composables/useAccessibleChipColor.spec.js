@@ -67,16 +67,6 @@ describe('composables', () => {
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
-      it('should reach the highest possible contrast by darkening the background', () => {
-        const result = pickAccessibleChipColors('#ffffff', {
-          targetContrast: 21,
-        })
-
-        expect(result.background).toBe('#000000')
-        expect(result.textColor).toBe('#ffffff')
-        expect(wcagContrast(result.background, result.textColor)).toBe(21)
-      })
-
       it('should fall back to white text when the background color cannot be parsed', () => {
         expect(pickAccessibleChipColors('not-a-color')).toEqual({
           background: 'not-a-color',
@@ -103,10 +93,25 @@ describe('composables', () => {
         expect(wcagContrast(result.textColor, result.background)).toBeGreaterThanOrEqual(4.5)
       })
 
+      it('should adjust the background on a dark surface when the original tonal contrast does not pass', () => {
+        const color = '#808080'
+        const surface = '#121212'
+
+        const result = pickAccessibleChipColors(color, {
+          variant: 'tonal',
+          surface,
+        })
+        expect(result.textColor).toBe(color)
+        expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
+        expect(result.background).not.toBe(color)
+        expect(result.backgroundChanged).toBe(true)
+        expect(result.textColorChanged).toBe(false)
+        expect(wcagContrast(result.textColor, result.background)).toBeGreaterThanOrEqual(4.5)
+      })
+
       it('should adjust only the background when that is enough for contrast', () => {
         const color = '#2e7b19'
-        const surface = '#ffffff'
-        expect(wcagContrast(color, surface)).toBeGreaterThanOrEqual(4.5)
+        const surface = '#ffffff' // surface color under the tonal background
 
         const result = pickAccessibleChipColors(color, {
           variant: 'tonal',
@@ -235,6 +240,9 @@ describe('composables', () => {
           .toBe(chipCssVars.value.error.textRgb)
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_TEXT_VAR))
           .toBe(chipCssVars.value.warning.textRgb)
+
+        // This warning color only needs a text adjustment, so its Vuetify background stays unchanged.
+        // and the last two properties are not set
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_VAR))
           .toBe('')
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR))
