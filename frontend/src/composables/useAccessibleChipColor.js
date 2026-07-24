@@ -119,7 +119,7 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
  * @param {string} color Flat background or tonal theme color
  * @param {object} [options]
  * @param {'flat'|'tonal'} [options.variant='flat']
- * @param {string} [options.surface] Surface behind a tonal chip
+ * @param {string} [options.surface] Surface color (hex) behind a tonal chip
  * @param {number} [options.targetContrast=4.5] Minimum WCAG contrast ratio
  * @returns {{
  *   background: string,

@@ -31,8 +31,8 @@ export default {
     labelStyle () {
       return label => {
         const background = `#${get(label, ['color'])}`
-        const accessible = pickAccessibleChipColors(background)
-        return `background-color: ${accessible.background}; color: ${accessible.textColor};`
+        const labelColors = pickAccessibleChipColors(background)
+        return `background-color: ${labelColors.background}; color: ${labelColors.textColor};`
       }
     },
   },

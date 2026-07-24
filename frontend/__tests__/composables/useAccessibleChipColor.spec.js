@@ -241,8 +241,8 @@ describe('composables', () => {
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_TEXT_VAR))
           .toBe(chipCssVars.value.warning.textRgb)
 
-        // This warning color only needs a text adjustment, so its Vuetify background stays unchanged.
-        // and the last two properties are not set
+        // This warning color only needs a text adjustment, so its Vuetify background stays unchanged
+        // and the last two properties don't get set
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_VAR))
           .toBe('')
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR))
