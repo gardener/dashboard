@@ -62,11 +62,7 @@ function pickHigherContrastTextColor (background) {
     : BLACK
 }
 
-/**
- * Alpha-blend `foreground` over `background` at unitless `opacity` (0–1).
- * Returns a hex string, or undefined when either color cannot be parsed.
- */
-function blendOver (foreground, background, opacity) {
+function createTonalBackgroundColor (foreground, background, opacity) {
   try {
     const fg = toSrgbGamut(toOklch(foreground))
     const bg = toSrgbGamut(toOklch(background))
@@ -88,8 +84,6 @@ function blendOver (foreground, background, opacity) {
  * Adjusts OKLCH lightness of `originalColor` toward `targetLightness` until contrast
  * with `textColor` meets `targetContrast`. Returns the closest passing hex color, or null.
  *
- * Contrast is checked on the hex-quantized candidate so 8-bit rounding cannot drop a
- * barely-passing float color below the threshold.
  *
  * @param {object} originalColor Culori OKLCH color object (not a hex string)
  * @param {string} textColor Hex color used as the contrast partner (e.g. `#ffffff`)
@@ -163,7 +157,7 @@ export function pickAccessibleChipColors (color, {
       return undefined
     }
 
-    background = blendOver(color, surface, TONAL_BACKGROUND_OPACITY)
+    background = createTonalBackgroundColor(color, surface, TONAL_BACKGROUND_OPACITY)
     if (!background) {
       return undefined
     }
