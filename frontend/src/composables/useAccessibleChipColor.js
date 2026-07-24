@@ -10,14 +10,19 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
-  converter,
   formatHex,
   formatRgb,
+  modeLrgb,
+  modeOklch,
+  modeRgb,
   toGamut,
+  useMode,
   wcagContrast,
-} from 'culori'
+} from 'culori/fn'
 
-const toOklch = converter('oklch')
+useMode(modeRgb)
+useMode(modeLrgb)
+const toOklch = useMode(modeOklch)
 const toSrgbGamut = toGamut('rgb', 'oklch')
 
 const WHITE = '#ffffff'

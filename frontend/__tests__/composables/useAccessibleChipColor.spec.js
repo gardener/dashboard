@@ -6,11 +6,14 @@
 
 import { ref } from 'vue'
 import {
-  converter,
   formatHex,
+  modeLrgb,
+  modeOklch,
+  modeRgb,
   toGamut,
+  useMode,
   wcagContrast,
-} from 'culori'
+} from 'culori/fn'
 
 const mockThemeCurrent = ref({
   colors: {
@@ -37,7 +40,9 @@ const {
   WARNING_CHIP_BACKGROUND_OPACITY_VAR,
 } = await import('@/composables/useAccessibleChipColor')
 
-const toOklch = converter('oklch')
+useMode(modeRgb)
+useMode(modeLrgb)
+const toOklch = useMode(modeOklch)
 const toSrgbGamut = toGamut('rgb', 'oklch')
 
 function blendOver (foreground, background, opacity) {
