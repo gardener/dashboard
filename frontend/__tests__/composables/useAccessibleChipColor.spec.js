@@ -30,7 +30,6 @@ const {
   pickAccessibleChipColors,
   colorToVuetifyRgb,
   useAccessibleChipColors,
-  resetAccessibleChipColorCache,
   ERROR_CHIP_BACKGROUND_VAR,
   ERROR_CHIP_TEXT_VAR,
   WARNING_CHIP_TEXT_VAR,
@@ -165,19 +164,16 @@ describe('composables', () => {
     })
 
     describe('#useAccessibleChipColors', () => {
-      function createTheme (colors, dark = false) {
-        return {
-          current: ref({
-            dark,
-            colors: {
-              ...colors,
-            },
-          }),
+      function setTheme (colors, dark = false) {
+        mockThemeCurrent.value = {
+          dark,
+          colors: {
+            ...colors,
+          },
         }
       }
 
       beforeEach(() => {
-        resetAccessibleChipColorCache()
         mockThemeCurrent.value = {
           dark: false,
           colors: {
@@ -188,27 +184,29 @@ describe('composables', () => {
       })
 
       it('should darken a low-contrast theme error color and use white text', () => {
-        const { chipCssVars } = useAccessibleChipColors(createTheme({
+        setTheme({
           error: '#E57373',
-        }))
+        })
+        const { chipCssVars } = useAccessibleChipColors()
 
         expect(chipCssVars.value.error.backgroundRgb).not.toBe(colorToVuetifyRgb('#E57373'))
         expect(chipCssVars.value.error.textRgb).toBe(colorToVuetifyRgb('#ffffff'))
       })
 
       it('should return undefined when the theme has no error color', () => {
-        const { chipCssVars } = useAccessibleChipColors(createTheme({}))
+        setTheme({})
+        const { chipCssVars } = useAccessibleChipColors()
         expect(chipCssVars.value.error).toBeUndefined()
       })
 
       it('should update the chip colors when the theme\'s error color changes', () => {
-        const theme = createTheme({
+        setTheme({
           error: '#E57373',
         })
-        const { chipCssVars } = useAccessibleChipColors(theme)
+        const { chipCssVars } = useAccessibleChipColors()
         const initialBackgroundRgb = chipCssVars.value.error.backgroundRgb
 
-        theme.current.value.colors.error = '#B71C1C'
+        mockThemeCurrent.value.colors.error = '#B71C1C'
 
         expect(chipCssVars.value.error.backgroundRgb).not.toBe(initialBackgroundRgb)
         expect(chipCssVars.value.error).toEqual({
@@ -218,18 +216,20 @@ describe('composables', () => {
       })
 
       it('should set only the text CSS variable for a low-contrast light warning', () => {
-        const { chipCssVars } = useAccessibleChipColors(createTheme({
+        setTheme({
           warning: '#E65100',
-        }))
+        })
+        const { chipCssVars } = useAccessibleChipColors()
 
         expect(chipCssVars.value.warning.textRgb).toBeDefined()
         expect(chipCssVars.value.warning).not.toHaveProperty('backgroundRgb')
       })
 
       it('should set only the background CSS variables when background adjustment is enough', () => {
-        const { chipCssVars } = useAccessibleChipColors(createTheme({
+        setTheme({
           warning: '#2e7b19',
-        }))
+        })
+        const { chipCssVars } = useAccessibleChipColors()
 
         expect(chipCssVars.value.warning.backgroundRgb).toBeDefined()
         expect(chipCssVars.value.warning.backgroundOpacity).toBe('1')
@@ -237,9 +237,10 @@ describe('composables', () => {
       })
 
       it('should not override tonal colors when their contrast already passes', () => {
-        const { chipCssVars } = useAccessibleChipColors(createTheme({
+        setTheme({
           warning: '#BF360C',
-        }))
+        })
+        const { chipCssVars } = useAccessibleChipColors()
 
         expect(chipCssVars.value.warning).toEqual({})
       })
@@ -257,18 +258,6 @@ describe('composables', () => {
           .toBe('')
         expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR))
           .toBe('')
-      })
-
-      it('should remove document-level CSS variables when shared state is reset', () => {
-        useAccessibleChipColors()
-
-        resetAccessibleChipColorCache()
-
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_BACKGROUND_VAR)).toBe('')
-        expect(document.documentElement.style.getPropertyValue(ERROR_CHIP_TEXT_VAR)).toBe('')
-        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_TEXT_VAR)).toBe('')
-        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_VAR)).toBe('')
-        expect(document.documentElement.style.getPropertyValue(WARNING_CHIP_BACKGROUND_OPACITY_VAR)).toBe('')
       })
     })
   })

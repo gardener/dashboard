@@ -6,7 +6,6 @@
 
 import {
   computed,
-  effectScope,
   watchEffect,
 } from 'vue'
 import { useTheme } from 'vuetify'
@@ -18,6 +17,7 @@ import {
 } from 'culori'
 
 const toOklch = converter('oklch')
+const toRgb = converter('rgb')
 const toSrgbGamut = toGamut('rgb', 'oklch')
 
 const WHITE = '#ffffff'
@@ -35,9 +35,6 @@ const TONAL_BACKGROUND_OPACITY = 0.12
 
 const LIGHT_SURFACE = '#ffffff'
 const DARK_SURFACE = '#121212'
-
-let sharedChipCssVars
-let sharedChipScope
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
@@ -136,22 +133,20 @@ export function pickAccessibleChipColors (color, {
   surface,
   targetContrast = 4.5,
 } = {}) {
-  const isTonal = variant === 'tonal'
-  if (!color || (isTonal && !surface)) {
+  if (!color || (variant === 'tonal' && !surface)) {
     return undefined
   }
 
   const original = toOklch(color)
   if (!original || typeof original.l !== 'number') {
-    // Keep an unparseable flat background and prefer white text rather than throwing.
-    return isTonal ? undefined : createChipColorResult(color, WHITE)
+    return variant === 'tonal' ? undefined : createChipColorResult(color, WHITE)
   }
 
   let background = color
   let textColor = WHITE
   let targetBackgroundLightness = 0
 
-  if (isTonal) {
+  if (variant === 'tonal') {
     const surfaceColor = toOklch(surface)
     if (!surfaceColor || typeof surfaceColor.l !== 'number') {
       return undefined
@@ -179,7 +174,7 @@ export function pickAccessibleChipColors (color, {
     return createChipColorResult(adjustedBackground, textColor, 'background')
   }
 
-  if (isTonal) {
+  if (variant === 'tonal') {
     const targetTextColor = pickHigherContrastTextColor(background)
     const targetTextLightness = targetTextColor === WHITE ? 1 : 0
     const adjustedTextColor = adjustLightnessForContrast(
@@ -201,7 +196,7 @@ export function pickAccessibleChipColors (color, {
  */
 export function colorToVuetifyRgb (color) {
   try {
-    const rgb = toSrgbGamut(toOklch(color))
+    const rgb = toRgb(color)
     if (!rgb || typeof rgb.r !== 'number') {
       return undefined
     }
@@ -287,34 +282,14 @@ function createChipCssVars (theme) {
 }
 
 /**
- * Ensures error and tonal warning chips remain readable without changing their
- * global theme colors.
- *
- * Calling without a theme exposes the colors as document CSS custom properties.
- * Passing a theme returns the reactive values without changing the document.
+ * Ensures error and tonal warning chips remain readable without changing the related
+ * global theme colors by exposing accessible colors as document CSS custom properties.
  */
-export function useAccessibleChipColors (theme) {
-  if (theme) {
-    return { chipCssVars: createChipCssVars(theme) }
-  }
+export function useAccessibleChipColors () {
+  const chipCssVars = createChipCssVars(useTheme())
+  watchEffect(() => {
+    applyAccessibleChipCssVars(chipCssVars.value)
+  })
 
-  if (!sharedChipCssVars) {
-    sharedChipScope = effectScope(true)
-    sharedChipScope.run(() => {
-      sharedChipCssVars = createChipCssVars(useTheme())
-      watchEffect(() => {
-        applyAccessibleChipCssVars(sharedChipCssVars.value)
-      })
-    })
-  }
-
-  return { chipCssVars: sharedChipCssVars }
-}
-
-/** Resets shared state between tests. */
-export function resetAccessibleChipColorCache () {
-  sharedChipScope?.stop()
-  sharedChipScope = undefined
-  sharedChipCssVars = undefined
-  applyAccessibleChipCssVars(undefined)
+  return { chipCssVars }
 }

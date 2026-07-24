@@ -52,17 +52,14 @@
   cursor: pointer;
 }
 
-/* Keep error chips readable without changing the global error color. */
 .g-error-chip {
   --v-theme-error: var(--g-error-chip-background);
   --v-theme-on-error: var(--g-error-chip-text);
 }
 
-/* Change only the color needed to keep tonal warning chips readable. */
 .v-chip.g-warning-chip {
   color: rgb(var(--g-warning-chip-text, var(--v-theme-warning)));
 
-  /* Vuetify renders the tonal background on this underlay. */
   &.v-chip--variant-tonal .v-chip__underlay {
     background: rgb(var(--g-warning-chip-background, var(--v-theme-warning)));
     opacity: var(--g-warning-chip-background-opacity, var(--v-activated-opacity));
