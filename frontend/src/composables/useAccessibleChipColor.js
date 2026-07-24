@@ -12,12 +12,12 @@ import { useTheme } from 'vuetify'
 import {
   converter,
   formatHex,
+  formatRgb,
   toGamut,
   wcagContrast,
 } from 'culori'
 
 const toOklch = converter('oklch')
-const toRgb = converter('rgb')
 const toSrgbGamut = toGamut('rgb', 'oklch')
 
 const WHITE = '#ffffff'
@@ -196,12 +196,11 @@ export function pickAccessibleChipColors (color, {
  */
 export function colorToVuetifyRgb (color) {
   try {
-    const rgb = toRgb(color)
-    if (!rgb || typeof rgb.r !== 'number') {
+    const formattedColor = formatRgb(color)
+    if (!formattedColor?.startsWith('rgb(')) {
       return undefined
     }
-    const { r, g, b } = rgb
-    return `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`
+    return formattedColor.slice(4, -1)
   } catch {
     return undefined
   }
