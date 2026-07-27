@@ -537,10 +537,27 @@ export default {
       allowProposedApi: true,
       minimumContrastRatio: 4.5,
       theme: getTerminalTheme(this.isDarkTheme),
+      macOptionClickForcesSelection: true,
     })
     const fitAddon = this.fitAddon = new FitAddon()
     const focusAddon = new FocusAddon(this.uuid)
 
+    if (navigator.userAgent.includes('Windows')) {
+      term.attachCustomKeyEventHandler(event => {
+        if (event.type !== 'keydown') {
+          return true
+        }
+        const onlyCtrlPressed = event.ctrlKey && !event.shiftKey && !event.altKey
+        if (!onlyCtrlPressed) {
+          return true
+        }
+        const hasSelection = term.getSelection().length > 0
+        const isCtrlCopy = event.code === 'KeyC' && hasSelection
+        const isCtrlPaste = event.code === 'KeyV'
+        const shouldXtermJsProcessTheKeyEvent = !(isCtrlCopy || isCtrlPaste)
+        return shouldXtermJsProcessTheKeyEvent
+      })
+    }
 
     term.open(this.$refs.container)
     term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
