@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             icon="mdi-close"
             size="small"
-            color="grey-lighten-1"
+            color="on-surface"
             variant="text"
             class="text-none g-system-bar-button g-ignore-drag"
             @click="deleteTerminal"
@@ -90,11 +90,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-spacer />
           <v-icon
             class="pr-2"
-            color="grey-lighten-1"
+            color="on-surface"
           >
             mdi-console
           </v-icon>
-          <span class="text-grey-lighten-1">{{ terminalTitle }}</span>
+          <span class="text-high-emphasis">{{ terminalTitle }}</span>
           <v-spacer />
           <v-tooltip
             v-if="terminalSession.imageHelpText"
@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-bind="mergeProps(activatorProps, tooltipProps)"
                     icon="mdi-help-circle-outline"
                     size="small"
-                    color="grey-lighten-1"
+                    color="on-surface"
                     variant="text"
                     class="text-none g-system-bar-button mx-1 g-ignore-drag"
                   />
@@ -131,82 +131,74 @@ SPDX-License-Identifier: Apache-2.0
             location="bottom"
             offset-y
             min-width="400px"
-            theme="dark"
           >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 icon="mdi-menu"
                 size="small"
-                color="grey-lighten-1"
+                color="on-surface"
                 variant="text"
                 class="text-none g-system-bar-button mx-1 g-ignore-drag"
               />
             </template>
-            <v-card rounded="0">
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  variant="text"
-                  @click="split('horizontal')"
+            <v-list density="compact">
+              <v-list-item @click="split('horizontal')">
+                <template #prepend>
+                  <g-icon-base
+                    width="16"
+                    height="16"
+                    view-box="0 -2 20 20"
+                    class="mr-2"
+                    icon-color="on-surface"
+                    icon-name="split-vertically"
+                  >
+                    <g-split-vertically />
+                  </g-icon-base>
+                </template>
+                <v-list-item-title>Split Pane Vertically</v-list-item-title>
+                <template #append>
+                  <span class="text-medium-emphasis text-caption">(ctrl + shift + v)</span>
+                </template>
+              </v-list-item>
+              <v-list-item @click="split('vertical')">
+                <template #prepend>
+                  <g-icon-base
+                    width="16"
+                    height="16"
+                    view-box="0 -2 20 20"
+                    class="mr-2"
+                    icon-color="on-surface"
+                    icon-name="split-horizontally"
+                  >
+                    <g-split-horizontally />
+                  </g-icon-base>
+                </template>
+                <v-list-item-title>Split Pane Horizontally</v-list-item-title>
+                <template #append>
+                  <span class="text-medium-emphasis text-caption">(ctrl + shift + h)</span>
+                </template>
+              </v-list-item>
+              <v-divider />
+              <v-list-item
+                prepend-icon="mdi-cog"
+                title="Settings"
+                :disabled="loading.settingsBtn"
+                @click="configure('settingsBtn')"
+              >
+                <template
+                  v-if="loading.settingsBtn"
+                  #prepend
                 >
-                  <div class="d-flex g-burger-menu-button">
-                    <g-icon-base
-                      width="16"
-                      height="16"
-                      view-box="0 -2 20 20"
-                      class="mr-2"
-                      icon-name="split-vertically"
-                    >
-                      <g-split-vertically />
-                    </g-icon-base>
-                    <span>Split Pane Vertically</span>
-                    <v-spacer />
-                    <span>(ctrl + shift + v)</span>
-                  </div>
-                </v-btn>
-              </v-card-actions>
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  variant="text"
-                  @click="split('vertical')"
-                >
-                  <div class="d-flex g-burger-menu-button">
-                    <g-icon-base
-                      width="16"
-                      height="16"
-                      view-box="0 -2 20 20"
-                      class="mr-2"
-                      icon-name="split-horizontally"
-                    >
-                      <g-split-horizontally />
-                    </g-icon-base>
-                    <span>Split Pane Horizontally</span>
-                    <v-spacer />
-                    <span>(ctrl + shift + h)</span>
-                  </div>
-                </v-btn>
-              </v-card-actions>
-              <v-divider class="mt-1 mb-1" />
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  :loading="loading.settingsBtn"
-                  @click="configure('settingsBtn')"
-                >
-                  <div class="d-flex g-burger-menu-button">
-                    <v-icon class="mr-2">
-                      mdi-cog
-                    </v-icon>
-                    Settings
-                  </div>
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+                  <v-progress-circular
+                    indeterminate
+                    size="16"
+                    width="2"
+                    class="mr-2"
+                  />
+                </template>
+              </v-list-item>
+            </v-list>
           </v-menu>
         </div>
       </template>
@@ -234,20 +226,20 @@ SPDX-License-Identifier: Apache-2.0
                 v-bind="menuProps"
                 size="small"
                 variant="text"
-                color="grey-lighten-1"
+                color="on-surface"
                 class="text-none g-system-bar-button"
               >
                 <g-icon-base
                   width="18"
                   height="18"
                   view-box="-2 -2 30 30"
-                  icon-color="#bdbdbd"
+                  icon-color="on-surface"
                   class="mr-2"
                   :icon-name="connectionIconName"
                 >
                   <component :is="resolveComponent(connectionIconName)" />
                 </g-icon-base>
-                <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
+                <span class="text-none text-high-emphasis">{{ connectionStateText }}</span>
               </v-btn>
             </template>
             <v-card rounded="0">
@@ -282,7 +274,7 @@ SPDX-License-Identifier: Apache-2.0
             size="small"
             variant="text"
             :loading="loading.imageBtn"
-            color="grey-lighten-1"
+            color="on-surface"
             class="text-none g-system-bar-button"
             @click="configure('imageBtn')"
           >
@@ -302,7 +294,7 @@ SPDX-License-Identifier: Apache-2.0
                 size="small"
                 variant="text"
                 :loading="loading.secContextBtn"
-                color="grey-lighten-1"
+                color="on-surface"
                 class="text-none g-system-bar-button"
                 @click="configure('secContextBtn')"
               >
@@ -323,7 +315,7 @@ SPDX-License-Identifier: Apache-2.0
             size="small"
             variant="text"
             :loading="loading.nodeBtn"
-            color="grey-lighten-1"
+            color="on-surface"
             class="text-none g-system-bar-button"
             @click="configure('nodeBtn')"
           >
@@ -355,7 +347,6 @@ import '@xterm/xterm/css/xterm.css'
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
-import { useTerminalStore } from '@/store/terminal'
 
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
@@ -375,6 +366,7 @@ import {
   TerminalSession,
   Spinner,
 } from '@/lib/terminal'
+import { getTerminalTheme } from '@/lib/terminal-themes'
 
 import head from 'lodash/head'
 import find from 'lodash/find'
@@ -417,7 +409,6 @@ export default {
   ],
   data () {
     return {
-      hasFocus: true,
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
@@ -440,18 +431,13 @@ export default {
         container: {},
       },
       TerminalSession,
-      showMenu: false,
     }
   },
   computed: {
     ...mapState(useConfigStore, [
       'terminal',
     ]),
-    ...mapState(useTerminalStore, [
-      'heartbeatIntervalSeconds',
-    ]),
     ...mapState(useAppStore, [
-      'focusedElementId',
       'splitpaneResize',
     ]),
     connectionIconName () {
@@ -472,8 +458,11 @@ export default {
     targetText () {
       return targetText(this.target) || 'UNKNOWN'
     },
+    isDarkTheme () {
+      return !!this.$vuetify.theme.current.dark
+    },
     backgroundClass () {
-      return this.hasFocus ? 'background' : 'bright-background'
+      return this.isDarkTheme ? 'background-dark' : 'background-light'
     },
     isTerminalSessionCreated () {
       return this.terminalSession && this.terminalSession.isCreated
@@ -534,23 +523,20 @@ export default {
     splitpaneResize () {
       this.onResize()
     },
+    isDarkTheme () {
+      this.applyTerminalTheme()
+    },
   },
   mounted () {
     const term = this.term = new Terminal({
       fontSize: 15,
       fontWeight: 600,
       fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
+      theme: getTerminalTheme(this.isDarkTheme),
     })
     const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid, this.$store)
-    focusAddon.onFocus = () => {
-      term.options.theme = { background: '#000' }
-      this.hasFocus = true
-    }
-    focusAddon.onBlur = () => {
-      term.options.theme = { background: '#333' }
-      this.hasFocus = false
-    }
+    const focusAddon = new FocusAddon(this.uuid)
+
 
     term.open(this.$refs.container)
     term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
@@ -576,6 +562,12 @@ export default {
   methods: {
     resolveComponent (name) {
       return get(components, [name])
+    },
+    applyTerminalTheme () {
+      if (!this.term) {
+        return
+      }
+      this.term.options.theme = getTerminalTheme(this.isDarkTheme)
     },
     focus () {
       this.term.focus()
@@ -700,18 +692,14 @@ export default {
     font-size: .875rem;
     font-weight: 400;
   }
-  .background {
+  .background-dark {
     background: #000;
   }
-  .bright-background {
-    background: #333;
+  .background-light {
+    background: #fafafa;
   }
   .g-system-bar-button {
     max-height: 24px;
     letter-spacing: normal;
-  }
-
-  .g-burger-menu-button {
-    width: 400px;
   }
 </style>

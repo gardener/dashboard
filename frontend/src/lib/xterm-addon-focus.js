@@ -13,24 +13,17 @@ const store = useAppStore()
 const focusedElementId = toRef(store, 'focusedElementId')
 
 export class FocusAddon {
-  constructor (uuid, store) {
+  constructor (uuid) {
     this.uuid = uuid
-    this.store = store
   }
 
   activate (terminal) {
     terminal.textarea.onfocus = () => {
       focusedElementId.value = this.uuid
-      if (typeof this.onFocus === 'function') {
-        this.onFocus()
-      }
     }
     terminal.textarea.onblur = () => {
       if (focusedElementId.value === this.uuid) {
         focusedElementId.value = null
-      }
-      if (typeof this.onBlur === 'function') {
-        this.onBlur()
       }
     }
   }
