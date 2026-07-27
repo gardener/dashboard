@@ -1041,7 +1041,9 @@ const RAW_RUNTIME_STATE =
           ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.3.0"],\
           ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.3.0"],\
           ["@xterm/addon-fit", "npm:0.11.0"],\
+          ["@xterm/addon-unicode11", "npm:0.9.0"],\
           ["@xterm/addon-web-links", "npm:0.12.0"],\
+          ["@xterm/addon-webgl", "npm:0.19.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
           ["dayjs", "npm:1.11.21"],\
@@ -4659,11 +4661,29 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@xterm/addon-unicode11", [\
+      ["npm:0.9.0", {\
+        "packageLocation": "./.yarn/cache/@xterm-addon-unicode11-npm-0.9.0-038c7a00a9-6a1e34d081.zip/node_modules/@xterm/addon-unicode11/",\
+        "packageDependencies": [\
+          ["@xterm/addon-unicode11", "npm:0.9.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@xterm/addon-web-links", [\
       ["npm:0.12.0", {\
         "packageLocation": "./.yarn/cache/@xterm-addon-web-links-npm-0.12.0-0676385f16-1c4847f439.zip/node_modules/@xterm/addon-web-links/",\
         "packageDependencies": [\
           ["@xterm/addon-web-links", "npm:0.12.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@xterm/addon-webgl", [\
+      ["npm:0.19.0", {\
+        "packageLocation": "./.yarn/cache/@xterm-addon-webgl-npm-0.19.0-547ab20571-238f9af374.zip/node_modules/@xterm/addon-webgl/",\
+        "packageDependencies": [\
+          ["@xterm/addon-webgl", "npm:0.19.0"]\
         ],\
         "linkType": "HARD"\
       }]\
