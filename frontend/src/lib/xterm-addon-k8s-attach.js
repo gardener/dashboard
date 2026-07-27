@@ -28,14 +28,36 @@ const BufferEnum = {
 
 export class K8sAttachAddon {
   constructor (socket, options = {}) {
+    const {
+      logger = useLogger(),
+      bidirectional = false,
+      pingIntervalSeconds = 30,
+    } = options
     this._socket = socket
-    this._logger = options.logger ?? useLogger()
+    this._logger = logger
     // always set binary type to arraybuffer, we do not handle blobs
     this._socket.binaryType = 'arraybuffer'
-    this._bidirectional = options.bidirectional || false
+    this._bidirectional = bidirectional
     this._disposables = []
+    this._pingIntervalSeconds = pingIntervalSeconds
+    this._resizeIntervalId = undefined
+    this._resizeCounter = 0
+  }
 
-    this._pingIntervalSeconds = options.pingIntervalSeconds || 30
+  _forceResize (size) {
+    const { cols, rows } = size
+    this._resizeCounter += 1
+    this._sendResize({ cols, rows: rows - 1 })
+    this._sendResize(size)
+    if (this._resizeCounter >= 5) {
+      this._clearForceResize()
+    }
+  }
+
+  _clearForceResize () {
+    this._resizeCounter = 0
+    clearInterval(this._resizeIntervalId)
+    this._resizeIntervalId = undefined
   }
 
   activate (terminal) {
@@ -46,67 +68,42 @@ export class K8sAttachAddon {
     )
 
     if (this._bidirectional) {
-      this._disposables.push(terminal.onData(data => this._sendData(data)))
+      this._disposables.push(terminal.onData(data => this._sendData(ChannelEnum.STD_IN, data)))
     }
 
     this._disposables.push(addSocketListener(this._socket, 'close', () => this.dispose()))
     this._disposables.push(addSocketListener(this._socket, 'error', () => this.dispose()))
     this._disposables.push(addSocketListener(this._socket, 'open', () => {
-      // force resize
-      this._sendResize({ cols: 1, rows: 1 })
-      this._sendResize({ cols: terminal.cols, rows: terminal.rows })
+      // force resize until stdout arrives or attempts are exhausted
+      this._resizeCounter = 0
+      this._resizeIntervalId = setInterval(() => {
+        this._forceResize(terminal)
+      }, 200)
+      this._forceResize(terminal)
     }))
 
     terminal.onResize(size => {
-      this._sendResize(terminal, size)
+      this._sendResize(size)
       terminal.scrollToBottom()
     })
 
     this.pingIntervalId = setInterval(() => {
       if (this._socket.readyState === WsReadyStateEnum.CONNECTING || this._socket.readyState === WsReadyStateEnum.CLOSED) {
         this._logger.info('Websocket closing or already closed. Stopping ping')
-        clearTimeout(this.pingIntervalId)
+        clearInterval(this.pingIntervalId)
         return
       }
-      this._sendData('') // send empty message to prevent socket connection from getting closed
+      this._sendData(ChannelEnum.STD_IN, '') // send empty message to prevent socket connection from getting closed
     }, this._pingIntervalSeconds * 1000)
-    this._disposables.push({ dispose: () => clearTimeout(this.pingIntervalId) })
+    this._disposables.push({ dispose: () => clearInterval(this.pingIntervalId) })
   }
 
   dispose () {
+    this._clearForceResize()
     this._disposables.forEach(d => d.dispose())
   }
 
-  _handleErrorChannelData (data) {
-    try {
-      const errorData = JSON.parse(data) || {}
-      if (errorData.status === 'Success') {
-        return
-      }
-      this._logger.error('On error channel:', errorData)
-    } catch {
-      this._logger.error('On error channel:', data)
-    }
-  }
-
-  _handleChannelData (terminal, channel, data) {
-    switch (channel) {
-      case ChannelEnum.STD_OUT:
-      case ChannelEnum.STD_ERR:
-        terminal.write(data)
-        return
-      case ChannelEnum.ERR:
-        this._handleErrorChannelData(data)
-        return
-      default:
-        throw Error('Unsupported message!')
-    }
-  }
-
   _messageHandler (terminal, ev) {
-    if (!this.decoder) {
-      this.decoder = new TextDecoder()
-    }
     if (!(typeof ev.data === 'object' && ev.data instanceof ArrayBuffer)) {
       throw Error(`Cannot handle "${typeof ev.data}" websocket message.`)
     }
@@ -117,19 +114,35 @@ export class K8sAttachAddon {
     }
 
     const channel = buffer[BufferEnum.CHANNEL_INDEX]
-    const data = this.decoder.decode(buffer.slice(BufferEnum.DATA_INDEX))
-    this._handleChannelData(terminal, channel, data)
+    const data = buffer.slice(BufferEnum.DATA_INDEX)
+    switch (channel) {
+      case ChannelEnum.STD_OUT:
+      case ChannelEnum.STD_ERR:
+        this._clearForceResize()
+        terminal.write(data)
+        break
+      case ChannelEnum.ERR:
+        try {
+          const decoder = new TextDecoder()
+          const err = JSON.parse(decoder.decode(data)) || {}
+          if (err.status === 'Success') {
+            return // just ignore success message
+          }
+          this._logger.error('On error channel:', err)
+        } catch {
+          this._logger.error('On error channel:', data)
+        }
+        break
+      default:
+        throw Error('Unsupported message!')
+    }
   }
 
   _sendResize ({ cols: Width, rows: Height }) {
-    this._sendDataOnChannel(ChannelEnum.RESIZE, JSON.stringify({ Width, Height }))
+    this._sendData(ChannelEnum.RESIZE, JSON.stringify({ Width, Height }))
   }
 
-  _sendData (data) {
-    this._sendDataOnChannel(ChannelEnum.STD_IN, data)
-  }
-
-  _sendDataOnChannel (channel, data) {
+  _sendData (channel, data) {
     if (this._socket.readyState !== WsReadyStateEnum.OPEN) {
       return
     }
