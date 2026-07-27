@@ -90,6 +90,7 @@ describe('security', function () {
   describe('openid-client', () => {
     const redirectUrl = new URL('/account', 'https://localhost:8443')
     const sub = 'john.doe@example.org'
+    const codeVerifier = 'a'.repeat(43)
 
     let undici
     let config
@@ -192,9 +193,9 @@ describe('security', function () {
     })
 
     describe('authorizationUrl', () => {
-      it('should return an authorization url with PKCE flow (preferring S256)', async () => {
+      it('should default to PKCE for a confidential client (preferring S256)', async () => {
         const scope = 'oidc email groups profile offline_access'
-        await mockSecurity({ oidc: { scope, usePKCE: true, client_secret: 'client_secret' } })
+        await mockSecurity({ oidc: { scope, client_secret: 'client_secret' } })
         discovery.mockResolvedValue({
           code_challenge_methods_supported: ['S256', 'plain'],
         })
@@ -202,7 +203,7 @@ describe('security', function () {
           'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
         )
         randomState.mockReturnValue('state')
-        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+        randomPKCECodeVerifier.mockReturnValue(codeVerifier)
         calculatePKCECodeChallenge.mockResolvedValue('code-challenge')
 
         const query = {
@@ -232,7 +233,7 @@ describe('security', function () {
         )
         expect(randomState).toHaveBeenCalledTimes(1)
         expect(randomPKCECodeVerifier).toHaveBeenCalledTimes(1)
-        expect(calculatePKCECodeChallenge).toHaveBeenCalledWith('code-verifier')
+        expect(calculatePKCECodeChallenge).toHaveBeenCalledWith(codeVerifier)
         expect(buildAuthorizationUrl).toHaveBeenCalledTimes(1)
         const [openidConfig, params] = buildAuthorizationUrl.mock.calls[0]
         expect(openidConfig).toMatchObject({
@@ -262,7 +263,7 @@ describe('security', function () {
           ],
           [
             '__Host-gCdVrfr',
-            'code-verifier',
+            codeVerifier,
             { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
           ],
         ])
@@ -278,7 +279,7 @@ describe('security', function () {
           'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
         )
         randomState.mockReturnValue('state')
-        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+        randomPKCECodeVerifier.mockReturnValue(codeVerifier)
 
         const query = {
           redirectUrl: redirectUrl.toString(),
@@ -293,7 +294,7 @@ describe('security', function () {
         expect(calculatePKCECodeChallenge).not.toHaveBeenCalled() // For "plain" method, no hashed code challenge is required
         const [, params] = buildAuthorizationUrl.mock.calls[0]
         expect(params).toMatchObject({
-          code_challenge: 'code-verifier',
+          code_challenge: codeVerifier,
         })
         expect(authorizationUrl).toBe(
           'https://issuer.example.org/oauth2/authorize?client_id=my-client-id&...',
@@ -311,7 +312,7 @@ describe('security', function () {
           ],
           [
             '__Host-gCdVrfr',
-            'code-verifier',
+            codeVerifier,
             { httpOnly: true, maxAge: 180000, sameSite: 'Lax', secure: true },
           ],
         ])
@@ -325,7 +326,7 @@ describe('security', function () {
         })
         buildAuthorizationUrl.mockReturnValue('should not be called')
         randomState.mockReturnValue('state')
-        randomPKCECodeVerifier.mockReturnValue('code-verifier')
+        randomPKCECodeVerifier.mockReturnValue(codeVerifier)
         calculatePKCECodeChallenge.mockResolvedValue('code-challenge')
 
         const query = {
@@ -485,7 +486,150 @@ describe('security', function () {
     })
 
     describe('authorizationCallback', () => {
-      it('should exchange the code and set cookies', async () => {
+      const validStateCookie = {
+        redirectOrigin: 'https://localhost:8443',
+        redirectPath: '/account',
+        state: 'some-state',
+      }
+      const transactionCookieOptions = {
+        secure: true,
+        path: '/',
+      }
+
+      function createResponse () {
+        return {
+          cookie: vi.fn(),
+          clearCookie: vi.fn(),
+        }
+      }
+
+      function expectTransactionCookiesCleared (res) {
+        expect(res.clearCookie.mock.calls).toEqual([
+          ['__Host-gStt', transactionCookieOptions],
+          ['__Host-gCdVrfr', transactionCookieOptions],
+        ])
+      }
+
+      function expectNoSessionCreated (res) {
+        expect(res.cookie).not.toHaveBeenCalled()
+        expect(authentication.isAuthenticated).not.toHaveBeenCalled()
+        expect(authorization.isAdmin).not.toHaveBeenCalled()
+        expect(authorization.canListShoots).not.toHaveBeenCalled()
+      }
+
+      async function useOpenIdClientStateValidation () {
+        const actualOpenidClient = await vi.importActual('openid-client')
+        const tokenEndpointFetch = vi.fn()
+        const openidConfiguration = new actualOpenidClient.Configuration({
+          issuer: 'https://issuer.example.org',
+          token_endpoint: 'https://issuer.example.org/token',
+        }, config.oidc.client_id, {
+          client_secret: 'client-secret',
+        })
+        openidConfiguration[actualOpenidClient.customFetch] = tokenEndpointFetch
+        discovery.mockResolvedValue(openidConfiguration)
+        authorizationCodeGrant.mockImplementation(actualOpenidClient.authorizationCodeGrant)
+        return tokenEndpointFetch
+      }
+
+      it('rejects a missing state transaction cookie before code exchange', async () => {
+        await mockSecurity()
+        const req = {
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
+          cookies: {},
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res))
+          .rejects
+          .toThrow('Invalid OIDC state cookie')
+
+        expect(discovery).not.toHaveBeenCalled()
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+      })
+
+      it.each([
+        ['null', null],
+        ['a scalar string', 'some-state'],
+        ['an empty object', {}],
+        ['an empty state', { ...validStateCookie, state: '' }],
+        ['a whitespace-only state', { ...validStateCookie, state: ' ' }],
+        ['a non-string state', { ...validStateCookie, state: 42 }],
+      ])('rejects a malformed state transaction cookie containing %s', async (description, stateCookie) => {
+        await mockSecurity()
+        const req = {
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
+          cookies: {
+            '__Host-gStt': stateCookie,
+            '__Host-gCdVrfr': codeVerifier,
+          },
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res))
+          .rejects
+          .toThrow('Invalid OIDC state cookie')
+
+        expect(discovery).not.toHaveBeenCalled()
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+      })
+
+      it.each([
+        ['missing', '/auth/callback?code=some-code'],
+        ['mismatched', '/auth/callback?code=some-code&state=other-state'],
+      ])('rejects a callback with %s state before a token endpoint request', async (description, originalUrl) => {
+        await mockSecurity()
+        const tokenEndpointFetch = await useOpenIdClientStateValidation()
+        const req = {
+          originalUrl,
+          cookies: {
+            '__Host-gStt': validStateCookie,
+            '__Host-gCdVrfr': codeVerifier,
+          },
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res)).rejects.toThrow()
+
+        expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+        expect(tokenEndpointFetch).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+      })
+
+      it.each([
+        ['missing', undefined],
+        ['empty', ''],
+        ['null', null],
+        ['non-string', 42],
+        ['too short', 'short-verifier'],
+        ['containing invalid characters', `${'a'.repeat(42)}!`],
+      ])('rejects a %s PKCE verifier before code exchange', async (description, pkceCodeVerifier) => {
+        await mockSecurity()
+        const req = {
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
+          cookies: {
+            '__Host-gStt': validStateCookie,
+            '__Host-gCdVrfr': pkceCodeVerifier,
+          },
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res))
+          .rejects
+          .toThrow('Invalid OIDC PKCE code verifier cookie')
+
+        expect(discovery).not.toHaveBeenCalled()
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+      })
+
+      it('exchanges a code with matching state and consumes the transaction cookies', async () => {
         await mockSecurity()
         discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
         authorizationCodeGrant.mockResolvedValue({
@@ -498,132 +642,157 @@ describe('security', function () {
         authorization.canListShoots.mockResolvedValue(false)
 
         const req = {
-          originalUrl: '/auth/callback?code=some-code',
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
           cookies: {
-            '__Host-gStt': {
-              redirectOrigin: 'https://localhost:8443',
-              redirectPath: '/account',
-              state: 'some-state',
-            },
-            '__Host-gCdVrfr': 'pkce-code-verifier',
+            '__Host-gStt': validStateCookie,
+            '__Host-gCdVrfr': codeVerifier,
           },
         }
-        const res = {
-          cookie: vi.fn(),
-          clearCookie: vi.fn(),
-        }
+        const res = createResponse()
 
-        // Act
         const { redirectPath } = await security.authorizationCallback(req, res)
 
-        // Assert
         expect(redirectPath).toBe('/account')
         expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
         expect(authorizationCodeGrant).toHaveBeenCalledWith(
           expect.any(Object),
-          new URL('/auth/callback?code=some-code', 'https://localhost:8443'),
+          new URL('/auth/callback?code=some-code&state=some-state', 'https://localhost:8443'),
           {
             idTokenExpected: true,
             expectedState: 'some-state',
-            pkceCodeVerifier: 'pkce-code-verifier',
+            pkceCodeVerifier: codeVerifier,
           },
         )
-        // __Host-gStt and __Host-gCdVrfr should be cleared
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
-        // New cookies should be set by setCookies
-        expect(res.cookie).toHaveBeenCalled()
+        expectTransactionCookiesCleared(res)
+        expect(res.cookie).toHaveBeenCalledTimes(3)
+
+        authorizationCodeGrant.mockClear()
+        authentication.isAuthenticated.mockClear()
+        authorization.isAdmin.mockClear()
+        authorization.canListShoots.mockClear()
+        const replayRes = createResponse()
+        await expect(security.authorizationCallback({
+          originalUrl: req.originalUrl,
+          cookies: {},
+        }, replayRes)).rejects.toThrow('Invalid OIDC state cookie')
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(replayRes)
+        expectTransactionCookiesCleared(replayRes)
       })
 
-      it('should throw 401 and clear cookies if authorizationCodeGrant fails', async () => {
+      it('does not create a session and consumes transaction cookies when code exchange fails', async () => {
         await mockSecurity()
         discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
         authorizationCodeGrant.mockRejectedValue(new Error('code exchange failed'))
 
         const req = {
-          originalUrl: '/auth/callback?code=some-code',
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
           cookies: {
-            '__Host-gStt': {
-              redirectOrigin: 'https://localhost:8443',
-              redirectPath: '/account',
-              state: 'another-state',
-            },
-            '__Host-gCdVrfr': 'pkce-code-verifier',
+            '__Host-gStt': validStateCookie,
+            '__Host-gCdVrfr': codeVerifier,
           },
         }
-        const res = {
-          cookie: vi.fn(),
-          clearCookie: vi.fn(),
-        }
+        const res = createResponse()
 
         await expect(security.authorizationCallback(req, res)).rejects.toThrow('code exchange failed')
 
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
-        // No cookies should be set if the exchange fails
-        expect(res.cookie).not.toHaveBeenCalled()
+        expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+
+        const retryRes = createResponse()
+        await expect(security.authorizationCallback({
+          originalUrl: req.originalUrl,
+          cookies: {},
+        }, retryRes)).rejects.toThrow('Invalid OIDC state cookie')
+        expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+        expectNoSessionCreated(retryRes)
+        expectTransactionCookiesCleared(retryRes)
       })
 
-      it('should throw 400 if the redirectPath is from a different (untrusted) origin', async () => {
-        await mockSecurity()
-        discovery.mockResolvedValue({ code_challenge_methods_supported: ['S256'] })
+      it('supports an explicit usePKCE false configuration for a confidential client', async () => {
+        await mockSecurity({
+          oidc: {
+            client_secret: 'client-secret',
+            usePKCE: false,
+          },
+        })
+        discovery.mockResolvedValue({})
+        authorizationCodeGrant.mockResolvedValue({
+          id_token: 'new-id-token',
+        })
         authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
         authorization.isAdmin.mockResolvedValue(false)
         authorization.canListShoots.mockResolvedValue(false)
 
         const req = {
-          originalUrl: '/auth/callback?code=some-code',
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
+          cookies: {
+            '__Host-gStt': validStateCookie,
+          },
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res))
+          .resolves
+          .toEqual({ redirectPath: '/account' })
+
+        expect(authorizationCodeGrant).toHaveBeenCalledWith(
+          expect.any(Object),
+          new URL(req.originalUrl, 'https://localhost:8443'),
+          {
+            idTokenExpected: true,
+            expectedState: 'some-state',
+          },
+        )
+        expectTransactionCookiesCleared(res)
+        expect(res.cookie).toHaveBeenCalledTimes(3)
+      })
+
+      it('preserves existing session cookies when a callback is rejected', async () => {
+        await mockSecurity()
+        const req = {
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
+          cookies: {
+            '__Host-gHdrPyl': 'existing-header-and-payload',
+            '__Host-gSgn': 'existing-signature',
+            '__Host-gTkn': 'existing-token',
+          },
+        }
+        const res = createResponse()
+
+        await expect(security.authorizationCallback(req, res))
+          .rejects
+          .toThrow('Invalid OIDC state cookie')
+
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
+      })
+
+      it('rejects an untrusted redirect path before code exchange', async () => {
+        await mockSecurity()
+
+        const req = {
+          originalUrl: '/auth/callback?code=some-code&state=some-state',
           cookies: {
             '__Host-gStt': {
-              redirectOrigin: 'https://localhost:8443',
-              redirectPath: 'https://127.0.0.1/account', // <-- Different origin
-              state: 'some-state',
+              ...validStateCookie,
+              redirectPath: 'https://127.0.0.1/account',
             },
-            '__Host-gCdVrfr': 'pkce-code-verifier',
+            '__Host-gCdVrfr': codeVerifier,
           },
         }
-        const res = {
-          cookie: vi.fn(),
-          clearCookie: vi.fn(),
-        }
-
-        await expect(security.authorizationCallback(req, res)).rejects.toThrow('Invalid redirect path')
-
-        // __Host-gStt and __Host-gCdVrfr should be cleared
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gStt', { secure: true, path: '/' })
-        expect(res.clearCookie).toHaveBeenCalledWith('__Host-gCdVrfr', { secure: true, path: '/' })
-        // No new cookies should be set
-        expect(res.cookie).not.toHaveBeenCalled()
-      })
-    })
-
-    describe('authorizationCallback - redirect validation', () => {
-      it('should throw 400 error if redirectPath has a mismatched origin', async () => {
-        await mockSecurity({})
-        const { COOKIE_STATE } = security
-
-        // Simulate a user state cookie that includes a redirectPath pointing to an unexpected domain
-        const req = {
-          cookies: {
-            [COOKIE_STATE]: {
-              redirectOrigin: 'https://localhost:8443',
-              redirectPath: 'https://127.0.0.1/account', // <-- Different origin
-              state: 'test-state',
-            },
-          },
-        }
-
-        const res = {
-          cookie: vi.fn(),
-          clearCookie: vi.fn(),
-        }
+        const res = createResponse()
 
         await expect(security.authorizationCallback(req, res))
           .rejects
           .toThrow('Invalid redirect path')
 
-        expect(res.clearCookie).toHaveBeenCalledWith(COOKIE_STATE, expect.any(Object))
-        expect(res.cookie).not.toHaveBeenCalled()
+        expect(discovery).not.toHaveBeenCalled()
+        expect(authorizationCodeGrant).not.toHaveBeenCalled()
+        expectNoSessionCreated(res)
+        expectTransactionCookiesCleared(res)
       })
     })
 

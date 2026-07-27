@@ -75,8 +75,8 @@ data:
     {{- if .Values.global.dashboard.oidc }}
     oidc:
       issuer: {{ required ".Values.global.dashboard.oidc.issuerUrl is required" .Values.global.dashboard.oidc.issuerUrl }}
-      {{- if .Values.global.dashboard.oidc.usePKCE }}
-      usePKCE: true
+      {{- if hasKey .Values.global.dashboard.oidc "usePKCE" }}
+      usePKCE: {{ .Values.global.dashboard.oidc.usePKCE }}
       {{- end }}
       {{- if .Values.global.dashboard.oidc.sessionLifetime }}
       sessionLifetime: {{ .Values.global.dashboard.oidc.sessionLifetime }}
@@ -114,7 +114,9 @@ data:
         {{- if .Values.global.dashboard.oidc.public.clientSecret }}
         clientSecret: {{ .Values.global.dashboard.oidc.public.clientSecret }}
         {{- end }}
-        {{- if or .Values.global.dashboard.oidc.public.usePKCE (not .Values.global.dashboard.oidc.public.clientSecret) }}
+        {{- if hasKey .Values.global.dashboard.oidc.public "usePKCE" }}
+        usePKCE: {{ .Values.global.dashboard.oidc.public.usePKCE }}
+        {{- else if not .Values.global.dashboard.oidc.public.clientSecret }}
         usePKCE: true
         {{- end }}
       {{- end }}
