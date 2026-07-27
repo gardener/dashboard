@@ -166,6 +166,32 @@ export class TerminalSession {
     this.vm.term.loadAddon(attachAddon)
     let reconnectTimeoutId
     let heartbeatIntervalId
+    let inactiveTimeoutId
+
+    const startHeartbeat = () => {
+      const sendHeartbeat = async () => {
+        try {
+          await this.heartbeat()
+        } catch (err) {
+          logger.error('heartbeat failed:', err)
+        }
+      }
+      clearInterval(heartbeatIntervalId)
+      heartbeatIntervalId = setInterval(sendHeartbeat, this.vm.heartbeatIntervalSeconds * 1000)
+      sendHeartbeat()
+    }
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        clearTimeout(inactiveTimeoutId)
+        inactiveTimeoutId = setTimeout(() => clearInterval(heartbeatIntervalId), 5 * 60 * 1000)
+        return
+      }
+      clearTimeout(inactiveTimeoutId)
+      if (this.connectionState === TerminalSession.CONNECTED) {
+        startHeartbeat()
+      }
+    }
 
     ws.onopen = () => {
       if (this.cancelConnect) {
@@ -178,13 +204,8 @@ export class TerminalSession {
       this.connectionState = TerminalSession.CONNECTED
       this.tries = 0
 
-      heartbeatIntervalId = setInterval(async () => {
-        try {
-          await this.heartbeat()
-        } catch (err) {
-          logger.error('heartbeat failed:', err)
-        }
-      }, this.vm.heartbeatIntervalSeconds * 1000)
+      document.addEventListener('visibilitychange', onVisibilityChange)
+      startHeartbeat()
     }
     ws.onclose = error => {
       this.close()
@@ -221,7 +242,9 @@ export class TerminalSession {
     }
     this.close = () => {
       clearTimeout(reconnectTimeoutId)
+      clearTimeout(inactiveTimeoutId)
       clearInterval(heartbeatIntervalId)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
 
       closeWsIfNotClosed(ws)
       attachAddon.dispose()
