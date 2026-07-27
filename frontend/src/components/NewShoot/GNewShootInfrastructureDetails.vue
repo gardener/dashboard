@@ -177,6 +177,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import {
+  or,
   required,
   requiredIf,
 } from '@vuelidate/validators'
@@ -269,8 +270,9 @@ export default {
     }
   },
   validations () {
+    const infrastructureRequired = providerType => !this.workerless && this.providerType === providerType
     const requiresInfrastructure = providerType => {
-      return requiredIf(() => !this.workerless && this.providerType === providerType)
+      return requiredIf(() => infrastructureRequired(providerType))
     }
     return {
       region: withFieldName('Region', {
@@ -284,7 +286,10 @@ export default {
       }),
       loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
         required: requiresInfrastructure('vsphere'),
-        includesKey: withMessage('Load Balancer Class \'default\' must be selected', includesIfAvailable('default', 'allLoadBalancerClassNames')),
+        includesKey: withMessage('Load Balancer Class \'default\' must be selected', or(
+          () => !infrastructureRequired('vsphere'),
+          includesIfAvailable('default', 'allLoadBalancerClassNames'),
+        )),
       }),
       partitionID: withFieldName('Partition ID', {
         required: requiresInfrastructure('metal'),

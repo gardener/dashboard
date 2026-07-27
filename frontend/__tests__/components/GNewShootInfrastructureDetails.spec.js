@@ -207,8 +207,13 @@ describe('components', () => {
       await wrapper.vm.v$.$validate()
       expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
 
+      shootContext.providerControlPlaneConfigLoadBalancerClassNames.value = []
       shootContext.workerless.value = true
       await nextTick()
+      await wrapper.vm.v$.$validate()
+      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(false)
+      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
+      expect(wrapper.vm.v$.$invalid).toBe(false)
       expect(selectByLabel('Load Balancer Classes').exists()).toBe(false)
     })
   })

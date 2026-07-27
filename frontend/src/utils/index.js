@@ -519,10 +519,17 @@ export function transformHtml (html, transformToExternalLinks = true) {
 }
 
 const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
+const maintenanceHourRegex = /^(?:[01]\d|2[0-3])$/
+
+export function isValidMaintenanceHours (hours) {
+  return Array.isArray(hours) &&
+    hours.length > 0 &&
+    hours.every(hour => typeof hour === 'string' && maintenanceHourRegex.test(hour))
+}
 
 export function randomMaintenanceBegin (hours = defaultMaintenanceHours) {
   // randomize maintenance time window
-  const randomHour = sample(isEmpty(hours) ? defaultMaintenanceHours : hours)
+  const randomHour = sample(isValidMaintenanceHours(hours) ? hours : defaultMaintenanceHours)
   return `${randomHour}:00`
 }
 
