@@ -17,6 +17,7 @@ import {
   head,
   chain,
   pick,
+  isPlainObject,
 } from 'lodash-es'
 import pRetry from 'p-retry'
 import pTimeout from 'p-timeout'
@@ -60,13 +61,13 @@ const {
   scope,
   client_id: clientId,
   client_secret: clientSecret,
-  usePKCE = !clientSecret,
   sessionLifetime = 86400,
   allowInsecure = false,
   ca,
   rejectUnauthorized = true,
   clockTolerance = 15,
 } = oidc
+const usePKCE = oidc.usePKCE !== false
 const connectOptions = {
   rejectUnauthorized,
 }
@@ -169,6 +170,28 @@ function getCodeChallengeMethod (config) {
     throw createError(500, 'neither code_challenge_method supported by the client is supported by the issuer')
   }
   return 'S256'
+}
+
+// RFC 7636 §4.1: code-verifier = 43*128unreserved
+// https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
+const PKCE_CODE_VERIFIER_PATTERN = /^[A-Za-z0-9._~-]{43,128}$/
+
+function isNonEmptyString (value) {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isValidStateCookie (value) {
+  return isPlainObject(value) &&
+    Object.hasOwn(value, 'redirectPath') &&
+    Object.hasOwn(value, 'redirectOrigin') &&
+    Object.hasOwn(value, 'state') &&
+    isNonEmptyString(value.redirectPath) &&
+    isNonEmptyString(value.redirectOrigin) &&
+    isNonEmptyString(value.state)
+}
+
+function isValidPKCECodeVerifier (value) {
+  return typeof value === 'string' && PKCE_CODE_VERIFIER_PATTERN.test(value)
 }
 
 async function authorizationUrl (req, res) {
@@ -319,13 +342,17 @@ async function authorizationCallback (req, res) {
     secure: true,
     path: '/',
   }
-  let stateObject = {}
-  if (COOKIE_STATE in req.cookies) {
-    stateObject = req.cookies[COOKIE_STATE] // eslint-disable-line security/detect-object-injection -- COOKIE_STATE is a constant
-    res.clearCookie(COOKIE_STATE, options)
+  const stateObject = req.cookies?.[COOKIE_STATE] // eslint-disable-line security/detect-object-injection -- COOKIE_STATE is a constant
+  const codeVerifier = req.cookies?.[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
+  res.clearCookie(COOKIE_STATE, options)
+  res.clearCookie(COOKIE_CODE_VERIFIER, options)
+
+  if (!isValidStateCookie(stateObject)) {
+    throw createError(400, 'Invalid OIDC state cookie')
   }
+
   const {
-    redirectPath = '/',
+    redirectPath,
     redirectOrigin,
     state,
   } = stateObject
@@ -334,9 +361,11 @@ async function authorizationCallback (req, res) {
     idTokenExpected: true,
     expectedState: state,
   }
-  if (COOKIE_CODE_VERIFIER in req.cookies) {
-    checks.pkceCodeVerifier = req.cookies[COOKIE_CODE_VERIFIER] // eslint-disable-line security/detect-object-injection -- COOKIE_CODE_VERIFIER is a constant
-    res.clearCookie(COOKIE_CODE_VERIFIER, options)
+  if (usePKCE) {
+    if (!isValidPKCECodeVerifier(codeVerifier)) {
+      throw createError(400, 'Invalid OIDC PKCE code verifier cookie')
+    }
+    checks.pkceCodeVerifier = codeVerifier
   }
 
   const baseUri = head(redirectUris)

@@ -43,7 +43,7 @@ router.route('/kubeconfig')
       public: {
         clientId = oidc.client_id,
         clientSecret,
-        usePKCE,
+        usePKCE: configuredUsePKCE,
       } = {},
     } = oidc
     const body = {
@@ -58,7 +58,7 @@ router.route('/kubeconfig')
     if (clientSecret) {
       body.oidc.clientSecret = clientSecret
     }
-    if (usePKCE || !clientSecret) {
+    if (configuredUsePKCE !== false || !clientSecret) {
       body.oidc.usePKCE = true
     }
     if (oidc.scope) {

@@ -68,6 +68,7 @@ exports[`api > user > should return the kubeconfig data the user 1`] = `
       "groups",
     ],
     "issuerUrl": "https://kubernetes:32001",
+    "usePKCE": true,
   },
   "server": "https://kubernetes.external.foo.bar",
 }
