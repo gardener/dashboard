@@ -343,6 +343,8 @@ import { mapState } from 'pinia'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
+import { WebglAddon } from '@xterm/addon-webgl'
+import { Unicode11Addon } from '@xterm/addon-unicode11'
 import '@xterm/xterm/css/xterm.css'
 
 import { useAppStore } from '@/store/app'
@@ -532,6 +534,8 @@ export default {
       fontSize: 15,
       fontWeight: 600,
       fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
+      allowProposedApi: true,
+      minimumContrastRatio: 4.5,
       theme: getTerminalTheme(this.isDarkTheme),
     })
     const fitAddon = this.fitAddon = new FitAddon()
@@ -542,6 +546,14 @@ export default {
     term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
     term.loadAddon(fitAddon)
     term.loadAddon(new WebLinksAddon())
+    const unicodeAddon = new Unicode11Addon()
+    term.loadAddon(unicodeAddon)
+    term.unicode.activeVersion = '11'
+    const webglAddon = new WebglAddon()
+    term.loadAddon(webglAddon)
+    webglAddon.onContextLoss(() => {
+      webglAddon.dispose()
+    })
 
     term.focus()
     this.$nextTick(() => {
