@@ -82,6 +82,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             icon="mdi-close"
             size="small"
+            density="compact"
             color="on-surface"
             variant="text"
             class="text-none g-system-bar-button g-ignore-drag"
