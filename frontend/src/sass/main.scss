@@ -53,8 +53,8 @@
 }
 
 .g-error-chip {
-  --v-theme-error: var(--g-error-chip-background);
-  --v-theme-on-error: var(--g-error-chip-text);
+  --v-theme-error: var(--g-error-chip-background, var(--v-theme-error));
+  --v-theme-on-error: var(--g-error-chip-text, var(--v-theme-on-error));
 }
 
 .v-chip.g-warning-chip {
