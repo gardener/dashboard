@@ -51,6 +51,6 @@
     "lodash-es": "^4.17.21"
   },
   "resolutions": {
-    "@vue/server-renderer": "3.5.39"
+    "@vue/server-renderer": "3.5.40"
   }
 }
