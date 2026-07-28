@@ -77,7 +77,7 @@ export class K8sAttachAddon {
     this._disposables.push(addSocketListener(this._socket, 'close', () => this.dispose()))
     this._disposables.push(addSocketListener(this._socket, 'error', () => this.dispose()))
     this._disposables.push(addSocketListener(this._socket, 'open', () => {
-      // force resize until stdout arrives or attempts are exhausted
+      // force resize
       this._resizeCounter = 0
       this._resizeIntervalId = setInterval(() => {
         this._forceResize(terminal)
