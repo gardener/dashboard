@@ -9,6 +9,7 @@ import infobloxDns from './infoblox'
 import netlifyDns from './netlify'
 import powerdns from './powerdns'
 import rfc2136 from './rfc2136'
+import stackitDns from './stackit-dns'
 
 export default [
   awsRoute53,
@@ -22,4 +23,5 @@ export default [
   netlifyDns,
   powerdns,
   rfc2136,
+  stackitDns,
 ]

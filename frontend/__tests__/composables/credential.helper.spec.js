@@ -30,6 +30,7 @@ function createSecretData () {
     TSIGKeyName: encode('key.example.org.'),
     Zone: encode('example.org.'),
     server: encode('https://powerdns.example.org'),
+    "project-id": encode('example-stackit-project-id'),
   }
 }
 

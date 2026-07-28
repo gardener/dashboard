@@ -29,6 +29,7 @@ const NetlifyDialog = defineAsyncComponent(() => import('@/components/Credential
 const DDnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDDns'))
 const HcloudDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHCloud'))
 const PowerdnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogPowerdns'))
+const StackitDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogStackit'))
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
 const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
 const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
@@ -56,6 +57,7 @@ export default {
         case 'metal': return MetalDialog
         case 'vsphere': return VsphereDialog
         case 'hcloud': return HcloudDialog
+        case 'stackit': return StackitDialog
 
         // DNS Secret Dialogs
         case 'aws-route53': return AwsDialog
@@ -70,6 +72,7 @@ export default {
         case 'rfc2136': return DDnsDialog
         case 'cloudflare': return CloudflareDialog
         case 'powerdns': return PowerdnsDialog
+        case 'stackit-dns': return StackitDialog
 
         // Generic Dialogs
         case 'delete': return DeleteDialog
