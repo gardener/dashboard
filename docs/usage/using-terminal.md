@@ -42,17 +42,3 @@ $ k get ns
 ```
 You get a result like this:
 <img src="../images/03-list-ns.png">
-
-### Copy and Paste
-
-#### macOS
-
-- **Copy**: Select text with the mouse.
-- **Paste**: Press `cmd-v` to paste from the system clipboard.
-
-#### Windows
-
-- **Copy**: Select text with the mouse, then press `ctrl-c` to copy to the system clipboard (or right-click).
-- **Paste**: Press `ctrl-v` to paste from the system clipboard (or `ctrl` + left-click).
-
-Without a selection, `ctrl-c` still sends an interrupt (`SIGINT`) to the shell as usual.
