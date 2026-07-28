@@ -26,6 +26,8 @@ onMounted(() => {
 
 <style scoped>
 .terminal-page {
+  height: 100%;
   background-color: rgb(var(--v-theme-surface));
+  padding: 4px;
 }
 </style>

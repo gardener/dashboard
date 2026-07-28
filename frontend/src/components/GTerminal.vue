@@ -566,11 +566,15 @@ export default {
     const unicodeAddon = new Unicode11Addon()
     term.loadAddon(unicodeAddon)
     term.unicode.activeVersion = '11'
-    const webglAddon = new WebglAddon()
-    term.loadAddon(webglAddon)
-    webglAddon.onContextLoss(() => {
-      webglAddon.dispose()
-    })
+    try {
+      const webglAddon = new WebglAddon()
+      term.loadAddon(webglAddon)
+      webglAddon.onContextLoss(() => {
+        webglAddon.dispose()
+      })
+    } catch (err) {
+      this.logger.warn('WebGL renderer not available, falling back to default renderer:', err)
+    }
 
     term.focus()
     this.$nextTick(() => {

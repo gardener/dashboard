@@ -47,7 +47,7 @@ You get a result like this:
 
 #### macOS
 
-- **Copy**: Hold the `option` key while selecting text, then press `cmd-c` to copy to the system clipboard.
+- **Copy**: Select text with the mouse.
 - **Paste**: Press `cmd-v` to paste from the system clipboard.
 
 #### Windows

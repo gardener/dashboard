@@ -46,6 +46,9 @@ export class K8sAttachAddon {
 
   _forceResize (size) {
     const { cols, rows } = size
+    if (!cols || !rows) {
+      return
+    }
     this._resizeCounter += 1
     this._sendResize({ cols, rows: rows - 1 })
     this._sendResize(size)
@@ -105,7 +108,8 @@ export class K8sAttachAddon {
 
   _messageHandler (terminal, ev) {
     if (!(typeof ev.data === 'object' && ev.data instanceof ArrayBuffer)) {
-      throw Error(`Cannot handle "${typeof ev.data}" websocket message.`)
+      this._logger.error(`Cannot handle "${typeof ev.data}" websocket message.`)
+      return
     }
 
     const buffer = new Uint8Array(ev.data)
@@ -134,7 +138,7 @@ export class K8sAttachAddon {
         }
         break
       default:
-        throw Error('Unsupported message!')
+        this._logger.error('Unsupported websocket channel:', channel)
     }
   }
 
