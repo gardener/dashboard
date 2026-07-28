@@ -44,14 +44,14 @@ export class K8sAttachAddon {
     this._resizeCounter = 0
   }
 
-  _forceResize (size) {
-    const { cols, rows } = size
+  _forceResize (terminal) {
+    const { cols, rows } = terminal
     if (!cols || !rows) {
       return
     }
     this._resizeCounter += 1
     this._sendResize({ cols, rows: rows - 1 })
-    this._sendResize(size)
+    this._sendResize({ cols, rows })
     if (this._resizeCounter >= 5) {
       this._clearForceResize()
     }
