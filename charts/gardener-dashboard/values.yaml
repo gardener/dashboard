@@ -138,7 +138,7 @@ global:
     #   clientSecret: ~
     #   # redirectUris is the list of allowed redirect URIs (the default list is generated based on the ingress hosts)
     #   redirectUris: ~
-    #   # force PKCE usage
+    #   # PKCE is enabled by default; set to false only for compatibility with legacy providers
     #   usePKCE: true
     #   # sessionLifetime is the maximum lifetime of a login session without reauthentication in seconds (defaults to 86400)
     #   sessionLifetime: 86400
@@ -153,7 +153,7 @@ global:
     #     clientId: kube-kubectl
     #     # clientSecret is the public client secret use by kubelogin and all users
     #     clientSecret: ~
-    #     # force PKCE usage (automatically enabled if no clientSecret is given)
+    #     # PKCE is enabled by default and always used if no clientSecret is given; otherwise set false only for compatibility with legacy providers
     #     usePKCE: true
 
     frontendConfig:

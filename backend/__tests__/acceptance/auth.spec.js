@@ -86,6 +86,7 @@ async function parseCookies (res) {
 
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
+const PKCE_CODE_VERIFIER = 'a'.repeat(43)
 
 const {
   discovery,
@@ -111,6 +112,32 @@ describe('auth', function () {
 
   let agent
 
+  function getRequestCookieHeader (res) {
+    return res.headers['set-cookie']
+      .map(value => value.split(';', 1)[0])
+      .join('; ')
+  }
+
+  function expectTransactionCookiesCleared (res) {
+    const cookies = setCookieParser.parse(res, {
+      decodeValues: true,
+      map: true,
+    })
+    expect(cookies['__Host-gStt'].value).toHaveLength(0)
+    expect(cookies['__Host-gStt'].expires).toEqual(ZERO_DATE)
+    expect(cookies['__Host-gCdVrfr'].value).toHaveLength(0)
+    expect(cookies['__Host-gCdVrfr'].expires).toEqual(ZERO_DATE)
+    return cookies
+  }
+
+  async function beginAuthorization () {
+    const res = await agent
+      .get('/auth')
+      .redirects(0)
+      .expect(302)
+    return getRequestCookieHeader(res)
+  }
+
   beforeAll(async () => {
     // The discovery mock must be set before the agent is created,
     // because the first getConfiguration() call caches the result.
@@ -129,7 +156,7 @@ describe('auth', function () {
     // but not mockResolvedValue, so this is technically redundant - but explicit).
     discovery.mockResolvedValue(discoveryConfig)
 
-    randomPKCECodeVerifier.mockReturnValueOnce('code-verifier')
+    randomPKCECodeVerifier.mockReturnValueOnce(PKCE_CODE_VERIFIER)
     calculatePKCECodeChallenge.mockReturnValueOnce('code-challenge')
     buildAuthorizationUrl.mockImplementationOnce((config, params) => {
       const url = new URL(oidc.issuer)
@@ -216,6 +243,7 @@ describe('auth', function () {
 
   it('should redirect to home after successful authorization', async function () {
     const bearer = await user.bearer
+    const transactionCookies = await beginAuthorization()
 
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
     mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
@@ -223,11 +251,15 @@ describe('auth', function () {
 
     authorizationCodeGrant.mockImplementationOnce((config, currentUrl, checks) => {
       assert.strictEqual(currentUrl.searchParams.get('code'), OTAC)
+      assert.strictEqual(currentUrl.searchParams.get('state'), 'state')
+      assert.strictEqual(checks.expectedState, 'state')
+      assert.strictEqual(checks.pkceCodeVerifier, PKCE_CODE_VERIFIER)
       return { id_token: bearer }
     })
 
     const res = await agent
-      .get(`/auth/callback?code=${OTAC}`)
+      .get(`/auth/callback?code=${OTAC}&state=state`)
+      .set('cookie', transactionCookies)
       .redirects(0)
       .expect(302)
 
@@ -254,10 +286,12 @@ describe('auth', function () {
     expect(res.headers).toHaveProperty('location', '/')
     expect(mockRequest).toHaveBeenCalledTimes(3)
     expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+    expectTransactionCookiesCleared(res)
   })
 
   it('should redirect to login after failed authorization', async function () {
     const bearer = await user.bearer
+    const transactionCookies = await beginAuthorization()
     authorizationCodeGrant.mockImplementationOnce((config, currentUrl, checks) => {
       assert.strictEqual(currentUrl.searchParams.get('code'), OTAC)
       return { id_token: bearer }
@@ -272,12 +306,36 @@ describe('auth', function () {
     }
 
     const res = await agent
-      .get(`/auth/callback?code=${invalidOtac}`)
+      .get(`/auth/callback?code=${invalidOtac}&state=state`)
+      .set('cookie', transactionCookies)
       .redirects(0)
       .expect(302)
 
     expect(res.headers).toHaveProperty('location', `/login#error=${encodeURIComponent(message)}`)
     expect(authorizationCodeGrant).toHaveBeenCalledTimes(1)
+    const cookies = expectTransactionCookiesCleared(res)
+    expect(cookies[COOKIE_HEADER_PAYLOAD]).toBeUndefined()
+    expect(cookies[COOKIE_SIGNATURE]).toBeUndefined()
+    expect(cookies[COOKIE_TOKEN]).toBeUndefined()
+  })
+
+  it('should not overwrite an existing session when the callback has no state transaction', async function () {
+    const res = await agent
+      .get(`/auth/callback?code=${OTAC}&state=state`)
+      .set('cookie', await user.cookie)
+      .redirects(0)
+      .expect(302)
+
+    expect(res.headers).toHaveProperty(
+      'location',
+      `/login#error=${encodeURIComponent('Invalid OIDC state cookie')}`,
+    )
+    expect(authorizationCodeGrant).not.toHaveBeenCalled()
+    expect(mockRequest).not.toHaveBeenCalled()
+    const cookies = expectTransactionCookiesCleared(res)
+    expect(cookies[COOKIE_HEADER_PAYLOAD]).toBeUndefined()
+    expect(cookies[COOKIE_SIGNATURE]).toBeUndefined()
+    expect(cookies[COOKIE_TOKEN]).toBeUndefined()
   })
 
   it('should successfully login with a given token', async function () {
