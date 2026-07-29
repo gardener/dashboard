@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="cursor-pointer ma-1"
         :variant="!shootSupportedPatchAvailable ? 'tonal' : 'flat'"
-        :color="chipColor"
+        :color="displayChipColor"
       >
         <v-icon
           v-if="shootSupportedPatchAvailable || shootSupportedUpgradeAvailable"
@@ -119,6 +119,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useShootItem } from '@/composables/useShootItem'
 
+import { getTonalColorName } from '@/utils/themeColors'
+
 export default {
   inject: [
     'mergeProps',
@@ -157,6 +159,11 @@ export default {
     },
     chipColor () {
       return this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
+    },
+    displayChipColor () {
+      return this.shootSupportedPatchAvailable
+        ? this.chipColor
+        : getTonalColorName(this.chipColor)
     },
     tooltipText () {
       if (this.shootKubernetesVersionObject.isDeprecated) {

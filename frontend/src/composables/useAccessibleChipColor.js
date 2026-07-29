@@ -5,14 +5,8 @@
 //
 
 import {
-  computed,
-  watchEffect,
-} from 'vue'
-import { useTheme } from 'vuetify'
-import {
   blend,
   formatHex,
-  formatRgb,
   modeLrgb,
   modeOklch,
   modeRgb,
@@ -29,15 +23,8 @@ const toSrgbGamut = toGamut('rgb', 'oklch')
 const WHITE = '#ffffff'
 const BLACK = '#000000'
 
-export const ERROR_CHIP_BACKGROUND_VAR = '--g-error-chip-background'
-export const ERROR_CHIP_TEXT_VAR = '--g-error-chip-text'
-
-export const WARNING_CHIP_TEXT_VAR = '--g-warning-chip-text'
-export const WARNING_CHIP_BACKGROUND_VAR = '--g-warning-chip-background'
-export const WARNING_CHIP_BACKGROUND_OPACITY_VAR = '--g-warning-chip-background-opacity'
-
-/** Match Vuetify's default tonal chip opacity when calculating its visible background color. */
-const TONAL_BACKGROUND_OPACITY = 0.12
+/** Match Vuetify's tonal variant opacity when calculating its visible background color. */
+export const TONAL_BACKGROUND_OPACITY = 0.12
 
 function meetsContrast (background, textColor, targetContrast) {
   try {
@@ -47,12 +34,12 @@ function meetsContrast (background, textColor, targetContrast) {
   }
 }
 
-function createChipColorResult (background, textColor, changedColor) {
+function createChipColorResult (background, textColor, backgroundChanged = false) {
   return {
     background,
     textColor,
-    backgroundChanged: changedColor === 'background',
-    textColorChanged: changedColor === 'text',
+    backgroundChanged,
+    textColorChanged: false,
   }
 }
 
@@ -62,7 +49,11 @@ function pickHigherContrastTextColor (background) {
     : BLACK
 }
 
-function createTonalBackgroundColor (foreground, background, opacity) {
+export function createTonalBackgroundColor (
+  foreground,
+  background,
+  opacity = TONAL_BACKGROUND_OPACITY,
+) {
   try {
     const foregroundRgb = toRgb(foreground)
     if (!foregroundRgb) {
@@ -81,12 +72,11 @@ function createTonalBackgroundColor (foreground, background, opacity) {
  * Adjusts OKLCH lightness of `originalColor` toward `targetLightness` until contrast
  * with `textColor` meets `targetContrast`. Returns the closest passing hex color, or null.
  *
- *
- * @param {object} originalColor Culori OKLCH color object (not a hex string)
- * @param {string} textColor Hex color used as the contrast partner (e.g. `#ffffff`)
+ * @param {object} originalColor Culori OKLCH color object
+ * @param {string} textColor Contrast partner
  * @param {number} targetLightness Unitless OKLCH lightness (0 = black, 1 = white)
- * @param {number} targetContrast Minimum WCAG contrast ratio (4.5 = AA, 7 = AAA)
- * @returns {string|null} Hex color (e.g. `#831723`), or null
+ * @param {number} targetContrast Minimum WCAG contrast ratio
+ * @returns {string|null} Hex color, or null
  */
 function adjustLightnessForContrast (originalColor, textColor, targetLightness, targetContrast) {
   let failing = 0
@@ -110,183 +100,100 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
 }
 
 /**
- * Chooses readable colors for Vuetify flat or tonal chips.
- *
- * Flat chips prefer white text and adjust their background when needed. Tonal
- * chips preserve the default colors when possible, then change either the
- * background or the text color.
- *
- * @param {string} color Flat background or tonal theme color
- * @param {object} [options]
- * @param {'flat'|'tonal'} [options.variant='flat']
- * @param {string} [options.surface] Surface color (hex) behind a tonal chip
- * @param {number} [options.targetContrast=4.5] Minimum WCAG contrast ratio
- * @returns {{
- *   background: string,
- *   textColor: string,
- *   backgroundChanged: boolean,
- *   textColorChanged: boolean
- * }|undefined}
+ * Chooses an accessible background and text pair for an arbitrary flat chip.
+ * White text is preferred and the background is darkened only when necessary.
  */
-export function pickAccessibleChipColors (color, {
-  variant = 'flat',
-  surface,
+export function pickAccessibleChipColors (background, {
   targetContrast = 4.5,
 } = {}) {
-  if (!color || (variant === 'tonal' && !surface)) {
+  if (!background) {
     return undefined
   }
 
-  const original = toOklch(color)
+  const original = toOklch(background)
   if (!original || typeof original.l !== 'number') {
-    return variant === 'tonal' ? undefined : createChipColorResult(color, WHITE)
+    return createChipColorResult(background, WHITE)
   }
 
-  let background = color
-  let textColor = WHITE
-  let targetBackgroundLightness = 0
-
-  if (variant === 'tonal') {
-    const surfaceColor = toOklch(surface)
-    if (!surfaceColor || typeof surfaceColor.l !== 'number') {
-      return undefined
-    }
-
-    background = createTonalBackgroundColor(color, surface, TONAL_BACKGROUND_OPACITY)
-    if (!background) {
-      return undefined
-    }
-    textColor = color
-    targetBackgroundLightness = surfaceColor.l
-  }
-
-  if (meetsContrast(background, textColor, targetContrast)) {
-    return createChipColorResult(background, textColor)
+  if (meetsContrast(background, WHITE, targetContrast)) {
+    return createChipColorResult(background, WHITE)
   }
 
   const adjustedBackground = adjustLightnessForContrast(
     original,
-    textColor,
-    targetBackgroundLightness,
+    WHITE,
+    0,
     targetContrast,
   )
-  if (adjustedBackground) {
-    return createChipColorResult(adjustedBackground, textColor, 'background')
-  }
 
-  if (variant === 'tonal') {
-    const targetTextColor = pickHigherContrastTextColor(background)
-    const targetTextLightness = targetTextColor === WHITE ? 1 : 0
-    const adjustedTextColor = adjustLightnessForContrast(
-      original,
-      background,
-      targetTextLightness,
-      targetContrast,
-    )
-    if (adjustedTextColor) {
-      return createChipColorResult(background, adjustedTextColor, 'text')
+  return adjustedBackground
+    ? createChipColorResult(adjustedBackground, WHITE, true)
+    : createChipColorResult(background, WHITE)
+}
+
+function adjustTonalColorForContrast (
+  originalColor,
+  surface,
+  targetLightness,
+  targetContrast,
+) {
+  let failing = 0
+  let passing = 1
+  let result
+
+  for (let i = 0; i < 30; i++) {
+    const position = (failing + passing) / 2
+    const lightness = originalColor.l + (targetLightness - originalColor.l) * position
+    const candidate = formatHex(toSrgbGamut({ ...originalColor, l: lightness }))
+    const background = createTonalBackgroundColor(candidate, surface)
+
+    if (candidate && background && meetsContrast(background, candidate, targetContrast)) {
+      result = candidate
+      passing = position
+    } else {
+      failing = position
     }
   }
 
-  return createChipColorResult(background, textColor)
+  return result
 }
 
 /**
- * Accepts a hex color and formats it as comma-separated RGB channels for Vuetify theme CSS
- * variables, e.g. `255, 0, 0`. Returns undefined for invalid or transparent colors.
+ * Returns a single theme color that remains readable when Vuetify uses it both as
+ * tonal foreground and as a translucent underlay over `surface`.
  */
-export function colorToVuetifyRgb (color) {
-  try {
-    const formattedColor = formatRgb(color)
-    if (!formattedColor?.startsWith('rgb(')) {
-      return undefined
-    }
-    return formattedColor.slice(4, -1)
-  } catch {
-    return undefined
-  }
-}
-
-function setCssVariable (name, value) {
-  const root = document.documentElement
-  if (value === undefined) {
-    root.style.removeProperty(name)
-    return
-  }
-  root.style.setProperty(name, value)
-}
-
-function applyAccessibleChipCssVars (vars) {
-  setCssVariable(ERROR_CHIP_BACKGROUND_VAR, vars?.error?.backgroundRgb)
-  setCssVariable(ERROR_CHIP_TEXT_VAR, vars?.error?.textRgb)
-  setCssVariable(WARNING_CHIP_BACKGROUND_VAR, vars?.warning?.backgroundRgb)
-  setCssVariable(WARNING_CHIP_BACKGROUND_OPACITY_VAR, vars?.warning?.backgroundOpacity)
-  setCssVariable(WARNING_CHIP_TEXT_VAR, vars?.warning?.textRgb)
-}
-
-function createErrorChipCssVars (themeValue) {
-  const errorChipColors = pickAccessibleChipColors(themeValue?.colors?.error)
-  if (!errorChipColors) {
+export function pickAccessibleTonalColor (color, surface, {
+  targetContrast = 4.5,
+} = {}) {
+  if (!color || !surface) {
     return undefined
   }
 
-  const backgroundRgb = colorToVuetifyRgb(errorChipColors.background)
-  const textRgb = colorToVuetifyRgb(errorChipColors.textColor)
-  if (!backgroundRgb || !textRgb) {
+  const original = toOklch(color)
+  const surfaceColor = toOklch(surface)
+  if (
+    !original ||
+    typeof original.l !== 'number' ||
+    !surfaceColor ||
+    typeof surfaceColor.l !== 'number'
+  ) {
     return undefined
   }
 
-  return { backgroundRgb, textRgb }
-}
-
-function createWarningChipCssVars (themeValue) {
-  const warningColor = themeValue?.colors?.warning
-  if (!warningColor) {
+  const tonalBackground = createTonalBackgroundColor(color, surface)
+  if (!tonalBackground) {
     return undefined
   }
-
-  const warningChipColors = pickAccessibleChipColors(warningColor, {
-    variant: 'tonal',
-    surface: themeValue.colors.surface,
-  })
-  if (!warningChipColors) {
-    return undefined
+  if (meetsContrast(tonalBackground, color, targetContrast)) {
+    return color
   }
 
-  const vars = {}
-  if (warningChipColors.backgroundChanged) {
-    const backgroundRgb = colorToVuetifyRgb(warningChipColors.background)
-    if (!backgroundRgb) {
-      return undefined
-    }
-    vars.backgroundRgb = backgroundRgb
-    vars.backgroundOpacity = '1'
-  } else if (warningChipColors.textColorChanged) {
-    const textRgb = colorToVuetifyRgb(warningChipColors.textColor)
-    if (!textRgb) {
-      return undefined
-    }
-    vars.textRgb = textRgb
-  }
-  return vars
-}
-
-function createChipCssVars (theme) {
-  return computed(() => ({
-    error: createErrorChipCssVars(theme.current.value),
-    warning: createWarningChipCssVars(theme.current.value),
-  }))
-}
-
-/**
- * Ensures error and tonal warning chips remain readable without changing the related
- * global theme colors by exposing accessible colors as document CSS custom properties.
- */
-export function useAccessibleChipColors () {
-  const chipCssVars = createChipCssVars(useTheme())
-  watchEffect(() => {
-    applyAccessibleChipCssVars(chipCssVars.value)
-  })
-
-  return { chipCssVars }
+  const targetColor = pickHigherContrastTextColor(surface)
+  const targetLightness = targetColor === WHITE ? 1 : 0
+  return adjustTonalColorForContrast(
+    original,
+    surface,
+    targetLightness,
+    targetContrast,
+  )
 }

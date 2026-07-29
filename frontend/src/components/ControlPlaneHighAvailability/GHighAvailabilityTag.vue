@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         v-bind="activatorProps"
         variant="tonal"
         :size="size"
-        :color="color"
+        :color="getTonalColorName(color)"
         :class="['cursor-pointer', chipClass]"
       >
         {{ failureToleranceTypeLabel }}
@@ -48,6 +48,8 @@ import {
   inject,
   ref,
 } from 'vue'
+
+import { getTonalColorName } from '@/utils/themeColors'
 
 const props = defineProps({
   popoverKey: {

@@ -101,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             ref="loginButton"
             variant="tonal"
-            color="primary"
+            color="tonalPrimary"
             @click="handleLogin"
           >
             Login
