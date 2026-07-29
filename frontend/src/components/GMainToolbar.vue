@@ -251,8 +251,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-btn
               block
               variant="text"
-              color="pink"
-              class="justify-start pl-4"
+              class="logout-btn justify-start pl-4"
               prepend-icon="mdi-exit-to-app"
               @click.stop="handleLogout"
             >
@@ -436,11 +435,17 @@ function helpTarget (item) {
     .tabs-bar-background {
       background-color: white !important;
     }
+    .logout-btn {
+      color: #C62828;
+    }
   }
 
   .v-theme--dark {
     .tabs-bar-background {
       background-color: black !important;
+    }
+    .logout-btn {
+      color: #EF5350;
     }
   }
 </style>

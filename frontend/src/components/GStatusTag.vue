@@ -16,9 +16,8 @@ SPDX-License-Identifier: Apache-2.0
       <template #activator="{ props: popoverActivatorProps }">
         <v-chip
           v-bind="popoverActivatorProps"
-          :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
-          :text-color="textColor"
+          :class="{ 'cursor-pointer': condition.message, 'g-error-chip': isError }"
+          :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
@@ -214,12 +213,6 @@ export default {
         return 'info'
       }
       return 'primary'
-    },
-    textColor () {
-      if (this.isError) {
-        return 'white'
-      }
-      return this.color
     },
     visible () {
       if (!this.canViewLandscape) {

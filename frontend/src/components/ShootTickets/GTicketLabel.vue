@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import contrast from 'get-contrast'
+import { pickAccessibleChipColors } from '@/composables/useAccessibleChipColor'
 
 import get from 'lodash/get'
 
@@ -30,9 +30,9 @@ export default {
   computed: {
     labelStyle () {
       return label => {
-        const bgColor = `#${get(label, ['color'])}`
-        const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
-        return `background-color: ${bgColor}; color: ${textColor};`
+        const background = `#${get(label, ['color'])}`
+        const labelColors = pickAccessibleChipColors(background)
+        return `background-color: ${labelColors.background}; color: ${labelColors.textColor};`
       }
     },
   },
