@@ -20,8 +20,8 @@
   customManagers: [
     {
       customType: 'regex',
-      fileMatch: [
-        '^.ci/pipeline_definitions$',
+      managerFilePatterns: [
+        '/^.ci/pipeline_definitions$/',
       ],
       matchStrings: [
         'image: [\'"]?(?<depName>.*?):(?<currentValue>.*?)[\'"]?\\s',
@@ -63,8 +63,8 @@
       matchManagers: [
         'github-actions',
       ],
-      excludePackageNames: [
-        'node',
+      matchPackageNames: [
+        '!node',
       ],
     },
     {
@@ -79,11 +79,11 @@
         'npm',
         'nvm',
         'nodenv',
-        'regex',
+        'custom.regex',
       ],
       matchDatasources: [
         'docker',
-        'node',
+        'node-version',
         'node-version',
       ],
       commitMessagePrefix: 'chore(node):',
