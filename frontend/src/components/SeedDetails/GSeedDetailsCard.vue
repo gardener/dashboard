@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
             v-else
             v-tooltip:top="'This seed is hidden from shoot scheduling'"
             size="small"
-            color="warning"
+            color="tonalWarning"
             variant="tonal"
           >
             Hidden

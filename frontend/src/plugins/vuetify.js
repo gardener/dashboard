@@ -22,9 +22,24 @@ import {
   shades,
 } from 'vuetify/util/colors'
 
+import {
+  getTonalColorName,
+  TONAL_COLOR_NAMES,
+} from '@/utils/themeColors'
+
+function withTonalColors (colors) {
+  const tonalColors = Object.fromEntries(Object.entries(colors)
+    .filter(([name]) => TONAL_COLOR_NAMES.includes(name))
+    .map(([name, value]) => [getTonalColorName(name), value]))
+  return {
+    ...colors,
+    ...tonalColors,
+  }
+}
+
 const light = {
   dark: false,
-  colors: {
+  colors: withTonalColors({
     anchor: '#0a6b51',
     primary: '#0a6b51',
     secondary: grey.darken3,
@@ -39,12 +54,12 @@ const light = {
     'toolbar-background': '#0a6b51',
     'toolbar-title': shades.white,
     'action-button': grey.darken4,
-  },
+  }),
 }
 
 const dark = {
   dark: true,
-  colors: {
+  colors: withTonalColors({
     anchor: '#60C0A0',
     primary: '#60C0A0',
     secondary: grey.darken3,
@@ -59,7 +74,7 @@ const dark = {
     'toolbar-background': '#0b8062',
     'toolbar-title': shades.white,
     'action-button': grey.lighten4,
-  },
+  }),
 }
 
 const variations = {

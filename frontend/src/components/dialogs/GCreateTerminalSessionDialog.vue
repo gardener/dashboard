@@ -92,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="isUserGardenTerminal"
           class="ma-2"
           type="info"
-          color="primary"
+          color="tonalPrimary"
           variant="tonal"
         >
           <strong>Terminal will be running on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>
@@ -102,7 +102,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="isAdmin && isTerminalInUntrustedEnvironment"
           class="ma-2"
           type="info"
-          color="primary"
+          color="tonalPrimary"
           variant="tonal"
         >
           <strong>Terminal will be running in an untrusted environment!</strong><br>
@@ -112,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="hasNoAvailableNodes"
           class="ma-2"
           type="error"
+          color="tonalError"
           variant="tonal"
         >
           <strong>Cannot schedule terminal on <span class="font-family-monospace">{{ shootName }}</span> cluster</strong><br>

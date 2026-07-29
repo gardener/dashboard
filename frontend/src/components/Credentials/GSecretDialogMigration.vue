@@ -38,14 +38,14 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     v-tooltip:top="'Deprecated SecretBinding that needs to be migrated'"
                     tile
-                    color="primary"
+                    color="tonalPrimary"
                     class="my-1"
                   >
                     {{ secretBindingName }}
                     <v-chip
                       v-tooltip:top="'Deprecated'"
                       size="x-small"
-                      color="warning"
+                      color="tonalWarning"
                       class="ml-2"
                       prepend-icon="mdi-key"
                     >
@@ -55,12 +55,12 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     v-tooltip:top="'A new CredentialsBinding will be created to reference the same Secret'"
                     tile
-                    color="primary"
+                    color="tonalPrimary"
                     class="my-1"
                   >
                     {{ secretBindingName }}
                     <v-chip
-                      color="success"
+                      color="tonalSuccess"
                       class="ml-2"
                       size="x-small"
                       prepend-icon="mdi-key-outline"
@@ -76,13 +76,13 @@ SPDX-License-Identifier: Apache-2.0
                   <v-chip
                     v-tooltip:top="'Secret referenced by the deprecated SecretBinding'"
                     tile
-                    color="primary"
+                    color="tonalPrimary"
                   >
                     {{ secretName }}
                     <v-chip
                       v-tooltip:top="`Namespace: ${secretNamespace}`"
                       size="x-small"
-                      color="primary"
+                      color="tonalPrimary"
                       class="ml-2"
                     >
                       Secret
@@ -98,6 +98,7 @@ SPDX-License-Identifier: Apache-2.0
           >
             <v-alert
               type="success"
+              color="tonalSuccess"
               variant="tonal"
             >
               <p class="font-weight-bold">
@@ -121,6 +122,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-alert
               v-if="credentialUsageCount > 0"
               type="warning"
+              color="tonalWarning"
               variant="tonal"
               class="mt-3"
             >

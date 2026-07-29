@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-if="!!shortPurpose"
     v-tooltip:top="purpose"
     :variant="!isCritical ? 'tonal' : 'flat'"
-    color="primary"
+    :color="isCritical ? 'primary' : 'tonalPrimary'"
     size="small"
     class="purpose-tag"
   >

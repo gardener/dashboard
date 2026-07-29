@@ -176,7 +176,7 @@ SPDX-License-Identifier: Apache-2.0
             </div>
             <v-btn-toggle
               v-model="colorMode"
-              color="primary"
+              color="tonalPrimary"
               mandatory="force"
               divided
               density="compact"

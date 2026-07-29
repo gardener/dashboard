@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-chip
               v-if="showChip"
               v-bind="props"
-              :color="phaseColor"
+              :color="tonalPhaseColor"
               label
               size="x-small"
               class="ml-2"
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
                 <strong>
                   All two-step credential rotations need to be in phase
                   <v-chip
-                    color="primary"
+                    color="tonalPrimary"
                     label
                     size="x-small"
                     class="ml-2"
@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
               <div>
                 This two-step operation is in phase
                 <v-chip
-                  color="primary"
+                  color="tonalPrimary"
                   label
                   size="x-small"
                   class="ml-2"
@@ -125,6 +125,8 @@ import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootStatusCredentialRotation } from '@/composables/useShootStatusCredentialRotation'
 
+import { getTonalColorName } from '@/utils/themeColors'
+
 import get from 'lodash/get'
 
 export default {
@@ -174,6 +176,9 @@ export default {
         default:
           return 'info'
       }
+    },
+    tonalPhaseColor () {
+      return getTonalColorName(this.phaseColor)
     },
     iconColor () {
       if (!this.isCACertificateValiditiesAcceptable) {
