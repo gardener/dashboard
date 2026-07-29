@@ -43,6 +43,7 @@
     "@kyvg/vue3-notification": "^3.2.1",
     "@lezer/common": "^1.2.1",
     "@mdi/font": "7.4.47",
+    "@vue/devtools-api": "^8.2.1",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "@vueuse/core": "^14.0.0",
