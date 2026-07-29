@@ -110,10 +110,21 @@ const configMappings = [
     configPath: 'port',
     type: 'Integer',
   },
+  // Also used for metrics unless metricsHost is configured separately. If omitted,
+  // Node.js binds to :: when IPv6 is available, otherwise 0.0.0.0.
+  {
+    environmentVariableName: 'BIND_HOST',
+    configPath: 'host',
+  },
   {
     environmentVariableName: 'METRICS_PORT',
     configPath: 'metricsPort',
     type: 'Integer',
+  },
+  // If omitted, inherits host. If both are omitted, Node.js uses its default bind behavior.
+  {
+    environmentVariableName: 'METRICS_BIND_HOST',
+    configPath: 'metricsHost',
   },
   {
     environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
@@ -191,6 +202,9 @@ export default {
       } catch (err) { /* ignore */ }
     }
     this.assignConfigFromEnvironmentAndFileSystem(config, env)
+    if (!_.has(config, ['metricsHost']) && _.has(config, ['host'])) {
+      config.metricsHost = config.host
+    }
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',

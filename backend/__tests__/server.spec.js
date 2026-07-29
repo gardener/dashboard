@@ -19,14 +19,16 @@ import terminus from '@godaddy/terminus'
 import metricsApp from '@gardener-dashboard/monitor'
 import createServer from '../lib/server.js'
 
-function createApplication (port, metricsPort, { tls } = {}) {
+function createApplication (port, metricsPort, { tls, host, metricsHost } = {}) {
   const app = (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
   }
   const map = new Map()
   map.set('port', port)
+  map.set('host', host)
   map.set('metricsPort', metricsPort)
+  map.set('metricsHost', metricsHost)
   map.set('tls', tls)
   map.set('periodSeconds', 1)
   map.set('healthCheck', vi.fn())
@@ -57,7 +59,7 @@ describe('server', () => {
   const port = 1234
   const metricsPort = 5678
   const mockServer = {
-    listen: vi.fn((_, callback) => setImmediate(callback)),
+    listen: vi.fn((...args) => setImmediate(args.at(-1))),
   }
   const mockTerminus = {}
   let app
@@ -81,6 +83,7 @@ describe('server', () => {
 
   beforeEach(() => {
     setTimeoutSpy.mockClear()
+    mockServer.listen.mockClear()
     mockCreateServer = vi.spyOn(http, 'createServer').mockReturnValue(mockServer)
     mockCreateTerminus = vi.spyOn(terminus, 'createTerminus').mockReturnValue(mockTerminus)
     app = createApplication(port, metricsPort)
@@ -129,6 +132,21 @@ describe('server', () => {
     ])
   })
 
+  it('should bind both listeners to configured hosts', async () => {
+    const app = createApplication(port, metricsPort, {
+      host: '127.0.0.1',
+      metricsHost: '127.0.0.2',
+    })
+    const server = createServer(app, metricsApp)
+
+    await server.run()
+
+    expect(mockServer.listen.mock.calls).toEqual([
+      [metricsPort, '127.0.0.2', expect.any(Function)],
+      [port, '127.0.0.1', expect.any(Function)],
+    ])
+  })
+
   it('should initialize terminus', async () => {
     expect(terminus.createTerminus).toHaveBeenCalledTimes(1)
     expect(terminus.createTerminus.mock.calls[0]).toHaveLength(2)
@@ -171,7 +189,7 @@ describe('server (https)', () => {
     key: 'mock-key-content',
   }
   const mockServer = {
-    listen: vi.fn((_, callback) => setImmediate(callback)),
+    listen: vi.fn((...args) => setImmediate(args.at(-1))),
   }
   let app
   let logger
@@ -192,6 +210,7 @@ describe('server (https)', () => {
 
   beforeEach(() => {
     setTimeoutSpy.mockClear()
+    mockServer.listen.mockClear()
     mockHttpCreateServer = vi.spyOn(http, 'createServer').mockReturnValue(mockServer)
     mockHttpsCreateServer = vi.spyOn(https, 'createServer').mockReturnValue(mockServer)
     app = createApplication(port, metricsPort, { tls })

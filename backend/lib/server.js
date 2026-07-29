@@ -19,7 +19,9 @@ function toMilliseconds (seconds) {
 
 function createServer (app, metricsApp) {
   const port = app.get('port')
+  const host = app.get('host')
   const metricsPort = app.get('metricsPort')
+  const metricsHost = app.get('metricsHost')
   const tls = app.get('tls')
   const periodSeconds = app.get('periodSeconds')
   const healthCheckFunc = app.get('healthCheck')
@@ -68,7 +70,7 @@ function createServer (app, metricsApp) {
 
   return {
     async run () {
-      await new Promise(resolve => metricsServer.listen(metricsPort, resolve))
+      await new Promise(resolve => metricsServer.listen(metricsPort, metricsHost, resolve))
       logger.info('Metrics server listening on port %d', metricsPort)
 
       const begin = Date.now()
@@ -80,7 +82,7 @@ function createServer (app, metricsApp) {
       } catch (err) {
         logger.warn('Before listen hook timed out: %s', err.message)
       }
-      await new Promise(resolve => server.listen(port, resolve))
+      await new Promise(resolve => server.listen(port, host, resolve))
       logger.info('%s server listening on port %d', isHttps ? 'HTTPS' : 'HTTP', port)
     },
   }
