@@ -12,9 +12,8 @@ import {
 import { useTheme } from 'vuetify'
 import vuetifyColors from 'vuetify/util/colors'
 
-import { pickAccessibleTonalColor } from '@/composables/useAccessibleChipColor'
-
 import { isHtmlColorCode } from '@/utils'
+import { pickAccessibleTonalColor } from '@/utils/accessibleColors'
 import {
   getTonalColorName,
   TONAL_COLOR_NAMES,

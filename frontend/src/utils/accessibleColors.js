@@ -24,26 +24,24 @@ const WHITE = '#ffffff'
 const BLACK = '#000000'
 
 /** Match Vuetify's tonal variant opacity when calculating its visible background color. */
-export const TONAL_BACKGROUND_OPACITY = 0.12
+const TONAL_BACKGROUND_OPACITY = 0.12
 
-function meetsContrast (background, textColor, targetContrast) {
+function meetsContrast (background, foreground, targetContrast) {
   try {
-    return wcagContrast(background, textColor) >= targetContrast
+    return wcagContrast(background, foreground) >= targetContrast
   } catch {
     return false
   }
 }
 
-function createChipColorResult (background, textColor, backgroundChanged = false) {
+function createColorPair (background, textColor) {
   return {
     background,
     textColor,
-    backgroundChanged,
-    textColorChanged: false,
   }
 }
 
-function pickHigherContrastTextColor (background) {
+function pickHigherContrastForegroundColor (background) {
   return wcagContrast(background, WHITE) >= wcagContrast(background, BLACK)
     ? WHITE
     : BLACK
@@ -70,15 +68,15 @@ export function createTonalBackgroundColor (
 
 /**
  * Adjusts OKLCH lightness of `originalColor` toward `targetLightness` until contrast
- * with `textColor` meets `targetContrast`. Returns the closest passing hex color, or null.
+ * with `foreground` meets `targetContrast`. Returns the closest passing hex color, or null.
  *
  * @param {object} originalColor Culori OKLCH color object
- * @param {string} textColor Contrast partner
+ * @param {string} foreground Contrast partner
  * @param {number} targetLightness Unitless OKLCH lightness (0 = black, 1 = white)
  * @param {number} targetContrast Minimum WCAG contrast ratio
  * @returns {string|null} Hex color, or null
  */
-function adjustLightnessForContrast (originalColor, textColor, targetLightness, targetContrast) {
+function adjustLightnessForContrast (originalColor, foreground, targetLightness, targetContrast) {
   let failing = 0
   let passing = 1
   let result = null
@@ -88,7 +86,7 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
     const lightness = originalColor.l + (targetLightness - originalColor.l) * position
     const candidateHex = formatHex(toSrgbGamut({ ...originalColor, l: lightness }))
 
-    if (candidateHex && meetsContrast(candidateHex, textColor, targetContrast)) {
+    if (candidateHex && meetsContrast(candidateHex, foreground, targetContrast)) {
       result = candidateHex
       passing = position
     } else {
@@ -100,10 +98,10 @@ function adjustLightnessForContrast (originalColor, textColor, targetLightness, 
 }
 
 /**
- * Chooses an accessible background and text pair for an arbitrary flat chip.
+ * Chooses an accessible background and text pair.
  * White text is preferred and the background is darkened only when necessary.
  */
-export function pickAccessibleChipColors (background, {
+export function pickAccessibleColorPair (background, {
   targetContrast = 4.5,
 } = {}) {
   if (!background) {
@@ -112,11 +110,11 @@ export function pickAccessibleChipColors (background, {
 
   const original = toOklch(background)
   if (!original || typeof original.l !== 'number') {
-    return createChipColorResult(background, WHITE)
+    return createColorPair(background, WHITE)
   }
 
   if (meetsContrast(background, WHITE, targetContrast)) {
-    return createChipColorResult(background, WHITE)
+    return createColorPair(background, WHITE)
   }
 
   const adjustedBackground = adjustLightnessForContrast(
@@ -127,8 +125,8 @@ export function pickAccessibleChipColors (background, {
   )
 
   return adjustedBackground
-    ? createChipColorResult(adjustedBackground, WHITE, true)
-    : createChipColorResult(background, WHITE)
+    ? createColorPair(adjustedBackground, WHITE)
+    : createColorPair(background, WHITE)
 }
 
 function adjustTonalColorForContrast (
@@ -188,7 +186,7 @@ export function pickAccessibleTonalColor (color, surface, {
     return color
   }
 
-  const targetColor = pickHigherContrastTextColor(surface)
+  const targetColor = pickHigherContrastForegroundColor(surface)
   const targetLightness = targetColor === WHITE ? 1 : 0
   return adjustTonalColorForContrast(
     original,

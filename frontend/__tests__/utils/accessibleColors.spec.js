@@ -13,24 +13,22 @@ import {
 
 import {
   createTonalBackgroundColor,
-  pickAccessibleChipColors,
+  pickAccessibleColorPair,
   pickAccessibleTonalColor,
-} from '@/composables/useAccessibleChipColor'
+} from '@/utils/accessibleColors'
 
 useMode(modeRgb)
 useMode(modeLrgb)
 
-describe('composables', () => {
-  describe('useAccessibleChipColor', () => {
-    describe('#pickAccessibleChipColors', () => {
+describe('utils', () => {
+  describe('accessibleColors', () => {
+    describe('#pickAccessibleColorPair', () => {
       it('should keep the background and use white text when contrast already passes', () => {
         const background = '#B71C1C'
-        const result = pickAccessibleChipColors(background)
+        const result = pickAccessibleColorPair(background)
 
         expect(result.background).toBe(background)
         expect(result.textColor).toBe('#ffffff')
-        expect(result.backgroundChanged).toBe(false)
-        expect(result.textColorChanged).toBe(false)
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
@@ -38,22 +36,18 @@ describe('composables', () => {
         const background = '#E57373'
         expect(wcagContrast(background, '#ffffff')).toBeLessThan(4.5)
 
-        const result = pickAccessibleChipColors(background)
+        const result = pickAccessibleColorPair(background)
 
         expect(result.background).toMatch(/^#[0-9a-f]{6}$/)
         expect(result.background).not.toBe(background)
         expect(result.textColor).toBe('#ffffff')
-        expect(result.backgroundChanged).toBe(true)
-        expect(result.textColorChanged).toBe(false)
         expect(wcagContrast(result.background, result.textColor)).toBeGreaterThanOrEqual(4.5)
       })
 
       it('should fall back to white text when the background color cannot be parsed', () => {
-        expect(pickAccessibleChipColors('not-a-color')).toEqual({
+        expect(pickAccessibleColorPair('not-a-color')).toEqual({
           background: 'not-a-color',
           textColor: '#ffffff',
-          backgroundChanged: false,
-          textColorChanged: false,
         })
       })
     })

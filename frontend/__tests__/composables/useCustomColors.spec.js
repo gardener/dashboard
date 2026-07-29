@@ -8,8 +8,8 @@ import { ref } from 'vue'
 import { wcagContrast } from 'culori/fn'
 
 import { useCustomColors } from '@/composables/useCustomColors'
-import { createTonalBackgroundColor } from '@/composables/useAccessibleChipColor'
 
+import { createTonalBackgroundColor } from '@/utils/accessibleColors'
 import {
   getTonalColorName,
   TONAL_COLOR_NAMES,
