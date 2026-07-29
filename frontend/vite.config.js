@@ -17,7 +17,10 @@ import {
   URL,
 } from 'node:url'
 
-import { defineConfig } from 'vite'
+import {
+  defineConfig,
+  loadEnv,
+} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
@@ -25,8 +28,6 @@ import Unfonts from 'unplugin-fonts/vite'
 import compression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { mdiMeta } from './vite/g-mdi-meta.js'
-
-const proxyTarget = 'http://localhost:3030'
 
 const KiB = 1024
 
@@ -177,6 +178,8 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (command === 'serve') {
+    const env = loadEnv(mode, process.cwd())
+    const proxyTarget = env.VITE_PROXY_TARGET || 'http://localhost:3030'
     const sslDirectory = process.env.GARDENER_DASHBOARD_SSL_DIR || join(homedir(), '.gardener', 'dashboard', 'ssl')
     const keyPath = join(sslDirectory, 'key.pem')
     const certPath = join(sslDirectory, 'cert.pem')
