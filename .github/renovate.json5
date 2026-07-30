@@ -72,6 +72,7 @@
       groupSlug: 'node-version',
       matchPackageNames: [
         'node',
+        'actions/node-versions',
       ],
       matchManagers: [
         'github-actions',
@@ -83,7 +84,7 @@
       ],
       matchDatasources: [
         'docker',
-        'node-version',
+        'github-releases',
         'node-version',
       ],
       commitMessagePrefix: 'chore(node):',
