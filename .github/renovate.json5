@@ -28,6 +28,19 @@
       ],
       datasourceTemplate: 'docker',
     },
+    {
+      customType: 'regex',
+      fileMatch: [
+        '^hack/local-dashboard/internal/configuration\\.mjs$',
+      ],
+      matchStrings: [
+        "export const GARDENERLESS_COMMIT = '(?<currentDigest>[0-9a-f]{40})'",
+      ],
+      currentValueTemplate: 'main',
+      depNameTemplate: 'gardenerless-local-setup',
+      packageNameTemplate: 'https://github.com/grolu/gardenerless-local-setup',
+      datasourceTemplate: 'git-refs',
+    },
   ],
   packageRules: [
     {

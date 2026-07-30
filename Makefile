@@ -15,18 +15,22 @@ help: ## Display this help.
 
 .PHONY: lint
 lint: ## Run eslint against code.
+	@yarn lint:hack
 	@yarn workspaces foreach --all --parallel --no-private run lint
 
 .PHONY: lint-sarif
 lint-sarif: ## Run eslint and output in sarif format.
+	@yarn lint:hack:sarif
 	@yarn workspaces foreach --all --parallel --no-private run lint-sarif
 
 .PHONY: test
 test: ## Run tests.
+	@yarn test:hack
 	@yarn workspaces foreach --all --parallel --no-private run test
 
 .PHONY: test-cov
 test-cov: ## Run tests with coverage.
+	@yarn test:hack:cov
 	@yarn workspaces foreach --all --parallel --no-private run test --coverage
 
 .PHONY: build
