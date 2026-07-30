@@ -319,21 +319,22 @@ export function searchItemsFn (state, context) {
     const searchQuery = parseSearch(search, QUALIFIED_SEARCH_FIELDS)
 
     return item => {
+      const f = key => ({ get: () => getRawVal(context, item, key) })
       const fields = {
-        name: getRawVal(context, item, 'name'),
-        provider: getRawVal(context, item, 'provider'),
-        region: getRawVal(context, item, 'region'),
-        seed: getRawVal(context, item, 'seed'),
-        project: getRawVal(context, item, 'project'),
-        createdBy: getRawVal(context, item, 'createdBy'),
-        purpose: getRawVal(context, item, 'purpose'),
-        k8sVersion: getRawVal(context, item, 'k8sVersion'),
-        ticketLabels: getRawVal(context, item, 'ticketLabels'),
-        errorCodes: getRawVal(context, item, 'errorCodes'),
-        controlPlaneHighAvailability: getRawVal(context, item, 'controlPlaneHighAvailability'),
+        name: f('name'),
+        provider: f('provider'),
+        region: f('region'),
+        seed: f('seed'),
+        project: f('project'),
+        createdBy: f('createdBy'),
+        purpose: f('purpose'),
+        k8sVersion: f('k8sVersion'),
+        ticketLabels: f('ticketLabels'),
+        errorCodes: f('errorCodes'),
+        controlPlaneHighAvailability: f('controlPlaneHighAvailability'),
       }
       Object.assign(fields, Object.fromEntries(
-        searchableCustomFields.value.map(({ key }) => [key, getRawVal(context, item, key)]),
+        searchableCustomFields.value.map(({ key }) => [key, f(key)]),
       ))
 
       return searchQuery.matches(fields)

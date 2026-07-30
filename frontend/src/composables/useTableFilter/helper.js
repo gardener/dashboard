@@ -18,14 +18,14 @@ function isTokenSeparator (code) {
   return code === CHAR_SPACE || code === CHAR_TAB || code === CHAR_LF || code === CHAR_CR
 }
 
-function getTermValues (fields, allValues, field) {
-  if (field === null) {
-    return allValues
+export function defaultFieldMatch (term, value) {
+  if (term.value === '') {
+    return value == null || value === ''
   }
-  if (!Object.hasOwn(fields, field)) {
-    return [undefined]
+  if (value == null || value === '') {
+    return false
   }
-  return [fields[field]] // eslint-disable-line security/detect-object-injection -- key validated by hasOwn above; fields is an app-constructed object literal, field is constrained to allowedFields
+  return term.exact ? value === term.value : value.includes(term.value)
 }
 
 // Splits the raw query on whitespace while keeping quoted phrases intact.
@@ -86,20 +86,17 @@ export class SearchQuery {
   }
 
   matches (fields) {
-    const allValues = Object.values(fields)
     for (const term of this.terms) {
-      const values = getTermValues(fields, allValues, term.field)
-      const matchesTermValue = value => {
-        if (term.value === '') {
-          return value == null || value === ''
-        }
-        if (value == null || value === '') {
-          return false
-        }
-        const stringValue = typeof value === 'string' ? value : String(value)
-        return term.exact ? stringValue === term.value : stringValue.includes(term.value)
+      let found
+      if (term.field !== null) {
+        const spec = fields[term.field]
+        const match = spec?.match ?? defaultFieldMatch
+        found = match(term, spec ? spec.get() : undefined)
+      } else {
+        found = Object.values(fields)
+          .filter(spec => spec.freeText !== false)
+          .some(spec => (spec.match ?? defaultFieldMatch)(term, spec.get()))
       }
-      const found = values.some(matchesTermValue)
       if ((!found && !term.exclude) || (found && term.exclude)) {
         return false
       }

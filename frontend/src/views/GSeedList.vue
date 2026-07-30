@@ -284,21 +284,18 @@ function seedFilterFn (query) {
   const searchQuery = parseSearch(query, QUALIFIED_SEARCH_FIELDS)
 
   return item => {
-    const conditions = get(item, ['status', 'conditions'], [])
-    const errorCodes = join(errorCodesFromArray(conditions), ' ')
-    const accessRestrictionNames = join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')
-    const shoot = getManagedSeedShootName(item) || 'Unmanaged'
+    const f = getter => ({ get: getter })
 
     const fields = {
-      name: get(item, ['metadata', 'name']),
-      shoot,
-      provider: get(item, ['spec', 'provider', 'type']),
-      region: get(item, ['spec', 'provider', 'region']),
-      k8sVersion: get(item, ['status', 'kubernetesVersion']),
-      gardenerVersion: get(item, ['status', 'gardener', 'version']),
-      visibility: get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden',
-      errorCodes,
-      accessRestrictions: accessRestrictionNames,
+      name: f(() => get(item, ['metadata', 'name'])),
+      shoot: f(() => getManagedSeedShootName(item) || 'Unmanaged'),
+      provider: f(() => get(item, ['spec', 'provider', 'type'])),
+      region: f(() => get(item, ['spec', 'provider', 'region'])),
+      k8sVersion: f(() => get(item, ['status', 'kubernetesVersion'])),
+      gardenerVersion: f(() => get(item, ['status', 'gardener', 'version'])),
+      visibility: f(() => get(item, ['spec', 'settings', 'scheduling', 'visible']) ? 'visible' : 'hidden'),
+      errorCodes: f(() => join(errorCodesFromArray(get(item, ['status', 'conditions'], [])), ' ')),
+      accessRestrictions: f(() => join(map(get(item, ['spec', 'accessRestrictions'], []), 'name'), ' ')),
     }
 
     return searchQuery.matches(fields)
