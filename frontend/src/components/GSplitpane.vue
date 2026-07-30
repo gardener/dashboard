@@ -87,12 +87,12 @@ export default {
 
   .splitpanes--vertical > .splitpanes__splitter {
     min-width: 2px !important;
-    background-color: rgba(var(--v-theme-on-surface), 0.5);
+    background-color: rgb(var(--v-theme-surface-light));
   }
 
   .splitpanes--horizontal > .splitpanes__splitter {
     min-height: 2px !important;
-    background-color: rgba(var(--v-theme-on-surface), 0.5);
+    background-color: rgb(var(--v-theme-surface-light));
   }
 
   .splitpanes__pane {
