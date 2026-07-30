@@ -131,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0
           <v-menu
             location="bottom"
             offset-y
-            min-width="400px"
+            min-width="420px"
           >
             <template #activator="{ props }">
               <v-btn
@@ -149,57 +149,65 @@ SPDX-License-Identifier: Apache-2.0
             >
               <v-list-item @click="split('horizontal')">
                 <template #prepend>
-                  <g-icon-base
-                    width="16"
-                    height="16"
-                    view-box="0 -2 20 20"
-                    class="mr-2"
-                    icon-color="on-surface"
-                    icon-name="split-vertically"
-                  >
-                    <g-split-vertically />
-                  </g-icon-base>
+                  <span class="d-inline-flex align-center justify-center mr-2">
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      icon-color="on-surface"
+                      icon-name="split-vertically"
+                    >
+                      <g-split-vertically />
+                    </g-icon-base>
+                  </span>
                 </template>
                 <v-list-item-title>Split Pane Vertically</v-list-item-title>
                 <template #append>
-                  <span class="text-medium-emphasis text-caption">(ctrl + shift + v)</span>
+                  <span class="terminal-menu-shortcut text-medium-emphasis text-caption">(ctrl + shift + v)</span>
                 </template>
               </v-list-item>
               <v-list-item @click="split('vertical')">
                 <template #prepend>
-                  <g-icon-base
-                    width="16"
-                    height="16"
-                    view-box="0 -2 20 20"
-                    class="mr-2"
-                    icon-color="on-surface"
-                    icon-name="split-horizontally"
-                  >
-                    <g-split-horizontally />
-                  </g-icon-base>
+                  <span class="d-inline-flex align-center justify-center mr-2">
+                    <g-icon-base
+                      width="16"
+                      height="16"
+                      view-box="0 -2 20 20"
+                      icon-color="on-surface"
+                      icon-name="split-horizontally"
+                    >
+                      <g-split-horizontally />
+                    </g-icon-base>
+                  </span>
                 </template>
                 <v-list-item-title>Split Pane Horizontally</v-list-item-title>
                 <template #append>
-                  <span class="text-medium-emphasis text-caption">(ctrl + shift + h)</span>
+                  <span class="terminal-menu-shortcut text-medium-emphasis text-caption">(ctrl + shift + h)</span>
                 </template>
               </v-list-item>
               <v-divider />
               <v-list-item
-                prepend-icon="mdi-cog"
                 title="Settings"
                 :disabled="loading.settingsBtn"
                 @click="configure('settingsBtn')"
               >
-                <template
-                  v-if="loading.settingsBtn"
-                  #prepend
-                >
-                  <v-progress-circular
-                    indeterminate
-                    size="16"
-                    width="2"
-                    class="mr-2"
-                  />
+                <template #prepend>
+                  <span class="d-inline-flex align-center justify-center mr-2">
+                    <v-progress-circular
+                      v-if="loading.settingsBtn"
+                      indeterminate
+                      size="16"
+                      width="2"
+                      color="on-surface"
+                    />
+                    <v-icon
+                      v-else
+                      size="16"
+                      color="on-surface"
+                    >
+                      mdi-cog
+                    </v-icon>
+                  </span>
                 </template>
               </v-list-item>
             </v-list>
@@ -743,5 +751,10 @@ export default {
   .g-system-bar-button {
     max-height: 24px;
     letter-spacing: normal;
+  }
+  .terminal-menu-shortcut {
+    min-width: 120px;
+    margin-left: 32px;
+    text-align: right;
   }
 </style>
