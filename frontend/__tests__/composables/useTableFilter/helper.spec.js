@@ -454,5 +454,12 @@ describe('composables/useTableFilter', () => {
       const query = parseSearch('xyz')
       expect(query.matches(fieldSpecs({ name: 'cluster', count: '99', flag: 'false' }))).toBe(false)
     })
+
+    it('should coerce raw primitive field values before matching', () => {
+      expect(parseSearch('42').matches(fieldSpecs({ workers: 142 }))).toBe(true)
+      expect(parseSearch('"42"').matches(fieldSpecs({ workers: 42 }))).toBe(true)
+      expect(parseSearch('true').matches(fieldSpecs({ enabled: true }))).toBe(true)
+      expect(parseSearch('xyz').matches(fieldSpecs({ count: 99, flag: false }))).toBe(false)
+    })
   })
 })

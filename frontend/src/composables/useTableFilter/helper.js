@@ -25,7 +25,8 @@ export function defaultFieldMatch (term, value) {
   if (value == null || value === '') {
     return false
   }
-  return term.exact ? value === term.value : value.includes(term.value)
+  const stringValue = typeof value === 'string' ? value : String(value)
+  return term.exact ? stringValue === term.value : stringValue.includes(term.value)
 }
 
 // Splits the raw query on whitespace while keeping quoted phrases intact.
