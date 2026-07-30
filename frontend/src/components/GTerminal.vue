@@ -435,6 +435,7 @@ export default {
       'terminal',
     ]),
     ...mapState(useAppStore, [
+      'focusedElementId',
       'splitpaneResize',
     ]),
     connectionIconName () {
@@ -458,8 +459,12 @@ export default {
     isDarkTheme () {
       return !!this.$vuetify.theme.current.dark
     },
+    hasFocus () {
+      return this.focusedElementId === this.uuid
+    },
     backgroundClass () {
-      return this.isDarkTheme ? 'background-dark' : 'background-light'
+      const theme = this.isDarkTheme ? 'dark' : 'light'
+      return `background-${theme}${this.hasFocus ? '' : '-dimmed'}`
     },
     isTerminalSessionCreated () {
       return this.terminalSession && this.terminalSession.isCreated
@@ -523,6 +528,9 @@ export default {
     isDarkTheme () {
       this.applyTerminalTheme()
     },
+    hasFocus () {
+      this.applyTerminalTheme()
+    },
   },
   mounted () {
     const term = this.term = new Terminal({
@@ -531,7 +539,7 @@ export default {
       fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
       allowProposedApi: true,
       minimumContrastRatio: 4.5,
-      theme: getTerminalTheme(this.isDarkTheme),
+      theme: getTerminalTheme(this.isDarkTheme, this.hasFocus),
       macOptionClickForcesSelection: true,
     })
     const fitAddon = this.fitAddon = new FitAddon()
@@ -595,7 +603,7 @@ export default {
       if (!this.term) {
         return
       }
-      this.term.options.theme = getTerminalTheme(this.isDarkTheme)
+      this.term.options.theme = getTerminalTheme(this.isDarkTheme, this.hasFocus)
     },
     focus () {
       this.term.focus()
@@ -723,8 +731,14 @@ export default {
   .background-dark {
     background: #000;
   }
+  .background-dark-dimmed {
+    background: #333;
+  }
   .background-light {
     background: #fafafa;
+  }
+  .background-light-dimmed {
+    background: #e0e0e0;
   }
   .g-system-bar-button {
     max-height: 24px;

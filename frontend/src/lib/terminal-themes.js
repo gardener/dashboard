@@ -72,10 +72,15 @@ export const light = {
   brightWhite: '#ffffff',
 }
 
-/**
- * @param {boolean} isDark
- * @returns {typeof dark}
- */
-export function getTerminalTheme (isDark) {
-  return { ...(isDark ? dark : light) }
+const dimmedBackground = {
+  dark: '#333333',
+  light: '#e0e0e0',
+}
+
+export function getTerminalTheme (isDark, hasFocus = true) {
+  const theme = { ...(isDark ? dark : light) }
+  if (!hasFocus) {
+    theme.background = isDark ? dimmedBackground.dark : dimmedBackground.light
+  }
+  return theme
 }
