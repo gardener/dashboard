@@ -56,3 +56,10 @@ kubeconfig*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Managed UI-verification checkout, runtime, state, and logs
+# Managed local Dashboard checkout, runtime, state, and logs
+.local-dashboard/
+
+# Local Dashboard session secret (never commit)
+hack/local-dashboard/.local-dashboard-session-secret.local
