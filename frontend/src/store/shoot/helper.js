@@ -32,6 +32,19 @@ import {
   errorCodesFromArray,
 } from '@/utils/errorCodes'
 
+import {
+  SHOOT_HEALTH_FIELD,
+  SHOOT_PROGRESSING_FIELD,
+  SHOOT_OPERATOR_ACTION_FIELD,
+  SHOOT_ALL_TICKETS_IGNORED_FIELD,
+  getShootHealth,
+  matchShootHealth,
+  matchShootProgressing,
+  matchShootOperatorAction,
+  matchShootAllTicketsIgnored,
+  normalizeShootSearch,
+} from './search'
+
 import head from 'lodash/head'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -61,13 +74,59 @@ export function isHealthyFilterActive (state, context) {
   return authzStore.namespace === '_all' && (healthy.value ?? true)
 }
 
-export function getFilteredUids (state, context) {
+function requiresOperatorAction (item) {
+  const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
+  if (ignoreIssues) {
+    return false
+  }
+  const lastErrors = get(item, ['status', 'lastErrors'], [])
+  const allLastErrorCodes = errorCodesFromArray(lastErrors)
+  if (isTemporaryError(allLastErrorCodes)) {
+    return false
+  }
+  const conditions = get(item, ['status', 'conditions'], [])
+  const allConditionCodes = errorCodesFromArray(conditions)
+
+  const constraints = get(item, ['status', 'constraints'], [])
+  const allConstraintCodes = errorCodesFromArray(constraints)
+
+  return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
+}
+
+function getTicketsForCluster (context, item) {
   const {
     projectStore,
     ticketStore,
-    configStore,
   } = context
 
+  const metadata = get(item, ['metadata'], {})
+  return ticketStore.issues({
+    ...metadata,
+    projectName: projectStore.projectNameByNamespace(metadata),
+  })
+}
+
+function ticketHasHideLabel (ticket, hideClustersWithLabels) {
+  const labelNames = map(get(ticket, ['data', 'labels']), 'name')
+  return some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
+}
+
+function areAllTicketsIgnored (context, item) {
+  const { configStore } = context
+
+  const hideClustersWithLabels = get(configStore.ticket, ['hideClustersWithLabels'])
+  if (!hideClustersWithLabels) {
+    return false
+  }
+  const ticketsForCluster = getTicketsForCluster(context, item)
+  if (!ticketsForCluster.length) {
+    return false
+  }
+
+  return !some(ticketsForCluster, ticket => !ticketHasHideLabel(ticket, hideClustersWithLabels))
+}
+
+export function getFilteredUids (state, context) {
   // filter function
   const notProgressing = item => {
     return !isStatusProgressing(get(item, ['metadata'], {}))
@@ -93,6 +152,11 @@ export function getFilteredUids (state, context) {
   }
 
   const hasTicketsWithoutHideLabel = item => {
+    const {
+      projectStore,
+      ticketStore,
+      configStore,
+    } = context
     const hideClustersWithLabels = get(configStore.ticket, ['hideClustersWithLabels'])
     if (!hideClustersWithLabels) {
       return true
@@ -177,6 +241,14 @@ export function getRawVal (context, item, column) {
       return get(spec, ['region'])
     case 'seed':
       return get(item, ['spec', 'seedName'])
+    case SHOOT_HEALTH_FIELD:
+      return getShootHealth(item)
+    case SHOOT_PROGRESSING_FIELD:
+      return isStatusProgressing(metadata)
+    case SHOOT_OPERATOR_ACTION_FIELD:
+      return requiresOperatorAction(item)
+    case SHOOT_ALL_TICKETS_IGNORED_FIELD:
+      return areAllTicketsIgnored(context, item)
     case 'ticketLabels': {
       const labels = ticketStore.labels({
         projectName: projectStore.projectNameByNamespace(metadata),
@@ -300,7 +372,15 @@ const QUALIFIED_SEARCH_FIELDS = Object.freeze([
   'region',
   'k8sVersion',
   'createdBy',
+  SHOOT_HEALTH_FIELD,
+  SHOOT_PROGRESSING_FIELD,
+  SHOOT_OPERATOR_ACTION_FIELD,
+  SHOOT_ALL_TICKETS_IGNORED_FIELD,
 ])
+
+export function parseShootSearch (search) {
+  return normalizeShootSearch(parseSearch(search, QUALIFIED_SEARCH_FIELDS))
+}
 
 export function searchItemsFn (state, context) {
   const {
@@ -316,12 +396,32 @@ export function searchItemsFn (state, context) {
   })
 
   return search => {
-    const searchQuery = parseSearch(search, QUALIFIED_SEARCH_FIELDS)
+    const searchQuery = parseShootSearch(search)
 
     return item => {
       const f = key => ({ get: () => getRawVal(context, item, key) })
       const fields = {
         name: f('name'),
+        [SHOOT_HEALTH_FIELD]: {
+          get: () => getRawVal(context, item, SHOOT_HEALTH_FIELD),
+          match: matchShootHealth,
+          freeText: false,
+        },
+        [SHOOT_PROGRESSING_FIELD]: {
+          get: () => getRawVal(context, item, SHOOT_PROGRESSING_FIELD),
+          match: matchShootProgressing,
+          freeText: false,
+        },
+        [SHOOT_OPERATOR_ACTION_FIELD]: {
+          get: () => getRawVal(context, item, SHOOT_OPERATOR_ACTION_FIELD),
+          match: matchShootOperatorAction,
+          freeText: false,
+        },
+        [SHOOT_ALL_TICKETS_IGNORED_FIELD]: {
+          get: () => getRawVal(context, item, SHOOT_ALL_TICKETS_IGNORED_FIELD),
+          match: matchShootAllTicketsIgnored,
+          freeText: false,
+        },
         provider: f('provider'),
         region: f('region'),
         seed: f('seed'),
