@@ -143,7 +143,10 @@ SPDX-License-Identifier: Apache-2.0
                 class="text-none g-system-bar-button mx-1 g-ignore-drag"
               />
             </template>
-            <v-list density="compact">
+            <v-list
+              density="compact"
+              class="py-0"
+            >
               <v-list-item @click="split('horizontal')">
                 <template #prepend>
                   <g-icon-base
@@ -243,7 +246,10 @@ SPDX-License-Identifier: Apache-2.0
                 <span class="text-none text-high-emphasis">{{ connectionStateText }}</span>
               </v-btn>
             </template>
-            <v-list density="compact">
+            <v-list
+              density="compact"
+              class="py-0"
+            >
               <v-list-item
                 v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED"
                 prepend-icon="mdi-reload"
