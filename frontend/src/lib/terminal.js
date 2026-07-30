@@ -206,6 +206,9 @@ export class TerminalSession {
 
       document.addEventListener('visibilitychange', onVisibilityChange)
       startHeartbeat()
+      if (document.visibilityState === 'hidden') {
+        onVisibilityChange()
+      }
     }
     ws.onclose = error => {
       this.close()
