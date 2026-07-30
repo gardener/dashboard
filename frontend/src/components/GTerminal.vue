@@ -243,30 +243,18 @@ SPDX-License-Identifier: Apache-2.0
                 <span class="text-none text-high-emphasis">{{ connectionStateText }}</span>
               </v-btn>
             </template>
-            <v-card rounded="0">
-              <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn
-                  size="small"
-                  variant="text"
-                  class="action-button"
-                  @click="retry()"
-                >
-                  <v-icon
-                    size="small"
-                    start
-                  >
-                    mdi-reload
-                  </v-icon>
-                  Reconnect
-                </v-btn>
-              </v-card-actions>
-              <v-card-text
+            <v-list density="compact">
+              <v-list-item
+                v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED"
+                prepend-icon="mdi-reload"
+                title="Reconnect"
+                @click="retry()"
+              />
+              <v-list-item
                 v-else
-                class="ml-2 mr-2"
-              >
-                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
-              </v-card-text>
-            </v-card>
+                :title="terminalSession.detailedConnectionStateText || connectionStateText"
+              />
+            </v-list>
           </v-menu>
 
           <v-btn
