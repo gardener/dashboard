@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <div
       v-g-draggable="draggableValue"
       class="fill-height full-width"
+      :class="{ 'pointer-events-none': draggingDragAndDropId && draggingDragAndDropId !== uuid }"
       :data-g-id="uuid"
       :draggable="true"
       @drag-start="dragStart"
@@ -30,7 +31,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapActions } from 'pinia'
+import {
+  mapActions,
+  mapState,
+} from 'pinia'
 
 import { useTerminalStore } from '@/store/terminal'
 
@@ -58,6 +62,11 @@ export default {
         dragging: false,
       },
     }
+  },
+  computed: {
+    ...mapState(useTerminalStore, [
+      'draggingDragAndDropId',
+    ]),
   },
   mounted () {
     this.draggableValue.handle = this.$refs.handle

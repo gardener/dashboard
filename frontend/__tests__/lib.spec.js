@@ -50,6 +50,13 @@ describe('lib', () => {
     })
 
     describe('#moveToWithId', () => {
+      it('should ignore an invalid position', () => {
+        tree.moveToWithId({ sourceId: b2.uuid, targetId: a.uuid, position: 'dropzone' })
+
+        expect(tree.childrenToArray(tree.root)).toEqual([a, b, c])
+        expect(tree.childrenToArray(b)).toEqual([b1, b2, b3])
+      })
+
       describe('position right', () => {
         it('should move b2 right to a', () => {
           tree.moveToWithId({ sourceId: b2.uuid, targetId: a.uuid, position: PositionEnum.RIGHT })
