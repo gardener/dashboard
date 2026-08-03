@@ -205,15 +205,15 @@ describe('stores', () => {
       expect(getUnhealthyFilterMaskFromShootListFilters({
         healthy: true,
         progressing: true,
-        noOperatorAction: true,
-        ignoredTickets: true,
+        operatorAction: true,
+        allTicketsIgnored: true,
       })).toBe(7)
 
       expect(getUnhealthyFilterMaskFromShootListFilters({
         healthy: false,
         progressing: true,
-        noOperatorAction: true,
-        ignoredTickets: true,
+        operatorAction: true,
+        allTicketsIgnored: true,
       })).toBe(0)
     })
   })
