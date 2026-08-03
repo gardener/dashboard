@@ -132,25 +132,6 @@ export function getFilteredUids (state, context) {
     return !isStatusProgressing(get(item, ['metadata'], {}))
   }
 
-  const noUserError = item => {
-    const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
-    if (ignoreIssues) {
-      return false
-    }
-    const lastErrors = get(item, ['status', 'lastErrors'], [])
-    const allLastErrorCodes = errorCodesFromArray(lastErrors)
-    if (isTemporaryError(allLastErrorCodes)) {
-      return false
-    }
-    const conditions = get(item, ['status', 'conditions'], [])
-    const allConditionCodes = errorCodesFromArray(conditions)
-
-    const constraints = get(item, ['status', 'constraints'], [])
-    const allConstraintCodes = errorCodesFromArray(constraints)
-
-    return !(isUserError(allLastErrorCodes) || isUserError(allConditionCodes) || isUserError(allConstraintCodes))
-  }
-
   const hasTicketsWithoutHideLabel = item => {
     const {
       projectStore,
@@ -189,7 +170,7 @@ export function getFilteredUids (state, context) {
       predicates.push(notProgressing)
     }
     if (noOperatorAction.value) {
-      predicates.push(noUserError)
+      predicates.push(requiresOperatorAction)
     }
     if (ignoredTickets.value) {
       predicates.push(hasTicketsWithoutHideLabel)
