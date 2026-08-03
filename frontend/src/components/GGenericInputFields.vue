@@ -81,8 +81,8 @@ watch(fieldData, value => {
   deep: true,
 })
 
-watch([() => props.fields, () => props.modelValue], ([fields, value]) => {
-  const valueWithDefaults = initialFieldData(fields, value)
+watch(() => props.modelValue, value => {
+  const valueWithDefaults = initialFieldData(props.fields, value)
   if (!isEqual(fieldData.value, valueWithDefaults)) {
     fieldData.value = valueWithDefaults
   }

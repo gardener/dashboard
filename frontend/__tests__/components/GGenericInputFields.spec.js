@@ -163,6 +163,30 @@ describe('GGenericInputFields', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 
+  it('updates field data when the model value changes', async () => {
+    const wrapper = mountInputFields({
+      fields: [
+        {
+          key: 'algorithm',
+          label: 'Algorithm',
+          type: 'select',
+          defaultValue: 'default',
+        },
+      ],
+      modelValue: {},
+    })
+
+    await nextTick()
+    await wrapper.setProps({
+      modelValue: {
+        algorithm: 'existing',
+      },
+    })
+    await nextTick()
+
+    expect(wrapper.findComponent(GGenericInputField).props('modelValue')).toBe('existing')
+  })
+
   it('updates the complete field data when a child value changes', async () => {
     const wrapper = mountInputFields({
       fields: [
