@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
     :error-messages="inputErrorMessages"
     variant="underlined"
     v-bind="inputProps"
-    @click:append="toggleSecretVisibility"
+    @click:append="toggleSensitiveVisibility"
     @blur="v$.localValue.$touch()"
   />
 
@@ -48,10 +48,10 @@ SPDX-License-Identifier: Apache-2.0
     :error-messages="inputErrorMessages"
     :autocomplete="inputAutocomplete"
     :append-icon="appendIcon"
-    :class="{ 'hide-secret': hideStructuredSecret }"
+    :class="{ 'hide-secret': hideStructuredSensitive }"
     variant="filled"
     v-bind="inputProps"
-    @click:append="toggleSecretVisibility"
+    @click:append="toggleSensitiveVisibility"
     @blur="v$.localValue.$touch()"
   />
 </template>
@@ -90,9 +90,7 @@ import {
 } from '@/utils'
 import {
   isJsonFieldType,
-  isSecretFieldType,
   isStructuredFieldType,
-  isStructuredSecretFieldType,
   isYamlFieldType,
 } from '@/utils/inputFieldTypes'
 
@@ -125,8 +123,8 @@ const dropErrorMessage = ref()
 const fieldType = computed(() => props.field.type)
 const isYaml = computed(() => isYamlFieldType(fieldType.value))
 const isJson = computed(() => isJsonFieldType(fieldType.value))
-const isStructuredSecret = computed(() => isStructuredSecretFieldType(fieldType.value))
-const isTextLike = computed(() => ['text', 'password'].includes(fieldType.value))
+const isSensitive = computed(() => props.field.sensitive === true)
+const isTextLike = computed(() => fieldType.value === 'text')
 const isSelectLike = computed(() => ['select', 'select-multiple'].includes(fieldType.value))
 const isStructuredLike = computed(() => isStructuredFieldType(fieldType.value))
 
@@ -134,38 +132,38 @@ const inputAutocomplete = computed(() => {
   if (props.field.autocomplete) {
     return props.field.autocomplete
   }
-  return isSecretFieldType(fieldType.value)
+  return isSensitive.value
     ? 'off'
     : undefined
 })
 
-const showSecret = ref(false)
+const showSensitive = ref(false)
 
 const appendIcon = computed(() => {
-  if (!isSecretFieldType(fieldType.value)) {
+  if (!isSensitive.value) {
     return undefined
   }
-  return showSecret.value
+  return showSensitive.value
     ? 'mdi-eye-off'
     : 'mdi-eye'
 })
 
 const textFieldType = computed(() => {
-  if (fieldType.value !== 'password') {
+  if (!isSensitive.value) {
     return 'text'
   }
-  return showSecret.value
+  return showSensitive.value
     ? 'text'
     : 'password'
 })
 
-const hideStructuredSecret = computed(() => {
-  return isStructuredSecret.value && !showSecret.value
+const hideStructuredSensitive = computed(() => {
+  return isStructuredLike.value && isSensitive.value && !showSensitive.value
 })
 
-function toggleSecretVisibility () {
-  if (isSecretFieldType(fieldType.value)) {
-    showSecret.value = !showSecret.value
+function toggleSensitiveVisibility () {
+  if (isSensitive.value) {
+    showSensitive.value = !showSensitive.value
   }
 }
 

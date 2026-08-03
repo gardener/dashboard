@@ -11,12 +11,12 @@ import { useStructuredTextField } from '@/composables/useStructuredTextField'
 describe('useStructuredTextField', () => {
   it.each([
     {
-      type: 'json-secret',
+      type: 'json',
       text: '{\n  "enabled": true\n}',
       value: { enabled: true },
     },
     {
-      type: 'yaml-secret',
+      type: 'yaml',
       text: 'enabled: true\n',
       value: { enabled: true },
     },
@@ -38,7 +38,7 @@ describe('useStructuredTextField', () => {
       rawText,
       setRawTextWithValue,
       parseRawTextToObject,
-    } = useStructuredTextField(computed(() => 'json-secret'))
+    } = useStructuredTextField(computed(() => 'json'))
 
     setRawTextWithValue('{"broken":')
 
@@ -53,7 +53,7 @@ describe('useStructuredTextField', () => {
     const {
       rawText,
       parseRawTextToObject,
-    } = useStructuredTextField(computed(() => 'yaml-secret'))
+    } = useStructuredTextField(computed(() => 'yaml'))
 
     rawText.value = value
 

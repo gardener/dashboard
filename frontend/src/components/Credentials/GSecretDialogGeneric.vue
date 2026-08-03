@@ -91,7 +91,8 @@ export default {
       return {
         key: 'secretData',
         label: 'Secret Data',
-        type: 'yaml-secret',
+        type: 'yaml',
+        sensitive: true,
         validators: {
           required: {
             type: 'required',

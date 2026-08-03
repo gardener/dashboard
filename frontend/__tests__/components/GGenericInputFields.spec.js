@@ -174,7 +174,8 @@ describe('GGenericInputFields', () => {
         {
           key: 'password',
           label: 'Password',
-          type: 'password',
+          type: 'text',
+          sensitive: true,
         },
       ],
       modelValue: {
@@ -246,7 +247,8 @@ describe('GGenericInputField', () => {
     field = {
       key: 'secret',
       label: 'Secret',
-      type: 'json-secret',
+      type: 'json',
+      sensitive: true,
       validators: {},
     },
     modelValue = '',
@@ -292,12 +294,13 @@ describe('GGenericInputField', () => {
     expect(lastEmittedValue(wrapper)).toEqual(['one', 'two'])
   })
 
-  it('hides password fields by default and toggles their visibility', async () => {
+  it('hides sensitive text fields by default and toggles their visibility', async () => {
     const wrapper = mountInputField({
       field: {
         key: 'password',
         label: 'Password',
-        type: 'password',
+        type: 'text',
+        sensitive: true,
       },
     })
     const input = wrapper.findComponent(TextFieldStub)
@@ -317,12 +320,54 @@ describe('GGenericInputField', () => {
     })
   })
 
+  it('does not mask regular text fields', () => {
+    const wrapper = mountInputField({
+      field: {
+        key: 'username',
+        label: 'Username',
+        type: 'text',
+      },
+    })
+
+    expect(wrapper.findComponent(TextFieldStub).props()).toMatchObject({
+      appendIcon: undefined,
+      autocomplete: undefined,
+      type: 'text',
+    })
+  })
+
+  it('hides sensitive structured fields by default and toggles their visibility', async () => {
+    const wrapper = mountStructuredInputField({
+      field: {
+        key: 'secret',
+        label: 'Secret',
+        type: 'yaml',
+        sensitive: true,
+        validators: {},
+      },
+    })
+    const textarea = wrapper.findComponent(TextareaStub)
+
+    expect(textarea.props()).toMatchObject({
+      appendIcon: 'mdi-eye',
+      autocomplete: 'off',
+    })
+    expect(textarea.classes()).toContain('hide-secret')
+
+    textarea.vm.$emit('click:append')
+    await nextTick()
+
+    expect(textarea.props('appendIcon')).toBe('mdi-eye-off')
+    expect(textarea.classes()).not.toContain('hide-secret')
+  })
+
   it('parses structured input and reacts to later parent resets', async () => {
     const wrapper = mountStructuredInputField({
       field: {
         key: 'secret',
         label: 'Secret',
-        type: 'yaml-secret',
+        type: 'yaml',
+        sensitive: true,
         validators: {},
       },
       modelValue: {
@@ -352,7 +397,8 @@ describe('GGenericInputField', () => {
       field: {
         key: 'secretData',
         label: 'Secret Data',
-        type: 'yaml-secret',
+        type: 'yaml',
+        sensitive: true,
         validators: {
           isYAML: {
             type: 'isValidObject',
@@ -453,7 +499,8 @@ describe('GGenericInputField', () => {
       field: {
         key: 'secret',
         label: 'Secret',
-        type: 'json-secret',
+        type: 'json',
+        sensitive: true,
         validators: {
           property: {
             type: 'hasObjectProp',
@@ -478,7 +525,8 @@ describe('GGenericInputField', () => {
       field: {
         key: 'secret',
         label: 'Secret',
-        type: 'json-secret',
+        type: 'json',
+        sensitive: true,
         validators: {
           property: {
             type: 'hasObjectProp',
@@ -504,7 +552,8 @@ describe('GGenericInputField', () => {
     const field = {
       key: 'secret',
       label: 'Secret',
-      type: 'json-secret',
+      type: 'json',
+      sensitive: true,
       validators: {
         validObject: {
           type: 'isValidObject',
