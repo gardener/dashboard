@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     :vendor-type="vendorType"
   >
     <template #secret-slot>
-      <GGenericInputField
+      <g-generic-input-field
         v-model="secretStringData"
         :field="defaultInputField"
       />

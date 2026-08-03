@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <GGenericActionButtonDialog
+  <g-generic-action-button-dialog
     ref="gDialog"
     :icon="icon"
     :color="color"
@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #footer>
       <slot name="footer" />
     </template>
-  </GGenericActionButtonDialog>
+  </g-generic-action-button-dialog>
 </template>
 
 <script>
