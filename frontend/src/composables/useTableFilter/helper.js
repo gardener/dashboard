@@ -90,7 +90,9 @@ export class SearchQuery {
     for (const term of this.terms) {
       let found
       if (term.field !== null) {
-        const spec = fields[term.field]
+        const spec = Object.hasOwn(fields, term.field)
+          ? fields[term.field]
+          : undefined
         const match = spec?.match ?? defaultFieldMatch
         found = match(term, spec ? spec.get() : undefined)
       } else {

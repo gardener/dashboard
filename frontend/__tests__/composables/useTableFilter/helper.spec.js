@@ -165,6 +165,11 @@ describe('composables/useTableFilter', () => {
         expect(query.matches(fieldSpecs({ name: 'aws-ha-cluster' }))).toBe(false)
       })
 
+      it('should treat inherited qualified fields as missing', () => {
+        const query = parseSearch('constructor:value', ['constructor'])
+        expect(query.matches(fieldSpecs({ name: 'shoot' }))).toBe(false)
+      })
+
       it('should treat null field value same as missing', () => {
         const query = new SearchQuery([{ field: 'seed', value: 'aws-ha', exact: false, exclude: false }])
         expect(query.matches(fieldSpecs({ name: 'aws-ha-cluster', seed: null }))).toBe(false)
