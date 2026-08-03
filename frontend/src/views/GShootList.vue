@@ -156,7 +156,7 @@ import { useProjectShootCustomFields } from '@/composables/useProjectShootCustom
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
 import { useShootListFilters } from '@/composables/useShootListFilters'
-import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
+import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 
 import { mapTableHeader } from '@/utils'
 
@@ -182,9 +182,6 @@ export default {
   },
   inject: ['logger'],
   beforeRouteUpdate (to, from) {
-    if (to.path !== from.path) {
-      this.setShootSearch('')
-    }
     this.focusModeInternal = false
 
     // Reset expanded state in case project changes
@@ -192,7 +189,6 @@ export default {
     this.resetState(this.expandedAccessRestrictions, { default: false })
   },
   beforeRouteLeave () {
-    this.setShootSearch('')
     this.focusModeInternal = false
   },
   setup () {
@@ -213,8 +209,22 @@ export default {
       shootCustomFields,
     } = useProjectShootCustomFields(projectItem)
 
-    const { search: shootSearch } = useUrlSearchSync()
-    const debouncedShootSearch = ref(shootSearch.value)
+    const authzStore = useAuthzStore()
+    const debouncedShootSearch = ref()
+    const {
+      searchQuery: shootSearch,
+    } = useShallowRouteSearchQuery({
+      onWrite (search) {
+        shootStore.activateShootList({
+          namespace: authzStore.namespace,
+          search,
+        })
+      },
+      onRouteCommitted (search) {
+        debouncedShootSearch.value = search
+      },
+    })
+    debouncedShootSearch.value = shootSearch.value
 
     function setShootSearch (value) {
       shootSearch.value = value

@@ -461,7 +461,7 @@ export function createRoutes () {
           appStore.setError({
             text: 'Access to cluster terminal is not allowed',
           })
-          return from
+          return false
         }
       },
     }
@@ -536,7 +536,7 @@ export function createRoutes () {
           appStore.setError({
             text: 'Access to garden terminal is not allowed.',
           })
-          return from
+          return false
         }
         to.params.target = 'garden'
       },
@@ -550,7 +550,7 @@ export function createRoutes () {
     }
 
     if (from?.name && from.name !== to.name) {
-      return from
+      return false
     }
 
     return {

@@ -14,9 +14,10 @@ import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useProjectStore } from '@/store/project'
 import { useSocketStore } from '@/store/socket'
+import { useConfigStore } from '@/store/config'
+import { useTicketStore } from '@/store/ticket'
 
 import { useApi } from '@/composables/useApi'
-import { useShootListFilters } from '@/composables/useShootListFilters'
 
 import cloneDeep from 'lodash/cloneDeep'
 import map from 'lodash/map'
@@ -53,7 +54,8 @@ describe('stores', () => {
     let authzStore
     let projectStore
     let socketStore
-    let shootListFilters
+    let configStore
+    let ticketStore
     let shootStore
 
     const flushEvents = () => {
@@ -182,6 +184,51 @@ describe('stores', () => {
       }]
     }
 
+    function createShoot ({
+      name,
+      uid,
+      health,
+      annotations,
+      status = {},
+    }) {
+      return {
+        metadata: {
+          name,
+          namespace: 'foo',
+          uid,
+          annotations,
+          labels: {
+            'shoot.gardener.cloud/status': health,
+          },
+        },
+        spec: {
+          provider: {},
+        },
+        status,
+      }
+    }
+
+    function createIssue ({
+      name,
+      number,
+      labels,
+    }) {
+      return {
+        metadata: {
+          name,
+          number,
+          projectName: 'foo',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+        data: {
+          labels: labels.map((label, index) => ({
+            id: index + 1,
+            name: label,
+          })),
+        },
+      }
+    }
+
     beforeEach(() => {
       setActivePinia(createPinia())
 
@@ -223,9 +270,8 @@ describe('stores', () => {
         ],
       })
       socketStore = useSocketStore()
-      const shootListFiltersComposable = useShootListFilters()
-      shootListFilters = shootListFiltersComposable.shootListFilters
-      shootListFilters.value = {}
+      configStore = useConfigStore()
+      ticketStore = useTicketStore()
       shootStore = useShootStore()
 
       mockEmitSubscribe = vi.spyOn(socketStore, 'emitSubscribe').mockImplementation(noop)
@@ -508,16 +554,132 @@ describe('stores', () => {
         }))
       })
 
-      it('should resubscribe when all-projects issue filter changes the subscription options', async () => {
-        authzStore._setNamespace('_all')
-        shootListFilters.value = {
-          healthy: true,
-        }
+      it('should not resubscribe when list search changes without changing the server target', async () => {
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'provider:aws',
+        })
 
-        await shootStore.subscribe()
+        vi.clearAllMocks()
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'provider:gcp',
+        })
+
+        expect(shootStore.shootListContext).toEqual({
+          namespace: '_all',
+          search: 'provider:gcp',
+        })
+        expect(mockEmitUnsubscribe).not.toHaveBeenCalled()
+        expect(mockEmitSubscribe).not.toHaveBeenCalled()
+        expect(mockGetShoots).not.toHaveBeenCalled()
+      })
+
+      it('should coalesce equal ShootList targets while a replacement is closing', async () => {
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'provider:aws',
+        })
+
+        vi.clearAllMocks()
+
+        let finishClose
+        mockEmitUnsubscribe.mockImplementationOnce(() => new Promise(resolve => {
+          finishClose = resolve
+        }))
+
+        const firstActivation = shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy provider:aws',
+        })
+        const secondActivation = shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy provider:gcp',
+        })
+
+        expect(mockEmitUnsubscribe).toHaveBeenCalledTimes(1)
+        expect(Object.keys(shootStore.state.shoots)).toHaveLength(shootList.length)
+
+        finishClose()
+        await Promise.all([firstActivation, secondActivation])
+
+        expect(mockGetShoots).toHaveBeenCalledTimes(1)
+        expect(mockGetShoots).toHaveBeenCalledWith({
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+        expect(shootStore.shootListContext).toEqual({
+          namespace: '_all',
+          search: 'health:unhealthy provider:gcp',
+        })
+      })
+
+      it('should keep generic list subscriptions unfiltered by the active ShootList search', async () => {
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy',
+        })
+
+        vi.clearAllMocks()
+
+        await shootStore.subscribe({ namespace: '_all' })
+
+        expect(mockGetShoots).toHaveBeenCalledWith({ namespace: '_all' })
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', { namespace: '_all' })
+        expect(shootStore.subscription).toEqual({ namespace: '_all' })
+        expect(Object.keys(shootStore.state.shoots)).toHaveLength(shootList.length)
+
+        shootStore.handleEvent({
+          type: 'ADDED',
+          uid: '4',
+        })
+        await flushEvents()
+
+        expect(shootStore.state.shoots['4']).toBeDefined()
+      })
+
+      it('should resubscribe when search query changes the subscription options', async () => {
+        authzStore._setNamespace('_all')
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: '',
+        })
 
         expect(mockEmitSubscribe).toHaveBeenCalledWith('issues', {
           namespace: '_all',
+        })
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+        })
+
+        vi.clearAllMocks()
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy',
+        })
+
+        expect(mockEmitUnsubscribe).toHaveBeenCalledWith('shoots')
+        expect(mockGetShoots).toHaveBeenCalledTimes(1)
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+      })
+
+      it('should resubscribe without the unhealthy label selector when health search includes all shoots', async () => {
+        authzStore._setNamespace('_all')
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy',
+        })
+
+        expect(mockGetShoots).toHaveBeenCalledWith({
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
         })
         expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
           namespace: '_all',
@@ -526,21 +688,201 @@ describe('stores', () => {
 
         vi.clearAllMocks()
 
-        shootListFilters.value = {
-          healthy: false,
-        }
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:any',
+        })
 
-        await shootStore.subscribe()
-
-        expect(mockEmitUnsubscribe).toHaveBeenCalledWith('issues')
         expect(mockEmitUnsubscribe).toHaveBeenCalledWith('shoots')
         expect(mockGetShoots).toHaveBeenCalledTimes(1)
-        expect(mockEmitSubscribe).toHaveBeenCalledWith('issues', {
+        expect(mockGetShoots).toHaveBeenCalledWith({
           namespace: '_all',
         })
         expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
           namespace: '_all',
         })
+      })
+
+      it('should resubscribe with the unhealthy label selector when health search requests unhealthy shoots', async () => {
+        authzStore._setNamespace('_all')
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: '',
+        })
+
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+        })
+
+        vi.clearAllMocks()
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy',
+        })
+
+        expect(mockEmitUnsubscribe).toHaveBeenCalledWith('shoots')
+        expect(mockGetShoots).toHaveBeenCalledTimes(1)
+        expect(mockGetShoots).toHaveBeenCalledWith({
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+      })
+
+      it('should use normalized health terms for subscription params', async () => {
+        authzStore._setNamespace('_all')
+
+        for (const search of ['health:unhealthy', '-health:healthy']) {
+          await shootStore.unsubscribe()
+          vi.clearAllMocks()
+
+          await shootStore.activateShootList({
+            namespace: '_all',
+            search,
+          })
+
+          expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+            namespace: '_all',
+            labelSelector: 'shoot.gardener.cloud/status!=healthy',
+          })
+        }
+      })
+
+      it('should keep multiple agreeing health terms and subscribe to unhealthy shoots', async () => {
+        authzStore._setNamespace('_all')
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: 'health:unhealthy -health:healthy',
+        })
+
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+          labelSelector: 'shoot.gardener.cloud/status!=healthy',
+        })
+      })
+
+      it('should not narrow the subscription for an excluded unknown health value', async () => {
+        authzStore._setNamespace('_all')
+
+        await shootStore.activateShootList({
+          namespace: '_all',
+          search: '-health:foo',
+        })
+
+        expect(mockEmitSubscribe).toHaveBeenCalledWith('shoots', {
+          namespace: '_all',
+        })
+      })
+
+      it('should let progressing search override the persisted progressing exclusion', () => {
+        authzStore._setNamespace('_all')
+        const progressingShoot = createShoot({ name: 'progressing-shoot', uid: 'progressing', health: 'progressing' })
+        const unhealthyShoot = createShoot({ name: 'unhealthy-shoot', uid: 'unhealthy', health: 'unhealthy' })
+        shootStore.receive([progressingShoot, unhealthyShoot])
+
+        // Persisted prefs no longer drive the list — all shoots visible without a search query
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['progressing-shoot', 'unhealthy-shoot'])
+
+        shootStore.setShootSearchQuery('progressing:false')
+
+        // Search-driven filtering now hides progressing shoots from the active list
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['unhealthy-shoot'])
+
+        const predicate = shootStore.searchItems('progressing:true')
+        expect(map(shootStore.shootList.filter(predicate), 'metadata.name')).toEqual([])
+      })
+
+      it('should let operatorAction search override the persisted operator-action exclusion', () => {
+        authzStore._setNamespace('_all')
+        const operatorActionShoot = createShoot({ name: 'operator-action-shoot', uid: 'operator-action', health: 'unhealthy' })
+        const userErrorShoot = createShoot({
+          name: 'user-error-shoot',
+          uid: 'user-error',
+          health: 'unhealthy',
+          status: {
+            lastErrors: [{
+              codes: ['ERR_CONFIGURATION_PROBLEM'],
+            }],
+          },
+        })
+        shootStore.receive([operatorActionShoot, userErrorShoot])
+
+        // Persisted prefs no longer drive the list — all shoots visible without a search query
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['operator-action-shoot', 'user-error-shoot'])
+
+        shootStore.setShootSearchQuery('operatorAction:true')
+
+        // Search-driven filtering now hides non-operator-action shoots from the active list
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['operator-action-shoot'])
+
+        const predicate = shootStore.searchItems('operatorAction:false')
+        expect(map(shootStore.shootList.filter(predicate), 'metadata.name')).toEqual([])
+      })
+
+      it('should let operatorAction:any deactivate the persisted operator-action exclusion', () => {
+        authzStore._setNamespace('_all')
+        const operatorActionShoot = createShoot({ name: 'operator-action-shoot', uid: 'operator-action', health: 'unhealthy' })
+        const userErrorShoot = createShoot({
+          name: 'user-error-shoot',
+          uid: 'user-error',
+          health: 'unhealthy',
+          status: {
+            lastErrors: [{
+              codes: ['ERR_CONFIGURATION_PROBLEM'],
+            }],
+          },
+        })
+        shootStore.receive([operatorActionShoot, userErrorShoot])
+
+        shootStore.setShootSearchQuery('operatorAction:any')
+
+        const predicate = shootStore.searchItems('operatorAction:any')
+        expect(map(shootStore.shootList.filter(predicate), 'metadata.name')).toEqual([
+          'operator-action-shoot',
+          'user-error-shoot',
+        ])
+      })
+
+      it('should let allTicketsIgnored search override the persisted all-tickets-ignored exclusion', () => {
+        authzStore._setNamespace('_all')
+        configStore.setConfiguration({
+          ticket: {
+            gitHubRepoUrl: 'https://github.com/org/repo',
+            hideClustersWithLabels: ['ignore'],
+          },
+        })
+        const ignoredTicketShoot = createShoot({ name: 'ignored-ticket-shoot', uid: 'ignored-ticket', health: 'unhealthy' })
+        const visibleTicketShoot = createShoot({ name: 'visible-ticket-shoot', uid: 'visible-ticket', health: 'unhealthy' })
+        ticketStore.receiveIssues([
+          createIssue({
+            name: 'ignored-ticket-shoot',
+            number: 1,
+            labels: ['ignore'],
+          }),
+          createIssue({
+            name: 'visible-ticket-shoot',
+            number: 2,
+            labels: ['needs-attention'],
+          }),
+        ])
+        shootStore.receive([ignoredTicketShoot, visibleTicketShoot])
+
+        // Persisted prefs no longer drive the list — all shoots visible without a search query
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['ignored-ticket-shoot', 'visible-ticket-shoot'])
+
+        shootStore.setShootSearchQuery('allTicketsIgnored:false')
+
+        // Search-driven filtering now hides shoots with only ignored tickets
+        expect(map(shootStore.shootList, 'metadata.name')).toEqual(['visible-ticket-shoot'])
+
+        const predicate = shootStore.searchItems('allTicketsIgnored:true')
+        expect(map(shootStore.shootList.filter(predicate), 'metadata.name')).toEqual([])
       })
     })
   })

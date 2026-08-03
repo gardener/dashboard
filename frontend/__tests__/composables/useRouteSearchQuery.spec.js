@@ -139,8 +139,13 @@ describe('composables', () => {
       const replace = vi.spyOn(router, 'replace')
       const historyReplace = vi.spyOn(routerHistory, 'replace')
       const onWrite = vi.fn()
-      const { searchQuery } = useSearchQuery({
-        onWrite,
+      const onRouteCommitted = vi.fn()
+      const scope = effectScope()
+      const { searchQuery } = scope.run(() => {
+        return useSearchQuery({
+          onWrite,
+          onRouteCommitted,
+        })
       })
       const search = '  name:"a b" plus:a+b foo&bar=baz#urgent percent:% equal:a=b unicode:Grüße  '
 
@@ -169,6 +174,126 @@ describe('composables', () => {
       expect(replace).not.toHaveBeenCalled()
       expect(beforeGuard).not.toHaveBeenCalled()
       expect(onWrite).toHaveBeenCalledWith(search)
+      expect(onRouteCommitted).not.toHaveBeenCalled()
+      scope.stop()
+    })
+
+    it('notifies active consumers after rehydrating from a committed route', async () => {
+      const { router, useSearchQuery } = createRouteContext()
+      await router.push({
+        name: 'SeedList',
+        query: {
+          q: 'provider:aws',
+        },
+      })
+
+      const committedRoutes = []
+      const onRouteCommitted = vi.fn((search, route) => {
+        committedRoutes.push({
+          search,
+          route,
+          liveSearch: searchQuery.value,
+        })
+      })
+      const scope = effectScope()
+      const { searchQuery } = scope.run(() => {
+        return useSearchQuery({
+          onRouteCommitted,
+        })
+      })
+
+      await router.push({
+        name: 'ShootList',
+        params: {
+          namespace: '_all',
+        },
+        query: {
+          q: 'seed:latest',
+        },
+      })
+
+      expect(onRouteCommitted).toHaveBeenCalledTimes(1)
+      expect(committedRoutes).toEqual([
+        {
+          search: 'seed:latest',
+          route: router.currentRoute.value,
+          liveSearch: 'seed:latest',
+        },
+      ])
+
+      await router.push({
+        name: 'ShootList',
+        params: {
+          namespace: 'garden-local',
+        },
+        query: {
+          q: 'seed:latest',
+        },
+      })
+
+      expect(onRouteCommitted).toHaveBeenCalledTimes(2)
+      expect(committedRoutes[1]).toEqual({
+        search: 'seed:latest',
+        route: router.currentRoute.value,
+        liveSearch: 'seed:latest',
+      })
+      scope.stop()
+    })
+
+    it('does not notify disposed consumers or notify after canceled navigation', async () => {
+      const { router, useSearchQuery } = createRouteContext()
+      await router.push({
+        name: 'SeedList',
+        query: {
+          q: 'provider:aws',
+        },
+      })
+
+      const activeCallback = vi.fn()
+      const disposedCallback = vi.fn()
+      const disposedScope = effectScope()
+      disposedScope.run(() => {
+        useSearchQuery({
+          onRouteCommitted: disposedCallback,
+        })
+      })
+      disposedScope.stop()
+      const activeScope = effectScope()
+      activeScope.run(() => {
+        useSearchQuery({
+          onRouteCommitted: activeCallback,
+        })
+      })
+      router.beforeEach(to => to.name !== 'Settings')
+
+      const failure = await router.push({ name: 'Settings' })
+
+      expect(isNavigationFailure(failure, NavigationFailureType.aborted)).toBe(true)
+      expect(activeCallback).not.toHaveBeenCalled()
+      expect(disposedCallback).not.toHaveBeenCalled()
+
+      await router.push({
+        name: 'ShootList',
+        params: {
+          namespace: '_all',
+        },
+      })
+
+      expect(activeCallback).toHaveBeenCalledWith('', router.currentRoute.value)
+      expect(disposedCallback).not.toHaveBeenCalled()
+      activeScope.stop()
+    })
+
+    it('rejects route commit listeners outside an active scope', () => {
+      const { useSearchQuery } = createRouteContext()
+
+      expect(() => {
+        useSearchQuery({
+          onRouteCommitted: vi.fn(),
+        })
+      }).toThrow(
+        'useShallowRouteSearchQuery with onRouteCommitted must be called within an active Vue scope',
+      )
     })
 
     it('preserves an explicitly empty search as q=', async () => {

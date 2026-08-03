@@ -36,6 +36,22 @@ describe('stores', () => {
       mockGetSubjectRules = vi.spyOn(api, 'getSubjectRules')
     })
 
+    it('does not publish prepared rules until they are activated', async () => {
+      mockGetSubjectRules
+        .mockResolvedValueOnce(createRulesResponse([]))
+        .mockResolvedValueOnce(createRulesResponse([]))
+
+      await authzStore.fetchRules('garden-source')
+      await authzStore.prepareRules('garden-target')
+
+      expect(authzStore.namespace).toBe('garden-source')
+      expect(authzStore.hasRulesForNamespace('garden-target')).toBe(true)
+
+      authzStore.activateRules('garden-target')
+
+      expect(authzStore.namespace).toBe('garden-target')
+    })
+
     describe('canViewLandscape', () => {
       it('should return true when user can list seeds (SSRR) and list shoots cluster-wide (JWT)', async () => {
         authnStore.user = { canListShootsAllNamespaces: true }

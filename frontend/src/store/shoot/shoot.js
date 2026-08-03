@@ -20,7 +20,6 @@ import {
 import { useLogger } from '@/composables/useLogger'
 import { useApi } from '@/composables/useApi'
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
-import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
 
 import { isNotFound } from '@/utils/error'
@@ -39,12 +38,14 @@ import { createSynchronizeLock } from '../helper'
 
 import {
   constants,
-  isHealthyFilterActive,
+  shouldHideHealthy,
   getFilteredUids,
   searchItemsFn,
   sortItemsFn,
   shootHasIssue,
+  parseShootSearch,
 } from './helper'
+import { SHOOT_UNHEALTHY_LABEL_SELECTOR } from './search'
 
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
@@ -74,14 +75,8 @@ const useShootStore = defineStore('shoot', () => {
   const projectItem = toRef(projectStore, 'project')
 
   const shootCustomFieldsComposable = useProjectShootCustomFields(projectItem, { logger })
-  const {
-    shootListFilters,
-    healthy,
-  } = useShootListFilters()
-
-  const progressing = computed(() => shootListFilters.value.progressing)
-  const operatorAction = computed(() => shootListFilters.value.operatorAction)
-  const allTicketsIgnored = computed(() => shootListFilters.value.allTicketsIgnored)
+  const shootSearchQuery = ref(parseShootSearch(''))
+  const shootListContext = ref(null)
 
   const context = {
     api,
@@ -97,11 +92,7 @@ const useShootStore = defineStore('shoot', () => {
     socketStore,
     seedStore,
     shootCustomFieldsComposable,
-    shootListFilters,
-    healthy,
-    progressing,
-    operatorAction,
-    allTicketsIgnored,
+    shootSearchQuery,
   }
 
   const state = reactive({
@@ -190,24 +181,7 @@ const useShootStore = defineStore('shoot', () => {
   })
 
   const subscription = computed(() => {
-    const metadata = state.subscription
-    if (!metadata) {
-      return null
-    }
-    const {
-      namespace = authzStore.namespace,
-      name,
-    } = metadata
-    if (!namespace) {
-      return null
-    }
-    if (name) {
-      return { namespace, name }
-    }
-    if (isHealthyFilterActive(state, context)) {
-      return { namespace, labelSelector: 'shoot.gardener.cloud/status!=healthy' }
-    }
-    return { namespace }
+    return state.subscription
   })
 
   const numberOfNewItemsSinceFreeze = computed(() => {
@@ -261,14 +235,57 @@ const useShootStore = defineStore('shoot', () => {
     }
   }
 
-  async function subscribe (metadata = {}) {
-    const shootStore = this
+  function createSubscription (metadata = {}) {
     const {
       namespace = authzStore.namespace,
       name,
+      labelSelector,
     } = metadata
-    const nextSubscription = { namespace, name }
-    if (name && isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
+
+    if (!namespace) {
+      return null
+    }
+
+    if (name) {
+      return { namespace, name }
+    }
+
+    if (labelSelector) {
+      return { namespace, labelSelector }
+    }
+
+    return { namespace }
+  }
+
+  function createShootListSubscription (metadata = {}) {
+    const namespace = metadata.namespace ?? authzStore.namespace
+
+    if (!namespace) {
+      return null
+    }
+
+    if (shouldHideHealthy(state, context)) {
+      return { namespace, labelSelector: SHOOT_UNHEALTHY_LABEL_SELECTOR }
+    }
+
+    return { namespace }
+  }
+
+  function subscriptionHidesHealthy () {
+    return state.subscription?.labelSelector === SHOOT_UNHEALTHY_LABEL_SELECTOR
+  }
+
+  async function subscribe (metadata = {}) {
+    const shootStore = this
+    if (metadata.name) {
+      shootStore.deactivateShootList()
+    }
+    const nextSubscription = createSubscription(metadata)
+
+    if (!nextSubscription) {
+      return shootStore.unsubscribe()
+    }
+    if (isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
       return
     }
     if (state.subscription) {
@@ -282,7 +299,7 @@ const useShootStore = defineStore('shoot', () => {
   }
 
   function subscribeShoots (metadata) {
-    (async shootStore => {
+    return (async shootStore => {
       try {
         await shootStore.subscribe(metadata)
       } catch (err) {
@@ -298,7 +315,7 @@ const useShootStore = defineStore('shoot', () => {
   }
 
   function unsubscribeShoots () {
-    (async shootStore => {
+    return (async shootStore => {
       try {
         await shootStore.unsubscribe()
       } catch (err) {
@@ -490,9 +507,64 @@ const useShootStore = defineStore('shoot', () => {
     state.sortBy = value
   }
 
+  function updateShootSearchQuery (value) {
+    shootSearchQuery.value = parseShootSearch(value)
+  }
+
+  let pendingShootListSubscription
+
+  function ensureShootListSubscription (shootStore, namespace) {
+    const nextSubscription = createShootListSubscription({ namespace })
+    if (!nextSubscription) {
+      pendingShootListSubscription = undefined
+      return shootStore.unsubscribeShoots()
+    }
+    if (isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
+      return
+    }
+    if (isEqual(pendingShootListSubscription?.target, nextSubscription)) {
+      return pendingShootListSubscription.promise
+    }
+
+    const request = {
+      target: nextSubscription,
+      promise: shootStore.subscribeShoots(nextSubscription),
+    }
+    pendingShootListSubscription = request
+    return request.promise.finally(() => {
+      if (pendingShootListSubscription === request) {
+        pendingShootListSubscription = undefined
+      }
+    })
+  }
+
+  function setShootSearchQuery (value) {
+    const shootStore = this
+    if (shootListContext.value) {
+      return shootStore.activateShootList({
+        ...shootListContext.value,
+        search: value,
+      })
+    }
+    updateShootSearchQuery(value)
+  }
+
+  function activateShootList ({ namespace, search } = {}) {
+    const shootStore = this
+    shootListContext.value = { namespace, search }
+    updateShootSearchQuery(search)
+    return ensureShootListSubscription(shootStore, namespace)
+  }
+
+  function deactivateShootList () {
+    pendingShootListSubscription = undefined
+    shootListContext.value = null
+    updateShootSearchQuery('')
+  }
+
   function receive (items) {
     const shootStore = this
-    const showAllShoots = !isHealthyFilterActive(state, context)
+    const showAllShoots = !subscriptionHidesHealthy()
 
     const shoots = {}
     for (const item of items) {
@@ -573,7 +645,7 @@ const useShootStore = defineStore('shoot', () => {
   const socketEventHandler = useSocketEventHandler(useShootStore, {
     logger,
     createOperator ({ state }) {
-      const showAllShoots = !isHealthyFilterActive(state, context)
+      const showAllShoots = !subscriptionHidesHealthy()
       return {
         set (uid, item) {
           if (showAllShoots || shootHasIssue(item)) {
@@ -603,6 +675,8 @@ const useShootStore = defineStore('shoot', () => {
     subscriptionError,
     focusMode,
     sortBy,
+    shootSearchQuery,
+    shootListContext,
     // getters
     activeShoots,
     shootList,
@@ -630,6 +704,9 @@ const useShootStore = defineStore('shoot', () => {
     searchItems,
     sortItems,
     setSortBy,
+    setShootSearchQuery,
+    activateShootList,
+    deactivateShootList,
     isShootActive,
     handleEvent: socketEventHandler.listener,
   }

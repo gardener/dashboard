@@ -58,8 +58,7 @@ export const useCredentialStore = defineStore('credential', () => {
     state.quotas = {}
   }
 
-  async function fetchCredentials () {
-    const namespace = authzStore.namespace
+  async function fetchCredentials (namespace = authzStore.namespace) {
     try {
       const { data: { secretBindings, secrets, credentialsBindings, workloadIdentities, quotas } } = await api.getCloudProviderCredentials(namespace)
       _setCredentials({ secretBindings, secrets, credentialsBindings, workloadIdentities, quotas })

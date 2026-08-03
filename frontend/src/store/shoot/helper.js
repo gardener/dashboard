@@ -37,6 +37,7 @@ import {
   SHOOT_PROGRESSING_FIELD,
   SHOOT_OPERATOR_ACTION_FIELD,
   SHOOT_ALL_TICKETS_IGNORED_FIELD,
+  resolveShootListFiltersFromSearch,
   getShootHealth,
   matchShootHealth,
   matchShootProgressing,
@@ -66,12 +67,10 @@ export const constants = Object.freeze({
   CLOSED: 6,
 })
 
-export function isHealthyFilterActive (state, context) {
-  const {
-    authzStore,
-    healthy,
-  } = context
-  return authzStore.namespace === '_all' && (healthy.value ?? true)
+export function shouldHideHealthy (state, context) {
+  const { shootSearchQuery } = context
+  const { healthy } = resolveShootListFiltersFromSearch(shootSearchQuery?.value)
+  return healthy
 }
 
 function requiresOperatorAction (item) {
@@ -135,49 +134,25 @@ export function getFilteredUids (state, context) {
     return !isStatusProgressing(get(item, ['metadata'], {}))
   }
 
-  const hasTicketsWithoutHideLabel = item => {
-    const {
-      projectStore,
-      ticketStore,
-      configStore,
-    } = context
-    const hideClustersWithLabels = get(configStore.ticket, ['hideClustersWithLabels'])
-    if (!hideClustersWithLabels) {
-      return true
-    }
-    const metadata = get(item, ['metadata'], {})
-    metadata.projectName = projectStore.projectNameByNamespace(metadata)
-    const ticketsForCluster = ticketStore.issues(metadata)
-    if (!ticketsForCluster.length) {
-      return true
-    }
-
-    const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
-      const labelNames = map(get(ticket, ['data', 'labels']), 'name')
-      const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
-      return !ticketHasHideLabel
-    })
-    return ticketsWithoutHideLabel.length > 0
-  }
-
   // list of active filter function
   const predicates = []
-  if (isHealthyFilterActive(state, context)) {
-    const {
-      progressing,
-      operatorAction,
-      allTicketsIgnored,
-    } = context
 
-    if (progressing.value) {
-      predicates.push(notProgressing)
-    }
-    if (operatorAction.value) {
-      predicates.push(requiresOperatorAction)
-    }
-    if (allTicketsIgnored.value) {
-      predicates.push(hasTicketsWithoutHideLabel)
-    }
+  const { shootSearchQuery } = context
+
+  const {
+    progressing,
+    operatorAction,
+    allTicketsIgnored,
+  } = resolveShootListFiltersFromSearch(shootSearchQuery?.value)
+
+  if (progressing) {
+    predicates.push(notProgressing)
+  }
+  if (operatorAction) {
+    predicates.push(requiresOperatorAction)
+  }
+  if (allTicketsIgnored) {
+    predicates.push(item => !areAllTicketsIgnored(context, item))
   }
 
   return Object.values(state.shoots)
@@ -298,7 +273,9 @@ export function getSortVal (state, context, item, sortBy) {
       const conditions = item.status?.conditions ?? []
       const constraints = item.status?.constraints ?? []
       const readinessConditions = [...conditions, ...constraints]
-      const hideProgressingClusters = context.progressing.value ?? false
+      const { progressing: hideProgressingClusters } = resolveShootListFiltersFromSearch(
+        context.shootSearchQuery?.value,
+      )
       const lastOperationTime = item.status?.lastOperation?.lastUpdateTime
       const creationTime = item.metadata.creationTimestamp
       const isErrorFn = status => status !== 'True' && !(hideProgressingClusters && status === 'Progressing')

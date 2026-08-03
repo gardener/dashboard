@@ -33,8 +33,7 @@ export const useMemberStore = defineStore('member', () => {
     return list.value ?? []
   })
 
-  async function fetchMembers () {
-    const namespace = authzStore.namespace
+  async function fetchMembers (namespace = authzStore.namespace) {
     try {
       const response = await api.getMembers({ namespace })
       list.value = response.data
