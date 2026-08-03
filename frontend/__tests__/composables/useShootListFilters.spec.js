@@ -13,6 +13,7 @@ import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { buildSearchTerms } from '@/store/shoot/search'
 
 import { useApi } from '@/composables/useApi'
 import { useShootListFilters } from '@/composables/useShootListFilters'
@@ -53,6 +54,7 @@ describe('composables', () => {
       mockGetSubjectRules = vi.spyOn(api, 'getSubjectRules')
       mockGetSubjectRules.mockResolvedValue(createRulesResponse())
       localStorageStore.allProjectsShootFilter = {}
+      localStorageStore.allProjectsShootDefaultView = null
     })
 
     async function grantLandscapeAccess () {
@@ -66,64 +68,85 @@ describe('composables', () => {
       await authzStore.fetchRules()
     }
 
-    it('should return empty labels when healthy is false', async () => {
+    it('should not return active filter reasons when all clusters is the default', async () => {
       await grantLandscapeAccess()
+      localStorageStore.allProjectsShootDefaultView = 'all'
       localStorageStore.allProjectsShootFilter = {
-        healthy: false,
         progressing: true,
-        noOperatorAction: true,
+        operatorAction: true,
+        allTicketsIgnored: false,
       }
 
-      const { activeFilterLabels } = useShootListFilters()
-      expect(activeFilterLabels.value).toEqual([])
+      const { activeFilterReasons } = useShootListFilters()
+      expect(activeFilterReasons.value).toEqual([])
     })
 
-    it('should return active filter labels for landscape defaults', async () => {
+    it('should preserve Operations View criteria when all clusters is the default', async () => {
+      await grantLandscapeAccess()
+      localStorageStore.allProjectsShootDefaultView = 'all'
+      localStorageStore.allProjectsShootFilter = {
+        progressing: true,
+        operatorAction: true,
+        allTicketsIgnored: true,
+      }
+
+      const {
+        defaultClusterView,
+        operationsViewFilters,
+        shootListFilters,
+      } = useShootListFilters()
+
+      expect(defaultClusterView.value).toBe('all')
+      expect(buildSearchTerms(shootListFilters.value)).toBe('')
+      expect(buildSearchTerms(operationsViewFilters.value)).toBe(
+        'health:unhealthy progressing:false operatorAction:true allTicketsIgnored:false',
+      )
+
+      defaultClusterView.value = 'operations'
+      expect(buildSearchTerms(shootListFilters.value)).toBe(
+        'health:unhealthy progressing:false operatorAction:true allTicketsIgnored:false',
+      )
+    })
+
+    it('should return active filter reasons for landscape defaults', async () => {
       await grantLandscapeAccess()
 
-      const { activeFilterLabels } = useShootListFilters()
-      expect(activeFilterLabels.value).toEqual([
-        'Progressing',
-        'User Errors',
-        'Ignored Ticket Labels',
+      const { activeFilterReasons } = useShootListFilters()
+      expect(activeFilterReasons.value).toEqual([
+        'are progressing',
+        'do not require operator action',
+        'have only ignored tickets',
       ])
     })
 
-    it('should return empty labels without landscape access', () => {
-      const { activeFilterLabels } = useShootListFilters()
-      expect(activeFilterLabels.value).toEqual([])
-    })
-
-    it('should return labels matching locally stored filters', async () => {
+    it('should return reasons matching locally stored filters', async () => {
       await grantLandscapeAccess()
       localStorageStore.allProjectsShootFilter = {
-        healthy: true,
         progressing: true,
-        noOperatorAction: false,
-        ignoredTickets: false,
+        operatorAction: false,
+        allTicketsIgnored: false,
       }
 
-      const { activeFilterLabels } = useShootListFilters()
-      expect(activeFilterLabels.value).toEqual([
-        'Progressing',
+      const { activeFilterReasons } = useShootListFilters()
+      expect(activeFilterReasons.value).toEqual([
+        'are progressing',
       ])
     })
 
-    it('should exclude ignoredTickets when ticket config is missing', async () => {
+    it('should exclude allTicketsIgnored when ticket config is missing', async () => {
       await grantLandscapeAccess()
       configStore.setConfiguration({ ticket: {} })
       localStorageStore.allProjectsShootFilter = {
-        healthy: true,
         progressing: false,
-        noOperatorAction: false,
-        ignoredTickets: true,
+        operatorAction: false,
+        allTicketsIgnored: true,
       }
 
-      const { activeFilterLabels } = useShootListFilters()
-      expect(activeFilterLabels.value).toEqual([])
+      const { activeFilterReasons } = useShootListFilters()
+      expect(activeFilterReasons.value).toEqual([])
     })
 
-    it('should include ignoredTickets when ticket config is present', async () => {
+    it('should include allTicketsIgnored when ticket config is present', async () => {
       await grantLandscapeAccess()
       configStore.setConfiguration({
         ticket: {
@@ -132,16 +155,130 @@ describe('composables', () => {
         },
       })
       localStorageStore.allProjectsShootFilter = {
-        healthy: true,
         progressing: false,
-        noOperatorAction: false,
-        ignoredTickets: true,
+        operatorAction: false,
+        allTicketsIgnored: true,
       }
 
-      const { activeFilterLabels } = useShootListFilters()
+      const { activeFilterReasons } = useShootListFilters()
+      expect(activeFilterReasons.value).toEqual([
+        'have only ignored tickets',
+      ])
+    })
+
+    it('should keep healthy clusters excluded from Operations View criteria', async () => {
+      await grantLandscapeAccess()
+      localStorageStore.allProjectsShootFilter = {
+        healthy: false,
+        progressing: false,
+        operatorAction: false,
+        allTicketsIgnored: false,
+      }
+
+      const { operationsViewFilters } = useShootListFilters()
+
+      expect(operationsViewFilters.value).toEqual({
+        healthy: true,
+        progressing: false,
+        operatorAction: false,
+        allTicketsIgnored: false,
+      })
+    })
+
+    it('should update Operations View criteria through dedicated setters', async () => {
+      await grantLandscapeAccess()
+      localStorageStore.allProjectsShootFilter = {
+        progressing: false,
+        operatorAction: false,
+        allTicketsIgnored: false,
+      }
+
+      const {
+        setHideProgressing,
+        setHideWithoutOperatorAction,
+        setHideAllTicketsIgnored,
+      } = useShootListFilters()
+
+      setHideProgressing(true)
+      setHideWithoutOperatorAction(true)
+      setHideAllTicketsIgnored(true)
+
+      expect(localStorageStore.allProjectsShootFilter).toEqual({
+        progressing: true,
+        operatorAction: true,
+        allTicketsIgnored: true,
+      })
+
+      setHideProgressing(true)
+      expect(localStorageStore.allProjectsShootFilter.progressing).toBe(true)
+    })
+
+    it('should keep existing filter consumers working with the renamed criteria', async () => {
+      await grantLandscapeAccess()
+
+      const {
+        activeFilterLabels,
+        defaultClusterView,
+        healthy,
+        toggleShootListFilter,
+      } = useShootListFilters()
+
       expect(activeFilterLabels.value).toEqual([
+        'Progressing',
+        'User Errors',
         'Ignored Ticket Labels',
       ])
+
+      toggleShootListFilter('operatorAction')
+      expect(localStorageStore.allProjectsShootFilter.operatorAction).toBe(false)
+      expect(activeFilterLabels.value).toEqual([
+        'Progressing',
+        'Ignored Ticket Labels',
+      ])
+
+      toggleShootListFilter('healthy')
+      expect(defaultClusterView.value).toBe('all')
+      expect(healthy.value).toBe(false)
+
+      toggleShootListFilter('healthy')
+      expect(defaultClusterView.value).toBe('operations')
+      expect(healthy.value).toBe(true)
+      expect(localStorageStore.allProjectsShootFilter.operatorAction).toBe(false)
+    })
+
+    it('should default non-landscape users to all clusters', () => {
+      const {
+        defaultClusterView,
+        operationsViewFilters,
+        shootListFilters,
+      } = useShootListFilters()
+
+      expect(defaultClusterView.value).toBe('all')
+      expect(operationsViewFilters.value.healthy).toBe(true)
+      expect(shootListFilters.value.healthy).toBe(false)
+    })
+
+    it('should ignore stored landscape filters for non-landscape users', () => {
+      localStorageStore.allProjectsShootDefaultView = 'operations'
+      localStorageStore.allProjectsShootFilter = {
+        progressing: true,
+        operatorAction: true,
+        allTicketsIgnored: true,
+      }
+
+      const {
+        operationsViewFilters,
+        shootListFilters,
+      } = useShootListFilters()
+
+      const expectedFilters = {
+        healthy: true,
+        progressing: false,
+        operatorAction: false,
+        allTicketsIgnored: false,
+      }
+      expect(operationsViewFilters.value).toEqual(expectedFilters)
+      expect(shootListFilters.value).toEqual(expectedFilters)
     })
   })
 })

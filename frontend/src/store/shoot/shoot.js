@@ -80,8 +80,8 @@ const useShootStore = defineStore('shoot', () => {
   } = useShootListFilters()
 
   const progressing = computed(() => shootListFilters.value.progressing)
-  const noOperatorAction = computed(() => shootListFilters.value.noOperatorAction)
-  const ignoredTickets = computed(() => shootListFilters.value.ignoredTickets)
+  const operatorAction = computed(() => shootListFilters.value.operatorAction)
+  const allTicketsIgnored = computed(() => shootListFilters.value.allTicketsIgnored)
 
   const context = {
     api,
@@ -100,8 +100,8 @@ const useShootStore = defineStore('shoot', () => {
     shootListFilters,
     healthy,
     progressing,
-    noOperatorAction,
-    ignoredTickets,
+    operatorAction,
+    allTicketsIgnored,
   }
 
   const state = reactive({

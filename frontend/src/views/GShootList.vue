@@ -575,8 +575,8 @@ export default {
         },
         {
           text: 'Hide clusters without operator action needed',
-          value: 'noOperatorAction',
-          selected: this.isFilterActive('noOperatorAction'),
+          value: 'operatorAction',
+          selected: this.isFilterActive('operatorAction'),
           hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
           helpTooltip: [
             'Hide clusters that do not require action by an operator',
@@ -588,8 +588,8 @@ export default {
         },
         {
           text: 'Hide clusters with ignored ticket labels',
-          value: 'ignoredTickets',
-          selected: this.isFilterActive('ignoredTickets'),
+          value: 'allTicketsIgnored',
+          selected: this.isFilterActive('allTicketsIgnored'),
           hidden: this.projectScope || !this.canViewLandscape || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
           helpTooltip: this.ignoredTicketsTooltip,
           disabled: this.changeFiltersDisabled,
