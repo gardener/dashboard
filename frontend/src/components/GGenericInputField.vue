@@ -310,7 +310,7 @@ const rules = computed(() => {
   for (const [validatorName, validator] of Object.entries(props.field.validators ?? {})) {
     let compiledValidator = compileValidator(validator)
     if (!compiledValidator) {
-      logger.warn(`Ignoring unsupported validator type '${validator.type}' for field '${props.field.key}'`)
+      logger.warn(`Ignoring unsupported validator type '${validator.type}' for field '${props.field.label}'`)
       continue
     }
 

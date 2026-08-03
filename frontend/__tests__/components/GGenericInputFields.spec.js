@@ -600,7 +600,6 @@ describe('GGenericInputField', () => {
   it('warns for unsupported validator types', async () => {
     mountInputField({
       field: {
-        key: 'foo',
         label: 'Foo',
         type: 'text',
         validators: {
@@ -613,7 +612,7 @@ describe('GGenericInputField', () => {
 
     await nextTick()
 
-    expect(warnSpy).toHaveBeenCalledWith('Ignoring unsupported validator type \'doesNotExist\' for field \'foo\'')
+    expect(warnSpy).toHaveBeenCalledWith('Ignoring unsupported validator type \'doesNotExist\' for field \'Foo\'')
   })
 
   it('imports a JSON file by extension when its MIME type is missing', async () => {

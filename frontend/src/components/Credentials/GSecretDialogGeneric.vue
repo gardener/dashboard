@@ -89,7 +89,6 @@ export default {
     },
     defaultInputField () {
       return {
-        key: 'secretData',
         label: 'Secret Data',
         type: 'yaml',
         sensitive: true,
