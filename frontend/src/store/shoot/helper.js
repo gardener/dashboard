@@ -75,6 +75,9 @@ export function isHealthyFilterActive (state, context) {
 }
 
 function requiresOperatorAction (item) {
+  if (!shootHasIssue(item)) {
+    return false
+  }
   const ignoreIssues = isTruthyValue(get(item, ['metadata', 'annotations', 'dashboard.gardener.cloud/ignore-issues']))
   if (ignoreIssues) {
     return false

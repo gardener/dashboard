@@ -266,6 +266,23 @@ describe('Shoot search', () => {
     )).toBe(true)
   })
 
+  it('does not match healthy shoots for operatorAction:true', () => {
+    const shoots = [
+      createShoot({
+        name: 'healthy-shoot',
+        uid: 'healthy',
+        health: 'healthy',
+      }),
+      createShoot({
+        name: 'operator-action-shoot',
+        uid: 'operator-action',
+        health: 'unhealthy',
+      }),
+    ]
+
+    expect(matchingNames('operatorAction:true', shoots)).toEqual(['operator-action-shoot'])
+  })
+
   it('normalizes and matches all-tickets-ignored terms', () => {
     configStore.setConfiguration({
       ticket: {
