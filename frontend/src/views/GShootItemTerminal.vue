@@ -5,9 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-terminal-splitpanes
-    style="background-color: #333;"
-  />
+  <g-terminal-splitpanes class="terminal-page" />
 </template>
 
 <script setup>
@@ -25,3 +23,11 @@ onMounted(() => {
   load()
 })
 </script>
+
+<style scoped>
+.terminal-page {
+  height: 100%;
+  background-color: rgb(var(--v-theme-surface));
+  padding: 4px;
+}
+</style>

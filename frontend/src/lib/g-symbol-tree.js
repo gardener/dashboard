@@ -114,7 +114,7 @@ export class GSymbolTree extends SymbolTree {
   }
 
   moveToWithId ({ sourceId, targetId, position }) {
-    if (!targetId || !sourceId) {
+    if (!targetId || !sourceId || !Object.values(PositionEnum).includes(position)) {
       return
     }
 

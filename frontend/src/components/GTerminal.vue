@@ -82,7 +82,8 @@ SPDX-License-Identifier: Apache-2.0
           <v-btn
             icon="mdi-close"
             size="small"
-            color="grey-lighten-1"
+            density="compact"
+            color="on-surface"
             variant="text"
             class="text-none g-system-bar-button g-ignore-drag"
             @click="deleteTerminal"
@@ -90,11 +91,11 @@ SPDX-License-Identifier: Apache-2.0
           <v-spacer />
           <v-icon
             class="pr-2"
-            color="grey-lighten-1"
+            color="on-surface"
           >
             mdi-console
           </v-icon>
-          <span class="text-grey-lighten-1">{{ terminalTitle }}</span>
+          <span class="text-high-emphasis">{{ terminalTitle }}</span>
           <v-spacer />
           <v-tooltip
             v-if="terminalSession.imageHelpText"
@@ -114,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
                     v-bind="mergeProps(activatorProps, tooltipProps)"
                     icon="mdi-help-circle-outline"
                     size="small"
-                    color="grey-lighten-1"
+                    color="on-surface"
                     variant="text"
                     class="text-none g-system-bar-button mx-1 g-ignore-drag"
                   />
@@ -130,83 +131,86 @@ SPDX-License-Identifier: Apache-2.0
           <v-menu
             location="bottom"
             offset-y
-            min-width="400px"
-            theme="dark"
+            min-width="420px"
           >
             <template #activator="{ props }">
               <v-btn
                 v-bind="props"
                 icon="mdi-menu"
                 size="small"
-                color="grey-lighten-1"
+                color="on-surface"
                 variant="text"
                 class="text-none g-system-bar-button mx-1 g-ignore-drag"
               />
             </template>
-            <v-card rounded="0">
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  variant="text"
-                  @click="split('horizontal')"
-                >
-                  <div class="d-flex g-burger-menu-button">
+            <v-list
+              density="compact"
+              class="py-0"
+            >
+              <v-list-item @click="split('horizontal')">
+                <template #prepend>
+                  <span class="d-inline-flex align-center justify-center mr-2">
                     <g-icon-base
                       width="16"
                       height="16"
                       view-box="0 -2 20 20"
-                      class="mr-2"
+                      icon-color="on-surface"
                       icon-name="split-vertically"
                     >
                       <g-split-vertically />
                     </g-icon-base>
-                    <span>Split Pane Vertically</span>
-                    <v-spacer />
-                    <span>(ctrl + shift + v)</span>
-                  </div>
-                </v-btn>
-              </v-card-actions>
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  variant="text"
-                  @click="split('vertical')"
-                >
-                  <div class="d-flex g-burger-menu-button">
+                  </span>
+                </template>
+                <v-list-item-title>Split Pane Vertically</v-list-item-title>
+                <template #append>
+                  <span class="terminal-menu-shortcut text-medium-emphasis text-caption">(ctrl + shift + v)</span>
+                </template>
+              </v-list-item>
+              <v-list-item @click="split('vertical')">
+                <template #prepend>
+                  <span class="d-inline-flex align-center justify-center mr-2">
                     <g-icon-base
                       width="16"
                       height="16"
                       view-box="0 -2 20 20"
-                      class="mr-2"
+                      icon-color="on-surface"
                       icon-name="split-horizontally"
                     >
                       <g-split-horizontally />
                     </g-icon-base>
-                    <span>Split Pane Horizontally</span>
-                    <v-spacer />
-                    <span>(ctrl + shift + h)</span>
-                  </div>
-                </v-btn>
-              </v-card-actions>
-              <v-divider class="mt-1 mb-1" />
-              <v-card-actions>
-                <v-btn
-                  size="small"
-                  block
-                  :loading="loading.settingsBtn"
-                  @click="configure('settingsBtn')"
-                >
-                  <div class="d-flex g-burger-menu-button">
-                    <v-icon class="mr-2">
+                  </span>
+                </template>
+                <v-list-item-title>Split Pane Horizontally</v-list-item-title>
+                <template #append>
+                  <span class="terminal-menu-shortcut text-medium-emphasis text-caption">(ctrl + shift + h)</span>
+                </template>
+              </v-list-item>
+              <v-divider />
+              <v-list-item
+                title="Settings"
+                :disabled="loading.settingsBtn"
+                @click="configure('settingsBtn')"
+              >
+                <template #prepend>
+                  <span class="d-inline-flex align-center justify-center mr-2">
+                    <v-progress-circular
+                      v-if="loading.settingsBtn"
+                      indeterminate
+                      size="16"
+                      width="2"
+                      color="on-surface"
+                    />
+                    <v-icon
+                      v-else
+                      size="16"
+                      color="on-surface"
+                    >
                       mdi-cog
                     </v-icon>
-                    Settings
-                  </div>
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+                  </span>
+                </template>
+              </v-list-item>
+            </v-list>
           </v-menu>
         </div>
       </template>
@@ -234,46 +238,37 @@ SPDX-License-Identifier: Apache-2.0
                 v-bind="menuProps"
                 size="small"
                 variant="text"
-                color="grey-lighten-1"
+                color="on-surface"
                 class="text-none g-system-bar-button"
               >
                 <g-icon-base
                   width="18"
                   height="18"
                   view-box="-2 -2 30 30"
-                  icon-color="#bdbdbd"
+                  icon-color="on-surface"
                   class="mr-2"
                   :icon-name="connectionIconName"
                 >
                   <component :is="resolveComponent(connectionIconName)" />
                 </g-icon-base>
-                <span class="text-none text-grey-lighten-1">{{ connectionStateText }}</span>
+                <span class="text-none text-high-emphasis">{{ connectionStateText }}</span>
               </v-btn>
             </template>
-            <v-card rounded="0">
-              <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn
-                  size="small"
-                  variant="text"
-                  class="action-button"
-                  @click="retry()"
-                >
-                  <v-icon
-                    size="small"
-                    start
-                  >
-                    mdi-reload
-                  </v-icon>
-                  Reconnect
-                </v-btn>
-              </v-card-actions>
-              <v-card-text
+            <v-list
+              density="compact"
+              class="py-0"
+            >
+              <v-list-item
+                v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED"
+                prepend-icon="mdi-reload"
+                title="Reconnect"
+                @click="retry()"
+              />
+              <v-list-item
                 v-else
-                class="ml-2 mr-2"
-              >
-                {{ terminalSession.detailedConnectionStateText || connectionStateText }}
-              </v-card-text>
-            </v-card>
+                :title="terminalSession.detailedConnectionStateText || connectionStateText"
+              />
+            </v-list>
           </v-menu>
 
           <v-btn
@@ -282,7 +277,7 @@ SPDX-License-Identifier: Apache-2.0
             size="small"
             variant="text"
             :loading="loading.imageBtn"
-            color="grey-lighten-1"
+            color="on-surface"
             class="text-none g-system-bar-button"
             @click="configure('imageBtn')"
           >
@@ -302,7 +297,7 @@ SPDX-License-Identifier: Apache-2.0
                 size="small"
                 variant="text"
                 :loading="loading.secContextBtn"
-                color="grey-lighten-1"
+                color="on-surface"
                 class="text-none g-system-bar-button"
                 @click="configure('secContextBtn')"
               >
@@ -323,7 +318,7 @@ SPDX-License-Identifier: Apache-2.0
             size="small"
             variant="text"
             :loading="loading.nodeBtn"
-            color="grey-lighten-1"
+            color="on-surface"
             class="text-none g-system-bar-button"
             @click="configure('nodeBtn')"
           >
@@ -351,11 +346,12 @@ import { mapState } from 'pinia'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
+import { WebglAddon } from '@xterm/addon-webgl'
+import { Unicode11Addon } from '@xterm/addon-unicode11'
 import '@xterm/xterm/css/xterm.css'
 
 import { useAppStore } from '@/store/app'
 import { useConfigStore } from '@/store/config'
-import { useTerminalStore } from '@/store/terminal'
 
 import GDragNDroppableComponent from '@/components/GDragNDroppableComponent.vue'
 import GTerminalSettingsDialog from '@/components/dialogs/GTerminalSettingsDialog.vue'
@@ -375,6 +371,7 @@ import {
   TerminalSession,
   Spinner,
 } from '@/lib/terminal'
+import { getTerminalTheme } from '@/lib/terminal-themes'
 
 import head from 'lodash/head'
 import find from 'lodash/find'
@@ -417,7 +414,6 @@ export default {
   ],
   data () {
     return {
-      hasFocus: true,
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
@@ -440,15 +436,11 @@ export default {
         container: {},
       },
       TerminalSession,
-      showMenu: false,
     }
   },
   computed: {
     ...mapState(useConfigStore, [
       'terminal',
-    ]),
-    ...mapState(useTerminalStore, [
-      'heartbeatIntervalSeconds',
     ]),
     ...mapState(useAppStore, [
       'focusedElementId',
@@ -472,8 +464,15 @@ export default {
     targetText () {
       return targetText(this.target) || 'UNKNOWN'
     },
+    isDarkTheme () {
+      return !!this.$vuetify.theme.current.dark
+    },
+    hasFocus () {
+      return this.focusedElementId === this.uuid
+    },
     backgroundClass () {
-      return this.hasFocus ? 'background' : 'bright-background'
+      const theme = this.isDarkTheme ? 'dark' : 'light'
+      return `background-${theme}${this.hasFocus ? '' : '-dimmed'}`
     },
     isTerminalSessionCreated () {
       return this.terminalSession && this.terminalSession.isCreated
@@ -534,28 +533,61 @@ export default {
     splitpaneResize () {
       this.onResize()
     },
+    isDarkTheme () {
+      this.applyTerminalTheme()
+    },
+    hasFocus () {
+      this.applyTerminalTheme()
+    },
   },
   mounted () {
     const term = this.term = new Terminal({
       fontSize: 15,
       fontWeight: 600,
       fontFamily: '"DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols"',
+      allowProposedApi: true,
+      minimumContrastRatio: 4.5,
+      theme: getTerminalTheme(this.isDarkTheme, this.hasFocus),
+      macOptionClickForcesSelection: true,
     })
     const fitAddon = this.fitAddon = new FitAddon()
-    const focusAddon = new FocusAddon(this.uuid, this.$store)
-    focusAddon.onFocus = () => {
-      term.options.theme = { background: '#000' }
-      this.hasFocus = true
-    }
-    focusAddon.onBlur = () => {
-      term.options.theme = { background: '#333' }
-      this.hasFocus = false
+    const focusAddon = new FocusAddon(this.uuid)
+
+    if (navigator.userAgent.includes('Windows')) {
+      term.attachCustomKeyEventHandler(event => {
+        if (event.type !== 'keydown') {
+          return true
+        }
+        const onlyCtrlPressed = event.ctrlKey && !event.shiftKey && !event.altKey
+        if (!onlyCtrlPressed) {
+          return true
+        }
+        const hasSelection = term.getSelection().length > 0
+        const isCtrlCopy = event.code === 'KeyC' && hasSelection
+        const isCtrlPaste = event.code === 'KeyV'
+        const shouldXtermJsProcessTheKeyEvent = !(isCtrlCopy || isCtrlPaste)
+        return shouldXtermJsProcessTheKeyEvent
+      })
     }
 
     term.open(this.$refs.container)
     term.loadAddon(focusAddon) // must be called after open, otherwise the terminal.textarea is not initialized
     term.loadAddon(fitAddon)
     term.loadAddon(new WebLinksAddon())
+    const unicodeAddon = new Unicode11Addon()
+    term.loadAddon(unicodeAddon)
+    term.unicode.activeVersion = '11'
+    let webglAddon
+    try {
+      webglAddon = new WebglAddon()
+      webglAddon.onContextLoss(() => {
+        webglAddon.dispose()
+      })
+      term.loadAddon(webglAddon)
+    } catch (err) {
+      webglAddon?.dispose()
+      this.logger.warn('WebGL renderer not available, falling back to default renderer:', err)
+    }
 
     term.focus()
     this.$nextTick(() => {
@@ -576,6 +608,12 @@ export default {
   methods: {
     resolveComponent (name) {
       return get(components, [name])
+    },
+    applyTerminalTheme () {
+      if (!this.term) {
+        return
+      }
+      this.term.options.theme = getTerminalTheme(this.isDarkTheme, this.hasFocus)
     },
     focus () {
       this.term.focus()
@@ -700,18 +738,25 @@ export default {
     font-size: .875rem;
     font-weight: 400;
   }
-  .background {
+  .background-dark {
     background: #000;
   }
-  .bright-background {
+  .background-dark-dimmed {
     background: #333;
+  }
+  .background-light {
+    background: #fafafa;
+  }
+  .background-light-dimmed {
+    background: #e0e0e0;
   }
   .g-system-bar-button {
     max-height: 24px;
     letter-spacing: normal;
   }
-
-  .g-burger-menu-button {
-    width: 400px;
+  .terminal-menu-shortcut {
+    min-width: 120px;
+    margin-left: 32px;
+    text-align: right;
   }
 </style>

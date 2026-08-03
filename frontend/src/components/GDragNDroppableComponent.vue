@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div class="fill-height">
     <div
       v-g-draggable="draggableValue"
-      class="fill-height full-width"
+      class="draggable-content fill-height full-width"
       :data-g-id="uuid"
       :draggable="true"
       @drag-start="dragStart"
@@ -75,3 +75,10 @@ export default {
   },
 }
 </script>
+
+<style lang="scss" scoped>
+  .draggable-content {
+    position: relative;
+    z-index: 0;
+  }
+</style>
