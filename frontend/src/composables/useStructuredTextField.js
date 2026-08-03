@@ -58,6 +58,8 @@ export function useStructuredTextField (typeRef) {
       return undefined
     }
 
+    // Only mapping roots are supported. Arrays are objects in JavaScript and
+    // would otherwise turn their indices into keys, e.g. Secret data keys
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return undefined
     }
