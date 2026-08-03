@@ -47,8 +47,7 @@ export const useTerminalStore = defineStore('terminal', () => {
     draggingDragAndDropId.value = value
   }
 
-  async function ensureProjectTerminalShortcutsLoaded () {
-    const namespace = authzStore.namespace
+  async function ensureProjectTerminalShortcutsLoaded (namespace = authzStore.namespace) {
     if (!projectTerminalShortcuts.value || projectTerminalShortcuts.value.namespace !== namespace) {
       try {
         const response = await api.listProjectTerminalShortcuts({ namespace })

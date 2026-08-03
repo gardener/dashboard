@@ -31,6 +31,12 @@ export const useAuthzStore = defineStore('authz', () => {
 
   const rulesMap = ref(new Map())
   const currentNamespace = ref(undefined)
+  const rulesRequestIds = new Map()
+  let rulesRequestId = 0
+
+  function normalizeNamespace (namespace) {
+    return namespace || null
+  }
 
   const namespace = computed(() => {
     return currentNamespace.value
@@ -39,6 +45,30 @@ export const useAuthzStore = defineStore('authz', () => {
   const status = computed(() => {
     return rulesMap.value.get(currentNamespace.value)
   })
+
+  function statusForNamespace (namespace) {
+    return rulesMap.value.get(normalizeNamespace(namespace))
+  }
+
+  function hasRulesForNamespace (namespace) {
+    return rulesMap.value.has(normalizeNamespace(namespace))
+  }
+
+  function canCreateTerminalsForNamespace (namespace) {
+    const status = statusForNamespace(namespace)
+    return canI(status, 'create', 'dashboard.gardener.cloud', 'terminals')
+  }
+
+  function canGetCloudProviderCredentialsForNamespace (namespace) {
+    const status = statusForNamespace(namespace)
+    return canI(status, 'list', '', 'secrets') && canI(status, 'list', 'security.gardener.cloud', 'workloadidentities')
+  }
+
+  function canUseProjectTerminalShortcutsForNamespace (namespace) {
+    return configStore.isProjectTerminalShortcutsEnabled &&
+      canGetCloudProviderCredentialsForNamespace(namespace) &&
+      canCreateTerminalsForNamespace(namespace)
+  }
 
   const gardenStatus = computed(() => {
     return rulesMap.value.get(GARDEN_NAMESPACE)
@@ -49,7 +79,7 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const canCreateTerminals = computed(() => {
-    return canI(status.value, 'create', 'dashboard.gardener.cloud', 'terminals')
+    return canCreateTerminalsForNamespace(currentNamespace.value)
   })
 
   const canCreateShoots = computed(() => {
@@ -69,7 +99,7 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const canGetCloudProviderCredentials = computed(() => {
-    return canI(status.value, 'list', '', 'secrets') && canI(status.value, 'list', 'security.gardener.cloud', 'workloadidentities')
+    return canGetCloudProviderCredentialsForNamespace(currentNamespace.value)
   })
 
   const canCreateCredentials = computed(() => {
@@ -133,9 +163,7 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const canUseProjectTerminalShortcuts = computed(() => {
-    return configStore.isProjectTerminalShortcutsEnabled &&
-      canGetProjectTerminalShortcuts.value &&
-      canCreateTerminals.value
+    return canUseProjectTerminalShortcutsForNamespace(currentNamespace.value)
   })
 
   const hasGardenTerminalAccess = computed(() => {
@@ -198,20 +226,41 @@ export const useAuthzStore = defineStore('authz', () => {
     return response.data
   }
 
-  async function fetchRules (namespace) {
+  async function prepareRules (namespace) {
     /**
      * The value of `currentNamespace` is:
      * - undefined if no rules have been fetched yet
      * - null if only cluster-scoped rules have been fetched
      * - a non-empty string if both cluster-scoped rules and the rules for the namespace have been fetched
      */
-    if (!namespace) {
-      namespace = null
-    }
+    namespace = normalizeNamespace(namespace)
     if (currentNamespace.value !== namespace) {
+      const requestId = ++rulesRequestId
+      rulesRequestIds.set(namespace, requestId)
       const data = await getRules(namespace)
-      setRules(namespace, data)
+      if (rulesRequestIds.get(namespace) === requestId) {
+        rulesMap.value.set(namespace, data)
+      }
     }
+  }
+
+  function activateRules (namespace) {
+    namespace = normalizeNamespace(namespace)
+    if (!rulesMap.value.has(namespace)) {
+      return false
+    }
+    for (const key of rulesMap.value.keys()) {
+      if (key !== GARDEN_NAMESPACE && key !== namespace) {
+        rulesMap.value.delete(key)
+      }
+    }
+    currentNamespace.value = namespace
+    return true
+  }
+
+  async function fetchRules (namespace) {
+    await prepareRules(namespace)
+    activateRules(namespace)
   }
 
   async function fetchGardenRules () {
@@ -229,13 +278,9 @@ export const useAuthzStore = defineStore('authz', () => {
   }
 
   function setRules (namespace, data) {
-    for (const key of rulesMap.value.keys()) {
-      if (key !== GARDEN_NAMESPACE) { // preserve garden rules across project switches
-        rulesMap.value.delete(key)
-      }
-    }
+    namespace = normalizeNamespace(namespace)
     rulesMap.value.set(namespace, data)
-    currentNamespace.value = namespace
+    activateRules(namespace)
   }
 
   // Test-only helper — production code should use fetchRules instead
@@ -246,6 +291,7 @@ export const useAuthzStore = defineStore('authz', () => {
   function $reset () {
     rulesMap.value = new Map()
     currentNamespace.value = undefined
+    rulesRequestIds.clear()
   }
 
   return {
@@ -283,6 +329,11 @@ export const useAuthzStore = defineStore('authz', () => {
     canCreateShootsViewerkubeconfigInGarden,
     canGetConfigMapsInGarden,
     isGardenInitial,
+    hasRulesForNamespace,
+    canGetCloudProviderCredentialsForNamespace,
+    canUseProjectTerminalShortcutsForNamespace,
+    prepareRules,
+    activateRules,
     fetchRules,
     fetchGardenRules,
     refreshRules,
