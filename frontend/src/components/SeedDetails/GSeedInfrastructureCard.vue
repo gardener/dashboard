@@ -47,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-seed-capacity-indicator
             :allocatable-shoots="seedAllocatableShoots"
             :shoot-count="seedShootCount"
+            :to="assignedShootsRoute"
           />
         </g-list-item-content>
       </g-list-item>
@@ -56,7 +57,8 @@ SPDX-License-Identifier: Apache-2.0
             :shoot-count="seedShootCount"
             :total-unhealthy-shoots="seedTotalUnhealthyShoots"
             :matching-unhealthy-shoots="seedUnhealthyShoots"
-            :active-filter-labels="activeFilterLabels"
+            :active-filter-reasons="activeFilterReasons"
+            :to="unhealthyShootsRoute"
           />
         </g-list-item-content>
       </g-list-item>
@@ -114,7 +116,7 @@ import GShootHealthDonut from '@/components/GShootHealthDonut.vue'
 import GVendor from '@/components/GVendor.vue'
 
 import { useSeedItem } from '@/composables/useSeedItem/index'
-import { useShootListFilters } from '@/composables/useShootListFilters'
+import { useSeedShootListNavigation } from '@/composables/useSeedShootListNavigation'
 
 const seedStatStore = useSeedStatStore()
 
@@ -135,7 +137,11 @@ const {
   seedName,
 } = useSeedItem()
 
-const { activeFilterLabels } = useShootListFilters()
+const {
+  activeFilterReasons,
+  assignedShootsRoute,
+  unhealthyShootsRoute,
+} = useSeedShootListNavigation(seedName)
 
 const seedNetworksBlockCIDRsText = computed(() => {
   return seedNetworksBlockCIDRs.value?.join(', ') ?? ''
