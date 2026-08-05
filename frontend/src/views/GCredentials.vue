@@ -23,7 +23,6 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <template #append>
           <v-text-field
-            v-if="infrastructureBindingList.length > 3"
             v-model="infraCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
@@ -150,7 +149,6 @@ SPDX-License-Identifier: Apache-2.0
 
         <template #append>
           <v-text-field
-            v-if="dnsCredentialList.length > 3"
             v-model="dnsCredentialFilter"
             prepend-inner-icon="mdi-magnify"
             color="primary"
