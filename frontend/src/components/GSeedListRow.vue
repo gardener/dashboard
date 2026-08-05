@@ -36,6 +36,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-seed-capacity-indicator
           :allocatable-shoots="seedAllocatableShoots"
           :shoot-count="seedShootCount"
+          :to="assignedShootsRoute"
         />
       </template>
       <template v-else-if="header.key === 'unhealthyShoots'">
@@ -44,7 +45,8 @@ SPDX-License-Identifier: Apache-2.0
             :shoot-count="seedShootCount"
             :total-unhealthy-shoots="seedTotalUnhealthyShoots"
             :matching-unhealthy-shoots="seedUnhealthyShoots"
-            :active-filter-labels="activeFilterLabels"
+            :active-filter-reasons="activeFilterReasons"
+            :to="unhealthyShootsRoute"
           />
         </div>
       </template>
@@ -129,7 +131,7 @@ import GScrollContainer from '@/components/GScrollContainer'
 
 import { useProvideManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useProvideSeedItem } from '@/composables/useSeedItem/index'
-import { useShootListFilters } from '@/composables/useShootListFilters'
+import { useSeedShootListNavigation } from '@/composables/useSeedShootListNavigation'
 
 const props = defineProps({
   modelValue: {
@@ -166,7 +168,11 @@ const {
   managedSeedShootName,
 } = useProvideManagedSeedShoot(seedName)
 
-const { activeFilterLabels } = useShootListFilters()
+const {
+  activeFilterReasons,
+  assignedShootsRoute,
+  unhealthyShootsRoute,
+} = useSeedShootListNavigation(seedName)
 
 const seedItemLink = computed(() => ({
   name: 'SeedItem',

@@ -23,8 +23,12 @@ describe('components', () => {
             GDetailTooltip: {
               template: '<div><slot /><slot name="footer" /></div>',
             },
-            'v-card': {
-              template: '<div><slot /></div>',
+            RouterLink: {
+              props: ['to'],
+              template: '<a class="router-link-stub"><slot /></a>',
+            },
+            'v-chip': {
+              template: '<span><slot /></span>',
             },
             'v-icon': true,
           },
@@ -34,7 +38,7 @@ describe('components', () => {
 
     function findRow (wrapper, label) {
       return wrapper.findAll('.health-row').find(item => {
-        return item.find('span').text() === label
+        return item.find('.health-label-text').text() === label
       })
     }
 
@@ -55,6 +59,24 @@ describe('components', () => {
     })
 
     describe('donut rendering', () => {
+      it('should render as a router link when a target is provided', () => {
+        const wrapper = mountComponent({
+          to: {
+            name: 'ShootList',
+            query: {
+              q: 'seed:"infra1-seed" health:unhealthy',
+            },
+          },
+          shootCount: 10,
+          totalUnhealthyShoots: 3,
+          matchingUnhealthyShoots: 1,
+        })
+
+        expect(wrapper.find('a.router-link-stub').exists()).toBe(true)
+        expect(wrapper.find('svg').exists()).toBe(true)
+        expect(wrapper.attributes('aria-label')).toContain('View unhealthy shoots for this seed')
+      })
+
       it('should render an SVG when there are shoots', () => {
         const wrapper = mountComponent({
           shootCount: 10,
@@ -212,7 +234,7 @@ describe('components', () => {
         expect(unhealthy).toBeDefined()
         expect(unhealthy.find('strong').text()).toBe('5')
 
-        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        const excluded = findRow(wrapper, 'Other unhealthy')
         expect(excluded).toBeUndefined()
       })
 
@@ -221,29 +243,38 @@ describe('components', () => {
           shootCount: 10,
           totalUnhealthyShoots: 5,
           matchingUnhealthyShoots: 2,
-          activeFilterLabels: ['User Errors', 'Progressing'],
+          activeFilterReasons: ['do not require operator action', 'are progressing'],
         })
 
-        const unhealthy = findRow(wrapper, 'Unhealthy shown')
+        const unhealthy = findRow(wrapper, 'Unhealthy')
         expect(unhealthy.find('strong').text()).toBe('2')
+        expect(unhealthy.find('.operations-view-chip').text()).toBe('Operations View')
 
-        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        const excluded = findRow(wrapper, 'Other unhealthy')
         expect(excluded).toBeDefined()
         expect(excluded.find('strong').text()).toBe('3')
-        expect(wrapper.find('.filter-summary').text()).toContain('User Errors, Progressing')
+        expect(wrapper.find('.exclusion-description').text()).toBe(
+          'Not shown in Operations View because they do not require operator action or are progressing.',
+        )
       })
 
-      it('should truncate filter labels after 2 with "& N more"', () => {
+      it('should explain all configured exclusion reasons', () => {
         const wrapper = mountComponent({
           shootCount: 20,
           totalUnhealthyShoots: 10,
           matchingUnhealthyShoots: 4,
-          activeFilterLabels: ['Progressing', 'User Errors', 'Deactivated Reconciliation', 'Ignored Ticket Labels'],
+          activeFilterReasons: [
+            'are progressing',
+            'do not require operator action',
+            'have only ignored tickets',
+          ],
         })
 
-        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        const excluded = findRow(wrapper, 'Other unhealthy')
         expect(excluded.find('strong').text()).toBe('6')
-        expect(wrapper.find('.filter-summary').text()).toContain('Progressing, User Errors & 2 more')
+        expect(wrapper.find('.exclusion-description').text()).toBe(
+          'Not shown in Operations View because they are progressing, do not require operator action, or have only ignored tickets.',
+        )
       })
 
       it('should not show excluded row when no filter labels provided', () => {
@@ -253,7 +284,7 @@ describe('components', () => {
           matchingUnhealthyShoots: 2,
         })
 
-        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        const excluded = findRow(wrapper, 'Other unhealthy')
         expect(excluded).toBeUndefined()
       })
 
@@ -262,13 +293,15 @@ describe('components', () => {
           shootCount: 10,
           totalUnhealthyShoots: 5,
           matchingUnhealthyShoots: 5,
-          activeFilterLabels: ['Progressing'],
+          activeFilterReasons: ['are progressing'],
         })
 
-        const excluded = findRow(wrapper, 'Unhealthy filtered out')
+        const excluded = findRow(wrapper, 'Other unhealthy')
         expect(excluded).toBeDefined()
         expect(excluded.find('strong').text()).toBe('0')
-        expect(wrapper.find('.filter-summary').text()).toContain('Progressing')
+        expect(wrapper.find('.exclusion-description').text()).toBe(
+          'Not shown in Operations View because they are progressing.',
+        )
       })
 
       it('should show healthy legend when there are healthy shoots', () => {
@@ -290,7 +323,7 @@ describe('components', () => {
           shootCount: 10,
           totalUnhealthyShoots: 3,
           matchingUnhealthyShoots: 1,
-          activeFilterLabels: ['User Errors'],
+          activeFilterReasons: ['do not require operator action'],
         })
 
         const label = wrapper.attributes('aria-label')
@@ -298,10 +331,33 @@ describe('components', () => {
         expect(label).toBe([
           'Shoot health distribution',
           '10 shoots',
-          '1 unhealthy shoot',
-          '2 unhealthy shoots excluded by Cluster Operations filters (User Errors)',
+          '1 unhealthy shoot in Operations View',
+          '2 unhealthy shoots outside Operations View because they do not require operator action',
           '7 healthy shoots.',
         ].join(', '))
+      })
+
+      it('should pluralize each shoot count correctly', () => {
+        const wrapper = mountComponent({
+          shootCount: 1,
+          totalUnhealthyShoots: 0,
+          matchingUnhealthyShoots: 0,
+        })
+
+        expect(wrapper.attributes('aria-label')).toBe(
+          'Shoot health distribution, 1 shoot, 0 unhealthy shoots, 1 healthy shoot.',
+        )
+      })
+
+      it('should describe the link purpose in the empty state', () => {
+        const wrapper = mountComponent({
+          to: { name: 'ShootList' },
+          shootCount: 0,
+        })
+
+        expect(wrapper.attributes('aria-label')).toBe(
+          'View unhealthy shoots for this seed; no shoots are assigned.',
+        )
       })
     })
 

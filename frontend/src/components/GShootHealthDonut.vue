@@ -5,11 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div
+  <component
+    :is="to ? RouterLink : 'div'"
+    :to="to"
     class="activator d-inline-flex align-center justify-center"
     :style="{ minWidth: `${donut.size}px`, minHeight: `${donut.size}px` }"
     tabindex="0"
-    role="img"
+    :role="to ? undefined : 'img'"
     :aria-label="ariaLabel"
   >
     <span
@@ -82,7 +84,18 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-alert-circle-outline"
             size="small"
           />
-          <span>{{ hasActiveFilters ? 'Unhealthy shown' : 'Unhealthy' }}</span>
+          <div class="health-label">
+            <span class="health-label-text">Unhealthy</span>
+            <v-chip
+              v-if="hasActiveFilters"
+              class="operations-view-chip"
+              label
+              size="x-small"
+              variant="tonal"
+            >
+              Operations View
+            </v-chip>
+          </div>
           <strong>{{ matchingUnhealthy }}</strong>
         </div>
         <div
@@ -94,8 +107,14 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-filter-minus-outline"
             size="small"
           />
-          <span>Unhealthy filtered out</span>
+          <span class="health-label-text">Other unhealthy</span>
           <strong>{{ hiddenUnhealthy }}</strong>
+        </div>
+        <div
+          v-if="hasActiveFilters"
+          class="exclusion-description text-medium-emphasis"
+        >
+          {{ exclusionDescription }}
         </div>
         <div class="health-row">
           <v-icon
@@ -103,21 +122,12 @@ SPDX-License-Identifier: Apache-2.0
             icon="mdi-check-circle-outline"
             size="small"
           />
-          <span>Healthy</span>
+          <span class="health-label-text">Healthy</span>
           <strong>{{ healthyShoots }}</strong>
         </div>
       </template>
-      <template
-        v-if="hasActiveFilters"
-        #footer
-      >
-        <div class="filter-summary">
-          <span>Cluster Operations excludes</span>
-          <span>{{ filterDescription }}</span>
-        </div>
-      </template>
     </g-detail-tooltip>
-  </div>
+  </component>
 </template>
 
 <script setup>
@@ -125,6 +135,7 @@ import {
   computed,
   toRefs,
 } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useTheme } from 'vuetify'
 
 import GDetailTooltip from '@/components/GDetailTooltip.vue'
@@ -132,6 +143,9 @@ import GDetailTooltip from '@/components/GDetailTooltip.vue'
 import { useDonutChart } from '@/composables/useDonutChart'
 
 const props = defineProps({
+  to: {
+    type: [String, Object],
+  },
   shootCount: {
     type: Number,
     default: 0,
@@ -148,7 +162,7 @@ const props = defineProps({
     default: 0,
     validator: v => Number.isInteger(v) && v >= 0,
   },
-  activeFilterLabels: {
+  activeFilterReasons: {
     type: Array,
     default: () => [],
   },
@@ -158,27 +172,32 @@ const {
   shootCount,
   totalUnhealthyShoots: totalUnhealthy,
   matchingUnhealthyShoots: matchingUnhealthy,
-  activeFilterLabels,
+  activeFilterReasons,
 } = toRefs(props)
 
 const hiddenUnhealthy = computed(() => totalUnhealthy.value - matchingUnhealthy.value)
 const healthyShoots = computed(() => shootCount.value - totalUnhealthy.value)
-const hasActiveFilters = computed(() => activeFilterLabels.value.length > 0)
+const hasActiveFilters = computed(() => activeFilterReasons.value.length > 0)
 
 const theme = useTheme()
 const isDark = computed(() => theme.current.value.dark)
 const errorColor = computed(() => isDark.value ? 'error-lighten-2' : 'error')
 const warningColor = computed(() => isDark.value ? 'warning-lighten-2' : 'warning')
 
-const filterDescription = computed(() => {
-  const labels = activeFilterLabels.value
-  if (!labels.length) {
-    return undefined
+function formatList (values) {
+  if (values.length < 2) {
+    return values[0] ?? ''
   }
-  const shown = labels.slice(0, 2).join(', ')
-  const remaining = labels.length - 2
-  const suffix = remaining > 0 ? ` & ${remaining} more` : ''
-  return `${shown}${suffix}`
+
+  if (values.length === 2) {
+    return values.join(' or ')
+  }
+
+  return `${values.slice(0, -1).join(', ')}, or ${values.at(-1)}`
+}
+
+const exclusionDescription = computed(() => {
+  return `Not shown in Operations View because they ${formatList(activeFilterReasons.value)}.`
 })
 
 // --- donut chart (two layers sharing the same total) ---
@@ -247,18 +266,19 @@ function formatShootCount (count, qualifier) {
 
 const ariaLabel = computed(() => {
   if (shootCount.value === 0) {
-    return 'No shoots assigned to this seed.'
+    return props.to
+      ? 'View unhealthy shoots for this seed; no shoots are assigned.'
+      : 'No shoots assigned to this seed.'
   }
   const parts = [
-    'Shoot health distribution',
+    props.to ? 'View unhealthy shoots for this seed' : 'Shoot health distribution',
     formatShootCount(shootCount.value),
-    formatShootCount(matchingUnhealthy.value, 'unhealthy'),
+    hasActiveFilters.value
+      ? `${formatShootCount(matchingUnhealthy.value, 'unhealthy')} in Operations View`
+      : formatShootCount(matchingUnhealthy.value, 'unhealthy'),
   ]
-  if (activeFilterLabels.value.length > 0) {
-    const desc = filterDescription.value
-      ? ` (${filterDescription.value})`
-      : ''
-    parts.push(`${formatShootCount(hiddenUnhealthy.value, 'unhealthy')} excluded by Cluster Operations filters${desc}`)
+  if (hasActiveFilters.value) {
+    parts.push(`${formatShootCount(hiddenUnhealthy.value, 'unhealthy')} outside Operations View because they ${formatList(activeFilterReasons.value)}`)
   }
   parts.push(formatShootCount(healthyShoots.value, 'healthy'))
   return parts.join(', ') + '.'
@@ -283,9 +303,22 @@ const ariaLabel = computed(() => {
     }
   }
 
-  .filter-summary {
-    display: grid;
-    gap: 2px;
+  .health-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .operations-view-chip {
+    pointer-events: none;
+  }
+
+  .exclusion-description {
+    margin-top: -4px;
+    margin-left: 30px;
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
 
   .center-text {

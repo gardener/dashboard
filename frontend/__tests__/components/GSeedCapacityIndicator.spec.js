@@ -48,6 +48,22 @@ describe('components', () => {
       expect(wrapper.find('.capacity-summary').text()).toContain('224 remaining')
     })
 
+    it('should render an accessible router link when a target is provided', () => {
+      const wrapper = mountComponent({
+        to: {
+          name: 'ShootList',
+          query: {
+            q: 'seed:"infra1-seed"',
+          },
+        },
+        shootCount: 26,
+        allocatableShoots: 250,
+      })
+
+      expect(wrapper.find('a.router-link-stub').exists()).toBe(true)
+      expect(wrapper.attributes('aria-label')).toContain('View assigned shoots for this seed')
+    })
+
     it('should explain when allocatable capacity is unknown', () => {
       const wrapper = mountComponent({ shootCount: 26 })
 

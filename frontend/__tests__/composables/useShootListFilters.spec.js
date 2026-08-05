@@ -213,28 +213,6 @@ describe('composables', () => {
       expect(localStorageStore.allProjectsShootFilter.progressing).toBe(true)
     })
 
-    it('should keep the existing Seed filter label consumer working', async () => {
-      await grantLandscapeAccess()
-
-      const { activeFilterLabels } = useShootListFilters()
-
-      expect(activeFilterLabels.value).toEqual([
-        'Progressing',
-        'User Errors',
-        'Ignored Ticket Labels',
-      ])
-
-      localStorageStore.allProjectsShootFilter = {
-        progressing: true,
-        operatorAction: false,
-        allTicketsIgnored: true,
-      }
-      expect(activeFilterLabels.value).toEqual([
-        'Progressing',
-        'Ignored Ticket Labels',
-      ])
-    })
-
     it('should default non-landscape users to all clusters', () => {
       const {
         defaultClusterView,
