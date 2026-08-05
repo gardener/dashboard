@@ -132,17 +132,6 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     setOperationsViewFilter('allTicketsIgnored', value)
   }
 
-  const healthy = computed(() => shootListFilters.value.healthy ?? true)
-
-  function toggleShootListFilter (key) {
-    if (key === 'healthy') {
-      defaultClusterView.value = healthy.value ? 'all' : 'operations'
-      return
-    }
-
-    setOperationsViewFilter(key, !operationsViewFilters.value[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
-  }
-
   const unhealthyFilterMask = computed(() => {
     return getUnhealthyFilterMaskFromShootListFilters(shootListFilters.value)
   })
@@ -152,10 +141,10 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     return getEnabledOperationsViewExclusionReasons(effective)
   })
 
-  // Retained until the existing Shoot/Seed list presentations are replaced by
-  // the Operations View controls in their dedicated follow-up tasks.
+  // Retained until the Seed list presentations are replaced in their
+  // dedicated follow-up task.
   const activeFilterLabels = computed(() => {
-    if (!healthy.value) {
+    if (!shootListFilters.value.healthy) {
       return []
     }
 
@@ -168,8 +157,6 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     shootListFilters,
     operationsViewFilters: readonly(operationsViewFilters),
     defaultClusterView,
-    healthy,
-    toggleShootListFilter,
     setHideProgressing,
     setHideWithoutOperatorAction,
     setHideAllTicketsIgnored,

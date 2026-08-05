@@ -10,79 +10,22 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex flex-column overflow-hidden max-h-100"
   >
     <v-card class="ma-3 d-flex flex-column flex-grow-1 overflow-hidden">
-      <g-toolbar
-        prepend-icon="mdi-hexagon-multiple"
-        :height="64"
-      >
-        <div class="text-title-large">
-          Kubernetes Clusters
-        </div>
-        <div class="text-body-small">
-          {{ headlineSubtitle }}
-        </div>
-        <template #append>
-          <v-tooltip location="bottom">
-            <template #activator="{ props }">
-              <div v-bind="props">
-                <v-badge
-                  v-if="issueSinceColumnVisible"
-                  class="mr-5"
-                  bordered
-                  color="primary-lighten-3"
-                  :content="numberOfNewItemsSinceFreeze"
-                  :model-value="numberOfNewItemsSinceFreeze > 0"
-                >
-                  <v-switch
-                    v-model="focusModeInternal"
-                    class="mr-3"
-                    density="compact"
-                    color="primary-lighten-3"
-                    hide-details
-                  >
-                    <template #label>
-                      <span class="text-body-large text-toolbar-title">Focus</span>
-                    </template>
-                  </v-switch>
-                </v-badge>
-              </div>
-            </template>
-            <span class="font-weight-bold">Focus Mode</span>
-            <ul class="ml-3">
-              <li>Cluster list sorting is freezed</li>
-              <li>Items in the list will still be updated</li>
-              <li>New clusters will not be added to the list until you disable focus mode</li>
-              <li>Removed items will be shown as stale (greyed out)</li>
-            </ul>
-            <template v-if="numberOfNewItemsSinceFreeze > 0">
-              <v-divider color="white" />
-              <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
-              new clusters were added to the list since you enabled focus mode.
-            </template>
-          </v-tooltip>
-          <g-table-search
-            v-if="shootSearch || items.length > 3"
-            :model-value="shootSearch"
-            :examples="['my-shoot', 'John Doe']"
-            :exclude-examples="['myproject', 'Jane Doe']"
-            @update:model-value="onUpdateShootSearch"
-          />
-          <v-btn
-            v-if="canCreateShoots && projectScope"
-            v-tooltip:top="'Create Cluster'"
-            icon="mdi-plus"
-            color="toolbar-title"
-            :to="{ name: 'NewShoot', params: { namespace } }"
-          />
-          <g-table-column-selection
-            :headers="selectableHeaders"
-            :filters="selectableFilters"
-            :filter-tooltip="filterTooltip"
-            @set-selected-header="setSelectedHeader"
-            @reset="resetTableSettings"
-            @toggle-filter="toggleFilter"
-          />
-        </template>
-      </g-toolbar>
+      <g-shoot-list-toolbar
+        :model-value="shootSearch"
+        :namespace="namespace"
+        :project-scope="projectScope"
+        :can-view-landscape="canViewLandscape"
+        :can-create-shoots="canCreateShoots"
+        :issue-since-column-visible="issueSinceColumnVisible"
+        :focus-mode="focusModeInternal"
+        :number-of-new-items-since-freeze="numberOfNewItemsSinceFreeze"
+        :selectable-headers="selectableHeaders"
+        @update:model-value="onUpdateShootSearch"
+        @update:focus-mode="focusModeInternal = $event"
+        @set-search="setShootSearch"
+        @set-selected-header="setSelectedHeader"
+        @reset="resetTableSettings"
+      />
       <v-data-table-virtual
         v-model:sort-by="sortByInternal"
         :headers="visibleHeaders"
@@ -144,18 +87,15 @@ import { useProjectStore } from '@/store/project'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
 
-import GToolbar from '@/components/GToolbar.vue'
+import GShootListToolbar from '@/components/GShootListToolbar.vue'
 import GShootListRow from '@/components/GShootListRow.vue'
 import GShootListProgress from '@/components/GShootListProgress.vue'
-import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 import GShootListActions from '@/components/GShootListActions.vue'
-import GTableSearch from '@/components/GTableSearch.vue'
 
 import { useProjectShootCustomFields } from '@/composables/useProjectShootCustomFields'
 import { isCustomField } from '@/composables/useProjectShootCustomFields/helper'
 import { useProvideShootAction } from '@/composables/useShootAction'
-import { useShootListFilters } from '@/composables/useShootListFilters'
 import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 
 import { mapTableHeader } from '@/utils'
@@ -172,13 +112,11 @@ import debounce from 'lodash/debounce'
 
 export default {
   components: {
-    GToolbar,
+    GShootListToolbar,
     GShootListRow,
     GShootListProgress,
-    GTableColumnSelection,
     GDataTableFooter,
     GShootListActions,
-    GTableSearch,
   },
   inject: ['logger'],
   beforeRouteUpdate (to, from) {
@@ -240,13 +178,6 @@ export default {
       setDebouncedShootSearch()
     }
 
-    const {
-      activeFilterLabels,
-      shootListFilters,
-      healthy,
-      toggleShootListFilter,
-    } = useShootListFilters()
-
     return {
       activePopoverKey,
       expandedWorkerGroups,
@@ -256,10 +187,6 @@ export default {
       debouncedShootSearch,
       setShootSearch,
       onUpdateShootSearch,
-      activeFilterLabels,
-      shootListFilters,
-      healthy,
-      toggleShootListFilter,
     }
   },
   data () {
@@ -281,6 +208,9 @@ export default {
       accessRestrictionConfig: 'accessRestriction',
       ticketConfig: 'ticket',
     }),
+    gitHubRepoUrl () {
+      return get(this.ticketConfig, ['gitHubRepoUrl'])
+    },
     ...mapState(useProjectStore, [
       'projectName',
     ]),
@@ -567,92 +497,11 @@ export default {
       }
       return value
     },
-    allFilters () {
-      return [
-        {
-          text: 'Hide healthy clusters',
-          value: 'healthy',
-          selected: this.healthy,
-          hidden: this.projectScope,
-          disabled: this.changeFiltersDisabled,
-        },
-        {
-          text: 'Hide progressing clusters',
-          value: 'progressing',
-          selected: this.isFilterActive('progressing'),
-          hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
-          disabled: this.changeFiltersDisabled,
-        },
-        {
-          text: 'Hide clusters without operator action needed',
-          value: 'operatorAction',
-          selected: this.isFilterActive('operatorAction'),
-          hidden: this.projectScope || !this.canViewLandscape || this.showAllShoots,
-          helpTooltip: [
-            'Hide clusters that do not require action by an operator',
-            '- Clusters with user issues',
-            '- Clusters with temporary issues that will be retried automatically',
-            '- Clusters with annotation dashboard.gardener.cloud/ignore-issues',
-          ],
-          disabled: this.changeFiltersDisabled,
-        },
-        {
-          text: 'Hide clusters with ignored ticket labels',
-          value: 'allTicketsIgnored',
-          selected: this.isFilterActive('allTicketsIgnored'),
-          hidden: this.projectScope || !this.canViewLandscape || !this.gitHubRepoUrl || !this.hideClustersWithLabels.length || this.showAllShoots,
-          helpTooltip: this.ignoredTicketsTooltip,
-          disabled: this.changeFiltersDisabled,
-        },
-      ]
-    },
-    selectableFilters () {
-      return filter(this.allFilters, ['hidden', false])
-    },
-    ignoredTicketsTooltip () {
-      const labels = this.hideClustersWithLabels.map(label => `- ${label}`)
-      return ['Labels', ...labels]
-    },
     projectScope () {
       return this.namespace !== '_all'
     },
-    hideHealthyShoots: {
-      get () {
-        return this.healthy
-      },
-      set (value) {
-        this.toggleFilter('healthy')
-      },
-    },
     items () {
       return this.shootList ?? []
-    },
-    changeFiltersDisabled () {
-      return this.focusModeInternal
-    },
-    showAllShoots () {
-      return !this.hideHealthyShoots
-    },
-    filterTooltip () {
-      return this.focusModeInternal
-        ? 'Filters cannot be changed when focus mode is active'
-        : ''
-    },
-    headlineSubtitle () {
-      if (this.projectScope || !this.hideHealthyShoots) {
-        return ''
-      }
-      const all = ['Healthy', ...this.activeFilterLabels]
-      const shown = all.slice(0, 2).join(', ')
-      const remaining = all.length - 2
-      const suffix = remaining > 0 ? ` & ${remaining} more` : ''
-      return `Excluding Clusters: ${shown}${suffix}`
-    },
-    gitHubRepoUrl () {
-      return get(this.ticketConfig, ['gitHubRepoUrl'])
-    },
-    hideClustersWithLabels () {
-      return get(this.ticketConfig, ['hideClustersWithLabels'], [])
     },
     filteredItems () {
       const query = this.debouncedShootSearch
@@ -689,7 +538,6 @@ export default {
   },
   methods: {
     ...mapActions(useShootStore, [
-      'subscribeShoots',
       'sortItems',
       'searchItems',
       'setFocusMode',
@@ -730,16 +578,6 @@ export default {
       }
 
       this.sortByInternal = this.defaultSortBy
-    },
-    toggleFilter ({ value: key }) {
-      this.toggleShootListFilter(key)
-      if (key === 'healthy') {
-        this.subscribeShoots()
-      }
-    },
-    isFilterActive (key) {
-      const filters = this.shootListFilters
-      return get(filters, [key], false)
     },
     resetState (reactiveObject, defaultState) {
       for (const key in reactiveObject) {
