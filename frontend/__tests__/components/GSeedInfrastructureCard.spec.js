@@ -82,12 +82,12 @@ describe('components', () => {
               template: '<div class="g-vendor-stub" />',
             },
             GShootHealthDonut: {
-              props: ['shootCount', 'totalUnhealthyShoots', 'matchingUnhealthyShoots'],
-              template: '<div class="shoot-health-donut-stub" :data-shoot-count="shootCount" :data-unhealthy-total="totalUnhealthyShoots" :data-unhealthy-matching="matchingUnhealthyShoots" />',
+              props: ['shootCount', 'totalUnhealthyShoots', 'matchingUnhealthyShoots', 'to'],
+              template: '<div class="shoot-health-donut-stub" :data-shoot-count="shootCount" :data-unhealthy-total="totalUnhealthyShoots" :data-unhealthy-matching="matchingUnhealthyShoots" :data-to-query="to.query.q" />',
             },
             GSeedCapacityIndicator: {
-              props: ['allocatableShoots', 'shootCount'],
-              template: '<div class="seed-capacity-indicator-stub" :data-allocatable-shoots="allocatableShoots" :data-shoot-count="shootCount" />',
+              props: ['allocatableShoots', 'shootCount', 'to'],
+              template: '<div class="seed-capacity-indicator-stub" :data-allocatable-shoots="allocatableShoots" :data-shoot-count="shootCount" :data-to-query="to.query.q" />',
             },
           },
         },
@@ -117,10 +117,12 @@ describe('components', () => {
       expect(capacityIndicator.exists()).toBe(true)
       expect(capacityIndicator.attributes('data-allocatable-shoots')).toBe('20')
       expect(capacityIndicator.attributes('data-shoot-count')).toBe('7')
+      expect(capacityIndicator.attributes('data-to-query')).toBe('seed:"infra1-seed"')
       expect(healthDonut.exists()).toBe(true)
       expect(healthDonut.attributes('data-shoot-count')).toBe('7')
       expect(healthDonut.attributes('data-unhealthy-total')).toBe('4')
       expect(healthDonut.attributes('data-unhealthy-matching')).toBe('2')
+      expect(healthDonut.attributes('data-to-query')).toBe('seed:"infra1-seed" health:unhealthy')
       expect(wrapper.text()).not.toContain('total unhealthy')
       expect(subscribeSpy).toHaveBeenCalledWith({
         name: 'infra1-seed',

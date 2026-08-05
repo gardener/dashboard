@@ -18,9 +18,9 @@ import { resolveShootListFiltersForDonut } from '@/store/shoot/search'
 import pick from 'lodash/pick'
 
 const OPERATIONS_VIEW_EXCLUSION_CRITERIA = [
-  { key: 'progressing', exclusionReason: 'are progressing', label: 'Progressing' },
-  { key: 'operatorAction', exclusionReason: 'do not require operator action', label: 'User Errors' },
-  { key: 'allTicketsIgnored', exclusionReason: 'have only ignored tickets', label: 'Ignored Ticket Labels' },
+  { key: 'progressing', exclusionReason: 'are progressing' },
+  { key: 'operatorAction', exclusionReason: 'do not require operator action' },
+  { key: 'allTicketsIgnored', exclusionReason: 'have only ignored tickets' },
 ]
 
 const FILTER_KEYS = [
@@ -141,18 +141,6 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     return getEnabledOperationsViewExclusionReasons(effective)
   })
 
-  // Retained until the Seed list presentations are replaced in their
-  // dedicated follow-up task.
-  const activeFilterLabels = computed(() => {
-    if (!shootListFilters.value.healthy) {
-      return []
-    }
-
-    return OPERATIONS_VIEW_EXCLUSION_CRITERIA
-      .filter(({ key }) => shootListFilters.value[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
-      .map(({ label }) => label)
-  })
-
   return {
     shootListFilters,
     operationsViewFilters: readonly(operationsViewFilters),
@@ -162,6 +150,5 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     setHideAllTicketsIgnored,
     unhealthyFilterMask,
     activeFilterReasons,
-    activeFilterLabels,
   }
 })

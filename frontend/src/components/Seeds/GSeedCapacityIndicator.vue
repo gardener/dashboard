@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div
+  <component
+    :is="to ? RouterLink : 'div'"
+    :to="to"
     class="activator"
     tabindex="0"
     :aria-label="ariaLabel"
@@ -65,16 +67,20 @@ SPDX-License-Identifier: Apache-2.0
         This seed does not report its allocatable shoot capacity.
       </template>
     </g-detail-tooltip>
-  </div>
+  </component>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useTheme } from 'vuetify'
 
 import GDetailTooltip from '@/components/GDetailTooltip.vue'
 
 const props = defineProps({
+  to: {
+    type: [String, Object],
+  },
   allocatableShoots: {
     type: Number,
   },
@@ -128,11 +134,15 @@ const remainingCapacity = computed(() => {
 })
 
 const ariaLabel = computed(() => {
+  const linkPurpose = props.to
+    ? 'View assigned shoots for this seed; '
+    : ''
+
   if (!hasKnownCapacity.value) {
-    return `Seed capacity: ${props.shootCount} assigned shoots, allocatable capacity unknown`
+    return `${linkPurpose}Seed capacity: ${props.shootCount} assigned shoots, allocatable capacity unknown`
   }
   const percent = Math.round(capacityUsagePercent.value)
-  return `Seed capacity: ${props.shootCount} of ${props.allocatableShoots} allocatable shoots assigned (${percent}%)`
+  return `${linkPurpose}Seed capacity: ${props.shootCount} of ${props.allocatableShoots} allocatable shoots assigned (${percent}%)`
 })
 </script>
 
