@@ -45,6 +45,8 @@ Each entry must be an object with a `name` key that identifies the vendor. The f
 | `weight`      | Sorting weight. Lower values appear first. See default weights in `frontend/src/store/config.js` |
 | `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
 
+Other properties are ignored. In particular, internal provider metadata such as credential fields, credential details, and help text cannot be overridden through frontend configuration.
+
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
 Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. `#FF0000` for red) or by referencing a color (e.g `grey.darken3` or `shades.white`) from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).

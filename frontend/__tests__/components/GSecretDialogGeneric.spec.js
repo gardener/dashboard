@@ -296,17 +296,17 @@ describe('GSecretDialogGeneric', () => {
     expect(wrapper.get('.markdown').text()).not.toContain('base64 encode')
   })
 
-  it('uses the YAML fallback when a provider configures an empty field list', async () => {
+  it('does not allow runtime branding to replace Netlify field definitions or help', async () => {
     const wrapper = mountDialog({
-      providerType: 'empty-fields-provider',
+      providerType: 'netlify-dns',
       configuration: {
         branding: {
           dnsVendors: [
             {
-              name: 'empty-fields-provider',
-              displayName: 'Empty Fields Provider',
+              name: 'netlify-dns',
               secret: {
                 fields: [],
+                help: '<p>Injected runtime help</p>',
               },
             },
           ],
@@ -315,12 +315,9 @@ describe('GSecretDialogGeneric', () => {
     })
     await nextTick()
 
-    expect(wrapper.findComponent(GGenericInputFields).exists()).toBe(false)
-    expect(wrapper.find('textarea').exists()).toBe(true)
-
-    await wrapper.get('textarea').setValue('token: fallback-token\n')
-    expect(secretContext.secretManifest.value.data).toEqual({
-      token: encodeBase64('fallback-token'),
-    })
+    expect(wrapper.findComponent(GGenericInputFields).exists()).toBe(true)
+    expect(wrapper.find('textarea').exists()).toBe(false)
+    expect(wrapper.get('.markdown').text()).toContain('authenticate with the Netlify DNS API')
+    expect(wrapper.get('.markdown').text()).not.toContain('Injected runtime help')
   })
 })

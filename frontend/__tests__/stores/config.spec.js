@@ -11,6 +11,8 @@ import {
 
 import { useConfigStore } from '@/store/config'
 
+import netlifyDns from '@/data/vendors/dns/netlify'
+
 describe('stores', () => {
   describe('config', () => {
     let configStore
@@ -21,47 +23,111 @@ describe('stores', () => {
       configStore.setConfiguration({
         branding: {
           infraVendors: [{
-            name: 'shared-provider',
+            name: 'aws',
             displayName: 'Infrastructure Provider',
+          }, {
+            name: 'custom-infra',
+            displayName: 'Custom Infrastructure Provider',
+            secret: {
+              details: [{ label: 'Injected Detail' }],
+            },
           }],
           dnsVendors: [{
-            name: 'shared-provider',
-            displayName: 'DNS Provider',
+            name: 'netlify-dns',
+            displayName: 'Branded Netlify',
+            weight: 1,
+            icon: 'custom-netlify.svg',
+            type: 'infra',
+            secret: {
+              details: [{ label: 'Injected Detail' }],
+              fields: [],
+              help: '<p>Injected help</p>',
+            },
+            undocumented: true,
+          }, {
+            name: 'custom-dns',
+            displayName: 'Custom DNS Provider',
+            weight: 2,
+            icon: 'custom-dns.svg',
+            secret: {
+              fields: [],
+              help: '<p>Injected help</p>',
+            },
+          }],
+          machineImageVendors: [{
+            name: 'custom-image',
+            displayName: 'Custom Image',
+            weight: 2,
+            icon: 'custom-image.svg',
+            secret: {
+              fields: [],
+            },
           }],
         },
       })
     })
 
-    it('looks up vendors by type and name', () => {
+    it('applies documented overrides without replacing internal vendor metadata', () => {
       expect(configStore.vendorDetails({
-        type: 'infra',
-        name: 'shared-provider',
-      })).toMatchObject({
-        type: 'infra',
-        name: 'shared-provider',
-        displayName: 'Infrastructure Provider',
+        type: 'dns',
+        name: 'netlify-dns',
+      })).toEqual({
+        ...netlifyDns,
+        type: 'dns',
+        displayName: 'Branded Netlify',
+        weight: 1,
+        icon: 'custom-netlify.svg',
       })
 
-      expect(configStore.vendorDetails({
-        type: 'dns',
-        name: 'shared-provider',
-      })).toMatchObject({
-        type: 'dns',
-        name: 'shared-provider',
-        displayName: 'DNS Provider',
-      })
+      expect(configStore.sortedDnsProviderTypeList[0]).toBe('netlify-dns')
     })
 
-    it('looks up display names by type and name', () => {
+    it('uses configured display names for known providers', () => {
       expect(configStore.vendorDisplayName({
         type: 'infra',
-        name: 'shared-provider',
+        name: 'aws',
       })).toBe('Infrastructure Provider')
 
       expect(configStore.vendorDisplayName({
         type: 'dns',
-        name: 'shared-provider',
-      })).toBe('DNS Provider')
+        name: 'netlify-dns',
+      })).toBe('Branded Netlify')
+    })
+
+    it('allows custom infrastructure and DNS vendors using documented properties only', () => {
+      expect(configStore.sortedDnsProviderTypeList).toContain('custom-dns')
+      expect(configStore.vendorDetails({
+        type: 'infra',
+        name: 'custom-infra',
+      })).toEqual({
+        type: 'infra',
+        name: 'custom-infra',
+        displayName: 'Custom Infrastructure Provider',
+        weight: Number.MAX_SAFE_INTEGER,
+      })
+      expect(configStore.vendorDetails({
+        type: 'dns',
+        name: 'custom-dns',
+      })).toEqual({
+        type: 'dns',
+        name: 'custom-dns',
+        displayName: 'Custom DNS Provider',
+        weight: 2,
+        icon: 'custom-dns.svg',
+      })
+    })
+
+    it('allows branding CloudProfile-provided machine image names using documented properties only', () => {
+      expect(configStore.vendorDetails({
+        type: 'machineImage',
+        name: 'custom-image',
+      })).toEqual({
+        type: 'machineImage',
+        name: 'custom-image',
+        displayName: 'Custom Image',
+        weight: 2,
+        icon: 'custom-image.svg',
+      })
     })
 
     it('provides built-in shoot defaults', () => {

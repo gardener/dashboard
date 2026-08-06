@@ -82,10 +82,6 @@ export async function sanitizeFrontendConfig (frontendConfig) {
       controlPlaneHighAvailabilityHelp = {},
     } = {},
   } = sanitizedFrontendConfig
-  const {
-    infraVendors = [],
-    dnsVendors = [],
-  } = sanitizedFrontendConfig.branding ?? {}
 
   tasks.push(convertAndSanitize(alert, 'message'))
 
@@ -119,15 +115,6 @@ export async function sanitizeFrontendConfig (frontendConfig) {
 
   for (const vendorHint of vendorHints) {
     tasks.push(convertAndSanitize(vendorHint, 'message'))
-  }
-
-  for (const vendors of [infraVendors, dnsVendors]) {
-    if (!Array.isArray(vendors)) {
-      continue
-    }
-    for (const vendor of vendors) {
-      tasks.push(convertAndSanitize(vendor?.secret, 'help'))
-    }
   }
 
   await Promise.all(tasks)
