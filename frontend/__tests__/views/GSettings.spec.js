@@ -20,6 +20,23 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GSettings from '@/views/GSettings.vue'
 
+const {
+  replaceRoute,
+  route,
+} = vi.hoisted(() => ({
+  replaceRoute: vi.fn(),
+  route: {
+    hash: '',
+  },
+}))
+
+vi.mock('vue-router', () => ({
+  useRoute: () => route,
+  useRouter: () => ({
+    replace: replaceRoute,
+  }),
+}))
+
 // Disable createSharedComposable so each test gets a fresh composable instance
 vi.mock('@vueuse/core', async importOriginal => {
   const actual = await importOriginal()
@@ -67,6 +84,7 @@ describe('views', () => {
     let wrapper
 
     function mountComponent () {
+      route.hash = window.location.hash
       wrapper = shallowMount(GSettings, {
         attachTo: document.body,
         global: {
@@ -98,6 +116,14 @@ describe('views', () => {
     beforeEach(() => {
       window.localStorage.clear()
       window.history.replaceState({}, '', '/')
+      route.hash = ''
+      replaceRoute.mockReset()
+      replaceRoute.mockImplementation(async ({ hash }) => {
+        route.hash = hash
+        const url = new URL(window.location.href)
+        url.hash = hash
+        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+      })
 
       pinia = createPinia()
       setActivePinia(pinia)
@@ -148,6 +174,7 @@ describe('views', () => {
       const operationsViewItem = wrapper.find('.operations-view')
       expect(operationsViewItem.classes()).not.toContain('operations-view--highlighted')
       expect(document.activeElement).not.toBe(operationsViewItem.element)
+      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
       expect(window.location.hash).toBe('')
     })
 
@@ -160,6 +187,7 @@ describe('views', () => {
       const defaultClusterViewItem = wrapper.find('.default-view')
       expect(defaultClusterViewItem.classes()).toContain('default-view--highlighted')
       expect(document.activeElement).toBe(defaultClusterViewItem.element)
+      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
       expect(window.location.hash).toBe('')
 
       await defaultClusterViewItem.trigger('keydown')
@@ -194,6 +222,12 @@ describe('views', () => {
       await wrapper.find('[aria-label="Configure exclusion criteria"]').trigger('click')
       expect(dialog.props('modelValue')).toBe(true)
 
+      const dialogTitle = wrapper.find('#cluster-operations-dialog-title')
+      expect(dialogTitle.attributes('tabindex')).toBeUndefined()
+      dialog.vm.$emit('afterEnter')
+      await nextTick()
+      expect(document.activeElement).not.toBe(dialogTitle.element)
+
       const okButton = wrapper.find('[aria-label="OK"]')
       expect(okButton.exists()).toBe(true)
 
@@ -216,6 +250,7 @@ describe('views', () => {
 
       const operationsViewItem = wrapper.find('.operations-view')
       expect(operationsViewItem.classes()).toContain('operations-view--highlighted')
+      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
       expect(window.location.hash).toBe('')
     })
 

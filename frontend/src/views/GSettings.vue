@@ -257,7 +257,6 @@ SPDX-License-Identifier: Apache-2.0
       scrollable
       persistent
       aria-labelledby="cluster-operations-dialog-title"
-      @after-enter="focusClusterOperationsDialogTitle"
       @after-leave="onClusterOperationsDialogClosed"
     >
       <v-card>
@@ -267,8 +266,6 @@ SPDX-License-Identifier: Apache-2.0
         >
           <span
             id="cluster-operations-dialog-title"
-            ref="clusterOperationsDialogTitle"
-            tabindex="-1"
           >
             Operations View
           </span>
@@ -437,10 +434,12 @@ import {
   nextTick,
   onBeforeUnmount,
   ref,
-  toRef,
   watch,
 } from 'vue'
-import { useUrlSearchParams } from '@vueuse/core'
+import {
+  useRoute,
+  useRouter,
+} from 'vue-router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
@@ -457,11 +456,8 @@ const allProjectsDialog = ref(false)
 const showIgnoredTicketLabels = ref(false)
 const defaultClusterViewSettingsItem = ref()
 const clusterOperationsSettingsItem = ref()
-const clusterOperationsDialogTitle = ref()
 const highlightDefaultClusterViewSettings = ref(false)
 const highlightClusterOperationsSettings = ref(false)
-const settingsHashParams = useUrlSearchParams('hash-params')
-const deepLinkedSetting = toRef(settingsHashParams, 'setting')
 let clusterOperationsDeepLinkActive = false
 let clusterOperationsHighlightTimer
 const shootAdminKubeconfig = useShootAdminKubeconfig()
@@ -474,6 +470,12 @@ const {
 
 const authzStore = useAuthzStore()
 const configStore = useConfigStore()
+const route = useRoute()
+const router = useRouter()
+const deepLinkedSetting = computed(() => {
+  const params = new URLSearchParams(route.hash.slice(1))
+  return params.get('setting')
+})
 
 const {
   operationsViewFilters,
@@ -567,8 +569,8 @@ function highlightClusterOperationsEntry () {
   }, 3000)
 }
 
-function focusClusterOperationsDialogTitle () {
-  clusterOperationsDialogTitle.value?.focus({ preventScroll: true })
+async function clearDeepLinkedSetting () {
+  await router.replace({ hash: '' })
 }
 
 async function onClusterOperationsDialogClosed () {
@@ -577,14 +579,14 @@ async function onClusterOperationsDialogClosed () {
   }
 
   clusterOperationsDeepLinkActive = false
-  deepLinkedSetting.value = null
+  await clearDeepLinkedSetting()
   await nextTick()
   highlightClusterOperationsEntry()
 }
 
 watch(deepLinkedSetting, async value => {
   if (value === 'default-cluster-view') {
-    deepLinkedSetting.value = null
+    await clearDeepLinkedSetting()
     await nextTick()
     highlightDefaultClusterViewEntry()
     return
@@ -595,7 +597,7 @@ watch(deepLinkedSetting, async value => {
   }
 
   if (!authzStore.canViewLandscape) {
-    deepLinkedSetting.value = null
+    await clearDeepLinkedSetting()
     return
   }
 
