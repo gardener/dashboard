@@ -76,16 +76,16 @@ export async function sanitizeFrontendConfig (frontendConfig) {
       items = [],
     } = {},
     vendorHints = [],
-    branding: {
-      infraVendors = [],
-      dnsVendors = [],
-    } = {},
     resourceQuotaHelp = {},
     controlPlaneHighAvailabilityHelp: legacyControlPlaneHighAvailabilityHelp = {},
     shootDefaults: {
       controlPlaneHighAvailabilityHelp = {},
     } = {},
   } = sanitizedFrontendConfig
+  const {
+    infraVendors = [],
+    dnsVendors = [],
+  } = sanitizedFrontendConfig.branding ?? {}
 
   tasks.push(convertAndSanitize(alert, 'message'))
 

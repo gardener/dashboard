@@ -12,6 +12,14 @@ import {
 import { sanitizeFrontendConfig } from '../lib/routes/config.js'
 
 describe('routes/config', () => {
+  it('handles a null branding configuration', async () => {
+    const frontendConfig = {
+      branding: null,
+    }
+
+    await expect(sanitizeFrontendConfig(frontendConfig)).resolves.toEqual(frontendConfig)
+  })
+
   it('converts and sanitizes nested and legacy control plane HA help', async () => {
     const frontendConfig = {
       controlPlaneHighAvailabilityHelp: {
