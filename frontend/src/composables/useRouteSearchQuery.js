@@ -43,7 +43,7 @@ function createSearchState (router) {
 
   function replace (value) {
     const normalizedValue = normalizeSearch(value)
-    const route = router.currentRoute.value
+    const route = router.resolve(routerHistory.location)
     const query = {
       ...route.query,
       // Keep q present for an empty search. Absence and q= intentionally have
@@ -123,10 +123,11 @@ export function useShallowRouteSearchQuery ({ onWrite } = {}) {
 export function isSameRouteIgnoringShallowQuery (router, first, second) {
   const resolveWithoutSearch = location => {
     const route = router.resolve(location)
-    const query = {
-      ...route.query,
-    }
-    delete query.q
+    const query = Object.fromEntries(
+      Object.entries(route.query)
+        .filter(([key]) => key !== 'q')
+        .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey)),
+    )
 
     return router.resolve({
       name: route.name,

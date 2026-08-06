@@ -119,6 +119,46 @@ describe('composables', () => {
       expect(searchQuery.value).toBe('seed:first-seed')
     })
 
+    it('bases shallow writes on the actual history location instead of stale router state', async () => {
+      const { router, routerHistory, useSearchQuery } = createRouteContext()
+      await router.push({
+        name: 'ShootList',
+        params: {
+          namespace: '_all',
+        },
+        query: {
+          q: 'provider:aws',
+          view: 'stale',
+        },
+        hash: '#stale',
+      })
+      const staleFullPath = router.currentRoute.value.fullPath
+
+      const actualLocation = router.resolve({
+        name: 'SeedList',
+        query: {
+          q: 'seed:first-seed',
+          namespace: 'garden-myproject',
+        },
+        hash: '#actual',
+      })
+      routerHistory.replace(actualLocation.fullPath)
+      const { searchQuery } = useSearchQuery()
+
+      searchQuery.value = 'seed:latest'
+
+      const expected = router.resolve({
+        name: 'SeedList',
+        query: {
+          q: 'seed:latest',
+          namespace: 'garden-myproject',
+        },
+        hash: '#actual',
+      })
+      expect(routerHistory.location).toBe(expected.fullPath)
+      expect(router.currentRoute.value.fullPath).toBe(staleFullPath)
+    })
+
     it('shallowly writes router-canonical encoding and preserves surrounding whitespace without running navigation', async () => {
       const { router, routerHistory, useSearchQuery } = createRouteContext()
       await router.push({
@@ -305,6 +345,33 @@ describe('composables', () => {
   })
 
   describe('isSameRouteIgnoringShallowQuery', () => {
+    it('normalizes non-search query key order when comparing routes', () => {
+      const { router } = createRouteContext()
+      const current = router.resolve({
+        name: 'ShootList',
+        params: {
+          namespace: '_all',
+        },
+        query: {
+          view: 'compact',
+          namespace: 'garden-local',
+          q: 'stale search',
+        },
+      })
+
+      expect(isSameRouteIgnoringShallowQuery(router, current, {
+        name: 'ShootList',
+        params: {
+          namespace: '_all',
+        },
+        query: {
+          namespace: 'garden-local',
+          view: 'compact',
+          q: 'current search',
+        },
+      })).toBe(true)
+    })
+
     it('ignores only q when comparing resolved routes', () => {
       const { router } = createRouteContext()
       const current = router.resolve({
