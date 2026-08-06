@@ -160,13 +160,14 @@ export default {
       this.wildcardSelectedValue = bestMatch
       const value = trim(newValue, '*')
       const index = value.indexOf(bestMatch.value)
-      if (bestMatch.startsWithWildcard) {
+      if (bestMatch.customWildcard) {
+        this.wildcardVariablePartPrefix = value
+      } else if (bestMatch.startsWithWildcard) {
         this.wildcardVariablePartPrefix = value.substring(0, index)
       } else {
         this.wildcardVariablePartPrefix = ''
       }
-      if (bestMatch.endsWithWildcard || bestMatch.customWildcard) {
-        const value = trim(newValue, '*')
+      if (bestMatch.endsWithWildcard) {
         this.wildcardVariablePartSuffix = value.substring(index + bestMatch.value.length)
       } else {
         this.wildcardVariablePartSuffix = ''

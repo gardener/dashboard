@@ -132,5 +132,31 @@ describe('stores', () => {
       expect(configStore.defaultHibernationSchedule).toEqual({ evaluation: [{ start: 'legacy' }] })
       expect(configStore.defaultNodesCIDR).toBe('10.0.0.0/16')
     })
+
+    it.each([
+      { maintenanceHours: [] },
+      { maintenanceHours: ['24'] },
+      { maintenanceHours: ['1'] },
+      { maintenanceHours: [12] },
+      { maintenanceHours: ['12.5'] },
+    ])('falls back to safe maintenance hours for an invalid configuration: $maintenanceHours', ({ maintenanceHours }) => {
+      configStore.setConfiguration({
+        shootDefaults: {
+          maintenanceHours,
+        },
+      })
+
+      expect(configStore.defaultMaintenanceHours).toEqual(['22', '23', '00', '01', '02', '03', '04', '05'])
+    })
+
+    it('accepts configured maintenance hours from 00 through 23', () => {
+      configStore.setConfiguration({
+        shootDefaults: {
+          maintenanceHours: ['00', '12', '23'],
+        },
+      })
+
+      expect(configStore.defaultMaintenanceHours).toEqual(['00', '12', '23'])
+    })
   })
 })

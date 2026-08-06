@@ -370,7 +370,7 @@ export function createShootContextComposable (options = {}) {
 
   /* provider */
   const providerState = reactive({
-    workerless: configStore.defaultWorkerlessCluster,
+    workerless: false,
   })
 
   const providerType = computed({
@@ -570,6 +570,9 @@ export function createShootContextComposable (options = {}) {
       applySpecTemplate(cloudProfileRef.value)
       resetCloudProfileDependendValues()
     }
+    if (isEmpty(providerWorkers.value)) {
+      resetProviderWorkers()
+    }
   }, {
     flush: 'sync',
   })
@@ -767,6 +770,9 @@ export function createShootContextComposable (options = {}) {
       appStore.timezone,
       configStore.defaultMaintenanceWindowSizeMinutes,
     )
+    if (!timeWindow) {
+      return
+    }
     maintenanceTimeWindowBegin.value = timeWindow.begin
     maintenanceTimeWindowEnd.value = timeWindow.end
   }

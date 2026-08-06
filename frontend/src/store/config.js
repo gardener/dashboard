@@ -17,6 +17,7 @@ import { useBrowserLocation } from '@vueuse/core'
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 
+import { isValidMaintenanceHours } from '@/utils'
 import { hash } from '@/utils/crypto'
 import knownInfraVendors from '@/data/vendors/infra'
 import knownDNSVendors from '@/data/vendors/dns'
@@ -339,7 +340,10 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   const defaultMaintenanceHours = computed(() => {
-    return shootDefaults.value.maintenanceHours ?? ['22', '23', '00', '01', '02', '03', '04', '05']
+    const maintenanceHours = shootDefaults.value.maintenanceHours
+    return isValidMaintenanceHours(maintenanceHours)
+      ? maintenanceHours
+      : ['22', '23', '00', '01', '02', '03', '04', '05']
   })
 
   const defaultMaintenanceWindowSizeMinutes = computed(() => {
