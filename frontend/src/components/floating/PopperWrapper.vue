@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <Popper
+  <popper
     ref="popper"
     v-slot="{
       popperId,
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         :show="show"
         :hide="hide"
       />
-      <PopperContent
+      <popper-content
         ref="popperContent"
         :popper-id="popperId"
         :theme="finalTheme"
@@ -63,9 +63,9 @@ SPDX-License-Identifier: Apache-2.0
           :shown="isShown"
           :hide="hide"
         />
-      </PopperContent>
+      </popper-content>
     </div>
-  </Popper>
+  </popper>
 </template>
 
 <script>

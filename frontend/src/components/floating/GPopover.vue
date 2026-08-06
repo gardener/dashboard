@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <Dropdown
+  <dropdown
     ref="popoverRef"
     v-model:shown="shown"
     prevent-overflow
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </v-card>
     </template>
-  </Dropdown>
+  </dropdown>
 </template>
 
 <script>

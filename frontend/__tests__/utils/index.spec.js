@@ -21,12 +21,173 @@ import {
   isEmail,
   convertToGi,
   convertToGibibyte,
+  handleTextFieldDrop,
 } from '@/utils'
 
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 
 describe('utils', () => {
+  describe('#handleTextFieldDrop', () => {
+    const originalFileReader = globalThis.FileReader
+
+    afterEach(() => {
+      vi.stubGlobal('FileReader', originalFileReader)
+    })
+
+    function createTextField () {
+      const element = document.createElement('div')
+      document.body.appendChild(element)
+      return { $el: element }
+    }
+
+    function createDropEvent (files) {
+      const event = new Event('drop', {
+        bubbles: true,
+        cancelable: true,
+      })
+      Object.defineProperty(event, 'dataTransfer', {
+        value: { files },
+      })
+      return event
+    }
+
+    it('accepts files by configured extension if the MIME type is missing', () => {
+      vi.stubGlobal('FileReader', class {
+        readAsText () {
+          this.onload({
+            target: {
+              result: '{"foo":"bar"}',
+            },
+          })
+        }
+      })
+
+      const onDrop = vi.fn()
+      const onReject = vi.fn()
+      const textField = createTextField()
+      const dispose = handleTextFieldDrop(textField, /json/, onDrop, {
+        acceptedFileDescription: 'a JSON file (.json)',
+        acceptedFileExtensions: ['json'],
+        onReject,
+      })
+
+      textField.$el.dispatchEvent(createDropEvent([{
+        name: 'secret.JSON',
+        type: '',
+      }]))
+
+      expect(onDrop).toHaveBeenCalledWith('{"foo":"bar"}')
+      expect(onReject).not.toHaveBeenCalled()
+
+      dispose()
+      textField.$el.remove()
+    })
+
+    it('rejects missing and multiple files', () => {
+      const onDrop = vi.fn()
+      const onReject = vi.fn()
+      const textField = createTextField()
+      const dispose = handleTextFieldDrop(textField, /json/, onDrop, {
+        acceptedFileDescription: 'a JSON file (.json)',
+        onReject,
+      })
+
+      textField.$el.dispatchEvent(createDropEvent([]))
+      textField.$el.dispatchEvent(createDropEvent([
+        { name: 'one.json', type: 'application/json' },
+        { name: 'two.json', type: 'application/json' },
+      ]))
+
+      expect(onDrop).not.toHaveBeenCalled()
+      expect(onReject).toHaveBeenNthCalledWith(1, {
+        code: 'missing-file',
+        file: undefined,
+        message: 'Drop a JSON file (.json) to import its contents.',
+      })
+      expect(onReject).toHaveBeenNthCalledWith(2, {
+        code: 'too-many-files',
+        file: undefined,
+        message: 'Drop only one file at a time. Expected a JSON file (.json).',
+      })
+
+      dispose()
+      textField.$el.remove()
+    })
+
+    it('rejects unsupported file types', () => {
+      const onDrop = vi.fn()
+      const onReject = vi.fn()
+      const textField = createTextField()
+      const file = {
+        name: 'secret.txt',
+        type: 'text/plain',
+      }
+      const dispose = handleTextFieldDrop(textField, /json/, onDrop, {
+        acceptedFileDescription: 'a JSON file (.json)',
+        acceptedFileExtensions: ['.json'],
+        onReject,
+      })
+
+      textField.$el.dispatchEvent(createDropEvent([file]))
+
+      expect(onDrop).not.toHaveBeenCalled()
+      expect(onReject).toHaveBeenCalledWith({
+        code: 'unsupported-file-type',
+        file,
+        message: 'File "secret.txt" was rejected. Expected a JSON file (.json), but received text/plain.',
+      })
+
+      dispose()
+      textField.$el.remove()
+    })
+
+    it('reports file read errors', () => {
+      vi.stubGlobal('FileReader', class {
+        readAsText () {
+          this.onerror()
+        }
+      })
+
+      const onDrop = vi.fn()
+      const onReject = vi.fn()
+      const textField = createTextField()
+      const file = {
+        name: 'secret.json',
+        type: 'application/json',
+      }
+      const dispose = handleTextFieldDrop(textField, /json/, onDrop, {
+        acceptedFileDescription: 'a JSON file (.json)',
+        onReject,
+      })
+
+      textField.$el.dispatchEvent(createDropEvent([file]))
+
+      expect(onDrop).not.toHaveBeenCalled()
+      expect(onReject).toHaveBeenCalledWith({
+        code: 'read-error',
+        file,
+        message: 'Could not read file "secret.json".',
+      })
+
+      dispose()
+      textField.$el.remove()
+    })
+
+    it('removes event listeners when disposed', () => {
+      const textField = createTextField()
+      const removeEventListenerSpy = vi.spyOn(textField.$el, 'removeEventListener')
+      const dispose = handleTextFieldDrop(textField, /json/)
+
+      dispose()
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('dragover', expect.any(Function), false)
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('drop', expect.any(Function), false)
+
+      textField.$el.remove()
+    })
+  })
+
   describe('authorization', () => {
     describe('#canI', () => {
       let rulesReview
