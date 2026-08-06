@@ -55,7 +55,7 @@ const wellKnownConditions = {
   EveryNodeReady: {
     name: 'Nodes',
     shortName: 'N',
-    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.',
+    description: 'Indicates whether all worker nodes are healthy, at their desired Kubernetes and OS versions, and present in the expected number. Often transiently unhealthy during node rollouts, scaling, or maintenance. A persistent error usually means nodes failed to join or turn ready, a rollout is stuck, or nodes are under resource pressure - which can disrupt their workloads.',
     sortOrder: '3',
   },
   ObservabilityComponentsHealthy: {
