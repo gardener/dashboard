@@ -27,20 +27,11 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #help-slot>
       <!-- eslint-disable vue/no-v-html -->
-      <template v-if="helpHtml || helpJSONTemplate">
-        <div
-          v-if="helpHtml"
-          class="markdown"
-          v-html="helpHtml"
-        />
-        <g-code-block
-          v-if="helpJSONTemplate"
-          class="mt-3"
-          max-height="100%"
-          lang="json"
-          :content="helpJSONTemplate"
-        />
-      </template>
+      <div
+        v-if="helpHtml"
+        class="markdown"
+        v-html="helpHtml"
+      />
       <div v-else>
         <p>
           This is a generic secret dialog.
@@ -59,7 +50,6 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
 
-import GCodeBlock from '@/components/GCodeBlock'
 import GGenericInputField from '@/components/GGenericInputField'
 import GGenericInputFields from '@/components/GGenericInputFields'
 import GSecretDialog from '@/components/Credentials/GSecretDialog'
@@ -70,7 +60,6 @@ import { transformHtml } from '@/utils'
 
 export default {
   components: {
-    GCodeBlock,
     GGenericInputField,
     GGenericInputFields,
     GSecretDialog,
@@ -149,12 +138,6 @@ export default {
     },
     helpHtml () {
       return transformHtml(this.vendorSecretConfiguration?.help)
-    },
-    helpJSONTemplate () {
-      const template = this.vendorSecretConfiguration?.helpJSONTemplate
-      return template === undefined
-        ? undefined
-        : JSON.stringify(template, undefined, 2)
     },
     vendorName () {
       return this.vendorDisplayName({
