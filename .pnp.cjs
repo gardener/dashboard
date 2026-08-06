@@ -1190,7 +1190,7 @@ const RAW_RUNTIME_STATE =
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
           ["@vitest/coverage-v8", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:4.1.10"],\
           ["@vitest/eslint-plugin", "virtual:feaa032e1ffbff8da5dad8429b8494744ade8373389ef8e26f3d1f1980ceff327ab996fdc7c1977df285edeb918372fa01d7c87d79c9d7218f8701c70203bfe5#npm:1.6.23"],\
-          ["chalk", "npm:5.6.2"],\
+          ["chalk", "npm:6.0.0"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:3.0.1"],\
@@ -5273,10 +5273,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.6.2", {\
-        "packageLocation": "./.yarn/cache/chalk-npm-5.6.2-ecbd482482-99a4b0f0e7.zip/node_modules/chalk/",\
+      ["npm:6.0.0", {\
+        "packageLocation": "./.yarn/cache/chalk-npm-6.0.0-11c087e840-47fd9028aa.zip/node_modules/chalk/",\
         "packageDependencies": [\
-          ["chalk", "npm:5.6.2"]\
+          ["chalk", "npm:6.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
