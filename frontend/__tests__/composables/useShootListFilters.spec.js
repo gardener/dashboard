@@ -51,6 +51,12 @@ describe('composables', () => {
       authzStore = useAuthzStore()
       configStore = useConfigStore()
       localStorageStore = useLocalStorageStore()
+      configStore.setConfiguration({
+        ticket: {
+          gitHubRepoUrl: 'https://github.com/org/repo',
+          hideClustersWithLabels: ['ignore'],
+        },
+      })
       mockGetSubjectRules = vi.spyOn(api, 'getSubjectRules')
       mockGetSubjectRules.mockResolvedValue(createRulesResponse())
       localStorageStore.allProjectsShootFilter = {}
@@ -133,9 +139,12 @@ describe('composables', () => {
       ])
     })
 
-    it('should exclude allTicketsIgnored when ticket config is missing', async () => {
+    it.each([
+      { description: 'missing', configuration: {} },
+      { description: 'incomplete', configuration: { ticket: {} } },
+    ])('should exclude allTicketsIgnored when ticket config is $description', async ({ configuration }) => {
       await grantLandscapeAccess()
-      configStore.setConfiguration({ ticket: {} })
+      configStore.setConfiguration(configuration)
       localStorageStore.allProjectsShootFilter = {
         progressing: false,
         operatorAction: false,

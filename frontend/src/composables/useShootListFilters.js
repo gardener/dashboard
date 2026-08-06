@@ -85,7 +85,7 @@ export const useShootListFilters = createSharedComposable(function useShootListF
       }
 
       const { ticket } = configStore
-      if (ticket && (!ticket.gitHubRepoUrl || !ticket.hideClustersWithLabels?.length)) {
+      if (!ticket?.gitHubRepoUrl || !ticket.hideClustersWithLabels?.length) {
         filters.allTicketsIgnored = false
       }
 
