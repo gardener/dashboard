@@ -4,34 +4,50 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { computed } from 'vue'
+import {
+  computed,
+  readonly,
+} from 'vue'
 import { createSharedComposable } from '@vueuse/core'
 
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
+import { resolveShootListFiltersForDonut } from '@/store/shoot/search'
 
 import pick from 'lodash/pick'
 
-const FILTER_LABELS = [
-  { key: 'progressing', label: 'Progressing' },
-  { key: 'noOperatorAction', label: 'User Errors' },
-  { key: 'ignoredTickets', label: 'Ignored Ticket Labels' },
+const OPERATIONS_VIEW_EXCLUSION_CRITERIA = [
+  { key: 'progressing', exclusionReason: 'are progressing', label: 'Progressing' },
+  { key: 'operatorAction', exclusionReason: 'do not require operator action', label: 'User Errors' },
+  { key: 'allTicketsIgnored', exclusionReason: 'have only ignored tickets', label: 'Ignored Ticket Labels' },
 ]
 
 const FILTER_KEYS = [
-  'healthy',
   'progressing',
-  'noOperatorAction',
-  'ignoredTickets',
+  'operatorAction',
+  'allTicketsIgnored',
 ]
+
+const ALL_CLUSTERS_FILTERS = {
+  healthy: false,
+  progressing: false,
+  operatorAction: false,
+  allTicketsIgnored: false,
+}
+
+export function getEnabledOperationsViewExclusionReasons (shootListFilters = {}) {
+  return OPERATIONS_VIEW_EXCLUSION_CRITERIA
+    .filter(({ key }) => shootListFilters[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
+    .map(({ exclusionReason }) => exclusionReason)
+}
 
 function getDefaultAllProjectsShootFilters (canViewLandscape) {
   return {
-    healthy: canViewLandscape,
-    progressing: true,
-    noOperatorAction: canViewLandscape,
-    ignoredTickets: canViewLandscape,
+    healthy: true,
+    progressing: canViewLandscape,
+    operatorAction: canViewLandscape,
+    allTicketsIgnored: canViewLandscape,
   }
 }
 
@@ -44,10 +60,10 @@ export function getUnhealthyFilterMaskFromShootListFilters (shootListFilters = {
   if (shootListFilters.progressing) {
     mask |= 1
   }
-  if (shootListFilters.noOperatorAction) {
+  if (shootListFilters.operatorAction) {
     mask |= 2
   }
-  if (shootListFilters.ignoredTickets) {
+  if (shootListFilters.allTicketsIgnored) {
     mask |= 4
   }
   return mask
@@ -58,16 +74,19 @@ export const useShootListFilters = createSharedComposable(function useShootListF
   const configStore = useConfigStore()
   const localStorageStore = useLocalStorageStore()
 
-  const shootListFilters = computed({
+  const operationsViewFilters = computed({
     get () {
+      const storedFilters = authzStore.canViewLandscape
+        ? pick(localStorageStore.allProjectsShootFilter, FILTER_KEYS)
+        : {} // Prevent saved settings leaking into filters regular users cannot configure
       const filters = {
         ...getDefaultAllProjectsShootFilters(authzStore.canViewLandscape),
-        ...pick(localStorageStore.allProjectsShootFilter, FILTER_KEYS),
+        ...storedFilters,
       }
 
       const { ticket } = configStore
-      if (ticket && (!ticket.gitHubRepoUrl || !ticket.hideClustersWithLabels?.length)) {
-        filters.ignoredTickets = false
+      if (!ticket?.gitHubRepoUrl || !ticket.hideClustersWithLabels?.length) {
+        filters.allTicketsIgnored = false
       }
 
       return filters
@@ -77,37 +96,91 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     },
   })
 
-  const healthy = computed(() => {
-    return shootListFilters.value.healthy ?? true
+  const defaultClusterView = computed({
+    get () {
+      return localStorageStore.allProjectsShootDefaultView ?? (
+        authzStore.canViewLandscape ? 'operations' : 'all'
+      )
+    },
+    set (value) {
+      localStorageStore.allProjectsShootDefaultView = value
+    },
   })
 
-  function toggleShootListFilter (key) {
-    shootListFilters.value = {
-      ...shootListFilters.value,
-      [key]: !shootListFilters.value[key], // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
+  const shootListFilters = computed({
+    get () {
+      return defaultClusterView.value === 'operations'
+        ? operationsViewFilters.value
+        : ALL_CLUSTERS_FILTERS
+    },
+    set (value) {
+      operationsViewFilters.value = value
+      defaultClusterView.value = value?.healthy ? 'operations' : 'all'
+    },
+  })
+
+  function setOperationsViewFilter (key, value) {
+    operationsViewFilters.value = {
+      ...operationsViewFilters.value,
+      [key]: value,
     }
+  }
+
+  function setHideProgressing (value) {
+    setOperationsViewFilter('progressing', value)
+  }
+
+  function setHideWithoutOperatorAction (value) {
+    setOperationsViewFilter('operatorAction', value)
+  }
+
+  function setHideAllTicketsIgnored (value) {
+    setOperationsViewFilter('allTicketsIgnored', value)
+  }
+
+  const healthy = computed(() => shootListFilters.value.healthy ?? true)
+
+  function toggleShootListFilter (key) {
+    if (key === 'healthy') {
+      defaultClusterView.value = healthy.value ? 'all' : 'operations'
+      return
+    }
+
+    setOperationsViewFilter(key, !operationsViewFilters.value[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
   }
 
   const unhealthyFilterMask = computed(() => {
     return getUnhealthyFilterMaskFromShootListFilters(shootListFilters.value)
   })
 
+  const activeFilterReasons = computed(() => {
+    const effective = resolveShootListFiltersForDonut(shootListFilters.value)
+    return getEnabledOperationsViewExclusionReasons(effective)
+  })
+
+  // Retained until the existing Shoot/Seed list presentations are replaced by
+  // the Operations View controls in their dedicated follow-up tasks.
   const activeFilterLabels = computed(() => {
-    const filters = shootListFilters.value
-    if (!filters.healthy) {
+    if (!healthy.value) {
       return []
     }
 
-    return FILTER_LABELS
-      .filter(({ key }) => filters[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
+    return OPERATIONS_VIEW_EXCLUSION_CRITERIA
+      .filter(({ key }) => shootListFilters.value[key]) // eslint-disable-line security/detect-object-injection -- key is a fixed set of strings, not user input
       .map(({ label }) => label)
   })
 
   return {
     shootListFilters,
+    operationsViewFilters: readonly(operationsViewFilters),
+    defaultClusterView,
     healthy,
     toggleShootListFilter,
+    setHideProgressing,
+    setHideWithoutOperatorAction,
+    setHideAllTicketsIgnored,
     unhealthyFilterMask,
+    activeFilterReasons,
     activeFilterLabels,
   }
 })

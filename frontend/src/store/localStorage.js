@@ -211,6 +211,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const allProjectsShootDefaultView = useLocalStorage('project/_all/shoot-list/default-view', null, {
+    serializer: StorageSerializers.enum(['all', 'operations']),
+    writeDefaults: false,
+  })
+
   const seedSelectedColumns = useLocalStorage('seeds/seed-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -273,6 +278,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     seedSelectedColumns,
     seedSortBy,
     allProjectsShootFilter,
+    allProjectsShootDefaultView,
     shootCustomSortBy,
     shootCustomSelectedColumns,
     terminalSplitpaneTreeRef,

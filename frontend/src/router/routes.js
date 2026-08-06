@@ -574,6 +574,7 @@ export function createRoutes () {
       return {
         name: to.name,
         params: to.params,
+        hash: to.hash,
         query: {
           namespace,
           ...to.query,

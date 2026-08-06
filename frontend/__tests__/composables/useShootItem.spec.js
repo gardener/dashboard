@@ -221,10 +221,13 @@ describe('composables', () => {
 
     it('should compute isStaleShoot correctly', () => {
       authzStore._setNamespace('_all')
+      vi.spyOn(authzStore, 'canViewLandscape', 'get').mockReturnValue(true)
       const localStorageStore = useLocalStorageStore()
+      localStorageStore.allProjectsShootDefaultView = 'operations'
       localStorageStore.allProjectsShootFilter = {
-        healthy: true,
         progressing: true,
+        operatorAction: false,
+        allTicketsIgnored: false,
       }
       setShootItem('metadata.labels["shoot.gardener.cloud/status"]', 'progressing')
       expect(reactiveShootItem.isStaleShoot).toBe(true)

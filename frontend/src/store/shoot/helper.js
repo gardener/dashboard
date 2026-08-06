@@ -165,17 +165,17 @@ export function getFilteredUids (state, context) {
   if (isHealthyFilterActive(state, context)) {
     const {
       progressing,
-      noOperatorAction,
-      ignoredTickets,
+      operatorAction,
+      allTicketsIgnored,
     } = context
 
     if (progressing.value) {
       predicates.push(notProgressing)
     }
-    if (noOperatorAction.value) {
+    if (operatorAction.value) {
       predicates.push(requiresOperatorAction)
     }
-    if (ignoredTickets.value) {
+    if (allTicketsIgnored.value) {
       predicates.push(hasTicketsWithoutHideLabel)
     }
   }
