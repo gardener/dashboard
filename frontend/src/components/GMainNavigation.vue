@@ -127,6 +127,8 @@ import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTeaser from '@/components/GTeaser.vue'
 
+import { isSameRouteIgnoringShallowQuery } from '@/composables/useRouteSearchQuery'
+
 import {
   routes as getRoutes,
   routeName as getRouteName,
@@ -244,6 +246,10 @@ function getProjectMenuTargetRoute (namespace) {
   }
 }
 
+function isCurrentProjectRoute (target) {
+  return isSameRouteIgnoringShallowQuery(router, currentRoute, target)
+}
+
 function onSelectProject (project) {
   const namespace = project?.spec?.namespace
   if (!namespace) {
@@ -251,10 +257,7 @@ function onSelectProject (project) {
   }
   const target = getProjectMenuTargetRoute(namespace)
 
-  const current = router.resolve(currentRoute)
-  const next = router.resolve(target)
-
-  if (current.fullPath === next.fullPath) {
+  if (isCurrentProjectRoute(target)) {
     return
   }
   router.push(target)
