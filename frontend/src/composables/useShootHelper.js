@@ -178,7 +178,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const { defaultNodesCIDR } = useDefaultNodesCIDR(cloudProfile)
 
-  const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+  const infrastructureBindings = useCloudProviderEntityList(providerType, { credentialStore, vendorType: 'infra' })
 
   const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 

@@ -38,17 +38,40 @@ describe('composables', () => {
 
     it('should return dns credentials as a plain array for a dns provider type', () => {
       const credentialStore = useCredentialStore()
-      const gardenerExtensionStore = useGardenerExtensionStore()
-      const cloudProfileStore = useCloudProfileStore()
 
       const credentialsForProviderType = getCloudProviderEntityList('aws-route53', {
         credentialStore,
-        gardenerExtensionStore,
-        cloudProfileStore,
+        vendorType: 'dns',
       })
 
       expect(Array.isArray(credentialsForProviderType)).toBe(true)
       expect(credentialsForProviderType).toEqual(credentialStore.dnsCredentialList.filter(credential => credential.metadata?.labels?.['dashboard.gardener.cloud/dnsProviderType'] === 'aws-route53'))
+    })
+
+    it('should select the entity list by vendor type when provider names overlap', () => {
+      const infrastructureBinding = {
+        provider: { type: 'shared-provider' },
+      }
+      const dnsCredential = {
+        metadata: {
+          labels: {
+            'dashboard.gardener.cloud/dnsProviderType': 'shared-provider',
+          },
+        },
+      }
+      const credentialStore = {
+        infrastructureBindingList: [infrastructureBinding],
+        dnsCredentialList: [dnsCredential],
+      }
+
+      expect(getCloudProviderEntityList('shared-provider', {
+        credentialStore,
+        vendorType: 'infra',
+      })).toEqual([infrastructureBinding])
+      expect(getCloudProviderEntityList('shared-provider', {
+        credentialStore,
+        vendorType: 'dns',
+      })).toEqual([dnsCredential])
     })
   })
 

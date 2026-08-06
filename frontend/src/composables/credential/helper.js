@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { storeToRefs } from 'pinia'
-
 import {
   decodeBase64,
   isTruthyValue,
@@ -180,18 +178,14 @@ export function isDNSCredential ({ credential, dnsProviderTypes }) {
 
 export function getCloudProviderEntityList (providerType, {
   credentialStore,
-  gardenerExtensionStore,
-  cloudProfileStore,
+  vendorType,
 }) {
-  const { dnsProviderTypes } = storeToRefs(gardenerExtensionStore)
-  const { sortedInfraProviderTypeList } = storeToRefs(cloudProfileStore)
-
-  if (sortedInfraProviderTypeList.value.includes(providerType)) {
+  if (vendorType === 'infra') {
     return filter(credentialStore.infrastructureBindingList, binding => {
       return bindingProviderType(binding) === providerType
     })
   }
-  if (dnsProviderTypes.value.includes(providerType)) {
+  if (vendorType === 'dns') {
     return filter(credentialStore.dnsCredentialList, credential => {
       return credentialProviderType(credential) === providerType
     })

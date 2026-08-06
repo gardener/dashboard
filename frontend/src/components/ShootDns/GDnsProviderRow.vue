@@ -42,6 +42,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-credential
           v-model="dnsProviderCredential"
           :provider-type="dnsProviderType"
+          vendor-type="dns"
           :filter-fn="credentialFilter"
           register-vuelidate-as="dnsProviderCredential"
         />
@@ -101,7 +102,6 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import GVendorIcon from '@/components/GVendorIcon'
@@ -140,11 +140,9 @@ export default {
     } = useShootContext()
 
     const credentialStore = useCredentialStore()
-    const gardenerExtensionStore = useGardenerExtensionStore()
-    const cloudProfileStore = useCloudProfileStore()
 
     const dnsProviderType = toRef(props.dnsProvider, 'type')
-    const dnsCloudProviderCredentials = useCloudProviderEntityList(dnsProviderType, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const dnsCloudProviderCredentials = useCloudProviderEntityList(dnsProviderType, { credentialStore, vendorType: 'dns' })
 
     return {
       v$: useVuelidate(),
