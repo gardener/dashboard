@@ -92,7 +92,7 @@ import GTableSearch from '@/components/GTableSearch.vue'
 import { useSeedTableSorting } from '@/composables/useSeedTableSorting'
 import { useTableFilter } from '@/composables/useTableFilter'
 import { parseSearch } from '@/composables/useTableFilter/helper'
-import { useUrlSearchSync } from '@/composables/useUrlSearchSync'
+import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 
 import { mapTableHeader } from '@/utils'
 import { errorCodesFromArray } from '@/utils/errorCodes'
@@ -122,7 +122,9 @@ provide('activePopoverKey', activePopoverKey)
 const expandedAccessRestrictions = reactive({ default: false })
 provide('expandedAccessRestrictions', expandedAccessRestrictions)
 
-const { search: searchQuery } = useUrlSearchSync()
+const {
+  searchQuery,
+} = useShallowRouteSearchQuery()
 
 const allHeaders = computed(() => [
   {
