@@ -76,6 +76,10 @@ export async function sanitizeFrontendConfig (frontendConfig) {
       items = [],
     } = {},
     vendorHints = [],
+    branding: {
+      infraVendors = [],
+      dnsVendors = [],
+    } = {},
     resourceQuotaHelp = {},
     controlPlaneHighAvailabilityHelp: legacyControlPlaneHighAvailabilityHelp = {},
     shootDefaults: {
@@ -115,6 +119,15 @@ export async function sanitizeFrontendConfig (frontendConfig) {
 
   for (const vendorHint of vendorHints) {
     tasks.push(convertAndSanitize(vendorHint, 'message'))
+  }
+
+  for (const vendors of [infraVendors, dnsVendors]) {
+    if (!Array.isArray(vendors)) {
+      continue
+    }
+    for (const vendor of vendors) {
+      tasks.push(convertAndSanitize(vendor?.secret, 'help'))
+    }
   }
 
   await Promise.all(tasks)

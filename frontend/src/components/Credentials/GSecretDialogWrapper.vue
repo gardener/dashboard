@@ -25,7 +25,6 @@ const MetalDialog = defineAsyncComponent(() => import('@/components/Credentials/
 const VsphereDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogVSphere'))
 const CloudflareDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogCloudflare'))
 const InfobloxDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogInfoblox'))
-const NetlifyDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogNetlify'))
 const DDnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDDns'))
 const HcloudDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHCloud'))
 const PowerdnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogPowerdns'))
@@ -66,7 +65,6 @@ export default {
         case 'alicloud-dns': return AlicloudDialog
         case 'cloudflare-dns': return CloudflareDialog
         case 'infoblox-dns': return InfobloxDialog
-        case 'netlify-dns': return NetlifyDialog
         case 'rfc2136': return DDnsDialog
         case 'cloudflare': return CloudflareDialog
         case 'powerdns': return PowerdnsDialog
