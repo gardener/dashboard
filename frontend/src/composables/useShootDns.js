@@ -8,7 +8,6 @@ import { computed } from 'vue'
 
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
-import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootExtensions } from '@/composables/useShootExtensions'
@@ -53,7 +52,6 @@ export const useShootDns = (manifest, options) => {
   const {
     gardenerExtensionStore = useGardenerExtensionStore(),
     credentialStore = useCredentialStore(),
-    cloudProfileStore = useCloudProfileStore(),
   } = options
 
   /* resources */
@@ -205,8 +203,7 @@ export const useShootDns = (manifest, options) => {
   function getDefaultCredential (providerType) {
     const credentials = getCloudProviderEntityList(providerType, {
       credentialStore,
-      gardenerExtensionStore,
-      cloudProfileStore,
+      vendorType: 'dns',
     })
 
     const usedResourceRefs = map(resources.value, 'resourceRef')
@@ -245,7 +242,7 @@ export const useShootDns = (manifest, options) => {
   }
 
   function resolveResourceRef (type, credentialsRef) {
-    const credentialsForProviderType = getCloudProviderEntityList(type, { credentialStore, gardenerExtensionStore, cloudProfileStore })
+    const credentialsForProviderType = getCloudProviderEntityList(type, { credentialStore, vendorType: 'dns' })
     const credential = find(credentialsForProviderType, credential => {
       return dnsCredentialResourceNamePart({
         kind: credential?.kind,

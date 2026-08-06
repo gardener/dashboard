@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-credential
           v-model="infrastructureBinding"
           :provider-type="shootProviderType"
+          vendor-type="infra"
           :filter-fn="credentialFilterFn"
         />
         <template v-if="migrationMode">

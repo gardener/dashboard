@@ -22,6 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-select-credential
           v-model="infrastructureBinding"
           :provider-type="providerType"
+          vendor-type="infra"
         />
       </v-col>
       <v-col cols="3">
