@@ -277,9 +277,12 @@ export async function assertPortsAvailable (ports, probe = portIsAvailable) {
   }
 }
 
-export function requestReady (url, caPath) {
+export function requestReady (
+  url,
+  caPath,
+  client = url.startsWith('https:') ? https : http,
+) {
   return new Promise(resolve => {
-    const client = url.startsWith('https:') ? https : http
     let ca
     try {
       if (caPath) {
@@ -297,8 +300,12 @@ export function requestReady (url, caPath) {
       response.resume()
       resolve(response.statusCode >= 200 && response.statusCode < 400)
     })
-    request.once('timeout', () => request.destroy())
+    request.once('timeout', () => {
+      resolve(false)
+      request.destroy()
+    })
     request.once('error', () => resolve(false))
+    request.once('close', () => resolve(false))
   })
 }
 
@@ -587,14 +594,37 @@ function detachedService (name, command, arguments_, { cwd, env, logPath }) {
   }
 }
 
-export async function startAndRecord (state, configuration, definition) {
-  const child = detachedService(
+async function stopSpawnedGroup (pgid) {
+  const signalGroup = (pgid, signal) => process.kill(-pgid, signal)
+  signalTrackedGroup(signalGroup, pgid, 'SIGTERM')
+  if (!await waitForGroupExit(pgid, 5_000)) {
+    signalTrackedGroup(signalGroup, pgid, 'SIGKILL')
+    if (!await waitForGroupExit(pgid, 2_000)) {
+      fail(`spawned process group ${pgid} did not stop`)
+    }
+  }
+}
+
+export async function startAndRecord (state, configuration, definition, {
+  spawnService = detachedService,
+  capture = captureProcess,
+  stop = stopSpawnedGroup,
+} = {}) {
+  const child = spawnService(
     definition.name,
     definition.command,
     definition.arguments,
     definition,
   )
-  const identity = await captureProcess(child.pid, definition.commandMarker)
+  let identity
+  try {
+    identity = await capture(child.pid, definition.commandMarker)
+  } catch (error) {
+    if (Number.isInteger(child.pid)) {
+      await stop(child.pid)
+    }
+    throw error
+  }
   const record = { name: definition.name, ...identity, logPath: definition.logPath }
   state.processes.push(record)
   writeState(state, configuration)

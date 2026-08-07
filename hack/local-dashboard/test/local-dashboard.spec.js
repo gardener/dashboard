@@ -76,9 +76,11 @@ import {
   parseState,
   processMatches,
   reconcileScenario,
+  requestReady,
   runTimedPhase,
   serializeState,
   serviceDefinitions,
+  startAndRecord,
   stopTrackedProcesses,
   waitUntilReady,
 } from '../internal/runtime.mjs'
@@ -653,6 +655,24 @@ describe('Gardenerless prerequisite contract', () => {
 })
 
 describe('compact state and process safety', () => {
+  it('settles failed readiness requests on timeout and close', async () => {
+    for (const event of ['timeout', 'close']) {
+      const listeners = {}
+      const request = {
+        destroy: vi.fn(),
+        once: (name, listener) => {
+          listeners[name] = listener
+        },
+      }
+      const ready = requestReady('http://127.0.0.1/healthz', undefined, {
+        get: () => request,
+      })
+      listeners[event]()
+      await expect(ready).resolves.toBe(false)
+      expect(request.destroy).toHaveBeenCalledTimes(event === 'timeout' ? 1 : 0)
+    }
+  })
+
   it('reads listener PIDs and process working directories from bounded lsof queries', () => {
     const listeners = vi.fn(() => ({ status: 0, stdout: 'p101\np202\n' }))
     expect(inspectListeningPids(8444, listeners)).toEqual([101, 202])
@@ -848,22 +868,38 @@ describe('compact state and process safety', () => {
     expect(signals).toEqual([[101, 'SIGTERM'], [101, 'SIGKILL']])
   })
 
-  it('fails promptly with bounded logs when a child identity disappears', async () => {
+  it('stops a spawned child group when identity capture fails', async () => {
+    const config = configuration()
+    const state = { processes: [] }
+    const definition = serviceDefinitions(config)[0]
+    const stop = vi.fn(async () => {})
+    await expect(startAndRecord(state, config, definition, {
+      spawnService: () => ({ name: definition.name, pid: 101 }),
+      capture: async () => {
+        throw new Error('identity capture failed')
+      },
+      stop,
+    })).rejects.toThrow('identity capture failed')
+    expect(stop).toHaveBeenCalledExactlyOnceWith(101)
+    expect(state.processes).toEqual([])
+  })
+
+  it('fails with bounded logs when a child identity disappears', async () => {
     const directory = temporaryDirectory('local-dashboard-log-')
     const config = configuration()
     const logPath = join(directory, 'child.log')
     writeFileSync(logPath, `${'discarded\n'.repeat(1000)}intentional failure\n`)
-    const started = Date.now()
+    const health = vi.fn(async () => false)
     await expect(waitUntilReady({
       label: 'garden',
       record: processRecord(config, 'garden', 101),
       configuration: config,
-      health: async () => false,
+      health,
       logPath,
       timeoutMs: 5_000,
       inspector: () => undefined,
     })).rejects.toThrow('intentional failure')
-    expect(Date.now() - started).toBeLessThan(500)
+    expect(health).not.toHaveBeenCalled()
   })
 })
 
