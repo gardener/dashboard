@@ -30,7 +30,6 @@ module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2025,
-      sourceType: 'module',
     },
     rules: {
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: false }],
