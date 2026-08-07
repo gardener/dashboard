@@ -7,6 +7,8 @@
 import {
   computed,
   effectScope,
+  getCurrentScope,
+  onScopeDispose,
   shallowRef,
   watch,
 } from 'vue'
@@ -27,6 +29,7 @@ function createSearchState (router) {
   const actualRoute = router.resolve(routerHistory.location)
 
   const search = shallowRef(normalizeSearch(actualRoute.query.q))
+  const routeCommittedListeners = new Set()
 
   // The state is router-scoped, so its watcher must not inherit the component
   // scope of the first list that happens to create it.
@@ -35,11 +38,20 @@ function createSearchState (router) {
     // search state whenever it publishes a successfully committed route by
     // copying q from currentRoute. Canceled navigations never reach this watcher.
     watch(router.currentRoute, route => {
-      search.value = normalizeSearch(route.query.q)
+      const value = normalizeSearch(route.query.q)
+      search.value = value
+      for (const listener of routeCommittedListeners) {
+        listener(value, route)
+      }
     }, {
       flush: 'sync',
     })
   })
+
+  function onRouteCommitted (listener) {
+    routeCommittedListeners.add(listener)
+    return () => routeCommittedListeners.delete(listener)
+  }
 
   function replace (value) {
     const normalizedValue = normalizeSearch(value)
@@ -66,6 +78,7 @@ function createSearchState (router) {
   return {
     search,
     replace,
+    onRouteCommitted,
   }
 }
 
@@ -80,14 +93,26 @@ function getSearchState (router) {
 
 /**
  * Creates the live shallow search binding for an explicit router.
- * `onWrite` runs only for a local shallow write, never for route rehydration.
+ * `onWrite` runs only for a local shallow write. `onRouteCommitted` runs after
+ * the shared search is rehydrated from each successfully committed route.
  */
 function createShallowRouteSearchQuery (router, options = {}) {
   const {
     onWrite,
+    onRouteCommitted,
   } = options
 
+  if (onRouteCommitted && !getCurrentScope()) {
+    throw new Error(
+      'useShallowRouteSearchQuery with onRouteCommitted must be called within an active Vue scope',
+    )
+  }
+
   const state = getSearchState(router)
+  if (onRouteCommitted) {
+    const removeListener = state.onRouteCommitted(onRouteCommitted)
+    onScopeDispose(removeListener)
+  }
 
   const searchQuery = computed({
     get () {
@@ -113,8 +138,11 @@ function createShallowRouteSearchQuery (router, options = {}) {
  * Local writes update RouterHistory directly and deliberately leave
  * router.currentRoute stale until the next real navigation.
  */
-export function useShallowRouteSearchQuery ({ onWrite } = {}) {
-  return createShallowRouteSearchQuery(useRouter(), { onWrite })
+export function useShallowRouteSearchQuery ({ onWrite, onRouteCommitted } = {}) {
+  return createShallowRouteSearchQuery(useRouter(), {
+    onWrite,
+    onRouteCommitted,
+  })
 }
 
 /**

@@ -107,16 +107,10 @@ export const useShootListFilters = createSharedComposable(function useShootListF
     },
   })
 
-  const shootListFilters = computed({
-    get () {
-      return defaultClusterView.value === 'operations'
-        ? operationsViewFilters.value
-        : ALL_CLUSTERS_FILTERS
-    },
-    set (value) {
-      operationsViewFilters.value = value
-      defaultClusterView.value = value?.healthy ? 'operations' : 'all'
-    },
+  const shootListFilters = computed(() => {
+    return defaultClusterView.value === 'operations'
+      ? operationsViewFilters.value
+      : ALL_CLUSTERS_FILTERS
   })
 
   function setOperationsViewFilter (key, value) {

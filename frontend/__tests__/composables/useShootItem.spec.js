@@ -20,7 +20,6 @@ import { useProjectStore } from '@/store/project'
 import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useSeedStore } from '@/store/seed'
 import { useCredentialStore } from '@/store/credential'
-import { useLocalStorageStore } from '@/store/localStorage'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
 
@@ -221,15 +220,10 @@ describe('composables', () => {
 
     it('should compute isStaleShoot correctly', () => {
       authzStore._setNamespace('_all')
-      vi.spyOn(authzStore, 'canViewLandscape', 'get').mockReturnValue(true)
-      const localStorageStore = useLocalStorageStore()
-      localStorageStore.allProjectsShootDefaultView = 'operations'
-      localStorageStore.allProjectsShootFilter = {
-        progressing: true,
-        operatorAction: false,
-        allTicketsIgnored: false,
-      }
       setShootItem('metadata.labels["shoot.gardener.cloud/status"]', 'progressing')
+
+      const shootStore = useShootStore()
+      shootStore.setShootSearchQuery('progressing:false')
       expect(reactiveShootItem.isStaleShoot).toBe(true)
 
       setShootItem('metadata.labels["shoot.gardener.cloud/status"]', undefined)

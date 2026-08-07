@@ -39,7 +39,7 @@ export function useShootSubscription (options = {}) {
         ? 'alert-load'
         : 'progress-load'
     }
-    if (subscriptionState.value === constants.LOADED || subscriptionState.value === constants.OPENING) {
+    if ([constants.LOADED, constants.OPENING, constants.CLOSING].includes(subscriptionState.value)) {
       return subscriptionError.value
         ? 'alert-subscribe'
         : 'progress-subscribe'
@@ -107,7 +107,9 @@ export function useShootSubscription (options = {}) {
   })
 
   function retry () {
-    if (!connected.value && !active.value) {
+    if (subscriptionState.value === constants.CLOSING) {
+      shootStore.closeSubscription()
+    } else if (!connected.value && !active.value) {
       socketStore.connect()
     } else {
       shootStore.synchronize()

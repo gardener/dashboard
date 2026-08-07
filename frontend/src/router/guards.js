@@ -21,6 +21,12 @@ import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
+import { useShootListFilters } from '@/composables/useShootListFilters'
+
+import {
+  getShootListContext,
+  normalizeShootListRoute,
+} from './shootList'
 
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
@@ -120,6 +126,11 @@ export function createGlobalResolveGuards () {
   const credentialStore = useCredentialStore()
   const shootStore = useShootStore()
   const terminalStore = useTerminalStore()
+  const { shootListFilters } = useShootListFilters()
+
+  function applyShootListRouteDefaults () {
+    return to => normalizeShootListRoute(to, shootListFilters.value)
+  }
 
   function ensureDataLoaded () {
     return async to => {
@@ -130,7 +141,7 @@ export function createGlobalResolveGuards () {
 
       try {
         const namespace = to.params.namespace ?? to.query.namespace
-        await refreshRules(authzStore, namespace)
+        await authzStore.prepareRules(namespace)
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
@@ -150,26 +161,25 @@ export function createGlobalResolveGuards () {
           }
           case 'Credentials':
           case 'Credential': {
-            shootStore.subscribeShoots()
-            await credentialStore.fetchCredentials()
+            shootStore.subscribeShoots({ namespace })
+            await credentialStore.fetchCredentials(namespace)
             break
           }
           case 'NewShoot':
           case 'NewShootEditor': {
-            shootStore.subscribeShoots()
-            if (authzStore.canGetCloudProviderCredentials) {
-              await credentialStore.fetchCredentials()
+            shootStore.subscribeShoots({ namespace })
+            if (authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
+              await credentialStore.fetchCredentials(namespace)
             }
             break
           }
           case 'ShootList': {
-            shootStore.subscribeShoots()
             const promises = []
-            if (authzStore.canUseProjectTerminalShortcuts) {
-              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded())
+            if (authzStore.canUseProjectTerminalShortcutsForNamespace(namespace)) {
+              promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded(namespace))
             }
-            if (authzStore.canGetCloudProviderCredentials) {
-              promises.push(credentialStore.fetchCredentials())
+            if (authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
+              promises.push(credentialStore.fetchCredentials(namespace))
             }
             await Promise.all(promises)
             break
@@ -183,8 +193,8 @@ export function createGlobalResolveGuards () {
           }
           case 'Members':
           case 'Administration': {
-            shootStore.subscribeShoots()
-            await memberStore.fetchMembers()
+            shootStore.subscribeShoots({ namespace })
+            await memberStore.fetchMembers(namespace)
             break
           }
           default: {
@@ -199,15 +209,32 @@ export function createGlobalResolveGuards () {
   }
 
   return [
+    applyShootListRouteDefaults(),
     ensureDataLoaded(),
   ]
 }
 
 export function createGlobalAfterHooks () {
   const appStore = useAppStore()
+  const authzStore = useAuthzStore()
+  const shootStore = useShootStore()
 
   return [
-    (to, from) => {
+    (to, from, failure) => {
+      if (!failure) {
+        if (to.meta?.public) {
+          shootStore.deactivateShootList()
+        } else {
+          const namespace = to.params.namespace ?? to.query.namespace
+          authzStore.activateRules(namespace)
+
+          if (to.name === 'ShootList') {
+            shootStore.activateShootList(getShootListContext(to))
+          } else {
+            shootStore.deactivateShootList()
+          }
+        }
+      }
       appStore.loading = false
       appStore.fromRoute = from
     },
@@ -224,10 +251,6 @@ function ensureProjectsLoaded (store) {
   if (store.isInitial) {
     return store.fetchProjects()
   }
-}
-
-async function refreshRules (store, ...args) {
-  return store.fetchRules(...args)
 }
 
 function ensureCloudProfilesLoaded (store) {
