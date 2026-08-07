@@ -71,6 +71,10 @@ function encodeSecretFieldValue (value, field) {
   return encodeBase64(JSON.stringify(value))
 }
 
+/**
+ * Creates reactive state and helpers for editing Kubernetes Secret manifests.
+ * String and structured field helpers handle base64 decoding and encoding.
+ */
 export function createSecretContextComposable (options = {}) {
   const {
     authzStore = useAuthzStore(),
@@ -196,11 +200,10 @@ export function createSecretContextComposable (options = {}) {
   }
 
   /**
-   * Creates a set of refs for string-based secret data fields. Each key in
-   * `keyMapping` maps a key in the `.data` object to a variable name. The
-   * composable automatically handles base64 decoding/encoding.
+   * Creates refs that two-way sync with Secret data keys.
+   * Keys in `keyMapping` map Secret data keys to ref names.
    *
-   * Example `keyMapping`: { 'accessKey': 'accessKeyRef', 'secretKey': 'secretKeyRef' }
+   * Example: { accessKey: 'accessKeyRef', secretKey: 'secretKeyRef' }
    */
   function secretStringDataRefs (keyMapping) {
     const refs = {}
