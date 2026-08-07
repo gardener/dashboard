@@ -57,6 +57,7 @@ Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml`
 A local configuration example could look like follows:
 
 ```yaml
+host: 127.0.0.1
 port: 3030
 logLevel: debug
 logFormat: text

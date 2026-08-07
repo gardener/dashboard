@@ -16,6 +16,7 @@ configMappings defines mappings between config values, their sources (environmen
 and destinations in the config object. Properties:
 - environmentVariableName: The environment variable to read the value from.
 - filePath: (Optional) File path to read the value from if environment variable is not set.
+- fileFallbackWhen: (Optional) Predicate that controls whether the file fallback applies. Defaults to allowing the fallback.
 - configPath: The path in the config object to set the value.
 - type: (Optional) 'Boolean', 'Integer', or 'String' (default). Value is converted to this type.
 
@@ -52,48 +53,57 @@ const configMappings = [
   {
     environmentVariableName: 'OIDC_CLIENT_ID',
     filePath: '/etc/gardener-dashboard/secrets/oidc/client_id',
+    fileFallbackWhen: config => Boolean(config.oidc?.issuer),
     configPath: 'oidc.client_id',
   },
   {
     environmentVariableName: 'OIDC_CLIENT_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/oidc/client_secret',
+    fileFallbackWhen: config => Boolean(config.oidc?.issuer),
     configPath: 'oidc.client_secret',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_APP_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.appId',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.appId',
     type: 'Integer',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientId',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.clientId',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_CLIENT_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.clientSecret',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.clientSecret',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_INSTALLATION_ID',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.installationId',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.installationId',
     type: 'Integer',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_PRIVATE_KEY',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.privateKey',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.privateKey',
   },
   {
     environmentVariableName: 'GITHUB_AUTHENTICATION_TOKEN',
     filePath: '/etc/gardener-dashboard/secrets/github/authentication.token',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.authentication.token',
   },
   {
     environmentVariableName: 'GITHUB_WEBHOOK_SECRET',
     filePath: '/etc/gardener-dashboard/secrets/github/webhookSecret',
+    fileFallbackWhen: config => Boolean(config.gitHub),
     configPath: 'gitHub.webhookSecret',
   },
   {
@@ -110,10 +120,21 @@ const configMappings = [
     configPath: 'port',
     type: 'Integer',
   },
+  // Also used for metrics unless metricsHost is configured separately. If omitted,
+  // Node.js binds to :: when IPv6 is available, otherwise 0.0.0.0.
+  {
+    environmentVariableName: 'BIND_HOST',
+    configPath: 'host',
+  },
   {
     environmentVariableName: 'METRICS_PORT',
     configPath: 'metricsPort',
     type: 'Integer',
+  },
+  // If omitted, inherits host. If both are omitted, Node.js uses its default bind behavior.
+  {
+    environmentVariableName: 'METRICS_BIND_HOST',
+    configPath: 'metricsHost',
   },
   {
     environmentVariableName: 'WEBSOCKET_ALLOWED_ORIGINS',
@@ -143,26 +164,39 @@ function parseConfigValue (value, type) {
   }
 }
 
+function assignConfigValue (config, { configPath, type = 'String' }, rawValue) {
+  const value = parseConfigValue(rawValue, type)
+  if (value !== undefined) {
+    _.set(config, configPath, value)
+  }
+}
+
 export default {
   assignConfigFromEnvironmentAndFileSystem (config, env) {
+    // Apply all environment values first so file fallback eligibility is independent of mapping order.
+    for (const configMapping of configMappings) {
+      const { environmentVariableName } = configMapping
+      const rawValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
+      assignConfigValue(config, configMapping, rawValue)
+    }
+
     for (const configMapping of configMappings) {
       const {
         environmentVariableName,
-        configPath,
         filePath,
-        type = 'String',
+        fileFallbackWhen = () => true,
       } = configMapping
-      let rawValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
-      if (!rawValue && filePath) {
-        try {
-          rawValue = fs.readFileSync(filePath, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
-        } catch (err) { /* ignore error */ }
+      const environmentValue = env[environmentVariableName] // eslint-disable-line security/detect-object-injection
+      if (!filePath || environmentValue || !fileFallbackWhen(config)) {
+        continue
       }
-      const value = parseConfigValue(rawValue, type)
-
-      if (value !== undefined) {
-        _.set(config, configPath, value)
+      let rawValue
+      try {
+        rawValue = fs.readFileSync(filePath, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
+      } catch (err) {
+        continue
       }
+      assignConfigValue(config, configMapping, rawValue)
     }
   },
   getDefaults ({ env } = process) {
@@ -191,6 +225,9 @@ export default {
       } catch (err) { /* ignore */ }
     }
     this.assignConfigFromEnvironmentAndFileSystem(config, env)
+    if (!_.has(config, ['metricsHost']) && _.has(config, ['host'])) {
+      config.metricsHost = config.host
+    }
     const requiredConfigurationProperties = [
       'sessionSecret',
       'apiServerUrl',

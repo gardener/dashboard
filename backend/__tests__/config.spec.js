@@ -112,7 +112,7 @@ describe('config', function () {
         expect(config.logLevel).toBe('warn')
       })
 
-      it('should return the config with values read from the filesystem', function () {
+      it('should use OIDC and GitHub file fallbacks when the providers are configured', function () {
         const env = {}
         const fileMap = {
           '/etc/gardener-dashboard/secrets/oidc/client_id': 'client_id_from_file',
@@ -138,12 +138,55 @@ describe('config', function () {
         expect(config.gitHub.authentication.installationId).toBe(67890)
         expect(config.websocketAllowedOrigins).toEqual(['*'])
         expect(config.logLevel).toBe('info')
+        for (const filePath of Object.keys(fileMap)) {
+          expect(readFileSyncSpy).toHaveBeenCalledWith(filePath, 'utf8')
+        }
+      })
+
+      it('should not read OIDC or GitHub file fallbacks when the providers are not configured', function () {
+        readFileSyncSpy.mockReturnValue('ambient-secret')
+        const env = {
+          ...environmentVariables,
+          SESSION_SECRET_PREVIOUS: 'previous-secret',
+        }
+
+        const config = gardener.loadConfig(undefined, { env })
+
+        expect(readFileSyncSpy).not.toHaveBeenCalled()
+        expect(config).not.toHaveProperty('oidc')
+        expect(config).not.toHaveProperty('gitHub')
+      })
+
+      it('should keep session secret file fallbacks independent of provider configuration', function () {
+        const fileMap = {
+          '/etc/gardener-dashboard/secrets/session/sessionSecret': 'current-secret',
+          '/etc/gardener-dashboard/secrets/session/sessionSecretPrevious': 'previous-secret',
+        }
+        readFileSyncSpy.mockImplementation(filePath => {
+          if (filePath in fileMap) {
+            return fileMap[filePath]
+          }
+          throw new Error(filePath + ': not found')
+        })
+        const env = {
+          API_SERVER_URL: 'apiServerUrl',
+          WEBSOCKET_ALLOWED_ORIGINS: '*',
+        }
+
+        const config = gardener.loadConfig(undefined, { env })
+
+        expect(config.sessionSecrets).toEqual(['current-secret', 'previous-secret'])
+        expect(readFileSyncSpy.mock.calls).toEqual(
+          Object.keys(fileMap).map(filePath => [filePath, 'utf8']),
+        )
       })
 
       it('should return the config overridden by environment variables', function () {
         const env = Object.assign({
           NODE_ENV: 'production',
           PORT: '3456',
+          BIND_HOST: '127.0.0.1',
+          METRICS_BIND_HOST: '127.0.0.2',
           LOG_LEVEL: 'error',
           OIDC_CLIENT_ID: 'client_id',
           OIDC_CLIENT_SECRET: 'client_secret',
@@ -157,6 +200,8 @@ describe('config', function () {
 
         // local env
         expect(config.port).toBe(3456)
+        expect(config.host).toBe('127.0.0.1')
+        expect(config.metricsHost).toBe('127.0.0.2')
         expect(config.logLevel).toBe('error')
         expect(config.oidc.client_id).toBe('client_id')
         expect(config.oidc.client_secret).toBe('client_secret')
@@ -166,6 +211,37 @@ describe('config', function () {
         expect(config.apiServerUrl).toBe('apiServerUrl')
         expect(config.sessionSecret).toBe('secret')
         expect(config.websocketAllowedOrigins).toEqual(['https://foo.example.org', 'https://bar.example.org'])
+      })
+
+      it('should use the configured host for metrics when metricsHost is absent', function () {
+        const env = {
+          ...environmentVariables,
+          BIND_HOST: '127.0.0.1',
+        }
+
+        const config = gardener.loadConfig(undefined, { env })
+
+        expect(config.host).toBe('127.0.0.1')
+        expect(config.metricsHost).toBe('127.0.0.1')
+      })
+
+      it('should preserve an explicitly configured metricsHost', function () {
+        const filename = '/etc/gardener/config.yaml'
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'apiServerUrl',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          host: '127.0.0.1',
+          metricsHost: '127.0.0.2',
+        })
+        const env = {
+          BIND_HOST: '127.0.0.3',
+        }
+
+        const config = gardener.loadConfig(filename, { env })
+
+        expect(config.host).toBe('127.0.0.3')
+        expect(config.metricsHost).toBe('127.0.0.2')
       })
 
       it('should throw empty apiServerUrl', function () {
@@ -206,6 +282,7 @@ describe('config', function () {
           NODE_ENV: 'production',
           API_SERVER_URL: 'apiServerUrl',
           SESSION_SECRET: 'secret',
+          SESSION_SECRET_PREVIOUS: 'previous-secret',
           WEBSOCKET_ALLOWED_ORIGINS: '*',
           OIDC_CLIENT_ID: 'client_id',
         })

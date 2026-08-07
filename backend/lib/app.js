@@ -30,7 +30,7 @@ import { router as authRouter } from './auth.js'
 import { router as githubWebhookRouter } from './github/webhook/index.js'
 import { healthCheck } from './healthz/index.js'
 
-const { port, metricsPort } = config
+const { port, host, metricsPort, metricsHost } = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // protect against Prototype Pollution vulnerabilities
@@ -77,7 +77,9 @@ app.set('x-powered-by', false)
 
 // configure custom app settings used by the server
 app.set('port', port)
+app.set('host', host)
 app.set('metricsPort', metricsPort)
+app.set('metricsHost', metricsHost)
 app.set('tls', config.tls)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
