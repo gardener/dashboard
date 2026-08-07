@@ -244,18 +244,40 @@ export function assertReusableFrontendCertificates (sslDirectory = FRONTEND_SSL_
   for (const filename of ['ca.pem', 'key.pem', 'cert.pem']) {
     assertSafeFile(join(sslDirectory, filename), `frontend certificate ${filename}`)
   }
+  const caPath = join(sslDirectory, 'ca.pem')
+  const certificatePath = join(sslDirectory, 'cert.pem')
+  const caPem = readFileSync(caPath)
   const key = readFileSync(join(sslDirectory, 'key.pem'))
-  const certificatePem = readFileSync(join(sslDirectory, 'cert.pem'))
+  const certificatePem = readFileSync(certificatePath)
+  let caCertificate
   let certificate
   try {
-    createSecureContext({ key, cert: certificatePem })
+    caCertificate = new X509Certificate(caPem)
+  } catch {
+    fail(`frontend TLS CA certificate is invalid: ${caPath}`)
+  }
+  try {
     certificate = new X509Certificate(certificatePem)
-  } catch (error) {
-    fail(`frontend TLS key and certificate are invalid: ${error.message}`)
+  } catch {
+    fail(`frontend TLS server certificate is invalid: ${certificatePath}`)
   }
   const now = new Date()
-  if (now < certificate.validFromDate || now >= certificate.validToDate) {
-    fail(`frontend TLS certificate is not currently valid: ${join(sslDirectory, 'cert.pem')}`)
+  for (const [currentCertificate, label, filename] of [
+    [caCertificate, 'CA certificate', caPath],
+    [certificate, 'server certificate', certificatePath],
+  ]) {
+    if (now < currentCertificate.validFromDate || now >= currentCertificate.validToDate) {
+      fail(`frontend TLS ${label} is not currently valid: ${filename}`)
+    }
+  }
+  try {
+    createSecureContext({ ca: caPem, key, cert: certificatePem })
+  } catch {
+    fail(`frontend TLS key and certificate material are invalid or mismatched: ${sslDirectory}`)
+  }
+  if (!certificate.checkIssued(caCertificate) ||
+      !certificate.verify(caCertificate.publicKey)) {
+    fail(`frontend TLS server certificate was not issued and signed by the CA certificate: ${certificatePath}`)
   }
   return sslDirectory
 }

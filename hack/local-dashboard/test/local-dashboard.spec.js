@@ -113,8 +113,15 @@ function temporaryDirectory (prefix = 'local-dashboard-') {
   return directory
 }
 
-function generateCertificate (directory, prefix = '') {
+function generateCertificate (
+  directory,
+  prefix = '',
+  { caDays = 3650, certificateDays = 3650 } = {},
+) {
+  const caKey = join(directory, `${prefix}ca-key.pem`)
+  const ca = join(directory, `${prefix}ca.pem`)
   const key = join(directory, `${prefix}key.pem`)
+  const certificateRequest = join(directory, `${prefix}csr.pem`)
   const certificate = join(directory, `${prefix}cert.pem`)
   execFileSync('openssl', [
     'req',
@@ -122,12 +129,31 @@ function generateCertificate (directory, prefix = '') {
     '-newkey',
     'rsa:2048',
     '-nodes',
+    '-keyout', caKey,
+    '-out', ca,
+    '-days', String(caDays),
+    '-subj', '/CN=local-dashboard-ca',
+  ], { stdio: 'ignore' })
+  execFileSync('openssl', [
+    'req',
+    '-new',
+    '-newkey', 'rsa:2048',
+    '-nodes',
     '-keyout', key,
-    '-out', certificate,
-    '-days', '1',
+    '-out', certificateRequest,
     '-subj', '/CN=localhost',
   ], { stdio: 'ignore' })
-  return { key, certificate }
+  execFileSync('openssl', [
+    'x509',
+    '-req',
+    '-in', certificateRequest,
+    '-CA', ca,
+    '-CAkey', caKey,
+    '-CAcreateserial',
+    '-out', certificate,
+    '-days', String(certificateDays),
+  ], { stdio: 'ignore' })
+  return { ca, key, certificate }
 }
 
 function silenceConsole (method = 'log') {
@@ -333,12 +359,12 @@ describe('managed configuration and environments', () => {
 
   it('isolates backend settings and only reuses safe frontend certificates', () => {
     const directory = temporaryDirectory('local-dashboard-ssl-')
-    const { key, certificate } = generateCertificate(directory)
-    writeFileSync(join(directory, 'ca.pem'), 'ca\n')
+    const { ca, key, certificate } = generateCertificate(directory)
     expect(assertReusableFrontendCertificates(directory)).toBe(directory)
-    rmSync(join(directory, 'ca.pem'))
+    const caPem = readFileSync(ca)
+    rmSync(ca)
     expect(() => assertReusableFrontendCertificates(directory)).toThrow('ca.pem')
-    writeFileSync(join(directory, 'ca.pem'), 'ca\n')
+    writeFileSync(ca, caPem)
     expect(frontendEnvironment(configuration(), directory, {
       VITE_PROXY_TARGET: 'https://remote.example.org',
       VITE_DEV_PORT: '443',
@@ -367,9 +393,26 @@ describe('managed configuration and environments', () => {
     expect(backend.GIT_DIR).toBeUndefined()
     expect(backend.BASH_ENV).toBeUndefined()
 
+    writeFileSync(ca, 'ca\n')
+    expect(() => assertReusableFrontendCertificates(directory)).toThrow('CA certificate is invalid')
+    writeFileSync(ca, caPem)
+
+    const unrelated = generateCertificate(directory, 'unrelated-')
+    cpSync(unrelated.ca, ca)
+    expect(() => assertReusableFrontendCertificates(directory)).toThrow('not issued and signed')
+    writeFileSync(ca, caPem)
+
     vi.useFakeTimers()
-    vi.setSystemTime(new Date('2100-01-01'))
-    expect(() => assertReusableFrontendCertificates(directory)).toThrow('not currently valid')
+    onTestFinished(() => vi.useRealTimers())
+    const expiredServerDirectory = temporaryDirectory('local-dashboard-expired-server-')
+    generateCertificate(expiredServerDirectory, '', { certificateDays: 1 })
+    vi.setSystemTime(Date.now() + 2 * 24 * 60 * 60 * 1000)
+    expect(() => assertReusableFrontendCertificates(expiredServerDirectory))
+      .toThrow('server certificate is not currently valid')
+    const expiredCaDirectory = temporaryDirectory('local-dashboard-expired-ca-')
+    generateCertificate(expiredCaDirectory, '', { caDays: 1 })
+    expect(() => assertReusableFrontendCertificates(expiredCaDirectory))
+      .toThrow('CA certificate is not currently valid')
     vi.useRealTimers()
 
     const other = generateCertificate(directory, 'other-')
