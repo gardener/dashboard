@@ -111,6 +111,23 @@ function temporaryDirectory (prefix = 'local-dashboard-') {
   return directory
 }
 
+function generateCertificate (directory, prefix = '') {
+  const key = join(directory, `${prefix}key.pem`)
+  const certificate = join(directory, `${prefix}cert.pem`)
+  execFileSync('openssl', [
+    'req',
+    '-x509',
+    '-newkey',
+    'rsa:2048',
+    '-nodes',
+    '-keyout', key,
+    '-out', certificate,
+    '-days', '1',
+    '-subj', '/CN=localhost',
+  ], { stdio: 'ignore' })
+  return { key, certificate }
+}
+
 function silenceConsole (method = 'log') {
   const spy = vi.spyOn(console, method).mockImplementation(() => {})
   onTestFinished(() => spy.mockRestore())
@@ -298,17 +315,24 @@ describe('managed configuration and environments', () => {
     for (const key of Object.keys(codeLoadingEnvironment)) {
       expect(env[key]).toBeUndefined()
     }
-    expect(gitEnvironment({ PATH: '/usr/bin', GIT_DIR: '/tmp/git', BASH_ENV: '/tmp/env' }))
-      .toEqual({ PATH: '/usr/bin', GIT_NO_REPLACE_OBJECTS: '1' })
+    expect(gitEnvironment({
+      PATH: '/usr/bin',
+      GIT_DIR: '/tmp/git',
+      GIT_CONFIG_GLOBAL: '/tmp/global-gitconfig',
+      GIT_CONFIG_SYSTEM: '/tmp/system-gitconfig',
+      BASH_ENV: '/tmp/env',
+    })).toEqual({
+      PATH: '/usr/bin',
+      GIT_NO_REPLACE_OBJECTS: '1',
+      GIT_CONFIG_GLOBAL: '/dev/null',
+      GIT_CONFIG_NOSYSTEM: '1',
+    })
   })
 
   it('isolates backend settings and only reuses safe frontend certificates', () => {
     const directory = temporaryDirectory('local-dashboard-ssl-')
-    const key = join(directory, 'key.pem')
-    const certificate = join(directory, 'cert.pem')
+    const { key, certificate } = generateCertificate(directory)
     writeFileSync(join(directory, 'ca.pem'), 'ca\n')
-    writeFileSync(key, 'key\n')
-    writeFileSync(certificate, 'certificate\n')
     expect(assertReusableFrontendCertificates(directory)).toBe(directory)
     rmSync(join(directory, 'ca.pem'))
     expect(() => assertReusableFrontendCertificates(directory)).toThrow('ca.pem')
@@ -340,6 +364,16 @@ describe('managed configuration and environments', () => {
     expect(backend.GITHUB_AUTHENTICATION_TOKEN).toBeUndefined()
     expect(backend.GIT_DIR).toBeUndefined()
     expect(backend.BASH_ENV).toBeUndefined()
+
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2100-01-01'))
+    expect(() => assertReusableFrontendCertificates(directory)).toThrow('not currently valid')
+    vi.useRealTimers()
+
+    const other = generateCertificate(directory, 'other-')
+    cpSync(other.key, key)
+    expect(() => assertReusableFrontendCertificates(directory)).toThrow('invalid')
+
     rmSync(key)
     symlinkSync(certificate, key)
     expect(() => assertReusableFrontendCertificates(directory)).toThrow('non-symlink file')
@@ -444,8 +478,20 @@ describe('Gardenerless prerequisite contract', () => {
       config,
       {
         PATH: '/trusted/tools:/usr/bin',
+        GOAUTH: 'netrc',
+        GOCACHE: '/tmp/ambient-gocache',
+        GOENV: '/tmp/ambient-goenv',
+        GOINSECURE: '*',
         GOMODCACHE: ambientModuleCache,
         GOFLAGS: '-mod=vendor',
+        GONOPROXY: '*',
+        GONOSUMDB: '*',
+        GOPATH: '/tmp/ambient-gopath',
+        GOPRIVATE: '*',
+        GOPROXY: 'https://proxy.example.test',
+        GOSUMDB: 'off',
+        GOTOOLCHAIN: 'local',
+        GOWORK: '/tmp/ambient-go.work',
         KUBECONFIG: '/remote/kubeconfig',
         BUILDFLAGS: '-ambient',
         ...codeLoadingEnvironment,
@@ -458,13 +504,24 @@ describe('Gardenerless prerequisite contract', () => {
           expect(arguments_).toEqual(['setup-kcp'])
           expect(options.env).toMatchObject({
             PATH: '/trusted/tools:/usr/bin',
+            GOAUTH: 'off',
+            GOENV: 'off',
             GOMODCACHE: config.goModCacheDir,
             GOFLAGS: '-modcacherw',
+            GOPROXY: 'https://proxy.golang.org,direct',
+            GOSUMDB: 'sum.golang.org',
+            GOTOOLCHAIN: 'auto',
             GOWORK: 'off',
             GIT_ALLOW_PROTOCOL: 'https',
           })
           expect(options.env.KUBECONFIG).toBeUndefined()
           expect(options.env.BUILDFLAGS).toBeUndefined()
+          expect(options.env.GOCACHE).toBeUndefined()
+          expect(options.env.GOINSECURE).toBeUndefined()
+          expect(options.env.GONOPROXY).toBeUndefined()
+          expect(options.env.GONOSUMDB).toBeUndefined()
+          expect(options.env.GOPATH).toBeUndefined()
+          expect(options.env.GOPRIVATE).toBeUndefined()
           expect(realpathSync(options.env.GOMODCACHE)).toBe(config.goModCacheDir)
           mkdirSync(join(config.runtimeDir, '.kcp'), { recursive: true })
           mkdirSync(join(config.runtimeDir, 'bin'))

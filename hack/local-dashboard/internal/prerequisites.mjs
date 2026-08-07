@@ -290,10 +290,34 @@ export async function setupKcpRuntime (configuration, environment, stdio, garden
     sanitizedGardenerlessEnvironment(configuration, environment),
   )
   ensureManagedChildDirectory(configuration.goModCacheDir, configuration.managedRoot)
-  delete setupEnvironment.BUILDFLAGS
-  setupEnvironment.GOMODCACHE = configuration.goModCacheDir
-  setupEnvironment.GOFLAGS = '-modcacherw'
-  setupEnvironment.GOWORK = 'off'
+  for (const key of [
+    'BUILDFLAGS',
+    'GO111MODULE',
+    'GOAUTH',
+    'GOCACHE',
+    'GOENV',
+    'GOINSECURE',
+    'GONOPROXY',
+    'GONOSUMDB',
+    'GOPATH',
+    'GOPRIVATE',
+    'GOPROXY',
+    'GOSUMDB',
+    'GOTOOLCHAIN',
+    'GOVCS',
+  ]) {
+    delete setupEnvironment[key]
+  }
+  Object.assign(setupEnvironment, {
+    GOAUTH: 'off',
+    GOENV: 'off',
+    GOFLAGS: '-modcacherw',
+    GOMODCACHE: configuration.goModCacheDir,
+    GOPROXY: 'https://proxy.golang.org,direct',
+    GOSUMDB: 'sum.golang.org',
+    GOTOOLCHAIN: 'auto',
+    GOWORK: 'off',
+  })
   await run(`${configuration.checkoutDir}/gardenerless-setup.sh`, ['setup-kcp'], {
     cwd: configuration.checkoutDir,
     env: setupEnvironment,

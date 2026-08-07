@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { randomBytes } from 'node:crypto'
+import {
+  X509Certificate,
+  randomBytes,
+} from 'node:crypto'
 import {
   lstatSync,
   mkdirSync,
@@ -19,6 +22,7 @@ import {
   relative,
   resolve,
 } from 'node:path'
+import { createSecureContext } from 'node:tls'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
@@ -88,8 +92,10 @@ const BACKEND_ENVIRONMENT_KEYS = [
 const GIT_LOCAL_ENVIRONMENT_KEYS = [
   'GIT_ALTERNATE_OBJECT_DIRECTORIES',
   'GIT_CONFIG',
+  'GIT_CONFIG_GLOBAL',
   'GIT_CONFIG_PARAMETERS',
   'GIT_CONFIG_COUNT',
+  'GIT_CONFIG_SYSTEM',
   'GIT_OBJECT_DIRECTORY',
   'GIT_DIR',
   'GIT_WORK_TREE',
@@ -238,6 +244,19 @@ export function assertReusableFrontendCertificates (sslDirectory = FRONTEND_SSL_
   for (const filename of ['ca.pem', 'key.pem', 'cert.pem']) {
     assertSafeFile(join(sslDirectory, filename), `frontend certificate ${filename}`)
   }
+  const key = readFileSync(join(sslDirectory, 'key.pem'))
+  const certificatePem = readFileSync(join(sslDirectory, 'cert.pem'))
+  let certificate
+  try {
+    createSecureContext({ key, cert: certificatePem })
+    certificate = new X509Certificate(certificatePem)
+  } catch (error) {
+    fail(`frontend TLS key and certificate are invalid: ${error.message}`)
+  }
+  const now = new Date()
+  if (now < certificate.validFromDate || now >= certificate.validToDate) {
+    fail(`frontend TLS certificate is not currently valid: ${join(sslDirectory, 'cert.pem')}`)
+  }
   return sslDirectory
 }
 
@@ -301,6 +320,8 @@ export function gitEnvironment (env = process.env) {
     [...GIT_LOCAL_ENVIRONMENT_KEYS, ...SUBPROCESS_CODE_LOADING_ENVIRONMENT_KEYS],
   )
   environment.GIT_NO_REPLACE_OBJECTS = '1'
+  environment.GIT_CONFIG_GLOBAL = '/dev/null'
+  environment.GIT_CONFIG_NOSYSTEM = '1'
   return environment
 }
 
