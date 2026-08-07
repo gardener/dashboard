@@ -50,8 +50,12 @@ describe('components', () => {
       expect(wrapper.classes()).toContain('fluid')
 
       field.vm.$emit('update:modelValue', 'provider:aws')
+      await field.trigger('keyup.esc')
       await wrapper.vm.$nextTick()
-      expect(wrapper.emitted('update:modelValue')).toEqual([['provider:aws']])
+      expect(wrapper.emitted('update:modelValue')).toEqual([
+        ['provider:aws'],
+        [''],
+      ])
     })
   })
 })

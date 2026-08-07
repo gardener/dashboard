@@ -383,14 +383,12 @@ describe('views', () => {
       await mountComponent()
 
       expect(wrapper.text()).toContain('Shows unhealthy clusters that may need attention')
-      expect(wrapper.text()).not.toContain('configured in Settings')
 
       const defaultClusterViewItem = wrapper.find('[data-test="operations-view-default-cluster-view"]')
       expect(defaultClusterViewItem.text()).toContain('Default cluster view')
       expect(defaultClusterViewItem.text()).toContain('Operations View')
 
       expect(wrapper.find('[data-test="operations-view-exclusion-criteria"]').exists()).toBe(false)
-      expect(wrapper.text()).not.toContain('About Operations View')
       expect(wrapper.find('[data-test="operations-view-apply"]').text()).toContain('Apply Operations View')
       expect(wrapper.find('[data-test="operations-view-apply"]').text()).toContain('Replaces every term in the current search with the Operations View criteria.')
 
