@@ -5348,10 +5348,16 @@ __metadata:
   resolution: "gardener-dashboard@workspace:."
   dependencies:
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
+    "@vitest/coverage-v8": "npm:^4.0.0"
+    "@vitest/eslint-plugin": "npm:^1.6.15"
     eslint: "npm:^9.11.0"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-import-newlines: "npm:^1.4.0"
+    eslint-plugin-security: "npm:^3.0.1"
     husky: "npm:^9.1.7"
     jsdom: "npm:^26.0.0"
     lodash-es: "npm:^4.17.21"
+    neostandard: "npm:^0.13.0"
     vitest: "npm:^4.0.0"
   dependenciesMeta:
     deasync:

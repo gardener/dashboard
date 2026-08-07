@@ -6,21 +6,29 @@ We use [Vitest](https://vitest.dev/) as our testing framework.
 * Vitest collects code coverage information via `@vitest/coverage-v8`
 * Vitest supports snapshot testing out of the box
 * It works with Vue.js (jsdom environment) and Node.js projects
-* Each workspace has its own `vitest.config.js`
+* Each workspace and the `hack/` CLI boundary have their own Vitest configurations
 
 To execute all tests, simply run
-```
-yarn workspaces foreach --all run test
+```shell
+make test
 ```
 
 or to include test coverage generation
-```
-yarn workspaces foreach --all run test-coverage
+```shell
+make test-cov
 ```
 
 You can also run tests for frontend, backend and charts directly inside the respective folder via
-```
+```shell
 yarn test
+```
+
+The local Dashboard CLI has an independent Node test suite under `hack/`.
+Run it directly with:
+
+```shell
+yarn test:hack
+yarn test:hack:cov
 ```
 
 ### VS Code Integration
@@ -34,6 +42,8 @@ We use ESLint for static code analyzing.
 
 To execute, run
 
+```shell
+make lint
 ```
-yarn workspaces foreach --all run lint
-```
+
+Run only the local Dashboard CLI lint boundary with `yarn lint:hack`.

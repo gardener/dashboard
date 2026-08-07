@@ -20,6 +20,10 @@
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
   "scripts": {
+    "lint:hack": "eslint --config hack/eslint.config.cjs hack/eslint.config.cjs hack/local-dashboard.mjs hack/local-dashboard",
+    "lint:hack:sarif": "yarn lint:hack --format=@microsoft/eslint-formatter-sarif",
+    "test:hack": "vitest run --config hack/local-dashboard/vitest.config.mjs",
+    "test:hack:cov": "yarn test:hack --coverage",
     "serve": "yarn workspaces foreach --all --parallel --interlaced --include '@gardener-dashboard/frontend' --include '@gardener-dashboard/backend' run serve",
     "packages-test-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run test",
     "packages-lint-all": "yarn workspaces foreach --all --parallel --no-private --include 'packages/*' run lint",
@@ -35,9 +39,15 @@
   },
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-import-newlines": "^1.4.0",
+    "eslint-plugin-security": "^3.0.1",
     "husky": "^9.1.7",
     "jsdom": "^26.0.0",
+    "neostandard": "^0.13.0",
     "vitest": "^4.0.0"
   },
   "bin": {
