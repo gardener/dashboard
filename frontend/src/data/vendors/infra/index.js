@@ -8,6 +8,7 @@ import vsphere from './vsphere'
 import hcloud from './hcloud'
 import onmetal from './onmetal'
 import ironcore from './ironcore'
+import ironcoreMetal from './ironcore-metal'
 import stackit from './stackit'
 import local from './local'
 
@@ -22,6 +23,7 @@ export default [
   hcloud,
   onmetal,
   ironcore,
+  ironcoreMetal,
   stackit,
   local,
 ]
