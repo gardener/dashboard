@@ -559,6 +559,8 @@ describe('stores', () => {
           namespace: '_all',
           search: 'provider:aws',
         })
+        shootStore.setFocusMode(true)
+        const frozenUids = [...shootStore.state.froozenUids]
 
         vi.clearAllMocks()
 
@@ -574,13 +576,16 @@ describe('stores', () => {
         expect(mockEmitUnsubscribe).not.toHaveBeenCalled()
         expect(mockEmitSubscribe).not.toHaveBeenCalled()
         expect(mockGetShoots).not.toHaveBeenCalled()
+        expect(shootStore.focusMode).toBe(true)
+        expect(shootStore.state.froozenUids).toEqual(frozenUids)
       })
 
-      it('should coalesce equal ShootList targets while a replacement is closing', async () => {
+      it('should exit focus mode when coalescing equal ShootList targets during replacement', async () => {
         await shootStore.activateShootList({
           namespace: '_all',
           search: 'provider:aws',
         })
+        shootStore.setFocusMode(true)
 
         vi.clearAllMocks()
 
@@ -593,6 +598,8 @@ describe('stores', () => {
           namespace: '_all',
           search: 'health:unhealthy provider:aws',
         })
+        expect(shootStore.focusMode).toBe(false)
+        shootStore.setFocusMode(true)
         const secondActivation = shootStore.activateShootList({
           namespace: '_all',
           search: 'health:unhealthy provider:gcp',
@@ -600,6 +607,8 @@ describe('stores', () => {
 
         expect(mockEmitUnsubscribe).toHaveBeenCalledTimes(1)
         expect(Object.keys(shootStore.state.shoots)).toHaveLength(shootList.length)
+        expect(shootStore.focusMode).toBe(false)
+        expect(shootStore.state.froozenUids).toEqual([])
 
         finishClose()
         await Promise.all([firstActivation, secondActivation])

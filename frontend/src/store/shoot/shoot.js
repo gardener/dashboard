@@ -522,6 +522,9 @@ const useShootStore = defineStore('shoot', () => {
     if (isEqual(state.subscription, nextSubscription) && !state.subscriptionError) {
       return
     }
+    if (state.focusMode) {
+      shootStore.setFocusMode(false)
+    }
     if (isEqual(pendingShootListSubscription?.target, nextSubscription)) {
       return pendingShootListSubscription.promise
     }
