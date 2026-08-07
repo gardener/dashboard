@@ -95,6 +95,7 @@ describe('GSecretDialogGeneric', () => {
     providerType = 'openstack-designate',
     vendorType = 'dns',
     configuration,
+    slots,
   } = {}) {
     const SecretDialogStub = defineComponent({
       name: 'GSecretDialog',
@@ -148,6 +149,7 @@ describe('GSecretDialogGeneric', () => {
           VTextarea: TextareaStub,
         },
       },
+      slots,
     })
   }
 
@@ -319,5 +321,66 @@ describe('GSecretDialogGeneric', () => {
     expect(wrapper.find('textarea').exists()).toBe(false)
     expect(wrapper.get('.markdown').text()).toContain('authenticate with the Netlify DNS API')
     expect(wrapper.get('.markdown').text()).not.toContain('Injected runtime help')
+  })
+
+  it('renders custom help while keeping the configured input fields', async () => {
+    const wrapper = mountDialog({
+      providerType: 'netlify-dns',
+      slots: {
+        help: '<div data-test-id="custom-help">Custom help</div>',
+      },
+    })
+    await nextTick()
+
+    expect(wrapper.findComponent(GGenericInputFields).exists()).toBe(true)
+    expect(wrapper.get('[data-test-id="custom-help"]').text()).toBe('Custom help')
+    expect(wrapper.find('.markdown').exists()).toBe(false)
+  })
+
+  it('creates an AWS Secret through its configured fields', async () => {
+    const wrapper = mountDialog({
+      providerType: 'aws',
+      vendorType: 'infra',
+    })
+    await nextTick()
+
+    const fields = wrapper.getComponent(GGenericInputFields).props('fields')
+    expect(fields.map(({ key }) => key)).toEqual(['accessKeyID', 'secretAccessKey'])
+    expect(fields[1]).toMatchObject({
+      type: 'text',
+      sensitive: true,
+    })
+
+    const inputs = wrapper.findAll('input')
+    await inputs[0].setValue('AKIAIOSFODNN7EXAMPLE')
+    await inputs[1].setValue('wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY')
+
+    expect(secretContext.secretManifest.value.data).toEqual({
+      accessKeyID: encodeBase64('AKIAIOSFODNN7EXAMPLE'),
+      secretAccessKey: encodeBase64('wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY'),
+    })
+    expect(getSecretValidations().$invalid).toBe(false)
+  })
+
+  it('omits an empty optional Route53 region', async () => {
+    const wrapper = mountDialog({ providerType: 'aws-route53' })
+    await nextTick()
+
+    const fields = wrapper.getComponent(GGenericInputFields).props('fields')
+    expect(fields[2]).toMatchObject({
+      key: 'AWS_REGION',
+      omitWhenEmpty: true,
+    })
+
+    const inputs = wrapper.findAll('input')
+    await inputs[0].setValue('AKIAIOSFODNN7EXAMPLE')
+    await inputs[1].setValue('wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY')
+    await inputs[2].setValue('eu-central-1')
+    await inputs[2].setValue('')
+
+    expect(secretContext.secretManifest.value.data).toEqual({
+      accessKeyID: encodeBase64('AKIAIOSFODNN7EXAMPLE'),
+      secretAccessKey: encodeBase64('wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY'),
+    })
   })
 })

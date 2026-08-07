@@ -10,14 +10,23 @@ SPDX-License-Identifier: Apache-2.0
     v-if="visibleDialog"
     v-model="visibleDialogState"
     v-bind="{ credential: selectedDnsCredential, binding: selectedInfraBinding, providerType: visibleDialog, vendorType: visibleDialogVendorType }"
-  />
+  >
+    <template
+      v-if="resolvedHelpComponent"
+      #help
+    >
+      <component
+        :is="resolvedHelpComponent"
+        :provider-type="visibleDialog"
+      />
+    </template>
+  </component>
 </template>
 
 <script>
 import { defineAsyncComponent } from 'vue'
 
 const GcpDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGcp'))
-const AwsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogAws'))
 const AzureDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogAzure'))
 const OpenstackDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogOpenstack'))
 const AlicloudDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogAlicloud'))
@@ -31,6 +40,7 @@ const PowerdnsDialog = defineAsyncComponent(() => import('@/components/Credentia
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
 const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
 const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
+const AwsHelp = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHelpAws'))
 
 export default {
   props: {
@@ -47,7 +57,6 @@ export default {
     resolvedComponent () {
       switch (this.visibleDialog) {
         // Infra Secret Dialogs
-        case 'aws': return AwsDialog
         case 'azure': return AzureDialog
         case 'gcp': return GcpDialog
         case 'openstack': return OpenstackDialog
@@ -57,7 +66,6 @@ export default {
         case 'hcloud': return HcloudDialog
 
         // DNS Secret Dialogs
-        case 'aws-route53': return AwsDialog
         case 'azure-dns': return AzureDialog
         case 'azure-private-dns': return AzureDialog
         case 'google-clouddns': return GcpDialog
@@ -74,6 +82,15 @@ export default {
         case 'migrate-secret-binding': return MigrationDialog
 
         default: return GenericDialog
+      }
+    },
+    resolvedHelpComponent () {
+      switch (this.visibleDialog) {
+        case 'aws':
+        case 'aws-route53':
+          return AwsHelp
+        default:
+          return undefined
       }
     },
   },

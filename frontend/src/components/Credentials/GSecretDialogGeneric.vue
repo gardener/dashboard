@@ -26,20 +26,22 @@ SPDX-License-Identifier: Apache-2.0
       />
     </template>
     <template #help-slot>
-      <!-- eslint-disable vue/no-v-html -->
-      <div
-        v-if="helpHtml"
-        class="markdown"
-        v-html="helpHtml"
-      />
-      <div v-else>
-        <p>
-          This is a generic secret dialog.
-        </p>
-        <p>
-          Please enter data required for <code>{{ vendorName }}</code>.
-        </p>
-      </div>
+      <slot name="help">
+        <!-- eslint-disable vue/no-v-html -- HTML comes exclusively from static vendor definitions and cannot be controlled by users. -->
+        <div
+          v-if="helpHtml"
+          class="markdown"
+          v-html="helpHtml"
+        />
+        <div v-else>
+          <p>
+            This is a generic secret dialog.
+          </p>
+          <p>
+            Please enter data required for <code>{{ vendorName }}</code>.
+          </p>
+        </div>
+      </slot>
     </template>
   </g-secret-dialog>
 </template>

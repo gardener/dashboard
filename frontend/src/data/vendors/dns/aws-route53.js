@@ -1,3 +1,9 @@
+import {
+  accessKeyIdDetail,
+  accessKeyIdField,
+  secretAccessKeyField,
+} from '../infra/aws'
+
 export default {
   name: 'aws-route53',
   displayName: 'Amazon Route53',
@@ -5,11 +11,17 @@ export default {
   icon: 'aws-route53.svg',
   secret: {
     details: [
+      accessKeyIdDetail,
+    ],
+    fields: [
+      accessKeyIdField,
+      secretAccessKeyField,
       {
-        label: 'Access Key ID',
-        valueFrom: {
-          key: ['accessKeyID'],
-        },
+        key: 'AWS_REGION',
+        label: 'Region (optional)',
+        hint: 'Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1',
+        type: 'text',
+        omitWhenEmpty: true,
       },
     ],
   },

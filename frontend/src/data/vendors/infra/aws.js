@@ -1,3 +1,53 @@
+export const accessKeyIdDetail = {
+  label: 'Access Key ID',
+  valueFrom: {
+    key: ['accessKeyID'],
+  },
+}
+
+export const accessKeyIdField = {
+  key: 'accessKeyID',
+  label: 'Access Key ID',
+  hint: 'e.g. AKIAIOSFODNN7EXAMPLE',
+  type: 'text',
+  validators: {
+    required: {
+      type: 'required',
+    },
+    minLength: {
+      type: 'minLength',
+      length: 16,
+    },
+    maxLength: {
+      type: 'maxLength',
+      length: 128,
+    },
+    alphaNumUnderscore: {
+      type: 'alphaNumUnderscore',
+    },
+  },
+}
+
+export const secretAccessKeyField = {
+  key: 'secretAccessKey',
+  label: 'Secret Access Key',
+  hint: 'e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY',
+  type: 'text',
+  sensitive: true,
+  validators: {
+    required: {
+      type: 'required',
+    },
+    minLength: {
+      type: 'minLength',
+      length: 40,
+    },
+    base64: {
+      type: 'base64',
+    },
+  },
+}
+
 export default {
   name: 'aws',
   displayName: 'AWS',
@@ -5,12 +55,11 @@ export default {
   icon: 'aws.svg',
   secret: {
     details: [
-      {
-        label: 'Access Key ID',
-        valueFrom: {
-          key: ['accessKeyID'],
-        },
-      },
+      accessKeyIdDetail,
+    ],
+    fields: [
+      accessKeyIdField,
+      secretAccessKeyField,
     ],
   },
 }
