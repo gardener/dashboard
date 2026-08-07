@@ -92,6 +92,15 @@ describe('components', () => {
       expect(wrapper.vm.operationsView.state).toBe('active')
     })
 
+    it.each([
+      { description: 'negated-equivalent', modelValue: '-health:healthy', state: 'active' },
+      { description: 'zero-term', modelValue: ' \t\n ', state: 'all' },
+    ])('classifies a $description search', ({ modelValue, state }) => {
+      const wrapper = mountToolbar({ modelValue })
+
+      expect(wrapper.vm.operationsView.state).toBe(state)
+    })
+
     it('uses the toolbar text variant for the create action', () => {
       const wrapper = mountToolbar({
         canCreateShoots: true,

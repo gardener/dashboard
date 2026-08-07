@@ -255,13 +255,13 @@ import {
   ref,
 } from 'vue'
 
+import { parseShootSearch } from '@/store/shoot/helper'
 import { buildSearchTerms } from '@/store/shoot/search'
 
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GTableSearch from '@/components/GTableSearch.vue'
 
 import { useShootListFilters } from '@/composables/useShootListFilters'
-import { tokenizeSearch } from '@/composables/useTableFilter/helper'
 
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
@@ -324,8 +324,12 @@ const operationsViewSearch = computed(() => {
   return buildSearchTerms(operationsViewFilters.value)
 })
 
+function canonicalSearchTerms (search) {
+  return sortBy(parseShootSearch(search).terms, ['field', 'value', 'exact', 'exclude'])
+}
+
 const operationsViewSearchTerms = computed(() => {
-  return sortBy(tokenizeSearch(operationsViewSearch.value))
+  return canonicalSearchTerms(operationsViewSearch.value)
 })
 
 const defaultClusterViewLabel = computed(() => {
@@ -335,7 +339,8 @@ const defaultClusterViewLabel = computed(() => {
 })
 
 const operationsView = computed(() => {
-  if (props.modelValue === '') {
+  const shootSearchTerms = canonicalSearchTerms(props.modelValue)
+  if (!shootSearchTerms.length) {
     return {
       state: 'all',
       isApplied: false,
@@ -348,7 +353,6 @@ const operationsView = computed(() => {
     }
   }
 
-  const shootSearchTerms = sortBy(tokenizeSearch(props.modelValue))
   if (isEqual(shootSearchTerms, operationsViewSearchTerms.value)) {
     return {
       state: 'active',
@@ -362,7 +366,7 @@ const operationsView = computed(() => {
   }
 
   const hasOperationsViewTerms = operationsViewSearchTerms.value.every(searchTerm => {
-    return shootSearchTerms.includes(searchTerm)
+    return shootSearchTerms.some(shootSearchTerm => isEqual(shootSearchTerm, searchTerm))
   })
   if (hasOperationsViewTerms) {
     return {
