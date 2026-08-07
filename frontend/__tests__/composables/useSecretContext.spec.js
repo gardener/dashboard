@@ -12,12 +12,16 @@ import {
   setActivePinia,
   createPinia,
 } from 'pinia'
+import { dump as yamlDump } from 'js-yaml'
 
 import { useAuthzStore } from '@/store/authz'
 
 import { createSecretContextComposable } from '@/composables/credential/useSecretContext'
 
-import { encodeBase64 } from '@/utils'
+import {
+  decodeBase64,
+  encodeBase64,
+} from '@/utils'
 
 describe('composables', () => {
   describe('useSecretContext', () => {
@@ -106,7 +110,7 @@ describe('composables', () => {
       })
     })
 
-    it('should update secretData vis secretStringData, null values shall not be encoded', async () => {
+    it('keeps the legacy falsy-value behavior of secretStringData unchanged', () => {
       secretContext.setSecretManifest({
         metadata: {
           name: 'my-secret',
@@ -119,12 +123,114 @@ describe('composables', () => {
 
       secretContext.secretStringData = {
         password: 'mypassword',
-        token: null,
+        empty: '',
+        zero: 0,
+        bool: false,
+        nil: null,
       }
 
       expect(secretContext.secretData).toEqual({
         password: encodeBase64('mypassword'),
-        token: undefined,
+        empty: undefined,
+        zero: undefined,
+        bool: undefined,
+        nil: undefined,
+      })
+      expect(secretContext.secretManifest.data).toEqual({
+        password: encodeBase64('mypassword'),
+      })
+    })
+
+    it('decodes only configured fields and keeps invalid structured values as text', () => {
+      const fields = [
+        { key: 'token', type: 'text' },
+        { key: 'jsonConfig', type: 'json' },
+        { key: 'yamlConfig', type: 'yaml' },
+        { key: 'invalidJson', type: 'json' },
+        { key: 'jsonArray', type: 'json' },
+        { key: 'yamlScalar', type: 'yaml' },
+      ]
+      secretContext.setSecretManifest({
+        data: {
+          token: encodeBase64('my-token'),
+          jsonConfig: encodeBase64('{"clientId":"client-id"}'),
+          yamlConfig: encodeBase64('endpoint: https://example.org\n'),
+          invalidJson: encodeBase64('{invalid'),
+          jsonArray: encodeBase64('["item"]'),
+          yamlScalar: encodeBase64('scalar'),
+          unmanaged: encodeBase64('keep-me'),
+        },
+      })
+
+      expect(secretContext.getSecretFieldValues(fields)).toEqual({
+        token: 'my-token',
+        jsonConfig: { clientId: 'client-id' },
+        yamlConfig: { endpoint: 'https://example.org' },
+        invalidJson: '{invalid',
+        jsonArray: '["item"]',
+        yamlScalar: 'scalar',
+      })
+    })
+
+    it('encodes configured fields while preserving unmanaged Secret data', () => {
+      const fields = [
+        { key: 'token', type: 'text' },
+        { key: 'jsonConfig', type: 'json' },
+        { key: 'yamlConfig', type: 'yaml' },
+      ]
+      const unmanagedValue = encodeBase64('keep-me')
+      secretContext.setSecretManifest({
+        data: {
+          token: encodeBase64('old-token'),
+          unmanaged: unmanagedValue,
+        },
+      })
+
+      secretContext.setSecretFieldValues(fields, {
+        token: 'new-token',
+        jsonConfig: { clientId: 'client-id' },
+        yamlConfig: { endpoint: 'https://example.org' },
+      })
+
+      expect(secretContext.secretData).toEqual({
+        token: encodeBase64('new-token'),
+        jsonConfig: encodeBase64(JSON.stringify({ clientId: 'client-id' })),
+        yamlConfig: encodeBase64(yamlDump({ endpoint: 'https://example.org' })),
+        unmanaged: unmanagedValue,
+      })
+      expect(JSON.parse(decodeBase64(secretContext.secretData.jsonConfig))).toEqual({
+        clientId: 'client-id',
+      })
+    })
+
+    it('omits only configured values that are nullish or marked omitWhenEmpty', () => {
+      const fields = [
+        { key: 'retainedEmpty', type: 'text' },
+        { key: 'omittedEmpty', type: 'text', omitWhenEmpty: true },
+        { key: 'omittedNull', type: 'text' },
+      ]
+      const unmanagedValue = encodeBase64('keep-me')
+      secretContext.setSecretManifest({
+        data: {
+          retainedEmpty: encodeBase64('old-value'),
+          omittedEmpty: encodeBase64('old-value'),
+          omittedNull: encodeBase64('old-value'),
+          unmanaged: unmanagedValue,
+        },
+      })
+
+      secretContext.setSecretFieldValues(fields, {
+        retainedEmpty: '',
+        omittedEmpty: '',
+        omittedNull: null,
+      })
+
+      expect(secretContext.secretData).toEqual({
+        retainedEmpty: encodeBase64(''),
+        unmanaged: unmanagedValue,
+      })
+      expect(secretContext.getSecretFieldValues(fields)).toEqual({
+        retainedEmpty: '',
       })
     })
 

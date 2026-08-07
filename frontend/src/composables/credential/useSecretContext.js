@@ -13,6 +13,10 @@ import {
   inject,
   provide,
 } from 'vue'
+import {
+  dump as yamlDump,
+  load as yamlLoad,
+} from 'js-yaml'
 
 import { useAuthzStore } from '@/store/authz'
 
@@ -24,6 +28,10 @@ import {
   decodeBase64,
   encodeBase64,
 } from '@/utils'
+import {
+  isStructuredFieldType,
+  isYamlFieldType,
+} from '@/utils/inputFieldTypes'
 
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
@@ -31,6 +39,42 @@ import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
 import mapValues from 'lodash/mapValues'
 
+function parseSecretFieldValue (value, field) {
+  if (!isStructuredFieldType(field?.type) || typeof value !== 'string' || !value) {
+    return value
+  }
+
+  try {
+    const parsed = isYamlFieldType(field.type)
+      ? yamlLoad(value)
+      : JSON.parse(value)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed
+    }
+  } catch (err) {
+    // Keep the raw value so the structured input can show and validate it.
+  }
+
+  return value
+}
+
+function encodeSecretFieldValue (value, field) {
+  if (value == null || (value === '' && field?.omitWhenEmpty)) {
+    return undefined
+  }
+  if (typeof value === 'string') {
+    return encodeBase64(value)
+  }
+  if (isYamlFieldType(field.type)) {
+    return encodeBase64(yamlDump(value))
+  }
+  return encodeBase64(JSON.stringify(value))
+}
+
+/**
+ * Creates reactive state and helpers for editing Kubernetes Secret manifests.
+ * String and structured field helpers handle base64 decoding and encoding.
+ */
 export function createSecretContextComposable (options = {}) {
   const {
     authzStore = useAuthzStore(),
@@ -122,12 +166,44 @@ export function createSecretContextComposable (options = {}) {
     },
   })
 
+  function getSecretFieldValues (fieldDefinitions = []) {
+    const data = secretData.value ?? {}
+    const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
+
+    return Object.fromEntries(
+      fields
+        .filter(field => Object.hasOwn(data, field.key))
+        .map(field => {
+          const encodedValue = data[field.key]
+          const value = encodedValue == null
+            ? undefined
+            : decodeBase64(encodedValue)
+          return [field.key, parseSecretFieldValue(value, field)]
+        }),
+    )
+  }
+
+  function setSecretFieldValues (fieldDefinitions = [], fieldValues) {
+    const nextData = { ...secretData.value }
+    const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
+
+    for (const field of fields) {
+      const encodedValue = encodeSecretFieldValue(fieldValues?.[field.key], field)
+      if (encodedValue === undefined) {
+        delete nextData[field.key]
+      } else {
+        nextData[field.key] = encodedValue
+      }
+    }
+
+    secretData.value = nextData
+  }
+
   /**
-   * Creates a set of refs for string-based secret data fields. Each key in
-   * `keyMapping` maps a key in the `.data` object to a variable name. The
-   * composable automatically handles base64 decoding/encoding.
+   * Creates refs that two-way sync with Secret data keys.
+   * Keys in `keyMapping` map Secret data keys to ref names.
    *
-   * Example `keyMapping`: { 'accessKey': 'accessKeyRef', 'secretKey': 'secretKeyRef' }
+   * Example: { accessKey: 'accessKeyRef', secretKey: 'secretKeyRef' }
    */
   function secretStringDataRefs (keyMapping) {
     const refs = {}
@@ -170,6 +246,8 @@ export function createSecretContextComposable (options = {}) {
     secretNamespace,
     secretData,
     secretStringData,
+    getSecretFieldValues,
+    setSecretFieldValues,
     secretStringDataRefs,
     dnsSecretProviderType,
   }

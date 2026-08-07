@@ -13,6 +13,9 @@ import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { load as yamlLoad } from 'js-yaml'
 
+import { useConfigStore } from '@/store/config'
+
+import GGenericInputFields from '@/components/GGenericInputFields'
 import GSecretDialogGeneric from '@/components/Credentials/GSecretDialogGeneric'
 
 import { useSecretContext } from '@/composables/credential/useSecretContext'
@@ -40,11 +43,59 @@ const TextareaStub = {
   `,
 }
 
+const TextFieldStub = {
+  name: 'VTextField',
+  props: {
+    modelValue: {
+      type: [String, Number, Boolean],
+    },
+    type: {
+      type: String,
+    },
+    autocomplete: {
+      type: String,
+    },
+    appendIcon: {
+      type: String,
+    },
+    errorMessages: {
+      type: Array,
+    },
+  },
+  emits: [
+    'update:modelValue',
+    'blur',
+    'click:append',
+  ],
+  template: `
+    <div>
+      <input
+        :value="modelValue"
+        :type="type"
+        :autocomplete="autocomplete"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @blur="$emit('blur')"
+      />
+      <button
+        v-if="appendIcon"
+        class="append-icon"
+        type="button"
+        @click="$emit('click:append')"
+      />
+    </div>
+  `,
+}
+
 describe('GSecretDialogGeneric', () => {
   let secretContext
   let getSecretValidations
 
-  function mountDialog ({ credential } = {}) {
+  function mountDialog ({
+    credential,
+    providerType = 'openstack-designate',
+    vendorType = 'dns',
+    configuration,
+  } = {}) {
     const SecretDialogStub = defineComponent({
       name: 'GSecretDialog',
       props: {
@@ -67,22 +118,33 @@ describe('GSecretDialogGeneric', () => {
           }
         })
       },
-      template: '<div><slot name="secret-slot" /></div>',
+      template: `
+        <div>
+          <slot name="secret-slot" />
+          <slot name="help-slot" />
+        </div>
+      `,
     })
+
+    const pinia = createTestingPinia({ stubActions: false })
+    if (configuration) {
+      useConfigStore(pinia).setConfiguration(configuration)
+    }
 
     return mount(GSecretDialogGeneric, {
       props: {
         credential,
         modelValue: true,
-        providerType: 'generic-provider',
-        vendorType: 'dns',
+        providerType,
+        vendorType,
       },
       global: {
         plugins: [
-          createTestingPinia(),
+          pinia,
         ],
         stubs: {
           GSecretDialog: SecretDialogStub,
+          VTextField: TextFieldStub,
           VTextarea: TextareaStub,
         },
       },
@@ -147,5 +209,115 @@ describe('GSecretDialogGeneric', () => {
         token: encodeBase64('new-token'),
       },
     })
+  })
+
+  it('creates a Netlify Secret through its configured sensitive field', async () => {
+    const wrapper = mountDialog({ providerType: 'netlify-dns' })
+    await nextTick()
+
+    expect(wrapper.getComponent(GGenericInputFields).props('fields')).toEqual([
+      {
+        key: 'apiToken',
+        label: 'Netlify API Token',
+        type: 'text',
+        sensitive: true,
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+    ])
+
+    const textField = wrapper.getComponent(TextFieldStub)
+    expect(textField.props()).toMatchObject({
+      type: 'password',
+      autocomplete: 'off',
+      appendIcon: 'mdi-eye',
+    })
+    expect(getSecretValidations().$invalid).toBe(true)
+
+    await wrapper.get('input').setValue('new-token')
+
+    expect(secretContext.secretManifest.value.data).toEqual({
+      apiToken: encodeBase64('new-token'),
+    })
+    expect(getSecretValidations().$invalid).toBe(false)
+
+    await wrapper.get('.append-icon').trigger('click')
+    expect(textField.props()).toMatchObject({
+      type: 'text',
+      appendIcon: 'mdi-eye-off',
+    })
+  })
+
+  it('updates a Netlify token without dropping unmanaged Secret data', async () => {
+    const unmanagedValue = encodeBase64('keep-me')
+    const credential = {
+      apiVersion: 'v1',
+      kind: 'Secret',
+      metadata: {
+        name: 'existing-netlify-secret',
+        namespace: 'garden-project',
+      },
+      type: 'Opaque',
+      data: {
+        apiToken: encodeBase64('old-token'),
+        unmanaged: unmanagedValue,
+      },
+    }
+    const wrapper = mountDialog({
+      credential,
+      providerType: 'netlify-dns',
+    })
+    await nextTick()
+
+    expect(wrapper.get('input').element.value).toBe('old-token')
+
+    await wrapper.get('input').setValue('new-token')
+
+    expect(secretContext.secretManifest.value.data).toEqual({
+      apiToken: encodeBase64('new-token'),
+      unmanaged: unmanagedValue,
+    })
+  })
+
+  it('renders the configured Netlify help as an external link', async () => {
+    const wrapper = mountDialog({ providerType: 'netlify-dns' })
+    await nextTick()
+
+    expect(wrapper.get('.markdown').text()).toContain('authenticate with the Netlify DNS API')
+    const link = wrapper.get('.markdown a')
+    expect(link.attributes()).toMatchObject({
+      href: 'https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui',
+      target: '_blank',
+      rel: 'noopener',
+    })
+    expect(wrapper.get('.markdown').text()).not.toContain('base64 encode')
+  })
+
+  it('does not allow runtime branding to replace Netlify field definitions or help', async () => {
+    const wrapper = mountDialog({
+      providerType: 'netlify-dns',
+      configuration: {
+        branding: {
+          dnsVendors: [
+            {
+              name: 'netlify-dns',
+              secret: {
+                fields: [],
+                help: '<p>Injected runtime help</p>',
+              },
+            },
+          ],
+        },
+      },
+    })
+    await nextTick()
+
+    expect(wrapper.findComponent(GGenericInputFields).exists()).toBe(true)
+    expect(wrapper.find('textarea').exists()).toBe(false)
+    expect(wrapper.get('.markdown').text()).toContain('authenticate with the Netlify DNS API')
+    expect(wrapper.get('.markdown').text()).not.toContain('Injected runtime help')
   })
 })

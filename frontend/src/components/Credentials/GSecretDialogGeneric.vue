@@ -14,18 +14,30 @@ SPDX-License-Identifier: Apache-2.0
     :vendor-type="vendorType"
   >
     <template #secret-slot>
+      <g-generic-input-fields
+        v-if="providerFields?.length"
+        v-model="secretFieldValues"
+        :fields="providerFields"
+      />
       <g-generic-input-field
+        v-else
         v-model="secretStringData"
         :field="defaultInputField"
       />
     </template>
     <template #help-slot>
-      <div class="help-content">
+      <!-- eslint-disable vue/no-v-html -->
+      <div
+        v-if="helpHtml"
+        class="markdown"
+        v-html="helpHtml"
+      />
+      <div v-else>
         <p>
           This is a generic secret dialog.
         </p>
         <p>
-          Please enter data required for {{ vendorName }}.
+          Please enter data required for <code>{{ vendorName }}</code>.
         </p>
       </div>
     </template>
@@ -38,15 +50,19 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useConfigStore } from '@/store/config'
 
-import GSecretDialog from '@/components/Credentials/GSecretDialog'
 import GGenericInputField from '@/components/GGenericInputField'
+import GGenericInputFields from '@/components/GGenericInputFields'
+import GSecretDialog from '@/components/Credentials/GSecretDialog'
 
 import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
+import { transformHtml } from '@/utils'
+
 export default {
   components: {
-    GSecretDialog,
     GGenericInputField,
+    GGenericInputFields,
+    GSecretDialog,
   },
   props: {
     modelValue: {
@@ -71,10 +87,16 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringData } = useProvideSecretContext()
+    const {
+      secretStringData,
+      getSecretFieldValues,
+      setSecretFieldValues,
+    } = useProvideSecretContext()
 
     return {
       secretStringData,
+      getSecretFieldValues,
+      setSecretFieldValues,
       v$: useVuelidate(),
     }
   },
@@ -87,9 +109,21 @@ export default {
         this.$emit('update:modelValue', modelValue)
       },
     },
+    providerFields () {
+      return this.vendorSecretConfiguration?.fields
+    },
+    secretFieldValues: {
+      get () {
+        return this.getSecretFieldValues(this.providerFields)
+      },
+      set (value) {
+        this.setSecretFieldValues(this.providerFields, value)
+      },
+    },
     defaultInputField () {
       return {
         label: 'Secret Data',
+        hint: 'Provide secret data as YAML key-value pairs',
         type: 'yaml',
         sensitive: true,
         validators: {
@@ -102,34 +136,34 @@ export default {
         },
       }
     },
+    helpHtml () {
+      return transformHtml(this.vendorSecretConfiguration?.help)
+    },
     vendorName () {
       return this.vendorDisplayName({
         type: this.vendorType,
         name: this.providerType,
       })
     },
+    vendorSecretConfiguration () {
+      return this.vendorDetails({
+        type: this.vendorType,
+        name: this.providerType,
+      })?.secret
+    },
   },
   methods: {
-    ...mapActions(useConfigStore, ['vendorDisplayName']),
+    ...mapActions(useConfigStore, ['vendorDetails', 'vendorDisplayName']),
   },
 }
 </script>
 
 <style lang="scss" scoped>
 
-  .help-content {
-    ul {
-      margin-top: 20px;
-      margin-bottom: 20px;
-      list-style-type: none;
-      border-left: 4px solid #318334 !important;
-      margin-left: 20px;
-      padding-left: 24px;
-      li {
-        font-weight: 300;
-        font-size: 16px;
-      }
-    }
+.markdown {
+  :deep(p) {
+    margin: 0;
   }
+}
 
 </style>

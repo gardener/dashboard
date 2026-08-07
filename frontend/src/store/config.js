@@ -29,9 +29,16 @@ import isEmpty from 'lodash/isEmpty'
 import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
+import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 
 const logger = useLogger()
+
+const configurableVendorProperties = [
+  'displayName',
+  'weight',
+  'icon',
+]
 
 const wellKnownConditions = {
   APIServerAvailable: {
@@ -537,11 +544,11 @@ export const useConfigStore = defineStore('config', () => {
         const configuredVendor = find(confArr, ['name', name])
 
         detailsByName.set(name, {
-          type,
-          name,
           weight: Number.MAX_SAFE_INTEGER,
           ...knownVendor,
-          ...configuredVendor,
+          ...pick(configuredVendor, configurableVendorProperties),
+          type,
+          name,
         })
       }
 
