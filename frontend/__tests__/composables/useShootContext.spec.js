@@ -20,12 +20,15 @@ import { useSeedStore } from '@/store/seed'
 
 import { createShootContextComposable } from '@/composables/useShootContext'
 
+import infraProviders from '@/data/vendors/infra'
+
 import cloneDeep from 'lodash/cloneDeep'
 
 describe('composables', () => {
   let shootContextStore
   let configStore
   let seedStore
+  const infraProviderTypes = infraProviders.map(({ name }) => name)
 
   const systemTime = new Date('2024-03-15T14:00:00+01:00')
 
@@ -83,9 +86,11 @@ describe('composables', () => {
   }
 
   describe('useShootContext', () => {
-    it('should create a default "aws" shoot manifest', async () => {
-      expect(createShootManifest('aws')).toMatchSnapshot()
-    })
+    for (const providerType of infraProviderTypes) {
+      it(`should create a default "${providerType}" shoot manifest`, () => {
+        expect(createShootManifest(providerType)).toMatchSnapshot()
+      })
+    }
 
     it('should omit spec.addons if no addon is enabled', () => {
       createShootManifest('aws')
@@ -135,26 +140,6 @@ describe('composables', () => {
           enabled: true,
         },
       })
-    })
-
-    it('should create a default "azure" shoot manifest', async () => {
-      expect(createShootManifest('azure')).toMatchSnapshot()
-    })
-
-    it('should create a default "alicloud" shoot manifest', async () => {
-      expect(createShootManifest('alicloud')).toMatchSnapshot()
-    })
-
-    it('should create a default "gcp" shoot manifest', async () => {
-      expect(createShootManifest('gcp')).toMatchSnapshot()
-    })
-
-    it('should create a default "openstack" shoot manifest', async () => {
-      expect(createShootManifest('openstack')).toMatchSnapshot()
-    })
-
-    it('should create a default "ironcore" shoot manifest', async () => {
-      expect(createShootManifest('ironcore')).toMatchSnapshot()
     })
 
     it('should not mutate high availability state when reading or disabling it', () => {

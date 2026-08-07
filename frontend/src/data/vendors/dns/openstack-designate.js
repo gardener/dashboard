@@ -1,3 +1,5 @@
+import openstack from '../infra/openstack'
+
 export default {
   name: 'openstack-designate',
   displayName: 'OpenStack Designate',
@@ -18,5 +20,6 @@ export default {
         },
       },
     ],
+    fields: openstack.secret.fields,
   },
 }

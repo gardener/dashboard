@@ -5,12 +5,17 @@
 //
 
 import { nextTick } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import {
+  mount,
+  shallowMount,
+} from '@vue/test-utils'
 
 import GGenericInputField from '@/components/GGenericInputField'
 import GGenericInputFields from '@/components/GGenericInputFields'
 
 import { useLogger } from '@/composables/useLogger'
+
+const { createVuetifyPlugin } = global.fixtures.helper
 
 const TextFieldStub = {
   name: 'VTextField',
@@ -140,6 +145,42 @@ describe('GGenericInputFields', () => {
 
     emittedValue.regions.push('two')
     expect(defaultValue).toEqual(['one'])
+  })
+
+  it('shows a configured empty default as the selected item', async () => {
+    const wrapper = mount(GGenericInputFields, {
+      props: {
+        fields: [
+          {
+            key: 'AZURE_CLOUD',
+            label: 'Azure Cloud',
+            type: 'select',
+            defaultValue: '',
+            values: [
+              {
+                title: 'Provider default (Azure Public)',
+                value: '',
+              },
+              {
+                title: 'AzureChina',
+                value: 'AzureChina',
+              },
+            ],
+          },
+        ],
+        modelValue: {},
+      },
+      global: {
+        plugins: [
+          createVuetifyPlugin(),
+        ],
+      },
+    })
+
+    await nextTick()
+
+    expect(wrapper.findComponent({ name: 'VSelect' }).props('modelValue')).toBe('')
+    expect(wrapper.text()).toContain('Provider default (Azure Public)')
   })
 
   it('keeps existing field data over configured defaults without a redundant emit', async () => {
@@ -587,6 +628,11 @@ describe('GGenericInputField', () => {
           key: 'project_id',
           pattern: /^[a-z][a-z0-9-]+$/,
         },
+        accountType: {
+          type: 'hasObjectProp',
+          key: 'type',
+          value: 'service_account',
+        },
       },
     }
 
@@ -595,6 +641,7 @@ describe('GGenericInputField', () => {
 
     expect(field.validators.validObject).not.toHaveProperty('message')
     expect(field.validators.projectID).not.toHaveProperty('message')
+    expect(field.validators.accountType).not.toHaveProperty('message')
   })
 
   it('warns for unsupported validator types', async () => {

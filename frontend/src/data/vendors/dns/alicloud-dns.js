@@ -7,5 +7,16 @@ export default {
   icon: 'alicloud-dns.png',
   secret: {
     details: alicloud.secret.details,
+    fields: alicloud.secret.fields,
+    help: `
+      <p>
+        You need to provide an access key (access key ID and secret access key) for Alibaba Cloud to allow the dns-controller-manager to authenticate to Alibaba Cloud DNS.
+      </p>
+      <p>
+        For details see
+        <a href="https://github.com/aliyun/alibaba-cloud-sdk-go/blob/master/docs/2-Client-EN.md#accesskey-client">AccessKey Client</a>.
+        Currently the regionId is fixed to cn-shanghai.
+      </p>
+      `,
   },
 }
