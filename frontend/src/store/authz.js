@@ -173,17 +173,18 @@ export const useAuthzStore = defineStore('authz', () => {
     canCreateServiceAccounts.value
   })
 
-  const canListSeeds = computed(() => {
-    return canI(status.value, 'list', 'core.gardener.cloud', 'seeds')
-  })
-
-  const canAccessSeedStats = computed(() => {
+  // Landscape-wide operator read views currently use the seed stats access
+  // contract: list access to seeds plus cluster-wide list access to shoots.
+  function canViewLandscapeForStatus (status) {
     // Seeds are cluster-scoped — SSRR is reliable.
     // Shoots are namespace-scoped — SSRR can't distinguish namespace-only from
     // cluster-wide access, so use JWT-based canListShootsAllNamespaces (via SSAR) instead.
-    return canListSeeds.value &&
-      authnStore.canListShootsAllNamespaces
-  })
+    return canI(status, 'list', 'core.gardener.cloud', 'seeds') && authnStore.canListShootsAllNamespaces
+  }
+
+  function canViewLandscapeForNamespace (namespace) {
+    return canViewLandscapeForStatus(statusForNamespace(namespace))
+  }
 
   // Garden-namespace selectors
   const canGetManagedSeedAndShootInGarden = computed(() => {
@@ -191,10 +192,8 @@ export const useAuthzStore = defineStore('authz', () => {
       canI(gardenStatus.value, 'get', 'core.gardener.cloud', 'shoots')
   })
 
-  // Landscape-wide operator read views currently use the seed stats access
-  // contract: list access to seeds plus cluster-wide list access to shoots.
   const canViewLandscape = computed(() => {
-    return canAccessSeedStats.value
+    return canViewLandscapeForStatus(status.value)
   })
 
   const canCreateShootsAdminkubeconfigInGarden = computed(() => {
@@ -325,6 +324,7 @@ export const useAuthzStore = defineStore('authz', () => {
     // Garden-namespace selectors
     canGetManagedSeedAndShootInGarden,
     canViewLandscape,
+    canViewLandscapeForNamespace,
     canCreateShootsAdminkubeconfigInGarden,
     canCreateShootsViewerkubeconfigInGarden,
     canGetConfigMapsInGarden,

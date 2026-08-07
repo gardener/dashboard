@@ -52,6 +52,24 @@ describe('stores', () => {
       expect(authzStore.namespace).toBe('garden-target')
     })
 
+    it('evaluates landscape access against prepared rules before activation', async () => {
+      authnStore.user = { canListShootsAllNamespaces: true }
+      mockGetSubjectRules
+        .mockResolvedValueOnce(createRulesResponse([]))
+        .mockResolvedValueOnce(createRulesResponse([{
+          apiGroups: ['core.gardener.cloud'],
+          resources: ['seeds'],
+          verbs: ['list'],
+        }]))
+
+      await authzStore.fetchRules('garden-source')
+      await authzStore.prepareRules()
+
+      expect(authzStore.namespace).toBe('garden-source')
+      expect(authzStore.canViewLandscape).toBe(false)
+      expect(authzStore.canViewLandscapeForNamespace()).toBe(true)
+    })
+
     describe('canViewLandscape', () => {
       it('should return true when user can list seeds (SSRR) and list shoots cluster-wide (JWT)', async () => {
         authnStore.user = { canListShootsAllNamespaces: true }

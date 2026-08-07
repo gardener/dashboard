@@ -545,7 +545,7 @@ export function createRoutes () {
 
   /* Helper functions */
   function getFallbackRedirectIfNoSeedAccess (to, from) {
-    if (authzStore.canViewLandscape) {
+    if (authzStore.canViewLandscapeForNamespace(to.params.namespace ?? to.query.namespace)) {
       return
     }
 
