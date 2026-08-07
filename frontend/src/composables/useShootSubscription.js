@@ -107,7 +107,9 @@ export function useShootSubscription (options = {}) {
   })
 
   function retry () {
-    if (!connected.value && !active.value) {
+    if (subscriptionState.value === constants.CLOSING) {
+      shootStore.closeSubscription()
+    } else if (!connected.value && !active.value) {
       socketStore.connect()
     } else {
       shootStore.synchronize()

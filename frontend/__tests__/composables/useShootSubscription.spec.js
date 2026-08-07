@@ -34,5 +34,27 @@ describe('composables', () => {
       expect(kind.value).toBe('progress-subscribe')
       expect(message.value).toBe('Subscribing shoots ...')
     })
+
+    it('retries a failed subscription close', async () => {
+      setActivePinia(createPinia())
+      const shootStore = useShootStore()
+      const socketStore = useSocketStore()
+      const emitUnsubscribe = vi.spyOn(socketStore, 'emitUnsubscribe')
+        .mockRejectedValueOnce(new Error('failed to unsubscribe'))
+        .mockResolvedValue()
+
+      shootStore.state.subscription = { namespace: 'foo' }
+      shootStore.state.subscriptionState = constants.OPEN
+      await shootStore.closeSubscription()
+
+      const { kind, action, retry } = useShootSubscription({ shootStore, socketStore })
+      expect(kind.value).toBe('alert-subscribe')
+      expect(action.value).toBe('retry')
+
+      retry()
+      await vi.waitFor(() => expect(shootStore.subscriptionState).toBe(constants.CLOSED))
+      expect(emitUnsubscribe).toHaveBeenCalledTimes(3)
+      expect(shootStore.subscriptionError).toBeNull()
+    })
   })
 })
