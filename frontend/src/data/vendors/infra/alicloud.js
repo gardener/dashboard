@@ -81,43 +81,6 @@ export default {
       accessKeyIdField,
       accessKeySecretField,
     ],
-    fields: [
-      {
-        key: 'accessKeyID',
-        label: 'Access Key ID',
-        hint: 'e.g. QNJebZ17v5Q7pYpP',
-        type: 'text',
-        validators: {
-          required: {
-            type: 'required',
-          },
-          minLength: {
-            type: 'minLength',
-            length: 16,
-          },
-          maxLength: {
-            type: 'maxLength',
-            length: 128,
-          },
-        },
-      },
-      {
-        key: 'accessKeySecret',
-        label: 'Access Key Secret',
-        hint: 'e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz',
-        type: 'text',
-        sensitive: true,
-        validators: {
-          required: {
-            type: 'required',
-          },
-          minLength: {
-            type: 'minLength',
-            length: 30,
-          },
-        },
-      },
-    ],
     help: `
       <p>
         Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage

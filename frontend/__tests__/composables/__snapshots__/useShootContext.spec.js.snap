@@ -768,6 +768,66 @@ exports[`composables > useShootContext > should create a default "ironcore" shoo
 }
 `;
 
+exports[`composables > useShootContext > should create a default "ironcore-metal" shoot manifest 1`] = `
+{
+  "apiVersion": "core.gardener.cloud/v1beta1",
+  "kind": "Shoot",
+  "metadata": {
+    "name": "m6kgstc1b0",
+    "namespace": "garden-test",
+  },
+  "spec": {
+    "cloudProfile": {
+      "kind": "CloudProfile",
+      "name": "ironcore-metal",
+    },
+    "kubernetes": {
+      "version": "1.28.6",
+    },
+    "maintenance": {
+      "autoUpdate": {
+        "kubernetesVersion": true,
+        "machineImageVersion": true,
+      },
+      "timeWindow": {
+        "begin": "220000+0100",
+        "end": "230000+0100",
+      },
+    },
+    "networking": {
+      "nodes": "10.180.0.0/16",
+      "type": "calico",
+    },
+    "provider": {
+      "type": "ironcore-metal",
+      "workers": [
+        {
+          "cri": {
+            "name": "containerd",
+          },
+          "machine": {
+            "architecture": "amd64",
+            "image": {
+              "name": "gardenlinux",
+              "version": "1312.3.0",
+            },
+            "type": "ironcore-metal-small",
+          },
+          "maxSurge": 1,
+          "maximum": 2,
+          "minimum": 1,
+          "name": "worker-m6kgs",
+          "zones": [
+            "zone-1",
+          ],
+        },
+      ],
+    },
+    "region": "region-1",
+  },
+}
+`;
+
 exports[`composables > useShootContext > should create a default "local" shoot manifest 1`] = `
 {
   "apiVersion": "core.gardener.cloud/v1beta1",

@@ -308,6 +308,10 @@ const metalMachineTypes = [
   createMachineType({ name: 'c1-metal-medium', cpu: '4', memory: '8Gi' }),
 ]
 
+const ironcoreMetalMachineTypes = [
+  createMachineType({ name: 'ironcore-metal-small', cpu: '2', memory: '4Gi' }),
+]
+
 const onmetalMachineTypes = [
   createMachineType({ name: 'c1-onmetal-small', cpu: '2', memory: '4Gi' }),
   createMachineType({ name: 'c1-onmetal-medium', cpu: '4', memory: '8Gi' }),
@@ -743,6 +747,27 @@ export default [
         name: 'on01',
         zones: [
           createZone({ name: 'on01-a' }),
+        ],
+      }),
+    ],
+  }),
+  createCloudProfile({
+    metadataName: 'ironcore-metal',
+    displayName: 'IronCore Metal',
+    type: 'ironcore-metal',
+    seedNames: [
+      'ironcore-metal-ha',
+    ],
+    machineTypes: ironcoreMetalMachineTypes,
+    providerConfig: {
+      apiVersion: 'ironcore-metal.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'CloudProfileConfig',
+    },
+    regions: [
+      createRegion({
+        name: 'region-1',
+        zones: [
+          createZone({ name: 'zone-1' }),
         ],
       }),
     ],
