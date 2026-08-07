@@ -1,6 +1,6 @@
 export default {
-  name: 'stackit',
-  displayName: 'STACKIT',
+  name: 'stackit-dns',
+  displayName: 'STACKIT DNS',
   weight: 1100,
   icon: 'stackit.svg',
   secret: {
