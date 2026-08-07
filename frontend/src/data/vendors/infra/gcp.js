@@ -1,3 +1,38 @@
+export const projectDetail = {
+  label: 'Project',
+  valueFrom: {
+    key: ['serviceaccount.json'],
+    parse: 'json',
+    path: ['project_id'],
+  },
+}
+
+export const serviceAccountField = {
+  key: 'serviceaccount.json',
+  label: 'Service Account Key',
+  hint: 'Enter or drop a service account key in JSON format',
+  type: 'json',
+  sensitive: true,
+  validators: {
+    required: {
+      type: 'required',
+    },
+    isJSON: {
+      type: 'isValidObject',
+    },
+    projectID: {
+      type: 'hasObjectProp',
+      key: 'project_id',
+      pattern: /^[a-z][a-z0-9-]{4,28}[a-z0-9]$/,
+    },
+    type: {
+      type: 'hasObjectProp',
+      key: 'type',
+      value: 'service_account',
+    },
+  },
+}
+
 export default {
   name: 'gcp',
   displayName: 'Google Cloud',
@@ -5,14 +40,35 @@ export default {
   icon: 'gcp.svg',
   secret: {
     details: [
-      {
-        label: 'Project',
-        valueFrom: {
-          key: ['serviceaccount.json'],
-          parse: 'json',
-          path: ['project_id'],
-        },
-      },
+      projectDetail,
     ],
+    fields: [
+      serviceAccountField,
+    ],
+    help: `
+      <p>
+        A service account is a special account that can be used by services and applications running on your Google
+        Compute Engine instance to interact with other Google Cloud Platform APIs. Applications can use service
+        account credentials to authorize themselves to a set of APIs and perform actions within the permissions
+        granted to the service account and virtual machine instance.
+      </p>
+      <p>
+        Ensure that the service account has at least the roles below.
+      </p>
+      <ul>
+        <li>Service Account Admin</li>
+        <li>Service Account Token Creator</li>
+        <li>Service Account User</li>
+        <li>Compute Admin</li>
+      </ul>
+      <p>
+        The Service Account has to be enabled for the Google Identity and Access Management API.
+      </p>
+      <p>
+        Read the
+        <a href="https://cloud.google.com/compute/docs/access/service-accounts">Service Account Documentation</a>
+        on how to apply for credentials to service accounts.
+      </p>
+    `,
   },
 }

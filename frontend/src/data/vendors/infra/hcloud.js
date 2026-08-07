@@ -10,5 +10,28 @@ export default {
         hidden: true,
       },
     ],
+    fields: [
+      {
+        key: 'hcloudToken',
+        label: 'Hetzner Cloud Token',
+        type: 'text',
+        sensitive: true,
+        validators: {
+          required: {
+            type: 'required',
+          },
+        },
+      },
+    ],
+    help: `
+      <p>
+        Before you can provision and access a Kubernetes cluster on Hetzner Cloud, you need to add a Hetzner Cloud token.
+        The Gardener needs these credentials to provision and operate Hetzner Cloud infrastructure for your Kubernetes cluster.
+      </p>
+      <p>
+        Please read the
+        <a href="https://www.hetzner.com/cloud">Hetzner Cloud Documentation</a>.
+      </p>
+    `,
   },
 }

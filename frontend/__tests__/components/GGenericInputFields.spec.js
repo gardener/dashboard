@@ -142,6 +142,33 @@ describe('GGenericInputFields', () => {
     expect(defaultValue).toEqual(['one'])
   })
 
+  it('initializes a select field with an empty configured default', async () => {
+    const wrapper = mountInputFields({
+      fields: [
+        {
+          key: 'AZURE_CLOUD',
+          label: 'Azure Cloud',
+          type: 'select',
+          defaultValue: '',
+          values: [
+            {
+              title: 'Provider default (Azure Public)',
+              value: '',
+            },
+          ],
+        },
+      ],
+      modelValue: {},
+    })
+
+    await nextTick()
+
+    expect(lastEmittedValue(wrapper)).toEqual({
+      AZURE_CLOUD: '',
+    })
+    expect(wrapper.findComponent(GGenericInputField).props('modelValue')).toBe('')
+  })
+
   it('keeps existing field data over configured defaults without a redundant emit', async () => {
     const wrapper = mountInputFields({
       fields: [
@@ -587,6 +614,11 @@ describe('GGenericInputField', () => {
           key: 'project_id',
           pattern: /^[a-z][a-z0-9-]+$/,
         },
+        accountType: {
+          type: 'hasObjectProp',
+          key: 'type',
+          value: 'service_account',
+        },
       },
     }
 
@@ -595,6 +627,7 @@ describe('GGenericInputField', () => {
 
     expect(field.validators.validObject).not.toHaveProperty('message')
     expect(field.validators.projectID).not.toHaveProperty('message')
+    expect(field.validators.accountType).not.toHaveProperty('message')
   })
 
   it('warns for unsupported validator types', async () => {

@@ -57,6 +57,14 @@ describe('secretDetails', () => {
     ...dnsProviders,
   ]
 
+  function providerConfig (name) {
+    return providerConfigs.find(config => config.name === name)
+  }
+
+  function secretField (providerName, fieldKey) {
+    return providerConfig(providerName).secret.fields.find(field => field.key === fieldKey)
+  }
+
   it('matches snapshots for all known provider types (including unhandled types)', () => {
     const secret = {
       data: createSecretData(),
@@ -212,5 +220,51 @@ describe('secretDetails', () => {
         value: undefined,
       },
     ])
+  })
+
+  it.each([
+    'alicloud',
+    'azure',
+    'gcp',
+    'hcloud',
+    'metal',
+    'vsphere',
+    'alicloud-dns',
+    'azure-dns',
+    'azure-private-dns',
+    'cloudflare-dns',
+    'google-clouddns',
+    'infoblox-dns',
+    'powerdns',
+    'rfc2136',
+  ])('defines generic input fields for %s', providerName => {
+    expect(providerConfig(providerName).secret.fields.length).toBeGreaterThan(0)
+  })
+
+  it('preserves provider-specific validators and empty defaults', () => {
+    expect(secretField('alicloud', 'accessKeyID').validators).toMatchObject({
+      required: { type: 'required' },
+      minLength: { type: 'minLength', length: 16 },
+      maxLength: { type: 'maxLength', length: 128 },
+    })
+    expect(secretField('azure', 'clientID').validators.guid).toEqual({ type: 'guid' })
+    expect(secretField('azure', 'tenantID').validators.guid).toEqual({ type: 'guid' })
+    expect(secretField('azure', 'subscriptionID').validators.guid).toEqual({ type: 'guid' })
+    expect(secretField('azure-dns', 'AZURE_CLOUD')).toMatchObject({
+      defaultValue: '',
+      omitWhenEmpty: true,
+    })
+    expect(secretField('rfc2136', 'TSIGSecretAlgorithm')).toMatchObject({
+      defaultValue: '',
+      omitWhenEmpty: true,
+    })
+  })
+
+  it('limits GCP project IDs to the documented length', () => {
+    const projectIdValidator = secretField('gcp', 'serviceaccount.json').validators.projectID
+
+    expect(projectIdValidator.pattern.test('abcde1')).toBe(true)
+    expect(projectIdValidator.pattern.test(`a${'b'.repeat(29)}`)).toBe(true)
+    expect(projectIdValidator.pattern.test(`a${'b'.repeat(30)}`)).toBe(false)
   })
 })
