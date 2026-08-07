@@ -235,7 +235,7 @@ export function assertReusableFrontendCertificates (sslDirectory = FRONTEND_SSL_
     fail(`trusted frontend certificates are missing at ${sslDirectory}; run 'yarn workspace @gardener-dashboard/frontend setup' deliberately before starting the local Dashboard`)
   }
   assertSafeDirectory(sslDirectory, 'frontend certificate directory')
-  for (const filename of ['key.pem', 'cert.pem']) {
+  for (const filename of ['ca.pem', 'key.pem', 'cert.pem']) {
     assertSafeFile(join(sslDirectory, filename), `frontend certificate ${filename}`)
   }
   return sslDirectory

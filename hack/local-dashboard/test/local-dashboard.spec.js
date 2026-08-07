@@ -41,6 +41,7 @@ import {
 } from '../internal/commands.mjs'
 import {
   COMMIT_PATTERN,
+  FRONTEND_SSL_DIRECTORY,
   GARDENERLESS_COMMIT,
   SCENARIOS,
   STATE_VERSION,
@@ -305,9 +306,13 @@ describe('managed configuration and environments', () => {
     const directory = temporaryDirectory('local-dashboard-ssl-')
     const key = join(directory, 'key.pem')
     const certificate = join(directory, 'cert.pem')
+    writeFileSync(join(directory, 'ca.pem'), 'ca\n')
     writeFileSync(key, 'key\n')
     writeFileSync(certificate, 'certificate\n')
     expect(assertReusableFrontendCertificates(directory)).toBe(directory)
+    rmSync(join(directory, 'ca.pem'))
+    expect(() => assertReusableFrontendCertificates(directory)).toThrow('ca.pem')
+    writeFileSync(join(directory, 'ca.pem'), 'ca\n')
     expect(frontendEnvironment(configuration(), directory, {
       VITE_PROXY_TARGET: 'https://remote.example.org',
       VITE_DEV_PORT: '443',
@@ -657,22 +662,34 @@ describe('compact state and process safety', () => {
   })
 
   it('derives markers from the same definitions used to start services', () => {
-    const definitions = serviceDefinitions(configuration())
+    const config = configuration()
+    const definitions = serviceDefinitions(config)
     expect(definitions.map(({ name, commandMarker }) => [name, commandMarker])).toEqual([
       ['garden', '/work/dashboard/.local-dashboard/runtime/bin/kcp start --bind-address=127.0.0.1'],
       ['backend', `${YARN_RUNTIME} workspace @gardener-dashboard/backend serve`],
       ['frontend', `${YARN_RUNTIME} workspace @gardener-dashboard/frontend serve --port 8444 --host 127.0.0.1`],
+    ])
+    expect(definitions.map(({ name, caPath }) => [name, caPath])).toEqual([
+      ['garden', join(config.runtimeDir, '.kcp', 'apiserver.crt')],
+      ['backend', undefined],
+      ['frontend', join(FRONTEND_SSL_DIRECTORY, 'ca.pem')],
     ])
   })
 
   it('assesses matching health and rejects stale or changed identities', async () => {
     const config = configuration()
     const state = trackedState(config)
+    const request = vi.fn(async () => true)
     await expect(assessTrackedState(state, config, {
       inspector: matchingInspector(state),
-      request: async () => true,
+      request,
       commits,
     })).resolves.toBe('healthy')
+    expect(request.mock.calls).toEqual([
+      [`${config.urls.garden}/readyz`, join(config.runtimeDir, '.kcp', 'apiserver.crt')],
+      [`${config.urls.backend}/healthz`],
+      [`${config.urls.frontend}/`, join(FRONTEND_SSL_DIRECTORY, 'ca.pem')],
+    ])
     await expect(assessTrackedState(state, { ...config, scenario: 'many-shoots' }, {
       inspector: matchingInspector(state),
       request: async () => true,

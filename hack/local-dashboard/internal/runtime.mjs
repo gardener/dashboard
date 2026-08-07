@@ -29,6 +29,7 @@ import {
 
 import {
   COMMIT_PATTERN,
+  FRONTEND_SSL_DIRECTORY,
   MANAGED_ROOT,
   MAX_STATE_BYTES,
   REPOSITORY_ROOT,
@@ -276,11 +277,21 @@ export async function assertPortsAvailable (ports, probe = portIsAvailable) {
   }
 }
 
-export function requestReady (url) {
+export function requestReady (url, caPath) {
   return new Promise(resolve => {
     const client = url.startsWith('https:') ? https : http
+    let ca
+    try {
+      if (caPath) {
+        assertSafeFile(caPath, 'readiness certificate')
+        ca = readFileSync(caPath)
+      }
+    } catch {
+      resolve(false)
+      return
+    }
     const request = client.get(url, {
-      rejectUnauthorized: false,
+      ca,
       timeout: 1500,
     }, response => {
       response.resume()
@@ -324,6 +335,7 @@ export function serviceDefinitions (configuration) {
       cwd: configuration.checkoutDir,
       ownershipPort: configuration.ports.garden,
       ports: [configuration.ports.garden],
+      caPath: join(configuration.runtimeDir, '.kcp', 'apiserver.crt'),
       runtimeCwds: [configuration.checkoutDir, configuration.runtimeDir],
       runtimeCommandMarkers: [
         join(configuration.runtimeDir, 'bin', 'kcp'),
@@ -359,6 +371,7 @@ export function serviceDefinitions (configuration) {
       cwd: configuration.repositoryRoot,
       ownershipPort: configuration.ports.frontend,
       ports: [configuration.ports.frontend],
+      caPath: join(FRONTEND_SSL_DIRECTORY, 'ca.pem'),
       runtimeCwds: [join(configuration.repositoryRoot, 'frontend')],
       runtimeCommandMarkers: [
         'vite',
@@ -480,10 +493,11 @@ export async function assessTrackedState (state, configuration, {
       state.commits.kcpRelease !== commits.kcpRelease)) {
     return 'configuration-mismatch'
   }
+  const [garden, , frontend] = serviceDefinitions(configuration)
   const [gardenReady, backendReady, frontendReady] = await Promise.all([
-    request(`${configuration.urls.garden}/readyz`),
+    request(`${configuration.urls.garden}/readyz`, garden.caPath),
     request(`${configuration.urls.backend}/healthz`),
-    request(`${configuration.urls.frontend}/`),
+    request(`${configuration.urls.frontend}/`, frontend.caPath),
   ])
   return gardenReady && backendReady && frontendReady ? 'healthy' : 'stale'
 }
@@ -593,7 +607,7 @@ export async function startReadyService (state, configuration, definition) {
     label: definition.name,
     record,
     configuration,
-    health: () => requestReady(definition.healthUrl),
+    health: () => requestReady(definition.healthUrl, definition.caPath),
     logPath: definition.logPath,
     timeoutMs: definition.timeoutMs,
   })
