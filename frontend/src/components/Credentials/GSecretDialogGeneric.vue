@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #help-slot>
       <slot name="help">
+        <!-- The HTML comes exclusively from static vendor definitions and cannot be controlled by users. -->
         <!-- eslint-disable vue/no-v-html -->
         <div
           v-if="helpHtml"

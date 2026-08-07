@@ -34,7 +34,9 @@ SPDX-License-Identifier: Apache-2.0
   />
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import GCodeBlock from '@/components/GCodeBlock'
 import GExternalLink from '@/components/GExternalLink'
 
@@ -121,24 +123,13 @@ const route53Policy = JSON.stringify({
   ],
 }, undefined, 2)
 
-export default {
-  components: {
-    GCodeBlock,
-    GExternalLink,
+const props = defineProps({
+  providerType: {
+    type: String,
+    required: true,
   },
-  props: {
-    providerType: {
-      type: String,
-      required: true,
-    },
-  },
-  computed: {
-    isRoute53 () {
-      return this.providerType === 'aws-route53'
-    },
-    policy () {
-      return this.isRoute53 ? route53Policy : awsPolicy
-    },
-  },
-}
+})
+
+const isRoute53 = computed(() => props.providerType === 'aws-route53')
+const policy = computed(() => isRoute53.value ? route53Policy : awsPolicy)
 </script>
