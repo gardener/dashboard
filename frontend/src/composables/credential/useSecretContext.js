@@ -168,7 +168,7 @@ export function createSecretContextComposable (options = {}) {
 
     return Object.fromEntries(
       fields
-        .filter(field => Object.prototype.hasOwnProperty.call(data, field.key))
+        .filter(field => Object.hasOwn(data, field.key))
         .map(field => {
           const encodedValue = data[field.key]
           const value = encodedValue == null
@@ -179,12 +179,12 @@ export function createSecretContextComposable (options = {}) {
     )
   }
 
-  function setSecretFieldValues (fieldDefinitions = [], value) {
+  function setSecretFieldValues (fieldDefinitions = [], fieldValues) {
     const nextData = { ...secretData.value }
     const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
 
     for (const field of fields) {
-      const encodedValue = encodeSecretFieldValue(value?.[field.key], field)
+      const encodedValue = encodeSecretFieldValue(fieldValues?.[field.key], field)
       if (encodedValue === undefined) {
         delete nextData[field.key]
       } else {
