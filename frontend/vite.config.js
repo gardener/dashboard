@@ -196,6 +196,9 @@ export default defineConfig(({ command, mode }) => {
       }))
     }
 
+    config.optimizeDeps = {
+      exclude: ['vuetify'],
+    }
     config.server = {
       port: 8443,
       strictPort: true,
