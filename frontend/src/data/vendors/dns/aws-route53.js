@@ -1,3 +1,5 @@
+import aws from '../infra/aws'
+
 export default {
   name: 'aws-route53',
   displayName: 'Amazon Route53',
@@ -10,6 +12,16 @@ export default {
         valueFrom: {
           key: ['accessKeyID'],
         },
+      },
+    ],
+    fields: [
+      ...aws.secret.fields,
+      {
+        key: 'AWS_REGION',
+        label: 'Region (optional)',
+        hint: 'Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1',
+        type: 'text',
+        omitWhenEmpty: true,
       },
     ],
   },
