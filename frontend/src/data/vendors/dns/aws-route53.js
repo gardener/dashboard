@@ -1,4 +1,8 @@
-import aws from '../infra/aws'
+import {
+  accessKeyIdDetail,
+  accessKeyIdField,
+  secretAccessKeyField,
+} from '../infra/aws'
 
 export default {
   name: 'aws-route53',
@@ -7,15 +11,11 @@ export default {
   icon: 'aws-route53.svg',
   secret: {
     details: [
-      {
-        label: 'Access Key ID',
-        valueFrom: {
-          key: ['accessKeyID'],
-        },
-      },
+      accessKeyIdDetail,
     ],
     fields: [
-      ...aws.secret.fields,
+      accessKeyIdField,
+      secretAccessKeyField,
       {
         key: 'AWS_REGION',
         label: 'Region (optional)',
