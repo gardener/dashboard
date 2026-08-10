@@ -192,7 +192,7 @@ const allHeaders = computed(() => [
     },
   },
   {
-    title: 'SHOOT HEALTH',
+    title: 'UNHEALTHY SHOOTS',
     key: 'unhealthyShoots',
     sortable: true,
     align: 'center',
