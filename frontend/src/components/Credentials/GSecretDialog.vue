@@ -54,6 +54,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-message
               v-model:message="errorMessage"
               v-model:detailed-message="detailedErrorMessage"
+              class="mt-3"
               color="error"
             />
           </div>

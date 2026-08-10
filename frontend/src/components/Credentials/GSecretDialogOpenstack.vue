@@ -13,63 +13,65 @@ SPDX-License-Identifier: Apache-2.0
     :vendor-type="vendorType"
   >
     <template #secret-slot>
-      <g-generic-input-field
-        v-if="providerType === 'openstack-designate'"
-        v-model="authURL"
-        :field="fields.authURL"
-      />
-      <g-generic-input-field
-        v-model="domainName"
-        :field="fields.domainName"
-      />
-      <g-generic-input-field
-        v-model="tenantName"
-        :field="fields.tenantName"
-      />
-      <v-radio-group
-        v-model="authenticationMethod"
-        row
-      >
-        <template #label>
-          <span class="text-body-large">Authentication Method:</span>
-        </template>
-        <v-radio
-          label="Technical User"
-          value="USER"
+      <div>
+        <g-generic-input-field
+          v-if="providerType === 'openstack-designate'"
+          v-model="authURL"
+          :field="fields.authURL"
         />
-        <v-radio
-          label="Application Credentials"
-          value="APPLICATION_CREDENTIALS"
+        <g-generic-input-field
+          v-model="domainName"
+          :field="fields.domainName"
         />
-      </v-radio-group>
-      <v-container class="py-0">
-        <template v-if="authenticationMethod === 'USER'">
-          <g-generic-input-field
-            v-model="username"
-            :field="fields.username"
-            :input-props="{ 'v-messages-color': { color: 'warning' } }"
+        <g-generic-input-field
+          v-model="tenantName"
+          :field="fields.tenantName"
+        />
+        <v-radio-group
+          v-model="authenticationMethod"
+          row
+        >
+          <template #label>
+            <span class="text-body-large">Authentication Method:</span>
+          </template>
+          <v-radio
+            label="Technical User"
+            value="USER"
           />
-          <g-generic-input-field
-            v-model="password"
-            :field="fields.password"
-            :input-props="{ 'v-messages-color': { color: 'warning' } }"
+          <v-radio
+            label="Application Credentials"
+            value="APPLICATION_CREDENTIALS"
           />
-        </template>
-        <template v-else>
-          <g-generic-input-field
-            v-model="applicationCredentialID"
-            :field="fields.applicationCredentialID"
-          />
-          <g-generic-input-field
-            v-model="applicationCredentialName"
-            :field="fields.applicationCredentialName"
-          />
-          <g-generic-input-field
-            v-model="applicationCredentialSecret"
-            :field="fields.applicationCredentialSecret"
-          />
-        </template>
-      </v-container>
+        </v-radio-group>
+        <v-container class="py-0">
+          <template v-if="authenticationMethod === 'USER'">
+            <g-generic-input-field
+              v-model="username"
+              :field="fields.username"
+              :input-props="{ 'v-messages-color': { color: 'warning' } }"
+            />
+            <g-generic-input-field
+              v-model="password"
+              :field="fields.password"
+              :input-props="{ 'v-messages-color': { color: 'warning' } }"
+            />
+          </template>
+          <template v-else>
+            <g-generic-input-field
+              v-model="applicationCredentialID"
+              :field="fields.applicationCredentialID"
+            />
+            <g-generic-input-field
+              v-model="applicationCredentialName"
+              :field="fields.applicationCredentialName"
+            />
+            <g-generic-input-field
+              v-model="applicationCredentialSecret"
+              :field="fields.applicationCredentialSecret"
+            />
+          </template>
+        </v-container>
+      </div>
     </template>
 
     <template #help-slot>
