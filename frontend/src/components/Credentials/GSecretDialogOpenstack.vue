@@ -16,15 +16,15 @@ SPDX-License-Identifier: Apache-2.0
       <g-generic-input-field
         v-if="providerType === 'openstack-designate'"
         v-model="authURL"
-        :field="fields['authURL']"
+        :field="fields.authURL"
       />
       <g-generic-input-field
         v-model="domainName"
-        :field="fields['domainName']"
+        :field="fields.domainName"
       />
       <g-generic-input-field
         v-model="tenantName"
-        :field="fields['tenantName']"
+        :field="fields.tenantName"
       />
       <v-radio-group
         v-model="authenticationMethod"
@@ -46,27 +46,27 @@ SPDX-License-Identifier: Apache-2.0
         <template v-if="authenticationMethod === 'USER'">
           <g-generic-input-field
             v-model="username"
-            :field="fields['username']"
+            :field="fields.username"
             :input-props="{ 'v-messages-color': { color: 'warning' } }"
           />
           <g-generic-input-field
             v-model="password"
-            :field="fields['password']"
+            :field="fields.password"
             :input-props="{ 'v-messages-color': { color: 'warning' } }"
           />
         </template>
         <template v-else>
           <g-generic-input-field
             v-model="applicationCredentialID"
-            :field="fields['applicationCredentialID']"
+            :field="fields.applicationCredentialID"
           />
           <g-generic-input-field
             v-model="applicationCredentialName"
-            :field="fields['applicationCredentialName']"
+            :field="fields.applicationCredentialName"
           />
           <g-generic-input-field
             v-model="applicationCredentialSecret"
-            :field="fields['applicationCredentialSecret']"
+            :field="fields.applicationCredentialSecret"
           />
         </template>
       </v-container>
