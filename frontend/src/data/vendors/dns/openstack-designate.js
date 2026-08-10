@@ -1,4 +1,13 @@
-import openstack from '../infra/openstack'
+import {
+  applicationCredentialIdField,
+  applicationCredentialNameField,
+  applicationCredentialSecretField,
+  authUrlField,
+  domainNameField,
+  passwordField,
+  tenantNameField,
+  usernameField,
+} from '../infra/openstack'
 
 export default {
   name: 'openstack-designate',
@@ -20,6 +29,15 @@ export default {
         },
       },
     ],
-    fields: openstack.secret.fields,
+    fields: [
+      authUrlField,
+      domainNameField,
+      tenantNameField,
+      applicationCredentialIdField,
+      applicationCredentialNameField,
+      applicationCredentialSecretField,
+      usernameField,
+      passwordField,
+    ],
   },
 }
