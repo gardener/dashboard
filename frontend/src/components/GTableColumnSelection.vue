@@ -19,6 +19,8 @@ SPDX-License-Identifier: Apache-2.0
         v-tooltip:top="'Column Selection'"
         v-bind="menuProps"
         icon="mdi-view-column"
+        :color="activatorColor"
+        :variant="activatorVariant"
       />
     </template>
     <v-card>
@@ -69,103 +71,35 @@ SPDX-License-Identifier: Apache-2.0
       </v-card-text>
     </v-card>
   </v-menu>
-  <v-menu
-    v-if="hasFilters"
-    v-model="filterSelectionMenu"
-    location="left"
-    offset="5"
-    :close-on-content-click="false"
-    absolute
-    min-width="240"
-    style="max-height: 80%"
-  >
-    <template #activator="{ props: menuProps }">
-      <v-btn
-        v-tooltip:top="'Filter Selection'"
-        v-bind="menuProps"
-        icon="mdi-filter-outline"
-      />
-    </template>
-    <v-card>
-      <v-card-text
-        v-tooltip:bottom="{
-          text: filterTooltip,
-          disabled: !filterTooltip, maxWidth: 300
-        }"
-        class="pt-1"
-      >
-        <div class="text-title-small text-medium-emphasis py-2">
-          Filter Selection
-        </div>
-        <div
-          v-for="filter in filters"
-          :key="filter.value"
-        >
-          <v-checkbox-btn
-            :model-value="filter.selected"
-            :color="checkboxColor(filter.selected)"
-            :disabled="filter.disabled"
-            density="compact"
-            class="text-body-medium"
-            @update:model-value="onToggleFilter(filter)"
-          >
-            <template #label>
-              <span class="text-body-small">
-                {{ filter.text }}
-              </span>
-            </template>
-          </v-checkbox-btn>
-          <v-tooltip
-            activator="parent"
-            :disabled="!filter.helpTooltip?.length"
-            :open-delay="200"
-            location="right"
-          >
-            <div
-              v-for="(line, index) in filter.helpTooltip"
-              :key="index"
-            >
-              {{ line }}
-            </div>
-          </v-tooltip>
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-menu>
 </template>
 
 <script setup>
 import {
-  computed,
   ref,
   toRefs,
 } from 'vue'
 
 const columnSelectionMenu = ref(false)
-const filterSelectionMenu = ref(false)
 
 // props
 const props = defineProps({
+  activatorColor: {
+    type: String,
+  },
+  activatorVariant: {
+    type: String,
+  },
   headers: {
     type: Array,
   },
-  filters: {
-    type: Array,
-  },
-  filterTooltip: {
-    type: String,
-  },
 })
 
-const { headers, filters, filterTooltip } = toRefs(props)
-
-const hasFilters = computed(() => filters.value?.length > 0)
+const { headers } = toRefs(props)
 
 // emits
 const emit = defineEmits([
   'reset',
   'setSelectedHeader',
-  'toggleFilter',
 ])
 
 function onSetSelectedHeader (header) {
@@ -174,10 +108,6 @@ function onSetSelectedHeader (header) {
 
 function onReset () {
   emit('reset')
-}
-
-function onToggleFilter (filter) {
-  emit('toggleFilter', filter)
 }
 
 function checkboxColor (selected) {

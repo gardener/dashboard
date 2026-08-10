@@ -20,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
         <template #append>
           <g-table-search
             v-model="searchQuery"
+            class="mr-3"
             :examples="['my-seed', 'aws eu-west-1']"
             :exclude-examples="['azure', 'us-east']"
           />
