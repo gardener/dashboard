@@ -6,6 +6,7 @@
 
 import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
 import GSecretDialogGeneric from '@/components/Credentials/GSecretDialogGeneric'
+import GSecretDialogHelpAlicloud from '@/components/Credentials/GSecretDialogHelpAlicloud'
 import GSecretDialogHelpAws from '@/components/Credentials/GSecretDialogHelpAws'
 
 describe('GSecretDialogWrapper', () => {
@@ -30,6 +31,32 @@ describe('GSecretDialogWrapper', () => {
 
     expect(resolveDialog('openstack-designate')).toBe(openstackDialog)
     expect(openstackDialog).not.toBe(genericDialog)
+  })
+
+  it.each([
+    'alicloud',
+    'azure',
+    'gcp',
+    'hcloud',
+    'metal',
+    'vsphere',
+    'alicloud-dns',
+    'azure-dns',
+    'azure-private-dns',
+    'cloudflare-dns',
+    'google-clouddns',
+    'infoblox-dns',
+    'powerdns',
+    'rfc2136',
+  ])('uses the generic dialog for %s', providerType => {
+    expect(resolveDialog(providerType)).toBe(resolveDialog('unknown-provider'))
+  })
+
+  it('uses dedicated help only for Alibaba Cloud infrastructure', async () => {
+    const alicloudHelp = resolveHelp('alicloud')
+
+    expect(resolveHelp('alicloud-dns')).toBeUndefined()
+    expect(await alicloudHelp.__asyncLoader()).toBe(GSecretDialogHelpAlicloud)
   })
 
   it('uses the generic dialog with dedicated help for AWS providers', async () => {

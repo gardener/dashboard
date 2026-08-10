@@ -1,4 +1,15 @@
-import azureDns from './azure-dns'
+import {
+  clientIdField,
+  clientSecretField,
+  subscriptionIdDetail,
+  subscriptionIdField,
+  tenantIdField,
+} from '../infra/azure'
+
+import {
+  cloudField,
+  help,
+} from './azure-dns'
 
 export default {
   name: 'azure-private-dns',
@@ -6,6 +17,16 @@ export default {
   weight: 300,
   icon: 'azure-dns.svg',
   secret: {
-    details: azureDns.secret.details,
+    details: [
+      subscriptionIdDetail,
+    ],
+    fields: [
+      clientIdField,
+      clientSecretField,
+      tenantIdField,
+      subscriptionIdField,
+      cloudField,
+    ],
+    help,
   },
 }

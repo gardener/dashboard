@@ -92,7 +92,7 @@ describe('GSecretDialogGeneric', () => {
 
   function mountDialog ({
     credential,
-    providerType = 'openstack-designate',
+    providerType = 'custom-dns',
     vendorType = 'dns',
     configuration,
     slots,

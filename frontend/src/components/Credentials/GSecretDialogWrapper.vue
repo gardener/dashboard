@@ -26,20 +26,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { defineAsyncComponent } from 'vue'
 
-const GcpDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGcp'))
-const AzureDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogAzure'))
 const OpenstackDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogOpenstack'))
-const AlicloudDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogAlicloud'))
-const MetalDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMetal'))
-const VsphereDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogVSphere'))
-const CloudflareDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogCloudflare'))
-const InfobloxDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogInfoblox'))
-const DDnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDDns'))
-const HcloudDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHCloud'))
-const PowerdnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogPowerdns'))
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
 const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
 const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
+const AlicloudHelp = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHelpAlicloud'))
 const AwsHelp = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHelpAws'))
 
 export default {
@@ -56,26 +47,9 @@ export default {
   computed: {
     resolvedComponent () {
       switch (this.visibleDialog) {
-        // Infra Secret Dialogs
-        case 'azure': return AzureDialog
-        case 'gcp': return GcpDialog
+        // Custom Dialogs for specific provider types
         case 'openstack': return OpenstackDialog
-        case 'alicloud': return AlicloudDialog
-        case 'metal': return MetalDialog
-        case 'vsphere': return VsphereDialog
-        case 'hcloud': return HcloudDialog
-
-        // DNS Secret Dialogs
-        case 'azure-dns': return AzureDialog
-        case 'azure-private-dns': return AzureDialog
-        case 'google-clouddns': return GcpDialog
         case 'openstack-designate': return OpenstackDialog
-        case 'alicloud-dns': return AlicloudDialog
-        case 'cloudflare-dns': return CloudflareDialog
-        case 'infoblox-dns': return InfobloxDialog
-        case 'rfc2136': return DDnsDialog
-        case 'cloudflare': return CloudflareDialog
-        case 'powerdns': return PowerdnsDialog
 
         // Generic Dialogs
         case 'delete': return DeleteDialog
@@ -86,6 +60,8 @@ export default {
     },
     resolvedHelpComponent () {
       switch (this.visibleDialog) {
+        case 'alicloud':
+          return AlicloudHelp
         case 'aws':
         case 'aws-route53':
           return AwsHelp
