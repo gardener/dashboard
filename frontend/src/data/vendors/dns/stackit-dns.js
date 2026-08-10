@@ -1,3 +1,9 @@
+import {
+  projectIdDetail,
+  projectIdField,
+  serviceAccountField,
+} from '../infra/stackit'
+
 export default {
   name: 'stackit-dns',
   displayName: 'STACKIT DNS',
@@ -5,12 +11,11 @@ export default {
   icon: 'stackit.svg',
   secret: {
     details: [
-      {
-        label: 'Project ID',
-        valueFrom: {
-          key: ['project-id'],
-        },
-      },
+      projectIdDetail,
+    ],
+    fields: [
+      projectIdField,
+      serviceAccountField,
     ],
   },
 }
