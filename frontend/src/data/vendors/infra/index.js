@@ -1,12 +1,12 @@
 import aws from './aws'
-import alicloud from './alicloud'
 import azure from './azure'
-import hcloud from './hcloud'
 import gcp from './gcp'
-import metal from './metal'
-import onmetal from './onmetal'
 import openstack from './openstack'
+import alicloud from './alicloud'
+import metal from './metal'
 import vsphere from './vsphere'
+import hcloud from './hcloud'
+import onmetal from './onmetal'
 import ironcore from './ironcore'
 import ironcoreMetal from './ironcore-metal'
 import stackit from './stackit'
@@ -14,14 +14,14 @@ import local from './local'
 
 export default [
   aws,
-  alicloud,
   azure,
-  hcloud,
   gcp,
-  metal,
-  onmetal,
   openstack,
+  alicloud,
+  metal,
   vsphere,
+  hcloud,
+  onmetal,
   ironcore,
   ironcoreMetal,
   stackit,
