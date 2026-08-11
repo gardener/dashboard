@@ -39,6 +39,7 @@ describe('GSecretDialogWrapper', () => {
     'gcp',
     'hcloud',
     'metal',
+    'stackit',
     'vsphere',
     'alicloud-dns',
     'azure-dns',
@@ -48,6 +49,7 @@ describe('GSecretDialogWrapper', () => {
     'infoblox-dns',
     'powerdns',
     'rfc2136',
+    'stackit-dns',
   ])('uses the generic dialog for %s', providerType => {
     expect(resolveDialog(providerType)).toBe(resolveDialog('unknown-provider'))
   })
