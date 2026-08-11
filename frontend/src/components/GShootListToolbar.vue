@@ -185,16 +185,18 @@ SPDX-License-Identifier: Apache-2.0
           </v-card>
         </v-menu>
       </div>
-      <v-tooltip location="bottom">
+      <g-detail-tooltip
+        v-if="issueSinceColumnVisible"
+        location="bottom"
+        title="Focus mode"
+        :width="380"
+      >
         <template #activator="{ props: tooltipProps }">
           <div
             v-bind="tooltipProps"
             class="focus-mode"
-            :class="{ 'focus-mode--visible': issueSinceColumnVisible }"
           >
             <v-badge
-              v-if="issueSinceColumnVisible"
-              class="mr-3"
               bordered
               color="primary-lighten-3"
               :content="numberOfNewItemsSinceFreeze"
@@ -202,6 +204,7 @@ SPDX-License-Identifier: Apache-2.0
             >
               <v-switch
                 v-model="focusModeInternal"
+                :aria-label="focusModeInternal ? 'Disable focus mode' : 'Enable focus mode'"
                 density="compact"
                 color="primary-lighten-3"
                 hide-details
@@ -215,19 +218,21 @@ SPDX-License-Identifier: Apache-2.0
             </v-badge>
           </div>
         </template>
-        <span class="font-weight-bold">Focus Mode</span>
-        <ul class="ml-3">
-          <li>Cluster list sorting is freezed</li>
-          <li>Items in the list will still be updated</li>
-          <li>New clusters will not be added to the list until you disable focus mode</li>
-          <li>Removed items will be shown as stale (greyed out)</li>
+        <p class="ma-0">
+          Keeps the current cluster list and sorting fixed while cluster data continues to update.
+        </p>
+        <ul class="focus-mode-details">
+          <li>New clusters remain hidden</li>
+          <li>Removed clusters appear dimmed</li>
         </ul>
-        <template v-if="numberOfNewItemsSinceFreeze > 0">
-          <v-divider color="white" />
+        <template
+          v-if="numberOfNewItemsSinceFreeze > 0"
+          #footer
+        >
           <span class="font-weight-bold">{{ numberOfNewItemsSinceFreeze }}</span>
-          new clusters were added to the list since you enabled focus mode.
+          {{ numberOfNewItemsSinceFreeze === 1 ? 'new cluster is' : 'new clusters are' }} hidden while focus mode is on.
         </template>
-      </v-tooltip>
+      </g-detail-tooltip>
       <div class="table-actions">
         <v-btn
           v-if="canCreateShoots && projectScope"
@@ -259,6 +264,7 @@ import { parseShootSearch } from '@/store/shoot/helper'
 import { buildSearchTerms } from '@/store/shoot/search'
 
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
+import GDetailTooltip from '@/components/GDetailTooltip.vue'
 import GTableSearch from '@/components/GTableSearch.vue'
 
 import { useShootListFilters } from '@/composables/useShootListFilters'
@@ -495,15 +501,19 @@ function applyOperationsView () {
 
 .focus-mode {
   flex: 0 0 auto;
-}
-
-.focus-mode--visible {
   margin-inline-start: 8px;
 }
 
 .focus-label {
   white-space: nowrap;
   word-break: normal;
+}
+
+.focus-mode-details {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-inline-start: 20px;
 }
 
 .table-actions {
@@ -548,7 +558,6 @@ function applyOperationsView () {
   .focus-mode {
     grid-column: 2;
     grid-row: 1;
-    margin-inline-start: 0;
   }
 
   .table-actions {

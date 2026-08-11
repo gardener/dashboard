@@ -34,6 +34,15 @@ const VModelStub = {
   template: '<div><slot name="label" /></div>',
 }
 
+const GDetailTooltipStub = {
+  name: 'GDetailTooltip',
+  props: {
+    title: String,
+    width: Number,
+  },
+  template: '<div><slot name="activator" :props="{}" /><slot /><slot name="footer" /></div>',
+}
+
 describe('components', () => {
   describe('g-shoot-list-toolbar', () => {
     function mountToolbar (props = {}) {
@@ -67,9 +76,7 @@ describe('components', () => {
               template: '<div><slot /></div>',
             },
             VSwitch: VModelStub,
-            VTooltip: {
-              template: '<div><slot name="activator" :props="{}" /><slot /></div>',
-            },
+            GDetailTooltip: GDetailTooltipStub,
           },
         },
       })
@@ -89,6 +96,13 @@ describe('components', () => {
       expect(columnSelection.props('activatorColor')).toBe('toolbar-title')
       expect(columnSelection.props('activatorVariant')).toBe('text')
       expect(wrapper.find('.focus-label').text()).toBe('Focus')
+      expect(wrapper.findComponent(GDetailTooltipStub).props()).toMatchObject({
+        title: 'Focus mode',
+        width: 380,
+      })
+      expect(wrapper.text()).toContain('Keeps the current cluster list and sorting fixed while cluster data continues to update.')
+      expect(wrapper.text()).toContain('New clusters remain hidden')
+      expect(wrapper.text()).toContain('Removed clusters appear dimmed')
       expect(wrapper.vm.operationsView.state).toBe('active')
     })
 
@@ -107,7 +121,8 @@ describe('components', () => {
         namespace: 'garden',
         projectScope: true,
       })
-      const createButton = wrapper.findComponent({ name: 'VBtn' })
+      const createButton = wrapper.findAllComponents({ name: 'VBtn' })
+        .find(button => button.props('to'))
 
       expect(createButton.props('color')).toBe('toolbar-title')
       expect(createButton.props('variant')).toBe('text')
