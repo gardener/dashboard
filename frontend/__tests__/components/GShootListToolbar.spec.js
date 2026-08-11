@@ -15,6 +15,7 @@ import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GTableSearch from '@/components/GTableSearch.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper
+const tooltipFocus = vi.fn()
 
 // Disable createSharedComposable so each test gets a fresh composable instance
 vi.mock('@vueuse/core', async importOriginal => {
@@ -27,11 +28,29 @@ vi.mock('@vueuse/core', async importOriginal => {
 
 const VModelStub = {
   name: 'VSwitch',
+  inheritAttrs: false,
   props: {
     modelValue: Boolean,
   },
   emits: ['update:modelValue'],
-  template: '<div><slot name="label" /></div>',
+  template: '<label><input v-bind="$attrs" type="checkbox"><slot name="label" /></label>',
+}
+
+const GDetailTooltipStub = {
+  name: 'GDetailTooltip',
+  props: {
+    title: String,
+    width: Number,
+  },
+  setup () {
+    return {
+      tooltipProps: {
+        'aria-describedby': 'focus-mode-tooltip',
+        onFocus: tooltipFocus,
+      },
+    }
+  },
+  template: '<div><slot name="activator" :props="tooltipProps" /><slot /><slot name="footer" /></div>',
 }
 
 describe('components', () => {
@@ -67,9 +86,7 @@ describe('components', () => {
               template: '<div><slot /></div>',
             },
             VSwitch: VModelStub,
-            VTooltip: {
-              template: '<div><slot name="activator" :props="{}" /><slot /></div>',
-            },
+            GDetailTooltip: GDetailTooltipStub,
           },
         },
       })
@@ -77,6 +94,7 @@ describe('components', () => {
 
     beforeEach(() => {
       window.localStorage.clear()
+      tooltipFocus.mockClear()
     })
 
     it('owns its layout and uses the public fluid search API', () => {
@@ -89,7 +107,23 @@ describe('components', () => {
       expect(columnSelection.props('activatorColor')).toBe('toolbar-title')
       expect(columnSelection.props('activatorVariant')).toBe('text')
       expect(wrapper.find('.focus-label').text()).toBe('Focus')
+      expect(wrapper.findComponent(GDetailTooltipStub).props()).toMatchObject({
+        title: 'Focus mode',
+        width: 380,
+      })
+      expect(wrapper.text()).toContain('Keeps the current cluster list and sorting fixed while cluster data continues to update.')
+      expect(wrapper.text()).toContain('New clusters remain hidden')
+      expect(wrapper.text()).toContain('Removed clusters appear dimmed')
       expect(wrapper.vm.operationsView.state).toBe('active')
+    })
+
+    it('forwards tooltip accessibility props and keyboard focus to the switch control', async () => {
+      const wrapper = mountToolbar()
+      const switchControl = wrapper.find('input[type="checkbox"]')
+
+      expect(switchControl.attributes('aria-describedby')).toBe('focus-mode-tooltip')
+      await switchControl.trigger('focus')
+      expect(tooltipFocus).toHaveBeenCalledOnce()
     })
 
     it.each([
@@ -107,7 +141,8 @@ describe('components', () => {
         namespace: 'garden',
         projectScope: true,
       })
-      const createButton = wrapper.findComponent({ name: 'VBtn' })
+      const createButton = wrapper.findAllComponents({ name: 'VBtn' })
+        .find(button => button.props('to'))
 
       expect(createButton.props('color')).toBe('toolbar-title')
       expect(createButton.props('variant')).toBe('text')
