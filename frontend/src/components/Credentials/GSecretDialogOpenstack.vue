@@ -216,6 +216,7 @@ export default {
     },
   },
   watch: {
+    // Existing secrets are hydrated during child mount; switch from the default technical-user form when application credentials are loaded.
     applicationCredentialID (value) {
       if (value) {
         this.authenticationMethodInternal = 'APPLICATION_CREDENTIALS'
