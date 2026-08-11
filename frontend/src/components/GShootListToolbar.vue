@@ -193,7 +193,6 @@ SPDX-License-Identifier: Apache-2.0
       >
         <template #activator="{ props: tooltipProps }">
           <div
-            v-bind="tooltipProps"
             class="focus-mode"
           >
             <v-badge
@@ -204,6 +203,7 @@ SPDX-License-Identifier: Apache-2.0
             >
               <v-switch
                 v-model="focusModeInternal"
+                v-bind="tooltipProps"
                 :aria-label="focusModeInternal ? 'Disable focus mode' : 'Enable focus mode'"
                 density="compact"
                 color="primary-lighten-3"
