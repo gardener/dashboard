@@ -1,3 +1,14 @@
+import {
+  applicationCredentialIdField,
+  applicationCredentialNameField,
+  applicationCredentialSecretField,
+  authUrlField,
+  domainNameField,
+  passwordField,
+  tenantNameField,
+  usernameField,
+} from '../infra/openstack'
+
 export default {
   name: 'openstack-designate',
   displayName: 'OpenStack Designate',
@@ -17,6 +28,16 @@ export default {
           key: ['tenantName'],
         },
       },
+    ],
+    fields: [
+      authUrlField,
+      domainNameField,
+      tenantNameField,
+      applicationCredentialIdField,
+      applicationCredentialNameField,
+      applicationCredentialSecretField,
+      usernameField,
+      passwordField,
     ],
   },
 }

@@ -228,6 +228,7 @@ describe('secretDetails', () => {
     'gcp',
     'hcloud',
     'metal',
+    'openstack',
     'vsphere',
     'alicloud-dns',
     'azure-dns',
@@ -235,6 +236,7 @@ describe('secretDetails', () => {
     'cloudflare-dns',
     'google-clouddns',
     'infoblox-dns',
+    'openstack-designate',
     'powerdns',
     'rfc2136',
   ])('defines generic input fields for %s', providerName => {
