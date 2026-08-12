@@ -12,7 +12,7 @@ import {
   chain,
 } from 'lodash-es'
 import createError from 'http-errors'
-import { legacyRestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods'
+import { restEndpointMethods } from '@octokit/plugin-rest-endpoint-methods'
 import fixtures from '../../fixtures/index.js'
 
 const { Octokit: Core } = await vi.importActual('@octokit/core')
@@ -96,11 +96,11 @@ function getIssueComments (number) {
 }
 
 const Octokit = vi.fn().mockImplementation(function (options) {
-  const OctokitWithRestEndpointMethods = Core.plugin(legacyRestEndpointMethods)
+  const OctokitWithRestEndpointMethods = Core.plugin(restEndpointMethods)
   const octokit = new OctokitWithRestEndpointMethods(options)
   octokit.paginate = mockOctokitPaginateREST
   octokit.graphql.paginate = mockOctokitPaginateGraphQL
-  octokit.issues = {
+  octokit.rest.issues = {
     get: vi.fn().mockRejectedValue(serviceUnavailable),
     update: vi.fn().mockRejectedValue(serviceUnavailable),
     createComment: vi.fn().mockRejectedValue(serviceUnavailable),

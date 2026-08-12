@@ -24,14 +24,14 @@ function searchIssues ({ state, title } = {}) {
   if (title) {
     q.push(`${title} in:title`)
   }
-  const options = octokit.search.issuesAndPullRequests.endpoint.merge({
+  const options = octokit.rest.search.issuesAndPullRequests.endpoint.merge({
     q: q.join(' '),
   })
   return octokit.paginate(options)
 }
 
 function getIssue ({ number }) {
-  return octokit.issues.get({
+  return octokit.rest.issues.get({
     owner,
     repo,
     issue_number: number,
@@ -39,7 +39,7 @@ function getIssue ({ number }) {
 }
 
 function closeIssue ({ number }) {
-  return octokit.issues.update({
+  return octokit.rest.issues.update({
     owner,
     repo,
     issue_number: number,
@@ -101,7 +101,7 @@ async function getComments ({ number }) {
 }
 
 function createComment ({ number }, body) {
-  return octokit.issues.createComment({
+  return octokit.rest.issues.createComment({
     owner,
     repo,
     issue_number: number,
