@@ -17,63 +17,201 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
-import cloneDeep from 'lodash/cloneDeep'
 
-const DEFAULT_WORKER_CIDR_PLACEHOLDER = '__DEFAULT_WORKER_CIDR__'
-
-function replacePlaceholderInTemplate (value, defaultWorkerCIDR) {
-  if (typeof value === 'string') {
-    return value === DEFAULT_WORKER_CIDR_PLACEHOLDER ? defaultWorkerCIDR : value
-  }
-  if (Array.isArray(value)) {
-    return map(value, item => replacePlaceholderInTemplate(item, defaultWorkerCIDR))
-  }
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, nestedValue]) => {
-        return [key, replacePlaceholderInTemplate(nestedValue, defaultWorkerCIDR)]
-      }),
-    )
-  }
-  return value
-}
-
-export function getSpecTemplate (providerType, defaultWorkerCIDR, shootVendor) {
+export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
-    provider: getProviderTemplate(providerType, defaultWorkerCIDR, shootVendor),
-    networking: getNetworkingTemplate(providerType, defaultWorkerCIDR, shootVendor),
+    provider: getProviderTemplate(providerType, defaultWorkerCIDR),
+    networking: getNetworkingTemplate(providerType, defaultWorkerCIDR),
   }
-  const kubernetes = getKubernetesTemplate(shootVendor)
+  const kubernetes = getKubernetesTemplate(providerType)
   if (!isEmpty(kubernetes)) {
     spec.kubernetes = kubernetes
   }
   return spec
 }
 
-export function getProviderTemplate (providerType, defaultWorkerCIDR, shootVendor) {
-  const template = shootVendor?.shoot?.templates?.provider
-  if (!template) {
-    return {
-      type: providerType,
-    }
+export function getProviderTemplate (providerType, defaultWorkerCIDR) {
+  switch (providerType) {
+    case 'aws':
+      return {
+        type: 'aws',
+        infrastructureConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: defaultWorkerCIDR,
+            },
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'azure':
+      return {
+        type: 'azure',
+        infrastructureConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vnet: {
+              cidr: defaultWorkerCIDR,
+            },
+            workers: defaultWorkerCIDR,
+          },
+          zoned: true,
+        },
+        controlPlaneConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'gcp':
+      return {
+        type: 'gcp',
+        infrastructureConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR,
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'openstack':
+      return {
+        type: 'openstack',
+        infrastructureConfig: {
+          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR,
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'stackit':
+      return {
+        type: 'stackit',
+        infrastructureConfig: {
+          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR,
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'stackit.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'alicloud':
+      return {
+        type: 'alicloud',
+        infrastructureConfig: {
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: defaultWorkerCIDR,
+            },
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'metal':
+      return {
+        type: 'metal',
+        infrastructureConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+        },
+        controlPlaneConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'vsphere':
+      return {
+        type: 'vsphere',
+        controlPlaneConfig: {
+          apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    case 'hcloud':
+      return {
+        type: 'hcloud',
+        infrastructureConfig: {
+          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            workers: defaultWorkerCIDR,
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'hcloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
+    default:
+      return {
+        type: providerType,
+      }
   }
-
-  return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
-export function getNetworkingTemplate (providerType, defaultWorkerCIDR, shootVendor) {
-  const template = shootVendor?.shoot?.templates?.networking
-  if (!template) {
-    return {
-      nodes: defaultWorkerCIDR,
-    }
+export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
+  switch (providerType) {
+    case 'metal':
+      return {
+        type: 'calico',
+        pods: '10.244.128.0/18',
+        services: '10.244.192.0/18',
+        providerConfig: {
+          apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
+          kind: 'NetworkConfig',
+          backend: 'vxlan',
+          ipv4: {
+            autoDetectionMethod: 'interface=lo',
+            mode: 'Always',
+            pool: 'vxlan',
+          },
+          typha: {
+            enabled: true,
+          },
+        },
+      }
+    default:
+      return {
+        nodes: defaultWorkerCIDR,
+      }
   }
-
-  return replacePlaceholderInTemplate(template, defaultWorkerCIDR)
 }
 
-export function getKubernetesTemplate (shootVendor) {
-  return cloneDeep(shootVendor?.shoot?.templates?.kubernetes)
+export function getKubernetesTemplate (providerType) {
+  switch (providerType) {
+    case 'metal':
+      return {
+        kubeControllerManager: {
+          nodeCIDRMaskSize: 23,
+        },
+        kubelet: {
+          maxPods: 510,
+        },
+      }
+  }
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
@@ -94,12 +232,12 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   return cidrArray
 }
 
-export function getDefaultNetworkConfigurationForAllZones (numberOfZones, workerCIDR, shootVendor) {
-  switch (shootVendor?.shoot?.zoneNetworking?.strategy) {
-    case 'split-workers-public-internal': {
-      const zoneNetworks = splitCIDR(workerCIDR, numberOfZones)
+export function getDefaultNetworkConfigurationForAllZones (numberOfZones, providerType, workerCIDR) {
+  switch (providerType) {
+    case 'aws': {
+      const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
-        const zoneNetwork = zoneNetworks[index] // eslint-disable-line security/detect-object-injection
+        const zoneNetwork = zoneNetworksAws[index] // eslint-disable-line security/detect-object-injection
         const bigNetWorks = splitCIDR(zoneNetwork, 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
@@ -112,10 +250,10 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, worker
         }
       })
     }
-    case 'split-workers': {
-      const zoneNetworks = splitCIDR(workerCIDR, numberOfZones)
+    case 'alicloud': {
+      const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
-        const zoneNetwork = zoneNetworks[index] // eslint-disable-line security/detect-object-injection
+        const zoneNetwork = zoneNetworksAli[index] // eslint-disable-line security/detect-object-injection
         return {
           workers: zoneNetwork,
         }
@@ -124,8 +262,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, worker
   }
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, maxNumberOfZones, workerCIDR, shootVendor) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, workerCIDR, shootVendor)
+export function getDefaultZonesNetworkConfiguration (zones, providerType, maxNumberOfZones, workerCIDR) {
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -138,12 +276,12 @@ export function getDefaultZonesNetworkConfiguration (zones, maxNumberOfZones, wo
   })
 }
 
-export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, maxNumberOfZones, shootVendor) {
+export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, providerType, maxNumberOfZones) {
   if (!existingZonesNetworkConfiguration) {
-    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, workerCIDR, shootVendor)
+    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, providerType, workerCIDR)
   }
   for (let numberOfZones = maxNumberOfZones; numberOfZones >= existingZonesNetworkConfiguration.length; numberOfZones--) {
-    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, workerCIDR, shootVendor)
+    const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, providerType, workerCIDR)
     const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
       return !some(existingZonesNetworkConfiguration, networkConfiguration)
     })
@@ -155,15 +293,15 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR, shootVendor) {
-  if (isEmpty(workers) || !maxNumberOfZones) {
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, providerType, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR) {
+  if (isEmpty(workers) || !providerType || !maxNumberOfZones) {
     return
   }
 
   const usedZones = uniq(flatMap(workers, 'zones'))
 
   const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, maxNumberOfZones, workerCIDR, shootVendor)
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, providerType, maxNumberOfZones, workerCIDR)
   if (!defaultZonesNetworkConfiguration) {
     return
   }
@@ -171,7 +309,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   const existingZonesNetworkConfiguration = filter(oldZonesNetworkConfiguration, ({ name }) => includes(usedZones, name))
 
   if (existingShootWorkerCIDR) {
-    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, maxNumberOfZones, shootVendor)
+    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, providerType, maxNumberOfZones)
     const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
     if (availableNetworksLength < usedZones.length) {
       return
@@ -203,10 +341,11 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
     : existingZonesNetworkConfiguration
 }
 
-export function getControlPlaneZone (workers, shootVendor, oldControlPlaneZone) {
+export function getControlPlaneZone (workers, providerType, oldControlPlaneZone) {
   const workerZones = uniq(flatMap(workers, 'zones'))
-  switch (shootVendor?.shoot?.controlPlane?.zoneStrategy) {
-    case 'worker-zones':
+  switch (providerType) {
+    case 'gcp':
+    case 'hcloud':
       if (includes(workerZones, oldControlPlaneZone)) {
         return oldControlPlaneZone
       }
