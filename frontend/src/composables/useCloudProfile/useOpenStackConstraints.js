@@ -19,8 +19,8 @@ import uniq from 'lodash/uniq'
 
 /**
  * Composable for managing OpenStack-specific constraints from a cloud profile.
- * Provides functions for working with floating pools, load balancer providers,
- * and load balancer classes specific to OpenStack infrastructure.
+ * Provides functions for working with floating pools and load balancer providers
+ * specific to OpenStack infrastructure.
  *
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
  * @throws {Error} If cloudProfile is not a ref
@@ -111,19 +111,9 @@ export function useOpenStackConstraints (cloudProfile) {
     })
   }
 
-  const loadBalancerClasses = computed(() => {
-    return get(cloudProfile.value, ['spec', 'providerConfig', 'constraints', 'loadBalancerConfig', 'classes'])
-  })
-
-  const loadBalancerClassNames = computed(() => {
-    return uniq(map(loadBalancerClasses.value, 'name'))
-  })
-
   return {
     useFloatingPools,
     useFloatingPoolNames,
     useLoadBalancerProviderNames,
-    loadBalancerClasses,
-    loadBalancerClassNames,
   }
 }
