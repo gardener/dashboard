@@ -53,6 +53,32 @@ export default {
   displayName: 'AWS',
   weight: 100,
   icon: 'aws.svg',
+  shoot: {
+    templates: {
+      provider: {
+        type: 'aws',
+        infrastructureConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: '__DEFAULT_WORKER_CIDR__',
+            },
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      },
+      networking: {
+        nodes: '__DEFAULT_WORKER_CIDR__',
+      },
+    },
+    zoneNetworking: {
+      strategy: 'split-workers-public-internal',
+    },
+  },
   secret: {
     details: [
       accessKeyIdDetail,
