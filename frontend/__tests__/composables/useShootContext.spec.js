@@ -365,6 +365,27 @@ describe('composables', () => {
       expect(shootContextStore.workerless).toBe(true)
     })
 
+    it('should treat new Azure manifests as zoned when the flag is missing', () => {
+      const manifest = {
+        metadata: {
+          name: 'new-azure-shoot',
+        },
+        spec: {
+          provider: {
+            type: 'azure',
+            infrastructureConfig: {},
+          },
+        },
+      }
+
+      shootContextStore.setShootManifest(manifest)
+      expect(shootContextStore.isZonedCluster).toBe(true)
+
+      manifest.metadata.creationTimestamp = '2024-03-01T12:00:00Z'
+      shootContextStore.setShootManifest(manifest)
+      expect(shootContextStore.isZonedCluster).toBe(false)
+    })
+
     it('should change the infrastructure kind', async () => {
       shootContextStore.createShootManifest()
       shootContextStore.providerType = 'gcp'

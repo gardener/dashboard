@@ -659,7 +659,7 @@ export function createShootContextComposable (options = {}) {
   const isZonedCluster = computed(() => {
     switch (providerVendor.value?.shoot?.zones?.mode) {
       case 'infrastructure-config-zoned':
-        return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
+        return isNewCluster.value || get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
       case 'never':
         return false
       case 'always':
