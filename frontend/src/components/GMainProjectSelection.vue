@@ -219,6 +219,12 @@ const emit = defineEmits([
   'projectSelect',
   'openProjectDialog',
 ])
+const componentProps = defineProps({
+  selectedProject: {
+    type: Object,
+    default: undefined,
+  },
+})
 
 const allProjectsItem = {
   metadata: {
@@ -242,21 +248,10 @@ const highlightedProjectName = ref()
 const refProjectFilter = useTemplateRef('refProjectFilter')
 const refProjectVirtualScroll = useTemplateRef('refProjectVirtualScroll')
 
-const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
 const canCreateProject = toRef(authzStore, 'canCreateProject')
 
-const selectedProject = defineModel({ type: Object })
-
-const currentProject = computed(() => {
-  if (isAllProjectsNamespace(namespace.value)) {
-    return allProjectsItem
-  }
-  return find(projectList.value, [
-    'spec.namespace',
-    namespace.value,
-  ])
-})
+const selectedProject = toRef(componentProps, 'selectedProject')
 
 const projectMenuIcon = computed(() => {
   return projectMenu.value ? 'mdi-chevron-up' : 'mdi-chevron-down'
@@ -359,7 +354,6 @@ function selectProject (project) {
   projectMenu.value = false
 
   if (project?.spec.namespace !== selectedProject.value?.spec.namespace) {
-    selectedProject.value = project
     emit('projectSelect', project)
   }
 }
@@ -427,14 +421,6 @@ watch(projectMenu, value => {
     highlightedProjectName.value = undefined
   }
 })
-
-watch(
-  currentProject,
-  project => {
-    selectedProject.value = project
-  },
-  { immediate: true },
-)
 
 async function scrollToActiveProject () {
   const activeProjectName = highlightedProjectName.value ?? selectedProject.value?.metadata.name

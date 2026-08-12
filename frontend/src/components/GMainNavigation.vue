@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
     </g-teaser>
     <template v-if="projectList.length">
       <g-main-project-selection
-        v-model="selectedProject"
+        :selected-project="selectedProject"
         @project-select="onSelectProject"
         @open-project-dialog="projectDialog = true"
       />
@@ -161,7 +161,12 @@ const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
 const sidebar = toRef(appStore, 'sidebar')
 
-const selectedProject = ref()
+const selectedProject = computed(() => {
+  if (namespace.value === allProjectsItem.spec.namespace) {
+    return allProjectsItem
+  }
+  return projectStore.project
+})
 
 const visibleRoutes = computed(() => {
   if (!selectedProject.value) {
