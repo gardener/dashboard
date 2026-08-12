@@ -62,5 +62,20 @@ describe('components', () => {
       expect(wrapper.vm.selectedProjectName).toBe('source')
       expect(wrapper.vm.projectMenu).toBe(false)
     })
+
+    it('handles a cleared project filter', () => {
+      const wrapper = shallowMount(GMainProjectSelection, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+            createPinia(),
+          ],
+        },
+      })
+
+      wrapper.vm.projectFilter = null
+
+      expect(wrapper.vm.sortedAndFilteredProjectItems).toHaveLength(1)
+    })
   })
 })
