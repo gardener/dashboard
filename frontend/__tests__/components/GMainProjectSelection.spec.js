@@ -4,12 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { nextTick } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-
-import { useAuthzStore } from '@/store/authz'
-import { useProjectStore } from '@/store/project'
 
 import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
 
@@ -17,30 +13,36 @@ const { createVuetifyPlugin } = global.fixtures.helper
 
 describe('components', () => {
   describe('g-main-project-selection', () => {
-    it('should update the selected project when its store entry is replaced', async () => {
+    it('emits a selection request without changing the selected project', () => {
       const pinia = createPinia()
-      const projectStore = useProjectStore(pinia)
-      const authzStore = useAuthzStore(pinia)
-
-      const project = {
+      const sourceProject = {
         metadata: {
-          name: 'foo',
-          uid: 'foo-uid',
+          name: 'source',
+          uid: 'source-uid',
         },
         spec: {
-          namespace: 'garden-foo',
-          description: 'Old description',
+          namespace: 'garden-source',
         },
         status: {
           phase: 'Ready',
         },
       }
-      projectStore.list = [project]
-      authzStore._setNamespace(project.spec.namespace)
+      const targetProject = {
+        metadata: {
+          name: 'target',
+          uid: 'target-uid',
+        },
+        spec: {
+          namespace: 'garden-target',
+        },
+        status: {
+          phase: 'Ready',
+        },
+      }
 
       const wrapper = shallowMount(GMainProjectSelection, {
         props: {
-          modelValue: project,
+          selectedProject: sourceProject,
         },
         global: {
           plugins: [
@@ -50,18 +52,12 @@ describe('components', () => {
         },
       })
 
-      const updatedProject = {
-        ...project,
-        spec: {
-          ...project.spec,
-          description: 'New description',
-        },
-      }
-      projectStore.list.splice(0, 1, updatedProject)
-      await nextTick()
+      wrapper.vm.projectMenu = true
+      wrapper.vm.selectProject(targetProject)
 
-      const updates = wrapper.emitted('update:modelValue')
-      expect(updates.at(-1)).toEqual([projectStore.list[0]])
+      expect(wrapper.emitted('projectSelect')).toEqual([[targetProject]])
+      expect(wrapper.vm.selectedProjectName).toBe('source')
+      expect(wrapper.vm.projectMenu).toBe(false)
     })
   })
 })
