@@ -135,7 +135,6 @@ import {
 } from '@/utils'
 
 import get from 'lodash/get'
-import find from 'lodash/find'
 import has from 'lodash/has'
 
 const allProjectsItem = {
@@ -166,10 +165,7 @@ const selectedProject = computed(() => {
   if (namespace.value === allProjectsItem.spec.namespace) {
     return allProjectsItem
   }
-  return find(projectList.value, [
-    'spec.namespace',
-    namespace.value,
-  ])
+  return projectStore.project
 })
 
 const visibleRoutes = computed(() => {

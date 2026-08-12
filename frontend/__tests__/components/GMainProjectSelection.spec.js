@@ -52,6 +52,9 @@ describe('components', () => {
         },
       })
 
+      wrapper.vm.selectProject(sourceProject)
+      expect(wrapper.emitted('projectSelect')).toBeUndefined()
+
       wrapper.vm.projectMenu = true
       wrapper.vm.selectProject(targetProject)
 
