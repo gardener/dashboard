@@ -216,6 +216,13 @@ export function getControlPlaneZone (workers, shootVendor, oldControlPlaneZone) 
   }
 }
 
-export function getWorkerProviderConfig (shootVendor) {
-  return cloneDeep(shootVendor?.shoot?.workerProviderConfig)
+export function getWorkerProviderConfig (providerType) {
+  switch (providerType) {
+    case 'aws': {
+      return {
+        apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+        kind: 'WorkerConfig',
+      }
+    }
+  }
 }

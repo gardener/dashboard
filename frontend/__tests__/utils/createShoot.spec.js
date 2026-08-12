@@ -9,7 +9,6 @@ import {
   getZonesNetworkConfiguration,
   findFreeNetworks,
   getKubernetesTemplate,
-  getWorkerProviderConfig,
 } from '@/utils/shoot'
 import infraProviders from '@/data/vendors/infra'
 
@@ -333,7 +332,7 @@ describe('utils', () => {
     })
 
     describe('vendor config templates', () => {
-      it('should return cloned kubernetes templates and worker provider configs', () => {
+      it('should return cloned kubernetes templates', () => {
         const shootVendor = {
           shoot: {
             templates: {
@@ -343,22 +342,14 @@ describe('utils', () => {
                 },
               },
             },
-            workerProviderConfig: {
-              volume: {
-                iops: 100,
-              },
-            },
           },
         }
 
         const kubernetesTemplate = getKubernetesTemplate(shootVendor)
-        const workerProviderConfig = getWorkerProviderConfig(shootVendor)
 
         kubernetesTemplate.kubelet.maxPods = 200
-        workerProviderConfig.volume.iops = 200
 
         expect(shootVendor.shoot.templates.kubernetes.kubelet.maxPods).toBe(100)
-        expect(shootVendor.shoot.workerProviderConfig.volume.iops).toBe(100)
       })
     })
   })
