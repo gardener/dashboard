@@ -11,6 +11,7 @@ import { load as yamlLoad } from 'js-yaml'
 import gardenerConfig from '../../config/index.js'
 import { getClusterCaData } from '../shoots.js'
 import kubeClientModule from '@gardener-dashboard/kube-client'
+import requestModule from '@gardener-dashboard/request'
 import {
   decodeBase64,
   getConfigValue,
@@ -31,7 +32,8 @@ import cache from '../../cache/index.js'
 import logger from '../../logger/index.js'
 import { createConverter } from '../../markdown.js'
 const { Resources } = kubeClientModule
-const { Forbidden, UnprocessableEntity, InternalServerError, isHttpError } = httpErrors
+const { isHttpError } = requestModule
+const { Forbidden, UnprocessableEntity, InternalServerError } = httpErrors
 const { getSeed, findProjectByNamespace } = cache
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
