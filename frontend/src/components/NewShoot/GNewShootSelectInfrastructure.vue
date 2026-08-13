@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-row class="my-0">
+  <v-row class="my-3">
     <g-new-shoot-infrastructure-card
       v-for="value in cloudProfileStore.sortedInfraProviderTypeList"
       :key="value"

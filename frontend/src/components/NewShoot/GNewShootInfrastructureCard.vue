@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-hover v-slot="{ isHovering, props }">
     <v-card
       v-bind="props"
-      class="cursor-pointer pa-2 ma-3"
+      class="cursor-pointer pa-2"
       min-width="120"
       hover
       elevation="3"
