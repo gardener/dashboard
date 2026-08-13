@@ -25,7 +25,7 @@ router.use(bodyParser.json())
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      res.redirect(await authorizationUrl(req, res))
+      res.redirect((await authorizationUrl(req, res)).toString())
     } catch (err) {
       logger.error('failed to redirect to authorization url: %s', err)
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
