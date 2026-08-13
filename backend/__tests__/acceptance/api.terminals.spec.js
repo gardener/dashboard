@@ -14,6 +14,7 @@ import {
   beforeEach,
 } from 'vitest'
 import { padStart } from 'lodash-es'
+import createError from 'http-errors'
 import request from '@gardener-dashboard/request'
 import { seedProjectNamespaceIndex } from '../helpers/cache.js'
 import { converter } from '../../lib/services/terminals/index.js'
@@ -134,6 +135,26 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
+      })
+
+      it('should propagate errors when listing terminal shortcuts fails', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockRejectedValueOnce(createError(500))
+
+        await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'listProjectTerminalShortcuts',
+            params: {
+              coordinate: {
+                namespace,
+              },
+            },
+          })
+          .expect(500)
+
+        expect(mockRequest).toHaveBeenCalledTimes(2)
       })
     })
 
@@ -348,6 +369,26 @@ describe('api', function () {
         expect(mockRequest.mock.calls).toMatchSnapshot()
 
         expect(res.body).toMatchSnapshot()
+      })
+
+      it('should propagate errors when deleting a terminal resource fails', async function () {
+        mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockRequest.mockImplementationOnce(fixtures.terminals.mocks.get())
+        mockRequest.mockRejectedValueOnce(createError(500))
+
+        await agent
+          .post('/api/terminals')
+          .set('cookie', await admin.cookie)
+          .send({
+            method: 'remove',
+            params: {
+              name,
+              namespace,
+            },
+          })
+          .expect(500)
+
+        expect(mockRequest).toHaveBeenCalledTimes(3)
       })
     })
 

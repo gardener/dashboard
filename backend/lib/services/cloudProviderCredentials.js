@@ -5,9 +5,11 @@
 //
 
 import _ from 'lodash-es'
-import createError, { isHttpError } from 'http-errors'
+import createError from 'http-errors'
+import requestModule from '@gardener-dashboard/request'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
+const { isHttpError } = requestModule
 const { getQuotas } = cache
 
 export async function list ({ user, params }) {

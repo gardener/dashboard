@@ -285,6 +285,21 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should not re-create an infra credential when the update fails with a non-404 error', async function () {
+      const secret = find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
+      secret.metadata.resourceVersion = '42'
+
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
+
+      await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'patchInfra', params: { secret } })
+        .expect(409)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+    })
+
     it('should delete an own cloudProvider credential (secretbinding)', async function () {
       const params = {
         bindingKind: 'SecretBinding',
