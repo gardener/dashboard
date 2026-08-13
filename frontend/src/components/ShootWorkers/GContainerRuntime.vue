@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       v-model="criName"
       v-messages-color="{ color: 'warning' }"
+      :style="{ flex: criContainerRuntimeTypes.length ? '0 0 125px' : undefined }"
       color="primary"
       item-color="primary"
       :items="criItems"
