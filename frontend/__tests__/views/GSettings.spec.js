@@ -27,6 +27,7 @@ const {
   replaceRoute: vi.fn(),
   route: {
     hash: '',
+    query: {},
   },
 }))
 
@@ -84,7 +85,9 @@ describe('views', () => {
     let wrapper
 
     function mountComponent () {
-      route.hash = window.location.hash
+      const url = new URL(window.location.href)
+      route.hash = url.hash
+      route.query = Object.fromEntries(url.searchParams)
       wrapper = shallowMount(GSettings, {
         attachTo: document.body,
         global: {
@@ -117,11 +120,20 @@ describe('views', () => {
       window.localStorage.clear()
       window.history.replaceState({}, '', '/')
       route.hash = ''
+      route.query = {}
       replaceRoute.mockReset()
-      replaceRoute.mockImplementation(async ({ hash }) => {
+      replaceRoute.mockImplementation(async location => {
+        const { hash, query } = location
         route.hash = hash
         const url = new URL(window.location.href)
         url.hash = hash
+        if ('query' in location) {
+          route.query = query ?? {}
+          url.search = new URLSearchParams(route.query).toString()
+        } else {
+          route.query = {}
+          url.search = ''
+        }
         window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
       })
 
@@ -174,12 +186,12 @@ describe('views', () => {
       const operationsViewItem = wrapper.find('.operations-view')
       expect(operationsViewItem.classes()).not.toContain('operations-view--highlighted')
       expect(document.activeElement).not.toBe(operationsViewItem.element)
-      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
+      expect(replaceRoute).toHaveBeenCalledWith({ query: {}, hash: '' })
       expect(window.location.hash).toBe('')
     })
 
     it('highlights the deep-linked default cluster view until the user interacts', async () => {
-      window.history.replaceState({}, '', '/#setting=default-cluster-view')
+      window.history.replaceState({}, '', '/?namespace=_all#setting=default-cluster-view')
 
       mountComponent()
       await flushPromises()
@@ -187,8 +199,9 @@ describe('views', () => {
       const defaultClusterViewItem = wrapper.find('.default-view')
       expect(defaultClusterViewItem.classes()).toContain('default-view--highlighted')
       expect(document.activeElement).toBe(defaultClusterViewItem.element)
-      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
+      expect(replaceRoute).toHaveBeenCalledWith({ query: { namespace: '_all' }, hash: '' })
       expect(window.location.hash).toBe('')
+      expect(window.location.search).toBe('?namespace=_all')
 
       await defaultClusterViewItem.trigger('keydown')
 
@@ -237,12 +250,14 @@ describe('views', () => {
 
     it('opens a deep-linked Operations View dialog and highlights its entry after closing for landscape viewers', async () => {
       canViewLandscapeSpy.mockReturnValue(true)
-      window.history.replaceState({}, '', '/#setting=cluster-operations')
+      window.history.replaceState({}, '', '/?namespace=_all#setting=cluster-operations')
 
       mountComponent()
 
       const dialog = wrapper.findComponent(VDialogStub)
       expect(dialog.props('modelValue')).toBe(true)
+      expect(replaceRoute).not.toHaveBeenCalled()
+      expect(window.location.search).toBe('?namespace=_all')
 
       await wrapper.find('[aria-label="OK"]').trigger('click')
       dialog.vm.$emit('afterLeave')
@@ -250,8 +265,9 @@ describe('views', () => {
 
       const operationsViewItem = wrapper.find('.operations-view')
       expect(operationsViewItem.classes()).toContain('operations-view--highlighted')
-      expect(replaceRoute).toHaveBeenCalledWith({ hash: '' })
+      expect(replaceRoute).toHaveBeenCalledWith({ query: { namespace: '_all' }, hash: '' })
       expect(window.location.hash).toBe('')
+      expect(window.location.search).toBe('?namespace=_all')
     })
 
     it('places the Operations View description before the exclusion criteria', () => {
