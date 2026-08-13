@@ -177,7 +177,7 @@ describe('auth', function () {
       searchParams.append('state', params.state)
       searchParams.append('scope', params.scope)
       searchParams.append('response_type', head(oidc.response_types))
-      return url.toString()
+      return url
     })
 
     randomState.mockReturnValueOnce('state')
