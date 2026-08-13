@@ -570,7 +570,10 @@ function highlightClusterOperationsEntry () {
 }
 
 async function clearDeepLinkedSetting () {
-  await router.replace({ hash: '' })
+  await router.replace({
+    query: route.query,
+    hash: '',
+  })
 }
 
 async function onClusterOperationsDialogClosed () {
