@@ -283,7 +283,7 @@ const sortedAndFilteredProjectItems = computed(() => {
     }
   })
 
-  const normalizedFilter = toLower(projectFilter.value.trimStart())
+  const normalizedFilter = toLower(projectFilter.value?.trim())
 
   const predicate = item => {
     if (!projectFilter.value) {
