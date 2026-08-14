@@ -5,19 +5,19 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="alternate-row-background">
+  <div class="alternate-row-background d-flex flex-column ga-6">
     <v-expand-transition group>
       <v-row
         v-for="{ id } in hibernationScheduleEvents"
         :key="id"
-        class="list-item"
+        class="list-item my-0"
       >
         <g-hibernation-schedule-event :id="id" />
       </v-row>
     </v-expand-transition>
     <v-row
       v-if="!hibernationSchedulesError"
-      class="list-item my-1"
+      class="list-item my-0"
     >
       <v-col>
         <v-btn
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-row
       v-show="showNoScheduleCheckbox"
       align="center"
-      class="list-item"
+      class="list-item my-0"
     >
       <v-col>
         <v-checkbox
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row
       v-if="hibernationSchedulesError"
-      class="pt-2"
+      class="my-0"
     >
       <v-alert
         type="warning"
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-row>
     <v-row
       v-if="!isHibernationPossible"
-      class="pt-2"
+      class="my-0"
     >
       <v-col>
         <v-alert

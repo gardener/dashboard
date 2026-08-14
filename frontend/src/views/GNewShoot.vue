@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-card>
         <g-toolbar title="Infrastructure" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-new-shoot-select-infrastructure />
         </v-card-text>
       </v-card>
@@ -23,25 +23,25 @@ SPDX-License-Identifier: Apache-2.0
         class="mt-4"
       >
         <g-toolbar title="Cluster Details" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-new-shoot-details />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="Infrastructure Details" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-new-shoot-infrastructure-details />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="Control Plane High Availability" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-manage-control-plane-high-availability />
         </v-card-text>
       </v-card>
       <v-card class="mt-4">
         <g-toolbar title="DNS Configuration" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-manage-dns />
         </v-card-text>
       </v-card>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
         class="mt-4"
       >
         <g-toolbar title="Access Restrictions" />
-        <v-card-text class="py-1">
+        <v-card-text>
           <g-access-restrictions />
         </v-card-text>
       </v-card>

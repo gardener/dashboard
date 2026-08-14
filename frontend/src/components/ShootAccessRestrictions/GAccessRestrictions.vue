@@ -7,15 +7,15 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="!isEmpty(accessRestrictionDefinitions)"
-    class="alternate-row-background"
+    class="alternate-row-background d-flex flex-column ga-6"
   >
     <v-row
       v-for="{ key, input, options } in accessRestrictionDefinitions"
       :key="key"
-      class="my-0"
+      class="my-0 pa-3"
     >
       <div
-        class="d-flex ma-3"
+        class="d-flex w-100"
       >
         <div class="action-select">
           <v-switch
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
       <div
         v-for="{ key: optionKey, input: optionInput } in options"
         :key="optionKey"
-        class="d-flex ma-3"
+        class="d-flex w-100"
       >
         <div class="action-select">
           <v-checkbox
@@ -70,10 +70,7 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </v-row>
   </div>
-  <div
-    v-else
-    class="pt-4"
-  >
+  <div v-else>
     {{ accessRestrictionNoItemsText }}
   </div>
 </template>

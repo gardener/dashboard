@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="ml-3">
-    <div class="text-body-large pt-4">
+  <div>
+    <div class="text-body-large">
       {{ title }}
     </div>
     <template v-if="!workerless">

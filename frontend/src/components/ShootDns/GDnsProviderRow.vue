@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap align-center">
+  <div class="d-flex flex-nowrap align-center ga-4">
     <div class="d-flex flex-wrap">
       <div class="regular-input">
         <v-select
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </div>
     </div>
-    <div class="ml-4 mr-2">
+    <div>
       <slot name="action" />
     </div>
   </div>

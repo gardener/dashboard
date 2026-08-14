@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div>
-    <v-row>
+  <div class="d-flex flex-column ga-6">
+    <v-row class="my-0">
       <v-checkbox
         v-model="customDomainEnabled"
         label="Configure Cluster Domain"
@@ -16,11 +16,10 @@ SPDX-License-Identifier: Apache-2.0
         persistent-hint
         :hint="domainCheckboxHint"
         max-width="50%"
-        class="mb-2"
       />
     </v-row>
     <template v-if="customDomainEnabled">
-      <v-row>
+      <v-row class="my-0">
         <v-col cols="6">
           <v-text-field
             ref="dnsDomainRef"
@@ -80,7 +79,10 @@ SPDX-License-Identifier: Apache-2.0
         </v-col>
       </v-row>
     </template>
-    <v-row v-if="domainRecommendationVisible">
+    <v-row
+      v-if="domainRecommendationVisible"
+      class="my-0"
+    >
       <v-col>
         <v-alert
           variant="tonal"
@@ -103,19 +105,22 @@ SPDX-License-Identifier: Apache-2.0
         </v-alert>
       </v-col>
     </v-row>
-    <template v-if="hasDnsServiceExtension">
-      <div class="text-body-large my-3">
+    <div
+      v-if="hasDnsServiceExtension"
+      class="d-flex flex-column ga-3"
+    >
+      <div class="text-body-large">
         DNS Providers for the shoot-dns-service Extension
       </div>
       <div class="text-body-small">
         Configure DNS providers for the shoot-dns-service extension to automatically manage and synchronize DNS entries for cluster resources like services and ingresses
       </div>
-      <div class="alternate-row-background">
+      <div class="alternate-row-background d-flex flex-column ga-6">
         <v-expand-transition group>
           <v-row
             v-for="(extensionDnsProvider, index) in dnsServiceExtensionProviders"
             :key="getDnsServiceExtensionProviderUid(extensionDnsProvider)"
-            class="list-item pt-2"
+            class="list-item my-0"
           >
             <g-dns-provider-row :dns-provider="extensionDnsProvider">
               <template #action>
@@ -132,7 +137,7 @@ SPDX-License-Identifier: Apache-2.0
         </v-expand-transition>
         <v-row
           key="addProvider"
-          class="list-item my-1"
+          class="list-item my-0"
         >
           <v-col>
             <v-btn
@@ -148,7 +153,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-col>
         </v-row>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
