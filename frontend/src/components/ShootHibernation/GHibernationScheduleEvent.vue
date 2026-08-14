@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <div
     class="d-flex flex-nowrap align-center ga-4"
   >
-    <div class="g-input-grid">
+    <div class="d-flex flex-wrap">
       <div class="large-input">
         <v-select
           ref="selectedDays"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div class="d-flex flex-nowrap align-center ga-4">
-    <div class="g-input-grid">
+    <div class="d-flex flex-wrap">
       <div class="regular-input">
         <v-select
           v-model="v$.dnsProviderType.$model"
