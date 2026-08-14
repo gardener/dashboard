@@ -11,12 +11,13 @@ SPDX-License-Identifier: Apache-2.0
     :show-status-text="showStatusText"
   >
     <template #condition="{ condition }">
-      <g-status-tag
+      <g-condition-status-tag
         :condition="condition"
+        :identifier="shootMetadata.uid || ''"
+        popover-key-prefix="g-status-tag"
         :popper-placement="popperPlacement"
         :shoot-binding="shootCloudProviderBinding"
-        :shoot-metadata="shootMetadata"
-        :stale-shoot="isStaleShoot"
+        :stale="isStaleShoot"
       />
     </template>
   </g-condition-status-tags>
@@ -31,7 +32,7 @@ import {
 import { useShootStore } from '@/store/shoot'
 
 import GConditionStatusTags from '@/components/GConditionStatusTags.vue'
-import GStatusTag from '@/components/GStatusTag.vue'
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 import { useStatusConditions } from '@/composables/useStatusConditions'

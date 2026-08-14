@@ -11,12 +11,13 @@ SPDX-License-Identifier: Apache-2.0
     :show-status-text="showStatusText"
   >
     <template #condition="{ condition }">
-      <g-seed-status-tag
-        :seed-name="seedName"
+      <g-condition-status-tag
         :condition="condition"
-        :popper-placement="popperPlacement"
         :identifier="identifier"
-        :stale-shoot="isStaleShoot"
+        popover-key-prefix="g-seed-status-tag"
+        :popper-placement="popperPlacement"
+        :resource-name="seedName"
+        :stale="isStaleShoot"
       />
     </template>
   </g-condition-status-tags>
@@ -26,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0
 import { toRefs } from 'vue'
 
 import GConditionStatusTags from '@/components/GConditionStatusTags.vue'
-import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 
 import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useSeedEffectiveConditions } from '@/composables/useSeedEffectiveConditions'

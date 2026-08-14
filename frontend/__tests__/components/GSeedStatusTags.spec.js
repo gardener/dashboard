@@ -8,6 +8,7 @@ import { ref } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 import GConditionStatusTags from '@/components/GConditionStatusTags.vue'
 import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 
@@ -35,7 +36,7 @@ describe('components', () => {
             },
           },
           stubs: {
-            GConditionStatusTags: true,
+            GConditionStatusTag: true,
           },
         },
       })
@@ -60,6 +61,23 @@ describe('components', () => {
       })
 
       expect(conditionTypes(wrapper)).toEqual(['GardenletReady'])
+    })
+
+    it('should adapt seed readiness data to the shared condition tag', () => {
+      const wrapper = mountSeedStatusTags({
+        seedConditions: [{
+          type: 'SeedSystemComponentsHealthy',
+          lastTransitionTime,
+        }],
+      })
+
+      expect(wrapper.getComponent(GConditionStatusTag).props()).toMatchObject({
+        condition: expect.objectContaining({ type: 'SeedSystemComponentsHealthy' }),
+        identifier: 'shoot-uid',
+        popoverKeyPrefix: 'g-seed-status-tag',
+        resourceName: 'infra1-seed',
+        stale: false,
+      })
     })
 
     it('should fall back to seed conditions', () => {
