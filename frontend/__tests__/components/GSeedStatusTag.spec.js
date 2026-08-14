@@ -7,19 +7,18 @@
 import { shallowMount } from '@vue/test-utils'
 
 import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
-import GStatusTag from '@/components/GStatusTag.vue'
+import GSeedStatusTag from '@/components/GSeedStatusTag.vue'
 
 describe('components', () => {
-  describe('g-status-tag', () => {
-    it('should adapt shoot readiness data to the shared condition tag', () => {
+  describe('g-seed-status-tag', () => {
+    it('should adapt seed readiness data to the shared condition tag', () => {
       const condition = { type: 'Ready' }
-      const shootBinding = { provider: { type: 'aws' } }
-      const wrapper = shallowMount(GStatusTag, {
+      const wrapper = shallowMount(GSeedStatusTag, {
         props: {
           condition,
+          identifier: 'shoot-uid',
           popperPlacement: 'right',
-          shootBinding,
-          shootMetadata: { uid: 'shoot-uid' },
+          seedName: 'infra1-seed',
           staleShoot: true,
         },
       })
@@ -27,9 +26,9 @@ describe('components', () => {
       expect(wrapper.getComponent(GConditionStatusTag).props()).toMatchObject({
         condition,
         identifier: 'shoot-uid',
-        popoverKeyPrefix: 'g-status-tag',
+        popoverKeyPrefix: 'g-seed-status-tag',
         popperPlacement: 'right',
-        shootBinding,
+        resourceName: 'infra1-seed',
         stale: true,
       })
     })

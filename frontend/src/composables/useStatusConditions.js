@@ -18,6 +18,31 @@ import {
 
 import padStart from 'lodash/padStart'
 import sortBy from 'lodash/sortBy'
+import isEmpty from 'lodash/isEmpty'
+
+export const CONDITION_STATES = Object.freeze({
+  ERROR: 'error',
+  UNKNOWN: 'unknown',
+  PROGRESSING: 'progressing',
+  HEALTHY: 'healthy',
+})
+
+export function conditionState (condition) {
+  if (condition?.status === 'False' || !isEmpty(condition?.codes)) {
+    return CONDITION_STATES.ERROR
+  }
+  if (condition?.status === 'Unknown') {
+    return CONDITION_STATES.UNKNOWN
+  }
+  if (condition?.status === 'Progressing') {
+    return CONDITION_STATES.PROGRESSING
+  }
+  return CONDITION_STATES.HEALTHY
+}
+
+export function isConditionHealthy (condition) {
+  return conditionState(condition) === CONDITION_STATES.HEALTHY
+}
 
 export function useStatusConditions (rawConditionsRef) {
   if (!isRef(rawConditionsRef)) {
