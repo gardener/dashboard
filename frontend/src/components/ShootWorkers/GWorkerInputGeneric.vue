@@ -47,14 +47,12 @@ SPDX-License-Identifier: Apache-2.0
           :field-name="`${workerGroupName} Machine Image`"
         />
       </div>
-      <div class="regular-input">
-        <g-container-runtime
-          :machine-image-cri="machineImageCri"
-          :worker="worker"
-          :kubernetes-version="kubernetesVersion"
-          :field-name="`${workerGroupName} Container Runtime`"
-        />
-      </div>
+      <g-container-runtime
+        :machine-image-cri="machineImageCri"
+        :worker="worker"
+        :kubernetes-version="kubernetesVersion"
+        :field-name="`${workerGroupName} Container Runtime`"
+      />
       <div
         v-if="volumeInCloudProfile"
         class="regular-input"
