@@ -6,7 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    class="d-flex flex-row"
+    class="d-flex flex-row regular-input"
+    :class="{ 'has-oci-runtimes': criContainerRuntimeTypes.length }"
   >
     <v-select
       v-model="criName"
@@ -167,3 +168,9 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.has-oci-runtimes {
+  min-width: 278px;
+}
+</style>
