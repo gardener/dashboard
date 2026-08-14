@@ -753,6 +753,7 @@ export default {
   .g-system-bar-button {
     max-height: 24px;
     letter-spacing: normal;
+    text-transform: none;
   }
   .terminal-menu-shortcut {
     min-width: 120px;
