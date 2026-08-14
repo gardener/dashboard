@@ -17,10 +17,11 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #content>
       <v-card-text>
-        <div class="text-body-large pt-4">
+        <div class="text-body-large">
           Do you want to start the maintenance of your cluster outside of the configured maintenance time window?
         </div>
         <g-maintenance-components
+          class="mt-4"
           title="The following updates might be performed"
           :readonly="true"
           :auto-update-kubernetes-version="autoUpdateKubernetesVersion"

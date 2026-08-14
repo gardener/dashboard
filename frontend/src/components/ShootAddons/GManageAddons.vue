@@ -5,13 +5,17 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div v-if="!workerless">
+  <div
+    v-if="!workerless"
+    class="d-flex flex-column ga-6"
+  >
     <v-row
       v-for="{ name, title, description } in addonDefinitions"
       :key="name"
+      class="my-0"
     >
       <div
-        class="d-flex ma-3"
+        class="d-flex"
       >
         <div class="action-select">
           <v-checkbox

@@ -6,9 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    class="d-flex flex-nowrap align-center"
+    class="d-flex flex-nowrap align-center ga-4"
   >
-    <div class="d-flex flex-wrap">
+    <div class="g-input-grid">
       <div class="large-input">
         <v-select
           ref="selectedDays"
@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
         />
       </div>
     </div>
-    <div class="ml-4 mr-2">
+    <div>
       <v-btn
         size="x-small"
         variant="tonal"

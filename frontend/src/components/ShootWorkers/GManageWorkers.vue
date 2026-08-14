@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="!workerless"
-    class="alternate-row-background"
+    class="alternate-row-background d-flex flex-column ga-6"
   >
     <v-expand-transition
       group
@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-row
         v-for="(worker, index) in providerWorkers"
         :key="index"
-        class="list-item"
+        class="list-item my-0 pa-3"
       >
         <g-worker-input-generic
           :worker="worker"
@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-expand-transition>
     <v-row
       key="addWorker"
-      class="list-item my-1"
+      class="list-item my-0"
     >
       <v-col>
         <v-btn

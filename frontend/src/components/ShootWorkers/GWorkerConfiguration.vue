@@ -42,11 +42,12 @@ SPDX-License-Identifier: Apache-2.0
         <v-window-item
           ref="overviewTab"
           value="overview"
-          class="ma-3"
         >
-          <g-manage-workers
-            :disable-worker-animation="disableWorkerAnimation"
-          />
+          <v-card-text>
+            <g-manage-workers
+              :disable-worker-animation="disableWorkerAnimation"
+            />
+          </v-card-text>
         </v-window-item>
         <v-window-item value="yaml">
           <div :style="{ 'min-height': `${overviewTabHeight}px` }">
