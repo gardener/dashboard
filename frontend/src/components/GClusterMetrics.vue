@@ -47,15 +47,14 @@ SPDX-License-Identifier: Apache-2.0
           :is-shoot-status-hibernated="isShootStatusHibernated"
           content-class="pt-0"
         />
-        <!-- TODO: Re-enable after the Dashboard release. -->
-        <!-- <g-link-list-tile
+        <g-link-list-tile
           v-if="victoriaLogsUrl"
           app-title="VictoriaLogs"
           :url="victoriaLogsUrl"
           :url-text="victoriaLogsUrl"
           :is-shoot-status-hibernated="isShootStatusHibernated"
           content-class="pt-0"
-        /> -->
+        />
         <v-divider
           v-show="!!username && !!password"
           inset
@@ -92,8 +91,7 @@ import GLinkListTile from '@/components/GLinkListTile'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 import { useShootStatus } from '@/composables/useShootStatus'
-// TODO: Re-enable after the Dashboard release.
-// import { useShootAdvertisedAddresses } from '@/composables/useShootAdvertisedAddresses'
+import { useShootAdvertisedAddresses } from '@/composables/useShootAdvertisedAddresses'
 
 import {
   getSeedPlutonoUrl,
@@ -133,10 +131,9 @@ export default {
       shootTechnicalId,
     } = useShootStatus(shootItem)
 
-    // TODO: Re-enable after the Dashboard release.
-    // const {
-    //   shootVictoriaLogsUrl,
-    // } = useShootAdvertisedAddresses(shootItem)
+    const {
+      shootVictoriaLogsUrl,
+    } = useShootAdvertisedAddresses(shootItem)
 
     return {
       shootItem,
@@ -147,7 +144,7 @@ export default {
       isOidcObservabilityUrlsEnabled,
       canViewLandscape,
       isTestingCluster,
-      // shootVictoriaLogsUrl,
+      shootVictoriaLogsUrl,
     }
   },
   computed: {
@@ -178,20 +175,19 @@ export default {
 
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
     },
-    // TODO: Re-enable after the Dashboard release.
-    // victoriaLogsUrl () {
-    //   // Prefer the advertised address; fall back to the hardcoded url until
-    //   // the migration to advertisedAddresses is complete.
-    //   if (this.shootVictoriaLogsUrl) {
-    //     return this.shootVictoriaLogsUrl
-    //   }
+    victoriaLogsUrl () {
+      // Prefer the advertised address; fall back to the hardcoded url until
+      // the migration to advertisedAddresses is complete.
+      if (this.shootVictoriaLogsUrl) {
+        return this.shootVictoriaLogsUrl
+      }
 
-    //   if (this.isOidcObservabilityUrlsEnabled) {
-    //     return `${this.getOidcDeploymentUrl('victoria-logs')}/select/vmui`
-    //   }
+      if (this.isOidcObservabilityUrlsEnabled) {
+        return `${this.getOidcDeploymentUrl('victoria-logs')}/select/vmui`
+      }
 
-    //   return `https://vl-${this.prefix}.${this.seedIngressDomain}/select/vmui`
-    // },
+      return `https://vl-${this.prefix}.${this.seedIngressDomain}/select/vmui`
+    },
     seedPlutonoUrl () {
       return getSeedPlutonoUrl(this.seedIngressDomain)
     },

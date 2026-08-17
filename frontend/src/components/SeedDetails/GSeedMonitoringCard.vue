@@ -70,14 +70,13 @@ SPDX-License-Identifier: Apache-2.0
         :url-text="managedSeedShootPrometheusUrl"
         content-class="pt-0"
       />
-      <!-- TODO: Re-enable after the Dashboard release. -->
-      <!-- <g-link-list-tile
+      <g-link-list-tile
         v-if="managedSeedShootVictoriaLogsUrl"
         app-title="Shoot VictoriaLogs"
         :url="managedSeedShootVictoriaLogsUrl"
         :url-text="managedSeedShootVictoriaLogsUrl"
         content-class="pt-0"
-      /> -->
+      />
     </g-list>
   </v-card>
 </template>
@@ -102,8 +101,7 @@ const {
 const {
   managedSeedShootPlutonoUrl,
   managedSeedShootPrometheusUrl,
-  // TODO: Re-enable after the Dashboard release.
-  // managedSeedShootVictoriaLogsUrl,
+  managedSeedShootVictoriaLogsUrl,
 } = useManagedSeedShoot()
 
 const seedPlutonoUrl = computed(() => getSeedPlutonoUrl(seedIngressDomain.value))
