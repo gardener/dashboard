@@ -964,7 +964,7 @@ const RAW_RUNTIME_STATE =
           ["openapi-types", "npm:12.1.3"],\
           ["openid-client", "npm:6.8.5"],\
           ["p-event", "npm:6.0.1"],\
-          ["p-limit", "npm:3.1.0"],\
+          ["p-limit", "npm:7.3.1"],\
           ["p-retry", "npm:8.0.0"],\
           ["path-to-regexp", "npm:8.4.2"],\
           ["rehype-external-links", "npm:3.0.0"],\
@@ -10599,6 +10599,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/p-limit-npm-4.0.0-5dccf29b67-a56af34a77.zip/node_modules/p-limit/",\
         "packageDependencies": [\
           ["p-limit", "npm:4.0.0"],\
+          ["yocto-queue", "npm:1.2.2"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.3.1", {\
+        "packageLocation": "./.yarn/cache/p-limit-npm-7.3.1-781ff6bfbc-49b7d7fcc2.zip/node_modules/p-limit/",\
+        "packageDependencies": [\
+          ["p-limit", "npm:7.3.1"],\
           ["yocto-queue", "npm:1.2.2"]\
         ],\
         "linkType": "HARD"\
