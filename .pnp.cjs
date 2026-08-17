@@ -953,7 +953,7 @@ const RAW_RUNTIME_STATE =
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:8.3.0"],\
           ["http-errors", "npm:2.0.1"],\
-          ["jose", "npm:5.10.0"],\
+          ["jose", "npm:6.2.9"],\
           ["js-yaml", "npm:5.2.3"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
@@ -8679,17 +8679,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:5.10.0", {\
-        "packageLocation": "./.yarn/cache/jose-npm-5.10.0-4ce825ae05-e20d9fc58d.zip/node_modules/jose/",\
+      ["npm:6.2.9", {\
+        "packageLocation": "./.yarn/cache/jose-npm-6.2.9-3ac85d642f-fc6d79b11f.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:5.10.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:6.2.3", {\
-        "packageLocation": "./.yarn/cache/jose-npm-6.2.3-e99322e00c-aa91bccba2.zip/node_modules/jose/",\
-        "packageDependencies": [\
-          ["jose", "npm:6.2.3"]\
+          ["jose", "npm:6.2.9"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10549,7 +10542,7 @@ const RAW_RUNTIME_STATE =
       ["npm:6.8.4", {\
         "packageLocation": "./.yarn/cache/openid-client-npm-6.8.4-f2e8a1b024-bb062df77d.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["jose", "npm:6.2.3"],\
+          ["jose", "npm:6.2.9"],\
           ["oauth4webapi", "npm:3.8.6"],\
           ["openid-client", "npm:6.8.4"]\
         ],\
