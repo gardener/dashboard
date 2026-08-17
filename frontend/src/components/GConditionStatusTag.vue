@@ -78,6 +78,13 @@ import {
 
 import filter from 'lodash/filter'
 
+const conditionStateLabels = Object.freeze({
+  [CONDITION_STATES.ERROR]: 'Error',
+  [CONDITION_STATES.UNKNOWN]: 'Unknown',
+  [CONDITION_STATES.PROGRESSING]: 'Progressing',
+  [CONDITION_STATES.HEALTHY]: 'Healthy',
+})
+
 export default {
   components: {
     GShootMessageDetails,
@@ -143,13 +150,7 @@ export default {
       return conditionState(this.condition)
     },
     chipStatus () {
-      const labels = {
-        [CONDITION_STATES.ERROR]: 'Error',
-        [CONDITION_STATES.UNKNOWN]: 'Unknown',
-        [CONDITION_STATES.PROGRESSING]: 'Progressing',
-        [CONDITION_STATES.HEALTHY]: 'Healthy',
-      }
-      return labels[this.state]
+      return conditionStateLabels[this.state]
     },
     chipTooltip () {
       return {

@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <template #condition="{ condition }">
       <g-condition-status-tag
         :condition="condition"
-        :identifier="shootMetadata.uid || ''"
+        :identifier="shootUid"
         popover-key-prefix="g-status-tag"
         :popper-placement="popperPlacement"
         :shoot-binding="shootCloudProviderBinding"
@@ -53,7 +53,6 @@ const {
 
 const {
   shootCloudProviderBinding,
-  shootMetadata,
   shootUid,
   shootReadiness,
 } = useShootItem()
