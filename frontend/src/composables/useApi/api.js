@@ -359,6 +359,10 @@ export function getKubeconfigData () {
   return getResource('/api/user/kubeconfig')
 }
 
+export function getUserGroups () {
+  return getResource('/api/user/groups')
+}
+
 /* Info */
 export function getInfo () {
   return getResource('/api/info')
@@ -497,6 +501,7 @@ export default {
   createTokenReview,
   getSubjectRules,
   getKubeconfigData,
+  getUserGroups,
   getInfo,
   createTerminal,
   fetchTerminalSession,

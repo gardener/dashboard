@@ -74,6 +74,7 @@ const sockets = [
     data: {
       user: {
         id: 'admin@example.org',
+        groups: [],
         profiles: {
           canListProjects: true,
           canListSeeds: true,
@@ -86,6 +87,7 @@ const sockets = [
     data: {
       user: {
         id: 'foo@example.org',
+        groups: [],
         profiles: {
           canListProjects: false,
           canListSeeds: false,
@@ -98,6 +100,7 @@ const sockets = [
     data: {
       user: {
         id: 'bar@example.org',
+        groups: [],
         profiles: {
           canListProjects: false,
           canListSeeds: true,
@@ -526,6 +529,46 @@ describe('watches', function () {
       expect(fooRoom.emit.mock.calls).toEqual([
         ['projects', { type: 'ADDED', uid }],
         ['projects', { type: 'DELETED', uid }],
+      ])
+    })
+
+    it('should notify users who belong to a project only through a group', async function () {
+      const groupUserId = 'group-user@example.org'
+      io.fetchSockets.mockResolvedValueOnce([{
+        id: 4,
+        data: {
+          user: {
+            id: groupUserId,
+            groups: ['group1'],
+            profiles: {
+              canListProjects: false,
+              canListSeeds: false,
+            },
+          },
+        },
+      }])
+      watches.projects(io, informer)
+
+      const uid = 8
+      const project = {
+        metadata: {
+          name: 'GroupMember1',
+          uid,
+        },
+        spec: {
+          members: [{
+            kind: 'Group',
+            name: 'group1',
+          }],
+        },
+      }
+
+      informer.emit('add', project)
+      await flushPromises()
+
+      const roomId = sha256(groupUserId)
+      expect(rooms.get(roomId).emit.mock.calls).toEqual([
+        ['projects', { type: 'ADDED', uid }],
       ])
     })
   })

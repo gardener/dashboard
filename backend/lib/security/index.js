@@ -21,6 +21,7 @@ import {
 } from 'lodash-es'
 import pRetry from 'p-retry'
 import { pTimeout } from '../utils/p-timeout.js'
+import { guardUserGroups } from '../utils/index.js'
 import services from '../services/index.js'
 import createError from 'http-errors'
 import logger from '../logger/index.js'
@@ -290,13 +291,12 @@ async function createAccessToken (payload, idToken) {
     }
   }
   const [
-    { value: { username, groups } },
+    { value: { username } },
     { value: isAdmin },
     { value: canListShootsAllNamespaces },
   ] = results
   Object.assign(payload, {
     id: username,
-    groups,
     aud: [GARDENER_AUDIENCE],
     isAdmin,
     canListShootsAllNamespaces,
@@ -569,6 +569,7 @@ function authenticate (options = {}) {
       csrfProtection(req, res)
       const tokenSet = await getTokenSet(req.cookies)
       const user = await verifyAccessToken(tokenSet.access_token)
+      guardUserGroups(user)
       const auth = Object.freeze({
         bearer: tokenSet.id_token,
       })

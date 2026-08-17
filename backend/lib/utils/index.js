@@ -29,6 +29,22 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
+function guardUserGroups (user) {
+  let groups
+  Object.defineProperty(user, 'groups', {
+    configurable: false,
+    enumerable: false,
+    get () {
+      assert.ok(groups, 'User groups have not been ensured')
+      return groups
+    },
+    set (value) {
+      assert.ok(Array.isArray(value), 'User groups must be an array')
+      groups = value
+    },
+  })
+}
+
 function isMemberOf (project, user) {
   return _
     .chain(project)
@@ -56,6 +72,7 @@ function isMemberOf (project, user) {
     .value()
 }
 
+// user.groups must be hydrated when canListProjects is false.
 function projectFilter (user, canListProjects = false) {
   const isPending = project => {
     return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
@@ -282,6 +299,7 @@ export {
   constants,
   decodeBase64,
   encodeBase64,
+  guardUserGroups,
   isMemberOf,
   projectFilter,
   parseRooms,

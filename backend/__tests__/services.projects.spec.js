@@ -32,6 +32,10 @@ vi.mock('../lib/cache/index.js', async () => {
             name: 'robot-sa',
             namespace: 'garden-foo',
           },
+          {
+            kind: 'Group',
+            name: 'team-a',
+          },
         ],
       },
       status: {
@@ -89,6 +93,12 @@ vi.mock('../lib/cache/index.js', async () => {
 })
 vi.mock('../lib/services/shoots.js')
 vi.mock('../lib/services/authorization.js')
+vi.mock('../lib/services/authentication.js', () => ({
+  ensureUserGroups: vi.fn(async user => {
+    user.groups ??= []
+    return user.groups
+  }),
+}))
 vi.mock('@gardener-dashboard/kube-client', () => {
   const mockKubeClient = {
     dashboardClient: {
@@ -170,6 +180,16 @@ describe('services/projects', () => {
 
       const result = await projects.list({ user })
       expect(result).toHaveLength(0)
+    })
+
+    it('should return project for group member with a group-free dashboard user', async () => {
+      authorization.canListProjects.mockResolvedValue(false)
+      const user = createUser('group-user@bar.com')
+      user.groups = ['team-a']
+
+      const result = await projects.list({ user })
+      expect(result).toHaveLength(1)
+      expect(result[0].metadata.name).toBe('foo')
     })
   })
 

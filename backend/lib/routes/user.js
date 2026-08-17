@@ -9,13 +9,24 @@ import services from '../services/index.js'
 import { metricsRoute } from '../middleware.js'
 import config from '../config/index.js'
 import { encodeBase64 } from '../utils/index.js'
-const { authorization } = services
+const { authentication, authorization } = services
 
 const router = express.Router({
   mergeParams: true,
 })
 
 const metricsMiddleware = metricsRoute('user')
+router.route('/groups')
+  .all(metricsMiddleware)
+  .get(async (req, res, next) => {
+    try {
+      const groups = await authentication.ensureUserGroups(req.user)
+      res.send(groups)
+    } catch (err) {
+      next(err)
+    }
+  })
+
 router.route('/subjectrules')
   .all(metricsMiddleware)
   .post(async (req, res, next) => {

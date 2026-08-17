@@ -39,3 +39,14 @@ export async function isAuthenticated ({ token } = {}) {
     throw new Unauthorized(err.message)
   }
 }
+
+export async function ensureUserGroups (user) {
+  const { username, groups } = await isAuthenticated({
+    token: user.auth.bearer,
+  })
+  if (username !== user.id) {
+    throw new Unauthorized('Bearer token user does not match dashboard session user')
+  }
+  user.groups = groups ?? []
+  return user.groups
+}

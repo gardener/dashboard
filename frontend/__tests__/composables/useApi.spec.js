@@ -51,6 +51,26 @@ describe('composables', () => {
         })
       })
 
+      describe('#getUserGroups', () => {
+        it('should fetch the current user groups', async () => {
+          const groups = ['group-a', 'group-b']
+          fetch.mockResponseOnce(JSON.stringify(groups), {
+            headers: {
+              'content-type': 'application/json; charset=UTF-8',
+            },
+          })
+
+          const res = await api.getUserGroups()
+
+          expect(res.status).toBe(200)
+          expect(res.data).toEqual(groups)
+          expect(fetch).toBeCalledTimes(1)
+          const [req] = fetch.mock.calls[0]
+          expect(req.method).toBe('GET')
+          expect(req.url).toBe('http://localhost:3000/api/user/groups')
+        })
+      })
+
       describe('#getConfiguration', () => {
         it('should fetch the configuration', async () => {
           const { getConfiguration } = api

@@ -378,7 +378,7 @@ describe('security', function () {
         })
         const { refreshToken } = security
 
-        authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: [] })
+        authentication.isAuthenticated.mockResolvedValue({ username: sub, groups: ['group-a', 'group-b'] })
         authorization.isAdmin.mockResolvedValue(false)
         authorization.canListShoots.mockResolvedValue(true)
 
@@ -476,12 +476,12 @@ describe('security', function () {
         expect(user).toEqual(
           expect.objectContaining({
             id: sub,
-            groups: [],
             aud: ['gardener'],
             isAdmin: false,
             canListShootsAllNamespaces: true,
           }),
         )
+        expect(Object.hasOwn(user, 'groups')).toBe(false)
       })
     })
 

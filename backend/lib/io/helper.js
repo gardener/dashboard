@@ -12,6 +12,7 @@ import kubeClientModule from '@gardener-dashboard/kube-client'
 import { cloneDeep } from 'lodash-es'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
+import * as authentication from '../services/authentication.js'
 import * as authorization from '../services/authorization.js'
 import { authenticate } from '../security/index.js'
 import { simplifyObjectMetadata } from '../utils/index.js'
@@ -65,12 +66,15 @@ function expiresIn (socket) {
 async function userProfiles (req, res, next) {
   try {
     const [
+      ,
       canListProjects,
       canListSeeds,
       canListShoots,
       canListManagedSeedsInGardenNamespace,
       canListShootsInGardenNamespace,
     ] = await Promise.all([
+      // Hydrate the shared socket user once for authorization in later events.
+      authentication.ensureUserGroups(req.user),
       authorization.canListProjects(req.user),
       authorization.canListSeeds(req.user),
       authorization.canListShoots(req.user),

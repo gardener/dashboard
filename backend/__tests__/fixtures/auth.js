@@ -28,10 +28,10 @@ const iat = 1577836800
 const expiresIn = '50y'
 const jwtid = 'jti'
 
-async function getCookieValue (token) {
-  const bearer = await token
+async function getCookieValue (accessToken, idToken = accessToken) {
+  const [bearer, encryptedBearer] = await Promise.all([accessToken, idToken])
   const [header, payload, signature] = split(bearer, '.')
-  const encrypted = await encrypt(bearer)
+  const encrypted = await encrypt(encryptedBearer)
   const cookies = {
     [COOKIE_HEADER_PAYLOAD]: join([header, payload], '.'),
     [COOKIE_SIGNATURE]: signature,
@@ -47,7 +47,7 @@ async function getCookieValue (token) {
 }
 
 const auth = {
-  createUser ({ id, aud = ['gardener'], ...rest }, invalid) {
+  createUser ({ id, aud = ['gardener'], groups, bearerId, ...rest }, invalid) {
     const secret = invalid === true
       ? 'invalid-secret'
       : undefined
@@ -59,16 +59,28 @@ const auth = {
     if (!rest.jti) {
       options.jwtid = jwtid
     }
-    const bearer = sign({ id, iat, aud, ...rest }, secret, options)
+    const accessToken = sign({ id, iat, aud, ...rest }, secret, options)
+    const idTokenPayload = {
+      id: bearerId ?? id,
+      iat,
+      aud,
+      ...rest,
+    }
+    if (groups !== undefined) {
+      idTokenPayload.groups = groups
+    }
+    const idToken = (groups !== undefined || bearerId !== undefined)
+      ? sign(idTokenPayload, secret, options)
+      : accessToken
     return {
       isAdmin () {
         return /^admin/.test(id)
       },
       get cookie () {
-        return getCookieValue(bearer)
+        return getCookieValue(accessToken, idToken)
       },
       get bearer () {
-        return bearer
+        return idToken
       },
     }
   },

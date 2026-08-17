@@ -11,6 +11,7 @@ import createError from 'http-errors'
 import * as utils from '../utils/index.js'
 import cache from '../cache/index.js'
 import * as authorization from './authorization.js'
+import * as authentication from './authentication.js'
 import logger from '../logger/index.js'
 import _ from 'lodash-es'
 import semver from 'semver'
@@ -39,7 +40,9 @@ export async function list ({ user, namespace, labelSelector }) {
         items: cache.getShoots(namespace, query),
       }
     } else {
-      // user is permitted to list shoots only in namespaces associated with their projects
+      // Without cluster-wide shoot access, fall back to namespaces of projects the user belongs to.
+      // Project membership can be granted through a group, so hydrate groups before filtering.
+      await authentication.ensureUserGroups(user)
       const namespaces = _
         .chain(cache.getProjects())
         .filter(projectFilter(user, false))
