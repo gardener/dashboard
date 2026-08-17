@@ -5,36 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap justify-start">
-    <g-status-tag
-      v-for="condition in conditions"
-      :key="condition.type"
-      :condition="condition"
-      :popper-placement="popperPlacement"
-      :shoot-binding="shootCloudProviderBinding"
-      :shoot-metadata="shootMetadata"
-      :stale-shoot="isStaleShoot"
-    />
-  </div>
-  <template v-if="showStatusText">
-    <div
-      v-for="({ description, link }) in errorCodeObjects"
-      :key="description"
-      class="mt-1"
-    >
-      <div class="font-weight-bold text-error wrap-text">
-        {{ description }}
-      </div>
-      <div v-if="link">
-        <g-external-link
-          :url="link.url"
-          class="font-weight-bold text-error"
-        >
-          {{ link.text }}
-        </g-external-link>
-      </div>
-    </div>
-  </template>
+  <g-condition-status-tags
+    :conditions="conditions"
+    :error-code-objects="errorCodeObjects"
+    :show-status-text="showStatusText"
+  >
+    <template #condition="{ condition }">
+      <g-condition-status-tag
+        :condition="condition"
+        :identifier="shootUid"
+        popover-key-prefix="g-status-tag"
+        :popper-placement="popperPlacement"
+        :shoot-binding="shootCloudProviderBinding"
+        :stale="isStaleShoot"
+      />
+    </template>
+  </g-condition-status-tags>
 </template>
 
 <script setup>
@@ -45,8 +31,8 @@ import {
 
 import { useShootStore } from '@/store/shoot'
 
-import GStatusTag from '@/components/GStatusTag.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
+import GConditionStatusTags from '@/components/GConditionStatusTags.vue'
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 import { useStatusConditions } from '@/composables/useStatusConditions'
@@ -67,7 +53,6 @@ const {
 
 const {
   shootCloudProviderBinding,
-  shootMetadata,
   shootUid,
   shootReadiness,
 } = useShootItem()

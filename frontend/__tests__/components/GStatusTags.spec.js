@@ -11,6 +11,7 @@ import { createTestingPinia } from '@pinia/testing'
 import { useConfigStore } from '@/store/config'
 import { useAuthnStore } from '@/store/authn'
 
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 import GStatusTags from '@/components/GStatusTags'
 
 import { createShootItemComposable } from '@/composables/useShootItem'
@@ -25,6 +26,9 @@ describe('components', () => {
 
     function mountStatusTags (conditionTypes) {
       const shootItem = shallowRef({
+        metadata: {
+          uid: 'shoot-uid',
+        },
         status: {
           conditions: conditionTypes.map(type => {
             return {
@@ -44,7 +48,7 @@ describe('components', () => {
             'shoot-item': createShootItemComposable(shootItem),
           },
           stubs: {
-            GStatusTag: true,
+            GConditionStatusTag: true,
           },
         },
       })
@@ -85,6 +89,17 @@ describe('components', () => {
         shortName: 'SC',
         name: 'Sample Condition',
         sortOrder: '000000SC',
+      })
+    })
+
+    it('should adapt shoot readiness data to the shared condition tag', () => {
+      const wrapper = mountStatusTags(['Ready'])
+
+      expect(wrapper.getComponent(GConditionStatusTag).props()).toMatchObject({
+        condition: expect.objectContaining({ type: 'Ready' }),
+        identifier: 'shoot-uid',
+        popoverKeyPrefix: 'g-status-tag',
+        stale: true,
       })
     })
 

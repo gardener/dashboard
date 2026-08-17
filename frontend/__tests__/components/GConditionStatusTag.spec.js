@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -10,7 +10,7 @@ import { createPinia } from 'pinia'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 
-import GStatusTag from '@/components/GStatusTag.vue'
+import GConditionStatusTag from '@/components/GConditionStatusTag.vue'
 
 import { useApi } from '@/composables/useApi'
 
@@ -25,7 +25,7 @@ function createRulesResponse (resourceRules = []) {
 }
 
 describe('components', () => {
-  describe('g-status-tag', () => {
+  describe('g-condition-status-tag', () => {
     const vuetifyPlugin = createVuetifyPlugin()
     const api = useApi()
 
@@ -35,7 +35,7 @@ describe('components', () => {
     let mockGetSubjectRules
 
     function mountStatusTag (condition, props = {}) {
-      return mount(GStatusTag, {
+      return mount(GConditionStatusTag, {
         global: {
           plugins: [
             vuetifyPlugin,
@@ -44,6 +44,8 @@ describe('components', () => {
         },
         props: {
           condition,
+          identifier: 'shoot-uid',
+          popoverKeyPrefix: 'g-status-tag',
           ...props,
         },
       })
@@ -68,7 +70,7 @@ describe('components', () => {
       mockGetSubjectRules.mockResolvedValue(createRulesResponse())
     })
 
-    it('should render healthy condition object', () => {
+    it('should render a healthy condition', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
@@ -91,13 +93,14 @@ describe('components', () => {
         name: 'foo-bar',
         status: 'True',
       }, {
-        staleShoot: true,
+        stale: true,
       })
 
       expect(wrapper.vm.chipAriaLabel).toBe('foo-bar: Last status: Healthy')
+      expect(wrapper.vm.toolbarTitle).toBe('Last Status')
     })
 
-    it('should render condition with user error', () => {
+    it('should render a condition with a user error', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
@@ -107,16 +110,15 @@ describe('components', () => {
         ],
       })
       const vm = wrapper.vm
-      expect(vm.chipText).toBe('foo')
       expect(vm.chipStatus).toBe('Error')
       expect(vm.isError).toBe(true)
-      expect(vm.isUserError).toBe(true)
+      expect(vm.hasUserError).toBe(true)
       expect(vm.chipIcon).toBe('mdi-account-alert-outline')
       expect(vm.color).toBe('error')
       expect(vm.visible).toBe(true)
     })
 
-    it('should hide landscape-viewer-only condition without landscape access', () => {
+    it('should hide a landscape-viewer-only condition without landscape access', () => {
       const wrapper = mountStatusTag({
         shortName: 'foo',
         name: 'foo-bar',
@@ -131,7 +133,7 @@ describe('components', () => {
       expect(vm.chipIcon).toBe('')
     })
 
-    it('should render landscape-viewer-only condition with landscape access', async () => {
+    it('should render a landscape-viewer-only condition with landscape access', async () => {
       await grantLandscapeAccess()
       const wrapper = mountStatusTag({
         shortName: 'foo',
