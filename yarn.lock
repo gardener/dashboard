@@ -815,7 +815,7 @@ __metadata:
     symbol-tree: "npm:^3.2.4"
     toidentifier: "npm:^1.0.1"
     typescript: "npm:^5.6.3"
-    universal-cookie: "npm:^7.0.0"
+    universal-cookie: "npm:^8.0.0"
     unplugin-fonts: "npm:^1.1.1"
     url-template: "npm:^3.1.1"
     uuid: "npm:^14.0.0"
@@ -2015,13 +2015,6 @@ __metadata:
   dependencies:
     "@types/deep-eql": "npm:*"
   checksum: 10c0/49282bf0e8246800ebb36f17256f97bd3a8c4fb31f92ad3c0eaa7623518d7e87f1eaad4ad206960fcaf7175854bdff4cb167e4fe96811e0081b4ada83dd533ec
-  languageName: node
-  linkType: hard
-
-"@types/cookie@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "@types/cookie@npm:0.6.0"
-  checksum: 10c0/5b326bd0188120fb32c0be086b141b1481fec9941b76ad537f9110e10d61ee2636beac145463319c71e4be67a17e85b81ca9e13ceb6e3bb63b93d16824d6c149
   languageName: node
   linkType: hard
 
@@ -3635,10 +3628,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie@npm:0.7.2, cookie@npm:^0.7.1, cookie@npm:^0.7.2, cookie@npm:~0.7.2":
+"cookie@npm:0.7.2, cookie@npm:^0.7.1, cookie@npm:~0.7.2":
   version: 0.7.2
   resolution: "cookie@npm:0.7.2"
   checksum: 10c0/9596e8ccdbf1a3a88ae02cf5ee80c1c50959423e1022e4e60b91dd87c622af1da309253d8abdb258fb5e3eacb4f08e579dc58b4897b8087574eee0fd35dfa5d2
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "cookie@npm:1.1.1"
+  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
   languageName: node
   linkType: hard
 
@@ -10003,13 +10003,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"universal-cookie@npm:^7.0.0":
-  version: 7.2.2
-  resolution: "universal-cookie@npm:7.2.2"
+"universal-cookie@npm:^8.0.0":
+  version: 8.1.2
+  resolution: "universal-cookie@npm:8.1.2"
   dependencies:
-    "@types/cookie": "npm:^0.6.0"
-    cookie: "npm:^0.7.2"
-  checksum: 10c0/214c5cf72b12b6d98a72e11a10adb3f1d06dbeadbd9a2d46ded8c288d86387e9ff25499f85d2f85728809484d678c02028ac674cb8747257b38d2c17fb93e896
+    cookie: "npm:^1.1.1"
+  checksum: 10c0/b0d2df0268d0f99f78bfb68c7dc876310f58d226771bbd5ef844255247a4e7b79142c97fa237bb86063ec9e62e0d08de6be64803d29828b4588b94f57fc14f83
   languageName: node
   linkType: hard
 
