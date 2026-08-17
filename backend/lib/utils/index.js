@@ -4,7 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import crypto from 'crypto'
 import _ from 'lodash-es'
+import canonicalize from 'canonicalize'
 import config from '../config/index.js'
 import assert from 'assert/strict'
 
@@ -146,6 +148,73 @@ function simplifyManagedSeedShoot (shoot) {
   }
 }
 
+function stripProviderConfig (providerConfig, allowlist = []) {
+  if (!providerConfig) {
+    return undefined
+  }
+
+  if (allowlist.length === 0) {
+    return undefined
+  }
+
+  const filteredProviderConfig = {}
+  for (const path of allowlist) {
+    const value = _.get(providerConfig, path)
+    if (value !== undefined) {
+      _.set(filteredProviderConfig, path, value)
+    }
+  }
+
+  return Object.keys(filteredProviderConfig).length === 0 ? undefined : filteredProviderConfig
+}
+
+/**
+ * Simplifies a CloudProfile or NamespacedCloudProfile object by removing unnecessary metadata
+ * and filtering the providerConfig based on the cloud provider type.
+ *
+ * This function can be used with both CloudProfile and NamespacedCloudProfile resources.
+ * It automatically detects the resource type and applies the appropriate simplification logic.
+ *
+ * @param {Object} profile - A CloudProfile or NamespacedCloudProfile object
+ * @returns {Object} The simplified profile object
+ */
+function simplifyCloudProfile (profile) {
+  const kind = _.get(profile, ['kind'])
+
+  let entrypath = ['spec']
+  if (kind === 'NamespacedCloudProfile') {
+    entrypath = ['status', 'cloudProfileSpec']
+  }
+  const allowedPathsIroncore = [
+    ['firewallImages'],
+    ['firewallNetworks'],
+  ]
+
+  const allowedPathsOpenstack = [
+    ['constraints', 'floatingPools'],
+    ['constraints', 'loadBalancerConfig', 'classes'],
+    ['constraints', 'loadBalancerProviders'],
+  ]
+
+  profile = simplifyObjectMetadata(profile)
+
+  const type = _.get(profile, [...entrypath, 'type'])
+  const providerConfig = _.get(profile, [...entrypath, 'providerConfig'])
+
+  let allowlist = []
+  if (type === 'ironcore' || type === 'metal') {
+    allowlist = allowedPathsIroncore
+  } else if (type === 'openstack') {
+    allowlist = allowedPathsOpenstack
+  }
+
+  const strippedProviderConfig = stripProviderConfig(providerConfig, allowlist)
+
+  _.set(profile, [...entrypath, 'providerConfig'], strippedProviderConfig)
+
+  return profile
+}
+
 function parseSelector (selector = '') {
   let notOperator
   let key
@@ -278,6 +347,13 @@ function isSeedUnreachable (seed) {
   return _.isMatch(seed, { metadata: { labels: matchLabels } })
 }
 
+function computeSpecHash (spec) {
+  if (!spec) {
+    return null
+  }
+  return crypto.createHash('sha256').update(canonicalize(spec)).digest('hex')
+}
+
 export {
   constants,
   decodeBase64,
@@ -290,6 +366,8 @@ export {
   simplifySeed,
   simplifyManagedSeed,
   simplifyManagedSeedShoot,
+  simplifyCloudProfile,
+  stripProviderConfig,
   parseSelector,
   parseSelectors,
   filterBySelectors,
@@ -299,4 +377,5 @@ export {
   isTruthyValue,
   getSeedIngressDomain,
   isSeedUnreachable,
+  computeSpecHash,
 }

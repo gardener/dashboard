@@ -453,6 +453,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@dmsnell/diff-match-patch", [\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/@dmsnell-diff-match-patch-npm-1.1.0-021308d314-8547bf4a62.zip/node_modules/@dmsnell/diff-match-patch/",\
+        "packageDependencies": [\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@emnapi/core", [\
       ["npm:1.11.1", {\
         "packageLocation": "./.yarn/cache/@emnapi-core-npm-1.11.1-99a234b095-2c6defdac2.zip/node_modules/@emnapi/core/",\
@@ -937,6 +946,7 @@ const RAW_RUNTIME_STATE =
           ["@vitest/eslint-plugin", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.6.26"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:2.3.0"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["compression", "npm:1.8.1"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:10.1.0"],\
@@ -955,6 +965,7 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["jose", "npm:5.10.0"],\
           ["js-yaml", "npm:5.2.3"],\
+          ["jsondiffpatch", "npm:0.7.6"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
           ["lodash-es", "npm:4.18.1"],\
@@ -1047,6 +1058,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-webgl", "npm:0.19.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
           ["ansi-html", "npm:0.0.9"],\
+          ["canonicalize", "npm:2.1.0"],\
           ["dayjs", "npm:1.11.21"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:9.39.5"],\
@@ -1064,6 +1076,7 @@ const RAW_RUNTIME_STATE =
           ["js-cookie", "npm:3.0.8"],\
           ["js-yaml", "npm:5.2.3"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
+          ["jsondiffpatch", "npm:0.7.6"],\
           ["jwt-decode", "npm:4.0.0"],\
           ["lodash", "npm:4.18.1"],\
           ["md5", "npm:2.3.0"],\
@@ -5260,6 +5273,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["canonicalize", [\
+      ["npm:2.1.0", {\
+        "packageLocation": "./.yarn/cache/canonicalize-npm-2.1.0-8ea3fe50f0-3b1ec61276.zip/node_modules/canonicalize/",\
+        "packageDependencies": [\
+          ["canonicalize", "npm:2.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["ccount", [\
       ["npm:2.0.1", {\
         "packageLocation": "./.yarn/cache/ccount-npm-2.0.1-f4b7827860-3939b16643.zip/node_modules/ccount/",\
@@ -8885,6 +8907,16 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/json5-npm-2.2.3-9962c55073-5a04eed948.zip/node_modules/json5/",\
         "packageDependencies": [\
           ["json5", "npm:2.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jsondiffpatch", [\
+      ["npm:0.7.6", {\
+        "packageLocation": "./.yarn/cache/jsondiffpatch-npm-0.7.6-61b4736c98-c82ea96bcc.zip/node_modules/jsondiffpatch/",\
+        "packageDependencies": [\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"],\
+          ["jsondiffpatch", "npm:0.7.6"]\
         ],\
         "linkType": "HARD"\
       }]\

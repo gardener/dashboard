@@ -6,18 +6,20 @@
 
 import httpErrors from 'http-errors'
 import * as authorization from './authorization.js'
-import _ from 'lodash-es'
 import cache from '../cache/index.js'
-const { NotFound, Forbidden } = httpErrors
-const { getCloudProfiles } = cache
+import { simplifyCloudProfile } from '../utils/index.js'
+const { Forbidden, NotFound } = httpErrors
+const { getCloudProfiles, getCloudProfile } = cache
 
 export async function list ({ user }) {
   const allowed = await authorization.canListCloudProfiles(user)
   if (!allowed) {
     throw new Forbidden('You are not allowed to list cloudprofiles')
   }
+  const allItems = getCloudProfiles()
 
-  return getCloudProfiles()
+  return allItems
+    .map(simplifyCloudProfile)
 }
 
 export async function read ({ user, name }) {
@@ -25,12 +27,9 @@ export async function read ({ user, name }) {
   if (!allowed) {
     throw new Forbidden(`You are not allowed to get cloudprofile ${name}`)
   }
-
-  const cloudProfiles = getCloudProfiles()
-  const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
-  if (!cloudProfileResource) {
-    throw new NotFound(`Cloud profile with name ${name} not found`)
+  const cloudProfile = getCloudProfile(name)
+  if (!cloudProfile) {
+    throw new NotFound(`CloudProfile '${name}' not found`)
   }
-
-  return cloudProfileResource
+  return simplifyCloudProfile(cloudProfile)
 }

@@ -23,6 +23,7 @@ import resourcequotas from './resourcequotas.js'
 import projects from './projects.js'
 import serviceaccounts from './serviceaccounts.js'
 import cloudprofiles from './cloudprofiles.js'
+import namespacedcloudprofiles from './namespacedCloudprofiles.js'
 import nodes from './nodes.js'
 import terminals from './terminals.js'
 import github from './github.js'
@@ -59,6 +60,7 @@ const fixtures = {
   projects,
   serviceaccounts,
   cloudprofiles,
+  namespacedcloudprofiles,
   quotas,
   controllerregistrations,
   resourcequotas,

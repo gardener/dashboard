@@ -14,6 +14,7 @@ function getCloudProfile ({ uid, name, kind, seedSelector = {} }) {
     metadata: {
       name,
       uid,
+      resourceVersion: String(uid * 100),
     },
     spec: {
       type: kind,
