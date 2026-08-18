@@ -56,7 +56,7 @@ function isExpired (user) {
   return typeof t === 'number' && t < CLOCK_TOLERANCE
 }
 
-export function useUserManager (cookies, options) {
+export function useUserManager (options) {
   const {
     logger = useLogger(),
   } = options ?? {}
@@ -70,20 +70,16 @@ export function useUserManager (cookies, options) {
 
   const origin = window.location.origin
 
-  function decodeCookie () {
+  async function decodeCookie () {
     try {
-      const value = cookies.get(COOKIE_HEADER_PAYLOAD)
-      if (value) {
-        return jwtDecode(value)
+      const cookie = await window.cookieStore.get(COOKIE_HEADER_PAYLOAD)
+      if (cookie?.value) {
+        return jwtDecode(cookie.value)
       }
     } catch (err) {
       logger.error(err.message)
     }
     return null
-  }
-
-  function deleteCookie () {
-    cookies.remove(COOKIE_HEADER_PAYLOAD)
   }
 
   async function createTokenRefreshRequest () {
@@ -101,7 +97,7 @@ export function useUserManager (cookies, options) {
 
     const statusCode = response.status
     if (statusCode >= 200 && statusCode < 300) {
-      const user = decodeCookie()
+      const user = await decodeCookie()
       if (!user) {
         throw createNoUserError()
       }
@@ -133,12 +129,16 @@ export function useUserManager (cookies, options) {
     window.location.href = url
   }
 
-  function signout (err, redirectPath) {
+  async function signout (err, redirectPath) {
     if (signoutInProgress) {
       return
     }
     signoutInProgress = true
-    deleteCookie()
+    try {
+      await window.cookieStore.delete(COOKIE_HEADER_PAYLOAD)
+    } catch (deleteError) {
+      logger.error(deleteError.message)
+    }
     const url = new URL('/auth/logout', origin)
     redirectPath ??= window.location.pathname + window.location.search
     if (redirectPath) {
@@ -150,6 +150,12 @@ export function useUserManager (cookies, options) {
     }
     redirect(url)
   }
+
+  useEventListener(window.cookieStore, 'change', event => {
+    if (event.deleted?.some(cookie => cookie.name === COOKIE_HEADER_PAYLOAD)) {
+      signout()
+    }
+  })
 
   function signin (redirectPath) {
     const url = new URL('/login', origin)
@@ -169,7 +175,7 @@ export function useUserManager (cookies, options) {
 
   async function refreshToken () {
     try {
-      let user = decodeCookie()
+      let user = await decodeCookie()
       if (!user) {
         throw createNoUserError()
       }
@@ -181,7 +187,7 @@ export function useUserManager (cookies, options) {
       }
       logger.debug('Acquiring token refresh lock (%s)', user.rti)
       await navigator.locks.request('token-refresh-request', async () => {
-        user = decodeCookie()
+        user = await decodeCookie()
         if (!user) {
           throw createNoUserError()
         }
@@ -224,11 +230,11 @@ export function useUserManager (cookies, options) {
 
   return {
     decodeCookie,
-    isRefreshRequired () {
-      return isRefreshRequired(decodeCookie())
+    async isRefreshRequired () {
+      return isRefreshRequired(await decodeCookie())
     },
-    isExpired () {
-      return isExpired(decodeCookie())
+    async isExpired () {
+      return isExpired(await decodeCookie())
     },
     signin,
     signout,

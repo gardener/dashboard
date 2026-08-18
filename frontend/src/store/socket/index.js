@@ -172,13 +172,24 @@ export const useSocketStore = defineStore('socket', () => {
     }
   }
 
-  watch(() => authnStore.user, value => {
-    if (authnStore.isExpired()) {
-      disconnect()
-    } else {
-      connect()
-    }
-  })
+  watch(
+    () => authnStore.user,
+    async (value, oldValue, onCleanup) => {
+      let cancelled = false
+      onCleanup(() => {
+        cancelled = true
+      })
+      const expired = await authnStore.isExpired()
+      if (cancelled) {
+        return
+      }
+      if (expired) {
+        disconnect()
+      } else {
+        connect()
+      }
+    },
+  )
 
   return {
     socket: markRaw(socket),

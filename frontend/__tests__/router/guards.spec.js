@@ -16,12 +16,16 @@ import {
   setActivePinia,
 } from 'pinia'
 
+import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 
 import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 
-import { createGlobalAfterHooks } from '@/router/guards'
+import {
+  createGlobalAfterHooks,
+  createGlobalBeforeGuards,
+} from '@/router/guards'
 
 function createTestRouter () {
   return createRouter({
@@ -150,6 +154,77 @@ describe('router', () => {
       expect(shootStore.shootListContext).toEqual({
         namespace: 'garden-source',
         search: 'seed:latest',
+      })
+    })
+  })
+
+  describe('global before guard', () => {
+    let authnStore
+
+    function createAuthGuard () {
+      return createGlobalBeforeGuards()[1]
+    }
+
+    beforeEach(() => {
+      setActivePinia(createPinia())
+      authnStore = useAuthnStore()
+    })
+
+    it('should wait for the asynchronous expiry result before allowing navigation', async () => {
+      let resolveExpired
+      vi.spyOn(authnStore, '$reset').mockResolvedValue()
+      vi.spyOn(authnStore, 'isExpired').mockReturnValue(new Promise(resolve => {
+        resolveExpired = () => resolve(false)
+      }))
+
+      const navigation = createAuthGuard()({
+        meta: {},
+        fullPath: '/namespace/foo',
+      })
+
+      let settled = false
+      const pending = navigation.then(result => {
+        settled = true
+        return result
+      })
+      await Promise.resolve()
+      expect(settled).toBe(false)
+
+      resolveExpired()
+      await expect(pending).resolves.toBe(true)
+      expect(settled).toBe(true)
+      expect(authnStore.$reset).toHaveBeenCalledTimes(1)
+      expect(authnStore.isExpired).toHaveBeenCalledTimes(1)
+    })
+
+    it('should redirect to login after the session is known to be expired', async () => {
+      let resolveExpired
+      vi.spyOn(authnStore, '$reset').mockImplementation(async () => {
+        authnStore.user = { id: 'john.doe' }
+      })
+      vi.spyOn(authnStore, 'isExpired').mockReturnValue(new Promise(resolve => {
+        resolveExpired = () => resolve(true)
+      }))
+
+      const navigation = createAuthGuard()({
+        meta: {},
+        fullPath: '/namespace/foo',
+      })
+
+      let settled = false
+      const pending = navigation.then(result => {
+        settled = true
+        return result
+      })
+      await Promise.resolve()
+      expect(settled).toBe(false)
+
+      resolveExpired()
+      await expect(pending).resolves.toEqual({
+        name: 'Login',
+        query: {
+          redirectPath: '/namespace/foo',
+        },
       })
     })
   })

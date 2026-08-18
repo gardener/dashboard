@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { nextTick } from 'vue'
 import {
   setActivePinia,
   createPinia,
@@ -49,8 +50,8 @@ describe('store', () => {
     let socketStore
     let authnStore
     let mockEnsureValidToken // eslint-disable-line no-unused-vars
-    let mockSignout // eslint-disable-line no-unused-vars
-    let mockIsExpired // eslint-disable-line no-unused-vars
+    let mockSignout
+    let mockIsExpired
 
     beforeEach(() => {
       vi.useFakeTimers()
@@ -62,7 +63,7 @@ describe('store', () => {
       authnStore = useAuthnStore()
       mockEnsureValidToken = vi.spyOn(authnStore, 'ensureValidToken').mockImplementation(noop)
       mockSignout = vi.spyOn(authnStore, 'signout').mockImplementation(noop)
-      mockIsExpired = vi.spyOn(authnStore, 'isExpired').mockReturnValue(false)
+      mockIsExpired = vi.spyOn(authnStore, 'isExpired').mockResolvedValue(false)
       socketStore = useSocketStore()
     })
 
@@ -93,10 +94,11 @@ describe('store', () => {
       expect(socketStore.active).toBe(true)
     })
 
-    it('should close the connection by "transport close"', () => {
+    it('should close the connection by "transport close"', async () => {
       mockSocket.connected = true
       mockSocket.active = true
       socketStore.disconnect()
+      await Promise.resolve()
       expect(socketStore.connected).toBe(false)
       expect(mockSocket.active).toBe(true)
       expect(mockSocket.disconnect).toBeCalledTimes(1)
@@ -106,11 +108,91 @@ describe('store', () => {
 
     it('should close the connection by "io server disconnect"', async () => {
       mockSocket.emit('disconnect', 'io server disconnect')
+      await Promise.resolve()
       expect(socketStore.connected).toBe(false)
       expect(socketStore.active).toBe(true)
       await vi.runOnlyPendingTimersAsync()
 
       expect(mockSocket.connect).toBeCalledTimes(1)
+    })
+
+    it('should wait for the asynchronous expiry result before reconnecting', async () => {
+      let resolveExpired
+      mockIsExpired.mockReturnValue(new Promise(resolve => {
+        resolveExpired = () => resolve(false)
+      }))
+
+      mockSocket.emit('disconnect', 'io server disconnect')
+      await Promise.resolve()
+      expect(mockSocket.connect).not.toBeCalled()
+
+      resolveExpired()
+      await Promise.resolve()
+      await vi.runOnlyPendingTimersAsync()
+
+      expect(mockSocket.connect).toBeCalledTimes(1)
+      expect(mockSignout).not.toBeCalled()
+    })
+
+    it('should wait for the asynchronous expiry result before signing out', async () => {
+      let resolveExpired
+      mockIsExpired.mockReturnValue(new Promise(resolve => {
+        resolveExpired = () => resolve(true)
+      }))
+
+      mockSocket.emit('disconnect', 'io server disconnect')
+      await Promise.resolve()
+      expect(mockSignout).not.toBeCalled()
+      expect(mockSocket.connect).not.toBeCalled()
+
+      resolveExpired()
+      await Promise.resolve()
+      await vi.runOnlyPendingTimersAsync()
+
+      expect(mockSignout).toBeCalledTimes(1)
+      expect(mockSocket.connect).not.toBeCalled()
+    })
+
+    it('should wait for the asynchronous expiry result before connecting when the user changes', async () => {
+      let resolveExpired
+      mockIsExpired.mockReturnValue(new Promise(resolve => {
+        resolveExpired = () => resolve(false)
+      }))
+
+      authnStore.user = { id: 'john.doe' }
+      await nextTick()
+      expect(mockSocket.connect).not.toBeCalled()
+
+      resolveExpired()
+      await nextTick()
+      await Promise.resolve()
+
+      expect(mockSocket.connect).toBeCalledTimes(1)
+    })
+
+    it('should ignore a stale expiry result when the user changes again', async () => {
+      let resolveFirst
+      let resolveSecond
+      mockIsExpired
+        .mockReturnValueOnce(new Promise(resolve => {
+          resolveFirst = () => resolve(false)
+        }))
+        .mockReturnValueOnce(new Promise(resolve => {
+          resolveSecond = () => resolve(true)
+        }))
+
+      authnStore.user = { id: 'john.doe' }
+      await nextTick()
+      authnStore.user = null
+      await nextTick()
+
+      resolveSecond()
+      await Promise.resolve()
+      expect(mockSocket.disconnect).toBeCalledTimes(1)
+
+      resolveFirst()
+      await Promise.resolve()
+      expect(mockSocket.connect).not.toBeCalled()
     })
   })
 })

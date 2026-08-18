@@ -48,7 +48,6 @@ const importConfig = {
       [path.resolve('../eslint-import-resolver-local.cjs')]: {
         map: [
           ['unfonts.css', null],
-          ['@vueuse/integrations/useCookies', null],
           ['vuetify/components', null],
           ['vuetify/directives', null],
           ['vuetify/styles', null],

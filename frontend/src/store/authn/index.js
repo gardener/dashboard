@@ -12,7 +12,6 @@ import {
   ref,
   computed,
 } from 'vue'
-import { useCookies } from '@vueuse/integrations/useCookies'
 
 import { useLogger } from '@/composables/useLogger'
 import { useInterceptors } from '@/composables/useApi'
@@ -23,14 +22,10 @@ import {
 } from '@/utils'
 import { createAbortError } from '@/utils/errors'
 
-import {
-  useUserManager,
-  COOKIE_HEADER_PAYLOAD,
-} from './helper'
+import { useUserManager } from './helper'
 
 export const useAuthnStore = defineStore('authn', () => {
   const logger = useLogger()
-  const cookies = useCookies([COOKIE_HEADER_PAYLOAD])
   const {
     decodeCookie,
     isExpired,
@@ -38,7 +33,7 @@ export const useAuthnStore = defineStore('authn', () => {
     signout,
     signinWithOidc,
     ensureValidToken,
-  } = useUserManager(cookies, {
+  } = useUserManager({
     logger,
   })
 
@@ -85,8 +80,8 @@ export const useAuthnStore = defineStore('authn', () => {
     return (user.value?.exp ?? 0) * 1000
   })
 
-  function $reset () {
-    user.value = decodeCookie()
+  async function $reset () {
+    user.value = await decodeCookie()
   }
 
   return {
