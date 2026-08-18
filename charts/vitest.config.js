@@ -11,7 +11,7 @@ export default defineConfig({
     include: ['__tests__/**/*.spec.js'],
     globals: true,
     environment: 'node',
-    pool: 'vmThreads',
+    pool: 'threads',
     restoreMocks: false,
     clearMocks: true,
     setupFiles: ['./vitest.setup.js'],
