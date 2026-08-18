@@ -11,7 +11,7 @@ export default defineConfig({
     include: ['__tests__/**/*.spec.js'],
     globals: true,
     environment: 'node',
-    pool: 'vmThreads',
+    pool: 'threads',
     restoreMocks: true,
     clearMocks: true,
     testTimeout: 10000,
