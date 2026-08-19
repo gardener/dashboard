@@ -113,8 +113,24 @@ yarn serve
 
 You can now access the UI on https://localhost:8443/
 
+### Local Gardener Dashboard
+
+For an isolated local environment useful for development and deterministic
+browser verification, use the Local Gardener Dashboard workflow described in
+[`hack/local-dashboard/README.md`](../../hack/local-dashboard/README.md).
+The initial implementation starts the complete Garden API (via gardenerless/KCP),
+backend, and frontend stack with managed defaults, deterministic scenarios, safe
+process ownership, and exact `setup`, `up`, `token`, `status`, and `down`
+commands. `up` never clones automatically; agents must ask before invoking the
+explicit `setup` command.
+
+The regular workflow above against a real landscape or local Gardener remains
+supported.
+
 ### 5. Login to the dashboard
-To login to the dashboard you can either configure `oidc`, or alternatively login using a token:
+For the Local Gardener Dashboard workflow, use the guarded `token` entry point
+described above. For a local Gardener or another landscape, you can either
+configure `oidc` or log in using a token:
 
 To login using a token, first create a service account.
 ```bash
