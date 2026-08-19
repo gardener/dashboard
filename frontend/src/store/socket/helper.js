@@ -119,8 +119,8 @@ export function createSocket (state, context) {
     seedStatStore.synchronize()
   })
 
-  socket.on('disconnect', reason => {
-    const isSessionExpired = authnStore.isExpired()
+  socket.on('disconnect', async reason => {
+    const isSessionExpired = await authnStore.isExpired()
 
     switch (reason) {
       case 'io server disconnect': {

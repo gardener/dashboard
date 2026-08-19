@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { vi } from 'vitest'
+import {
+  vi,
+  beforeEach,
+} from 'vitest'
 import createFetchMock from 'vitest-fetch-mock'
 
 import * as fixtures from './__fixtures__'
@@ -63,9 +66,84 @@ globalWindow.matchMedia = vi.fn(query => {
   }
 })
 
-globalWindow.cookieStore = {
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
+function createCookieStoreFake () {
+  const cookies = new Map()
+  const changeListeners = new Set()
+
+  function cookieName (name) {
+    return typeof name === 'object' && name
+      ? name.name
+      : name
+  }
+
+  function dispatchChange (event) {
+    for (const listener of [...changeListeners]) {
+      listener(event)
+    }
+  }
+
+  return {
+    async get (name) {
+      name = cookieName(name)
+      if (!cookies.has(name)) {
+        return null
+      }
+      return {
+        name,
+        value: cookies.get(name),
+      }
+    },
+    async set (name, value) {
+      if (typeof name === 'object' && name) {
+        value = name.value
+        name = name.name
+      }
+      cookies.set(name, value)
+    },
+    async delete (name) {
+      name = cookieName(name)
+      cookies.delete(name)
+      dispatchChange(Object.assign(new Event('change'), {
+        changed: [],
+        deleted: [{ name }],
+      }))
+    },
+    addEventListener (type, listener) {
+      if (type === 'change') {
+        changeListeners.add(listener)
+      }
+    },
+    removeEventListener (type, listener) {
+      if (type === 'change') {
+        changeListeners.delete(listener)
+      }
+    },
+    dispatchEvent (event) {
+      if (event?.type === 'change') {
+        dispatchChange(event)
+        return true
+      }
+      return false
+    },
+    get listenerCount () {
+      return changeListeners.size
+    },
+  }
+}
+
+beforeEach(() => {
+  globalWindow.cookieStore = createCookieStoreFake()
+})
+
+globalWindow.cookieStore = createCookieStoreFake()
+
+if (!globalWindow.navigator.locks) {
+  Object.defineProperty(globalWindow.navigator, 'locks', {
+    configurable: true,
+    value: {
+      request: (_name, callback) => Promise.resolve().then(() => callback()),
+    },
+  })
 }
 
 vi.stubGlobal('console', {

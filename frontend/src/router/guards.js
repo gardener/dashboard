@@ -43,7 +43,7 @@ export function createGlobalBeforeGuards () {
   const kubeconfigStore = useKubeconfigStore()
 
   function ensureUserAuthenticatedForNonPublicRoutes () {
-    return to => {
+    return async to => {
       const {
         meta = {},
         fullPath: redirectPath,
@@ -53,9 +53,9 @@ export function createGlobalBeforeGuards () {
         return true
       }
 
-      authnStore.$reset()
+      await authnStore.$reset()
 
-      if (!authnStore.isExpired()) {
+      if (!(await authnStore.isExpired())) {
         return true
       }
 

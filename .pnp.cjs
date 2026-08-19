@@ -1045,7 +1045,6 @@ const RAW_RUNTIME_STATE =
           ["@vuelidate/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.3"],\
           ["@vuelidate/validators", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:2.0.4"],\
           ["@vueuse/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0"],\
-          ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0"],\
           ["@vueuse/router", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0"],\
           ["@xterm/addon-fit", "npm:0.11.0"],\
           ["@xterm/addon-unicode11", "npm:0.9.0"],\
@@ -1067,7 +1066,6 @@ const RAW_RUNTIME_STATE =
           ["get-contrast", "npm:3.0.0"],\
           ["highlight.js", "npm:11.12.0"],\
           ["js-base64", "npm:3.9.2"],\
-          ["js-cookie", "npm:3.0.8"],\
           ["js-yaml", "npm:5.3.0"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:26.1.0"],\
           ["jwt-decode", "npm:4.0.0"],\
@@ -1086,7 +1084,6 @@ const RAW_RUNTIME_STATE =
           ["symbol-tree", "npm:3.2.4"],\
           ["toidentifier", "npm:1.0.1"],\
           ["typescript", "patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"],\
-          ["universal-cookie", "npm:7.2.2"],\
           ["unplugin-fonts", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:1.4.0"],\
           ["url-template", "npm:3.1.1"],\
           ["uuid", "npm:14.0.1"],\
@@ -2675,15 +2672,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@types/chai", "npm:5.2.2"],\
           ["@types/deep-eql", "npm:4.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@types/cookie", [\
-      ["npm:0.6.0", {\
-        "packageLocation": "./.yarn/cache/@types-cookie-npm-0.6.0-1f4c3f48f0-5b326bd018.zip/node_modules/@types/cookie/",\
-        "packageDependencies": [\
-          ["@types/cookie", "npm:0.6.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -4551,78 +4539,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "packagePeers": [\
           "@types/vue",\
-          "vue"\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@vueuse/integrations", [\
-      ["npm:14.4.0", {\
-        "packageLocation": "./.yarn/cache/@vueuse-integrations-npm-14.4.0-0630078919-8b0b2a6cca.zip/node_modules/@vueuse/integrations/",\
-        "packageDependencies": [\
-          ["@vueuse/integrations", "npm:14.4.0"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
-      ["virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0", {\
-        "packageLocation": "./.yarn/__virtual__/@vueuse-integrations-virtual-7c86987a18/0/cache/@vueuse-integrations-npm-14.4.0-0630078919-8b0b2a6cca.zip/node_modules/@vueuse/integrations/",\
-        "packageDependencies": [\
-          ["@types/async-validator", null],\
-          ["@types/axios", null],\
-          ["@types/change-case", null],\
-          ["@types/drauu", null],\
-          ["@types/focus-trap", null],\
-          ["@types/fuse.js", null],\
-          ["@types/idb-keyval", null],\
-          ["@types/jwt-decode", null],\
-          ["@types/nprogress", null],\
-          ["@types/qrcode", null],\
-          ["@types/sortablejs", null],\
-          ["@types/universal-cookie", null],\
-          ["@types/vue", null],\
-          ["@vueuse/core", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0"],\
-          ["@vueuse/integrations", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:14.4.0"],\
-          ["@vueuse/shared", "virtual:be6d30573de1cf67ec9bf1c86a086b5c263d5f538be75395ab123645ab8093c053bd4cdc03866d1fc789b37b3156d7befe1cfbd290ab3bd2af5f2cf5458acd3a#npm:14.4.0"],\
-          ["async-validator", null],\
-          ["axios", null],\
-          ["change-case", null],\
-          ["drauu", null],\
-          ["focus-trap", null],\
-          ["fuse.js", null],\
-          ["idb-keyval", null],\
-          ["jwt-decode", "npm:4.0.0"],\
-          ["nprogress", null],\
-          ["qrcode", null],\
-          ["sortablejs", null],\
-          ["universal-cookie", "npm:7.2.2"],\
-          ["vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.5.41"]\
-        ],\
-        "packagePeers": [\
-          "@types/async-validator",\
-          "@types/axios",\
-          "@types/change-case",\
-          "@types/drauu",\
-          "@types/focus-trap",\
-          "@types/fuse.js",\
-          "@types/idb-keyval",\
-          "@types/jwt-decode",\
-          "@types/nprogress",\
-          "@types/qrcode",\
-          "@types/sortablejs",\
-          "@types/universal-cookie",\
-          "@types/vue",\
-          "async-validator",\
-          "axios",\
-          "change-case",\
-          "drauu",\
-          "focus-trap",\
-          "fuse.js",\
-          "idb-keyval",\
-          "jwt-decode",\
-          "nprogress",\
-          "qrcode",\
-          "sortablejs",\
-          "universal-cookie",\
           "vue"\
         ],\
         "linkType": "HARD"\
@@ -12813,17 +12729,6 @@ const RAW_RUNTIME_STATE =
           ["@types/unist", "npm:3.0.3"],\
           ["unist-util-is", "npm:6.0.1"],\
           ["unist-util-visit-parents", "npm:6.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["universal-cookie", [\
-      ["npm:7.2.2", {\
-        "packageLocation": "./.yarn/cache/universal-cookie-npm-7.2.2-c7f1748d18-214c5cf72b.zip/node_modules/universal-cookie/",\
-        "packageDependencies": [\
-          ["@types/cookie", "npm:0.6.0"],\
-          ["cookie", "npm:0.7.2"],\
-          ["universal-cookie", "npm:7.2.2"]\
         ],\
         "linkType": "HARD"\
       }]\
