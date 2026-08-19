@@ -11,6 +11,7 @@ import cache from '../cache/index.js'
 import * as tickets from '../services/tickets.js'
 import { metricsRoute } from '../middleware.js'
 import * as authorization from '../services/authorization.js'
+import * as authentication from '../services/authentication.js'
 import { projectFilter } from '../utils/index.js'
 
 const router = express.Router({
@@ -22,6 +23,10 @@ const metricsMiddleware = metricsRoute('tickets')
 
 async function getIssues (namespace, user) {
   const canListProjects = await authorization.canListProjects(user)
+  if (!canListProjects) {
+    // Without cluster-wide project access, projectFilter evaluates user and group membership.
+    await authentication.ensureUserGroups(user)
+  }
   let allowedProjects = cache.getProjects()
     .filter(projectFilter(user, canListProjects))
 

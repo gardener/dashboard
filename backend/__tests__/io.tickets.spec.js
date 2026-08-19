@@ -38,7 +38,7 @@ describe('io/tickets', () => {
   }
 
   // foo@example.org is a member of projects 'foo' and 'bar' in fixtures
-  const user = { id: 'foo@example.org' }
+  const user = { id: 'foo@example.org', groups: [] }
 
   it('should join all non-pending project rooms when user can list projects', async () => {
     vi.spyOn(authorization, 'canListProjects').mockResolvedValue(true)
@@ -74,6 +74,16 @@ describe('io/tickets', () => {
       message: 'Forbidden to subscribe to tickets in namespace garden-GroupMember1',
     })
     expect(socket.join).not.toHaveBeenCalled()
+  })
+
+  it('should join a group-only project room when the socket user has groups', async () => {
+    vi.spyOn(authorization, 'canListProjects').mockResolvedValue(false)
+    const socket = createSocket({
+      id: 'group-user@example.org',
+      groups: ['group1'],
+    })
+    await subscribe(socket, { namespace: 'garden-GroupMember1' })
+    expect(socket.join).toHaveBeenCalledExactlyOnceWith('issues;garden-GroupMember1')
   })
 
   it('should throw when the requested namespace does not exist', async () => {

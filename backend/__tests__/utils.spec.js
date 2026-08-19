@@ -17,6 +17,8 @@ import {
 import {
   encodeBase64,
   decodeBase64,
+  guardUserGroups,
+  isMemberOf,
   getConfigValue,
   isTruthyValue,
   shootHasIssue,
@@ -43,6 +45,18 @@ describe('utils', function () {
       expect(decodeBase64()).toBeUndefined()
       expect(decodeBase64('')).toBeUndefined()
       expect(decodeBase64('Zm9v')).toBe('foo')
+    })
+
+    it('should guard access to user groups until they have been ensured', function () {
+      const user = { groups: ['legacy-group'] }
+      guardUserGroups(user)
+
+      expect(() => user.groups).toThrow('User groups have not been ensured')
+      expect(Object.keys(user)).not.toContain('groups')
+      expect(() => isMemberOf({ spec: { members: [{ kind: 'Group' }] } }, user)).toThrow('User groups have not been ensured')
+
+      user.groups = []
+      expect(user.groups).toEqual([])
     })
 
     it('should return some config values with defaults', function () {

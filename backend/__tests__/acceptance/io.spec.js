@@ -117,6 +117,14 @@ function notFoundStatus ({ group, kind, uid }) {
   }
 }
 
+function mockSocketAuthentication (accessReviews = [{}, {}, {}, {}, {}]) {
+  mockRequest.mockReset()
+  mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+  for (const options of accessReviews) {
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess(options))
+  }
+}
+
 describe('api', function () {
   let agent
   let socket
@@ -190,6 +198,7 @@ describe('api', function () {
 
   afterEach(function () {
     socket?.destroy()
+    mockRequest.mockReset()
     vi.clearAllMocks()
   })
 
@@ -205,12 +214,7 @@ describe('api', function () {
       beforeEach(async () => {
         // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
         // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
-        mockRequest
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockSocketAuthentication()
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -221,7 +225,7 @@ describe('api', function () {
           'managedseeds;garden',
           'managedseed-shoots;garden',
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(5)
+        expect(mockRequest).toHaveBeenCalledTimes(6)
         mockRequest.mockClear()
       })
 
@@ -396,12 +400,13 @@ describe('api', function () {
       })
 
       it('should fail to synchronize managed seeds without garden access', async function () {
-        mockRequest
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+        mockSocketAuthentication([
+          {},
+          {},
+          {},
+          { allowed: false },
+          { allowed: false },
+        ])
 
         const limitedSocket = await agent.connect({
           cookie: await user.cookie,
@@ -422,12 +427,13 @@ describe('api', function () {
       })
 
       it('should fail to synchronize managed seed shoots without garden access', async function () {
-        mockRequest
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+        mockSocketAuthentication([
+          {},
+          {},
+          {},
+          { allowed: false },
+          { allowed: false },
+        ])
 
         const limitedSocket = await agent.connect({
           cookie: await user.cookie,
@@ -458,12 +464,7 @@ describe('api', function () {
       beforeEach(async () => {
         // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
         // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
-        mockRequest
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-          .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+        mockSocketAuthentication()
         socket = await agent.connect({
           cookie: await user.cookie,
         })
@@ -474,7 +475,7 @@ describe('api', function () {
           'managedseeds;garden',
           'managedseed-shoots;garden',
         ]
-        expect(mockRequest).toHaveBeenCalledTimes(5)
+        expect(mockRequest).toHaveBeenCalledTimes(6)
         mockRequest.mockClear()
       })
 
@@ -629,15 +630,47 @@ describe('api', function () {
     })
   })
 
+  describe('when user belongs to a project only through a group', () => {
+    const username = 'group-user@example.org'
+    const user = fixtures.auth.createUser({
+      id: username,
+      groups: ['group1'],
+    })
+
+    beforeEach(async () => {
+      mockSocketAuthentication()
+      socket = await agent.connect({
+        cookie: await user.cookie,
+      })
+      expect(mockRequest.mock.calls[0][0][':path']).toBe('/apis/authentication.k8s.io/v1/tokenreviews')
+      mockRequest.mockClear()
+    })
+
+    it('should synchronize a group-only project from a group-free dashboard JWT', async function () {
+      const items = await synchronize(socket, 'projects', [3])
+      expect(items).toEqual([
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            name: 'GroupMember1',
+            uid: 3,
+          }),
+        }),
+      ])
+    })
+
+    it('should subscribe tickets for the group-only project', async function () {
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      await subscribe(socket, 'issues', { namespace: 'garden-GroupMember1' })
+
+      expect(getRooms(socket, nsp).has('issues;garden-GroupMember1')).toBe(true)
+    })
+  })
+
   describe('when user authentication fails', () => {
     let timestamp
 
     beforeEach(() => {
-      mockRequest
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       timestamp = Math.floor(Date.now() / 1000)
     })
 
@@ -666,6 +699,7 @@ describe('api', function () {
         rti,
         refresh_at: refreshAt,
       })
+      mockSocketAuthentication()
       const cookie = await user.cookie
       await expect(agent.connect({ cookie })).rejects.toEqual(expect.objectContaining({
         name: 'Error',
@@ -703,16 +737,11 @@ describe('api', function () {
       const user = fixtures.auth.createUser(options)
       // authorization check for `canListProjects`, `canListSeeds`, `canListShoots`,
       // `canListManagedSeedsInGardenNamespace`, and `canListShootsInGardenNamespace`
-      mockRequest
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-        .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+      mockSocketAuthentication()
       socket = await agent.connect({
         cookie: await user.cookie,
       })
-      expect(mockRequest).toHaveBeenCalledTimes(5)
+      expect(mockRequest).toHaveBeenCalledTimes(6)
       expect(mockSetDisconnectTimeout).toHaveBeenCalledTimes(1)
       expect(mockSetDisconnectTimeout.mock.calls[0]).toEqual([
         expect.objectContaining({

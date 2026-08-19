@@ -48,15 +48,24 @@ SPDX-License-Identifier: Apache-2.0
                 Groups
               </div>
               <div class="content py-1">
-                <v-chip
-                  v-for="(group, index) in groups"
-                  :key="index"
-                  label
-                  size="small"
-                  class="mr-2"
+                <span
+                  v-if="groups === null"
+                  role="status"
+                  data-test="groups-loading"
                 >
-                  {{ group }}
-                </v-chip>
+                  Loading groups…
+                </span>
+                <template v-else>
+                  <v-chip
+                    v-for="(group, index) in groups"
+                    :key="index"
+                    label
+                    size="small"
+                    class="mr-2"
+                  >
+                    {{ group }}
+                  </v-chip>
+                </template>
               </div>
             </g-list-item>
           </g-list>
@@ -231,11 +240,13 @@ import {
 } from 'vue'
 import download from 'downloadjs'
 import {
+  mapActions,
   mapState,
   storeToRefs,
 } from 'pinia'
 import { dump as yamlDump } from 'js-yaml'
 
+import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
@@ -259,7 +270,7 @@ export default {
     GAccountAvatar,
     GTimeString,
   },
-  inject: ['logger'],
+  inject: ['api', 'logger'],
   setup () {
     const projectStore = useProjectStore()
     const configStore = useConfigStore()
@@ -293,6 +304,7 @@ export default {
       skipOpenBrowser: false,
       showToken: false,
       showMessage: false,
+      groups: null,
     }
   },
   computed: {
@@ -321,9 +333,6 @@ export default {
     },
     id () {
       return this.user.id
-    },
-    groups () {
-      return this.user.groups
     },
     expiresAt () {
       return this.user.exp * 1000
@@ -425,7 +434,22 @@ export default {
       this.internalProjectName = value
     },
   },
+  mounted () {
+    this.fetchGroups()
+  },
   methods: {
+    ...mapActions(useAppStore, [
+      'setError',
+    ]),
+    async fetchGroups () {
+      try {
+        const { data } = await this.api.getUserGroups()
+        this.groups = data
+      } catch (err) {
+        this.groups = []
+        this.setError(err)
+      }
+    },
     async onDownload () {
       const kubeconfig = this.kubeconfigYaml
       const filename = this.kubeconfigFilename

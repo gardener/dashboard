@@ -105,6 +105,7 @@ describe('api', function () {
 
     it('should return all shoots for a non-admin user', async () => {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
@@ -114,11 +115,39 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
+      expect(mockRequest).toHaveBeenCalledTimes(4)
+      expect(mockRequest.mock.calls[1][0][':path']).toBe('/apis/authentication.k8s.io/v1/tokenreviews')
+      const accessReviews = mockRequest.mock.calls.filter(([headers]) =>
+        headers[':path'] === '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews',
+      )
+      expect(accessReviews).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
       expect(res.body).toMatchSnapshot()
+    })
+
+    it('should use group membership for the _all shoot fallback', async () => {
+      const groupUser = fixtures.auth.createUser({
+        id: 'group-user@example.org',
+        groups: ['group1'],
+      })
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get('/api/namespaces/_all/shoots')
+        .set('cookie', await groupUser.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(3)
+      expect(mockRequest.mock.calls[1][0][':path']).toBe('/apis/authentication.k8s.io/v1/tokenreviews')
+      const reviewedNamespaces = mockRequest.mock.calls
+        .filter(([headers]) => headers[':path'] === '/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
+        .map(([, json]) => json.spec.resourceAttributes.namespace)
+      expect(reviewedNamespaces).toEqual([undefined, 'garden-GroupMember1'])
+      expect(res.body.items).toEqual([])
     })
 
     it('should return all unhealthy shoots', async () => {

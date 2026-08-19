@@ -17,6 +17,17 @@ import config from '../../lib/config/index.js'
 
 const { mockRequest } = request
 
+function mockSocketAuthentication () {
+  mockRequest.mockReset()
+  mockRequest
+    .mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+    .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+}
+
 describe('cors', () => {
   let agent
   let socket
@@ -33,6 +44,7 @@ describe('cors', () => {
   afterEach(async () => {
     await socket?.destroy()
     await agent?.close()
+    mockRequest.mockReset()
     vi.clearAllMocks()
   })
 
@@ -80,12 +92,7 @@ describe('cors', () => {
 
   it('should allow connections from allowed origins', async () => {
     Object.defineProperty(config, 'websocketAllowedOrigins', { value: ['https://allowed.example.org'] })
-    mockRequest
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockSocketAuthentication()
     agent = await createAgent('io', cache)
     const cookie = await user.cookie
     socket = await agent.connect({ cookie, originHeader: 'https://allowed.example.org' })
@@ -94,12 +101,7 @@ describe('cors', () => {
 
   it('should allow connections when "*" is configured', async () => {
     Object.defineProperty(config, 'websocketAllowedOrigins', { value: ['*'] })
-    mockRequest
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
-      .mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockSocketAuthentication()
     agent = await createAgent('io', cache)
     const cookie = await user.cookie
     socket = await agent.connect({ cookie, originHeader: 'https://any.example.org' })

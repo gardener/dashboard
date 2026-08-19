@@ -393,8 +393,34 @@ describe('auth', function () {
       exp: expect.toBeWithinRange(expiresAt, expiresAt + 3),
       jti: expect.stringMatching(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i),
     }))
+    expect(Object.hasOwn(payload, 'groups')).toBe(false)
 
     expect(res.body.id).toBe(id)
+  })
+
+  it('should omit groups from the dashboard JWT after token login', async function () {
+    const groups = ['group-a', 'group-b']
+    const groupUser = fixtures.user.create({ id, groups })
+    const bearer = await groupUser.bearer
+
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+    mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+    const res = await agent
+      .post('/auth')
+      .send({ token: bearer })
+      .expect('content-type', /json/)
+      .expect(200)
+
+    const [accessToken, idToken] = await parseCookies(res)
+    expect(idToken).toEqual(bearer)
+    expect(decode(idToken).groups).toEqual(groups)
+
+    const payload = await security.verify(accessToken)
+    expect(payload.id).toBe(id)
+    expect(Object.hasOwn(payload, 'groups')).toBe(false)
+    expect(Object.hasOwn(res.body, 'groups')).toBe(false)
   })
 
   it('should logout', async function () {
@@ -443,6 +469,7 @@ describe('auth', function () {
       iat: iat + 60,
       sub: id,
       exp: iat + 61 * 60,
+      groups: ['group-a', 'group-b'],
     }
     const tokenSet = {
       id_token: await sign(idTokenPayload),
@@ -545,5 +572,6 @@ describe('auth', function () {
       refresh_at: refreshTokenPayload.exp,
       rti: expect.stringMatching(/^[a-z0-9]{7}$/),
     })
+    expect(Object.hasOwn(payload, 'groups')).toBe(false)
   })
 })

@@ -22,6 +22,9 @@ import { seedProjectNamespaceIndex } from '../helpers/cache.js'
 import cache from '../../lib/cache/index.js'
 import * as authorization from '../../lib/services/authorization.js'
 import * as tickets from '../../lib/services/tickets.js'
+import request from '@gardener-dashboard/request'
+
+const { mockRequest } = request
 
 describe('api', function () {
   let agent
@@ -37,6 +40,7 @@ describe('api', function () {
   })
 
   beforeEach(async () => {
+    mockRequest.mockReset()
     mockListIssues.mockReturnValue([
       fixtures.github.createIssue(1, 'foo'),
       fixtures.github.createIssue(2, 'bar', { comments: 1 }),
@@ -78,6 +82,7 @@ describe('api', function () {
     it('should fetch only member project issues for all namespaces when user cannot list projects', async () => {
       const namespace = '_all'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
       const res = await agent
         .get(`/api/namespaces/${namespace}/tickets`)
@@ -108,6 +113,7 @@ describe('api', function () {
     it('should return 403 for namespace the user is not a member of', async () => {
       const namespace = 'garden-GroupMember1'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
       const result = await agent
         .get(`/api/namespaces/${namespace}/tickets`)
@@ -118,11 +124,33 @@ describe('api', function () {
     it('should return 403 for a namespace that does not exist', async () => {
       const namespace = 'garden-nonexistent'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
       const result = await agent
         .get(`/api/namespaces/${namespace}/tickets`)
         .set('cookie', await user.cookie)
       expect(result.status).toEqual(403)
+    })
+
+    it('should fetch tickets for a group-only project with a group-free dashboard JWT', async () => {
+      const groupUser = fixtures.auth.createUser({
+        id: 'group-user@example.org',
+        groups: ['group1'],
+      })
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
+
+      const res = await agent
+        .get('/api/namespaces/garden-GroupMember1/tickets')
+        .set('cookie', await groupUser.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest.mock.calls[0][0][':path']).toBe('/apis/authentication.k8s.io/v1/tokenreviews')
+      expect(res.body).toEqual({
+        issues: [],
+      })
     })
 
     it('should fetch open issues and comments for shoot cluster test in namespace bar', async () => {
@@ -143,6 +171,7 @@ describe('api', function () {
       const namespace = 'garden-GroupMember1'
       const name = 'test'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
 
       const result = await agent
         .get(`/api/namespaces/${namespace}/tickets/${name}`)
