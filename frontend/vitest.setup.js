@@ -45,7 +45,7 @@ if (!Uint8Array.fromBase64) {
         if (alphabet === 'base64url') {
           encoded = encoded.replace(/\+/g, '-').replace(/\//g, '_')
         }
-        if (encoded !== input.replace(/\s/g, '')) {
+        if (encoded !== input.replace(/[\t\n\f\r ]/g, '')) {
           throw new SyntaxError('Invalid base64 string')
         }
       }
