@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { unique } from '@/utils/validators'
+import {
+  unique,
+  base64,
+} from '@/utils/validators'
 
 describe('utils', () => {
   describe('validators', () => {
@@ -17,6 +20,23 @@ describe('utils', () => {
       })
       it('should validate unique values', () => {
         expect(unique('keys').$validator.call(parentVm, 0)).toBe(true)
+      })
+    })
+    describe('#base64', () => {
+      it.each([
+        'YWJjZA==',
+        'YWJj',
+        '',
+      ])('validates %j', value => {
+        expect(base64.$validator(value)).toBe(true)
+      })
+
+      it.each([
+        'a',
+        'YWJjZA=',
+        'invalid%',
+      ])('rejects %j', value => {
+        expect(base64.$validator(value)).toBe(false)
       })
     })
   })
