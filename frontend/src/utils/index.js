@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Base64 } from 'js-base64'
 import semver from 'semver'
 import {
   unref,
@@ -508,19 +507,18 @@ export function parseServiceAccountUsername (username) {
 }
 
 export function encodeBase64 (input) {
-  return Base64.encode(input)
+  return new TextEncoder().encode(input).toBase64()
 }
 
 export function encodeBase64Url (input) {
-  let output = encodeBase64(input)
-  output = output.replace(/=/g, '')
-  output = output.replace(/\+/g, '-')
-  output = output.replace(/\//g, '_')
-  return output
+  return new TextEncoder().encode(input).toBase64({
+    alphabet: 'base64url',
+    omitPadding: true,
+  })
 }
 
 export function decodeBase64 (input) {
-  return Base64.decode(input)
+  return new TextDecoder().decode(Uint8Array.fromBase64(input))
 }
 
 export function shortRandomString (length) {

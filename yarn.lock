@@ -794,7 +794,6 @@ __metadata:
     floating-vue: "npm:^5.2.2"
     get-contrast: "npm:^3.0.0"
     highlight.js: "npm:^11.9.0"
-    js-base64: "npm:^3.7.6"
     js-yaml: "npm:^5.0.0"
     jsdom: "npm:^26.0.0"
     jwt-decode: "npm:^4.0.0"
@@ -6250,13 +6249,6 @@ __metadata:
   version: 6.2.9
   resolution: "jose@npm:6.2.9"
   checksum: 10c0/fc6d79b11fdd5cc1393bccd644533b3e2445fd8eb2468066eb23c01ed7f6b41deca710e8aabe9379a382cca7920740900c7f610bdf0be4ff5e7ee44412730d4c
-  languageName: node
-  linkType: hard
-
-"js-base64@npm:^3.7.6":
-  version: 3.9.2
-  resolution: "js-base64@npm:3.9.2"
-  checksum: 10c0/59bfa7f05953aa3e630812d3fcf96ea56597100b4baf367fdaacb696712e5b774cbb95f90185f88cf0ccbb864fcf62b1f75e8eed283214076d6bec8952f621dc
   languageName: node
   linkType: hard
 

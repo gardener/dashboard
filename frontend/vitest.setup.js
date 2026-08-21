@@ -15,6 +15,44 @@ import * as fixtures from './__fixtures__'
 const globalConsole = global.console
 const globalDocument = global.document
 const globalWindow = global.window
+const NodeBuffer = global.Buffer
+
+// TODO: Remove these Base64 shims after the test runtime is upgraded beyond Node.js 24
+const encodedBytesPrototype = Object.getPrototypeOf(new TextEncoder().encode())
+
+for (const prototype of new Set([Uint8Array.prototype, encodedBytesPrototype])) {
+  if (!prototype.toBase64) {
+    Object.defineProperty(prototype, 'toBase64', {
+      configurable: true,
+      value ({ alphabet = 'base64', omitPadding = false } = {}) {
+        let output = NodeBuffer.from(this).toString('base64')
+        if (alphabet === 'base64url') {
+          output = output.replace(/\+/g, '-').replace(/\//g, '_')
+        }
+        return omitPadding ? output.replace(/=+$/, '') : output
+      },
+    })
+  }
+}
+
+if (!Uint8Array.fromBase64) {
+  Object.defineProperty(Uint8Array, 'fromBase64', {
+    configurable: true,
+    value (input, { alphabet = 'base64', lastChunkHandling = 'loose' } = {}) {
+      const bytes = NodeBuffer.from(input, alphabet)
+      if (lastChunkHandling === 'strict') {
+        let encoded = bytes.toString('base64')
+        if (alphabet === 'base64url') {
+          encoded = encoded.replace(/\+/g, '-').replace(/\//g, '_')
+        }
+        if (encoded !== input.replace(/\s/g, '')) {
+          throw new SyntaxError('Invalid base64 string')
+        }
+      }
+      return new Uint8Array(bytes)
+    },
+  })
+}
 
 const fetchMock = createFetchMock(vi)
 fetchMock.enableMocks()

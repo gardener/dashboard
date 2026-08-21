@@ -4,16 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { Base64 } from 'js-base64'
-
 import { secretDetails } from '@/composables/credential/helper'
 
+import { encodeBase64 as encode } from '@/utils'
 import infraProviders from '@/data/vendors/infra'
 import dnsProviders from '@/data/vendors/dns'
-
-function encode (value) {
-  return Base64.encode(value)
-}
 
 function createSecretData () {
   return {
