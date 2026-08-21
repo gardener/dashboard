@@ -156,29 +156,12 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
-      <template v-else-if="!workerless && providerType === 'vsphere'">
-        <v-col cols="3">
-          <v-select
-            v-model="v$.loadBalancerClassNames.$model"
-            color="primary"
-            label="Load Balancer Classes"
-            :items="allLoadBalancerClasses"
-            :error-messages="getErrorMessages(v$.loadBalancerClassNames)"
-            attach
-            chips
-            multiple
-            variant="underlined"
-            @blur="v$.loadBalancerClassNames.$touch()"
-          />
-        </v-col>
-      </template>
     </v-row>
   </v-container>
 </template>
 
 <script>
 import {
-  or,
   required,
   requiredIf,
 } from '@vuelidate/validators'
@@ -191,16 +174,11 @@ import GSelectCredential from '@/components/Credentials/GSelectCredential'
 import { useShootContext } from '@/composables/useShootContext'
 
 import { getErrorMessages } from '@/utils'
-import {
-  includesIfAvailable,
-  withMessage,
-  withFieldName,
-} from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
-import map from 'lodash/map'
 
 export default {
   components: {
@@ -216,7 +194,6 @@ export default {
       region,
       networkingType,
       providerControlPlaneConfigLoadBalancerProviderName,
-      providerControlPlaneConfigLoadBalancerClassNames,
       providerInfrastructureConfigFloatingPoolName,
       providerInfrastructureConfigPartitionID,
       providerInfrastructureConfigProjectID,
@@ -230,7 +207,6 @@ export default {
       showAllRegions,
       networkingTypes,
       allLoadBalancerProviderNames,
-      allLoadBalancerClassNames,
       partitionIDs,
       firewallImages,
       firewallSizes,
@@ -247,7 +223,6 @@ export default {
       region,
       networkingType,
       loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
-      loadBalancerClassNames: providerControlPlaneConfigLoadBalancerClassNames,
       floatingPoolName: providerInfrastructureConfigFloatingPoolName,
       partitionID: providerInfrastructureConfigPartitionID,
       projectID: providerInfrastructureConfigProjectID,
@@ -261,7 +236,6 @@ export default {
       showAllRegions,
       networkingTypes,
       allLoadBalancerProviderNames,
-      allLoadBalancerClassNames,
       partitionIDs,
       firewallImages,
       firewallSizes,
@@ -284,13 +258,6 @@ export default {
       }),
       loadBalancerProviderName: withFieldName('Load Balancer Provider', {
         required: requiresInfrastructure('openstack'),
-      }),
-      loadBalancerClassNames: withFieldName('Load Balancer Class Names', {
-        required: requiresInfrastructure('vsphere'),
-        includesKey: withMessage('Load Balancer Class \'default\' must be selected', or(
-          () => !infrastructureRequired('vsphere'),
-          includesIfAvailable('default', 'allLoadBalancerClassNames'),
-        )),
       }),
       partitionID: withFieldName('Partition ID', {
         required: requiresInfrastructure('metal'),
@@ -331,17 +298,6 @@ export default {
         return 'API servers in same region as your workers (optimal if you require a low latency)'
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
-    },
-    allLoadBalancerClasses () {
-      return map(this.allLoadBalancerClassNames, name => {
-        return {
-          title: name,
-          value: name,
-          props: {
-            disabled: name === 'default',
-          },
-        }
-      })
     },
   },
   mounted () {

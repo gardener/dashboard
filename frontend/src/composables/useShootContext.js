@@ -248,7 +248,6 @@ export function createShootContextComposable (options = {}) {
     resetKubernetesVersion()
     resetBindingName()
     resetRegion()
-    resetProviderControlPlaneConfigLoadBalancerClasses()
     resetProviderInfrastructureConfigProjectID()
     resetProviderInfrastructureConfigFirewallImage()
   }
@@ -433,33 +432,6 @@ export function createShootContextComposable (options = {}) {
     providerControlPlaneConfigLoadBalancerProviderName.value = includes(allLoadBalancerProviderNames.value, configuredDefault)
       ? configuredDefault
       : head(allLoadBalancerProviderNames.value)
-  }
-
-  const providerControlPlaneConfigLoadBalancerClassNames = computed({
-    get () {
-      return map(providerControlPlaneConfigLoadBalancerClasses.value, 'name')
-    },
-    set (value) {
-      providerControlPlaneConfigLoadBalancerClasses.value = map(value, name => ({ name }))
-    },
-  })
-
-  const providerControlPlaneConfigLoadBalancerClasses = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'], value)
-    },
-  })
-
-  function resetProviderControlPlaneConfigLoadBalancerClasses () {
-    const loadBalancerClassName = includes(allLoadBalancerClassNames.value, 'default')
-      ? 'default'
-      : head(allLoadBalancerClassNames.value)
-    providerControlPlaneConfigLoadBalancerClassNames.value = loadBalancerClassName
-      ? [loadBalancerClassName]
-      : []
   }
 
   const providerInfrastructureConfigPartitionID = computed({
@@ -963,7 +935,6 @@ export function createShootContextComposable (options = {}) {
     regionsWithSeed,
     regionsWithoutSeed,
     allLoadBalancerProviderNames,
-    allLoadBalancerClassNames,
     partitionIDs,
     firewallImages,
     firewallSizes,
@@ -1095,8 +1066,6 @@ export function createShootContextComposable (options = {}) {
     providerType,
     /* provider - controlPlaneConfig */
     providerControlPlaneConfigLoadBalancerProviderName,
-    providerControlPlaneConfigLoadBalancerClasses,
-    providerControlPlaneConfigLoadBalancerClassNames,
     providerControlPlaneConfigZone,
     /* provider - infrastructureConfig */
     providerInfrastructureConfigFirewallImage,
@@ -1181,7 +1150,6 @@ export function createShootContextComposable (options = {}) {
     regionsWithSeed,
     regionsWithoutSeed,
     allLoadBalancerProviderNames,
-    allLoadBalancerClassNames,
     partitionIDs,
     firewallImages,
     firewallSizes,
