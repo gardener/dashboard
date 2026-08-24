@@ -7927,12 +7927,12 @@ __metadata:
   linkType: hard
 
 "openid-client@npm:^6.1.7":
-  version: 6.8.5
-  resolution: "openid-client@npm:6.8.5"
+  version: 6.8.7
+  resolution: "openid-client@npm:6.8.7"
   dependencies:
     jose: "npm:^6.2.8"
     oauth4webapi: "npm:^3.8.7"
-  checksum: 10c0/287ddd918859ce4ae0d339145c33db4d77529d16d0f999b28da62a4746b30f2ecc1bf8f83798b42d4c6ad6b61fd51aa21cf7a20a5c40649d5d8672227e0ac747
+  checksum: 10c0/309a7924e034193d36634b7e2cfbb003c5018bfb800d9c1d6c5d3cb986682e9aef594038eb7a87153d36a96d1a9dba921491cb9145930116340a7af7e73928ee
   languageName: node
   linkType: hard
 
