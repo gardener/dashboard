@@ -4,21 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  modeLrgb,
-  modeRgb,
-  useMode,
-  wcagContrast,
-} from 'culori/fn'
+import { wcagContrast } from 'culori/fn'
 
 import {
   pickAccessibleTextColor,
   createTonalBackgroundColor,
   pickAccessibleTonalColor,
 } from '@/utils/accessibleColors'
-
-useMode(modeRgb)
-useMode(modeLrgb)
 
 describe('utils', () => {
   describe('accessibleColors', () => {
