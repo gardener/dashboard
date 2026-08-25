@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         size="small"
         class="cursor-pointer ma-1"
         :variant="!shootSupportedPatchAvailable ? 'tonal' : 'flat'"
-        :color="displayChipColor"
+        :color="chipColor"
       >
         <v-icon
           v-if="shootSupportedPatchAvailable || shootSupportedUpgradeAvailable"
@@ -160,7 +160,7 @@ export default {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
     },
-    displayChipColor () {
+    chipColor () {
       const base = this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
       return this.shootSupportedPatchAvailable ? getFlatColorName(base) : getTonalColorName(base)
     },
