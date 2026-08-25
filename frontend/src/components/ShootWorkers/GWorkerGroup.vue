@@ -387,6 +387,7 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+
 import { getTonalColorName } from '@/utils/themeColors'
 
 import get from 'lodash/get'
