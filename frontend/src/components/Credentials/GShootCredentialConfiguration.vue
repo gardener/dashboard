@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
             v-if="credentialsBindingNamesForSecretBinding.length"
             variant="tonal"
             type="info"
-            color="tonalInfo"
+            color="tonal-info"
             class="mt-2"
           >
             <p>
@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
             v-else
             variant="tonal"
             type="warning"
-            color="tonalWarning"
+            color="tonal-warning"
             class="mt-2"
           >
             <p>

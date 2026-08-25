@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-alert
     class="my-2"
     type="warning"
-    color="tonalWarning"
+    color="tonal-warning"
     variant="tonal"
   >
     <div>

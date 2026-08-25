@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         density="compact"
         type="info"
         variant="tonal"
-        color="tonalPrimary"
+        color="tonal-primary"
       >
         <!-- eslint-disable vue/no-v-html -->
         <div

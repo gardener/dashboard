@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="newZonesYaml"
           v-model="newZonesAlert"
           type="warning"
-          color="tonalWarning"
+          color="tonal-warning"
           variant="tonal"
           tile
           prominent

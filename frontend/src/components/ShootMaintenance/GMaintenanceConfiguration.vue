@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0
         />
         <v-alert
           type="warning"
-          color="tonalWarning"
+          color="tonal-warning"
           variant="tonal"
           :model-value="!isMaintenancePreconditionSatisfied"
           class="mt-2"

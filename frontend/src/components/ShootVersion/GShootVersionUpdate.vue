@@ -43,7 +43,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-alert
       v-if="needsMigration"
       type="warning"
-      color="tonalWarning"
+      color="tonal-warning"
       variant="tonal"
     >
       <p>
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-alert
       v-if="shootKubernetesVersionObject.isExpirationWarning && !selectedItem"
       type="warning"
-      color="tonalWarning"
+      color="tonal-warning"
       variant="tonal"
     >
       Current Kubernetes version expires
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-alert
       v-if="hasMoreSupportedVersions"
       type="info"
-      color="tonalInfo"
+      color="tonal-info"
       variant="tonal"
     >
       Newer versions are available than those currently shown. However, cluster upgrades must be performed one minor version at a time.

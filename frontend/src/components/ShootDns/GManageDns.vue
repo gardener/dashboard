@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           variant="tonal"
           type="info"
-          color="tonalPrimary"
+          color="tonal-primary"
           max-width="50%"
         >
           <div>

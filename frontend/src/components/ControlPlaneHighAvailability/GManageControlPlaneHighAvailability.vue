@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-alert
         v-if="(controlPlaneHighAvailabilityFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported) || controlPlaneHighAvailabilityFailureToleranceTypeChangeAllowed"
         type="info"
-        color="tonalInfo"
+        color="tonal-info"
         variant="tonal"
       >
         <div v-if="controlPlaneHighAvailabilityFailureToleranceType === 'node' && !isFailureToleranceTypeZoneSupported">

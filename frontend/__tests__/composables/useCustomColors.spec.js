@@ -112,12 +112,12 @@ describe('composables', () => {
       await useCustomColors(customThemes, theme)
 
       expect(theme.themes.light.colors.warning).toBe(warning)
-      expect(theme.themes.light.colors.flatWarning).toBe(warning)
-      expect(theme.themes.light.colors['on-flatWarning']).toBe('#000000')
+      expect(theme.themes.light.colors['flat-warning']).toBe(warning)
+      expect(theme.themes.light.colors['on-flat-warning']).toBe('#000000')
       expect(
         wcagContrast(
-          theme.themes.light.colors.flatWarning,
-          theme.themes.light.colors['on-flatWarning'],
+          theme.themes.light.colors['flat-warning'],
+          theme.themes.light.colors['on-flat-warning'],
         ),
       ).toBeGreaterThanOrEqual(4.5)
     })
@@ -126,31 +126,31 @@ describe('composables', () => {
       const tonalWarning = '#FFFF00'
       customThemes.value = {
         light: {
-          tonalWarning,
+          'tonal-warning': tonalWarning,
         },
       }
 
       await useCustomColors(customThemes, theme)
 
-      expect(theme.themes.light.colors.tonalWarning).toBe(tonalWarning)
+      expect(theme.themes.light.colors['tonal-warning']).toBe(tonalWarning)
     })
 
     it('should use black text when a user-provided flat color is too light for white text', async () => {
       const flatWarning = '#E57373'
       customThemes.value = {
         light: {
-          flatWarning,
+          'flat-warning': flatWarning,
         },
       }
 
       await useCustomColors(customThemes, theme)
 
-      expect(theme.themes.light.colors.flatWarning).toBe(flatWarning)
-      expect(theme.themes.light.colors['on-flatWarning']).toBe('#000000')
+      expect(theme.themes.light.colors['flat-warning']).toBe(flatWarning)
+      expect(theme.themes.light.colors['on-flat-warning']).toBe('#000000')
       expect(
         wcagContrast(
-          theme.themes.light.colors.flatWarning,
-          theme.themes.light.colors['on-flatWarning'],
+          theme.themes.light.colors['flat-warning'],
+          theme.themes.light.colors['on-flat-warning'],
         ),
       ).toBeGreaterThanOrEqual(4.5)
     })
@@ -160,15 +160,15 @@ describe('composables', () => {
       const onFlatWarning = '#ffffff'
       customThemes.value = {
         light: {
-          flatWarning,
-          'on-flatWarning': onFlatWarning,
+          'flat-warning': flatWarning,
+          'on-flat-warning': onFlatWarning,
         },
       }
 
       await useCustomColors(customThemes, theme)
 
-      expect(theme.themes.light.colors.flatWarning).toBe(flatWarning)
-      expect(theme.themes.light.colors['on-flatWarning']).toBe(onFlatWarning)
+      expect(theme.themes.light.colors['flat-warning']).toBe(flatWarning)
+      expect(theme.themes.light.colors['on-flat-warning']).toBe(onFlatWarning)
     })
 
     it('should calculate a tonal color from the final customized base color', async () => {
@@ -181,7 +181,7 @@ describe('composables', () => {
 
       await useCustomColors(customThemes, theme)
 
-      const tonalWarning = theme.themes.light.colors.tonalWarning
+      const tonalWarning = theme.themes.light.colors['tonal-warning']
       const tonalBackground = createTonalBackgroundColor(
         tonalWarning,
         theme.themes.light.colors.surface,
@@ -197,8 +197,8 @@ describe('composables', () => {
 
       await useCustomColors(customThemes, theme)
 
-      expect(theme.themes.light.colors.tonalInfo).toBe('not-a-color')
-      expect(theme.themes.light.colors.flatInfo).toBe('not-a-color')
+      expect(theme.themes.light.colors['tonal-info']).toBe('not-a-color')
+      expect(theme.themes.light.colors['flat-info']).toBe('not-a-color')
     })
 
     it('should update theme colors immediately', async () => {

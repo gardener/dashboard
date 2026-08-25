@@ -17,29 +17,25 @@ export const SEMANTIC_COLOR_NAMES = Object.freeze([
 
 const semanticColorNames = new Set(SEMANTIC_COLOR_NAMES)
 
-function capitalize (value) {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
-}
-
 export function getTonalColorName (color) {
   if (!semanticColorNames.has(color)) {
     return color
   }
-  return `tonal${capitalize(color)}`
+  return `tonal-${color}`
 }
 
 export function getFlatColorName (color) {
   if (!semanticColorNames.has(color)) {
     return color
   }
-  return `flat${capitalize(color)}`
+  return `flat-${color}`
 }
 
 export function getOnFlatColorName (color) {
   if (!semanticColorNames.has(color)) {
     return color
   }
-  return `on-${getFlatColorName(color)}`
+  return `on-flat-${color}`
 }
 
 const derivedColorNames = new Set(

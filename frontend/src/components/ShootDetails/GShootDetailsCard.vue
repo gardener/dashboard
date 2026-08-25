@@ -215,7 +215,7 @@ SPDX-License-Identifier: Apache-2.0
                 :key="index"
                 size="small"
                 variant="tonal"
-                color="tonalPrimary"
+                color="tonal-primary"
                 class="mr-2"
               >
                 {{ name }}

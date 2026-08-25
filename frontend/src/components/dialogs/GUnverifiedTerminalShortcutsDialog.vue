@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
               size="small"
               class="my-0"
               variant="tonal"
-              color="tonalWarning"
+              color="tonal-warning"
             >
               Unverified
             </v-chip>

@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
                 <strong>
                   All two-step credential rotations need to be in phase
                   <v-chip
-                    color="tonalPrimary"
+                    color="tonal-primary"
                     label
                     size="x-small"
                     class="ml-2"
@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0
               <div>
                 This two-step operation is in phase
                 <v-chip
-                  color="tonalPrimary"
+                  color="tonal-primary"
                   label
                   size="x-small"
                   class="ml-2"

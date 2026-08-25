@@ -164,7 +164,7 @@ SPDX-License-Identifier: Apache-2.0
             <v-chip
               label
               size="x-small"
-              color="tonalPrimary"
+              color="tonal-primary"
               variant="tonal"
               class="ml-2"
             >
@@ -235,7 +235,7 @@ SPDX-License-Identifier: Apache-2.0
                 size="small"
                 class="mr-2"
                 variant="tonal"
-                color="tonalPrimary"
+                color="tonal-primary"
               >
                 {{ name }}
                 <v-icon

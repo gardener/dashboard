@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex align-center justify-center">
         <v-btn
           variant="tonal"
-          color="tonalPrimary"
+          color="tonal-primary"
           :href="sanitizeUrl(ticketLink)"
           target="_blank"
           rel="noopener"
@@ -34,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
       <div class="d-flex justify-center pa-4">
         <v-btn
           variant="tonal"
-          color="tonalPrimary"
+          color="tonal-primary"
           :href="sanitizeUrl(ticketLink)"
           target="_blank"
           rel="noopener"
