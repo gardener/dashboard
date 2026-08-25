@@ -156,22 +156,13 @@ export default {
       return ''
     },
     isError () {
-      if (this.condition.status === 'False' || !isEmpty(this.condition.codes)) {
-        return true
-      }
-      return false
+      return this.condition.status === 'False' || !isEmpty(this.condition.codes)
     },
     isUnknown () {
-      if (this.condition.status === 'Unknown') {
-        return true
-      }
-      return false
+      return this.condition.status === 'Unknown'
     },
     isProgressing () {
-      if (this.condition.status === 'Progressing') {
-        return true
-      }
-      return false
+      return this.condition.status === 'Progressing'
     },
     errorDescriptions () {
       if (this.isError) {

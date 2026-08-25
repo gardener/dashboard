@@ -208,7 +208,7 @@ export default {
       return undefined
     },
     color () {
-      if (this.isUnknown || this.staleShoot) {
+      if (this.isUnknown || this.stale) {
         return 'unknown'
       }
       if (this.isError) {

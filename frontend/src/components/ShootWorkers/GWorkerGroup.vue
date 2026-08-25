@@ -387,6 +387,7 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
+import { getTonalColorName } from '@/utils/themeColors'
 
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -502,9 +503,8 @@ export default {
       return yamlDump(this.workerGroup)
     },
     chipColor () {
-      return !this.machineImage || this.machineImage.isDeprecated
-        ? 'tonalWarning'
-        : 'tonalPrimary'
+      const base = !this.machineImage || this.machineImage.isDeprecated ? 'warning' : 'primary'
+      return getTonalColorName(base)
     },
   },
 }

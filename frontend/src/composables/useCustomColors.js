@@ -71,10 +71,7 @@ function setTonalThemeColors (themeColors, customDerivedColors = {}) {
     const baseColor = get(themeColors, [colorName])
     const customTonalColor = get(customDerivedColors, [tonalColorName])
 
-    if (
-      customTonalColor &&
-      pickAccessibleTonalColor(customTonalColor, surfaceColor) === customTonalColor
-    ) {
+    if (customTonalColor) {
       set(themeColors, [tonalColorName], customTonalColor)
       continue
     }

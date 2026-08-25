@@ -160,13 +160,9 @@ export default {
         this.activePopoverKey = value ? this.popoverKey : ''
       },
     },
-    chipColor () {
-      return this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
-    },
     displayChipColor () {
-      return this.shootSupportedPatchAvailable
-        ? getFlatColorName(this.chipColor)
-        : getTonalColorName(this.chipColor)
+      const base = this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
+      return this.shootSupportedPatchAvailable ? getFlatColorName(base) : getTonalColorName(base)
     },
     tooltipText () {
       if (this.shootKubernetesVersionObject.isDeprecated) {
