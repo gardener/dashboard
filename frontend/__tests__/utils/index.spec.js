@@ -22,12 +22,29 @@ import {
   convertToGi,
   convertToGibibyte,
   handleTextFieldDrop,
+  encodeBase64,
+  encodeBase64Url,
+  decodeBase64,
 } from '@/utils'
 
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 
 describe('utils', () => {
+  describe('base64', () => {
+    it('encodes and decodes UTF-8 strings', () => {
+      const value = 'a Ā 𐀀 文 🦄'
+      const encoded = 'YSDEgCDwkICAIOaWhyDwn6aE'
+
+      expect(encodeBase64(value)).toBe(encoded)
+      expect(decodeBase64(encoded)).toBe(value)
+    })
+
+    it('encodes URL-safe strings without padding', () => {
+      expect(encodeBase64Url('hello??')).toBe('aGVsbG8_Pw')
+    })
+  })
+
   describe('#handleTextFieldDrop', () => {
     const originalFileReader = globalThis.FileReader
 

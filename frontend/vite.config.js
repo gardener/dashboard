@@ -78,7 +78,6 @@ export default defineConfig(({ command, mode }) => {
       'socket.io-client',
       'dayjs',
       'semver',
-      'js-base64',
       'downloadjs',
       'md5',
       'uuid',

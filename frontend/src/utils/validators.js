@@ -5,7 +5,6 @@
 //
 
 import { helpers } from '@vuelidate/validators'
-import { Base64 } from 'js-base64'
 
 import get from 'lodash/get'
 import set from 'lodash/set'
@@ -22,7 +21,15 @@ const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', value => {
-  return Base64.isValid(value)
+  if (typeof value !== 'string') {
+    return false
+  }
+  try {
+    Uint8Array.fromBase64(value, { lastChunkHandling: 'strict' })
+    return true
+  } catch {
+    return false
+  }
 })
 const alphaNumUnderscore = withMessage('Must contain only alphanumeric characters and underscore', regex(alphaNumUnderscorePattern))
 const lowerCaseAlphaNumHyphen = withMessage('Must contain only lowercase alphanumeric characters or hyphen', regex(lowerCaseAlphaNumHyphenPattern))
