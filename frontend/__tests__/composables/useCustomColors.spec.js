@@ -122,27 +122,8 @@ describe('composables', () => {
       ).toBeGreaterThanOrEqual(4.5)
     })
 
-    it('should replace a user-provided tonal color that is not readable', async () => {
+    it('should use a user-provided tonal color as-is without recalculating', async () => {
       const tonalWarning = '#FFFF00'
-      customThemes.value = {
-        light: {
-          tonalWarning,
-        },
-      }
-
-      await useCustomColors(customThemes, theme)
-
-      const generatedTonalWarning = theme.themes.light.colors.tonalWarning
-      const tonalBackground = createTonalBackgroundColor(
-        generatedTonalWarning,
-        theme.themes.light.colors.surface,
-      )
-      expect(generatedTonalWarning).not.toBe(tonalWarning)
-      expect(wcagContrast(generatedTonalWarning, tonalBackground)).toBeGreaterThanOrEqual(4.5)
-    })
-
-    it('should keep a user-provided tonal color that stays readable on the theme surface', async () => {
-      const tonalWarning = '#BF360C'
       customThemes.value = {
         light: {
           tonalWarning,
