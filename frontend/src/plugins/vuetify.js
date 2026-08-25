@@ -59,7 +59,7 @@ const light = {
     error: red.darken2,
     info: blue.darken4,
     success: green.darken3,
-    warning: orange.darken4,
+    warning: orange.base,
     'main-background': grey.darken3,
     'main-navigation-title': shades.white,
     'toolbar-background': '#0a6b51',
