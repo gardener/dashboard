@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// SPDX-FileCopyrightText: Copyright Contributors to the Gardener project
+// SPDX-FileCopyrightText: Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -95,7 +95,7 @@ ${body}
 }
 
 const template = `//
-// SPDX-FileCopyrightText: ${fullYear} Copyright Contributors to the Gardener project
+// SPDX-FileCopyrightText: ${fullYear} Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //

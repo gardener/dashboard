@@ -1,6 +1,6 @@
 <!-- eslint-disable vuetify/no-deprecated-components -->
 <!--
-SPDX-FileCopyrightText: Copyright Contributors to the Gardener project
+SPDX-FileCopyrightText: Contributors to the Gardener project
 
 SPDX-License-Identifier: Apache-2.0
  -->
