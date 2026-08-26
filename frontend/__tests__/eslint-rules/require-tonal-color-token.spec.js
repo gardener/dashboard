@@ -30,6 +30,11 @@ ruleTester.run('require-tonal-color-token', requireTonalColorToken, {
       code: '<template><v-chip color="tonal-warning" /></template>',
     },
     {
+      name: 'ignores a hard-coded hex color on a tonal component',
+      filename: 'test.vue',
+      code: '<template><v-alert variant="tonal" color="#ff0000" /></template>',
+    },
+    {
       name: 'accepts a non-tonal alert with a semantic color',
       filename: 'test.vue',
       code: '<template><v-alert variant="outlined" color="error" /></template>',
@@ -48,6 +53,35 @@ ruleTester.run('require-tonal-color-token', requireTonalColorToken, {
       name: 'does not assume a chip with a dynamic variant is tonal',
       filename: 'test.vue',
       code: '<template><v-chip :variant="variant" color="primary" /></template>',
+    },
+    {
+      name: 'ignores correlated variant and color conditions',
+      filename: 'test.vue',
+      code: `
+        <template>
+          <v-chip
+            :variant="isCritical ? 'flat' : 'tonal'"
+            :color="isCritical ? 'flat-primary' : 'tonal-primary'"
+          />
+        </template>
+      `,
+    },
+    {
+      name: 'ignores correlated conditions that call color helpers',
+      filename: 'test.vue',
+      code: `
+        <template>
+          <v-chip
+            :variant="isHovering ? 'flat' : 'tonal'"
+            :color="isHovering ? getFlatColorName(chipColor) : getTonalColorName(chipColor)"
+          />
+        </template>
+      `,
+    },
+    {
+      name: 'ignores a dynamic color on an explicitly tonal component',
+      filename: 'test.vue',
+      code: '<template><v-alert variant="tonal" :color="color" /></template>',
     },
     {
       name: 'ignores components other than alerts and chips',
