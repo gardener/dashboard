@@ -64,11 +64,14 @@ module.exports = {
           return
         }
 
+        const hasUnqualifiedBind = node.startTag.attributes.some(a =>
+          a.directive && a.key.name.name === 'bind' && !a.key.argument,
+        )
         const variantAttribute = findAttribute(node, 'variant')
         const variant = getStaticAttributeValue(node, 'variant')
         const isTonal =
           variant === 'tonal' ||
-          (component === 'v-chip' && !variantAttribute)
+          (component === 'v-chip' && !variantAttribute && !hasUnqualifiedBind)
 
         if (!isTonal) {
           return

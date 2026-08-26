@@ -55,6 +55,11 @@ ruleTester.run('require-tonal-color-token', requireTonalColorToken, {
       code: '<template><v-chip :variant="variant" color="primary" /></template>',
     },
     {
+      name: 'does not assume a chip with an unqualified v-bind is tonal (chipProps.variant may be outlined)',
+      filename: 'test.vue',
+      code: '<template><v-chip v-bind="chipProps" color="primary" /></template>',
+    },
+    {
       name: 'ignores correlated variant and color conditions',
       filename: 'test.vue',
       code: `
