@@ -1,6 +1,6 @@
 <!-- eslint-disable vuetify/no-deprecated-components -->
 <!--
-SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Gardener contributors
+SPDX-FileCopyrightText: Copyright Contributors to the Gardener project
 
 SPDX-License-Identifier: Apache-2.0
  -->
