@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
           v-if="!isCreateMode && isOrphanedBinding"
           :value="true"
           type="info"
-          color="primary"
+          color="tonal-primary"
           variant="tonal"
         >
           The Secret <code>{{ credentialName }}</code> for this <code>Binding</code> does not exist anymore and will be re-created if you update the data.

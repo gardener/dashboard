@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
     close-label="Dismiss error"
     close-icon="mdi-close"
     border="start"
-    color="error"
+    color="tonal-error"
     :icon="false"
     class="pl-2 mb-2"
     @update:model-value="onUpdateModelValue"

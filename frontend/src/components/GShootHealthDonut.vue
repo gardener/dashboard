@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-else>
         <div class="health-row">
           <v-icon
-            :color="errorColor"
+            color="error"
             icon="mdi-alert-circle-outline"
             size="small"
           />
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
           class="health-row"
         >
           <v-icon
-            :color="warningColor"
+            color="warning"
             icon="mdi-filter-minus-outline"
             size="small"
           />
@@ -136,7 +136,6 @@ import {
   toRefs,
 } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useTheme } from 'vuetify'
 
 import GDetailTooltip from '@/components/GDetailTooltip.vue'
 
@@ -178,11 +177,6 @@ const {
 const hiddenUnhealthy = computed(() => totalUnhealthy.value - matchingUnhealthy.value)
 const healthyShoots = computed(() => shootCount.value - totalUnhealthy.value)
 const hasActiveFilters = computed(() => activeFilterReasons.value.length > 0)
-
-const theme = useTheme()
-const isDark = computed(() => theme.current.value.dark)
-const errorColor = computed(() => isDark.value ? 'error-lighten-2' : 'error')
-const warningColor = computed(() => isDark.value ? 'warning-lighten-2' : 'warning')
 
 function formatList (values) {
   if (values.length < 2) {

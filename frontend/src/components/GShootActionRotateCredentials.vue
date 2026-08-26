@@ -26,6 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           v-if="mode === 'START'"
           type="info"
+          color="tonal-info"
           variant="tonal"
           density="comfortable"
         >
@@ -34,6 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-alert
           v-if="mode === 'COMPLETE'"
           type="info"
+          color="tonal-info"
           variant="tonal"
           density="comfortable"
         >

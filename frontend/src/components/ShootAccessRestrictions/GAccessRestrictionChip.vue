@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-chip
       size="small"
       variant="tonal"
-      color="primary"
+      color="tonal-primary"
       class="mr-2 my-1"
     >
       {{ title }}
@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       :key="`${id}_${option.key}`"
       size="small"
       variant="tonal"
-      color="primary"
+      color="tonal-primary"
       class="mr-2 my-1"
     >
       {{ option.title }}

@@ -23,12 +23,11 @@ SPDX-License-Identifier: Apache-2.0
         <v-chip
           v-bind="popoverActivatorProps"
           :class="{ 'cursor-pointer': condition.message }"
-          :variant="!isError ? 'tonal' : 'flat'"
-          :text-color="textColor"
+          :variant="isError ? 'flat' : 'tonal'"
           :aria-label="chipAriaLabel"
           tabindex="0"
           size="small"
-          :color="color"
+          :color="chipColor"
           class="status-tag"
         >
           <v-icon
@@ -75,6 +74,10 @@ import {
   isUserError,
   objectsFromErrorCodes,
 } from '@/utils/errorCodes'
+import {
+  getFlatColorName,
+  getTonalColorName,
+} from '@/utils/themeColors'
 
 import filter from 'lodash/filter'
 
@@ -216,11 +219,10 @@ export default {
       }
       return 'primary'
     },
-    textColor () {
-      if (this.isError) {
-        return 'white'
-      }
-      return this.color
+    chipColor () {
+      return this.isError
+        ? getFlatColorName(this.color)
+        : getTonalColorName(this.color)
     },
     visible () {
       return this.canViewLandscape || !this.condition.showLandscapeViewerOnly

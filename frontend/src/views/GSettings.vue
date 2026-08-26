@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-list-item-content label="Color Scheme">
                 <v-btn-toggle
                   v-model="colorScheme"
-                  color="primary"
+                  color="tonal-primary"
                   mandatory="force"
                   divided
                   density="compact"
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-list-item-content label="Log Level">
                 <v-btn-toggle
                   v-model="logLevel"
-                  color="primary"
+                  color="tonal-primary"
                   mandatory="force"
                   divided
                   density="compact"

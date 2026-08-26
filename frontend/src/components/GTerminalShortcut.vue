@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
           maxWidth: 400
         }"
         size="small"
-        color="warning"
+        color="tonal-warning"
         variant="tonal"
         class="my-0 ml-2"
       >

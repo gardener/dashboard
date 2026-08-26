@@ -15,53 +15,77 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import {
   grey,
+  green,
   orange,
   red,
   blue,
-  green,
   shades,
 } from 'vuetify/util/colors'
 
-const gardenerGreen = '#0b8062'
+import { pickAccessibleTextColor } from '@/utils/accessibleColors'
+import {
+  getFlatColorName,
+  getOnFlatColorName,
+  getTonalColorName,
+  SEMANTIC_COLOR_NAMES,
+} from '@/utils/themeColors'
+
+function withDerivedColors (colors) {
+  const derivedColors = Object.fromEntries(
+    Object.entries(colors)
+      .filter(([name]) => SEMANTIC_COLOR_NAMES.includes(name))
+      .flatMap(([name, value]) => {
+        return [
+          [getTonalColorName(name), value],
+          [getFlatColorName(name), value],
+          [getOnFlatColorName(name), pickAccessibleTextColor(value)],
+        ]
+      }),
+  )
+  return {
+    ...colors,
+    ...derivedColors,
+  }
+}
 
 const light = {
   dark: false,
-  colors: {
-    anchor: gardenerGreen,
-    primary: gardenerGreen,
+  colors: withDerivedColors({
+    anchor: '#0a6b51',
+    primary: '#0a6b51',
     secondary: grey.darken3,
-    unknown: grey.darken1,
+    unknown: grey.darken3,
     accent: orange.lighten5,
-    error: red.accent2,
-    info: blue.base,
-    success: green.base,
-    warning: orange.darken1,
+    error: '#E91916',
+    info: blue.darken4,
+    success: green.darken3,
+    warning: orange.lighten1,
     'main-background': grey.darken3,
     'main-navigation-title': shades.white,
-    'toolbar-background': gardenerGreen,
+    'toolbar-background': '#0a6b51',
     'toolbar-title': shades.white,
     'action-button': grey.darken4,
-  },
+  }),
 }
 
 const dark = {
   dark: true,
-  colors: {
-    anchor: gardenerGreen,
-    primary: gardenerGreen,
+  colors: withDerivedColors({
+    anchor: '#60C0A0',
+    primary: '#60C0A0',
     secondary: grey.darken3,
-    unknown: grey.darken1,
+    unknown: grey.lighten1,
     accent: grey.darken3,
-    error: red.darken4,
-    info: blue.base,
-    success: green.base,
-    warning: orange.darken4,
+    error: red.lighten1,
+    info: '#27bbf5',
+    success: green.lighten1,
+    warning: orange.lighten2,
     'main-background': grey.darken3,
     'main-navigation-title': shades.white,
-    'toolbar-background': gardenerGreen,
+    'toolbar-background': '#0b8062',
     'toolbar-title': shades.white,
     'action-button': grey.lighten4,
-  },
+  }),
 }
 
 const variations = {

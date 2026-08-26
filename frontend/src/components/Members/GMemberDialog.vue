@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
                 <template #selection="{ item, index }">
                   <v-chip
                     size="small"
-                    color="primary"
+                    color="tonal-primary"
                     variant="tonal"
                     closable
                     @update:model-value="internalRoles.splice(index, 1); v$.internalRoles.$touch()"
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0
               v-if="isUpdateDialog && orphaned"
               :value="true"
               type="info"
-              color="primary"
+              color="tonal-primary"
               variant="tonal"
             >
               The service account does not exist anymore and will be re-created if you update the roles.

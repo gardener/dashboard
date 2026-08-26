@@ -119,6 +119,11 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { useShootItem } from '@/composables/useShootItem'
 
+import {
+  getFlatColorName,
+  getTonalColorName,
+} from '@/utils/themeColors'
+
 export default {
   inject: [
     'mergeProps',
@@ -156,7 +161,8 @@ export default {
       },
     },
     chipColor () {
-      return this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
+      const base = this.shootKubernetesVersionObject.isDeprecated ? 'warning' : 'primary'
+      return this.shootSupportedPatchAvailable ? getFlatColorName(base) : getTonalColorName(base)
     },
     tooltipText () {
       if (this.shootKubernetesVersionObject.isDeprecated) {

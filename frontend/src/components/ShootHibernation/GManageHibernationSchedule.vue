@@ -54,6 +54,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <v-alert
         type="warning"
+        color="tonal-warning"
         variant="tonal"
       >
         One or more errors occurred while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br>
@@ -67,6 +68,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-col>
         <v-alert
           type="warning"
+          color="tonal-warning"
           variant="tonal"
           :model-value="!isHibernationPossible && !isEmpty(hibernationScheduleEvents)"
         >

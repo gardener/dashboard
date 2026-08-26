@@ -17,9 +17,9 @@ SPDX-License-Identifier: Apache-2.0
           <v-chip
             v-tooltip:top="'Expand items'"
             v-bind="hoverProps"
-            :variant="isHovering ? 'flat' : 'outlined'"
+            :variant="isHovering ? 'flat' : 'tonal'"
             size="small"
-            :color="chipColor"
+            :color="isHovering ? getFlatColorName(chipColor) : getTonalColorName(chipColor)"
             label
             class="pointer"
             @click="expanded = true"
@@ -64,6 +64,11 @@ import {
   computed,
   inject,
 } from 'vue'
+
+import {
+  getFlatColorName,
+  getTonalColorName,
+} from '@/utils/themeColors'
 
 const props = defineProps({
   items: {

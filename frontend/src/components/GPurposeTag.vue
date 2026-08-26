@@ -9,8 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-if="!!shortPurpose"
     v-tooltip:top="purpose"
     :variant="!isCritical ? 'tonal' : 'flat'"
-    :text-color="textColor"
-    color="primary"
+    :color="isCritical ? 'flat-primary' : 'tonal-primary'"
     size="small"
     class="purpose-tag"
   >
@@ -46,13 +45,6 @@ export default {
     },
     isCritical () {
       return this.purpose === 'production' || this.purpose === 'infrastructure'
-    },
-    textColor () {
-      if (!this.isCritical) {
-        return 'primary'
-      } else {
-        return 'white'
-      }
     },
   },
 }
