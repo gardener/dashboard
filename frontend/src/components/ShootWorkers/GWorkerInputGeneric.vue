@@ -605,7 +605,7 @@ export default {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .worker-tinted {
