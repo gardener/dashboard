@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-expand-transition
       group
       :disabled="disableWorkerAnimation"
+      @after-enter="onAfterEnter"
     >
       <div
         v-for="(worker, index) in providerWorkers"
@@ -52,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { toRefs, inject, nextTick } from 'vue'
+import { toRefs, inject } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 
@@ -78,10 +79,9 @@ const scrollContainer = inject('dialogScrollContainer', null)
 
 function addProviderWorker () {
   _addProviderWorker()
-  nextTick(() => {
-    if (scrollContainer?.value) {
-      scrollContainer.value.scrollTo({ top: scrollContainer.value.scrollHeight, behavior: 'smooth' })
-    }
-  })
+}
+
+function onAfterEnter () {
+  scrollContainer.value?.scrollTo({ top: scrollContainer.value.scrollHeight, behavior: 'smooth' })
 }
 </script>
