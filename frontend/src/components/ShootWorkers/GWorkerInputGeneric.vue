@@ -599,11 +599,6 @@ export default {
     opacity: 1;
   }
 
-  .field-group {
-    border-left: 2px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    padding-left: 4px;
-  }
-
   .worker-tinted {
     background-color: rgba(var(--v-border-color), 0.04);
   }

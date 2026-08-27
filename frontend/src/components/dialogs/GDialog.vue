@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref, provide } from 'vue'
+import { ref } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GMessage from '@/components/GMessage.vue'
@@ -177,7 +177,6 @@ export default {
   setup () {
     const cardContentRef = ref(null)
     useScrollBar(cardContentRef)
-    provide('dialogScrollContainer', cardContentRef)
 
     return {
       v$: useVuelidate(),

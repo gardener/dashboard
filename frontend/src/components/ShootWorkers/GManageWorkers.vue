@@ -53,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { toRefs, inject } from 'vue'
+import { toRefs } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 
@@ -71,17 +71,11 @@ const {
   providerWorkers,
   workerless,
   allMachineTypes,
-  addProviderWorker: _addProviderWorker,
+  addProviderWorker,
   removeProviderWorker,
 } = useShootContext()
 
-const scrollContainer = inject('dialogScrollContainer', null)
-
-function addProviderWorker () {
-  _addProviderWorker()
-}
-
-function onAfterEnter () {
-  scrollContainer.value?.scrollTo({ top: scrollContainer.value.scrollHeight, behavior: 'smooth' })
+function onAfterEnter (element) {
+  element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 </script>
