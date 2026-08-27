@@ -36,7 +36,6 @@ SPDX-License-Identifier: Apache-2.0
       </div>
     </v-expand-transition>
     <div
-      key="addWorker"
       class="mt-2"
     >
       <v-btn
@@ -53,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { toRefs } from 'vue'
+import { toRefs, inject, nextTick } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 
@@ -71,7 +70,18 @@ const {
   providerWorkers,
   workerless,
   allMachineTypes,
-  addProviderWorker,
+  addProviderWorker: _addProviderWorker,
   removeProviderWorker,
 } = useShootContext()
+
+const scrollContainer = inject('dialogScrollContainer', null)
+
+function addProviderWorker () {
+  _addProviderWorker()
+  nextTick(() => {
+    if (scrollContainer?.value) {
+      scrollContainer.value.scrollTo({ top: scrollContainer.value.scrollHeight, behavior: 'smooth' })
+    }
+  })
+}
 </script>

@@ -44,6 +44,7 @@ SPDX-License-Identifier: Apache-2.0
       <div
         ref="cardContentRef"
         class="card-content"
+        :style="maxHeight ? { maxHeight } : undefined"
       >
         <slot name="content" />
       </div>
@@ -107,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 
 import GMessage from '@/components/GMessage.vue'
@@ -176,6 +177,7 @@ export default {
   setup () {
     const cardContentRef = ref(null)
     useScrollBar(cardContentRef)
+    provide('dialogScrollContainer', cardContentRef)
 
     return {
       v$: useVuelidate(),
