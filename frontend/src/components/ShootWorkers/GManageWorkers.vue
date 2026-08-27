@@ -25,6 +25,7 @@ SPDX-License-Identifier: Apache-2.0
           <template #action>
             <v-btn
               v-show="providerWorkers.length > 1"
+              class="mr-2"
               variant="text"
               prepend-icon="mdi-delete-outline"
               color="error"
