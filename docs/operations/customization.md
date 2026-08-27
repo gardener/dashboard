@@ -45,6 +45,14 @@ Each entry must be an object with a `name` key that identifies the vendor. The f
 | `weight`      | Sorting weight. Lower values appear first. See the default weights in the built-in [infrastructure](../../frontend/src/data/vendors/infra), [DNS](../../frontend/src/data/vendors/dns), and [machine image](../../frontend/src/data/vendors/machineImage) vendor registries. |
 | `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
 
+The DNS provider list can be restricted with `frontendConfig.branding.enabledDnsProviders`, which is an array of provider names. If this option is configured, only the listed providers are shown. If it is omitted, providers marked `hiddenByDefault` in their built-in definition are hidden.
+
+```yaml
+branding:
+  enabledDnsProviders:
+    - gdch-dns
+```
+
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
 Colors can be configured for both light and dark themes. Configuration is done via the helm chart, see the respective theme section there. Colors can be specified as HTML color code (e.g. `#FF0000` for red) or by referencing a color (e.g `grey.darken3` or `shades.white`) from Vuetify's Material Design [Color Pack](https://vuetifyjs.com/en/styles/colors/#javascript-color-pack).
