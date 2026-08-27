@@ -7,51 +7,47 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="!workerless"
-    class="alternate-row-background d-flex flex-column ga-6"
   >
     <v-expand-transition
       group
       :disabled="disableWorkerAnimation"
     >
-      <v-row
+      <div
         v-for="(worker, index) in providerWorkers"
         :key="index"
-        class="list-item my-0"
       >
         <g-worker-input-generic
           :worker="worker"
+          :worker-index="index"
         >
           <template #action>
             <v-btn
               v-show="providerWorkers.length > 1"
-              size="x-small"
-              variant="tonal"
-              icon="mdi-close"
-              color="grey"
+              variant="text"
+              prepend-icon="mdi-delete-outline"
+              color="error"
               @click.stop="removeProviderWorker(index)"
-            />
+            >
+              Remove
+            </v-btn>
           </template>
         </g-worker-input-generic>
-      </v-row>
+      </div>
     </v-expand-transition>
-    <v-row
+    <div
       key="addWorker"
-      class="list-item my-0"
+      class="mt-2"
     >
-      <v-col>
-        <v-btn
-          :disabled="!allMachineTypes.length"
-          variant="text"
-          color="primary"
-          @click="addProviderWorker"
-        >
-          <v-icon class="text-primary">
-            mdi-plus
-          </v-icon>
-          Add Worker Group
-        </v-btn>
-      </v-col>
-    </v-row>
+      <v-btn
+        :disabled="!allMachineTypes.length"
+        variant="text"
+        prepend-icon="mdi-plus"
+        color="primary"
+        @click="addProviderWorker"
+      >
+        Add Worker Group
+      </v-btn>
+    </div>
   </div>
 </template>
 
