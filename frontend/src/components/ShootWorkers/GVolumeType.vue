@@ -35,7 +35,8 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="isAWS && worker.volume.type !== 'gp2'"
       v-model.number="workerIops"
-      class="ml-4 small-input"
+      class="ml-4"
+      style="width: 80px;"
       color="primary"
       :error-messages="getErrorMessages(v$.workerIops)"
       type="number"
