@@ -1,17 +1,12 @@
 # Local Gardener Dashboard
 
-`node hack/local-dashboard.mjs` manages an isolated local Gardener Dashboard
-environment for development and deterministic browser verification. The initial
-implementation starts the complete Garden API, backend, and frontend stack
-without using ambient kubeconfig or Dashboard configuration.
+`node hack/local-dashboard.mjs` manages an isolated local Gardener Dashboard environment for development and deterministic browser verification. The initial implementation starts the complete Garden API, backend, and frontend stack without using ambient kubeconfig or Dashboard configuration.
 
-The local Garden API is implemented with gardenerless/KCP. It is not a complete
-Garden cluster.
+The local Garden API is implemented with gardenerless/KCP. It is not a complete Garden cluster.
 
 ## Prerequisites
 
-Install the repository dependencies and create the trusted frontend
-development certificate:
+Install the repository dependencies and create the trusted frontend development certificate:
 
 ```sh
 yarn
@@ -25,15 +20,11 @@ node hack/local-dashboard.mjs setup
 node hack/local-dashboard.mjs up
 ```
 
-Open `https://127.0.0.1:8444`. Run `node hack/local-dashboard.mjs token` when a
-login token is needed, and stop the stack with
-`node hack/local-dashboard.mjs down`.
+Open `https://127.0.0.1:8444`. Run `node hack/local-dashboard.mjs token` when a login token is needed, and stop the stack with `node hack/local-dashboard.mjs down`.
 
 ## Setup
 
-`setup` idempotently prepares the pinned gardenerless checkout and local Garden
-API runtime under `.local-dashboard`. Detailed output is written to
-`.local-dashboard/setup.log`.
+`setup` idempotently prepares the pinned gardenerless checkout and local Garden API runtime under `.local-dashboard`. Detailed output is written to `.local-dashboard/setup.log`.
 
 To reset the managed checkout and runtime:
 
@@ -65,8 +56,7 @@ Reports stack health and managed prerequisite versions.
 node hack/local-dashboard.mjs token
 ```
 
-Prints a login token for the operator service account
-`garden/dashboard-user` by default.
+Prints a login token for the operator service account `garden/dashboard-user` by default.
 
 ```sh
 node hack/local-dashboard.mjs token | pbcopy
@@ -84,6 +74,23 @@ node hack/local-dashboard.mjs down
 
 Stops the stack.
 
+## Accessing the local Garden API
+
+The bundled kubectl wrapper automatically targets the managed local Garden API, so no manual kubeconfig configuration is required:
+
+```sh
+./hack/local-dashboard/bin/kubectl-gardenerless get shoots -A
+./hack/local-dashboard/bin/kubectl-gardenerless get projects
+```
+
+No `PATH` change is required for direct invocation. To use the wrapper as `kubectl gardenerless` with shell completion, add the wrapper directory to `PATH`:
+
+```sh
+export PATH="$PWD/hack/local-dashboard/bin:$PATH"
+kubectl gardenerless get shoots -A
+kubectl gardenerless get projects
+```
+
 ## Managed resources
 
 The workflow uses these managed paths and fixed loopback endpoints:
@@ -95,15 +102,3 @@ The workflow uses these managed paths and fixed loopback endpoints:
 - garden: `https://127.0.0.1:6443`
 
 Managed components are presented as `garden`, `backend`, and `frontend`.
-
-## Tests
-
-The command contract is covered by
-`hack/local-dashboard/test/local-dashboard.spec.js`:
-
-```sh
-yarn test:hack
-```
-
-Run `yarn test:hack:cov` to write its dedicated coverage report to
-`coverage/local-dashboard`.
