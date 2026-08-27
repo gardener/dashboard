@@ -5,9 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card variant="outlined">
+  <v-card
+    variant="outlined"
+    :class="{ 'worker-tinted': workerIndex % 2 === 1 }"
+    style="border-color: rgba(var(--v-border-color), 0.15)"
+  >
     <v-card-text class="pa-0 pb-4">
-      <div class="px-3 pt-2 pb-1 text-caption text-high-emphasis font-weight-bold text-uppercase">
+      <div class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase">
         Worker Group
       </div>
       <div class="d-flex align-center flex-wrap">
@@ -55,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
 
     <v-card-text class="pa-0 pb-4">
-      <div class="px-3 pt-2 pb-1 text-caption text-high-emphasis font-weight-bold text-uppercase">
+      <div class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase">
         Machine
       </div>
       <div class="d-flex flex-wrap align-start">
@@ -105,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
 
     <v-card-text class="pa-0 pb-4">
-      <div class="px-3 pt-2 pb-1 text-caption text-high-emphasis font-weight-bold text-uppercase">
+      <div class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase">
         Volume
       </div>
       <div class="d-flex flex-wrap align-start">
@@ -140,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
 
     <div class="d-flex flex-wrap gap-4 pb-4">
-      <div class="px-3 pt-2 pb-1 text-caption text-high-emphasis font-weight-bold text-uppercase" style="width: 100%">
+      <div class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase" style="width: 100%">
         Scaling &amp; Rollout
       </div>
       <div class="d-flex">
@@ -257,6 +261,10 @@ export default {
     worker: {
       type: Object,
       required: true,
+    },
+    workerIndex: {
+      type: Number,
+      default: 0,
     },
   },
   setup (props) {
@@ -594,5 +602,9 @@ export default {
   .field-group {
     border-left: 2px solid rgba(var(--v-border-color), var(--v-border-opacity));
     padding-left: 4px;
+  }
+
+  .worker-tinted {
+    background-color: rgba(var(--v-border-color), 0.04);
   }
 </style>

@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <div
         v-for="(worker, index) in providerWorkers"
         :key="index"
+        class="mb-4"
       >
         <g-worker-input-generic
           :worker="worker"
