@@ -225,12 +225,13 @@ export default {
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       providerWorkers,
+      volumeTypes,
     } = useShootContext()
 
     const { machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
-    const { useMinimumVolumeSize, volumeTypes } = useVolumeTypes(cloudProfile)
+    const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
       props.worker.machine.type = get(defaultMachineType.value, ['name'])
