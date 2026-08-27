@@ -379,7 +379,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   }
 
   const shootCIDR = new Netmask(newShootWorkerCIDR)
-  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact([zone.workers, zone.public, zone.internal]))
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact([zone.workers, zone.public, zone.internal, zone.CIDR]))
   const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => !shootCIDR.contains(cidr))
   return zoneConfigurationContainsInvalidCIDR
     ? defaultZonesNetworkConfiguration
