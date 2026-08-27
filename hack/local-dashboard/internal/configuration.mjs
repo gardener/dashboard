@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
 export const GARDENERLESS_REPOSITORY = 'https://github.com/grolu/gardenerless-local-setup.git'
-export const GARDENERLESS_COMMIT = '28ab775a8320ac4bf9a708c692f0918a56b06167'
+export const GARDENERLESS_COMMIT = '06564c30c3c8bfa970e259ac337936a5fd6e2f0c'
 export const SCENARIOS = ['healthy-shoot', 'failing-shoot', 'many-shoots', 'operation-in-progress']
 
 export const REPOSITORY_ROOT = realpathSync(resolve(
