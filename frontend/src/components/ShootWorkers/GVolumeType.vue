@@ -5,10 +5,11 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-row">
+  <div class="d-flex flex-row align-start">
     <v-select
       v-model="worker.volume.type"
       v-messages-color="{ color: 'warning' }"
+      class="flex-grow-1"
       color="primary"
       item-color="primary"
       :items="volumeTypeItems"
@@ -17,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :error-messages="getErrorMessages(v$.worker.volume.type)"
       label="Volume Type"
       :hint="hint"
-      persistent-hint
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputVolumeType"
       @blur="v$.worker.volume.type.$touch()"
@@ -33,12 +34,15 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="isAWS && worker.volume.type !== 'gp2'"
       v-model.number="workerIops"
-      class="ml-1"
+      class="ml-4 flex-0-0"
+      style="width: 120px"
       color="primary"
       :error-messages="getErrorMessages(v$.workerIops)"
       type="number"
       min="100"
       label="IOPS"
+      hint="I/O operations per second"
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputIops"
       @blur="v$.workerIops.$touch()"
