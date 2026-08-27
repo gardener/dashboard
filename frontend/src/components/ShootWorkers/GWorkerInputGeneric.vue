@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     style="border-color: rgba(var(--v-border-color), 0.15)"
   >
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head px-3 pt-2 pb-1">
+      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
         Worker Group
       </div>
       <div class="pl-4">
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card-text>
 
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head px-3 pt-2 pb-1">
+      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
         Machine
       </div>
       <div class="pl-4">
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card-text>
 
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head px-3 pt-2 pb-1">
+      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
         Volume
       </div>
       <div class="pl-4">
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <div class="pb-4">
       <div
-        class="section-head px-3 pt-2 pb-1"
+        class="section-head text-medium-emphasis px-3 pt-2 pb-1"
       >
         Scaling &amp; Rollout
       </div>
@@ -609,7 +609,6 @@ export default {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
   }
 
   .section-head::after {
