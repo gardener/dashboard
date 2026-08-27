@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             />
           </div>
         </div>
-        <div class="d-flex flex-wrap align-start">
+        <div class="d-flex flex-wrap align-end">
           <g-container-runtime
             :machine-image-cri="machineImageCri"
             :worker="worker"
@@ -125,7 +125,7 @@ SPDX-License-Identifier: Apache-2.0
               :field-name="`${workerGroupName} Volume Type`"
             />
           </div>
-          <div class="small-input">
+          <div class="regular-input">
             <g-volume-size-input
               v-model="volumeSize"
               v-model:has-custom-storage-size="hasCustomStorageSize"
@@ -150,38 +150,36 @@ SPDX-License-Identifier: Apache-2.0
         Scaling &amp; Rollout
       </div>
       <div class="pl-4">
-        <div class="d-flex flex-wrap gap-4">
-          <div class="d-flex">
-            <div class="small-input">
-              <v-text-field
-                v-model="innerMin"
-                min="0"
-                color="primary"
-                :error-messages="getErrorMessages(v$.worker.minimum)"
-                type="number"
-                label="Autoscaler Min."
-                hint="Minimum nodes kept running at all times"
-                persistent-hint
-                variant="underlined"
-                @input="v$.worker.minimum.$touch()"
-                @blur="ensureValidAutoscalerMin()"
-              />
-            </div>
-            <div class="small-input">
-              <v-text-field
-                v-model="innerMax"
-                min="0"
-                color="primary"
-                type="number"
-                label="Autoscaler Max."
-                hint="Maximum nodes the autoscaler can scale up to"
-                persistent-hint
-                variant="underlined"
-                :error-messages="getErrorMessages(v$.worker.maximum)"
-                @input="v$.worker.maximum.$touch()"
-                @blur="ensureValidAutoscalerMax()"
-              />
-            </div>
+        <div class="d-flex flex-wrap">
+          <div class="small-input">
+            <v-text-field
+              v-model="innerMin"
+              min="0"
+              color="primary"
+              :error-messages="getErrorMessages(v$.worker.minimum)"
+              type="number"
+              label="Autoscaler Min."
+              hint="Minimum nodes kept running at all times"
+              persistent-hint
+              variant="underlined"
+              @input="v$.worker.minimum.$touch()"
+              @blur="ensureValidAutoscalerMin()"
+            />
+          </div>
+          <div class="small-input">
+            <v-text-field
+              v-model="innerMax"
+              min="0"
+              color="primary"
+              type="number"
+              label="Autoscaler Max."
+              hint="Maximum nodes the autoscaler can scale up to"
+              persistent-hint
+              variant="underlined"
+              :error-messages="getErrorMessages(v$.worker.maximum)"
+              @input="v$.worker.maximum.$touch()"
+              @blur="ensureValidAutoscalerMax()"
+            />
           </div>
           <div class="regular-input">
             <v-text-field
