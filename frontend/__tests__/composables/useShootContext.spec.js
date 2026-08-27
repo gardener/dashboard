@@ -90,6 +90,17 @@ describe('composables', () => {
       expect(createShootManifest('aws')).toMatchSnapshot()
     })
 
+    it('should select the only available infrastructure provider by default', () => {
+      const cloudProfileStore = useCloudProfileStore()
+      cloudProfileStore.setCloudProfiles(
+        cloneDeep(global.fixtures.cloudprofiles.filter(({ spec }) => spec.type === 'aws')),
+      )
+
+      shootContextStore.createShootManifest()
+
+      expect(shootContextStore.providerType).toBe('aws')
+    })
+
     it('should omit spec.addons if no addon is enabled', () => {
       createShootManifest('aws')
 
