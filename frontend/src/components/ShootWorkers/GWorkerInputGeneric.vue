@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
     style="border-color: rgba(var(--v-border-color), 0.15)"
   >
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
+      <div class="text-medium-emphasis section-heading px-3 pt-2 pb-1">
         Worker Group
       </div>
       <div class="pl-4">
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card-text>
 
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
+      <div class="text-medium-emphasis section-heading px-3 pt-2 pb-1">
         Machine
       </div>
       <div class="pl-4">
@@ -97,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0
             />
           </div>
         </div>
-        <div class="d-flex flex-wrap align-end">
+        <div class="d-flex mt-n6 flex-wrap align-end">
           <g-container-runtime
             :machine-image-cri="machineImageCri"
             :worker="worker"
@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card-text>
 
     <v-card-text class="pa-0 pb-4">
-      <div class="section-head text-medium-emphasis px-3 pt-2 pb-1">
+      <div class="text-medium-emphasis section-heading px-3 pt-2 pb-1">
         Volume
       </div>
       <div class="pl-4">
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
 
     <div class="pb-4">
       <div
-        class="section-head text-medium-emphasis px-3 pt-2 pb-1"
+        class="text-medium-emphasis section-heading px-3 pt-2 pb-1"
       >
         Scaling &amp; Rollout
       </div>
@@ -601,20 +601,11 @@ export default {
     opacity: 1;
   }
 
-  .section-head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
+  .section-heading {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-  }
-
-  .section-head::after {
-    content: '';
-    flex: 1;
-    border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+    font-size: 16px;
   }
 
   .worker-tinted {
