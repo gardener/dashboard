@@ -153,6 +153,33 @@ describe('utils', () => {
           { CIDR: '10.250.128.0/17' },
         ])
       })
+
+      it('should update GDCH zone CIDRs when the node CIDR changes', () => {
+        const workers = [
+          {
+            zones: ['fooZone'],
+          },
+          {
+            zones: ['barZone'],
+          },
+        ]
+        const oldZonesNetworkConfiguration = [
+          { name: 'fooZone', CIDR: '10.250.0.0/17' },
+          { name: 'barZone', CIDR: '10.250.128.0/17' },
+        ]
+
+        expect(getZonesNetworkConfiguration(
+          oldZonesNetworkConfiguration,
+          workers,
+          'gdch',
+          2,
+          undefined,
+          '10.180.0.0/16',
+        )).toEqual([
+          { name: 'fooZone', CIDR: '10.180.0.0/17' },
+          { name: 'barZone', CIDR: '10.180.128.0/17' },
+        ])
+      })
     })
 
     describe('GDCH templates', () => {
