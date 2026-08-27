@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <g-action-button-dialog
     :key="componentKey"
     ref="actionDialog"
-    width="1250"
+    width="900"
     confirm-required
     caption="Configure Workers"
     :tooltip="dialogTooltip"
