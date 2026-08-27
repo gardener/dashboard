@@ -41,7 +41,7 @@ path = [
   "frontend/public/robots.txt"
 ]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2017-2024 SAP SE or an SAP affiliate company and Gardener contributors"
+SPDX-FileCopyrightText = "Contributors to the Gardener project"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
@@ -51,11 +51,11 @@ path = [
   "frontend/src/data/vendors/machineImage/**.js"
 ]
 precedence = "closest"
-SPDX-FileCopyrightText = "2026 SAP SE or an SAP affiliate company and Gardener contributors"
+SPDX-FileCopyrightText = "Contributors to the Gardener project"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
 path = ["**.md", "docs/usage/shoot.yaml"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2017-2024 SAP SE or an SAP affiliate company and Gardener contributors"
+SPDX-FileCopyrightText = "Contributors to the Gardener project"
 SPDX-License-Identifier = "CC-BY-4.0"

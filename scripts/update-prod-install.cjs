@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -95,7 +95,7 @@ ${body}
 }
 
 const template = `//
-// SPDX-FileCopyrightText: ${fullYear} SAP SE or an SAP affiliate company and Gardener contributors
+// SPDX-FileCopyrightText: ${fullYear} Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
