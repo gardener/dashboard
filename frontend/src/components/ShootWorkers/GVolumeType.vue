@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       :error-messages="getErrorMessages(v$.worker.volume.type)"
       label="Volume Type"
       :hint="hint"
+      persistent-hint
       persistent-placeholder
       variant="underlined"
       @update:model-value="onInputVolumeType"
