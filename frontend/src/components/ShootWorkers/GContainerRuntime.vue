@@ -6,12 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    class="d-flex flex-row regular-input"
+    class="d-flex flex-row"
     :class="{ 'has-oci-runtimes': criContainerRuntimeTypes.length }"
   >
     <v-select
       v-model="criName"
       v-messages-color="{ color: 'warning' }"
+      class="regular-input"
       :style="{ flex: criContainerRuntimeTypes.length ? '0 0 125px' : undefined }"
       color="primary"
       item-color="primary"
@@ -27,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-select
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
-      class="ml-1"
+      class="regular-input ml-1"
       style="flex: 0 0 140px"
       color="primary"
       item-color="primary"
