@@ -144,7 +144,10 @@ SPDX-License-Identifier: Apache-2.0
     <v-divider />
 
     <div class="d-flex flex-wrap gap-4 pb-4">
-      <div class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase" style="width: 100%">
+      <div
+        class="px-3 pt-2 pb-1 text-caption text-medium-emphasis font-weight-bold text-uppercase"
+        style="width: 100%"
+      >
         Scaling &amp; Rollout
       </div>
       <div class="d-flex">
