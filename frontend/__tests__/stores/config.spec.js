@@ -117,6 +117,20 @@ describe('stores', () => {
       })
     })
 
+    it('hides gdch-dns by default', () => {
+      expect(configStore.sortedDnsProviderTypeList).not.toContain('gdch-dns')
+    })
+
+    it('allows explicitly enabling a list of DNS providers', () => {
+      configStore.setConfiguration({
+        branding: {
+          enabledDnsProviders: ['gdch-dns'],
+        },
+      })
+
+      expect(configStore.sortedDnsProviderTypeList).toEqual(['gdch-dns'])
+    })
+
     it('allows branding CloudProfile-provided machine image names using documented properties only', () => {
       expect(configStore.vendorDetails({
         type: 'machineImage',
