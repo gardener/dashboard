@@ -18,6 +18,7 @@ SPDX-License-Identifier: Apache-2.0
       label="Volume Type"
       :hint="hint"
       persistent-hint
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputVolumeType"
       @blur="v$.worker.volume.type.$touch()"
@@ -33,12 +34,15 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="isAWS && worker.volume.type !== 'gp2'"
       v-model.number="workerIops"
-      class="ml-1"
+      class="ml-4"
+      style="width: 80px;"
       color="primary"
       :error-messages="getErrorMessages(v$.workerIops)"
       type="number"
       min="100"
       label="IOPS"
+      hint="I/O operations per second"
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputIops"
       @blur="v$.workerIops.$touch()"

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <div
-    class="d-flex flex-row regular-input"
+    class="d-flex flex-row"
     :class="{ 'has-oci-runtimes': criContainerRuntimeTypes.length }"
   >
     <v-select
@@ -28,11 +28,12 @@ SPDX-License-Identifier: Apache-2.0
       v-if="criContainerRuntimeTypes.length"
       v-model="selectedCriContainerRuntimeTypes"
       class="ml-1"
-      style="flex: 0 0 125px"
+      style="flex: 0 0 140px"
       color="primary"
       item-color="primary"
       :items="criContainerRuntimeTypes"
-      label="Add. OCI Runtimes"
+      label="Additional OCI Runtimes"
+      persistent-placeholder
       multiple
       chips
       closable-chips
