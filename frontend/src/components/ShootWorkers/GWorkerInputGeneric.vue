@@ -160,7 +160,6 @@ SPDX-License-Identifier: Apache-2.0
               type="number"
               label="Autoscaler Min."
               hint="Minimum nodes kept running at all times"
-              persistent-hint
               variant="underlined"
               @input="v$.worker.minimum.$touch()"
               @blur="ensureValidAutoscalerMin()"
@@ -174,7 +173,6 @@ SPDX-License-Identifier: Apache-2.0
               type="number"
               label="Autoscaler Max."
               hint="Maximum nodes the autoscaler can scale up to"
-              persistent-hint
               variant="underlined"
               :error-messages="getErrorMessages(v$.worker.maximum)"
               @input="v$.worker.maximum.$touch()"
@@ -189,7 +187,6 @@ SPDX-License-Identifier: Apache-2.0
               :error-messages="getErrorMessages(v$.worker.maxSurge)"
               label="Max. Surge"
               hint="Number of extra nodes allowed during a rolling update"
-              persistent-hint
               variant="underlined"
               @input="v$.worker.maxSurge.$touch()"
               @blur="v$.worker.maxSurge.$touch()"
