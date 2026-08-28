@@ -7,33 +7,40 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="!workerless"
-    class="alternate-row-background d-flex flex-column ga-6"
+    class="d-flex flex-column ga-6"
   >
-    <v-expand-transition
-      group
-      :disabled="disableWorkerAnimation"
+    <template
+      v-for="(worker, index) in providerWorkers"
+      :key="index"
     >
-      <v-row
-        v-for="(worker, index) in providerWorkers"
-        :key="index"
-        class="list-item my-0"
+      <v-divider v-if="index > 0" />
+      <v-expand-transition
+        :disabled="disableWorkerAnimation"
+        @after-enter="el => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })"
       >
-        <g-worker-input-generic
-          :worker="worker"
+        <div
+          class="pa-2 rounded"
+          :class="index % 2 === 1 ? 'worker-group-even' : ''"
         >
-          <template #action>
-            <v-btn
-              v-show="providerWorkers.length > 1"
-              size="x-small"
-              variant="tonal"
-              icon="mdi-close"
-              color="grey"
-              @click.stop="removeProviderWorker(index)"
-            />
-          </template>
-        </g-worker-input-generic>
-      </v-row>
-    </v-expand-transition>
+          <g-worker-input-generic
+            :worker="worker"
+          >
+            <template #action>
+              <v-btn
+                v-show="providerWorkers.length > 1"
+                size="small"
+                variant="tonal"
+                color="error"
+                prepend-icon="mdi-delete-outline"
+                @click.stop="removeProviderWorker(index)"
+              >
+                Remove
+              </v-btn>
+            </template>
+          </g-worker-input-generic>
+        </div>
+      </v-expand-transition>
+    </template>
     <v-row
       key="addWorker"
       class="list-item my-0"
@@ -78,3 +85,9 @@ const {
   removeProviderWorker,
 } = useShootContext()
 </script>
+
+<style scoped>
+.worker-group-even {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+</style>
