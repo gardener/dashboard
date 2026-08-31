@@ -579,7 +579,13 @@ export function createShootContextComposable (options = {}) {
 
   const providerWorkers = computed({
     get () {
-      return get(manifest.value, ['spec', 'provider', 'workers'], [])
+      const workers = get(manifest.value, ['spec', 'provider', 'workers'], [])
+      for (const worker of workers) {
+        if (!Object.prototype.hasOwnProperty.call(worker, '_uid')) {
+          Object.defineProperty(worker, '_uid', { value: uuidv4() })
+        }
+      }
+      return workers
     },
     set (value = []) {
       set(manifest.value, ['spec', 'provider', 'workers'], value)
@@ -611,6 +617,7 @@ export function createShootContextComposable (options = {}) {
         : availableZones.value,
     )
     Object.defineProperty(worker, 'isNew', { value: isNew })
+    Object.defineProperty(worker, '_uid', { value: id })
     return worker
   }
 
