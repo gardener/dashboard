@@ -102,7 +102,7 @@
       ],
       commitMessagePrefix: 'chore(node):',
       commitMessageAction: 'upgrade',
-      commitMessageTopic: 'Node to {{newVersion}} everywhere',
+      commitMessageTopic: 'Node',
       separateMinorPatch: false,
     },
   ],
