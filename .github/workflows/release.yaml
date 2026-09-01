@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yaml
+    uses: $/.github/workflows/build.yaml
     secrets:
       dockerhub-auth-token: ${{ secrets.DOCKERHUB_RO_AUTH }}
     permissions:

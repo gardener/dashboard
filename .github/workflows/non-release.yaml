@@ -21,7 +21,7 @@ permissions: {}
 jobs:
   build:
     if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == vars.DEFAULT_LABEL_OK_TO_TEST && vars.DEFAULT_LABEL_OK_TO_TEST != '') }}
-    uses: ./.github/workflows/build.yaml
+    uses: $/.github/workflows/build.yaml
     with:
       mode: snapshot
     secrets:
