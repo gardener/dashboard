@@ -2,10 +2,12 @@
 
 aliases:
   dashboard-reviewers:
+  - chrisstiefel
   - grolu
   - julestree
   - petersutter
   dashboard-approvers:
+  - chrisstiefel
   - grolu
   - julestree
   - petersutter
