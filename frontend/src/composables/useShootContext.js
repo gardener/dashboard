@@ -610,6 +610,19 @@ export function createShootContextComposable (options = {}) {
     providerWorkers.value = filter(providerWorkers.value, (_, i) => i !== index)
   }
 
+  function duplicateProviderWorker (index) {
+    const source = providerWorkers.value[index] // eslint-disable-line security/detect-object-injection -- index from internal click handler
+    const clone = JSON.parse(JSON.stringify(source)) // get rid of uid and isNew (not serializable)
+    clone.name = `worker-${shortRandomString(5)}`
+    Object.defineProperty(clone, 'isNew', { value: true })
+    Object.defineProperty(clone, '_uid', { value: uuidv4() })
+    providerWorkers.value = [
+      ...providerWorkers.value.slice(0, index + 1),
+      clone,
+      ...providerWorkers.value.slice(index + 1),
+    ]
+  }
+
   function generateProviderWorker (zones) {
     const { id, isNew, ...worker } = generateWorker(
       !isEmpty(zones)
@@ -1118,6 +1131,7 @@ export function createShootContextComposable (options = {}) {
     providerWorkers,
     addProviderWorker,
     removeProviderWorker,
+    duplicateProviderWorker,
     workerless,
     usedZones,
     unusedZones,
