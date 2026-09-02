@@ -59,7 +59,11 @@ SPDX-License-Identifier: Apache-2.0
                 </v-btn-toggle>
               </g-list-item-content>
             </g-list-item>
-            <v-divider inset />
+            <v-divider
+              v-if="!sapTheme"
+              data-test="color-scheme-divider"
+              inset
+            />
             <g-list-item>
               <template #prepend>
                 <v-icon color="primary">
@@ -440,7 +444,6 @@ import {
   useRoute,
   useRouter,
 } from 'vue-router'
-import { useRouteQuery } from '@vueuse/router'
 
 import { useAuthzStore } from '@/store/authz'
 import { useConfigStore } from '@/store/config'
@@ -453,7 +456,6 @@ import {
 } from '@/composables/useShootListFilters'
 
 const localStorageStore = useLocalStorageStore()
-const sapTheme = useRouteQuery('sap-theme')
 const allProjectsDialog = ref(false)
 const showIgnoredTicketLabels = ref(false)
 const defaultClusterViewSettingsItem = ref()
@@ -474,6 +476,7 @@ const authzStore = useAuthzStore()
 const configStore = useConfigStore()
 const route = useRoute()
 const router = useRouter()
+const sapTheme = computed(() => route.query['sap-theme'])
 const deepLinkedSetting = computed(() => {
   const params = new URLSearchParams(route.hash.slice(1))
   return params.get('setting')

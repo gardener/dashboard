@@ -88,12 +88,13 @@ import { useRoute } from 'vue-router'
 
 import { useProjectStore } from '@/store/project'
 
-import { kebabCase } from '@/lodash'
+import kebabCase from 'lodash/kebabCase'
 
 const projectStore = useProjectStore()
 const route = useRoute()
 
 const breadcrumbItems = computed(() => {
+  const projectName = projectStore.projectName ?? 'all'
   switch (route.name) {
     case 'ProjectList':
       return [{
@@ -108,7 +109,7 @@ const breadcrumbItems = computed(() => {
         title: 'projects',
         to: { name: 'ProjectList' },
       }, {
-        title: projectStore.projectName,
+        title: projectName,
         disabled: false,
         exact: true,
         to: { name: 'Administration', params: route.params },
@@ -124,7 +125,7 @@ const breadcrumbItems = computed(() => {
         title: 'projects',
         to: { name: 'ProjectList' },
       }, {
-        title: projectStore.projectName,
+        title: projectName,
         disabled: false,
         exact: true,
         to: { name: 'Administration', params: route.params },
@@ -141,7 +142,7 @@ const breadcrumbItems = computed(() => {
         title: 'projects',
         to: { name: 'ProjectList' },
       }, {
-        title: projectStore.projectName,
+        title: projectName,
         exact: true,
         to: { name: 'Administration', params: route.params },
       },

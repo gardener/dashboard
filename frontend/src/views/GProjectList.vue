@@ -141,10 +141,8 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 
 import { useOpenMFP } from '@/composables/useOpenMFP'
 
-import {
-  filter,
-  get,
-} from '@/lodash'
+import filter from 'lodash/filter'
+import get from 'lodash/get'
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
@@ -155,13 +153,13 @@ const canCreateProject = toRef(authzStore, 'canCreateProject')
 const projectDialog = ref(false)
 
 const projectList = computed(() => {
-  const belongsToAccount = project => accountId.value === get(project, 'metadata.annotations["openmfp.org/account-id"]')
+  const belongsToAccount = project => accountId.value === get(project, ['metadata', 'annotations', 'openmfp.org/account-id'])
   return !accountId.value
     ? projectStore.projectList
     : filter(projectStore.projectList, belongsToAccount)
 })
 
 function getNumberOfShoots (project) {
-  return get(project, 'metadata.annotations["computed.gardener.cloud/number-of-shoots"]', 0)
+  return get(project, ['metadata', 'annotations', 'computed.gardener.cloud/number-of-shoots'], 0)
 }
 </script>

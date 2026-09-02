@@ -46,7 +46,7 @@ function guardUserGroups (user) {
 }
 
 function isMemberOf (project, user, projectAllowList = []) {
-  if (projectAllowList.includes(project.metadata.name)) {
+  if (projectAllowList.includes(project.metadata?.name)) {
     return true
   }
   return _

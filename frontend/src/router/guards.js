@@ -66,17 +66,17 @@ export function createGlobalBeforeGuards () {
       const context = await openMFP.getLuigiContext()
       if (context) {
         logger.debug('Luigi context:', context)
-        const token = context.token
-        if (token) {
-          try {
-            await api.createTokenReview({ token })
-            await authnStore.$reset()
-            if (!(await authnStore.isExpired())) {
-              return true
-            }
-          } catch (err) {
-            logger.error('Luigi token review error: %s', err.message)
+      }
+      const token = context?.token
+      if (token) {
+        try {
+          await api.createTokenReview({ token })
+          await authnStore.$reset()
+          if (!(await authnStore.isExpired())) {
+            return true
           }
+        } catch (err) {
+          logger.error('Luigi token review error: %s', err.message)
         }
       }
 

@@ -152,18 +152,22 @@ const configMappings = [
   },
   {
     environmentVariableName: 'FGA_API_URL',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiUrl',
     configPath: 'fgaApiUrl',
   },
   {
     environmentVariableName: 'FGA_STORE_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/storeId',
     configPath: 'fgaStoreId',
   },
   {
     environmentVariableName: 'FGA_AUTHORIZATION_MODEL_ID',
+    filePath: '/etc/gardener-dashboard/secrets/fga/authorizationModelId',
     configPath: 'fgaAuthorizationModelId',
   },
   {
     environmentVariableName: 'FGA_API_TOKEN',
+    filePath: '/etc/gardener-dashboard/secrets/fga/apiToken',
     configPath: 'fgaApiToken',
   },
 ]

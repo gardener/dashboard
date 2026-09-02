@@ -41,7 +41,7 @@ export async function list ({ user, namespace, labelSelector }) {
     } else {
       // Fall back to namespaces of projects the user belongs to, including OpenFGA grants.
       const projects = await projectsService.list({ user, canListProjects: false })
-      const namespaces = _.map(projects, 'metadata.namespace')
+      const namespaces = _.map(projects, 'spec.namespace')
 
       const results = await Promise.allSettled(namespaces.map(async namespace => {
         const allowed = await authorization.canListShoots(user, namespace)
