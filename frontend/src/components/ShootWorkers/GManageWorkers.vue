@@ -10,7 +10,10 @@ SPDX-License-Identifier: Apache-2.0
     ref="containerRef"
     class="d-flex flex-column"
   >
-    <div class="d-flex justify-end mb-6">
+    <div
+      v-if="providerWorkers.length > 1"
+      class="d-flex justify-end mb-2"
+    >
       <v-btn
         variant="text"
         size="small"
@@ -22,57 +25,84 @@ SPDX-License-Identifier: Apache-2.0
     <v-expand-transition
       group
       :disabled="disableWorkerAnimation"
+      @after-enter="scrollAddedWorkerGroup"
     >
       <div
         v-for="(worker, index) in providerWorkers"
         :key="worker._uid"
         :ref="element => { if (element) workerGroupRefs[worker._uid] = element }"
-        class="worker-group-wrapper"
+        class="worker-group-wrapper mb-4"
       >
-        <div
-          class="worker-group-card rounded pa-3 mb-6"
-          :class="index % 2 === 1 ? 'worker-group-even' : ''"
+        <v-expansion-panels
+          :model-value="openWorkers[worker._uid] ? [worker._uid] : []"
+          multiple
+          @update:model-value="value => setOpen(worker._uid, value.length > 0)"
         >
-          <div
-            class="d-flex align-center py-1 cursor-pointer"
-            @click="setCollapsed(worker._uid, !collapsedWorkers[worker._uid])"
+          <v-expansion-panel
+            :value="worker._uid"
           >
-            <v-icon
-              :icon="collapsedWorkers[worker._uid] ? 'mdi-chevron-right' : 'mdi-chevron-down'"
-              size="small"
-              class="text-medium-emphasis mr-1"
-            />
-            <span class="text-body-2 font-weight-medium">{{ worker.name }}</span>
-            <span
-              v-if="collapsedWorkers[worker._uid]"
-              class="ml-3 text-body-2 text-medium-emphasis"
-            >{{ worker.machine.architecture }} / {{ worker.machine.type }}</span>
-            <v-spacer />
-            <v-btn
-              v-show="providerWorkers.length > 1"
-              size="small"
-              variant="tonal"
-              color="error"
-              prepend-icon="mdi-delete-outline"
-              @click.stop="removeProviderWorker(index)"
-            >
-              Remove
-            </v-btn>
-          </div>
-          <v-expand-transition
-            :disabled="disableWorkerAnimation"
-            @after-enter="() => scrollToWorker(worker._uid)"
-          >
-            <div
-              v-if="!collapsedWorkers[worker._uid]"
-              class="pt-3"
-            >
+            <v-expansion-panel-title>
+              <v-icon
+                size="small"
+                class="mr-2 flex-grow-0 flex-shrink-0"
+              >
+                {{ openWorkers[worker._uid] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
+              <span class="text-body-2 font-weight-medium">{{ worker.name }}</span>
+              <template v-if="!openWorkers[worker._uid]">
+                <template v-if="getCollapsedSummary(worker)">
+                  <span class="mx-2 text-medium-emphasis">/</span>
+                  <span class="d-inline-flex align-center">
+                    <span class="text-body-2 text-medium-emphasis">{{ getCollapsedSummary(worker) }}</span>
+                  </span>
+                </template>
+                <template v-if="worker.zones?.length">
+                  <span class="mx-2 text-medium-emphasis">/</span>
+                  <v-chip
+                    v-for="zone in worker.zones.slice(0, 3)"
+                    :key="zone"
+                    size="x-small"
+                    class="mr-1"
+                  >
+                    {{ zone }}
+                  </v-chip>
+                  <span
+                    v-if="worker.zones.length > 3"
+                    class="text-body-2 text-medium-emphasis"
+                  >+{{ worker.zones.length - 3 }} more</span>
+                </template>
+              </template>
+              <template #actions>
+                <v-btn
+                  size="small"
+                  variant="tonal"
+                  color="secondary"
+                  prepend-icon="mdi-content-copy"
+                  class="mr-2"
+                  @click.stop="handleDuplicateProviderWorker(index)"
+                >
+                  Duplicate
+                </v-btn>
+                <v-btn
+                  v-show="providerWorkers.length > 1"
+                  size="small"
+                  variant="tonal"
+                  color="error"
+                  prepend-icon="mdi-delete-outline"
+                  class="mr-2"
+                  @click.stop="removeProviderWorker(index)"
+                >
+                  Remove
+                </v-btn>
+              </template>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
               <g-worker-input-generic
                 :worker="worker"
               />
-            </div>
-          </v-expand-transition>
-        </div>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </div>
     </v-expand-transition>
     <v-row
@@ -84,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="!allMachineTypes.length"
           variant="text"
           color="primary"
-          @click="addProviderWorker"
+          @click="handleAddProviderWorker"
         >
           <v-icon class="text-primary">
             mdi-plus
@@ -100,6 +130,7 @@ SPDX-License-Identifier: Apache-2.0
 import {
   ref,
   computed,
+  watch,
   toRefs,
   nextTick,
   onMounted,
@@ -123,48 +154,110 @@ const {
   providerWorkers,
   workerless,
   allMachineTypes,
+  machineImages,
   addProviderWorker,
+  duplicateProviderWorker,
   removeProviderWorker: removeProviderWorkerFromContext,
 } = useShootContext()
 
+function getCollapsedSummary (worker) {
+  const parts = []
+  const machineLabel = [worker.machine?.architecture, worker.machine?.type].filter(Boolean).join(' / ')
+  if (machineLabel) {
+    parts.push(machineLabel)
+  }
+
+  const machineImageText = getMachineImageText(worker)
+  if (machineImageText) {
+    parts.push(machineImageText)
+  }
+  return parts.join(' / ')
+}
+
+function getMachineImageText (worker) {
+  const { name, version } = worker.machine?.image ?? {}
+  const image = machineImages.value.find(i => i.name === name && i.version === version)
+  if (image?.isDeprecated) {
+    return image.name + ' (deprecated)'
+  }
+  if (image?.isExpirationWarning) {
+    return image.name + ' (expiring soon)'
+  }
+  return image.name
+}
+
 function removeProviderWorker (index) {
-  const uid = providerWorkers.value.index?._uid
+  const uid = providerWorkers.value[index]?._uid // eslint-disable-line security/detect-object-injection -- index from internal click handler
   if (uid) {
-    delete workerGroupRefs.uid
+    delete workerGroupRefs[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
+    delete openWorkers.value[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
   }
   lastInteracted = null
   removeProviderWorkerFromContext(index)
 }
 
-const collapsedWorkers = ref({})
+const openWorkers = ref({})
 const workerGroupRefs = {}
 const containerRef = useTemplateRef('containerRef')
 let lastInteracted = null
 
+watch(providerWorkers, workers => {
+  const firstUid = workers[0]?._uid
+  if (workers.length === 1 && firstUid && !(firstUid in openWorkers.value)) {
+    openWorkers.value = { ...openWorkers.value, [firstUid]: true }
+  }
+}, { immediate: true })
+
 const allCollapsed = computed(() =>
   providerWorkers.value.length > 0 &&
-  providerWorkers.value.every(worker => collapsedWorkers.value[worker._uid]),
+  providerWorkers.value.every(worker => !openWorkers.value[worker._uid]),
 )
 
 function scrollToWorker (uid) {
-  nextTick(() => workerGroupRefs.uid?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+  nextTick(() => workerGroupRefs[uid]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })) // eslint-disable-line security/detect-object-injection -- uid from internal worker list
 }
 
-function setCollapsed (uid, value) {
-  collapsedWorkers.value = { ...collapsedWorkers.value, [uid]: value }
+function scrollAddedWorkerGroup (element) {
+  element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+
+function handleAddProviderWorker () {
+  addProviderWorker()
+  const uid = providerWorkers.value.at(-1)?._uid
+  if (!uid) {
+    return
+  }
+  openWorkers.value = { ...openWorkers.value, [uid]: true }
   lastInteracted = uid
-  if (value) {
+  nextTick(() => scrollToWorker(uid))
+}
+
+function handleDuplicateProviderWorker (index) {
+  duplicateProviderWorker(index)
+  const uid = providerWorkers.value[index + 1]?._uid
+  if (!uid) {
+    return
+  }
+  openWorkers.value = { ...openWorkers.value, [uid]: true }
+  lastInteracted = uid
+  nextTick(() => scrollToWorker(uid))
+}
+
+function setOpen (uid, value) {
+  openWorkers.value = { ...openWorkers.value, [uid]: value }
+  lastInteracted = uid
+  if (!value) {
     scrollToWorker(uid)
   }
 }
 
 function toggleCollapseAll () {
   if (allCollapsed.value) {
-    collapsedWorkers.value = {}
-  } else {
-    collapsedWorkers.value = Object.fromEntries(
+    openWorkers.value = Object.fromEntries(
       providerWorkers.value.map(worker => [worker._uid, true]),
     )
+  } else {
+    openWorkers.value = {}
   }
 }
 
@@ -186,17 +279,3 @@ onUnmounted(() => {
   resizeObserver?.disconnect()
 })
 </script>
-
-<style scoped>
-.worker-group-even {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.worker-group-wrapper {
-  overflow: hidden;
-}
-
-.worker-group-card {
-  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-</style>
