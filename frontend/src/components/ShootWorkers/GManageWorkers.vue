@@ -79,6 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="secondary"
                   prepend-icon="mdi-content-copy"
                   class="mr-2"
+                  :disabled="!allMachineTypes.length"
                   @click.stop="handleDuplicateProviderWorker(index)"
                 >
                   Duplicate
