@@ -178,13 +178,19 @@ function getCollapsedSummary (worker) {
 function getMachineImageText (worker) {
   const { name, version } = worker.machine?.image ?? {}
   const image = machineImages.value.find(i => i.name === name && i.version === version)
+  const imageName = image?.name ?? name
+  const imageVersion = image?.version ?? version
+  const baseText = [imageName, imageVersion].filter(Boolean).join(' ')
+  if (!baseText) {
+    return undefined
+  }
   if (image?.isDeprecated) {
-    return image.name + ' (deprecated)'
+    return baseText + ' (deprecated)'
   }
   if (image?.isExpirationWarning) {
-    return image.name + ' (expiring soon)'
+    return baseText + ' (expiring soon)'
   }
-  return image.name
+  return baseText
 }
 
 function removeProviderWorker (index) {
