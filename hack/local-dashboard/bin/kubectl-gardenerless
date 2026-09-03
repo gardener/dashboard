@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2026 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -o pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)" || exit 1
+REPOSITORY_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd -P)" || exit 1
+MANAGED_ROOT="${REPOSITORY_ROOT}/.local-dashboard"
+GARDENERLESS_DIR="${MANAGED_ROOT}/gardenerless"
+GARDENERLESS_RUNTIME="${MANAGED_ROOT}/runtime"
+GARDENERLESS_KUBECTL="${GARDENERLESS_DIR}/bin/kubectl-gardenerless"
+
+if [[ ! -d "$MANAGED_ROOT" || -L "$MANAGED_ROOT" ||
+      ! -d "$GARDENERLESS_DIR" || -L "$GARDENERLESS_DIR" ||
+      ! -d "$GARDENERLESS_RUNTIME" || -L "$GARDENERLESS_RUNTIME" ||
+      ! -f "$GARDENERLESS_KUBECTL" || -L "$GARDENERLESS_KUBECTL" ||
+      ! -x "$GARDENERLESS_KUBECTL" ]]; then
+  printf '%s\n' \
+    "Error: local Dashboard Gardenerless runtime is unavailable. Run 'node hack/local-dashboard.mjs setup'." \
+    >&2
+  exit 1
+fi
+
+export GARDENERLESS_KCP_DIR="$GARDENERLESS_RUNTIME"
+exec "$GARDENERLESS_KUBECTL" "$@"

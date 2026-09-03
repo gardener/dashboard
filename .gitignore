@@ -43,6 +43,10 @@ scripts/bin
 .DS_Store
 node_modules/
 bin/
+!hack/local-dashboard/bin/
+hack/local-dashboard/bin/*
+!hack/local-dashboard/bin/kubectl-gardenerless
+!hack/local-dashboard/bin/kubectl_complete-gardenerless
 dist/
 ssl/
 tmp/

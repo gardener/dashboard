@@ -51,7 +51,19 @@ cd dashboard
 yarn
 ```
 
-### 3. Configuration
+### 3. Run it locally
+
+There are two local development setups:
+
+- **Local Gardener Dashboard (gardenerless)** — a lightweight, fixture-based environment for UI development and visual verification. The Garden API is backed by KCP with static fixture data; no Gardener controllers are running, so resources are not reconciled. Fast to start, with deterministic scenarios.
+- **Against a Garden cluster** — for testing against a fully reconciled Gardener environment with controllers.
+
+#### Local Gardener Dashboard (gardenerless)
+
+See [`hack/local-dashboard/README.md`](../../hack/local-dashboard/README.md) for setup, commands, scenarios, and login.
+
+#### Against a Garden cluster
+
 Place the Gardener Dashboard configuration under `${HOME}/.gardener/config.yaml` or alternatively set the path to the configuration file using the `GARDENER_CONFIG` environment variable.
 
 A local configuration example could look like follows:
@@ -80,12 +92,7 @@ frontend:
 
 The `websocketAllowedOrigins` list restricts which origins may establish socket.io connections. This setting is required; use `"*"` to allow all origins (not recommended for production).
 
-### 4. Run it locally
-The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable.
-
-If you want to run the Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation.
-Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
-See [5. Login to the dashboard](#5-login-to-the-dashboard) for more information on how to use the Dashboard with a local gardener or any other Gardener landscape.
+The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable. To run a Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation. Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
 
 Start the `backend` server (`http://localhost:3030`).
 
@@ -113,26 +120,8 @@ yarn serve
 
 You can now access the UI on https://localhost:8443/
 
-### Local Gardener Dashboard
+To log in, use OIDC if configured on the Garden cluster, or create a service account token for development use:
 
-For an isolated local environment useful for development and deterministic
-browser verification, use the Local Gardener Dashboard workflow described in
-[`hack/local-dashboard/README.md`](../../hack/local-dashboard/README.md).
-The initial implementation starts the complete Garden API (via gardenerless/KCP),
-backend, and frontend stack with managed defaults, deterministic scenarios, safe
-process ownership, and exact `setup`, `up`, `token`, `status`, and `down`
-commands. `up` never clones automatically; agents must ask before invoking the
-explicit `setup` command.
-
-The regular workflow above against a real landscape or local Gardener remains
-supported.
-
-### 5. Login to the dashboard
-For the Local Gardener Dashboard workflow, use the guarded `token` entry point
-described above. For a local Gardener or another landscape, you can either
-configure `oidc` or log in using a token:
-
-To login using a token, first create a service account.
 ```bash
 kubectl -n garden create serviceaccount dashboard-user
 ```
