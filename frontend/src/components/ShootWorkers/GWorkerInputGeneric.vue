@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     class="pa-0"
   >
     <div class="worker-cards">
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -69,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
         </v-card-text>
       </v-card>
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -112,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
         </v-card-text>
       </v-card>
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -142,7 +142,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
         </v-card-text>
       </v-card>
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -171,7 +171,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
         </v-card-text>
       </v-card>
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -238,7 +238,7 @@ SPDX-License-Identifier: Apache-2.0
           </v-row>
         </v-card-text>
       </v-card>
-      <v-card class="border">
+      <v-card class="worker-section-card">
         <v-toolbar
           height="28"
           class="text-medium-emphasis"
@@ -696,7 +696,8 @@ export default {
   opacity: 1;
 }
 
-.border {
+.worker-section-card {
   border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+  min-height: 200px;
 }
 </style>
