@@ -14,7 +14,26 @@ const pluginImport = require('eslint-plugin-import')
 const pluginVitest = require('@vitest/eslint-plugin')
 const importNewlines = require('eslint-plugin-import-newlines')
 
+const requireTonalColorToken = require('./eslint-rules/require-tonal-color-token.cjs')
+
 const securityConfig = pluginSecurity.configs.recommended
+
+const gardenerConfig = {
+  files: ['**/*.vue'],
+  plugins: {
+    gardener: {
+      meta: {
+        name: '@gardener-dashboard/eslint-plugin',
+      },
+      rules: {
+        'require-tonal-color-token': requireTonalColorToken,
+      },
+    },
+  },
+  rules: {
+    'gardener/require-tonal-color-token': 'error',
+  },
+}
 
 const lodashConfig = {
   plugins: {
@@ -211,6 +230,7 @@ module.exports = [
       'vue/order-in-components': 'error',
     },
   },
+  gardenerConfig,
   importConfig,
   importNewlinesConfig,
   vitestConfig,
