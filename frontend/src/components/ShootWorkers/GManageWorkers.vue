@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0
                 <v-btn
                   size="small"
                   variant="tonal"
-                  color="secondary"
+                  color="tonal-info"
                   prepend-icon="mdi-content-copy"
                   class="mr-2"
                   :disabled="!allMachineTypes.length"
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0
                   v-show="providerWorkers.length > 1"
                   size="small"
                   variant="tonal"
-                  color="error"
+                  color="tonal-error"
                   prepend-icon="mdi-delete-outline"
                   class="mr-2"
                   @click.stop="removeProviderWorker(index)"
