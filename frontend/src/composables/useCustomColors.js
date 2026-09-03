@@ -6,7 +6,6 @@
 
 import {
   watch,
-  nextTick,
   toValue,
 } from 'vue'
 import { useTheme } from 'vuetify'
@@ -126,23 +125,27 @@ function patchThemes (themes, customThemes) {
   }
 }
 
-export const useCustomColors = (customThemes, theme = useTheme()) => {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      unwatch()
-      reject(new Error('Setting custom colors timed out'))
-    }, 3000)
-    const unwatch = watch(customThemes, value => {
-      if (!value) {
-        return
-      }
-      clearTimeout(timeoutId)
-      nextTick(() => unwatch())
-      const themes = toValue(theme.themes) ?? {}
-      patchThemes(themes, value)
-      resolve()
-    }, {
-      immediate: true,
+export const useCustomColors = async (customThemes, theme = useTheme()) => {
+  let value = toValue(customThemes)
+
+  // A nullish value means configuration is still loading; `{}` means loaded without overrides.
+  if (value == null) {
+    value = await new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        unwatch()
+        reject(new Error('Setting custom colors timed out'))
+      }, 3000)
+      const unwatch = watch(customThemes, value => {
+        if (value == null) {
+          return
+        }
+        clearTimeout(timeoutId)
+        unwatch()
+        resolve(value)
+      })
     })
-  })
+  }
+
+  const themes = toValue(theme.themes) ?? {}
+  patchThemes(themes, value)
 }
