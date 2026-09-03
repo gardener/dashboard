@@ -33,10 +33,18 @@ describe('GSecretDialogWrapper', () => {
     expect(openstackDialog).not.toBe(genericDialog)
   })
 
+  it('uses a dedicated dialog only for GDCH DNS', () => {
+    const genericDialog = resolveDialog('unknown-provider')
+    const gdchDnsDialog = resolveDialog('gdch-dns')
+
+    expect(gdchDnsDialog).not.toBe(genericDialog)
+  })
+
   it.each([
     'alicloud',
     'azure',
     'gcp',
+    'gdch',
     'hcloud',
     'metal',
     'stackit',

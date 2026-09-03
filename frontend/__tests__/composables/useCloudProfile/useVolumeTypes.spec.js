@@ -142,11 +142,12 @@ describe('composables', () => {
     })
 
     describe('#useFilteredVolumeTypes', () => {
-      it('should return all volume types when no region specified', () => {
+      it('should return usable volume types when no region specified', () => {
         const { useFilteredVolumeTypes } = useVolumeTypes(cloudProfile)
         const region = ref(undefined)
         const volumeTypes = useFilteredVolumeTypes(region)
-        expect(volumeTypes.value).toHaveLength(4)
+        expect(volumeTypes.value).toHaveLength(3)
+        expect(find(volumeTypes.value, { name: 'sc1' })).toBeUndefined()
       })
 
       it('should return volume types available in all zones of a region', () => {

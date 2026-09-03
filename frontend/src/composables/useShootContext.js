@@ -301,8 +301,13 @@ export function createShootContextComposable (options = {}) {
   }
 
   /* networking */
-  const networkingNodes = computed(() => {
-    return get(manifest.value, ['spec', 'networking', 'nodes'])
+  const networkingNodes = computed({
+    get () {
+      return get(manifest.value, ['spec', 'networking', 'nodes'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'networking', 'nodes'], value)
+    },
   })
 
   const networkingType = computed({
@@ -549,6 +554,67 @@ export function createShootContextComposable (options = {}) {
       ? [internetFirewallNetwork.value]
       : undefined
   }
+
+  // GDCH-specific: parentReference points at a GDC `Subnet` or `SubnetGroup` that scopes
+  // worker-pool IP allocation.
+  const providerInfrastructureConfigParentReferenceName = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'], value)
+    },
+  })
+
+  const providerInfrastructureConfigParentReferenceNamespace = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
+    },
+    set (value) {
+      if (value) {
+        set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'], value)
+      } else {
+        unset(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
+      }
+    },
+  })
+
+  const providerInfrastructureConfigParentReferenceType = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'], value)
+    },
+  })
+
+  // GDCH-specific: enableEgress controls Cloud NAT egress.
+  const providerInfrastructureConfigEnableEgress = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'], value)
+    },
+  })
+
+  // GDCH-specific: nodeCIDR under infrastructureConfig.networks must equal spec.networking.nodes.
+  // Setting this ref writes both fields simultaneously so they never diverge.
+  const providerInfrastructureConfigNodeCIDR = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
+      networkingNodes.value = value
+    },
+  })
+
+  watch(networkingNodes, value => {
+    if (providerType.value === 'gdch' && providerInfrastructureConfigNodeCIDR.value !== value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
+    }
+  })
 
   const workerless = computed({
     get () {
@@ -1107,6 +1173,11 @@ export function createShootContextComposable (options = {}) {
     initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
+    providerInfrastructureConfigParentReferenceName,
+    providerInfrastructureConfigParentReferenceNamespace,
+    providerInfrastructureConfigParentReferenceType,
+    providerInfrastructureConfigEnableEgress,
+    providerInfrastructureConfigNodeCIDR,
     /* provider - workers */
     providerWorkers,
     addProviderWorker,

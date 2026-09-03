@@ -248,6 +248,11 @@ export const useConfigStore = defineStore('config', () => {
     return []
   })
 
+  const enabledDnsProviders = computed(() => {
+    const providers = branding.value.enabledDnsProviders
+    return Array.isArray(providers) ? providers : undefined
+  })
+
   const configMachineImageVendors = computed(() => {
     const vendors = branding.value.machineImageVendors
     if (vendors && Array.isArray(vendors)) {
@@ -578,10 +583,16 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   const dnsProviderTypesList = computed(() => {
-    return uniq([
+    const providerNames = uniq([
       ...map(knownDNSVendors, 'name'),
       ...map(configDNSVendors.value, 'name'),
     ])
+
+    if (enabledDnsProviders.value) {
+      return providerNames.filter(name => enabledDnsProviders.value.includes(name))
+    }
+
+    return providerNames.filter(name => !get(vendorDetails({ type: 'dns', name }), ['hiddenByDefault'], false))
   })
 
   const sortedDnsProviderTypeList = computed(() => {
