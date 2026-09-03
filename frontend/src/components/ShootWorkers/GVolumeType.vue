@@ -31,13 +31,13 @@ SPDX-License-Identifier: Apache-2.0
       </template>
     </v-select>
     <v-text-field
-      v-if="isAWS && worker.volume.type !== 'gp2'"
+      v-if="showIops"
       v-model.number="workerIops"
       class="ml-1"
       color="primary"
       :error-messages="getErrorMessages(v$.workerIops)"
       type="number"
-      min="100"
+      :min="minIops"
       label="IOPS"
       variant="underlined"
       @update:model-value="onInputIops"
@@ -56,6 +56,7 @@ import {
 import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
+import { useConfigStore } from '@/store/config'
 
 import { getErrorMessages } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/shoot'
@@ -107,9 +108,9 @@ export default {
       },
       workerIops: withFieldName(() => `${this.fieldName} IOPS`, {
         required: requiredIf(() => {
-          return this.isAWS && (this.worker.volume.type === 'io1' || this.worker.volume.type === 'io2')
+          return this.isIopsRequired
         }),
-        minValue: minValue(100),
+        minValue: minValue(this.minIops),
       }),
     }
   },
@@ -133,9 +134,38 @@ export default {
       }
       return ''
     },
-    isAWS () {
+    providerType () {
       const cloudProfile = this.cloudProfileByRef(this.cloudProfileRef)
-      return get(cloudProfile, ['spec', 'type']) === 'aws'
+      return get(cloudProfile, ['spec', 'type'])
+    },
+    providerVendor () {
+      if (!this.providerType) {
+        return undefined
+      }
+      return this.vendorDetails({
+        type: 'infra',
+        name: this.providerType,
+      })
+    },
+    iopsConfig () {
+      return get(this.providerVendor, ['shoot', 'workerVolume', 'iops'])
+    },
+    showIops () {
+      if (!this.iopsConfig) {
+        return false
+      }
+      const hiddenForVolumeTypes = get(this.iopsConfig, ['hiddenForVolumeTypes'], [])
+      return !hiddenForVolumeTypes.includes(this.worker.volume.type)
+    },
+    minIops () {
+      return get(this.iopsConfig, ['min'], 100)
+    },
+    isIopsRequired () {
+      if (!this.showIops) {
+        return false
+      }
+      const requiredForVolumeTypes = get(this.iopsConfig, ['requiredForVolumeTypes'], [])
+      return requiredForVolumeTypes.includes(this.worker.volume.type)
     },
   },
   watch: {
@@ -151,6 +181,9 @@ export default {
     ...mapActions(useCloudProfileStore, [
       'cloudProfileByRef',
     ]),
+    ...mapActions(useConfigStore, [
+      'vendorDetails',
+    ]),
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
       this.$emit('updateVolumeType')
@@ -159,7 +192,7 @@ export default {
       const iopsValue = parseInt(value)
       if (value && iopsValue > 0) {
         if (!this.worker.providerConfig) {
-          this.worker.providerConfig = getWorkerProviderConfig('aws')
+          this.worker.providerConfig = getWorkerProviderConfig(this.providerVendor) ?? {}
         }
         set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
       } else {
