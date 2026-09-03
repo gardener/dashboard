@@ -4157,7 +4157,7 @@ const RAW_RUNTIME_STATE =
           ["@types/vitest", null],\
           ["@vitest/ui", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.1.11"],\
           ["@vitest/utils", "npm:4.1.11"],\
-          ["fflate", "npm:0.8.2"],\
+          ["fflate", "npm:0.8.3"],\
           ["flatted", "npm:3.4.2"],\
           ["pathe", "npm:2.0.3"],\
           ["sirv", "npm:3.0.2"],\
@@ -7223,10 +7223,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["fflate", [\
-      ["npm:0.8.2", {\
-        "packageLocation": "./.yarn/cache/fflate-npm-0.8.2-5129f303f0-03448d630c.zip/node_modules/fflate/",\
+      ["npm:0.8.3", {\
+        "packageLocation": "./.yarn/cache/fflate-npm-0.8.3-35acaff861-eab181ca37.zip/node_modules/fflate/",\
         "packageDependencies": [\
-          ["fflate", "npm:0.8.2"]\
+          ["fflate", "npm:0.8.3"]\
         ],\
         "linkType": "HARD"\
       }]\
