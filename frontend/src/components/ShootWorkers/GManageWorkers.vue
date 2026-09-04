@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
                 size="small"
                 class="mr-2 flex-grow-0 flex-shrink-0"
               >
-                {{ openWorkers[worker._uid] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                {{ openWorkers[worker._uid] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
               </v-icon>
               <span class="text-body-2 font-weight-medium">{{ worker.name }}</span>
               <template v-if="!openWorkers[worker._uid]">
