@@ -579,7 +579,13 @@ export function createShootContextComposable (options = {}) {
 
   const providerWorkers = computed({
     get () {
-      return get(manifest.value, ['spec', 'provider', 'workers'], [])
+      const workers = get(manifest.value, ['spec', 'provider', 'workers'], [])
+      for (const worker of workers) {
+        if (!Object.prototype.hasOwnProperty.call(worker, '_uid')) {
+          Object.defineProperty(worker, '_uid', { value: uuidv4() })
+        }
+      }
+      return workers
     },
     set (value = []) {
       set(manifest.value, ['spec', 'provider', 'workers'], value)
@@ -604,6 +610,19 @@ export function createShootContextComposable (options = {}) {
     providerWorkers.value = filter(providerWorkers.value, (_, i) => i !== index)
   }
 
+  function duplicateProviderWorker (index) {
+    const source = providerWorkers.value[index] // eslint-disable-line security/detect-object-injection -- index from internal click handler
+    const clone = JSON.parse(JSON.stringify(source)) // get rid of uid and isNew (not serializable)
+    clone.name = `worker-${shortRandomString(5)}`
+    Object.defineProperty(clone, 'isNew', { value: true })
+    Object.defineProperty(clone, '_uid', { value: uuidv4() })
+    providerWorkers.value = [
+      ...providerWorkers.value.slice(0, index + 1),
+      clone,
+      ...providerWorkers.value.slice(index + 1),
+    ]
+  }
+
   function generateProviderWorker (zones) {
     const { id, isNew, ...worker } = generateWorker(
       !isEmpty(zones)
@@ -611,6 +630,7 @@ export function createShootContextComposable (options = {}) {
         : availableZones.value,
     )
     Object.defineProperty(worker, 'isNew', { value: isNew })
+    Object.defineProperty(worker, '_uid', { value: id })
     return worker
   }
 
@@ -1111,6 +1131,7 @@ export function createShootContextComposable (options = {}) {
     providerWorkers,
     addProviderWorker,
     removeProviderWorker,
+    duplicateProviderWorker,
     workerless,
     usedZones,
     unusedZones,

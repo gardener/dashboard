@@ -10,13 +10,14 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
+      ref="scrollContainer"
       class="overflow-auto"
       fluid
     >
       <v-card>
         <g-toolbar title="Infrastructure" />
         <v-card-text>
-          <g-new-shoot-select-infrastructure />
+          <g-new-shoot-select-infrastructure :scroll-container="$refs.scrollContainer?.$el" />
         </v-card-text>
       </v-card>
       <v-card
@@ -62,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           title="Worker"
         />
         <v-card-text>
-          <g-manage-workers />
+          <g-manage-workers :scroll-container="$refs.scrollContainer?.$el" />
         </v-card-text>
       </v-card>
       <v-card

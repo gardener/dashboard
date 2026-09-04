@@ -21,6 +21,7 @@ SPDX-License-Identifier: Apache-2.0
       :loading="loading"
       :width="isTextBtn ? '100%' : undefined"
       :class="{ 'text-none font-weight-regular justify-start': isTextBtn }"
+      :aria-label="tooltip"
       @click.stop.prevent="emit('click', $event)"
     />
     <v-tooltip
