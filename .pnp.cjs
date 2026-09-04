@@ -887,7 +887,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/test-utils", "workspace:packages/test-utils"],\
           ["@godaddy/terminus", "npm:4.12.1"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
-          ["@octokit/auth-app", "npm:8.3.0"],\
+          ["@octokit/auth-app", "npm:8.3.1"],\
           ["@octokit/core", "npm:7.0.8"],\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:6.0.0"],\
           ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:15.0.0"],\
@@ -1673,15 +1673,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/auth-app", [\
-      ["npm:8.3.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-8.3.0-376e8a256d-cc74d6d54a.zip/node_modules/@octokit/auth-app/",\
+      ["npm:8.3.1", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-app-npm-8.3.1-41e977596c-821d1998a6.zip/node_modules/@octokit/auth-app/",\
         "packageDependencies": [\
-          ["@octokit/auth-app", "npm:8.3.0"],\
-          ["@octokit/auth-oauth-app", "npm:9.0.4"],\
-          ["@octokit/auth-oauth-user", "npm:6.0.3"],\
+          ["@octokit/auth-app", "npm:8.3.1"],\
+          ["@octokit/auth-oauth-app", "npm:9.0.5"],\
+          ["@octokit/auth-oauth-user", "npm:6.0.4"],\
           ["@octokit/request", "npm:10.0.16"],\
           ["@octokit/request-error", "npm:7.1.2"],\
-          ["@octokit/types", "npm:17.0.0"],\
+          ["@octokit/types", "npm:18.0.0"],\
           ["toad-cache", "npm:3.7.0"],\
           ["universal-github-app-jwt", "npm:2.2.2"],\
           ["universal-user-agent", "npm:7.0.3"]\
@@ -1690,41 +1690,41 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/auth-oauth-app", [\
-      ["npm:9.0.4", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-app-npm-9.0.4-56c77978d7-752993bc65.zip/node_modules/@octokit/auth-oauth-app/",\
+      ["npm:9.0.5", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-app-npm-9.0.5-7222bbebb0-dff8b29059.zip/node_modules/@octokit/auth-oauth-app/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-app", "npm:9.0.4"],\
-          ["@octokit/auth-oauth-device", "npm:8.0.4"],\
-          ["@octokit/auth-oauth-user", "npm:6.0.3"],\
+          ["@octokit/auth-oauth-app", "npm:9.0.5"],\
+          ["@octokit/auth-oauth-device", "npm:8.0.5"],\
+          ["@octokit/auth-oauth-user", "npm:6.0.4"],\
           ["@octokit/request", "npm:10.0.16"],\
-          ["@octokit/types", "npm:17.0.0"],\
+          ["@octokit/types", "npm:18.0.0"],\
           ["universal-user-agent", "npm:7.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/auth-oauth-device", [\
-      ["npm:8.0.4", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-device-npm-8.0.4-c3b6905801-881641864e.zip/node_modules/@octokit/auth-oauth-device/",\
+      ["npm:8.0.5", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-device-npm-8.0.5-3d7af6b2e5-118bc86e5e.zip/node_modules/@octokit/auth-oauth-device/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-device", "npm:8.0.4"],\
-          ["@octokit/oauth-methods", "npm:6.0.3"],\
+          ["@octokit/auth-oauth-device", "npm:8.0.5"],\
+          ["@octokit/oauth-methods", "npm:6.0.5"],\
           ["@octokit/request", "npm:10.0.16"],\
-          ["@octokit/types", "npm:17.0.0"],\
+          ["@octokit/types", "npm:18.0.0"],\
           ["universal-user-agent", "npm:7.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["@octokit/auth-oauth-user", [\
-      ["npm:6.0.3", {\
-        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-user-npm-6.0.3-6c2d4e110b-1a97479716.zip/node_modules/@octokit/auth-oauth-user/",\
+      ["npm:6.0.4", {\
+        "packageLocation": "./.yarn/cache/@octokit-auth-oauth-user-npm-6.0.4-dd7e37a1e8-f0e0657a5d.zip/node_modules/@octokit/auth-oauth-user/",\
         "packageDependencies": [\
-          ["@octokit/auth-oauth-device", "npm:8.0.4"],\
-          ["@octokit/auth-oauth-user", "npm:6.0.3"],\
-          ["@octokit/oauth-methods", "npm:6.0.3"],\
+          ["@octokit/auth-oauth-device", "npm:8.0.5"],\
+          ["@octokit/auth-oauth-user", "npm:6.0.4"],\
+          ["@octokit/oauth-methods", "npm:6.0.5"],\
           ["@octokit/request", "npm:10.0.16"],\
-          ["@octokit/types", "npm:17.0.0"],\
+          ["@octokit/types", "npm:18.0.0"],\
           ["universal-user-agent", "npm:7.0.3"]\
         ],\
         "linkType": "HARD"\
@@ -1788,14 +1788,14 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/oauth-methods", [\
-      ["npm:6.0.3", {\
-        "packageLocation": "./.yarn/cache/@octokit-oauth-methods-npm-6.0.3-fbd300a5e5-21b57482bf.zip/node_modules/@octokit/oauth-methods/",\
+      ["npm:6.0.5", {\
+        "packageLocation": "./.yarn/cache/@octokit-oauth-methods-npm-6.0.5-8b2c6b6970-0621d8d9ef.zip/node_modules/@octokit/oauth-methods/",\
         "packageDependencies": [\
           ["@octokit/oauth-authorization-url", "npm:8.0.0"],\
-          ["@octokit/oauth-methods", "npm:6.0.3"],\
+          ["@octokit/oauth-methods", "npm:6.0.5"],\
           ["@octokit/request", "npm:10.0.16"],\
           ["@octokit/request-error", "npm:7.1.2"],\
-          ["@octokit/types", "npm:17.0.0"]\
+          ["@octokit/types", "npm:18.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
