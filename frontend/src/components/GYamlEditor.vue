@@ -107,12 +107,11 @@ SPDX-License-Identifier: Apache-2.0
             icon
             @click="renderWhitespaces = !renderWhitespaces"
           >
-            <!-- eslint-disable vue/no-v-html -->
-            <span
-              style="width: 18px; height: 18px"
-              v-html="renderWhitespaces ? whitespaceEyeOff : whitespaceEye"
-            />
-          <!-- eslint-enable vue/no-v-html -->
+            <img
+              :src="renderWhitespaces ? whitespaceEyeOff : whitespaceEye"
+              height="18px"
+              width="18px"
+            >
           </v-btn>
         </div>
         <v-divider vertical />
@@ -158,8 +157,8 @@ import GCopyBtn from '@/components/GCopyBtn'
 import GActionButton from '@/components/GActionButton'
 import GAlertBanner from '@/components/GAlertBanner'
 
-import whitespaceEye from '@/assets/whitespace-eye.svg?raw'
-import whitespaceEyeOff from '@/assets/whitespace-eye-off.svg?raw'
+import whitespaceEye from '@/assets/whitespace-eye.svg?data'
+import whitespaceEyeOff from '@/assets/whitespace-eye-off.svg?data'
 
 import camelCase from 'lodash/camelCase'
 
