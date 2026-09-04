@@ -21,7 +21,8 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="projectPhase !== 'Ready'">
       <div>
         The project phase is <v-chip
-          color="tonal-primary"
+          :color="color"
+          variant="flat"
           label
           size="x-small"
           class="px-1"
@@ -77,9 +78,15 @@ const color = computed(() => {
     return 'primary'
   }
 
-  return ['Terminating', 'Pending'].includes(projectPhase.value)
-    ? 'primary'
-    : 'warning'
+  switch (projectPhase.value) {
+    case 'Terminating':
+    case 'Pending':
+      return 'primary'
+    case 'Failed':
+      return 'error'
+    default:
+      return 'warning'
+  }
 })
 
 const inDeletion = computed(() => {
