@@ -925,7 +925,7 @@ const RAW_RUNTIME_STATE =
           ["openid-client", "npm:6.8.5"],\
           ["p-event", "npm:6.0.1"],\
           ["p-limit", "npm:7.3.1"],\
-          ["p-retry", "npm:8.0.0"],\
+          ["p-retry", "npm:8.0.1"],\
           ["path-to-regexp", "npm:8.4.2"],\
           ["rehype-external-links", "npm:3.0.0"],\
           ["rehype-stringify", "npm:10.0.1"],\
@@ -10493,11 +10493,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["p-retry", [\
-      ["npm:8.0.0", {\
-        "packageLocation": "./.yarn/cache/p-retry-npm-8.0.0-c56865d165-81a788f358.zip/node_modules/p-retry/",\
+      ["npm:8.0.1", {\
+        "packageLocation": "./.yarn/cache/p-retry-npm-8.0.1-a6a003f7d4-3ce078a179.zip/node_modules/p-retry/",\
         "packageDependencies": [\
           ["is-network-error", "npm:1.3.2"],\
-          ["p-retry", "npm:8.0.0"]\
+          ["p-retry", "npm:8.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
