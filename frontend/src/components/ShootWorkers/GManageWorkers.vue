@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="!workerless"
-    ref="containerRef"
     class="d-flex flex-column"
   >
     <div
@@ -36,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-expansion-panels
           :model-value="openWorkers[worker._uid] ? [worker._uid] : []"
           multiple
-          @update:model-value="value => setOpen(worker._uid, value.length > 0)"
+          @update:model-value="openPanels => setExpanded(worker._uid, !!openPanels.length)"
         >
           <v-expansion-panel
             :value="worker._uid"
@@ -134,9 +133,6 @@ import {
   watch,
   toRefs,
   nextTick,
-  onMounted,
-  onUnmounted,
-  useTemplateRef,
 } from 'vue'
 
 import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
@@ -147,6 +143,10 @@ const props = defineProps({
   disableWorkerAnimation: {
     type: Boolean,
     default: false,
+  },
+  scrollContainer: {
+    type: HTMLElement,
+    default: null,
   },
 })
 const { disableWorkerAnimation } = toRefs(props)
@@ -199,21 +199,29 @@ function removeProviderWorker (index) {
     delete workerGroupRefs[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
     delete openWorkers.value[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
   }
-  lastInteracted = null
   removeProviderWorkerFromContext(index)
 }
 
 const openWorkers = ref({})
 const workerGroupRefs = {}
-const containerRef = useTemplateRef('containerRef')
-let lastInteracted = null
+let scrollOnEnter = false
+let savedScrollTop = null
 
 watch(providerWorkers, workers => {
+  savedScrollTop = props.scrollContainer?.scrollTop ?? null
   const firstUid = workers[0]?._uid
   if (workers.length === 1 && firstUid && !(firstUid in openWorkers.value)) {
     openWorkers.value = { ...openWorkers.value, [firstUid]: true }
   }
-}, { immediate: true })
+  if (savedScrollTop !== null) {
+    requestAnimationFrame(() => {
+      if (props.scrollContainer) {
+        props.scrollContainer.scrollTop = savedScrollTop
+      }
+      savedScrollTop = null
+    })
+  }
+}, { immediate: true, flush: 'sync' })
 
 const allCollapsed = computed(() =>
   providerWorkers.value.length > 0 &&
@@ -225,7 +233,10 @@ function scrollToWorker (uid) {
 }
 
 function scrollAddedWorkerGroup (element) {
-  element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  if (scrollOnEnter) {
+    element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    scrollOnEnter = false
+  }
 }
 
 function handleAddProviderWorker () {
@@ -235,7 +246,7 @@ function handleAddProviderWorker () {
     return
   }
   openWorkers.value = { ...openWorkers.value, [uid]: true }
-  lastInteracted = uid
+  scrollOnEnter = true
   nextTick(() => scrollToWorker(uid))
 }
 
@@ -246,14 +257,13 @@ function handleDuplicateProviderWorker (index) {
     return
   }
   openWorkers.value = { ...openWorkers.value, [uid]: true }
-  lastInteracted = uid
+  scrollOnEnter = true
   nextTick(() => scrollToWorker(uid))
 }
 
-function setOpen (uid, value) {
-  openWorkers.value = { ...openWorkers.value, [uid]: value }
-  lastInteracted = uid
-  if (!value) {
+function setExpanded (uid, isExpanded) {
+  openWorkers.value = { ...openWorkers.value, [uid]: isExpanded }
+  if (!isExpanded) {
     scrollToWorker(uid)
   }
 }
@@ -268,21 +278,4 @@ function toggleCollapseAll () {
   }
 }
 
-let resizeObserver = null
-
-onMounted(() => {
-  if (!containerRef.value) {
-    return
-  }
-  resizeObserver = new ResizeObserver(() => {
-    if (lastInteracted) {
-      scrollToWorker(lastInteracted)
-    }
-  })
-  resizeObserver.observe(containerRef.value)
-})
-
-onUnmounted(() => {
-  resizeObserver?.disconnect()
-})
 </script>
