@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-card class="mt-4">
           <g-toolbar title="Global" />
           <g-list>
-            <g-list-item>
+            <g-list-item v-if="!sapTheme">
               <template #prepend>
                 <v-icon color="primary">
                   mdi-theme-light-dark
@@ -59,7 +59,11 @@ SPDX-License-Identifier: Apache-2.0
                 </v-btn-toggle>
               </g-list-item-content>
             </g-list-item>
-            <v-divider inset />
+            <v-divider
+              v-if="!sapTheme"
+              data-test="color-scheme-divider"
+              inset
+            />
             <g-list-item>
               <template #prepend>
                 <v-icon color="primary">
@@ -472,6 +476,7 @@ const authzStore = useAuthzStore()
 const configStore = useConfigStore()
 const route = useRoute()
 const router = useRouter()
+const sapTheme = computed(() => route.query['sap-theme'])
 const deepLinkedSetting = computed(() => {
   const params = new URLSearchParams(route.hash.slice(1))
   return params.get('setting')

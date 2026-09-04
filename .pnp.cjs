@@ -920,6 +920,7 @@ const RAW_RUNTIME_STATE =
           ["lodash-es", "npm:4.18.1"],\
           ["morgan", "npm:1.12.0"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.13.0"],\
+          ["node-fetch-commonjs", "npm:3.3.2"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
           ["openid-client", "npm:6.8.5"],\
@@ -984,6 +985,7 @@ const RAW_RUNTIME_STATE =
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
           ["@lezer/common", "npm:1.5.2"],\
+          ["@luigi-project/client", "npm:2.31.0"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -1537,6 +1539,15 @@ const RAW_RUNTIME_STATE =
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@luigi-project/client", [\
+      ["npm:2.31.0", {\
+        "packageLocation": "./.yarn/cache/@luigi-project-client-npm-2.31.0-9544e82a24-33244269b1.zip/node_modules/@luigi-project/client/",\
+        "packageDependencies": [\
+          ["@luigi-project/client", "npm:2.31.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10152,6 +10163,17 @@ const RAW_RUNTIME_STATE =
           ["fetch-blob", "npm:3.2.0"],\
           ["formdata-polyfill", "npm:4.0.10"],\
           ["node-fetch", "npm:3.3.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["node-fetch-commonjs", [\
+      ["npm:3.3.2", {\
+        "packageLocation": "./.yarn/cache/node-fetch-commonjs-npm-3.3.2-9bdee6d77d-87d36ed3e6.zip/node_modules/node-fetch-commonjs/",\
+        "packageDependencies": [\
+          ["node-domexception", "npm:1.0.0"],\
+          ["node-fetch-commonjs", "npm:3.3.2"],\
+          ["web-streams-polyfill", "npm:3.3.3"]\
         ],\
         "linkType": "HARD"\
       }]\

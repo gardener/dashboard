@@ -20,8 +20,10 @@ import { useManagedSeedShootStore } from '@/store/managedSeedShoot'
 import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
+import { useOpenMFP } from '@/composables/useOpenMFP'
 import { useLogger } from '@/composables/useLogger'
 import { useShootListFilters } from '@/composables/useShootListFilters'
+import { useApi } from '@/composables/useApi'
 
 import {
   getShootListContext,
@@ -30,6 +32,7 @@ import {
 
 export function createGlobalBeforeGuards () {
   const logger = useLogger()
+  const api = useApi()
   const appStore = useAppStore()
   const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
@@ -57,6 +60,24 @@ export function createGlobalBeforeGuards () {
 
       if (!(await authnStore.isExpired())) {
         return true
+      }
+
+      const openMFP = useOpenMFP()
+      const context = await openMFP.getLuigiContext()
+      if (context) {
+        logger.debug('Luigi context:', context)
+      }
+      const token = context?.token
+      if (token) {
+        try {
+          await api.createTokenReview({ token })
+          await authnStore.$reset()
+          if (!(await authnStore.isExpired())) {
+            return true
+          }
+        } catch (err) {
+          logger.error('Luigi token review error: %s', err.message)
+        }
       }
 
       const message = !authnStore.user
@@ -140,8 +161,10 @@ export function createGlobalResolveGuards () {
       }
 
       try {
+        const { accountId } = useOpenMFP()
+
         const namespace = to.params.namespace ?? to.query.namespace
-        await authzStore.prepareRules(namespace)
+        await authzStore.prepareRules(namespace, accountId.value ?? to.query.accountId)
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
@@ -156,7 +179,7 @@ export function createGlobalResolveGuards () {
         switch (to.name) {
           case 'Home':
           case 'ProjectList': {
-            // no action required for redirect routes
+            await projectStore.fetchProjects()
             break
           }
           case 'Credentials':

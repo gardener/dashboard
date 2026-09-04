@@ -127,6 +127,7 @@ import GProjectCostObject from '@/components/GProjectCostObject.vue'
 
 import { useLogger } from '@/composables/useLogger'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
+import { useOpenMFP } from '@/composables/useOpenMFP'
 
 import {
   messageFromErrors,
@@ -158,6 +159,7 @@ const emit = defineEmits([
 ])
 
 const logger = useLogger()
+const openMFP = useOpenMFP()
 const projectStore = useProjectStore()
 const router = useRouter()
 const {
@@ -167,7 +169,9 @@ const {
   projectTitle,
   description,
   purpose,
-} = useProvideProjectContext()
+} = useProvideProjectContext({
+  openMFP,
+})
 
 const projectNames = toRef(projectStore, 'projectNames')
 

@@ -30,7 +30,13 @@ import { router as authRouter } from './auth.js'
 import { router as githubWebhookRouter } from './github/webhook/index.js'
 import { healthCheck } from './healthz/index.js'
 
-const { port, host, metricsPort, metricsHost } = config
+const {
+  port,
+  host,
+  metricsPort,
+  metricsHost,
+  cspFrameAncestors = [],
+} = config
 const periodSeconds = config.readinessProbe?.periodSeconds || 10
 
 // protect against Prototype Pollution vulnerabilities
@@ -66,6 +72,15 @@ if (gitHubRepoUrl) {
   imgSrc.push(url.origin)
   url.hostname = 'media.' + gitHubHostname
   imgSrc.push(url.origin)
+}
+const directives = {
+  defaultSrc: ['\'self\''],
+  connectSrc,
+  styleSrc: ['\'self\'', '\'unsafe-inline\''],
+  fontSrc: ['\'self\'', 'data:'],
+  imgSrc,
+  scriptSrc: ['\'self\'', '\'unsafe-eval\''],
+  frameAncestors: ['\'self\'', ...cspFrameAncestors],
 }
 
 const app = express()
@@ -106,15 +121,7 @@ app.use(apiApp)
 
 app.use(helmet.xXssProtection())
 app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ['\'self\''],
-    connectSrc,
-    styleSrc: ['\'self\'', '\'unsafe-inline\''],
-    fontSrc: ['\'self\'', 'data:'],
-    imgSrc,
-    scriptSrc: ['\'self\'', '\'unsafe-eval\''],
-    frameAncestors: ['\'self\''],
-  },
+  directives,
 }))
 app.use(helmet.referrerPolicy({
   policy: 'same-origin',
@@ -141,7 +148,6 @@ app.use(BUILD_ASSETS_URL_PATH, expressStaticGzip(BUILD_ASSETS_FS_PATH, {
     maxAge: '1 Week',
   },
 }))
-
 app.use(expressStaticGzip(PUBLIC_FS_PATH, {
   enableBrotli: true,
   orderPreference: ['br'],
@@ -153,9 +159,11 @@ app.use(expressStaticGzip(PUBLIC_FS_PATH, {
 
 app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
-app.use(helmet.xFrameOptions({
-  action: 'deny',
-}))
+if (cspFrameAncestors.length === 0) {
+  app.use(helmet.xFrameOptions({
+    action: 'deny',
+  }))
+}
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(renderError)
