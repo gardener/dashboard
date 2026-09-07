@@ -110,7 +110,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-icon-base
               width="18"
               height="18"
-              icon-color="#f00"
+              icon-color="action-button"
               view-box="0 0 24 24"
               icon-name="renderWhitespaces ? 'whitespace-eye-off' : whitespace-eye"
             >

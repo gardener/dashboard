@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g
     transform="translate(2, 10)"
-    fill="rgb(var(--v-theme-action-button))"
     fill-rule="nonzero"
   >
     <path
