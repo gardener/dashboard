@@ -14,33 +14,31 @@ import remarkRehype from 'remark-rehype'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypeStringify from 'rehype-stringify'
 import sanitizeHtml from 'sanitize-html'
-
 const SANITIZE = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
 }
 
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkGithub)
-  .use(remarkBreaks)
-  .use(remarkEmoji, { emoticon: false })
-
+function buildProcessor (githubOptions = {}) {
+  return unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkGithub, githubOptions)
+    .use(remarkBreaks)
+    .use(remarkEmoji, { emoticon: false })
   // Keep raw HTML as raw nodes, required too keep some tags like details/summary
   // Unsafe HTML will be sanitized later
-  .use(remarkRehype, { allowDangerousHtml: true })
-
-  .use(rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] })
-
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] })
   // emit raw nodes as HTML (unsafe until sanitized)
-  .use(rehypeStringify, { allowDangerousHtml: true })
+    .use(rehypeStringify, { allowDangerousHtml: true })
+}
 
-export function createConverter () {
+export function createConverter (githubOptions = {}) {
+  const processor = buildProcessor(githubOptions)
   return {
     async makeSanitizedHtml (text) {
       const file = await processor.process(text)
       const rawHtml = String(file)
-      // Sanitize the generated HTML
       return sanitizeHtml(rawHtml, SANITIZE).trim()
     },
   }

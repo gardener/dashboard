@@ -11,6 +11,7 @@ import {
   getComments,
 } from '../github/index.js'
 import { createConverter } from '../markdown.js'
+import { defaultBuildUrl } from 'remark-github'
 import cache from '../cache/index.js'
 
 function fromLabel (item) {
@@ -21,15 +22,22 @@ function fromLabel (item) {
   ])
 }
 
-const apiUrl = _.get(config, ['gitHub', 'apiUrl'])
-const options = {}
+const { apiUrl, org, repository } = config.gitHub ?? {}
+const githubOptions = {}
 
-if (apiUrl) {
-  options.ghMentions = true
-  options.ghMentionsLink = new URL(apiUrl).origin + '/{u}'
+if (org && repository) {
+  githubOptions.repository = `${org}/${repository}`
 }
 
-export const converter = createConverter(options)
+if (apiUrl) {
+  const { protocol, hostname } = new URL(apiUrl)
+  const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
+  githubOptions.ghMentions = true
+  githubOptions.ghMentionsLink = `${webOrigin}/{u}`
+  githubOptions.buildUrl = values => defaultBuildUrl(values).replace('https://github.com', webOrigin)
+}
+
+export const converter = createConverter(githubOptions)
 
 export async function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
