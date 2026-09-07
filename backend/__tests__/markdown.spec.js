@@ -177,4 +177,17 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(html).toContain('https://enterprise.github.example.com/ticket-org/ticket-repo/issues/123')
     expect(html).not.toContain('https://github.com')
   })
+
+  test('issue reference links also work with api.subdomain url from config', async () => {
+    const apiUrl = 'https://api.github.example.com'
+    const { protocol, hostname } = new URL(apiUrl)
+    const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
+    const { makeSanitizedHtml } = createConverter({
+      repository: 'ticket-org/ticket-repo',
+      buildUrl: values => defaultBuildUrl(values).replace('https://github.com', webOrigin),
+    })
+    const html = await makeSanitizedHtml('See #456 for details.')
+    expect(html).toContain('https://github.example.com/ticket-org/ticket-repo/issues/456')
+    expect(html).not.toContain('https://api.github.example.com')
+  })
 })
