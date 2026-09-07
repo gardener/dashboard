@@ -189,7 +189,6 @@ module.exports = [
       MouseEvent: 'readonly',
       FileReader: 'readonly',
       Range: 'readonly',
-      ResizeObserver: 'readonly',
       fixtures: 'readonly',
       requestAnimationFrame: 'readonly',
     },
