@@ -22,22 +22,22 @@ function fromLabel (item) {
   ])
 }
 
-const { apiUrl, org, repository } = config.gitHub ?? {}
-const options = { github: {} }
-
-if (org && repository) {
-  options.github.repository = `${org}/${repository}`
+export function buildConverterOptions ({ apiUrl, org, repository } = {}) {
+  const options = { github: {} }
+  if (org && repository) {
+    options.github.repository = `${org}/${repository}`
+  }
+  if (apiUrl) {
+    const { protocol, hostname } = new URL(apiUrl)
+    const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
+    options.github.ghMentions = true
+    options.github.ghMentionsLink = `${webOrigin}/{u}`
+    options.github.buildUrl = values => defaultBuildUrl(values).replace('https://github.com', webOrigin)
+  }
+  return options
 }
 
-if (apiUrl) {
-  const { protocol, hostname } = new URL(apiUrl)
-  const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
-  options.github.ghMentions = true
-  options.github.ghMentionsLink = `${webOrigin}/{u}`
-  options.github.buildUrl = values => defaultBuildUrl(values).replace('https://github.com', webOrigin)
-}
-
-export const converter = createConverter(options)
+export const converter = createConverter(buildConverterOptions(config.gitHub ?? {}))
 
 export async function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)

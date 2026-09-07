@@ -10,7 +10,7 @@ import {
   expect,
 } from 'vitest'
 import { createConverter } from '../lib/markdown.js'
-import { defaultBuildUrl } from 'remark-github'
+import { buildConverterOptions } from '../lib/services/tickets.js'
 
 async function render (md, sanitizeOptions) {
   const { makeSanitizedHtml } = createConverter()
@@ -169,27 +169,22 @@ describe('createConverter().makeSanitizedHtml', () => {
   })
 
   test('issue reference in a comment should link to configured repo, not the default GitHub', async () => {
-    const { makeSanitizedHtml } = createConverter({
-      github: {
-        repository: 'ticket-org/ticket-repo',
-        buildUrl: values => defaultBuildUrl(values).replace('https://github.com', 'https://enterprise.github.example.com'),
-      },
-    })
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://enterprise.github.example.com/api/v3',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
     const html = await makeSanitizedHtml('See #123 for details.')
     expect(html).toContain('https://enterprise.github.example.com/ticket-org/ticket-repo/issues/123')
     expect(html).not.toContain('https://github.com')
   })
 
   test('issue reference links also work with api.subdomain url from config', async () => {
-    const apiUrl = 'https://api.github.example.com'
-    const { protocol, hostname } = new URL(apiUrl)
-    const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
-    const { makeSanitizedHtml } = createConverter({
-      github: {
-        repository: 'ticket-org/ticket-repo',
-        buildUrl: values => defaultBuildUrl(values).replace('https://github.com', webOrigin),
-      },
-    })
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://api.github.example.com',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
     const html = await makeSanitizedHtml('See #456 for details.')
     expect(html).toContain('https://github.example.com/ticket-org/ticket-repo/issues/456')
     expect(html).not.toContain('https://api.github.example.com')
