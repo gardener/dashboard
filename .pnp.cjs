@@ -1389,13 +1389,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@humanwhocodes/retry", [\
-      ["npm:0.4.2", {\
-        "packageLocation": "./.yarn/cache/@humanwhocodes-retry-npm-0.4.2-78a05c1b69-0235525d38.zip/node_modules/@humanwhocodes/retry/",\
-        "packageDependencies": [\
-          ["@humanwhocodes/retry", "npm:0.4.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:0.4.3", {\
         "packageLocation": "./.yarn/cache/@humanwhocodes-retry-npm-0.4.3-a8d7ca1663-3775bb3008.zip/node_modules/@humanwhocodes/retry/",\
         "packageDependencies": [\
@@ -6467,7 +6460,7 @@ const RAW_RUNTIME_STATE =
           ["@eslint/plugin-kit", "npm:0.4.1"],\
           ["@humanfs/node", "npm:0.16.8"],\
           ["@humanwhocodes/module-importer", "npm:1.0.1"],\
-          ["@humanwhocodes/retry", "npm:0.4.2"],\
+          ["@humanwhocodes/retry", "npm:0.4.3"],\
           ["@types/estree", "npm:1.0.9"],\
           ["@types/jiti", null],\
           ["ajv", "npm:6.15.0"],\
