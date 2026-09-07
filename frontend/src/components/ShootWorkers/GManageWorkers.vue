@@ -179,13 +179,10 @@ function getMachineImageText (worker) {
   const { name, version } = worker.machine?.image ?? {}
   const image = machineImages.value.find(image => image.name === name && image.version === version)
   const baseText = [name, version].filter(Boolean).join(' ')
-  if (!baseText) {
-    return undefined
-  }
   if (image?.isDeprecated) {
     return baseText + ' (deprecated)'
   }
-  return baseText
+  return baseText || undefined
 }
 
 function removeProviderWorker (index) {
