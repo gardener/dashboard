@@ -612,7 +612,7 @@ export function createShootContextComposable (options = {}) {
 
   function duplicateProviderWorker (index) {
     const source = providerWorkers.value[index] // eslint-disable-line security/detect-object-injection -- index from internal click handler
-    const clone = structuredClone(source) // get rid of uid and isNew (not serializable)
+    const clone = JSON.parse(JSON.stringify(source))
     clone.name = `worker-${shortRandomString(5)}`
     Object.defineProperty(clone, 'isNew', { value: true })
     Object.defineProperty(clone, '_uid', { value: uuidv4() })
