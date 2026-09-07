@@ -79,7 +79,7 @@ SPDX-License-Identifier: Apache-2.0
                   prepend-icon="mdi-content-copy"
                   class="mr-2"
                   :disabled="!allMachineTypes.length"
-                  @click.stop="handleDuplicateProviderWorker(index)"
+                  @click.stop="duplicateWorker(index)"
                 >
                   Duplicate
                 </v-btn>
@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
           :disabled="!allMachineTypes.length"
           variant="text"
           color="primary"
-          @click="handleAddProviderWorker"
+          @click="addWorker"
         >
           <v-icon class="text-primary">
             mdi-plus
@@ -177,7 +177,7 @@ function getCollapsedSummary (worker) {
 
 function getMachineImageText (worker) {
   const { name, version } = worker.machine?.image ?? {}
-  const image = machineImages.value.find(i => i.name === name && i.version === version)
+  const image = machineImages.value.find(image => image.name === name && image.version === version)
   const imageName = image?.name ?? name
   const imageVersion = image?.version ?? version
   const baseText = [imageName, imageVersion].filter(Boolean).join(' ')
@@ -236,9 +236,7 @@ function scrollAddedWorkerGroup (element) {
   }
 }
 
-function handleAddProviderWorker () {
-  addProviderWorker()
-  const uid = providerWorkers.value.at(-1)?._uid
+function openAndScrollToWorker (uid) {
   if (!uid) {
     return
   }
@@ -247,15 +245,14 @@ function handleAddProviderWorker () {
   nextTick(() => scrollToWorker(uid))
 }
 
-function handleDuplicateProviderWorker (index) {
+function addWorker () {
+  addProviderWorker()
+  openAndScrollToWorker(providerWorkers.value.at(-1)?._uid)
+}
+
+function duplicateWorker (index) {
   duplicateProviderWorker(index)
-  const uid = providerWorkers.value[index + 1]?._uid
-  if (!uid) {
-    return
-  }
-  openWorkers.value = { ...openWorkers.value, [uid]: true }
-  scrollOnEnter = true
-  nextTick(() => scrollToWorker(uid))
+  openAndScrollToWorker(providerWorkers.value[index + 1]?._uid)
 }
 
 function setExpanded (uid, isExpanded) {
