@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0
                   color="tonal-error"
                   prepend-icon="mdi-delete-outline"
                   class="mr-2"
-                  @click.stop="removeProviderWorker(index)"
+                  @click.stop="removeWorker(index)"
                 >
                   Remove
                 </v-btn>
@@ -158,7 +158,7 @@ const {
   machineImages,
   addProviderWorker,
   duplicateProviderWorker,
-  removeProviderWorker: removeProviderWorkerFromContext,
+  removeProviderWorker,
 } = useShootContext()
 
 function getCollapsedSummary (worker) {
@@ -185,13 +185,13 @@ function getMachineImageText (worker) {
   return baseText || undefined
 }
 
-function removeProviderWorker (index) {
+function removeWorker (index) {
   const uid = providerWorkers.value[index]?._uid // eslint-disable-line security/detect-object-injection -- index from internal click handler
   if (uid) {
     delete workerGroupRefs[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
     delete openWorkers.value[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
   }
-  removeProviderWorkerFromContext(index)
+  removeProviderWorker(index)
 }
 
 const openWorkers = ref({})
