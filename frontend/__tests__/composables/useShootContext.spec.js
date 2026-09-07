@@ -469,4 +469,36 @@ describe('composables', () => {
       }])
     })
   })
+
+  describe('providerWorkers', () => {
+    beforeEach(() => {
+      shootContextStore.createShootManifest({ providerType: 'aws', workerless: false })
+    })
+
+    it('adds a worker', () => {
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+      shootContextStore.addProviderWorker()
+      expect(shootContextStore.providerWorkers).toHaveLength(2)
+    })
+
+    it('removes a worker by index', () => {
+      shootContextStore.addProviderWorker()
+      const nameToKeep = shootContextStore.providerWorkers[0].name
+      shootContextStore.removeProviderWorker(1)
+      expect(shootContextStore.providerWorkers).toHaveLength(1)
+      expect(shootContextStore.providerWorkers[0].name).toBe(nameToKeep)
+    })
+
+    it('duplicates a worker and inserts it after the source', () => {
+      const original = shootContextStore.providerWorkers[0]
+      original.name = 'worker-original'
+      original.machine = { type: 'z1.2xlarge', architecture: 'arm64' }
+      shootContextStore.duplicateProviderWorker(0)
+      expect(shootContextStore.providerWorkers).toHaveLength(2)
+      const clone = shootContextStore.providerWorkers[1]
+      expect(clone.name).not.toBe('worker-original')
+      expect(clone._uid).not.toBe(original._uid)
+      expect(clone.machine).toEqual({ type: 'z1.2xlarge', architecture: 'arm64' })
+    })
+  })
 })
