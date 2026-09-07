@@ -113,9 +113,9 @@ SPDX-License-Identifier: Apache-2.0
               icon-color="#f00"
               view-box="0 0 24 24"
               icon-name="renderWhitespaces ? 'whitespace-eye-off' : whitespace-eye"
-              >
-                <component :is="renderWhitespaces ? GWhitespaceEyeOff : GWhitespaceEye" />
-              </g-icon-base>
+            >
+              <component :is="renderWhitespaces ? GWhitespaceEyeOff : GWhitespaceEye" />
+            </g-icon-base>
           </v-btn>
         </div>
         <v-divider vertical />
