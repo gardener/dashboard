@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-expand-transition
       group
       :disabled="disableWorkerAnimation"
-      @after-enter="scrollAddedWorkerGroup"
+      @after-enter="scrollToAddedWorkerGroup"
     >
       <div
         v-for="(worker, index) in providerWorkers"
@@ -224,7 +224,7 @@ function scrollToWorker (uid) {
   nextTick(() => workerGroupRefs[uid]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })) // eslint-disable-line security/detect-object-injection -- uid from internal worker list
 }
 
-function scrollAddedWorkerGroup (element) {
+function scrollToAddedWorkerGroup (element) {
   if (scrollOnEnter) {
     element?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     scrollOnEnter = false
