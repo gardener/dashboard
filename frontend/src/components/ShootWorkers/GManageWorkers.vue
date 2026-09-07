@@ -187,9 +187,6 @@ function getMachineImageText (worker) {
   if (image?.isDeprecated) {
     return baseText + ' (deprecated)'
   }
-  if (image?.isExpirationWarning) {
-    return baseText + ' (expiring soon)'
-  }
   return baseText
 }
 
