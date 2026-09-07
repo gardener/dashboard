@@ -112,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0
               height="18"
               icon-color="action-button"
               view-box="0 0 24 24"
-              icon-name="renderWhitespaces ? 'whitespace-eye-off' : whitespace-eye"
+              :icon-name="renderWhitespaces ? 'whitespace-eye-off' : 'whitespace-eye'"
             >
               <component :is="renderWhitespaces ? GWhitespaceEyeOff : GWhitespaceEye" />
             </g-icon-base>
