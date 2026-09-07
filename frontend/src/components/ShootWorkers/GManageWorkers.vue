@@ -178,9 +178,7 @@ function getCollapsedSummary (worker) {
 function getMachineImageText (worker) {
   const { name, version } = worker.machine?.image ?? {}
   const image = machineImages.value.find(image => image.name === name && image.version === version)
-  const imageName = image?.name ?? name
-  const imageVersion = image?.version ?? version
-  const baseText = [imageName, imageVersion].filter(Boolean).join(' ')
+  const baseText = [name, version].filter(Boolean).join(' ')
   if (!baseText) {
     return undefined
   }
