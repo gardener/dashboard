@@ -18,11 +18,11 @@ const SANITIZE = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
 }
 
-function buildProcessor (githubOptions = {}) {
+function buildProcessor ({ github } = {}) {
   return unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkGithub, githubOptions)
+    .use(remarkGithub, github ?? {})
     .use(remarkBreaks)
     .use(remarkEmoji, { emoticon: false })
   // Keep raw HTML as raw nodes, required too keep some tags like details/summary
@@ -33,8 +33,8 @@ function buildProcessor (githubOptions = {}) {
     .use(rehypeStringify, { allowDangerousHtml: true })
 }
 
-export function createConverter (githubOptions = {}) {
-  const processor = buildProcessor(githubOptions)
+export function createConverter (options = {}) {
+  const processor = buildProcessor(options)
   return {
     async makeSanitizedHtml (text) {
       const file = await processor.process(text)

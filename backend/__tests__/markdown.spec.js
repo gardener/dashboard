@@ -170,8 +170,10 @@ describe('createConverter().makeSanitizedHtml', () => {
 
   test('issue reference in a comment should link to configured repo, not the default GitHub', async () => {
     const { makeSanitizedHtml } = createConverter({
-      repository: 'ticket-org/ticket-repo',
-      buildUrl: values => defaultBuildUrl(values).replace('https://github.com', 'https://enterprise.github.example.com'),
+      github: {
+        repository: 'ticket-org/ticket-repo',
+        buildUrl: values => defaultBuildUrl(values).replace('https://github.com', 'https://enterprise.github.example.com'),
+      },
     })
     const html = await makeSanitizedHtml('See #123 for details.')
     expect(html).toContain('https://enterprise.github.example.com/ticket-org/ticket-repo/issues/123')
@@ -183,8 +185,10 @@ describe('createConverter().makeSanitizedHtml', () => {
     const { protocol, hostname } = new URL(apiUrl)
     const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
     const { makeSanitizedHtml } = createConverter({
-      repository: 'ticket-org/ticket-repo',
-      buildUrl: values => defaultBuildUrl(values).replace('https://github.com', webOrigin),
+      github: {
+        repository: 'ticket-org/ticket-repo',
+        buildUrl: values => defaultBuildUrl(values).replace('https://github.com', webOrigin),
+      },
     })
     const html = await makeSanitizedHtml('See #456 for details.')
     expect(html).toContain('https://github.example.com/ticket-org/ticket-repo/issues/456')
