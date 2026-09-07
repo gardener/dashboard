@@ -10,6 +10,7 @@ import {
   expect,
 } from 'vitest'
 import { createConverter } from '../lib/markdown.js'
+import { defaultBuildUrl } from 'remark-github'
 
 async function render (md, sanitizeOptions) {
   const { makeSanitizedHtml } = createConverter()
@@ -165,5 +166,15 @@ describe('createConverter().makeSanitizedHtml', () => {
   test('Non-string input does not throw (treated as empty)', async () => {
   // Your converter already coalesces null/undefined to empty, but we ensure it never throws.
     expect(await render({})).toMatchSnapshot()
+  })
+
+  test('issue reference in a comment should link to configured repo, not the default GitHub', async () => {
+    const { makeSanitizedHtml } = createConverter({
+      repository: 'ticket-org/ticket-repo',
+      buildUrl: values => defaultBuildUrl(values).replace('https://github.com', 'https://enterprise.github.example.com'),
+    })
+    const html = await makeSanitizedHtml('See #123 for details.')
+    expect(html).toContain('https://enterprise.github.example.com/ticket-org/ticket-repo/issues/123')
+    expect(html).not.toContain('https://github.com')
   })
 })
