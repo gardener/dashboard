@@ -8081,7 +8081,7 @@ const RAW_RUNTIME_STATE =
           ["es-errors", "npm:1.3.0"],\
           ["hasown", "npm:2.0.4"],\
           ["internal-slot", "npm:1.1.0"],\
-          ["side-channel", "npm:1.1.0"]\
+          ["side-channel", "npm:1.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -11562,18 +11562,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["side-channel", [\
-      ["npm:1.1.0", {\
-        "packageLocation": "./.yarn/cache/side-channel-npm-1.1.0-4993930974-cb20dad41e.zip/node_modules/side-channel/",\
-        "packageDependencies": [\
-          ["es-errors", "npm:1.3.0"],\
-          ["object-inspect", "npm:1.13.4"],\
-          ["side-channel", "npm:1.1.0"],\
-          ["side-channel-list", "npm:1.0.0"],\
-          ["side-channel-map", "npm:1.0.1"],\
-          ["side-channel-weakmap", "npm:1.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:1.1.1", {\
         "packageLocation": "./.yarn/cache/side-channel-npm-1.1.1-3d97a5a6fb-dc0ab81d67.zip/node_modules/side-channel/",\
         "packageDependencies": [\
@@ -11588,15 +11576,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["side-channel-list", [\
-      ["npm:1.0.0", {\
-        "packageLocation": "./.yarn/cache/side-channel-list-npm-1.0.0-14f74146d1-644f4ac893.zip/node_modules/side-channel-list/",\
-        "packageDependencies": [\
-          ["es-errors", "npm:1.3.0"],\
-          ["object-inspect", "npm:1.13.4"],\
-          ["side-channel-list", "npm:1.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:1.0.1", {\
         "packageLocation": "./.yarn/cache/side-channel-list-npm-1.0.1-7a0802d399-d346c787fd.zip/node_modules/side-channel-list/",\
         "packageDependencies": [\
@@ -11910,7 +11889,7 @@ const RAW_RUNTIME_STATE =
           ["internal-slot", "npm:1.1.0"],\
           ["regexp.prototype.flags", "npm:1.5.4"],\
           ["set-function-name", "npm:2.0.2"],\
-          ["side-channel", "npm:1.1.0"],\
+          ["side-channel", "npm:1.1.1"],\
           ["string.prototype.matchall", "npm:4.0.12"]\
         ],\
         "linkType": "HARD"\
