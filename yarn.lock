@@ -774,7 +774,7 @@ __metadata:
     vue: "npm:3.5.42"
     vue-eslint-parser: "npm:^10.1.1"
     vue-router: "npm:^5.0.0"
-    vuetify: "npm:4.1.12"
+    vuetify: "npm:4.2.0"
   languageName: unknown
   linkType: soft
 
@@ -2677,6 +2677,43 @@ __metadata:
     vue: ^3.0.0
     vuetify: ">=3"
   checksum: 10c0/20f7ef91aecde1ea5a7e2f5417714972de9d570ff1b4aec61281cb3a5aecd65965be17018e629072aec853402bbea8a05759774cd59fd98777adf995d1dc9a63
+  languageName: node
+  linkType: hard
+
+"@vuetify/v0@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@vuetify/v0@npm:1.2.1"
+  peerDependencies:
+    "@adobe/leonardo-contrast-colors": ">=1.0.0"
+    "@ant-design/colors": ">=7.0.0"
+    "@flagsmith/flagsmith": ">=11.0.0"
+    "@floating-ui/dom": ">=1.8.0"
+    "@js-temporal/polyfill": ">=0.5.0"
+    "@material/material-color-utilities": ">=0.3.0"
+    launchdarkly-js-client-sdk: ^3.0.0
+    posthog-js: ^1.0.0
+    vue: ">=3.5.0 || >=3.6.0-0"
+    vue-i18n: ">=10.0.0"
+  peerDependenciesMeta:
+    "@adobe/leonardo-contrast-colors":
+      optional: true
+    "@ant-design/colors":
+      optional: true
+    "@flagsmith/flagsmith":
+      optional: true
+    "@floating-ui/dom":
+      optional: true
+    "@js-temporal/polyfill":
+      optional: true
+    "@material/material-color-utilities":
+      optional: true
+    launchdarkly-js-client-sdk:
+      optional: true
+    posthog-js:
+      optional: true
+    vue-i18n:
+      optional: true
+  checksum: 10c0/be850fab53494027d1eda7529f7650257f31d6121a7a0fefc266f2ad42d5733ab8e9570042d363a5c6d6d5221c6540b3257454cfbd4b3f612be742cfc82d2b25
   languageName: node
   linkType: hard
 
@@ -10341,9 +10378,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vuetify@npm:4.1.12":
-  version: 4.1.12
-  resolution: "vuetify@npm:4.1.12"
+"vuetify@npm:4.2.0":
+  version: 4.2.0
+  resolution: "vuetify@npm:4.2.0"
+  dependencies:
+    "@vuetify/v0": "npm:^1.2.1"
   peerDependencies:
     typescript: ">=4.7"
     vite-plugin-vuetify: ">=2.1.0"
@@ -10356,7 +10395,7 @@ __metadata:
       optional: true
     webpack-plugin-vuetify:
       optional: true
-  checksum: 10c0/2d88b30196f3b1184f8d84b3e7951af16ac8d08e0a215d07f471cb948734de5131a25b2090eb8bd362ed0c5bb265b171b63cf47b7056b239fac3f1de0ded7f3e
+  checksum: 10c0/dfee7703ba523b9b07d699b92945695576301f94f30b9ab99cdccca7eff991661c80d683001381c339c8368d42e0e76c7a3077b607b48f7619d9876fee4e5dad
   languageName: node
   linkType: hard
 
