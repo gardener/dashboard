@@ -19,8 +19,10 @@ const SANITIZE = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
   transformTags: {
     a (tagName, attribs) {
-      if (attribs.href?.toLowerCase().startsWith('mailto:')) {
-        const url = new URL(attribs.href)
+      // eslint-disable-next-line no-control-regex -- intentional: strip control chars and whitespace before scheme check
+      const href = attribs.href?.replace(/[\u0000-\u0020\u007f]/g, '')
+      if (href?.toLowerCase().startsWith('mailto:')) {
+        const url = new URL(href)
         attribs.href = `mailto:${url.pathname}`
       }
       return { tagName, attribs }

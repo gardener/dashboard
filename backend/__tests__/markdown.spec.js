@@ -105,7 +105,21 @@ describe('createConverter().makeSanitizedHtml', () => {
   test('mailto: query params stripped case-insensitively', async () => {
     const result = await render('<a href="MAILTO:test@example.com?subject=injected">mail</a>')
     expect(result).not.toContain('subject=')
-    expect(result).toContain('test@example.com')
+    expect(result).toContain('href="mailto:test@example.com"')
+  })
+
+  test('mailto: leading whitespace cannot bypass query-param stripping', async () => {
+    for (const prefix of ['\t', ' ']) {
+      const result = await render(`<a href="${prefix}mailto:test@example.com?subject=injected">mail</a>`)
+      expect(result).not.toContain('subject=')
+      expect(result).toContain('href="mailto:test@example.com"')
+    }
+  })
+
+  test('mailto: embedded control characters cannot bypass query-param stripping', async () => {
+    const result = await render('<a href="mail\x01to:test@example.com?subject=injected">mail</a>')
+    expect(result).not.toContain('subject=')
+    expect(result).toContain('href="mailto:test@example.com"')
   })
 
   test('Images: allow src/alt/title/width/height, strip event handlers', async () => {
