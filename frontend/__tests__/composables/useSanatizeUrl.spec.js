@@ -33,8 +33,12 @@ describe('composables', () => {
       expect(sanitizeUrl('https://example.com:4567/path/to/something')).toBe('https://example.com:4567/path/to/something')
     })
 
-    it('does not alter mailto urls', () => {
-      expect(sanitizeUrl('mailto:test@example.com?subject=hello+world')).toBe('mailto:test@example.com?subject=hello+world')
+    it('strips query params from mailto urls', () => {
+      expect(sanitizeUrl('mailto:test@example.com')).toBe('mailto:test@example.com')
+      expect(sanitizeUrl('mailto:test@example.com?subject=hello+world')).toBe('mailto:test@example.com')
+      expect(sanitizeUrl('mailto:test@example.com?body=injected&subject=x')).toBe('mailto:test@example.com')
+      expect(sanitizeUrl('mailto:test@example.com?subject=javascript:alert(1)')).toBe('mailto:test@example.com')
+      expect(sanitizeUrl('mailto:test@example.com?body=javascript:alert(document.domain)')).toBe('mailto:test@example.com')
     })
 
     it('does not alter http(s) URLs with encoded search params', () => {
