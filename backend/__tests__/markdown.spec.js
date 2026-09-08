@@ -102,6 +102,12 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(result).not.toContain('body=')
   })
 
+  test('mailto: query params stripped case-insensitively', async () => {
+    const result = await render('<a href="MAILTO:test@example.com?subject=injected">mail</a>')
+    expect(result).not.toContain('subject=')
+    expect(result).toContain('test@example.com')
+  })
+
   test('Images: allow src/alt/title/width/height, strip event handlers', async () => {
     const md = [
     // Allowed attributes
