@@ -17,6 +17,15 @@ import sanitizeHtml from 'sanitize-html'
 
 const SANITIZE = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'details', 'summary'],
+  transformTags: {
+    a (tagName, attribs) {
+      if (attribs.href?.startsWith('mailto:')) {
+        const url = new URL(attribs.href)
+        attribs.href = `mailto:${url.pathname}`
+      }
+      return { tagName, attribs }
+    },
+  },
 }
 
 const processor = unified()

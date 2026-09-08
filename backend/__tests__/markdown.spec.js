@@ -95,6 +95,13 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(await render(md)).toMatchSnapshot()
   })
 
+  test('mailto: query params stripped', async () => {
+    const result = await render('[mail](mailto:test@example.com?subject=injected&body=phishing)')
+    expect(result).toContain('href="mailto:test@example.com"')
+    expect(result).not.toContain('subject=')
+    expect(result).not.toContain('body=')
+  })
+
   test('Images: allow src/alt/title/width/height, strip event handlers', async () => {
     const md = [
     // Allowed attributes
