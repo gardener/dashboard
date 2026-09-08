@@ -500,6 +500,7 @@ async function scrollToActiveProject () {
     }
 
     .project-list {
+      min-height: 62px;
       max-height: calc(100vh - 420px);
       max-width: 255px;
 
