@@ -46,6 +46,7 @@
     "@vitest/coverage-v8": "^4.0.0",
     "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^9.11.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^3.0.1",
     "express": "^5.0.0",
