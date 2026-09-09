@@ -10,6 +10,7 @@ import {
   expect,
 } from 'vitest'
 import { createConverter } from '../lib/markdown.js'
+import { buildConverterOptions } from '../lib/services/tickets.js'
 
 async function render (md, sanitizeOptions) {
   const { makeSanitizedHtml } = createConverter()
@@ -165,5 +166,37 @@ describe('createConverter().makeSanitizedHtml', () => {
   test('Non-string input does not throw (treated as empty)', async () => {
   // Your converter already coalesces null/undefined to empty, but we ensure it never throws.
     expect(await render({})).toMatchSnapshot()
+  })
+
+  test('issue reference in a comment should link to configured repo, not the default GitHub', async () => {
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://enterprise.github.example.com/api/v3',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
+    const html = await makeSanitizedHtml('See #123 for details.')
+    expect(html).toContain('https://enterprise.github.example.com/ticket-org/ticket-repo/issues/123')
+    expect(html).not.toContain('https://github.com')
+  })
+
+  test('issue reference links also work with api.subdomain url from config', async () => {
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://api.github.example.com',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
+    const html = await makeSanitizedHtml('See #456 for details.')
+    expect(html).toContain('https://github.example.com/ticket-org/ticket-repo/issues/456')
+    expect(html).not.toContain('https://api.github.example.com')
+  })
+
+  test('issue reference links preserve non-default port from api.subdomain url', async () => {
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://api.github.example.com:8443/api/v3',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
+    const html = await makeSanitizedHtml('See #789 for details.')
+    expect(html).toContain('https://github.example.com:8443/ticket-org/ticket-repo/issues/789')
   })
 })

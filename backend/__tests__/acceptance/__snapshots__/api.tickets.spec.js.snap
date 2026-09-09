@@ -70,7 +70,7 @@ exports[`api > tickets > should fetch open issues and comments for shoot cluster
   "comments": [
     {
       "data": {
-        "body": "<p>This is comment 1 for issue <a href="https://github.com/gardener/dashboard/issues/2" target="_blank">#2</a></p>",
+        "body": "<p>This is comment 1 for issue <a href="https://github.com/gardener/ticket-dev/issues/2" target="_blank">#2</a></p>",
         "html_url": "https://github.com/gardener/ticket-dev/issues/2#issuecomment-1",
         "user": {
           "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
