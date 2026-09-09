@@ -20,18 +20,27 @@ import { computed } from 'vue'
 
 import { pickAccessibleTextColor } from '@/utils/accessibleColors'
 
-import get from 'lodash/get'
-
 const props = defineProps({
   label: {
     type: Object,
     required: true,
   },
 })
+const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/
 
 const labelStyle = computed(() => {
-  const background = `#${get(props.label, ['color'])}`
-  const textColor = pickAccessibleTextColor(background)
-  return `background-color: ${background}; color: ${textColor};`
+  if (!HEX_COLOR_REGEX.test(props.label.color)) {
+    return {
+      backgroundColor: 'rgb(var(--v-theme-surface-variant))',
+      color: 'rgb(var(--v-theme-on-surface-variant))',
+    }
+  }
+
+  const background = `#${props.label.color}`
+  return {
+    backgroundColor: background,
+    color: pickAccessibleTextColor(background),
+  }
 })
+
 </script>
