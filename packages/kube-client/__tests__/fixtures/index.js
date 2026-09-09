@@ -5,7 +5,7 @@
 //
 
 import helper from './helper.js'
-import resources from './resources.js'
+import * as resources from './resources.js'
 
 export default {
   helper,

@@ -15,6 +15,7 @@ import {
   renameSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -302,15 +303,15 @@ describe('managed configuration and environments', () => {
     mkdirSync(external)
     symlinkSync(external, config.checkoutDir)
     expect(() => assertSetupTargetsAvailable(config)).toThrow('gardenerless checkout')
-    rmSync(config.checkoutDir)
+    unlinkSync(config.checkoutDir)
     symlinkSync(external, config.runtimeDir)
     expect(() => assertSetupTargetsAvailable(config)).toThrow('KCP runtime')
     expect(() => assertSetupTargetsAvailable(config, { reset: true })).not.toThrow()
-    rmSync(config.runtimeDir)
+    unlinkSync(config.runtimeDir)
     symlinkSync(external, config.goModCacheDir)
     expect(() => assertSetupTargetsAvailable(config)).toThrow('Go module cache')
     expect(() => assertSetupTargetsAvailable(config, { reset: true })).not.toThrow()
-    rmSync(config.goModCacheDir)
+    unlinkSync(config.goModCacheDir)
     rmSync(config.managedRoot, { recursive: true })
     symlinkSync('/missing/local-dashboard-root', config.managedRoot)
     expect(() => assertSetupTargetsAvailable(config)).toThrow('non-symlink directory')
@@ -508,7 +509,7 @@ describe('Gardenerless prerequisite contract', () => {
       expect(() => inspectPrerequisites(config, { inspect, verify })).toThrow('non-symlink directory')
       expect(inspect).not.toHaveBeenCalled()
       expect(verify).not.toHaveBeenCalled()
-      rmSync(config[key])
+      unlinkSync(config[key])
       mkdirSync(config[key])
     }
   })

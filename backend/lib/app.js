@@ -21,7 +21,16 @@ import {
   renderError,
   historyFallback,
 } from './middleware.js'
-import helmet from 'helmet'
+import {
+  contentSecurityPolicy,
+  referrerPolicy,
+  strictTransportSecurity,
+  xContentTypeOptions,
+  xDnsPrefetchControl,
+  xFrameOptions,
+  xPermittedCrossDomainPolicies,
+  xXssProtection,
+} from 'helmet'
 import {
   router as apiRouter,
   hooks as apiHooks,
@@ -96,16 +105,16 @@ apiApp.use('/webhook', githubWebhookRouter)
 apiApp.use('/api', apiRouter)
 apiApp.use(renderError)
 
-app.use(helmet.xDnsPrefetchControl())
-app.use(helmet.xPermittedCrossDomainPolicies())
-app.use(helmet.xContentTypeOptions())
+app.use(xDnsPrefetchControl())
+app.use(xPermittedCrossDomainPolicies())
+app.use(xContentTypeOptions())
 if (process.env.NODE_ENV !== 'development') {
-  app.use(helmet.strictTransportSecurity())
+  app.use(strictTransportSecurity())
 }
 app.use(apiApp)
 
-app.use(helmet.xXssProtection())
-app.use(helmet.contentSecurityPolicy({
+app.use(xXssProtection())
+app.use(contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
     connectSrc,
@@ -116,7 +125,7 @@ app.use(helmet.contentSecurityPolicy({
     frameAncestors: ['\'self\''],
   },
 }))
-app.use(helmet.referrerPolicy({
+app.use(referrerPolicy({
   policy: 'same-origin',
 }))
 
@@ -153,7 +162,7 @@ app.use(expressStaticGzip(PUBLIC_FS_PATH, {
 
 app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
-app.use(helmet.xFrameOptions({
+app.use(xFrameOptions({
   action: 'deny',
 }))
 app.use(historyFallback(INDEX_FILENAME))
