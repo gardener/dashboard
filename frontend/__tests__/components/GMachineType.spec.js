@@ -76,7 +76,6 @@ describe('components', () => {
 
       await setInputValue('256Gi')
       expect(getFilteredItems()).toEqual(['bar'])
-      // console.log(autocompleteWrapper.emitted('update:search'))
       expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi']])
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
