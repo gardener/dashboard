@@ -123,43 +123,32 @@ SPDX-License-Identifier: Apache-2.0
   </g-list>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 
-import GBindingName from '@/components/Credentials/GBindingName.vue'
+const props = defineProps({
+  statusTitle: {
+    type: String,
+  },
+  lastMessage: {
+    type: String,
+  },
+  errorDescriptions: {
+    type: Array,
+  },
+  lastUpdateTime: {
+    type: String,
+  },
+  lastTransitionTime: {
+    type: String,
+  },
+  shootBinding: {
+    type: Object,
+    default: null,
+  },
+})
+const hasError = computed(() => !!props.errorDescriptions?.length)
 
-import isEmpty from 'lodash/isEmpty'
-
-export default {
-  components: {
-    GBindingName,
-  },
-  props: {
-    statusTitle: {
-      type: String,
-    },
-    lastMessage: {
-      type: String,
-    },
-    errorDescriptions: {
-      type: Array,
-    },
-    lastUpdateTime: {
-      type: String,
-    },
-    lastTransitionTime: {
-      type: String,
-    },
-    shootBinding: {
-      type: Object,
-      default: null,
-    },
-  },
-  computed: {
-    hasError () {
-      return !isEmpty(this.errorDescriptions)
-    },
-  },
-}
 </script>
 
 <style lang="scss" scoped>
