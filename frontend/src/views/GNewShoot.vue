@@ -128,7 +128,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent, ref } from 'vue'
+import {
+  defineAsyncComponent,
+  ref,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import {
   mapActions,
