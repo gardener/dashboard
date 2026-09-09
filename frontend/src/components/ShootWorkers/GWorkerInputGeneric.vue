@@ -196,6 +196,7 @@ SPDX-License-Identifier: Apache-2.0
                 label="Autoscaler Min."
                 hint="Minimum nodes kept running at all times"
                 variant="underlined"
+                @input="v$.worker.minimum.$touch()"
                 @blur="ensureValidAutoscalerMin()"
               />
             </v-col>

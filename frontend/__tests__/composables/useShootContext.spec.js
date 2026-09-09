@@ -493,12 +493,15 @@ describe('composables', () => {
       const original = shootContextStore.providerWorkers[0]
       original.name = 'worker-original'
       original.machine = { type: 'z1.2xlarge', architecture: 'arm64' }
+      shootContextStore.addProviderWorker()
+      const third = shootContextStore.providerWorkers[1]
       shootContextStore.duplicateProviderWorker(0)
-      expect(shootContextStore.providerWorkers).toHaveLength(2)
+      expect(shootContextStore.providerWorkers).toHaveLength(3)
       const clone = shootContextStore.providerWorkers[1]
       expect(clone.name).not.toBe('worker-original')
       expect(clone._uid).not.toBe(original._uid)
       expect(clone.machine).toEqual({ type: 'z1.2xlarge', architecture: 'arm64' })
+      expect(shootContextStore.providerWorkers[2]._uid).toBe(third._uid)
     })
   })
 })
