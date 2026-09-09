@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Last Message">
           <div class="message-block">
-            <g-ansi-text :text="lastMessage" />
+            <pre class="message-text">{{ lastMessage }}</pre>
           </div>
         </g-list-item-content>
       </g-list-item>
@@ -112,10 +112,9 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </span>
               </v-alert>
-              <g-ansi-text
-                :text="lastErrorDescription.description"
-                class="text-error"
-              />
+              <pre
+                class="message-text text-error"
+              >{{ lastErrorDescription.description }}</pre>
             </div>
           </div>
         </g-list-item-content>
@@ -126,14 +125,12 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 
-import GAnsiText from '@/components/GAnsiText.vue'
 import GBindingName from '@/components/Credentials/GBindingName.vue'
 
 import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
-    GAnsiText,
     GBindingName,
   },
   props: {
@@ -168,5 +165,11 @@ export default {
 <style lang="scss" scoped>
   .message-block {
     height: fit-content;
+  }
+  .message-text {
+    text-align: left;
+    min-width: 250px;
+    white-space: pre-wrap;
+    max-height: inherit;
   }
 </style>
