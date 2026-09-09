@@ -9,32 +9,29 @@ SPDX-License-Identifier: Apache-2.0
     label
     size="x-small"
     class="mr-1"
-    :style="labelStyle(label)"
+    :style="labelStyle"
   >
     {{ label.name }}
   </v-chip>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import { pickAccessibleTextColor } from '@/utils/accessibleColors'
 
 import get from 'lodash/get'
 
-export default {
-  props: {
-    label: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  label: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    labelStyle () {
-      return label => {
-        const background = `#${get(label, ['color'])}`
-        const textColor = pickAccessibleTextColor(background)
-        return `background-color: ${background}; color: ${textColor};`
-      }
-    },
-  },
-}
+})
+
+const labelStyle = computed(() => {
+  const background = `#${get(props.label, ['color'])}`
+  const textColor = pickAccessibleTextColor(background)
+  return `background-color: ${background}; color: ${textColor};`
+})
 </script>
