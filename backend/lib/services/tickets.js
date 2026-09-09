@@ -28,8 +28,9 @@ export function buildConverterOptions ({ apiUrl, org, repository } = {}) {
     options.github.repository = `${org}/${repository}`
   }
   if (apiUrl) {
-    const { protocol, hostname } = new URL(apiUrl)
-    const webOrigin = `${protocol}//${hostname.replace(/^api\./, '')}`
+    const parsedUrl = new URL(apiUrl)
+    parsedUrl.hostname = parsedUrl.hostname.replace(/^api\./, '')
+    const webOrigin = parsedUrl.origin
     options.github.ghMentions = true
     options.github.ghMentionsLink = `${webOrigin}/{u}`
     options.github.buildUrl = values => defaultBuildUrl(values).replace('https://github.com', webOrigin)

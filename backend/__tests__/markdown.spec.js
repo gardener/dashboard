@@ -189,4 +189,14 @@ describe('createConverter().makeSanitizedHtml', () => {
     expect(html).toContain('https://github.example.com/ticket-org/ticket-repo/issues/456')
     expect(html).not.toContain('https://api.github.example.com')
   })
+
+  test('issue reference links preserve non-default port from api.subdomain url', async () => {
+    const { makeSanitizedHtml } = createConverter(buildConverterOptions({
+      apiUrl: 'https://api.github.example.com:8443/api/v3',
+      org: 'ticket-org',
+      repository: 'ticket-repo',
+    }))
+    const html = await makeSanitizedHtml('See #789 for details.')
+    expect(html).toContain('https://github.example.com:8443/ticket-org/ticket-repo/issues/789')
+  })
 })
