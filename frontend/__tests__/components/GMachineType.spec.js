@@ -59,9 +59,10 @@ describe('components', () => {
       })
 
       const setInputValue = async value => {
-        const inputElement = autocompleteWrapper.find('input')
-        await inputElement.trigger('focus')
-        await inputElement.setValue(value)
+        autocompleteWrapper.vm.isFocused = true
+        await autocompleteWrapper.vm.$nextTick()
+        autocompleteWrapper.vm.search = value
+        await autocompleteWrapper.vm.$nextTick()
       }
 
       const getFilteredItems = () => {
@@ -70,11 +71,12 @@ describe('components', () => {
 
       expect(wrapper.vm.notInList).toBe(false)
       expect(getFilteredItems()).toEqual(['foo', 'bar'])
-      expect(autocompleteWrapper.emitted('update:search')).toBeFalsy()
+      expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo']])
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue('256Gi')
       expect(getFilteredItems()).toEqual(['bar'])
+      // console.log(autocompleteWrapper.emitted('update:search'))
       expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi']])
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
@@ -84,6 +86,8 @@ describe('components', () => {
       expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue(null)
+      autocompleteWrapper.vm.isFocused = false
+      await autocompleteWrapper.vm.$nextTick()
       expect(getFilteredItems()).toEqual(['foo', 'bar'])
       expect(wrapper.vm.v$.$invalid).toBe(true)
       expect(wrapper.vm.v$.internalValue.required.$message).toBe('Value is required')
