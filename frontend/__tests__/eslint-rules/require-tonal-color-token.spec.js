@@ -93,6 +93,16 @@ ruleTester.run('require-tonal-color-token', requireTonalColorToken, {
       filename: 'test.vue',
       code: '<template><v-btn variant="tonal" color="primary" /></template>',
     },
+    {
+      name: 'does not report PascalCase chip with a tonal color token',
+      filename: 'test.vue',
+      code: '<template><VChip color="tonal-primary" /></template>',
+    },
+    {
+      name: 'does not report PascalCase alert with a tonal color token',
+      filename: 'test.vue',
+      code: '<template><VAlert variant="tonal" color="tonal-error" /></template>',
+    },
   ],
   invalid: [
     {
@@ -176,6 +186,51 @@ ruleTester.run('require-tonal-color-token', requireTonalColorToken, {
             actual: 'info',
             expected: 'tonal-info',
             component: 'v-chip',
+          },
+        },
+      ],
+    },
+    {
+      name: 'reports secondary on a tonal chip (previously uncovered by hardcoded map)',
+      filename: 'test.vue',
+      code: '<template><v-chip color="secondary" /></template>',
+      errors: [
+        {
+          messageId: 'useTonalColor',
+          data: {
+            actual: 'secondary',
+            expected: 'tonal-secondary',
+            component: 'v-chip',
+          },
+        },
+      ],
+    },
+    {
+      name: 'reports PascalCase VChip with default tonal variant',
+      filename: 'test.vue',
+      code: '<template><VChip color="warning" /></template>',
+      errors: [
+        {
+          messageId: 'useTonalColor',
+          data: {
+            actual: 'warning',
+            expected: 'tonal-warning',
+            component: 'v-chip',
+          },
+        },
+      ],
+    },
+    {
+      name: 'reports PascalCase VAlert with tonal variant',
+      filename: 'test.vue',
+      code: '<template><VAlert variant="tonal" color="error" /></template>',
+      errors: [
+        {
+          messageId: 'useTonalColor',
+          data: {
+            actual: 'error',
+            expected: 'tonal-error',
+            component: 'v-alert',
           },
         },
       ],

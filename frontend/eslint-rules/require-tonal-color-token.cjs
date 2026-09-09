@@ -4,27 +4,25 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const tonalColors = new Map([
-  ['primary', 'tonal-primary'],
-  ['warning', 'tonal-warning'],
-  ['error', 'tonal-error'],
-  ['info', 'tonal-info'],
-  ['success', 'tonal-success'],
-])
+const { SEMANTIC_COLOR_NAMES, getTonalColorName } = require('../src/utils/themeColors.js')
 
-function findAttribute (node, name) {
-  return node.startTag.attributes.find(attribute => {
-    if (!attribute.directive) {
-      return attribute.key.name === name
-    }
+const semanticColorNames = new Set(SEMANTIC_COLOR_NAMES)
 
-    return attribute.key.name.name === 'bind' &&
-      attribute.key.argument?.name === name
-  })
+const TONAL_COMPONENTS = new Set(['v-alert', 'v-chip'])
+const CHIP_COMPONENTS = new Set(['v-chip'])
+
+function normalizeComponentName (name) {
+  return name.replace(/([A-Z])/g, (_, char, index) => (index ? '-' : '') + char.toLowerCase())
 }
 
 function getStaticAttributeValue (node, name) {
-  const attribute = findAttribute(node, name)
+  const attribute = node.startTag.attributes.find(attr => {
+    if (!attr.directive) {
+      return attr.key.name === name
+    }
+
+    return attr.key.name.name === 'bind' && attr.key.argument?.name === name
+  })
 
   if (!attribute?.value) {
     return undefined
@@ -36,11 +34,25 @@ function getStaticAttributeValue (node, name) {
 
   const expression = attribute.value.expression
 
-  if (expression?.type === 'Literal') {
-    return expression.value
-  }
+  return expression?.type === 'Literal' ? expression.value : undefined
+}
 
-  return undefined
+function resolveProps (node) {
+  const attributes = node.startTag.attributes
+  const hasUnqualifiedBind = attributes.some(
+    attr => attr.directive && attr.key.name.name === 'bind' && !attr.key.argument,
+  )
+  const hasVariantAttr = hasUnqualifiedBind || attributes.some(attr => {
+    if (!attr.directive) {
+      return attr.key.name === 'variant'
+    }
+
+    return attr.key.name.name === 'bind' && attr.key.argument?.name === 'variant'
+  })
+  const variant = hasUnqualifiedBind ? undefined : getStaticAttributeValue(node, 'variant')
+  const color = getStaticAttributeValue(node, 'color')
+
+  return { variant, hasVariantAttr, color }
 }
 
 module.exports = {
@@ -58,29 +70,16 @@ module.exports = {
   create (context) {
     return context.sourceCode.parserServices.defineTemplateBodyVisitor({
       VElement (node) {
-        const component = node.rawName
+        const component = normalizeComponentName(node.rawName)
 
-        if (component !== 'v-alert' && component !== 'v-chip') {
+        if (!TONAL_COMPONENTS.has(component)) {
           return
         }
 
-        const hasUnqualifiedBind = node.startTag.attributes.some(a =>
-          a.directive && a.key.name.name === 'bind' && !a.key.argument,
-        )
-        const variantAttribute = findAttribute(node, 'variant')
-        const variant = getStaticAttributeValue(node, 'variant')
-        const isTonal =
-          variant === 'tonal' ||
-          (component === 'v-chip' && !variantAttribute && !hasUnqualifiedBind)
+        const { variant, hasVariantAttr, color } = resolveProps(node)
+        const isTonal = variant === 'tonal' || (CHIP_COMPONENTS.has(component) && !hasVariantAttr)
 
-        if (!isTonal) {
-          return
-        }
-
-        const color = getStaticAttributeValue(node, 'color')
-        const expected = tonalColors.get(color)
-
-        if (!expected) {
+        if (!isTonal || !semanticColorNames.has(color)) {
           return
         }
 
@@ -89,7 +88,7 @@ module.exports = {
           messageId: 'useTonalColor',
           data: {
             actual: color,
-            expected,
+            expected: getTonalColorName(color),
             component,
           },
         })
