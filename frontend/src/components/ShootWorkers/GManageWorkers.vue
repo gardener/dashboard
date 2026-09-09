@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
       <div
         v-for="(worker, index) in providerWorkers"
         :key="worker._uid"
-        :ref="element => { if (element) workerGroupRefs[worker._uid] = element }"
+        :ref="element => setWorkerGroupRef(worker._uid, element)"
         class="worker-group-wrapper mb-4"
       >
         <v-expansion-panels
@@ -185,10 +185,17 @@ function getMachineImageText (worker) {
   return baseText || undefined
 }
 
+function setWorkerGroupRef (uid, element) {
+  if (element) {
+    workerGroupRefs[uid] = element // eslint-disable-line security/detect-object-injection -- uid from internal worker list
+  } else {
+    delete workerGroupRefs[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
+  }
+}
+
 function removeWorker (index) {
   const uid = providerWorkers.value[index]?._uid // eslint-disable-line security/detect-object-injection -- index from internal click handler
   if (uid) {
-    delete workerGroupRefs[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
     delete openWorkers.value[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
   }
   removeProviderWorker(index)
@@ -201,6 +208,12 @@ let savedScrollTop = null
 
 watch(providerWorkers, workers => {
   savedScrollTop = props.scrollContainer?.scrollTop ?? null
+  const activeUids = new Set(workers.map(worker => worker._uid))
+  for (const uid of Object.keys(openWorkers.value)) {
+    if (!activeUids.has(uid)) {
+      delete openWorkers.value[uid] // eslint-disable-line security/detect-object-injection -- uid from internal worker list
+    }
+  }
   const firstUid = workers[0]?._uid
   if (workers.length === 1 && firstUid && !(firstUid in openWorkers.value)) {
     openWorkers.value = { ...openWorkers.value, [firstUid]: true }
