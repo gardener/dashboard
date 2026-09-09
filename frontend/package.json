@@ -110,7 +110,7 @@
     "vitest-fetch-mock": "^0.4.0",
     "vue-eslint-parser": "^10.1.1"
   },
-  "packageManager": "yarn@4.17.1",
+  "packageManager": "yarn@4.18.0",
   "engines": {
     "node": "24.19.0"
   },
