@@ -6,7 +6,10 @@
 
 import { mount } from '@vue/test-utils'
 
-import { messagesColor } from '@/directives'
+import {
+  messagesColor,
+  safeHtml,
+} from '@/directives'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
@@ -128,6 +131,46 @@ describe('directives', () => {
       })
       const colorizerHintElement = findMessagesElement(wrapper)
       expect(colorizerHintElement.element.style.color).toBe('')
+    })
+  })
+
+  describe('v-safe-html', () => {
+    function mountWithSafeHtml (value) {
+      return mount({
+        template: '<div v-safe-html="content"></div>',
+        data () {
+          return { content: value }
+        },
+      }, {
+        global: { directives: { safeHtml } },
+      })
+    }
+
+    it('renders safe HTML', () => {
+      const wrapper = mountWithSafeHtml('<b>bold</b>')
+      expect(wrapper.find('div').element.innerHTML).toBe('<b>bold</b>')
+    })
+
+    it('strips script tags', () => {
+      const wrapper = mountWithSafeHtml('<script>alert(1)</script>text')
+      expect(wrapper.find('div').element.innerHTML).toBe('text')
+    })
+
+    it('strips event handlers', () => {
+      const wrapper = mountWithSafeHtml('<img src=x onerror="alert(1)">')
+      expect(wrapper.find('div').element.innerHTML).not.toContain('onerror')
+    })
+
+    it('is idempotent on already-sanitized HTML', async () => {
+      const clean = '<b>hello <a href="https://example.com">link</a></b>'
+      const wrapper = mountWithSafeHtml(clean)
+      expect(wrapper.find('div').element.innerHTML).toBe(clean)
+    })
+
+    it('updates innerHTML on value change', async () => {
+      const wrapper = mountWithSafeHtml('<i>first</i>')
+      await wrapper.setData({ content: '<i>second</i>' })
+      expect(wrapper.find('div').element.innerHTML).toBe('<i>second</i>')
     })
   })
 })
