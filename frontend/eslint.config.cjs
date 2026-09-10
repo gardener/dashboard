@@ -40,7 +40,6 @@ const lodashConfig = {
     lodash: {
       meta: {
         name: 'eslint-plugin-lodash',
-        version: '11.0.0',
       },
       rules: pluginLodash.rules,
     },
@@ -142,7 +141,6 @@ const importNewlinesConfig = {
     'import-newlines': {
       meta: {
         name: 'eslint-plugin-import-newlines',
-        version: '2.0.0',
       },
       rules: importNewlines.rules,
     },
