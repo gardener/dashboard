@@ -50,6 +50,7 @@
     "eslint-plugin-security": "^4.0.0",
     "express": "^5.0.0",
     "neostandard": "0.14.0-next.1",
+    "vite": "^8.0.0",
     "vitest": "^5.0.0"
   },
   "packageManager": "yarn@4.17.1",
