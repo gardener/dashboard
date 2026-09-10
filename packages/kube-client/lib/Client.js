@@ -82,12 +82,12 @@ class Client {
 
   async createKubeconfigClient (secretRef) {
     const kubeconfig = await this.getKubeconfig(secretRef)
-    return new this.constructor(fromKubeconfig(kubeconfig))
+    return new this.constructor(fromKubeconfig(kubeconfig)) // eslint-disable-line new-cap
   }
 
   async createShootAdminKubeconfigClient (shootRef) {
     const kubeconfig = await this.createShootAdminKubeconfig(shootRef)
-    return new this.constructor(fromKubeconfig(kubeconfig))
+    return new this.constructor(fromKubeconfig(kubeconfig)) // eslint-disable-line new-cap
   }
 
   getShoot (...args) {

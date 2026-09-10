@@ -40,7 +40,6 @@ const lodashConfig = {
     lodash: {
       meta: {
         name: 'eslint-plugin-lodash',
-        version: '11.0.0',
       },
       rules: pluginLodash.rules,
     },
@@ -142,7 +141,6 @@ const importNewlinesConfig = {
     'import-newlines': {
       meta: {
         name: 'eslint-plugin-import-newlines',
-        version: '1.4.0',
       },
       rules: importNewlines.rules,
     },
@@ -162,6 +160,7 @@ const vitestConfig = {
     'vitest/max-nested-describe': ['error', {
       max: 5,
     }],
+    'max-nested-callbacks': 'off',
   },
   languageOptions: {
     globals: {
@@ -193,6 +192,9 @@ module.exports = [
     },
   }),
   {
+    plugins: {
+      '@stylistic': require('@stylistic/eslint-plugin'),
+    },
     languageOptions: {
       ecmaVersion: 2025,
       sourceType: 'module',

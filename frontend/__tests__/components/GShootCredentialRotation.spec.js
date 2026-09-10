@@ -151,9 +151,7 @@ describe('components', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
           allWrapper,
-          certificateAuthoritiesWrapper,
-          ,
-          ,
+          certificateAuthoritiesWrapper,,,
           etcdEncryptionKeyWrapper,
           serviceAccountKeyWrapper,
         ] = wrapper.findAllComponents(GCredentialTile)
@@ -264,8 +262,7 @@ describe('components', () => {
         const [
           allTileWrapper,
           certificateAuthoritiesTileWrapper,
-          observabilityTileWrapper,
-          ,
+          observabilityTileWrapper,,
           etcdEncryptionKeyTileWrapper,
           serviceAccountKeyTileWrapper,
         ] = wrapper.findAllComponents(GCredentialTile)

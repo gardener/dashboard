@@ -15,7 +15,6 @@ const importNewlinesConfig = {
     'import-newlines': {
       meta: {
         name: 'eslint-plugin-import-newlines',
-        version: '1.4.0',
       },
       rules: importNewlines.rules,
     },
