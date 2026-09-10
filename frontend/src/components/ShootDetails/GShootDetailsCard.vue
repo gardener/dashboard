@@ -154,12 +154,10 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content :label="slaTitle">
-            <!-- eslint-disable vue/no-v-html -->
             <div
+              v-safe-html="slaDescriptionHtml"
               class="markdown"
-              v-html="slaDescriptionHtml"
             />
-            <!-- eslint-enable vue/no-v-html -->
           </g-list-item-content>
         </g-list-item>
       </template>
