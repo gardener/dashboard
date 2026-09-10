@@ -248,8 +248,6 @@ export function getRawVal (context, item, column) {
 export function getSortVal (state, context, item, sortBy) {
   const {
     configStore,
-    projectStore,
-    ticketStore,
     seedStore,
   } = context
 
@@ -429,7 +427,7 @@ export function sortItemsFn (state, context) {
       sortOrders = [order, 'asc']
     }
 
-    let [emptyItems, filledItems] = partition(items, (item) => !getRawVal(context, item, key))
+    const [emptyItems, filledItems] = partition(items, item => !getRawVal(context, item, key))
 
     return orderBy(filledItems, sortKeys, sortOrders)
       .concat(orderBy(emptyItems, sortKeys, sortOrders))
