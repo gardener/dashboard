@@ -5,3 +5,4 @@
 //
 
 export { messagesColor } from './messagesColor'
+export { safeHtml } from './safeHtml'
