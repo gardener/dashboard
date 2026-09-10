@@ -7,15 +7,20 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <v-sheet
     class="toolbar text-toolbar-title"
+    :class="{ 'toolbar--iframe': isInIframe }"
     color="toolbar-background"
   >
     <div class="heading">
       <v-icon
+        v-if="!isInIframe"
         class="heading-icon"
         icon="mdi-hexagon-multiple"
       />
-      <div class="heading-title text-title-large">
-        Kubernetes Clusters
+      <div
+        class="heading-title"
+        :class="isInIframe ? 'text-body-1' : 'text-h5'"
+      >
+        Clusters
       </div>
     </div>
     <div class="controls">
@@ -268,9 +273,12 @@ import GDetailTooltip from '@/components/GDetailTooltip.vue'
 import GTableSearch from '@/components/GTableSearch.vue'
 
 import { useShootListFilters } from '@/composables/useShootListFilters'
+import { useIsInIframe } from '@/composables/useIsInIframe'
 
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+
+const isInIframe = useIsInIframe()
 
 const props = defineProps({
   modelValue: {
@@ -420,14 +428,20 @@ function applyOperationsView () {
 
 <style lang="scss" scoped>
 .toolbar {
+  --toolbar-min-height: 72px;
+
   align-items: center;
   box-sizing: border-box;
   column-gap: 16px;
   display: grid;
   flex-shrink: 0;
   grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 64px;
+  min-height: var(--toolbar-min-height);
   padding: 0 8px 0 16px;
+}
+
+.toolbar--iframe {
+  --toolbar-min-height: 48px;
 }
 
 .heading {
@@ -524,7 +538,7 @@ function applyOperationsView () {
   .toolbar {
     column-gap: 4px;
     grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-rows: minmax(64px, auto) auto;
+    grid-template-rows: minmax(var(--toolbar-min-height), auto) auto;
   }
 
   .heading {
@@ -582,7 +596,7 @@ function applyOperationsView () {
 @media (max-width: 600px) {
   .toolbar {
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: minmax(64px, auto) auto auto;
+    grid-template-rows: minmax(var(--toolbar-min-height), auto) auto auto;
   }
 
   .heading {

@@ -176,6 +176,15 @@ describe('views', () => {
       expect(wrapper.text()).not.toContain('determines which unhealthy Shoots are counted for each Seed')
     })
 
+    it('hides the color scheme and its divider when the theme is controlled by the host', () => {
+      window.history.replaceState({}, '', '/?sap-theme=sap_horizon_dark')
+
+      mountComponent()
+
+      expect(wrapper.text()).not.toContain('Color Scheme')
+      expect(wrapper.find('[data-test="color-scheme-divider"]').exists()).toBe(false)
+    })
+
     it('ignores exclusion-criteria deep links for regular users', async () => {
       window.history.replaceState({}, '', '/#setting=cluster-operations')
 

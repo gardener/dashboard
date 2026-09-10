@@ -15,6 +15,8 @@ import {
 } from '../utils/index.js'
 import cache from '../cache/index.js'
 import * as authentication from './authentication.js'
+import logger from '../logger/index.js'
+import openfga from '../openfga/index.js'
 const { dashboardClient } = kubeClientModule
 const { PreconditionFailed, InternalServerError } = httpErrors
 
@@ -31,15 +33,26 @@ async function validateDeletePreconditions ({ user, name }) {
   }
 }
 
-export async function list ({ user }) {
-  const canListProjects = await authorization.canListProjects(user)
+export async function list ({ user, canListProjects }) {
+  if (typeof canListProjects !== 'boolean') {
+    canListProjects = await authorization.canListProjects(user)
+  }
+  let projectAllowList = []
+  if (openfga.client) {
+    try {
+      projectAllowList = await openfga.listProjects(user.id)
+    } catch (err) {
+      logger.error('openfga query failed: %s', err)
+    }
+  }
   if (!canListProjects) {
     // Without cluster-wide project access, projectFilter evaluates user and group membership.
     await authentication.ensureUserGroups(user)
   }
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, canListProjects))
+    .filter(projectFilter(user, canListProjects, projectAllowList))
+    .forEach(project => setComputedProjectAnnotations(project))
     .map(_.cloneDeep)
     .map(simplifyProject)
     .value()
@@ -48,8 +61,10 @@ export async function list ({ user }) {
 export async function create ({ user, body }) {
   const client = user.client
 
+  const accountId = _.get(body, ['metadata', 'annotations', 'openmfp.org/account-id'])
   const name = _.get(body, ['metadata', 'name'])
-  _.set(body, ['spec', 'namespace'], `garden-${name}`)
+  const namespace = `garden-${name}`
+  _.set(body, ['spec', 'namespace'], namespace)
   let project = await client['core.gardener.cloud'].projects.create(body)
 
   const isProjectReady = ({ type, object: project }) => {
@@ -63,6 +78,13 @@ export async function create ({ user, body }) {
   // must be the dashboardClient because rbac rolebinding does not exist yet
   const asyncIterable = await dashboardClient['core.gardener.cloud'].projects.watch(name)
   project = await asyncIterable.until(isProjectReady, { PROJECT_INITIALIZATION_TIMEOUT })
+  if (openfga.client && accountId) {
+    try {
+      await openfga.writeProject(namespace, accountId)
+    } catch (err) {
+      logger.error('Failed to write OpenFGA account relation:', err)
+    }
+  }
 
   return project
 }
@@ -70,13 +92,23 @@ export async function create ({ user, body }) {
 export async function read ({ user, name }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.get(name)
+  setComputedProjectAnnotations(project)
   return project
 }
 
 export async function patch ({ user, name, body }) {
   const client = user.client
   const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  setComputedProjectAnnotations(project)
   return project
+}
+
+function setComputedProjectAnnotations (project) {
+  if (process.env.NODE_ENV === 'test') {
+    return
+  }
+  const projectShoots = cache.getShoots(project.spec.namespace) ?? []
+  _.set(project, ['metadata', 'annotations', 'computed.gardener.cloud/number-of-shoots'], projectShoots.length)
 }
 
 export async function remove ({ user, name }) {

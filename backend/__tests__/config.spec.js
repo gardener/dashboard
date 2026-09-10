@@ -80,6 +80,12 @@ describe('config', function () {
         SESSION_SECRET: 'secret',
         WEBSOCKET_ALLOWED_ORIGINS: 'https://foo.example.org,https://bar.example.org',
       }
+      const fgaFilePaths = [
+        '/etc/gardener-dashboard/secrets/fga/apiUrl',
+        '/etc/gardener-dashboard/secrets/fga/storeId',
+        '/etc/gardener-dashboard/secrets/fga/authorizationModelId',
+        '/etc/gardener-dashboard/secrets/fga/apiToken',
+      ]
 
       let readFileSyncSpy
 
@@ -144,7 +150,9 @@ describe('config', function () {
       })
 
       it('should not read OIDC or GitHub file fallbacks when the providers are not configured', function () {
-        readFileSyncSpy.mockReturnValue('ambient-secret')
+        readFileSyncSpy.mockImplementation(filePath => {
+          throw new Error(filePath + ': not found')
+        })
         const env = {
           ...environmentVariables,
           SESSION_SECRET_PREVIOUS: 'previous-secret',
@@ -152,7 +160,9 @@ describe('config', function () {
 
         const config = gardener.loadConfig(undefined, { env })
 
-        expect(readFileSyncSpy).not.toHaveBeenCalled()
+        expect(readFileSyncSpy.mock.calls).toEqual(
+          fgaFilePaths.map(filePath => [filePath, 'utf8']),
+        )
         expect(config).not.toHaveProperty('oidc')
         expect(config).not.toHaveProperty('gitHub')
       })
@@ -177,7 +187,39 @@ describe('config', function () {
 
         expect(config.sessionSecrets).toEqual(['current-secret', 'previous-secret'])
         expect(readFileSyncSpy.mock.calls).toEqual(
-          Object.keys(fileMap).map(filePath => [filePath, 'utf8']),
+          [...Object.keys(fileMap), ...fgaFilePaths].map(filePath => [filePath, 'utf8']),
+        )
+      })
+
+      it('should use OpenFGA file fallbacks', function () {
+        const fileMap = {
+          '/etc/gardener-dashboard/secrets/fga/apiUrl': 'https://fga.example.org',
+          '/etc/gardener-dashboard/secrets/fga/storeId': 'store-id',
+          '/etc/gardener-dashboard/secrets/fga/authorizationModelId': 'model-id',
+          '/etc/gardener-dashboard/secrets/fga/apiToken': 'api-token',
+        }
+        readFileSyncSpy.mockImplementation(filePath => {
+          if (filePath in fileMap) {
+            return fileMap[filePath]
+          }
+          throw new Error(filePath + ': not found')
+        })
+
+        const config = gardener.loadConfig(undefined, {
+          env: {
+            ...environmentVariables,
+            SESSION_SECRET_PREVIOUS: 'previous-secret',
+          },
+        })
+
+        expect(config).toMatchObject({
+          fgaApiUrl: 'https://fga.example.org',
+          fgaStoreId: 'store-id',
+          fgaAuthorizationModelId: 'model-id',
+          fgaApiToken: 'api-token',
+        })
+        expect(readFileSyncSpy.mock.calls).toEqual(
+          fgaFilePaths.map(filePath => [filePath, 'utf8']),
         )
       })
 

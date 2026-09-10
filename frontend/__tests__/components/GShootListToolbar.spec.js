@@ -16,6 +16,14 @@ import GTableSearch from '@/components/GTableSearch.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 const tooltipFocus = vi.fn()
+const isInIframe = vi.hoisted(() => ({
+  __v_isRef: true,
+  value: false,
+}))
+
+vi.mock('@/composables/useIsInIframe', () => ({
+  useIsInIframe: () => isInIframe,
+}))
 
 // Disable createSharedComposable so each test gets a fresh composable instance
 vi.mock('@vueuse/core', async importOriginal => {
@@ -95,6 +103,7 @@ describe('components', () => {
     beforeEach(() => {
       window.localStorage.clear()
       tooltipFocus.mockClear()
+      isInIframe.value = false
     })
 
     it('owns its layout and uses the public fluid search API', () => {
@@ -115,6 +124,31 @@ describe('components', () => {
       expect(wrapper.text()).toContain('New clusters remain hidden')
       expect(wrapper.text()).toContain('Removed clusters appear dimmed')
       expect(wrapper.vm.operationsView.state).toBe('active')
+    })
+
+    it.each([
+      {
+        description: 'standalone',
+        iframe: false,
+        headingClass: 'text-h5',
+        toolbarClass: undefined,
+      },
+      {
+        description: 'iframe',
+        iframe: true,
+        headingClass: 'text-body-1',
+        toolbarClass: 'toolbar--iframe',
+      },
+    ])('adapts its heading in $description mode', ({ iframe, headingClass, toolbarClass }) => {
+      isInIframe.value = iframe
+      const wrapper = mountToolbar()
+      const toolbar = wrapper.find('.toolbar')
+      const heading = wrapper.find('.heading-title')
+
+      expect(toolbar.classes()).toEqual(expect.arrayContaining(['toolbar']))
+      expect(toolbar.classes().includes('toolbar--iframe')).toBe(Boolean(toolbarClass))
+      expect(heading.classes()).toContain(headingClass)
+      expect(heading.text()).toBe('Clusters')
     })
 
     it('forwards tooltip accessibility props and keyboard focus to the switch control', async () => {

@@ -37,7 +37,20 @@ import {
 } from './constants.js'
 
 const { authentication, authorization } = services
-const { sessionSecrets, oidc = {} } = config
+const {
+  sessionSecrets,
+  cookieSameSitePolicy = 'Lax',
+  oidc = {},
+} = config
+
+const cookieAttributes = {
+  secure: true,
+  sameSite: cookieSameSitePolicy,
+}
+if (cookieSameSitePolicy === 'None') {
+  cookieAttributes.partitioned = true
+}
+
 const {
   sign,
   verify,
@@ -226,10 +239,9 @@ async function authorizationUrl (req, res) {
     redirectOrigin,
     state,
   }, {
-    secure: true,
+    ...cookieAttributes,
     httpOnly: true,
     maxAge: 180_000, // cookie will be removed after 3 minutes
-    sameSite: 'Lax',
   })
 
   const params = {
@@ -243,10 +255,9 @@ async function authorizationUrl (req, res) {
     const codeChallengeMethod = getCodeChallengeMethod(config)
     const codeVerifier = randomPKCECodeVerifier()
     res.cookie(COOKIE_CODE_VERIFIER, codeVerifier, {
-      secure: true,
+      ...cookieAttributes,
       httpOnly: true,
       maxAge: 180_000, // cookie will be removed after 3 minutes
-      sameSite: 'Lax',
     })
     switch (codeChallengeMethod) {
       case 'S256':
@@ -323,15 +334,13 @@ async function setCookies (res, tokenSet) {
   const accessToken = tokenSet.access_token
   const [header, payload, signature] = split(accessToken, '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
-    secure: true,
+    ...cookieAttributes,
     expires: undefined,
-    sameSite: 'Lax',
   })
   res.cookie(COOKIE_SIGNATURE, signature, {
-    secure: true,
+    ...cookieAttributes,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax',
   })
   const values = [tokenSet.id_token]
   if (tokenSet.refresh_token) {
@@ -339,10 +348,9 @@ async function setCookies (res, tokenSet) {
   }
   const encryptedValues = await encrypt(values.join(','))
   res.cookie(COOKIE_TOKEN, encryptedValues, {
-    secure: true,
+    ...cookieAttributes,
     httpOnly: true,
     expires: undefined,
-    sameSite: 'Lax',
   })
   return accessToken
 }
