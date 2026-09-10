@@ -27,13 +27,11 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div>
           <span class="wrap-text text-title-small">{{ input.title }}</span>
-          <!-- eslint-disable vue/no-v-html -->
           <span
             v-if="input.description"
+            v-safe-html="transformHtml(input.description)"
             class="wrap-text pt-1 text-body-medium"
-            v-html="transformHtml(input.description)"
           />
-          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
       <div
@@ -59,13 +57,11 @@ SPDX-License-Identifier: Apache-2.0
           >
             {{ optionInput.title }}
           </span>
-          <!-- eslint-disable vue/no-v-html -->
           <span
             v-if="optionInput.description"
+            v-safe-html="transformHtml(optionInput.description)"
             class="pt-1 text-body-medium"
-            v-html="transformHtml(optionInput.description)"
           />
-          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
     </v-row>

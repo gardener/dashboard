@@ -229,12 +229,10 @@ SPDX-License-Identifier: Apache-2.0
                     <div class="text-body-medium text-medium-emphasis">
                       {{ slaTitle }}
                     </div>
-                    <!-- eslint-disable vue/no-v-html -->
                     <div
+                      v-safe-html="slaDescriptionHtml"
                       class="text-body-large markdown wrap-text"
-                      v-html="slaDescriptionHtml"
                     />
-                    <!-- eslint-enable vue/no-v-html -->
                   </g-list-item>
                 </template>
                 <v-divider inset />

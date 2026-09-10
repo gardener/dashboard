@@ -51,24 +51,20 @@ SPDX-License-Identifier: Apache-2.0
             class="pa-3"
             style="windowItemStyle"
           >
-            <!-- eslint-disable vue/no-v-html -->
             <div
+              v-safe-html="oidcLoginText"
               class="text-body-large text-center text-medium-emphasis"
-              v-html="oidcLoginText"
             />
-            <!-- eslint-enable vue/no-v-html -->
           </v-window-item>
           <v-window-item
             value="token"
             class="pa-3"
             style="windowItemStyle"
           >
-            <!-- eslint-disable vue/no-v-html -->
             <div
+              v-safe-html="tokenLoginText"
               class="text-body-large text-center text-medium-emphasis"
-              v-html="tokenLoginText"
             />
-            <!-- eslint-enable vue/no-v-html -->
             <div class="d-flex justify-center mt-3">
               <v-text-field
                 ref="tokenField"
