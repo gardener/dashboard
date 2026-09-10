@@ -562,6 +562,7 @@ __metadata:
     "@mdi/svg": "npm:7.4.47"
     "@microsoft/eslint-formatter-sarif": "npm:^3.1.0"
     "@pinia/testing": "npm:^2.0.0"
+    "@stylistic/eslint-plugin": "npm:^5.10.0"
     "@typescript-eslint/utils": "npm:^8.12.2"
     "@vitejs/plugin-basic-ssl": "npm:^2.0.0"
     "@vitejs/plugin-vue": "npm:^6.0.0"
@@ -1611,7 +1612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stylistic/eslint-plugin@npm:5.10.0":
+"@stylistic/eslint-plugin@npm:5.10.0, @stylistic/eslint-plugin@npm:^5.10.0":
   version: 5.10.0
   resolution: "@stylistic/eslint-plugin@npm:5.10.0"
   dependencies:
