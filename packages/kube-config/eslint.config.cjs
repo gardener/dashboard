@@ -8,6 +8,7 @@ const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
+const pluginImport = require('eslint-plugin-import')
 
 module.exports = [
   ...neostandard({}),
@@ -18,6 +19,17 @@ module.exports = [
     },
   },
   pluginSecurity.configs.recommended,
+  {
+    settings: {
+      'import/resolver': {
+        [require.resolve('../../eslint-import-resolver-local.cjs')]: {},
+      },
+    },
+    plugins: {
+      import: pluginImport,
+    },
+    rules: pluginImport.flatConfigs.recommended.rules,
+  },
   {
     plugins: {
       lodash: pluginLodash,
