@@ -55,6 +55,7 @@
     "@xterm/xterm": "^6.0.0",
     "culori": "^4.0.2",
     "dayjs": "^1.11.10",
+    "dompurify": "^3.4.15",
     "downloadjs": "^1.4.7",
     "eventemitter3": "^5.0.1",
     "floating-vue": "^5.2.2",
