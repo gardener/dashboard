@@ -133,7 +133,7 @@ export default {
     line-height: 20px;
   }
   .ticket-labels {
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 30px;
   }
 
