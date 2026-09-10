@@ -100,6 +100,7 @@ module.exports = [
       'import/named': 'off',
       'vitest/no-standalone-expect': 'off',
       'vitest/no-disabled-tests': 'warn',
+      'max-nested-callbacks': 'off',
     },
   },
   {

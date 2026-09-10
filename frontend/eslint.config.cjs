@@ -162,6 +162,7 @@ const vitestConfig = {
     'vitest/max-nested-describe': ['error', {
       max: 5,
     }],
+    'max-nested-callbacks': 'off',
   },
   languageOptions: {
     globals: {
@@ -193,6 +194,9 @@ module.exports = [
     },
   }),
   {
+    plugins: {
+      '@stylistic': require('@stylistic/eslint-plugin'),
+    },
     languageOptions: {
       ecmaVersion: 2025,
       sourceType: 'module',
