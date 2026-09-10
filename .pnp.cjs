@@ -1016,7 +1016,6 @@ const RAW_RUNTIME_STATE =
           ["@xterm/addon-web-links", "npm:0.12.0"],\
           ["@xterm/addon-webgl", "npm:0.19.0"],\
           ["@xterm/xterm", "npm:6.0.0"],\
-          ["ansi-html", "npm:0.0.9"],\
           ["culori", "npm:4.0.2"],\
           ["dayjs", "npm:1.11.23"],\
           ["downloadjs", "npm:1.4.7"],\
@@ -4782,15 +4781,6 @@ const RAW_RUNTIME_STATE =
         "packagePeers": [\
           "@types/ajv",\
           "ajv"\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["ansi-html", [\
-      ["npm:0.0.9", {\
-        "packageLocation": "./.yarn/cache/ansi-html-npm-0.0.9-0568c06690-4a5de9802f.zip/node_modules/ansi-html/",\
-        "packageDependencies": [\
-          ["ansi-html", "npm:0.0.9"]\
         ],\
         "linkType": "HARD"\
       }]\

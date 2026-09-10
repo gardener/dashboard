@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Last Message">
           <div class="message-block">
-            <g-ansi-text :text="lastMessage" />
+            <pre class="message-text">{{ lastMessage }}</pre>
           </div>
         </g-list-item-content>
       </g-list-item>
@@ -112,10 +112,9 @@ SPDX-License-Identifier: Apache-2.0
                   </div>
                 </span>
               </v-alert>
-              <g-ansi-text
-                :text="lastErrorDescription.description"
-                class="text-error"
-              />
+              <pre
+                class="message-text text-error"
+              >{{ lastErrorDescription.description }}</pre>
             </div>
           </div>
         </g-list-item-content>
@@ -124,49 +123,42 @@ SPDX-License-Identifier: Apache-2.0
   </g-list>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 
-import GAnsiText from '@/components/GAnsiText.vue'
-import GBindingName from '@/components/Credentials/GBindingName.vue'
+const props = defineProps({
+  statusTitle: {
+    type: String,
+  },
+  lastMessage: {
+    type: String,
+  },
+  errorDescriptions: {
+    type: Array,
+  },
+  lastUpdateTime: {
+    type: String,
+  },
+  lastTransitionTime: {
+    type: String,
+  },
+  shootBinding: {
+    type: Object,
+    default: null,
+  },
+})
+const hasError = computed(() => !!props.errorDescriptions?.length)
 
-import isEmpty from 'lodash/isEmpty'
-
-export default {
-  components: {
-    GAnsiText,
-    GBindingName,
-  },
-  props: {
-    statusTitle: {
-      type: String,
-    },
-    lastMessage: {
-      type: String,
-    },
-    errorDescriptions: {
-      type: Array,
-    },
-    lastUpdateTime: {
-      type: String,
-    },
-    lastTransitionTime: {
-      type: String,
-    },
-    shootBinding: {
-      type: Object,
-      default: null,
-    },
-  },
-  computed: {
-    hasError () {
-      return !isEmpty(this.errorDescriptions)
-    },
-  },
-}
 </script>
 
 <style lang="scss" scoped>
   .message-block {
     height: fit-content;
+  }
+  .message-text {
+    text-align: left;
+    min-width: 250px;
+    white-space: pre-wrap;
+    max-height: inherit;
   }
 </style>
