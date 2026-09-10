@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
     <v-btn
       color="primary"
       icon
-      class="mr-3"
+      class="mr-3 profile-btn"
     >
       <v-tooltip
         :disabled="menu"
@@ -447,5 +447,9 @@ function helpTarget (item) {
     .logout-btn {
       color: #EF5350;
     }
+  }
+
+  .profile-btn {
+    overflow: visible;
   }
 </style>
