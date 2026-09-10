@@ -56,6 +56,7 @@ import toLower from 'lodash/toLower'
 import join from 'lodash/join'
 import padStart from 'lodash/padStart'
 import orderBy from 'lodash/orderBy'
+import partition from 'lodash/partition'
 
 export const constants = Object.freeze({
   DEFINED: 0,
@@ -225,6 +226,11 @@ export function getRawVal (context, item, column) {
       return item.status?.technicalID
     case 'workers':
       return item.spec.provider.workers?.length ?? 0
+    case 'ticket':
+      return ticketStore.latestUpdated({
+        projectName: projectStore.projectNameByNamespace(metadata),
+        name: metadata.name,
+      })
     default: {
       if (isCustomField(column)) {
         const {
@@ -309,11 +315,7 @@ export function getSortVal (state, context, item, sortBy) {
       })
     }
     case 'ticket': {
-      const metadata = item.metadata
-      return ticketStore.latestUpdated({
-        projectName: projectStore.projectNameByNamespace(metadata),
-        name: metadata.name,
-      })
+      return new Date(get(value, ['metadata', 'updated_at'])).getTime()
     }
     default:
       if (typeof value === 'number') {
@@ -427,7 +429,10 @@ export function sortItemsFn (state, context) {
       sortOrders = [order, 'asc']
     }
 
-    return orderBy(items, sortKeys, sortOrders)
+    let [emptyItems, filledItems] = partition(items, (item) => !getRawVal(context, item, key))
+
+    return orderBy(filledItems, sortKeys, sortOrders)
+      .concat(orderBy(emptyItems, sortKeys, sortOrders))
   }
 }
 
