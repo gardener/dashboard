@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0
       Discover what our service is about at the
     </span>
     <a
-      :href="landingPageUrl"
+      :href="sanitizeUrl(landingPageUrl)"
       target="_blank"
       rel="noopener noreferrer"
       class="text-anchor"
@@ -28,7 +28,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import {
+  computed,
+  inject,
+} from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { useLoginStore } from '@/store/login'
@@ -36,6 +39,8 @@ import { useLoginStore } from '@/store/login'
 import { omitKeysWithSuffix } from '@/utils'
 
 import template from 'lodash/template'
+
+const sanitizeUrl = inject('sanitizeUrl')
 
 const loginStore = useLoginStore()
 
