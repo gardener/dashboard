@@ -35,13 +35,13 @@
     "@gardener-dashboard/polling-watcher": "workspace:^",
     "@gardener-dashboard/test-utils": "workspace:^",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "@vitest/coverage-v8": "^4.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.15",
-    "eslint": "^9.11.0",
+    "eslint": "^10.0.0",
     "eslint-plugin-lodash": "^8.0.0",
-    "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-security": "^4.0.0",
     "neostandard": "^0.13.0",
-    "vitest": "^4.0.0"
+    "vitest": "^5.0.0"
   },
   "packageManager": "yarn@4.17.1",
   "engines": {
