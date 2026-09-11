@@ -13,6 +13,8 @@ import {
 
 import { useConfigStore } from '@/store/config'
 
+import { useSanitizeUrl } from '@/composables/useSanitizeUrl'
+
 import { gravatarUrlGeneric } from '@/utils'
 
 import get from 'lodash/get'
@@ -25,6 +27,7 @@ const AvatarSourceEnum = {
 
 export function useTicketAvatar (username, githubAvatarUrl, size = 128) {
   const configStore = useConfigStore()
+  const sanitizeUrl = useSanitizeUrl()
   const avatarUrl = ref(undefined)
 
   const ticketConfig = computed(() => configStore.ticket)
@@ -42,7 +45,7 @@ export function useTicketAvatar (username, githubAvatarUrl, size = 128) {
 
     switch (source) {
       case AvatarSourceEnum.GITHUB:
-        avatarUrl.value = githubUrlValue
+        avatarUrl.value = githubUrlValue ? sanitizeUrl(githubUrlValue) : undefined
         break
       case AvatarSourceEnum.GRAVATAR:
         avatarUrl.value = await gravatarUrlGeneric(usernameValue, unref(size), 'gravatar')

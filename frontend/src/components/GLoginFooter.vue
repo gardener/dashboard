@@ -9,7 +9,6 @@ SPDX-License-Identifier: Apache-2.0
     v-if="footerTemplate"
     v-html="footerHtml"
   />
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-else-if="hasFooter"
     class="text-body-small text-center"
@@ -18,9 +17,9 @@ SPDX-License-Identifier: Apache-2.0
       Discover what our service is about at the
     </span>
     <a
-      :href="landingPageUrl"
+      :href="sanitizeUrl(landingPageUrl)"
       target="_blank"
-      rel="noopener"
+      rel="noopener noreferrer"
       class="text-anchor"
     >
       {{ branding.productName }} Landing Page
@@ -28,8 +27,12 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import {
+  computed,
+  inject,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useLoginStore } from '@/store/login'
 
@@ -37,28 +40,26 @@ import { omitKeysWithSuffix } from '@/utils'
 
 import template from 'lodash/template'
 
-export default {
-  computed: {
-    ...mapState(useLoginStore, [
-      'landingPageUrl',
-      'branding',
-    ]),
-    hasFooter () {
-      return !!this.landingPageUrl && ![false, null, ''].includes(this.footerTemplate)
-    },
-    footerTemplate () {
-      return this.branding.loginFooterTemplate
-    },
-    compiledFooterTemplate () {
-      return template(this.footerTemplate, {
-        interpolate: /{{([\s\S]+?)}}/g,
-      })
-    },
-    footerHtml () {
-      const data = omitKeysWithSuffix(this.branding, 'Template')
-      data.landingPageUrl = this.landingPageUrl
-      return this.compiledFooterTemplate(data)
-    },
-  },
-}
+const sanitizeUrl = inject('sanitizeUrl')
+
+const loginStore = useLoginStore()
+
+const { landingPageUrl, branding } = storeToRefs(loginStore)
+
+const footerTemplate = computed(() => branding.value.loginFooterTemplate)
+const hasFooter = computed(() => {
+  return !!landingPageUrl.value && ![false, null, ''].includes(footerTemplate.value)
+})
+
+const compiledFooterTemplate = computed(() => {
+  return template(footerTemplate.value, {
+    interpolate: /{{([\s\S]+?)}}/g,
+  })
+})
+
+const footerHtml = computed(() => {
+  const data = omitKeysWithSuffix(branding.value, 'Template')
+  data.landingPageUrl = landingPageUrl.value
+  return compiledFooterTemplate.value(data)
+})
 </script>
