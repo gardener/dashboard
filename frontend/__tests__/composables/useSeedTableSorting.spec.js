@@ -134,17 +134,17 @@ describe('composables', () => {
       const a = {
         healthy: 2,
         unhealthy: 4,
-        otherUnhealthy: 3
+        otherUnhealthy: 3,
       }
       const b = {
         healthy: 20,
         unhealthy: 3,
-        otherUnhealthy: 3
+        otherUnhealthy: 3,
       }
       const c = {
         healthy: 2,
         unhealthy: 3,
-        otherUnhealthy: 4
+        otherUnhealthy: 4,
       }
       const { customKeySort } = useSeedTableSorting()
 
