@@ -10,6 +10,7 @@ import netlifyDns from './netlify'
 import powerdns from './powerdns'
 import rfc2136 from './rfc2136'
 import stackitDns from './stackit-dns'
+import gdchDns from './gdch-dns'
 
 export default [
   awsRoute53,
@@ -24,4 +25,5 @@ export default [
   powerdns,
   rfc2136,
   stackitDns,
+  gdchDns,
 ]

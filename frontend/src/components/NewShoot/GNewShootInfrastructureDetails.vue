@@ -172,6 +172,66 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
       </template>
+      <template v-else-if="!workerless && providerType === 'gdch'">
+        <v-col cols="3">
+          <v-select
+            v-model="v$.parentReferenceType.$model"
+            color="primary"
+            item-color="primary"
+            label="Parent Reference Type"
+            :items="parentReferenceTypes"
+            :error-messages="getErrorMessages(v$.parentReferenceType)"
+            hint="Reference type for the parent resource: SingleSubnet or SubnetGroup"
+            persistent-hint
+            variant="underlined"
+            @blur="v$.parentReferenceType.$touch()"
+          />
+        </v-col>
+        <v-col cols="3">
+          <v-text-field
+            v-model="v$.parentReferenceName.$model"
+            color="primary"
+            label="Parent Reference Name"
+            :error-messages="getErrorMessages(v$.parentReferenceName)"
+            hint="Name of the parent GDC Subnet or SubnetGroup"
+            persistent-hint
+            variant="underlined"
+            @blur="v$.parentReferenceName.$touch()"
+          />
+        </v-col>
+        <v-col cols="3">
+          <v-text-field
+            v-model="parentReferenceNamespace"
+            color="primary"
+            label="Parent Reference Namespace (optional)"
+            hint="Namespace of the parent reference, if it is in another GDC project"
+            persistent-hint
+            variant="underlined"
+          />
+        </v-col>
+        <v-col cols="3">
+          <v-text-field
+            v-model="v$.nodeCIDR.$model"
+            color="primary"
+            label="Node CIDR"
+            :error-messages="getErrorMessages(v$.nodeCIDR)"
+            hint="CIDR range used for worker nodes. The GDC provider extension creates a subnet for this range from the parent reference (e.g. 10.0.0.0/18)"
+            persistent-hint
+            variant="underlined"
+            @blur="v$.nodeCIDR.$touch()"
+          />
+        </v-col>
+        <v-col cols="3">
+          <v-switch
+            v-model="enableEgress"
+            color="primary"
+            label="Enable Cloud NAT egress"
+            hint="Recommended. Disable only if your project does not use Cloud NAT egress."
+            persistent-hint
+            inset
+          />
+        </v-col>
+      </template>
     </v-row>
   </v-container>
 </template>
@@ -183,6 +243,7 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
+import { Netmask } from 'netmask'
 
 import GSelectCloudProfile from '@/components/GSelectCloudProfile'
 import GWildcardSelect from '@/components/GWildcardSelect'
@@ -223,6 +284,12 @@ export default {
       providerInfrastructureConfigFirewallImage,
       providerInfrastructureConfigFirewallSize,
       providerInfrastructureConfigFirewallNetworks,
+      providerInfrastructureConfigParentReferenceName,
+      providerInfrastructureConfigParentReferenceNamespace,
+      providerInfrastructureConfigParentReferenceType,
+      providerInfrastructureConfigEnableEgress,
+      providerInfrastructureConfigNodeCIDR,
+      networkingNodes,
       cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
@@ -254,6 +321,12 @@ export default {
       firewallImage: providerInfrastructureConfigFirewallImage,
       firewallSize: providerInfrastructureConfigFirewallSize,
       firewallNetworks: providerInfrastructureConfigFirewallNetworks,
+      parentReferenceName: providerInfrastructureConfigParentReferenceName,
+      parentReferenceNamespace: providerInfrastructureConfigParentReferenceNamespace,
+      parentReferenceType: providerInfrastructureConfigParentReferenceType,
+      enableEgress: providerInfrastructureConfigEnableEgress,
+      nodeCIDR: providerInfrastructureConfigNodeCIDR,
+      networkingNodes,
       cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
@@ -307,6 +380,33 @@ export default {
       projectID: withFieldName('Project ID', {
         required: requiresInfrastructure('metal'),
       }),
+      parentReferenceName: withFieldName('Parent Reference Name', {
+        required: requiresInfrastructure('gdch'),
+      }),
+      parentReferenceType: withFieldName('Parent Reference Type', {
+        required: requiresInfrastructure('gdch'),
+      }),
+      nodeCIDR: withFieldName('Node CIDR', {
+        required: requiresInfrastructure('gdch'),
+        cidr: withMessage('Must be a valid IPv4 CIDR range', value => {
+          if (!infrastructureRequired('gdch') || !value) {
+            return true
+          }
+          const [address, prefix, ...remainder] = value.split('/')
+          const octets = address?.split('.') ?? []
+          if (remainder.length || !prefix || octets.length !== 4 || octets.some(octet => !/^\d{1,3}$/.test(octet))) {
+            return false
+          }
+          try {
+            return new Netmask(value).toString() === value
+          } catch {
+            return false
+          }
+        }),
+        matchesNetworkingNodes: withMessage('Must match the shoot networking node CIDR', value => {
+          return !infrastructureRequired('gdch') || value === this.networkingNodes
+        }),
+      }),
     }
   },
   computed: {
@@ -342,6 +442,9 @@ export default {
           },
         }
       })
+    },
+    parentReferenceTypes () {
+      return ['SingleSubnet', 'SubnetGroup']
     },
   },
   mounted () {

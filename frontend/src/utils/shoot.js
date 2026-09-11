@@ -165,6 +165,26 @@ export function getProviderTemplate (providerType, defaultWorkerCIDR) {
           kind: 'ControlPlaneConfig',
         },
       }
+    case 'gdch':
+      return {
+        type: 'gdch',
+        infrastructureConfig: {
+          apiVersion: 'gdch.provider.extensions.gardener.gdc.goog/v1alpha1',
+          kind: 'InfrastructureConfig',
+          enableEgress: true,
+          networks: {
+            nodeCIDR: defaultWorkerCIDR,
+            parentReference: {
+              name: '',
+              type: 'SingleSubnet',
+            },
+          },
+        },
+        controlPlaneConfig: {
+          apiVersion: 'gdch.provider.extensions.gardener.gdc.goog/v1alpha1',
+          kind: 'ControlPlaneConfig',
+        },
+      }
     default:
       return {
         type: providerType,
@@ -189,6 +209,22 @@ export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
             pool: 'vxlan',
           },
           typha: {
+            enabled: true,
+          },
+        },
+      }
+    case 'gdch':
+      return {
+        type: 'calico',
+        nodes: defaultWorkerCIDR,
+        ipFamilies: ['IPv4'],
+        providerConfig: {
+          apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
+          kind: 'NetworkConfig',
+          vxlan: {
+            enabled: true,
+          },
+          overlay: {
             enabled: true,
           },
         },
@@ -256,6 +292,15 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, provid
         const zoneNetwork = zoneNetworksAli[index] // eslint-disable-line security/detect-object-injection
         return {
           workers: zoneNetwork,
+        }
+      })
+    }
+    case 'gdch': {
+      const zoneNetworksGdch = splitCIDR(workerCIDR, numberOfZones)
+      return map(range(numberOfZones), index => {
+        const zoneNetwork = zoneNetworksGdch[index] // eslint-disable-line security/detect-object-injection
+        return {
+          CIDR: zoneNetwork,
         }
       })
     }
@@ -334,7 +379,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   }
 
   const shootCIDR = new Netmask(newShootWorkerCIDR)
-  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact([zone.workers, zone.public, zone.internal]))
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact([zone.workers, zone.public, zone.internal, zone.CIDR]))
   const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => !shootCIDR.contains(cidr))
   return zoneConfigurationContainsInvalidCIDR
     ? defaultZonesNetworkConfiguration

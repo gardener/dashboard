@@ -27,6 +27,7 @@ SPDX-License-Identifier: Apache-2.0
 import { defineAsyncComponent } from 'vue'
 
 const OpenstackDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogOpenstack'))
+const GdchDnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGdchDns'))
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
 const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
 const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
@@ -50,6 +51,7 @@ export default {
         // Custom Dialogs for specific provider types
         case 'openstack': return OpenstackDialog
         case 'openstack-designate': return OpenstackDialog
+        case 'gdch-dns': return GdchDnsDialog
 
         // Generic Dialogs
         case 'delete': return DeleteDialog
