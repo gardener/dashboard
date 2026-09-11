@@ -7179,7 +7179,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:10.10.0"],\
           ["eslint-plugin-es-x", "virtual:bed5728bfd8c350fc93160278451a706f6037b3a0707d6b87f46b01aefd6f2a408d2dc56e26fa15c56a4d43f14fb0dbe293ed62c26cd9dd6a4155d57075eb195#npm:7.8.0"],\
           ["eslint-plugin-n", "virtual:6c00f0910c6e759e4141f88b3c45286837109c9452989175177dc281c58007ca3eafca11c261b00df7b057d940bb10727202fa9431bcae4a266d93b3f02049b5#npm:18.3.0"],\
-          ["get-tsconfig", "npm:4.10.1"],\
+          ["get-tsconfig", "npm:4.14.3"],\
           ["globals", "npm:15.15.0"],\
           ["globrex", "npm:0.1.2"],\
           ["ignore", "npm:5.3.2"],\
@@ -8040,14 +8040,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["get-tsconfig", [\
-      ["npm:4.10.1", {\
-        "packageLocation": "./.yarn/cache/get-tsconfig-npm-4.10.1-87b6240e36-7f8e3dabc6.zip/node_modules/get-tsconfig/",\
-        "packageDependencies": [\
-          ["get-tsconfig", "npm:4.10.1"],\
-          ["resolve-pkg-maps", "npm:1.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:4.14.3", {\
         "packageLocation": "./.yarn/cache/get-tsconfig-npm-4.14.3-8162819adf-22119bb5b7.zip/node_modules/get-tsconfig/",\
         "packageDependencies": [\
