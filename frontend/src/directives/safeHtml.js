@@ -6,11 +6,13 @@
 
 import DOMPurify from 'dompurify'
 
+const PURIFY_CONFIG = { ADD_ATTR: ['target', 'rel'] }
+
 export const safeHtml = {
   mounted (el, { value }) {
-    el.innerHTML = DOMPurify.sanitize(value ?? '')
+    el.innerHTML = DOMPurify.sanitize(value ?? '', PURIFY_CONFIG)
   },
   updated (el, { value }) {
-    el.innerHTML = DOMPurify.sanitize(value ?? '')
+    el.innerHTML = DOMPurify.sanitize(value ?? '', PURIFY_CONFIG)
   },
 }
