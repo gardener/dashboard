@@ -101,7 +101,6 @@
     "neostandard": "0.14.0-next.1",
     "rollup-plugin-visualizer": "^7.0.0",
     "sass": "~1.79.0",
-    "typescript": "^7.0.0",
     "unplugin-fonts": "^2.0.0",
     "vite": "^7.0.0",
     "vite-plugin-compression": "^0.5.1",
