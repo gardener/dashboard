@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+/* eslint-disable import-x/no-named-as-default-member -- helmet exposes sub-methods on its default export; this is the documented usage pattern */
 
 import express from 'express'
 import expressStaticGzip from 'express-static-gzip'

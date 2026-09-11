@@ -52,7 +52,7 @@ const lodashConfig = {
 }
 
 const virtualModuleResolver = pluginImport.importXResolverCompat(
-  require(path.resolve('../eslint-import-resolver-local.cjs')),
+  require(path.resolve(__dirname, '../eslint-import-resolver-local.cjs')),
   {
     map: [
       ['unfonts.css', null],
@@ -73,7 +73,7 @@ const importConfig = {
   settings: {
     'import-x/resolver-next': [
       pluginImport.createNodeResolver({
-        alias: { '@': [path.resolve('./src')] },
+        alias: { '@': [path.resolve(__dirname, './src')] },
         extensions: ['.js', '.vue'],
       }),
       virtualModuleResolver,
