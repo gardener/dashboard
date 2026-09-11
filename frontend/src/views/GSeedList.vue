@@ -331,7 +331,7 @@ function isHeaderSelected (key) {
   return header?.selected ?? false
 }
 
-function getUnhealthyShootInformation(item) {
+function getUnhealthyShootInformation (item) {
   const name = get(item, ['metadata', 'name'])
   const shootCount = seedStatStore.shootCountForSeed(name) ?? 0
   if (shootCount === 0) {
@@ -341,7 +341,7 @@ function getUnhealthyShootInformation(item) {
   const total = seedStatStore.statByName(name)?.counts?.unhealthyShoots?.total ?? 0
   const otherUnhealthy = total - unhealthy
   const healthy = shootCount - total
-  return { unhealthy, otherUnhealthy, healthy, total}
+  return { unhealthy, otherUnhealthy, healthy, total }
 }
 
 const seedStatsSubscriptionOptions = computed(() => {
