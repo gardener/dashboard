@@ -10,7 +10,7 @@ const neostandard = require('neostandard')
 const pluginVue = require('eslint-plugin-vue')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
+const pluginImport = require('eslint-plugin-import-x')
 const pluginVitest = require('@vitest/eslint-plugin')
 const importNewlines = require('eslint-plugin-import-newlines')
 
@@ -50,37 +50,40 @@ const lodashConfig = {
   },
 }
 
+const virtualModuleResolver = pluginImport.importXResolverCompat(
+  require(path.resolve('../eslint-import-resolver-local.cjs')),
+  {
+    map: [
+      ['unfonts.css', null],
+      ['vuetify/components', null],
+      ['vuetify/directives', null],
+      ['vuetify/styles', null],
+      ['vuetify/util/colors', null],
+      ['virtual:g-mdi-meta', null],
+    ],
+  },
+)
+
 const importConfig = {
   ignores: [
     'vite.config.js',
     'vitest.config.js',
   ],
   settings: {
-    'import/resolver': {
-      alias: {
-        map: [
-          ['@', './src'],
-        ],
+    'import-x/resolver-next': [
+      pluginImport.createNodeResolver({
+        alias: { '@': [path.resolve('./src')] },
         extensions: ['.js', '.vue'],
-      },
-      [path.resolve('../eslint-import-resolver-local.cjs')]: {
-        map: [
-          ['unfonts.css', null],
-          ['vuetify/components', null],
-          ['vuetify/directives', null],
-          ['vuetify/styles', null],
-          ['vuetify/util/colors', null],
-          ['virtual:g-mdi-meta', null],
-        ],
-      },
-    },
+      }),
+      virtualModuleResolver,
+    ],
   },
   plugins: {
-    import: pluginImport,
+    'import-x': pluginImport,
   },
   rules: {
     ...pluginImport.flatConfigs.recommended.rules,
-    'import/order': ['error', {
+    'import-x/order': ['error', {
       groups: [
         'builtin',
         'external',
@@ -249,6 +252,7 @@ module.exports = [
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'security/detect-unsafe-regex': 'off',
+      'import-x/named': 'off',
     },
   },
 ]
