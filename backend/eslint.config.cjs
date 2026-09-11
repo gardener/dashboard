@@ -4,11 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+const path = require('path')
+
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
+const pluginImport = require('eslint-plugin-import-x')
 const importNewlines = require('eslint-plugin-import-newlines')
 
 const importNewlinesConfig = {
@@ -24,6 +26,21 @@ const importNewlinesConfig = {
     'import-newlines/enforce': ['error', 1],
   },
 }
+
+const workspacePackageResolver = pluginImport.importXResolverCompat(
+  require(path.resolve('../eslint-import-resolver-local.cjs')),
+  {
+    map: [
+      ['@gardener-dashboard/monitor', '../packages/monitor'],
+      ['@gardener-dashboard/logger', '../packages/logger'],
+      ['@gardener-dashboard/kube-client', '../packages/kube-client'],
+      ['@gardener-dashboard/kube-config', '../packages/kube-config'],
+      ['@gardener-dashboard/polling-watcher', '../packages/polling-watcher'],
+      ['@gardener-dashboard/request', '../packages/request'],
+      ['@gardener-dashboard/test-utils', '../packages/test-utils'],
+    ],
+  },
+)
 
 module.exports = [
   ...neostandard({}),
@@ -47,27 +64,20 @@ module.exports = [
   pluginSecurity.configs.recommended,
   {
     settings: {
-      'import/resolver': {
-        [require.resolve('../eslint-import-resolver-local.cjs')]: {
-          map: [
-            ['@gardener-dashboard/monitor', '../packages/monitor'],
-            ['@gardener-dashboard/logger', '../packages/logger'],
-            ['@gardener-dashboard/kube-client', '../packages/kube-client'],
-            ['@gardener-dashboard/kube-config', '../packages/kube-config'],
-            ['@gardener-dashboard/polling-watcher', '../packages/polling-watcher'],
-            ['@gardener-dashboard/request', '../packages/request'],
-            ['@gardener-dashboard/test-utils', '../packages/test-utils'],
-          ],
-        },
-        alias: {
+      'import-x/resolver-next': [
+        pluginImport.createNodeResolver({
           extensions: ['.js', '.cjs', '.mjs'],
-        },
-      },
+        }),
+        workspacePackageResolver,
+      ],
     },
     plugins: {
-      import: pluginImport,
+      'import-x': pluginImport,
     },
-    rules: pluginImport.flatConfigs.recommended.rules,
+    rules: {
+      ...pluginImport.flatConfigs.recommended.rules,
+      'import-x/no-named-as-default-member': 'off',
+    },
   },
   {
     plugins: {
@@ -96,7 +106,7 @@ module.exports = [
       'security/detect-object-injection': 'off',
       'security/detect-possible-timing-attacks': 'off',
       'security/detect-unsafe-regex': 'off',
-      'import/named': 'off',
+      'import-x/named': 'off',
       'vitest/no-standalone-expect': 'off',
       'vitest/no-disabled-tests': 'warn',
       'max-nested-callbacks': 'off',
@@ -105,7 +115,7 @@ module.exports = [
   {
     files: ['**/vitest.config.js'],
     rules: {
-      'import/no-unresolved': 'off',
+      'import-x/no-unresolved': 'off',
     },
   },
   importNewlinesConfig,

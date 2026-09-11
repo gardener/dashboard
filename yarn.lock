@@ -688,9 +688,8 @@ __metadata:
     cross-env: "npm:^10.0.0"
     dockerfile-ast: "npm:^0.7.0"
     eslint: "npm:^10.0.0"
-    eslint-import-resolver-alias: "npm:^1.1.2"
-    eslint-plugin-import: "npm:^2.31.0"
     eslint-plugin-import-newlines: "npm:^2.0.0"
+    eslint-plugin-import-x: "npm:^4.17.1"
     eslint-plugin-lodash: "npm:^8.0.0"
     eslint-plugin-security: "npm:^4.0.0"
     express: "npm:^5.0.0"
@@ -4651,15 +4650,6 @@ __metadata:
     unrs-resolver:
       optional: true
   checksum: 10c0/07851103443b70af681c5988e2702e681ff9b956e055e11d4bd9b2322847fa0d9e8da50c18fc7cb1165106b043f34fbd0384d7011c239465c4645c52132e56f3
-  languageName: node
-  linkType: hard
-
-"eslint-import-resolver-alias@npm:^1.1.2":
-  version: 1.1.2
-  resolution: "eslint-import-resolver-alias@npm:1.1.2"
-  peerDependencies:
-    eslint-plugin-import: ">=1.4.0"
-  checksum: 10c0/71f156e131242db509fe1cfdb410cca665cc9c6e4201e20609689016414e3c6c0b9df27a74b83367694b8ccc5f41687abde26b6cd2c96f961ba16152aca40e43
   languageName: node
   linkType: hard
 
