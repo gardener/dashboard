@@ -6927,19 +6927,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:6d0f9b5892a1cb3cda8c768eb240ec482cf9618cdcf15ef2c026b11937db2a3b4db65a6683461adbbbcba1e7c4f4abeb4fa766ebc31376b24e3c9c053388fdad#npm:1.1.2", {\
-        "packageLocation": "./.yarn/__virtual__/eslint-import-resolver-alias-virtual-d7f98d2024/0/cache/eslint-import-resolver-alias-npm-1.1.2-19bb9eab39-71f156e131.zip/node_modules/eslint-import-resolver-alias/",\
-        "packageDependencies": [\
-          ["@types/eslint-plugin-import", null],\
-          ["eslint-import-resolver-alias", "virtual:6d0f9b5892a1cb3cda8c768eb240ec482cf9618cdcf15ef2c026b11937db2a3b4db65a6683461adbbbcba1e7c4f4abeb4fa766ebc31376b24e3c9c053388fdad#npm:1.1.2"],\
-          ["eslint-plugin-import", null]\
-        ],\
-        "packagePeers": [\
-          "@types/eslint-plugin-import",\
-          "eslint-plugin-import"\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.1.2", {\
         "packageLocation": "./.yarn/__virtual__/eslint-import-resolver-alias-virtual-597b73ffd1/0/cache/eslint-import-resolver-alias-npm-1.1.2-19bb9eab39-71f156e131.zip/node_modules/eslint-import-resolver-alias/",\
         "packageDependencies": [\
@@ -6985,7 +6972,6 @@ const RAW_RUNTIME_STATE =
           ["@typescript-eslint/parser", null],\
           ["debug", "virtual:2a426afc4b2eef43db12a540d29c2b5476640459bfcd5c24f86bb401cf8cce97e63bd81794d206a5643057e7f662643afd5ce3dfc4d4bfd8e706006c6309c5fa#npm:3.2.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:10.10.0"],\
-          ["eslint-import-resolver-alias", "virtual:6d0f9b5892a1cb3cda8c768eb240ec482cf9618cdcf15ef2c026b11937db2a3b4db65a6683461adbbbcba1e7c4f4abeb4fa766ebc31376b24e3c9c053388fdad#npm:1.1.2"],\
           ["eslint-import-resolver-node", "npm:0.3.9"],\
           ["eslint-import-resolver-typescript", null],\
           ["eslint-import-resolver-webpack", null],\
