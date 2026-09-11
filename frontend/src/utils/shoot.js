@@ -142,14 +142,6 @@ export function getProviderTemplate (providerType, defaultWorkerCIDR) {
           kind: 'ControlPlaneConfig',
         },
       }
-    case 'vsphere':
-      return {
-        type: 'vsphere',
-        controlPlaneConfig: {
-          apiVersion: 'vsphere.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-        },
-      }
     case 'hcloud':
       return {
         type: 'hcloud',

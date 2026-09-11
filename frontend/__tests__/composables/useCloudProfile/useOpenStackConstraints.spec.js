@@ -67,15 +67,6 @@ describe('composables', () => {
       },
     ]
 
-    const loadBalancerClasses = [
-      {
-        name: 'class1',
-      },
-      {
-        name: 'class2',
-      },
-    ]
-
     let cloudProfile
 
     beforeEach(() => {
@@ -89,9 +80,6 @@ describe('composables', () => {
             constraints: {
               floatingPools,
               loadBalancerProviders,
-              loadBalancerConfig: {
-                classes: loadBalancerClasses,
-              },
             },
           },
         },
@@ -169,26 +157,6 @@ describe('composables', () => {
         dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
         expect(dashboardLoadBalancerProviderNames.value).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames.value[0]).toBe('other regional LB')
-      })
-    })
-
-    describe('#loadBalancerClassNames', () => {
-      it('should return load balancer class names from cloud profile', () => {
-        const { loadBalancerClassNames } = useOpenStackConstraints(cloudProfile)
-
-        expect(loadBalancerClassNames.value).toHaveLength(2)
-        expect(loadBalancerClassNames.value[0]).toBe('class1')
-        expect(loadBalancerClassNames.value[1]).toBe('class2')
-      })
-    })
-
-    describe('#loadBalancerClasses', () => {
-      it('should return load balancer classes from cloud profile', () => {
-        const { loadBalancerClasses } = useOpenStackConstraints(cloudProfile)
-
-        expect(loadBalancerClasses.value).toHaveLength(2)
-        expect(loadBalancerClasses.value[0]).toEqual({ name: 'class1' })
-        expect(loadBalancerClasses.value[1]).toEqual({ name: 'class2' })
       })
     })
   })

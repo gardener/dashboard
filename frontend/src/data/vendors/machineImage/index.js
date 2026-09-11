@@ -30,12 +30,6 @@ export default [
     icon: 'flatcar.svg',
   },
   {
-    name: 'suse-jeos',
-    displayName: 'SUSE Linux Enterprise Server (JeOS)',
-    weight: 500,
-    icon: 'suse.svg',
-  },
-  {
     name: 'suse-chost',
     displayName: 'SUSE Container Host configuration (Chost)',
     weight: 600,

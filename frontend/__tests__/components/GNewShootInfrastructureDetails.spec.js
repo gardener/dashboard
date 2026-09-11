@@ -29,7 +29,6 @@ describe('components', () => {
         region: ref('region-1'),
         networkingType: ref('cilium'),
         providerControlPlaneConfigLoadBalancerProviderName: ref(),
-        providerControlPlaneConfigLoadBalancerClassNames: refList(),
         providerInfrastructureConfigFloatingPoolName: ref(),
         providerInfrastructureConfigPartitionID: ref(),
         providerInfrastructureConfigProjectID: ref(),
@@ -43,7 +42,6 @@ describe('components', () => {
         showAllRegions: ref(true),
         networkingTypes: ref(['calico', 'cilium']),
         allLoadBalancerProviderNames: ref(['f5']),
-        allLoadBalancerClassNames: refList(),
         partitionIDs: refList(),
         firewallImages: refList(),
         firewallSizes: refList(),
@@ -184,37 +182,6 @@ describe('components', () => {
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(false)
       await wrapper.find('.v-select[data-label="Firewall Size"]').trigger('blur')
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(true)
-    })
-
-    it('should require the default vSphere load balancer class when available', async () => {
-      shootContext.allLoadBalancerClassNames.value = ['default', 'other']
-      shootContext.providerType.value = 'vsphere'
-      await nextTick()
-      await wrapper.vm.v$.$validate()
-
-      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(true)
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(true)
-      expect(selectByLabel('Load Balancer Classes').exists()).toBe(true)
-
-      shootContext.providerControlPlaneConfigLoadBalancerClassNames.value = ['other']
-      await nextTick()
-      await wrapper.vm.v$.$validate()
-      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(false)
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(true)
-
-      shootContext.providerControlPlaneConfigLoadBalancerClassNames.value = ['default']
-      await nextTick()
-      await wrapper.vm.v$.$validate()
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
-
-      shootContext.providerControlPlaneConfigLoadBalancerClassNames.value = []
-      shootContext.workerless.value = true
-      await nextTick()
-      await wrapper.vm.v$.$validate()
-      expect(wrapper.vm.v$.loadBalancerClassNames.required.$invalid).toBe(false)
-      expect(wrapper.vm.v$.loadBalancerClassNames.includesKey.$invalid).toBe(false)
-      expect(wrapper.vm.v$.$invalid).toBe(false)
-      expect(selectByLabel('Load Balancer Classes').exists()).toBe(false)
     })
   })
 })
