@@ -56,9 +56,15 @@ function compareLastOperation (a, b, compareValues) {
 }
 
 function compareUnhealthyShoots (a, b, compareValues) {
-  if (a == null && b == null) {return 0}
-  if (a == null) {return -1}
-  if (b == null) {return 1}
+  if (a == null && b == null) {
+    return 0
+  }
+  if (a == null) {
+    return -1
+  }
+  if (b == null) {
+    return 1
+  }
 
   return compareValues(a.unhealthy, b.unhealthy) ||
     compareValues(a.otherUnhealthy, b.otherUnhealthy) ||
