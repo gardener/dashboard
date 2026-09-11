@@ -198,7 +198,7 @@ const allHeaders = computed(() => [
     align: 'center',
     defaultSelected: true,
     hidden: false,
-    value: item => seedStatStore.unhealthyShootsForSeed(get(item, ['metadata', 'name'])) ?? 0,
+    value: item => getUnhealthyShootInformation(item),
   },
   {
     title: 'ACCESS RESTRICTIONS',
@@ -329,6 +329,19 @@ function getItemKey (item, fallback) {
 function isHeaderSelected (key) {
   const header = find(headers.value, ['key', key])
   return header?.selected ?? false
+}
+
+function getUnhealthyShootInformation (item) {
+  const name = get(item, ['metadata', 'name'])
+  const shootCount = seedStatStore.shootCountForSeed(name) ?? 0
+  if (shootCount === 0) {
+    return null
+  }
+  const unhealthy = seedStatStore.unhealthyShootsForSeed(name) ?? 0
+  const total = seedStatStore.statByName(name)?.counts?.unhealthyShoots?.total ?? 0
+  const otherUnhealthy = total - unhealthy
+  const healthy = shootCount - total
+  return { unhealthy, otherUnhealthy, healthy, total }
 }
 
 const seedStatsSubscriptionOptions = computed(() => {

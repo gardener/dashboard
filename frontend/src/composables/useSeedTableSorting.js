@@ -55,6 +55,22 @@ function compareLastOperation (a, b, compareValues) {
   return compareValues(getSeedLastOperationSortVal(a), getSeedLastOperationSortVal(b))
 }
 
+function compareUnhealthyShoots (a, b, compareValues) {
+  if (a == null && b == null) {
+    return 0
+  }
+  if (a == null) {
+    return -1
+  }
+  if (b == null) {
+    return 1
+  }
+
+  return compareValues(a.unhealthy, b.unhealthy) ||
+    compareValues(a.otherUnhealthy, b.otherUnhealthy) ||
+    compareValues(a.healthy, b.healthy)
+}
+
 export function useSeedTableSorting () {
   const configStore = useConfigStore()
 
@@ -67,7 +83,7 @@ export function useSeedTableSorting () {
     name: compareValues,
     infrastructure: compareValues,
     shootCount: compareValues,
-    unhealthyShoots: compareValues,
+    unhealthyShoots: (a, b) => compareUnhealthyShoots(a, b, compareValues),
     lastOperation: (a, b) => compareLastOperation(a, b, compareValues),
     kubernetesVersion: compareSemanticVersions,
     gardenerVersion: compareSemanticVersions,

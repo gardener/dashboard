@@ -131,11 +131,30 @@ describe('composables', () => {
     })
 
     it('should sort unhealthy shoots numerically', () => {
+      const a = {
+        healthy: 2,
+        unhealthy: 4,
+        otherUnhealthy: 3,
+      }
+      const b = {
+        healthy: 20,
+        unhealthy: 3,
+        otherUnhealthy: 3,
+      }
+      const c = {
+        healthy: 2,
+        unhealthy: 3,
+        otherUnhealthy: 4,
+      }
       const { customKeySort } = useSeedTableSorting()
 
-      expect(customKeySort.unhealthyShoots(0, 1)).toBeLessThan(0)
-      expect(customKeySort.unhealthyShoots(3, 1)).toBeGreaterThan(0)
-      expect(customKeySort.unhealthyShoots(1, 1)).toBe(0)
+      expect(customKeySort.unhealthyShoots(b, a)).toBeLessThan(0)
+      expect(customKeySort.unhealthyShoots(a, b)).toBeGreaterThan(0)
+      expect(customKeySort.unhealthyShoots(c, a)).toBeLessThan(0)
+      expect(customKeySort.unhealthyShoots(a, c)).toBeGreaterThan(0)
+      expect(customKeySort.unhealthyShoots(b, c)).toBeLessThan(0)
+      expect(customKeySort.unhealthyShoots(c, b)).toBeGreaterThan(0)
+      expect(customKeySort.unhealthyShoots(a, a)).toBe(0)
     })
   })
 })
