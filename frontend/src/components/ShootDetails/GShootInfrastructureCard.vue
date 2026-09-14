@@ -190,9 +190,10 @@ SPDX-License-Identifier: Apache-2.0
             v-if="shootDnsServiceExtensionProviders && shootDnsServiceExtensionProviders.length"
             class="d-flex"
           >
-            <template 
+            <template
               v-for="provider in shootDnsServiceExtensionProviders"
-              :key="dnsExtensionProviderResourceName(provider)">
+              :key="dnsExtensionProviderResourceName(provider)"
+            >
               <g-dns-provider 
                 v-if="dnsProviderCredential(provider)"
                 class="mr-2"
@@ -450,7 +451,7 @@ export default {
         namespace: this.shootNamespace,
       })
     },
-    isADnsProviderCredentialExisting() {
+    isADnsProviderCredentialExisting () {
       if(this.shootDnsServiceExtensionProviders) {
         return this.shootDnsServiceExtensionProviders.some(provider => !!this.dnsProviderCredential(provider))
       }
