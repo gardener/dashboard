@@ -30,6 +30,10 @@ export const serviceIdentityField = {
       key: 'type',
       value: 'gdch_service_account',
     },
+    name: {
+      type: 'hasObjectProp',
+      key: 'name',
+    },
     privateKeyID: {
       type: 'hasObjectProp',
       key: 'private_key_id',
