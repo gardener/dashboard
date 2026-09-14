@@ -956,7 +956,7 @@ const RAW_RUNTIME_STATE =
           ["@vitest/eslint-plugin", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:1.6.27"],\
           ["base64url", "npm:3.0.1"],\
           ["body-parser", "npm:2.3.0"],\
-          ["compression", "npm:1.8.1"],\
+          ["compression", "npm:1.8.2"],\
           ["cookie-parser", "npm:1.4.7"],\
           ["cross-env", "npm:10.1.0"],\
           ["dockerfile-ast", "npm:0.7.1"],\
@@ -5487,13 +5487,14 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["compression", [\
-      ["npm:1.8.1", {\
-        "packageLocation": "./.yarn/cache/compression-npm-1.8.1-e34a5db404-85114b0b91.zip/node_modules/compression/",\
+      ["npm:1.8.2", {\
+        "packageLocation": "./.yarn/cache/compression-npm-1.8.2-4b720da886-f95be71223.zip/node_modules/compression/",\
         "packageDependencies": [\
           ["bytes", "npm:3.1.2"],\
           ["compressible", "npm:2.0.18"],\
-          ["compression", "npm:1.8.1"],\
-          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
+          ["compression", "npm:1.8.2"],\
+          ["debug", "virtual:4b720da886f3a24ed25e3c8a6340d4d47afe353cab1ba8824d464cfd6b5f69af66967c1478256bd0a5296befed31593460b4110b4ede0955b4b381b51cc215c5#npm:2.6.9"],\
+          ["destroy", "npm:1.2.0"],\
           ["negotiator", "npm:0.6.4"],\
           ["on-headers", "npm:1.1.0"],\
           ["safe-buffer", "npm:5.2.1"],\
@@ -5837,11 +5838,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9", {\
-        "packageLocation": "./.yarn/__virtual__/debug-virtual-63e86aadbc/0/cache/debug-npm-2.6.9-7d4cb597dc-121908fb83.zip/node_modules/debug/",\
+      ["virtual:4b720da886f3a24ed25e3c8a6340d4d47afe353cab1ba8824d464cfd6b5f69af66967c1478256bd0a5296befed31593460b4110b4ede0955b4b381b51cc215c5#npm:2.6.9", {\
+        "packageLocation": "./.yarn/__virtual__/debug-virtual-4cd5aa0bd3/0/cache/debug-npm-2.6.9-7d4cb597dc-121908fb83.zip/node_modules/debug/",\
         "packageDependencies": [\
           ["@types/supports-color", null],\
-          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
+          ["debug", "virtual:4b720da886f3a24ed25e3c8a6340d4d47afe353cab1ba8824d464cfd6b5f69af66967c1478256bd0a5296befed31593460b4110b4ede0955b4b381b51cc215c5#npm:2.6.9"],\
           ["ms", "npm:2.0.0"],\
           ["supports-color", null]\
         ],\
@@ -5979,6 +5980,15 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/dequal-npm-2.0.3-53a630c60e-f98860cdf5.zip/node_modules/dequal/",\
         "packageDependencies": [\
           ["dequal", "npm:2.0.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["destroy", [\
+      ["npm:1.2.0", {\
+        "packageLocation": "./.yarn/cache/destroy-npm-1.2.0-6a511802e2-bd7633942f.zip/node_modules/destroy/",\
+        "packageDependencies": [\
+          ["destroy", "npm:1.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9954,7 +9964,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/morgan-npm-1.12.0-fcc384b2b9-84480e2414.zip/node_modules/morgan/",\
         "packageDependencies": [\
           ["basic-auth", "npm:2.0.1"],\
-          ["debug", "virtual:e34a5db40400b9e5b2ff4a99207e6e6259d3054982622ae91b68c81eb2631164c6d9db4ab29c0dbf7620574b8d6b678f010601eafc55a6b832550053c1b61b7b#npm:2.6.9"],\
+          ["debug", "virtual:4b720da886f3a24ed25e3c8a6340d4d47afe353cab1ba8824d464cfd6b5f69af66967c1478256bd0a5296befed31593460b4110b4ede0955b4b381b51cc215c5#npm:2.6.9"],\
           ["depd", "npm:2.0.0"],\
           ["morgan", "npm:1.12.0"],\
           ["on-finished", "npm:2.4.1"],\
