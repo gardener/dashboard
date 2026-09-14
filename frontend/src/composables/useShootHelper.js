@@ -133,7 +133,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
   const {
     useFloatingPoolNames,
     useLoadBalancerProviderNames,
-    loadBalancerClassNames,
   } = useOpenStackConstraints(cloudProfile)
 
   const {
@@ -246,7 +245,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
     regionsWithSeed,
     regionsWithoutSeed,
     allLoadBalancerProviderNames,
-    allLoadBalancerClassNames: loadBalancerClassNames,
     partitionIDs,
     firewallImages,
     firewallSizes,
