@@ -5,15 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-gardenctl-command
-    v-if="commandParametersPresentAndValid"
-    v-for="({ title, subtitle, value }, index) in commands"
-    :key="title"
-    :title="title"
-    :subtitle="subtitle"
-    :command="value"
-    :show-icon="index === 0"
-  />
+  <template v-if="commandParametersPresentAndValid">
+    <g-gardenctl-command
+      v-for="({ title, subtitle, value }, index) in commands"
+      :key="title"
+      :title="title"
+      :subtitle="subtitle"
+      :command="value"
+      :show-icon="index === 0"
+    />
+  </template>
 </template>
 
 <script>
@@ -86,11 +87,11 @@ export default {
     targetShootCommand () {
       return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName}`  
     },
-    commandParametersPresentAndValid() {
+    commandParametersPresentAndValid () {
       return this.clusterIdentity && isGardenName(this.clusterIdentity) 
         && this.shootProjectName && isDnsSubdomainName(this.shootProjectName)
         && this.shootName && isRfc1123LabelName(this.shootName)
-    }
+    },
   },
 }
 </script>

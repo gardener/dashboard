@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card v-if="commandParametersPresentAndValid" class="mb-4">
+  <v-card
+    v-if="commandParametersPresentAndValid"
+    class="mb-4"
+  >
     <g-toolbar title="Access" />
     <g-list>
       <g-gardenctl-command
@@ -40,6 +43,7 @@ const { seedName } = useSeedItem()
 const targetSeedCommand = computed(() => {
   return `gardenctl target --garden ${clusterIdentity.value} --seed ${seedName.value}`
 })
+
 const commandParametersPresentAndValid = computed(() => {
   return clusterIdentity.value && isGardenName(clusterIdentity.value)
   && seedName.value && isRfc1123LabelName(seedName.value)

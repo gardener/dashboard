@@ -56,10 +56,11 @@ import { mapState } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
+import { isGardenName } from '@/utils/validators'
+
 import GCodeBlock from './GCodeBlock.vue'
 import GTextRouterLink from './GTextRouterLink.vue'
 
-import { isGardenName } from '@/utils/validators'
 
 export default {
   components: {
@@ -89,12 +90,12 @@ export default {
     configCmd () {
       return `gardenctl config set-garden ${this.gardenName} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
     },
-    gardenName() {
+    gardenName () {
       if(this.clusterIdentity && isGardenName(this.clusterIdentity)) {
         return this.clusterIdentity
       }
       return '<garden-identifier>'
-    }
+    },
   },
 }
 </script>
