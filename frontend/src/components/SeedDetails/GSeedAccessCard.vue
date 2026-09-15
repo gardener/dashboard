@@ -38,7 +38,7 @@ const { seedName } = useSeedItem()
 
 const targetSeedCommand = computed(() => {
   const args = []
-  if (clusterIdentity.value && gardenName.$validator(lusterIdentity.value)) {
+  if (clusterIdentity.value && gardenName.$validator(clusterIdentity.value)) {
     args.push(`--garden ${clusterIdentity.value}`)
   }
   if (seedName.value && rfc1123LableName.$validator(seedName.value)) {
