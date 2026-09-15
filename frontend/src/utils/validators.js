@@ -19,7 +19,7 @@ const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/
 const rfc1123LableNamePattern = /^(?![0-9]+$)(?!.*-$)(?!-)[a-z0-9-]{1,63}$/
-const dnsSubdomainNamePattern = /^(?![0-9]+$)(?!.*[-\.]$)(?![-\.])[a-z0-9-\.]{1,253}$/
+const dnsSubdomainNamePattern = /^(?![0-9]+$)(?!.*[-.]$)(?![-.])[a-z0-9-.]{1,253}$/
 const gardenNamePattern = /^(?![0-9]+$)(?!.*[-_]$)(?![-_])[a-zA-Z0-9-_]+$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
