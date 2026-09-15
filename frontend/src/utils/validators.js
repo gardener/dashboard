@@ -47,7 +47,7 @@ const numberOrPercentage = withMessage('Must be a number or percentage', value =
 })
 const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 
-const rfc1123LableName = withMessage('Must contain only lowercase alphanumeric characters or \'-\', not start or end with a hyphen. Contain at most 63 characters.', value => {
+const rfc1123LabelName = withMessage('Must contain only lowercase alphanumeric characters or \'-\', not start or end with a hyphen and contain at most 63 characters.', value => {
   return rfc1123LableNamePattern.test(value)
 })
 const dnsSubdomainName = withMessage('Must contain only lowercase alphanumeric characters, \'-\' or \'.\', start and end with an alphanumeric character. Contain at most 253 characters.', value => {
