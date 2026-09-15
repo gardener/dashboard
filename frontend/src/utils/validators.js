@@ -18,6 +18,9 @@ const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/
+const rfc1123LableNamePattern = /^(?![0-9]+$)(?!.*-$)(?!-)[a-z0-9-]{1,63}$/
+const dnsSubdomainNamePattern = /^(?![0-9]+$)(?!.*[-\.]$)(?![-\.])[a-z0-9-\.]{1,253}$/
+const gardenNamePattern = /^(?![0-9]+$)(?!.*[-_]$)(?![-_])[a-zA-Z0-9-_]+$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', value => {
@@ -44,6 +47,15 @@ const numberOrPercentage = withMessage('Must be a number or percentage', value =
 })
 const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 
+const rfc1123LableName = withMessage('Must contain only lowercase alphanumeric characters or \'-\', not start or end with a hyphen. Contain at most 63 characters.', value => {
+  return rfc1123LableNamePattern.test(value)
+})
+const dnsSubdomainName = withMessage('Must contain only lowercase alphanumeric characters, \'-\' or \'.\', start and end with an alphanumeric character. Contain at most 253 characters.', value => {
+  return dnsSubdomainNamePattern.test(value)
+})
+const gardenName = withMessage('Must contain only alphanumeric characters, \'-\' or \'_\', start and end with an alphanumeric character.', value => {
+  return gardenNamePattern.test(value)
+})
 const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', value => {
   return timezonePattern.test(value)
 })
@@ -109,4 +121,7 @@ export {
   numberOrPercentage,
   isTimezone,
   guid,
+  rfc1123LableName,
+  dnsSubdomainName,
+  gardenName,
 }

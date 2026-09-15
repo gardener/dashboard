@@ -24,6 +24,11 @@ import { useConfigStore } from '@/store/config'
 import GGardenctlCommand from '@/components/GGardenctlCommand.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
+import {
+  rfc1123LableName,
+  dnsSubdomainName,
+  gardenName,
+} from '@/utils/validators'
 
 export default {
   components: {
@@ -75,13 +80,13 @@ export default {
     },
     targetControlPlaneCommand () {
       const args = []
-      if (this.clusterIdentity) {
+      if (this.clusterIdentity && gardenName.$validator(this.clusterIdentity)) {
         args.push(`--garden ${this.clusterIdentity}`)
       }
-      if (this.shootProjectName) {
+      if (this.shootProjectName && dnsSubdomainName.$validator(this.shootProjectName)) {
         args.push(`--project ${this.shootProjectName}`)
       }
-      if (this.shootName) {
+      if (this.shootName && rfc1123LableName.$validator(this.shootName)) {
         args.push(`--shoot ${this.shootName}`)
       }
 
@@ -91,13 +96,13 @@ export default {
     },
     targetShootCommand () {
       const args = []
-      if (this.clusterIdentity) {
+      if (this.clusterIdentity && gardenName.$validator(this.clusterIdentity)) {
         args.push(`--garden ${this.clusterIdentity}`)
       }
-      if (this.shootProjectName) {
+      if (this.shootProjectName && dnsSubdomainName.$validator(this.shootProjectName)) {
         args.push(`--project ${this.shootProjectName}`)
       }
-      if (this.shootName) {
+      if (this.shootName && rfc1123LableName.$validator(this.shootName)) {
         args.push(`--shoot ${this.shootName}`)
       }
 

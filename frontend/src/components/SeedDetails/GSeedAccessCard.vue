@@ -27,6 +27,10 @@ import GGardenctlCommand from '@/components/GGardenctlCommand.vue'
 import GList from '@/components/GList.vue'
 
 import { useSeedItem } from '@/composables/useSeedItem/index'
+import {
+  rfc1123LableName,
+  gardenName,
+} from '@/utils/validators'
 
 const configStore = useConfigStore()
 const { clusterIdentity } = storeToRefs(configStore)
@@ -34,11 +38,10 @@ const { seedName } = useSeedItem()
 
 const targetSeedCommand = computed(() => {
   const args = []
-
-  if (clusterIdentity.value) {
+  if (clusterIdentity.value && gardenName.$validator(lusterIdentity.value)) {
     args.push(`--garden ${clusterIdentity.value}`)
   }
-  if (seedName.value) {
+  if (seedName.value && rfc1123LableName.$validator(seedName.value)) {
     args.push(`--seed ${seedName.value}`)
   }
 
