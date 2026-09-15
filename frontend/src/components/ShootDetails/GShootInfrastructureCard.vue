@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && isADnsProviderCredentialExisting">
+      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShootsBinding || isADnsProviderCredentialExisting)">
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
