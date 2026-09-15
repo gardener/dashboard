@@ -267,8 +267,8 @@ export default {
     },
     isTerminalInUntrustedEnvironment () {
       return this.targetTab.selectedTarget === TargetEnum.SHOOT &&
-          !this.targetTab.configLoading &&
-          this.state.runtime === TargetEnum.SHOOT
+        !this.targetTab.configLoading &&
+        this.state.runtime === TargetEnum.SHOOT
     },
     hasNoAvailableNodes () {
       if (this.state.runtime !== TargetEnum.SHOOT) {
