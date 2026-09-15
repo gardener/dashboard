@@ -50,7 +50,7 @@ const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 const rfc1123LabelName = withMessage('Must contain only lowercase alphanumeric characters or \'-\', not start or end with a hyphen and contain at most 63 characters.', value => {
   return rfc1123LableNamePattern.test(value)
 })
-const dnsSubdomainName = withMessage('Must contain only lowercase alphanumeric characters, \'-\' or \'.\', start and end with an alphanumeric character. Contain at most 253 characters.', value => {
+const dnsSubdomainName = withMessage('Must contain only lowercase alphanumeric characters, \'-\' or \'.\', start and end with an alphanumeric character and contain at most 253 characters.', value => {
   return dnsSubdomainNamePattern.test(value)
 })
 const gardenName = withMessage('Must contain only alphanumeric characters, \'-\' or \'_\', start and end with an alphanumeric character.', value => {
