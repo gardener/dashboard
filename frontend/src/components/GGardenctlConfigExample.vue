@@ -59,6 +59,8 @@ import { useConfigStore } from '@/store/config'
 import GCodeBlock from './GCodeBlock.vue'
 import GTextRouterLink from './GTextRouterLink.vue'
 
+import { isGardenName } from '@/utils/validators'
+
 export default {
   components: {
     GCodeBlock,
@@ -81,12 +83,18 @@ export default {
     },
     gardenctlConfigYaml () {
       return `gardens:
-  - identity: ${this.clusterIdentity}
+  - identity: ${this.gardenName}
     kubeconfig: <path-to-garden-cluster-kubeconfig>`
     },
     configCmd () {
-      return `gardenctl config set-garden ${this.clusterIdentity} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
+      return `gardenctl config set-garden ${this.gardenName} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
     },
+    gardenName() {
+      if(this.clusterIdentity && isGardenName(this.clusterIdentity)) {
+        return this.clusterIdentity
+      }
+      return '<garden-identifier>'
+    }
   },
 }
 </script>

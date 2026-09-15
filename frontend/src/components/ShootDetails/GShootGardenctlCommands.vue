@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <g-gardenctl-command
+    v-if="commandParametersPresentAndValid"
     v-for="({ title, subtitle, value }, index) in commands"
     :key="title"
     :title="title"
@@ -26,9 +27,9 @@ import GGardenctlCommand from '@/components/GGardenctlCommand.vue'
 import { useShootItem } from '@/composables/useShootItem'
 
 import {
-  rfc1123LableName,
-  dnsSubdomainName,
-  gardenName,
+  isRfc1123LabelName,
+  isDnsSubdomainName,
+  isGardenName,
 } from '@/utils/validators'
 
 export default {
@@ -80,35 +81,16 @@ export default {
       return cmds
     },
     targetControlPlaneCommand () {
-      const args = []
-      if (this.clusterIdentity && gardenName.$validator(this.clusterIdentity)) {
-        args.push(`--garden ${this.clusterIdentity}`)
-      }
-      if (this.shootProjectName && dnsSubdomainName.$validator(this.shootProjectName)) {
-        args.push(`--project ${this.shootProjectName}`)
-      }
-      if (this.shootName && rfc1123LableName.$validator(this.shootName)) {
-        args.push(`--shoot ${this.shootName}`)
-      }
-
-      args.push('--control-plane')
-
-      return `gardenctl target ${args.join(' ')}`
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName} --control-plane`  
     },
     targetShootCommand () {
-      const args = []
-      if (this.clusterIdentity && gardenName.$validator(this.clusterIdentity)) {
-        args.push(`--garden ${this.clusterIdentity}`)
-      }
-      if (this.shootProjectName && dnsSubdomainName.$validator(this.shootProjectName)) {
-        args.push(`--project ${this.shootProjectName}`)
-      }
-      if (this.shootName && rfc1123LableName.$validator(this.shootName)) {
-        args.push(`--shoot ${this.shootName}`)
-      }
-
-      return `gardenctl target ${args.join(' ')}`
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName}`  
     },
+    commandParametersPresentAndValid() {
+      return this.clusterIdentity && isGardenName(this.clusterIdentity) 
+        && this.shootProjectName && isDnsSubdomainName(this.shootProjectName)
+        && this.shootName && isRfc1123LabelName(this.shootName)
+    }
   },
 }
 </script>
