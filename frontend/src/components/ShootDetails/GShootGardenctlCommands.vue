@@ -5,14 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <g-gardenctl-command
-    v-for="({ title, subtitle, value }, index) in commands"
-    :key="title"
-    :title="title"
-    :subtitle="subtitle"
-    :command="value"
-    :show-icon="index === 0"
-  />
+  <template v-if="hasValidCommandParameters">
+    <g-gardenctl-command
+      v-for="({ title, subtitle, value }, index) in commands"
+      :key="title"
+      :title="title"
+      :subtitle="subtitle"
+      :command="value"
+      :show-icon="index === 0"
+    />
+  </template>
 </template>
 
 <script>
@@ -24,6 +26,12 @@ import { useConfigStore } from '@/store/config'
 import GGardenctlCommand from '@/components/GGardenctlCommand.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
+
+import {
+  isRfc1123LabelName,
+  isDnsSubdomainName,
+  isGardenName,
+} from '@/utils/validators'
 
 export default {
   components: {
@@ -74,34 +82,15 @@ export default {
       return cmds
     },
     targetControlPlaneCommand () {
-      const args = []
-      if (this.clusterIdentity) {
-        args.push(`--garden ${this.clusterIdentity}`)
-      }
-      if (this.shootProjectName) {
-        args.push(`--project ${this.shootProjectName}`)
-      }
-      if (this.shootName) {
-        args.push(`--shoot ${this.shootName}`)
-      }
-
-      args.push('--control-plane')
-
-      return `gardenctl target ${args.join(' ')}`
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName} --control-plane`  
     },
     targetShootCommand () {
-      const args = []
-      if (this.clusterIdentity) {
-        args.push(`--garden ${this.clusterIdentity}`)
-      }
-      if (this.shootProjectName) {
-        args.push(`--project ${this.shootProjectName}`)
-      }
-      if (this.shootName) {
-        args.push(`--shoot ${this.shootName}`)
-      }
-
-      return `gardenctl target ${args.join(' ')}`
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName}`  
+    },
+    hasValidCommandParameters () {
+      return this.clusterIdentity && isGardenName(this.clusterIdentity) 
+        && this.shootProjectName && isDnsSubdomainName(this.shootProjectName)
+        && this.shootName && isRfc1123LabelName(this.shootName)
     },
   },
 }

@@ -18,6 +18,9 @@ const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/
+const rfc1123LabelNamePattern = /^(?!.*-$)(?!-)[a-z0-9-]{1,63}$/
+const dnsSubdomainNamePattern = /^(?!.*[-.]$)(?![-.])[a-z0-9-.]{1,253}$/
+const gardenNamePattern = /^(?!.*[-_]$)(?![-_])[a-zA-Z0-9-_]+$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
 const base64 = withMessage('Must be a valid base64 string', value => {
@@ -44,6 +47,15 @@ const numberOrPercentage = withMessage('Must be a number or percentage', value =
 })
 const guid = withMessage('Must be a valid GUID', regex(guidPattern))
 
+const isRfc1123LabelName = value => {
+  return rfc1123LabelNamePattern.test(value)
+}
+const isDnsSubdomainName = value => {
+  return dnsSubdomainNamePattern.test(value)
+}
+const isGardenName = value => {
+  return gardenNamePattern.test(value)
+}
 const isTimezone = withMessage('TimeZone must have format [+|-]HH:mm', value => {
   return timezonePattern.test(value)
 })
@@ -109,4 +121,7 @@ export {
   numberOrPercentage,
   isTimezone,
   guid,
+  isRfc1123LabelName,
+  isDnsSubdomainName,
+  isGardenName,
 }

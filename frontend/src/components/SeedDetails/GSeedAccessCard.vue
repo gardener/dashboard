@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card class="mb-4">
+  <v-card
+    v-if="hasValidCommandParameters"
+    class="mb-4"
+  >
     <g-toolbar title="Access" />
     <g-list>
       <g-gardenctl-command
@@ -28,20 +31,21 @@ import GList from '@/components/GList.vue'
 
 import { useSeedItem } from '@/composables/useSeedItem/index'
 
+import {
+  isRfc1123LabelName,
+  isGardenName,
+} from '@/utils/validators'
+
 const configStore = useConfigStore()
 const { clusterIdentity } = storeToRefs(configStore)
 const { seedName } = useSeedItem()
 
 const targetSeedCommand = computed(() => {
-  const args = []
+  return `gardenctl target --garden ${clusterIdentity.value} --seed ${seedName.value}`
+})
 
-  if (clusterIdentity.value) {
-    args.push(`--garden ${clusterIdentity.value}`)
-  }
-  if (seedName.value) {
-    args.push(`--seed ${seedName.value}`)
-  }
-
-  return `gardenctl target ${args.join(' ')}`
+const hasValidCommandParameters = computed(() => {
+  return clusterIdentity.value && isGardenName(clusterIdentity.value)
+  && seedName.value && isRfc1123LabelName(seedName.value)
 })
 </script>
