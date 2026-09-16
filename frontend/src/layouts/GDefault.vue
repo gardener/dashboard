@@ -31,7 +31,10 @@ import {
   computed,
   onMounted,
 } from 'vue'
-import { onBeforeRouteUpdate } from 'vue-router'
+import {
+  onBeforeRouteUpdate,
+  useRouter,
+} from 'vue-router'
 
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
@@ -50,6 +53,7 @@ import get from 'lodash/get'
 const logger = useLogger()
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
+const router = useRouter()
 
 // refs
 const app = ref(null)
@@ -76,9 +80,15 @@ const routerErrorMessage = computed(() => {
 })
 
 const buttonText = computed(() => {
-  return routerErrorCode.value === 401
-    ? 'Reset Session'
-    : 'Reload this page'
+  switch(routerErrorCode.value) {
+    case 401: {
+      return 'Reset Session'
+    }
+    case 403: {
+      return 'Get me out of here'
+    }
+  }
+  return 'Reload this page'
 })
 
 // methods
@@ -89,10 +99,19 @@ function setElementOverflowY (element, value) {
 }
 
 function onClick () {
-  if (routerErrorCode.value === 401) {
-    authnStore.signout()
-  } else {
-    window.location.reload()
+  switch(routerErrorCode.value) {
+    case 401: {
+      authnStore.signout()
+      break
+    }
+    case 403: {
+      appStore.routerError = null
+      router.push({ name: 'Home' })
+      break
+    }
+    default: {
+      window.location.reload()
+    }
   }
 }
 
