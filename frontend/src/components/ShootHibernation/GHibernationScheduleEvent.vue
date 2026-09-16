@@ -258,8 +258,8 @@ export default {
   methods: {
     touchIfNothingFocused () {
       if (!get(this, ['$refs', 'selectedDays', 'isFocused']) &&
-          !get(this, ['$refs', 'wakeUpTime', 'isFocused']) &&
-          !get(this, ['$refs', 'hibernateTime', 'isFocused'])) {
+        !get(this, ['$refs', 'wakeUpTime', 'isFocused']) &&
+        !get(this, ['$refs', 'hibernateTime', 'isFocused'])) {
         this.v$.selectedDays.$touch()
         this.v$.wakeUpTime.$touch()
         this.v$.hibernateTime.$touch()

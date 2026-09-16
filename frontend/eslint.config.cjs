@@ -8,6 +8,7 @@ const path = require('path')
 
 const neostandard = require('neostandard')
 const pluginVue = require('eslint-plugin-vue')
+const stylistic = require('@stylistic/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import')
@@ -178,6 +179,7 @@ module.exports = [
     ],
   },
   ...neostandard({
+    files: ['**/*.js', '**/*.vue'],
     globals: {
       window: 'readonly',
       document: 'readonly',
@@ -193,7 +195,7 @@ module.exports = [
   }),
   {
     plugins: {
-      '@stylistic': require('@stylistic/eslint-plugin'),
+      '@stylistic': stylistic,
     },
     languageOptions: {
       ecmaVersion: 2025,

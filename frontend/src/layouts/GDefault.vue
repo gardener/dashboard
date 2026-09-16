@@ -80,7 +80,7 @@ const routerErrorMessage = computed(() => {
 })
 
 const buttonText = computed(() => {
-  switch(routerErrorCode.value) {
+  switch (routerErrorCode.value) {
     case 401: {
       return 'Reset Session'
     }
@@ -99,7 +99,7 @@ function setElementOverflowY (element, value) {
 }
 
 function onClick () {
-  switch(routerErrorCode.value) {
+  switch (routerErrorCode.value) {
     case 401: {
       authnStore.signout()
       break
