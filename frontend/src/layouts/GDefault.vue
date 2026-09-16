@@ -85,7 +85,7 @@ const buttonText = computed(() => {
       return 'Reset Session'
     }
     case 403: {
-      return 'Navigate to home'
+      return 'Get me out of here'
     }
   }
   return 'Reload this page'
