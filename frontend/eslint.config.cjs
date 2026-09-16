@@ -51,20 +51,6 @@ const lodashConfig = {
   },
 }
 
-const virtualModuleResolver = pluginImport.importXResolverCompat(
-  require(path.resolve(__dirname, '../eslint-import-resolver-local.cjs')),
-  {
-    map: [
-      ['unfonts.css', null],
-      ['vuetify/components', null],
-      ['vuetify/directives', null],
-      ['vuetify/styles', null],
-      ['vuetify/util/colors', null],
-      ['virtual:g-mdi-meta', null],
-    ],
-  },
-)
-
 const importConfig = {
   ignores: [
     'vite.config.js',
@@ -76,7 +62,19 @@ const importConfig = {
         alias: { '@': [path.resolve(__dirname, './src')] },
         extensions: ['.js', '.vue'],
       }),
-      virtualModuleResolver,
+      pluginImport.importXResolverCompat(
+        require(path.resolve(__dirname, '../eslint-import-resolver-local.cjs')),
+        {
+          map: [
+            ['unfonts.css', null],
+            ['vuetify/components', null],
+            ['vuetify/directives', null],
+            ['vuetify/styles', null],
+            ['vuetify/util/colors', null],
+            ['virtual:g-mdi-meta', null],
+          ],
+        },
+      ),
     ],
   },
   plugins: {
