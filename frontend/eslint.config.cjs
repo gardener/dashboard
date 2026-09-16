@@ -62,19 +62,6 @@ const importConfig = {
         alias: { '@': [path.resolve(__dirname, './src')] },
         extensions: ['.js', '.vue'],
       }),
-      pluginImport.importXResolverCompat(
-        require(path.resolve(__dirname, '../eslint-import-resolver-local.cjs')),
-        {
-          map: [
-            ['unfonts.css', null],
-            ['vuetify/components', null],
-            ['vuetify/directives', null],
-            ['vuetify/styles', null],
-            ['vuetify/util/colors', null],
-            ['virtual:g-mdi-meta', null],
-          ],
-        },
-      ),
     ],
   },
   plugins: {
@@ -82,6 +69,16 @@ const importConfig = {
   },
   rules: {
     ...pluginImport.flatConfigs.recommended.rules,
+    'import-x/no-unresolved': ['error', {
+      ignore: [
+        'unfonts\\.css',
+        'vuetify/components',
+        'vuetify/directives',
+        'vuetify/styles',
+        'vuetify/util/colors',
+        'virtual:g-mdi-meta',
+      ],
+    }],
     'import-x/order': ['error', {
       groups: [
         'builtin',

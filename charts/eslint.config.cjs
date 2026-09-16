@@ -9,14 +9,9 @@ const pluginVitest = require('@vitest/eslint-plugin')
 const pluginLodash = require('eslint-plugin-lodash')
 const pluginImport = require('eslint-plugin-import-x')
 
-const localResolver = pluginImport.importXResolverCompat(
-  require(require.resolve('../eslint-import-resolver-local.cjs')),
-  {
-    map: [
-      ['@gardener-dashboard/test-utils', '../packages/test-utils'],
-    ],
-  },
-)
+const workspacePackageMap = new Map([
+  ['@gardener-dashboard/test-utils', '../packages/test-utils'],
+])
 
 module.exports = [
   ...neostandard({}),
@@ -32,7 +27,13 @@ module.exports = [
         pluginImport.createNodeResolver({
           extensions: ['.js', '.cjs', '.mjs'],
         }),
-        localResolver,
+        {
+          interfaceVersion: 3,
+          resolve (modulePath) {
+            const found = workspacePackageMap.has(modulePath)
+            return { found, path: found ? workspacePackageMap.get(modulePath) : undefined }
+          },
+        },
       ],
     },
     plugins: {

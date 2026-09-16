@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-const path = require('path')
-
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
@@ -27,20 +25,15 @@ const importNewlinesConfig = {
   },
 }
 
-const workspacePackageResolver = pluginImport.importXResolverCompat(
-  require(path.resolve(__dirname, '../eslint-import-resolver-local.cjs')),
-  {
-    map: [
-      ['@gardener-dashboard/monitor', '../packages/monitor'],
-      ['@gardener-dashboard/logger', '../packages/logger'],
-      ['@gardener-dashboard/kube-client', '../packages/kube-client'],
-      ['@gardener-dashboard/kube-config', '../packages/kube-config'],
-      ['@gardener-dashboard/polling-watcher', '../packages/polling-watcher'],
-      ['@gardener-dashboard/request', '../packages/request'],
-      ['@gardener-dashboard/test-utils', '../packages/test-utils'],
-    ],
-  },
-)
+const workspacePackageMap = new Map([
+  ['@gardener-dashboard/monitor', '../packages/monitor'],
+  ['@gardener-dashboard/logger', '../packages/logger'],
+  ['@gardener-dashboard/kube-client', '../packages/kube-client'],
+  ['@gardener-dashboard/kube-config', '../packages/kube-config'],
+  ['@gardener-dashboard/polling-watcher', '../packages/polling-watcher'],
+  ['@gardener-dashboard/request', '../packages/request'],
+  ['@gardener-dashboard/test-utils', '../packages/test-utils'],
+])
 
 module.exports = [
   ...neostandard({}),
@@ -68,7 +61,13 @@ module.exports = [
         pluginImport.createNodeResolver({
           extensions: ['.js', '.cjs', '.mjs'],
         }),
-        workspacePackageResolver,
+        {
+          interfaceVersion: 3,
+          resolve (modulePath) {
+            const found = workspacePackageMap.has(modulePath)
+            return { found, path: found ? workspacePackageMap.get(modulePath) : undefined }
+          },
+        },
       ],
     },
     plugins: {
