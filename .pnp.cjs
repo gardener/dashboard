@@ -973,7 +973,7 @@ const RAW_RUNTIME_STATE =
           ["helmet", "npm:8.3.0"],\
           ["http-errors", "npm:2.0.1"],\
           ["jose", "npm:6.2.12"],\
-          ["js-yaml", "npm:5.4.1"],\
+          ["js-yaml", "npm:5.4.2"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
           ["lodash-es", "npm:4.18.1"],\
@@ -1020,7 +1020,7 @@ const RAW_RUNTIME_STATE =
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:10.10.0"],\
           ["eslint-plugin-import", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:2.32.0"],\
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
-          ["js-yaml", "npm:5.4.1"],\
+          ["js-yaml", "npm:5.4.2"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.0-next.1"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
@@ -1080,7 +1080,7 @@ const RAW_RUNTIME_STATE =
           ["eventemitter3", "npm:5.0.4"],\
           ["floating-vue", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:5.2.2"],\
           ["highlight.js", "npm:11.12.0"],\
-          ["js-yaml", "npm:5.4.1"],\
+          ["js-yaml", "npm:5.4.2"],\
           ["jsdom", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:30.0.1"],\
           ["jwt-decode", "npm:4.0.0"],\
           ["lodash", "npm:4.18.1"],\
@@ -1193,7 +1193,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-plugin-lodash", "virtual:faee47847dc7127a4fda44fca2035ae541a9af6260b1926ad890f5f677339c049ea62d6b398ffa233a226c0b5c370a517802e428d53b03a3356e9a04d51e8e42#npm:8.0.0"],\
           ["eslint-plugin-security", "npm:4.0.1"],\
           ["gtoken", "npm:8.0.0"],\
-          ["js-yaml", "npm:5.4.1"],\
+          ["js-yaml", "npm:5.4.2"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.0-next.1"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
@@ -8696,11 +8696,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.4.1", {\
-        "packageLocation": "./.yarn/cache/js-yaml-npm-5.4.1-6d21f8264d-efe9dfaf22.zip/node_modules/js-yaml/",\
+      ["npm:5.4.2", {\
+        "packageLocation": "./.yarn/cache/js-yaml-npm-5.4.2-13d0bbee21-ba7e0f72c9.zip/node_modules/js-yaml/",\
         "packageDependencies": [\
           ["argparse", "npm:2.0.1"],\
-          ["js-yaml", "npm:5.4.1"]\
+          ["js-yaml", "npm:5.4.2"]\
         ],\
         "linkType": "HARD"\
       }]\
