@@ -254,7 +254,6 @@ module.exports = [
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'security/detect-unsafe-regex': 'off',
-      'import-x/named': 'off',
     },
   },
 ]
