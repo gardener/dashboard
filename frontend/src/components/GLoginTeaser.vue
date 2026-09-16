@@ -31,6 +31,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
+import DOMPurify from 'dompurify'
+
 import { useLoginStore } from '@/store/login'
 
 import { omitKeysWithSuffix } from '@/utils'
@@ -61,7 +63,8 @@ export default {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.minHeight = this.minHeight
       data.landingPageUrl = this.landingPageUrl
-      return this.compiledTeaserTemplate(data)
+      const html = this.compiledTeaserTemplate(data)
+      return DOMPurify.sanitize(html, { ADD_ATTR: ['target', 'rel', 'style'], ADD_TAGS: ['style'], FORCE_BODY: true })
     },
     logoSize () {
       return this.minHeight - 100

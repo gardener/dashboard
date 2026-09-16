@@ -29,6 +29,8 @@ SPDX-License-Identifier: Apache-2.0
 <script>
 import { mapState } from 'pinia'
 
+import DOMPurify from 'dompurify'
+
 import { useLoginStore } from '@/store/login'
 
 import { omitKeysWithSuffix } from '@/utils'
@@ -55,7 +57,8 @@ export default {
     footerHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.landingPageUrl = this.landingPageUrl
-      return this.compiledFooterTemplate(data)
+      const html = this.compiledFooterTemplate(data)
+      return DOMPurify.sanitize(html, { ADD_ATTR: ['target', 'rel', 'style'], ADD_TAGS: ['style'], FORCE_BODY: true })
     },
   },
 }

@@ -6,7 +6,9 @@
 
 import DOMPurify from 'dompurify'
 
-const PURIFY_CONFIG = { ADD_ATTR: ['target', 'rel'] }
+const PURIFY_CONFIG = {
+  ADD_ATTR: ['target', 'rel'],
+}
 
 export const safeHtml = {
   mounted (el, { value }) {
