@@ -323,11 +323,7 @@ export default {
         const token = this.token
         this.token = undefined
         await this.api.createTokenReview({ token })
-        try {
-          await this.$router.push(this.redirectPath)
-        } catch (err) {
-          /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards */
-        }
+        await this.$router.push(this.redirectPath)
       } catch (err) {
         this.setError({
           title: `${this.getLoginTypeTitle('token')} Login Error`,

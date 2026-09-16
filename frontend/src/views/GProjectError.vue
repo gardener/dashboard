@@ -51,10 +51,6 @@ const props = defineProps({
 const { code, text, message, buttonText } = toRefs(props)
 
 async function onClick () {
-  try {
-    await router.push(props.fallbackRoute)
-  } catch (err) {
-    /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
-  }
+  await router.push(props.fallbackRoute)
 }
 </script>
