@@ -179,7 +179,7 @@ module.exports = [
     ],
   },
   ...neostandard({
-    files: ['**/*.vue'],
+    files: ['**/*.js', '**/*.vue'],
     globals: {
       window: 'readonly',
       document: 'readonly',
