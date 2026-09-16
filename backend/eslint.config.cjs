@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+const path = require('path')
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
@@ -65,7 +66,7 @@ module.exports = [
           interfaceVersion: 3,
           resolve (modulePath) {
             const found = workspacePackageMap.has(modulePath)
-            return { found, path: found ? workspacePackageMap.get(modulePath) : undefined }
+            return { found, path: found ? path.resolve(__dirname, workspacePackageMap.get(modulePath)) : undefined }
           },
         },
       ],

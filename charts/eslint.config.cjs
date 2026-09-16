@@ -7,6 +7,7 @@
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginLodash = require('eslint-plugin-lodash')
+const path = require('path')
 const pluginImport = require('eslint-plugin-import-x')
 
 const workspacePackageMap = new Map([
@@ -31,7 +32,7 @@ module.exports = [
           interfaceVersion: 3,
           resolve (modulePath) {
             const found = workspacePackageMap.has(modulePath)
-            return { found, path: found ? workspacePackageMap.get(modulePath) : undefined }
+            return { found, path: found ? path.resolve(__dirname, workspacePackageMap.get(modulePath)) : undefined }
           },
         },
       ],
