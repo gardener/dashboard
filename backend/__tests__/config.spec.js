@@ -92,6 +92,21 @@ describe('config', function () {
         readFileSyncSpy.mockRestore()
       })
 
+      function loadKubeClientConfig (kubeClient, env = { NODE_ENV: 'test' }) {
+        const filename = '/etc/gardener/config-with-reflector.yaml'
+        gardener.readConfig.mockReturnValueOnce({
+          apiServerUrl: 'https://api.example.com',
+          sessionSecret: 'secret',
+          websocketAllowedOrigins: ['*'],
+          kubeClient,
+        })
+        return gardener.loadConfig(filename, { env })
+      }
+
+      function loadReflectorConfig (reflector, env) {
+        return loadKubeClientConfig({ reflector }, env)
+      }
+
       it('should return the config in test environment without config file', function () {
         const env = Object.assign({
           NODE_ENV: 'test',
@@ -289,6 +304,229 @@ describe('config', function () {
 
         expect(() => gardener.loadConfig(undefined, { env }))
           .toThrow("Configuration value 'oidc.issuer' is required")
+      })
+
+      it('should accept configured reflector resources, including an omitted core API group', function () {
+        const reflector = {
+          resources: [
+            {
+              apiGroup: 'core.gardener.cloud',
+              resource: 'shoots',
+              strategy: 'mostRecentPaginated',
+              pageSize: 500,
+            },
+            {
+              resource: 'resourcequotas',
+              strategy: 'mostRecentPaginated',
+              pageSize: 100,
+            },
+          ],
+        }
+
+        expect(loadReflectorConfig(reflector).kubeClient.reflector).toEqual(reflector)
+      })
+
+      it.each([
+        ['absent', undefined],
+        ['empty', ''],
+      ])('should preserve file reflector resources when the environment variable is %s', function (_, value) {
+        const resources = [{
+          apiGroup: 'core.gardener.cloud',
+          resource: 'shoots',
+          strategy: 'mostRecentPaginated',
+          pageSize: 500,
+        }]
+        const env = { NODE_ENV: 'test' }
+        if (value !== undefined) {
+          env.KUBE_CLIENT_REFLECTOR_RESOURCES = value
+        }
+
+        const config = loadReflectorConfig({ resources }, env)
+
+        expect(config.kubeClient.reflector.resources).toEqual(resources)
+      })
+
+      it('should replace the complete reflector resources array from the environment', function () {
+        const fileResources = [{
+          resource: 'resourcequotas',
+          strategy: 'mostRecentPaginated',
+          pageSize: 100,
+        }]
+        const environmentResources = [{
+          apiGroup: 'core.gardener.cloud',
+          resource: 'shoots',
+          strategy: 'mostRecentPaginated',
+          pageSize: 500,
+        }]
+        const env = {
+          NODE_ENV: 'test',
+          KUBE_CLIENT_REFLECTOR_RESOURCES: JSON.stringify(environmentResources),
+        }
+
+        const config = loadReflectorConfig({ resources: fileResources }, env)
+
+        expect(config.kubeClient.reflector.resources).toEqual(environmentResources)
+      })
+
+      it('should allow the environment to disable all reflector resources', function () {
+        const fileResources = [{
+          apiGroup: 'core.gardener.cloud',
+          resource: 'shoots',
+          strategy: 'mostRecentPaginated',
+          pageSize: 500,
+        }]
+        const env = {
+          NODE_ENV: 'test',
+          KUBE_CLIENT_REFLECTOR_RESOURCES: '[]',
+        }
+
+        const config = loadReflectorConfig({ resources: fileResources }, env)
+
+        expect(config.kubeClient.reflector.resources).toEqual([])
+      })
+
+      it('should reject malformed reflector resources JSON from the environment', function () {
+        const env = {
+          NODE_ENV: 'test',
+          KUBE_CLIENT_REFLECTOR_RESOURCES: '[invalid',
+        }
+
+        expect(() => loadReflectorConfig({ resources: [] }, env))
+          .toThrow("Environment variable 'KUBE_CLIENT_REFLECTOR_RESOURCES' must contain valid JSON")
+      })
+
+      it('should validate reflector resource entries provided by the environment', function () {
+        const env = {
+          NODE_ENV: 'test',
+          KUBE_CLIENT_REFLECTOR_RESOURCES: JSON.stringify([{
+            apiGroup: 'core.gardener.cloud',
+            resource: 'shoots',
+            strategy: 'watchList',
+            pageSize: 500,
+          }]),
+        }
+
+        expect(() => loadReflectorConfig({ resources: [] }, env))
+          .toThrow("Configuration value 'kubeClient.reflector.resources[0].strategy' must be 'mostRecentPaginated'")
+      })
+
+      it.each([
+        {
+          name: 'a non-object kube client',
+          kubeClient: [],
+          message: "Configuration value 'kubeClient' must be an object",
+        },
+        {
+          name: 'a non-object reflector',
+          reflector: [],
+          message: "Configuration value 'kubeClient.reflector' must be an object",
+        },
+        {
+          name: 'a non-array resources value',
+          reflector: { resources: {} },
+          message: "Configuration value 'kubeClient.reflector.resources' must be an array",
+        },
+        {
+          name: 'a reserved reflector property',
+          reflector: { default: {} },
+          message: "Configuration value 'kubeClient.reflector.default' is not supported",
+        },
+        {
+          name: 'a non-object resource entry',
+          reflector: { resources: ['shoots'] },
+          message: "Configuration value 'kubeClient.reflector.resources[0]' must be an object",
+        },
+        {
+          name: 'an unknown resource property',
+          reflector: {
+            resources: [{
+              apiVersion: 'v1beta1',
+              resource: 'shoots',
+              strategy: 'mostRecentPaginated',
+              pageSize: 500,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0].apiVersion' is not supported",
+        },
+        {
+          name: 'a missing resource name',
+          reflector: {
+            resources: [{
+              strategy: 'mostRecentPaginated',
+              pageSize: 500,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0].resource' must be a non-empty string",
+        },
+        {
+          name: 'an unsupported strategy',
+          reflector: {
+            resources: [{
+              apiGroup: 'core.gardener.cloud',
+              resource: 'shoots',
+              strategy: 'watchList',
+              pageSize: 500,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0].strategy' must be 'mostRecentPaginated'",
+        },
+        {
+          name: 'an unsafe page size',
+          reflector: {
+            resources: [{
+              apiGroup: 'core.gardener.cloud',
+              resource: 'shoots',
+              strategy: 'mostRecentPaginated',
+              pageSize: Number.MAX_SAFE_INTEGER + 1,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0].pageSize' must be a positive safe integer",
+        },
+        {
+          name: 'duplicate resources',
+          reflector: {
+            resources: [
+              {
+                apiGroup: 'core.gardener.cloud',
+                resource: 'shoots',
+                strategy: 'mostRecentPaginated',
+                pageSize: 500,
+              },
+              {
+                apiGroup: 'core.gardener.cloud',
+                resource: 'shoots',
+                strategy: 'mostRecentPaginated',
+                pageSize: 100,
+              },
+            ],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources' contains duplicate entry 'core.gardener.cloud/shoots'",
+        },
+        {
+          name: 'an unknown resource',
+          reflector: {
+            resources: [{
+              resource: 'pods',
+              strategy: 'mostRecentPaginated',
+              pageSize: 500,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0]' refers to resource '/pods' without an active Dashboard informer",
+        },
+        {
+          name: 'a conditionally inactive resource',
+          reflector: {
+            resources: [{
+              apiGroup: 'coordination.k8s.io',
+              resource: 'leases',
+              strategy: 'mostRecentPaginated',
+              pageSize: 500,
+            }],
+          },
+          message: "Configuration value 'kubeClient.reflector.resources[0]' refers to resource 'coordination.k8s.io/leases' without an active Dashboard informer",
+        },
+      ])('should reject $name', function ({ kubeClient, reflector, message }) {
+        expect(() => kubeClient === undefined ? loadReflectorConfig(reflector) : loadKubeClientConfig(kubeClient)).toThrow(message)
       })
 
       it('should default avatarSource to gravatar if not defined', function () {
