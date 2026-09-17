@@ -45,7 +45,7 @@ const targetSeedCommand = computed(() => {
 })
 
 const hasValidCommandParameters = computed(() => {
-  return clusterIdentity.value && isGardenName(clusterIdentity.value)
-  && seedName.value && isRfc1123LabelName(seedName.value)
+  return clusterIdentity.value && isGardenName(clusterIdentity.value) &&
+    seedName.value && isRfc1123LabelName(seedName.value)
 })
 </script>
