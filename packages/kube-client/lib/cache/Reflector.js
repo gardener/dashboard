@@ -6,6 +6,7 @@
 
 import { format as fmt } from 'node:util'
 import timers from 'timers/promises'
+import { isPlainObject } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import ListPager from './ListPager.js'
 import BackoffManager from './BackoffManager.js'
@@ -17,6 +18,8 @@ import {
   StatusError,
 } from '../ApiErrors.js'
 import { getResourceApiVersion, normalizeResourceListItems } from '../resource.js'
+
+const MOST_RECENT_PAGINATED = 'mostRecentPaginated'
 
 function delay (milliseconds) {
   return timers.setTimeout(milliseconds)
@@ -31,9 +34,12 @@ function getTypeName (apiVersion, kind) {
 }
 
 class Reflector {
-  constructor (listWatcher, store) {
+  constructor (listWatcher, store, options) {
+    const { strategy, pageSize } = validateReflectorOptions(options)
     this.listWatcher = listWatcher
     this.store = store
+    this.strategy = strategy
+    this.pageSize = pageSize
     this.minWatchTimeout = 300 // 5 minutes
     this.isLastSyncResourceVersionUnavailable = false
     this.lastSyncResourceVersion = ''
@@ -68,11 +74,28 @@ class Reflector {
       return ''
     }
     if (this.lastSyncResourceVersion === '') {
+      if (this.strategy === MOST_RECENT_PAGINATED) {
+        return ''
+      }
       // For performance reasons, initial list performed by reflector uses "0" as resource version to allow it to
       // be served from the watch cache if it is enabled.
       return '0'
     }
     return this.lastSyncResourceVersion
+  }
+
+  get relistOptions () {
+    const resourceVersion = this.relistResourceVersion
+    if (this.strategy !== MOST_RECENT_PAGINATED) {
+      return { resourceVersion }
+    }
+    if (!resourceVersion) {
+      return {}
+    }
+    return {
+      resourceVersion,
+      resourceVersionMatch: 'NotOlderThan',
+    }
   }
 
   destroy () {
@@ -116,29 +139,34 @@ class Reflector {
   }
 
   async listAndWatch () {
-    const pager = ListPager.create(this.listWatcher)
-    const options = {
-      resourceVersion: this.relistResourceVersion,
-    }
+    const pager = this.strategy === MOST_RECENT_PAGINATED
+      ? ListPager.create(this.listWatcher, {
+        pageSize: this.pageSize,
+        fullListIfExpired: false,
+      })
+      : ListPager.create(this.listWatcher)
+    let options = this.relistOptions
 
-    if (this.paginatedResult) {
-      // We got a paginated result initially. Assume this resource and server honor
-      // paging requests (i.e. watch cache is probably disabled) and leave the default
-      // pager size set.
-    } else if (options.resourceVersion !== '' && options.resourceVersion !== '0') {
-      // User didn't explicitly request pagination.
-      //
-      // With ResourceVersion != "", we have a possibility to list from watch cache,
-      // but we do that (for ResourceVersion != "0") only if Limit is unset.
-      // To avoid thundering herd on etcd (e.g. on master upgrades), we explicitly
-      // switch off pagination to force listing from watch cache (if enabled).
-      // With the existing semantic of RV (result is at least as fresh as provided RV),
-      // this is correct and doesn't lead to going back in time.
-      //
-      // We also don't turn off pagination for ResourceVersion="0", since watch cache
-      // is ignoring Limit in that case anyway, and if watch cache is not enabled
-      // we don't introduce regression.
-      pager.pageSize = 0
+    if (this.strategy !== MOST_RECENT_PAGINATED) {
+      if (this.paginatedResult) {
+        // We got a paginated result initially. Assume this resource and server honor
+        // paging requests (i.e. watch cache is probably disabled) and leave the default
+        // pager size set.
+      } else if (options.resourceVersion !== '' && options.resourceVersion !== '0') {
+        // User didn't explicitly request pagination.
+        //
+        // With ResourceVersion != "", we have a possibility to list from watch cache,
+        // but we do that (for ResourceVersion != "0") only if Limit is unset.
+        // To avoid thundering herd on etcd (e.g. on master upgrades), we explicitly
+        // switch off pagination to force listing from watch cache (if enabled).
+        // With the existing semantic of RV (result is at least as fresh as provided RV),
+        // this is correct and doesn't lead to going back in time.
+        //
+        // We also don't turn off pagination for ResourceVersion="0", since watch cache
+        // is ignoring Limit in that case anyway, and if watch cache is not enabled
+        // we don't introduce regression.
+        pager.pageSize = 0
+      }
     }
 
     let list
@@ -155,17 +183,17 @@ class Reflector {
         // resource version. So we need to fallback to resourceVersion="" in all to recover and ensure
         // the reflector makes forward progress.
         try {
-          logger.debug('Falling back to full list %s', this.expectedTypeName)
-          list = await pager.list({
-            resourceVersion: this.relistResourceVersion,
-          })
+          logger.debug('Retrying recovery list %s', this.expectedTypeName)
+          options = this.relistOptions
+          list = await pager.list(options)
         } catch (err) {
-          logger.error('Failed to call full list %s: %s', this.expectedTypeName, err.message)
+          logger.error('Failed to call recovery list %s: %s', this.expectedTypeName, err.message)
           return
         }
+      } else {
+        logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
+        return
       }
-      logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
-      return
     }
 
     const {
@@ -299,6 +327,33 @@ function assertSignal (signal) {
   if (!(signal instanceof AbortSignal)) {
     throw TypeError('The parameter "signal" must be an instance of AbortSignal')
   }
+}
+
+function validateReflectorOptions (options) {
+  if (options === undefined) {
+    return {}
+  }
+  if (!isPlainObject(options)) {
+    throw new TypeError('The reflector options must be a plain object')
+  }
+  const unsupportedOption = Object.keys(options).find(key => !['strategy', 'pageSize'].includes(key))
+  if (unsupportedOption) {
+    throw new TypeError(`Unsupported reflector option "${unsupportedOption}"`)
+  }
+  const { strategy, pageSize } = options
+  if (strategy === undefined) {
+    if (pageSize !== undefined) {
+      throw new TypeError('The reflector option "pageSize" requires a strategy')
+    }
+    return {}
+  }
+  if (strategy !== MOST_RECENT_PAGINATED) {
+    throw new TypeError(`Unsupported reflector strategy "${strategy}"`)
+  }
+  if (!Number.isSafeInteger(pageSize) || pageSize <= 0) {
+    throw new TypeError('The reflector option "pageSize" must be a positive safe integer')
+  }
+  return { strategy, pageSize }
 }
 
 export default Reflector
