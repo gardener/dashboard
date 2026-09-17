@@ -49,10 +49,23 @@ SPDX-License-Identifier: Apache-2.0
               </v-icon>
               <span class="text-body-2 font-weight-medium">{{ worker.name }}</span>
               <template v-if="!openWorkers[worker._uid]">
-                <template v-if="getCollapsedSummary(worker)">
+                <template v-if="workerSummaries[worker._uid]?.machineLabel">
+                  <span class="mx-2 text-medium-emphasis">/</span>
+                  <span class="text-body-2 text-medium-emphasis">{{ workerSummaries[worker._uid].machineLabel }}</span>
+                </template>
+                <template v-if="workerSummaries[worker._uid]?.machineImageText">
                   <span class="mx-2 text-medium-emphasis">/</span>
                   <span class="d-inline-flex align-center">
-                    <span class="text-body-2 text-medium-emphasis">{{ getCollapsedSummary(worker) }}</span>
+                    <span class="text-body-2 text-medium-emphasis">{{ workerSummaries[worker._uid].machineImageText }}</span>
+                    <template v-if="workerSummaries[worker._uid].isMachineImageDeprecated">
+                      <span class="text-body-2 text-medium-emphasis ml-1">(deprecated)</span>
+                      <v-icon
+                        size="x-small"
+                        color="warning"
+                        icon="mdi-alert-outline"
+                        class="ml-1"
+                      />
+                    </template>
                   </span>
                 </template>
                 <template v-if="worker.zones?.length">
@@ -161,29 +174,21 @@ const {
   removeProviderWorker,
 } = useShootContext()
 
-function getCollapsedSummary (worker) {
-  const parts = []
-  const machineLabel = [worker.machine?.architecture, worker.machine?.type].filter(Boolean).join(' / ')
-  if (machineLabel) {
-    parts.push(machineLabel)
+const workerSummaries = computed(() => {
+  const summaries = {}
+  for (const worker of providerWorkers.value) {
+    const machineLabel = [worker.machine?.architecture, worker.machine?.type].filter(Boolean).join(' / ')
+    const { name, version } = worker.machine?.image ?? {}
+    const machineImageText = [name, version].filter(Boolean).join(' ') || undefined
+    const machineImage = machineImages.value.find(image => image.name === name && image.version === version)
+    summaries[worker._uid] = {
+      machineLabel: machineLabel || undefined,
+      machineImageText,
+      isMachineImageDeprecated: machineImage?.isDeprecated ?? false,
+    }
   }
-
-  const machineImageText = getMachineImageText(worker)
-  if (machineImageText) {
-    parts.push(machineImageText)
-  }
-  return parts.join(' / ')
-}
-
-function getMachineImageText (worker) {
-  const { name, version } = worker.machine?.image ?? {}
-  const image = machineImages.value.find(image => image.name === name && image.version === version)
-  const baseText = [name, version].filter(Boolean).join(' ')
-  if (image?.isDeprecated) {
-    return baseText + ' (deprecated)'
-  }
-  return baseText || undefined
-}
+  return summaries
+})
 
 function setWorkerGroupRef (uid, element) {
   if (element) {
