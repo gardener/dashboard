@@ -9,20 +9,20 @@ SPDX-License-Identifier: Apache-2.0
     v-model="popover"
     :z-index="2500"
     placement="bottom"
-    toolbar-title="Max Pods per Worker Node"
+    toolbar-title="Max Worker Nodes"
   >
     <template #activator="{ props }">
       <g-action-button
         v-bind="props"
         icon="mdi-information-outline"
-        tooltip="Show information about Max Pods per Worker Node"
+        tooltip="Show information about Max Worker Nodes"
         :tooltip-disabled="popover"
       />
     </template>
     <template #text>
       <div class="wrapper">
         <div class="text-title-large text-grey-darken-1 mb-4">
-          Max Pods per Worker Node
+          Max Worker Nodes
         </div>
         <p>
           <ul>
