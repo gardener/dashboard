@@ -30,6 +30,7 @@ import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import pick from 'lodash/pick'
+import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 
 const logger = useLogger()
@@ -38,6 +39,7 @@ const configurableVendorProperties = [
   'displayName',
   'weight',
   'icon',
+  'hidden',
 ]
 
 const wellKnownConditions = {
@@ -246,11 +248,6 @@ export const useConfigStore = defineStore('config', () => {
       return vendors
     }
     return []
-  })
-
-  const enabledDnsProviders = computed(() => {
-    const providers = branding.value.enabledDnsProviders
-    return Array.isArray(providers) ? providers : undefined
   })
 
   const configMachineImageVendors = computed(() => {
@@ -583,21 +580,16 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   const dnsProviderTypesList = computed(() => {
-    const providerNames = uniq([
+    return uniq([
       ...map(knownDNSVendors, 'name'),
       ...map(configDNSVendors.value, 'name'),
     ])
-
-    if (enabledDnsProviders.value) {
-      return providerNames.filter(name => enabledDnsProviders.value.includes(name))
-    }
-
-    return providerNames.filter(name => !get(vendorDetails({ type: 'dns', name }), ['hiddenByDefault'], false))
   })
 
   const sortedDnsProviderTypeList = computed(() => {
     const dnsProviderVendors = map(dnsProviderTypesList.value, name => vendorDetails({ type: 'dns', name }))
-    const sortedVisibleDnsVendors = sortBy(dnsProviderVendors, 'weight')
+    const visibleDnsProviderVendors = filter(dnsProviderVendors, vendor => !vendor.hidden)
+    const sortedVisibleDnsVendors = sortBy(visibleDnsProviderVendors, 'weight')
     return map(sortedVisibleDnsVendors, 'name')
   })
 

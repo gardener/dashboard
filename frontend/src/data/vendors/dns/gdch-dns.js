@@ -22,7 +22,7 @@ const gdchConfigField = {
 export default {
   name: 'gdch-dns',
   displayName: 'Google Distributed Cloud DNS',
-  hiddenByDefault: true,
+  hidden: true,
   weight: 700,
   icon: 'gdch.svg',
   secret: {
