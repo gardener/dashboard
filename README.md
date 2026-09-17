@@ -4,7 +4,7 @@
 
 ![](https://github.com/gardener/dashboard/blob/master/logo/logo_gardener_dashboard.png)
 
-[![CI Build status](https://github.com/gardener/dashboard/actions/workflows/non-release.yaml/badge.svg?branch=master)](https://github.com/gardener/dashboard/actions/workflows/non-release.yaml?query=branch%3Amaster)
+[![CI Build status](https://github.com/gardener/dashboard/actions/workflows/non-release.yaml/badge.svg?branch=master&event=push)](https://github.com/gardener/dashboard/actions/workflows/non-release.yaml?query=branch%3Amaster)
 [![Slack workspace](https://img.shields.io/badge/Slack-Gardener%20Project-brightgreen.svg?logo=slack)](https://gardener-cloud.slack.com/)
 
 ## Demo
