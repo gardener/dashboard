@@ -127,6 +127,22 @@ SPDX-License-Identifier: Apache-2.0
           <g-worker-configuration />
         </template>
       </g-list-item>
+      <g-list-item v-if="hasIpv4 && podsCidr && nodeCIDRMaskSize">
+        <g-list-item-content label="Max Worker Nodes">
+          {{ maxNodeCount }}
+        </g-list-item-content>
+        <template #append>
+          <g-max-node-count-info />
+        </template>
+      </g-list-item>
+      <g-list-item v-if="hasIpv4 && nodeCIDRMaskSize">
+        <g-list-item-content label="Max Pods per Worker Node">
+          {{ maxPodsPerNodeCount }}
+        </g-list-item-content>
+        <template #append>
+          <g-max-pods-per-node-count-info />
+        </template>
+      </g-list-item>
       <v-divider inset />
       <g-list-item>
         <template #prepend>
@@ -280,6 +296,8 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GAddonConfiguration from '@/components/ShootAddons/GAddonConfiguration'
 import GCopyBtn from '@/components/GCopyBtn'
+import GMaxNodeCountInfo from '@/components/GMaxNodeCountInfo.vue'
+import GMaxPodsPerNodeCountInfo from '@/components/GMaxPodsPerNodeCountInfo.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -307,6 +325,9 @@ const {
   shootWorkerGroups,
   shootAccessRestrictions,
   isSelfHostedShoot,
+  podsCidr,
+  ipFamilies,
+  nodeCIDRMaskSize,
 } = useShootItem()
 
 const configStore = useConfigStore()
@@ -346,6 +367,19 @@ const slaDescriptionHtml = computed(() => {
 
 const slaTitle = computed(() => {
   return sla.value.title
+})
+
+const maxNodeCount = computed(() => {
+  const cidrPrefix = podsCidr.value?.split('/')[1]
+  return Math.pow(2, nodeCIDRMaskSize.value - cidrPrefix)
+})
+
+const maxPodsPerNodeCount = computed(() => {
+  return Math.pow(2, 32 - nodeCIDRMaskSize.value)
+})
+
+const hasIpv4 = computed(() => {
+  return ipFamilies?.value?.includes('IPv4')
 })
 </script>
 
