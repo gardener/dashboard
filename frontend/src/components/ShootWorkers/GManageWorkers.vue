@@ -58,14 +58,11 @@ SPDX-License-Identifier: Apache-2.0
                   <span class="d-inline-flex align-center">
                     <span class="text-body-2 text-medium-emphasis">{{ workerSummaries[worker._uid].machineImageText }}</span>
                     <template v-if="workerSummaries[worker._uid].isMachineImageDeprecated">
-                      <span class="text-body-2 text-medium-emphasis ml-1">(deprecated)</span>
-                      <v-icon
+                      <span class="text-body-2 text-medium-emphasis ml-1">(</span><v-icon
                         size="x-small"
                         color="warning"
                         icon="mdi-alert-outline"
-                        class="ml-1"
-                      />
-                    </template>
+                      /><span class="text-body-2 text-medium-emphasis">deprecated)</span></template>
                   </span>
                 </template>
                 <template v-if="worker.zones?.length">
