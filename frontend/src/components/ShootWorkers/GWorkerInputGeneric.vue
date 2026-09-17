@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -145,7 +145,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -174,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -242,7 +242,7 @@ SPDX-License-Identifier: Apache-2.0
       <v-card class="worker-section-card">
         <v-toolbar
           height="28"
-          class="text-medium-emphasis"
+          class="text-medium-emphasis toolbar-tonal-primary"
         >
           <div class="d-flex align-center ga-2 px-3">
             <v-icon
@@ -698,7 +698,9 @@ export default {
 }
 
 .worker-section-card {
-  border-color: rgba(var(--v-border-color), var(--v-border-opacity)) !important;
   min-height: 200px;
+  .toolbar-tonal-primary {
+    background-color: rgba(var(--v-theme-primary), var(--v-activated-opacity, 0.2));
+  }
 }
 </style>
