@@ -82,15 +82,15 @@ export default {
       return cmds
     },
     targetControlPlaneCommand () {
-      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName} --control-plane`  
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName} --control-plane`
     },
     targetShootCommand () {
-      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName}`  
+      return `gardenctl target --garden ${this.clusterIdentity} --project ${this.shootProjectName} --shoot ${this.shootName}`
     },
     hasValidCommandParameters () {
-      return this.clusterIdentity && isGardenName(this.clusterIdentity) 
-        && this.shootProjectName && isDnsSubdomainName(this.shootProjectName)
-        && this.shootName && isRfc1123LabelName(this.shootName)
+      return this.clusterIdentity && isGardenName(this.clusterIdentity) &&
+        this.shootProjectName && isDnsSubdomainName(this.shootProjectName) &&
+        this.shootName && isRfc1123LabelName(this.shootName)
     },
   },
 }

@@ -61,7 +61,6 @@ import { isGardenName } from '@/utils/validators'
 import GCodeBlock from './GCodeBlock.vue'
 import GTextRouterLink from './GTextRouterLink.vue'
 
-
 export default {
   components: {
     GCodeBlock,
@@ -91,7 +90,7 @@ export default {
       return `gardenctl config set-garden ${this.gardenName} --kubeconfig "<path-to-garden-cluster-kubeconfig>"`
     },
     gardenName () {
-      if(this.clusterIdentity && isGardenName(this.clusterIdentity)) {
+      if (this.clusterIdentity && isGardenName(this.clusterIdentity)) {
         return this.clusterIdentity
       }
       return '<garden-identifier>'
