@@ -160,6 +160,22 @@ describe('composables', () => {
         expect(deprecatedImageWithNoExpiration.isDeprecated).toBe(true)
         expect(deprecatedImageWithNoExpiration.isExpirationWarning).toBe(false)
       })
+
+      it('hides machine image vendors using vendor branding', () => {
+        configStore.setConfiguration({
+          branding: {
+            machineImageVendors: [{
+              name: 'gardenlinux',
+              hidden: true,
+            }],
+          },
+        })
+
+        const { machineImages: decoratedAndSortedMachineImages } = useMachineImages(cloudProfile)
+
+        expect(decoratedAndSortedMachineImages.value).toHaveLength(3)
+        expect(decoratedAndSortedMachineImages.value.every(({ name }) => name === 'foo')).toBe(true)
+      })
     })
   })
 })
