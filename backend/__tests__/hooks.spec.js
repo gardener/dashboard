@@ -14,6 +14,7 @@ import {
 import { createDashboardClient } from '@gardener-dashboard/kube-client'
 
 import cache from '../lib/cache/index.js'
+import config from '../lib/config/index.js'
 
 vi.mock('../lib/io/index.js')
 vi.mock('../lib/watches/index.js')
@@ -30,6 +31,7 @@ describe('hooks', () => {
     let dashboardClient
 
     beforeEach(() => {
+      delete config.kubeClient
       createDashboardClient.mockClear()
       hooks = createHooks()
       dashboardClient = createDashboardClient.mock.results[0].value
@@ -41,36 +43,130 @@ describe('hooks', () => {
       expect(hooks.io).toBeUndefined()
     })
 
-    it('#createInformers', async function () {
+    describe('#createInformers', function () {
+      const leaseQuery = { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
       const resources = [
-        ['core.gardener.cloud', 'cloudprofiles'],
-        ['core.gardener.cloud', 'seeds'],
-        ['core.gardener.cloud', 'controllerregistrations'],
-        ['core.gardener.cloud', 'quotas'],
-        ['core.gardener.cloud', 'shoots'],
-        ['core', 'resourcequotas'],
-        ['coordination.k8s.io', 'leases'],
+        { clientGroup: 'core.gardener.cloud', name: 'cloudprofiles', method: 'informer', args: [undefined, undefined] },
+        { clientGroup: 'core.gardener.cloud', name: 'controllerregistrations', method: 'informer', args: [undefined, undefined] },
+        { clientGroup: 'core.gardener.cloud', name: 'projects', method: 'informer', args: [undefined, undefined] },
+        { clientGroup: 'core.gardener.cloud', name: 'quotas', method: 'informerAllNamespaces', args: [undefined, undefined] },
+        { clientGroup: 'core.gardener.cloud', name: 'seeds', method: 'informer', args: [undefined, undefined] },
+        { clientGroup: 'core.gardener.cloud', name: 'shoots', method: 'informerAllNamespaces', args: [undefined, undefined] },
+        { clientGroup: 'seedmanagement.gardener.cloud', name: 'managedseeds', method: 'informer', args: ['garden', undefined, undefined] },
+        { clientGroup: 'core', name: 'resourcequotas', method: 'informerAllNamespaces', args: [undefined, undefined] },
+        { clientGroup: 'coordination.k8s.io', name: 'leases', method: 'informer', args: () => [process.env.POD_NAMESPACE, leaseQuery, undefined] },
       ]
+      const reflectorOptions = {
+        strategy: 'mostRecentPaginated',
+        pageSize: 500,
+      }
 
-      for (const [apiGroup, name] of resources) {
-        const observable = dashboardClient[apiGroup][name]
-
-        const informer = {
-          names: {
-            plural: name,
-          },
-          mockFn: vi.fn(() => informer),
+      function mockInformerFactories () {
+        const factories = {}
+        for (const { clientGroup, name, method } of resources) {
+          const informer = {
+            names: { plural: name },
+          }
+          const factory = vi.fn(() => informer)
+          dashboardClient[clientGroup][name][method] = factory
+          factories[name] = factory
         }
+        return factories
+      }
 
-        observable.informerAllNamespaces = informer.mockFn
-        observable.informer = informer.mockFn
+      function expectInformerArgs (factories, overrides = {}) {
+        for (const { name, args } of resources) {
+          expect(factories[name].mock.calls).toEqual([overrides[name] ?? (typeof args === 'function' ? args() : args)])
+        }
       }
-      const informers = LifecycleHooks.createInformers(dashboardClient)
-      for (const [, name] of resources) {
-        const { mockFn, names } = informers[name]
-        expect(names.plural).toBe(name)
-        expect(mockFn).toHaveBeenCalledTimes(1)
-      }
+
+      it('creates all informers without reflector configuration', function () {
+        const factories = mockInformerFactories()
+
+        const informers = LifecycleHooks.createInformers(dashboardClient)
+
+        expect(Object.keys(informers)).toEqual(resources.map(({ name }) => name))
+        expectInformerArgs(factories)
+      })
+
+      it('passes reflector options only to the configured Shoot informer', function () {
+        expect.hasAssertions()
+        config.kubeClient = {
+          reflector: {
+            resources: [{
+              apiGroup: 'core.gardener.cloud',
+              resource: 'shoots',
+              ...reflectorOptions,
+            }],
+          },
+        }
+        const factories = mockInformerFactories()
+
+        LifecycleHooks.createInformers(dashboardClient)
+
+        expectInformerArgs(factories, {
+          shoots: [undefined, reflectorOptions],
+        })
+      })
+
+      it('passes reflector options to another existing namespaced resource', function () {
+        expect.hasAssertions()
+        config.kubeClient = {
+          reflector: {
+            resources: [{
+              apiGroup: 'seedmanagement.gardener.cloud',
+              resource: 'managedseeds',
+              ...reflectorOptions,
+            }],
+          },
+        }
+        const factories = mockInformerFactories()
+
+        LifecycleHooks.createInformers(dashboardClient)
+
+        expectInformerArgs(factories, {
+          managedseeds: ['garden', undefined, reflectorOptions],
+        })
+      })
+
+      it('matches a core resource when apiGroup is omitted', function () {
+        expect.hasAssertions()
+        config.kubeClient = {
+          reflector: {
+            resources: [{
+              resource: 'resourcequotas',
+              ...reflectorOptions,
+            }],
+          },
+        }
+        const factories = mockInformerFactories()
+
+        LifecycleHooks.createInformers(dashboardClient)
+
+        expectInformerArgs(factories, {
+          resourcequotas: [undefined, reflectorOptions],
+        })
+      })
+
+      it('keeps the Lease field selector when passing reflector options', function () {
+        expect.hasAssertions()
+        config.kubeClient = {
+          reflector: {
+            resources: [{
+              apiGroup: 'coordination.k8s.io',
+              resource: 'leases',
+              ...reflectorOptions,
+            }],
+          },
+        }
+        const factories = mockInformerFactories()
+
+        LifecycleHooks.createInformers(dashboardClient)
+
+        expectInformerArgs(factories, {
+          leases: [process.env.POD_NAMESPACE, leaseQuery, reflectorOptions],
+        })
+      })
     })
 
     it('#cleanup', async function () {
