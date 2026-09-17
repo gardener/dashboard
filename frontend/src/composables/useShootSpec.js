@@ -133,6 +133,14 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootSpec.value, ['networking', 'nodes'])
   })
 
+  const ipFamilies = computed(() => {
+    return get(shootSpec.value, ['networking', 'ipFamilies'])
+  })
+
+  const nodeCIDRMaskSize = computed(() => {
+    return get(shootSpec.value, ['kubernetes', 'kubeControllerManager', 'nodeCIDRMaskSize'])
+  })
+
   const servicesCidr = computed(() => {
     return get(shootSpec.value, ['networking', 'services'])
   })
@@ -198,6 +206,8 @@ export function useShootSpec (shootItem, options = {}) {
     shootZones,
     podsCidr,
     nodesCidr,
+    ipFamilies,
+    nodeCIDRMaskSize,
     servicesCidr,
     shootDomain,
     isCustomShootDomain,
