@@ -35,6 +35,12 @@ data:
     clusterIdentity: {{ .Values.global.dashboard.clusterIdentity }}
     {{- end }}
     maxRequestBodySize: {{ .Values.global.dashboard.maxRequestBodySize | default "100kb" }}
+    {{- with .Values.global.dashboard.kubeClient.reflector.resources }}
+    kubeClient:
+      reflector:
+        resources:
+{{ toYaml . | trim | nindent 10 }}
+    {{- end }}
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}
     {{- $allowedOrigins := .Values.global.dashboard.websocketAllowedOrigins | default (list "*") }}

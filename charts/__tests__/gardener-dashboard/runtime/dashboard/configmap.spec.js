@@ -738,6 +738,42 @@ describe('gardener-dashboard', function () {
       })
     })
 
+    describe('reflector', function () {
+      it('should not render empty resources by default', async function () {
+        const documents = await renderTemplates(templates, {})
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config).not.toHaveProperty('kubeClient')
+      })
+
+      it('should render configured resources', async function () {
+        const reflector = {
+          resources: [{
+            apiGroup: 'core.gardener.cloud',
+            resource: 'shoots',
+            strategy: 'mostRecentPaginated',
+            pageSize: 500,
+          }],
+        }
+        const values = {
+          global: {
+            dashboard: {
+              kubeClient: {
+                reflector,
+              },
+            },
+          },
+        }
+
+        const documents = await renderTemplates(templates, values)
+        const [configMap] = documents
+        const config = yamlLoad(configMap.data['config.yaml'])
+
+        expect(config.kubeClient.reflector).toEqual(reflector)
+      })
+    })
+
     describe('maxRequestBodySize', function () {
       it('should render the template', async function () {
         const limit = '1mb'
