@@ -142,13 +142,13 @@ ClusterScoped.Observable = superclass => class extends superclass {
     return this[http.stream](url, { method, searchParams, signal })
   }
 
-  informer (options) {
+  informer (query, reflectorOptions) {
     // create ListWatcher
     const listFunc = options => this.list(options)
     const watchFunc = options => this.watchList(options)
-    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, options)
+    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, query)
     // create informer
-    return Informer.create(listWatcher)
+    return Informer.create(listWatcher, reflectorOptions)
   }
 }
 
@@ -190,23 +190,23 @@ NamespaceScoped.Observable = superclass => class extends superclass {
     return this[http.stream](url, { method, searchParams, signal })
   }
 
-  informer (namespace, options) {
+  informer (namespace, query, reflectorOptions) {
     assertNamespace(namespace)
     // create ListWatcher
     const listFunc = options => this.list(namespace, options)
     const watchFunc = options => this.watchList(namespace, options)
-    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, options)
+    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, query)
     // create informer
-    return Informer.create(listWatcher)
+    return Informer.create(listWatcher, reflectorOptions)
   }
 
-  informerAllNamespaces (options) {
+  informerAllNamespaces (query, reflectorOptions) {
     // create ListWatcher
     const listFunc = options => this.listAllNamespaces(options)
     const watchFunc = options => this.watchListAllNamespaces(options)
-    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, options)
+    const listWatcher = new ListWatcher(listFunc, watchFunc, this.constructor, query)
     // create informer
-    return Informer.create(listWatcher)
+    return Informer.create(listWatcher, reflectorOptions)
   }
 }
 
@@ -498,6 +498,7 @@ const allowedSearchParamsMap = new Map(Object.entries({
     'fieldSelector',
     'labelSelector',
     'resourceVersion',
+    'resourceVersionMatch',
     'timeoutSeconds',
     'includeUninitialized',
     'allowWatchBookmarks',

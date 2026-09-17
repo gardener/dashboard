@@ -61,6 +61,9 @@ describe('kube-client', () => {
         }
         this.stream = undefined
         this.expiredErrorForToken = undefined
+        this.expireOnce = false
+        this.listErrors = []
+        this.listOptions = []
         this.events = []
       }
 
@@ -68,8 +71,14 @@ describe('kube-client', () => {
         this.signal = signal
       }
 
-      async list ({ limit, continue: continueToken }) {
+      async list (options) {
         await nextTick()
+        this.listOptions.push({ ...options })
+        const error = this.listErrors.shift()
+        if (error) {
+          throw error
+        }
+        const { limit, continue: continueToken } = options
         const metadata = {
           resourceVersion: '2',
           selfLink: 'link',
@@ -81,6 +90,9 @@ describe('kube-client', () => {
           return { metadata: { continue: 'b', ...metadata }, items: [a] }
         }
         if (continueToken === this.expiredErrorForToken) {
+          if (this.expireOnce) {
+            this.expiredErrorForToken = undefined
+          }
           throw new ApiErrors.StatusError({
             code: 410,
             reason: 'Expired',
@@ -170,7 +182,10 @@ describe('kube-client', () => {
         expect(listPager).toBeInstanceOf(ListPager)
         expect(listPager.pageSize).toBe(1)
         expect(listPager.fullListIfExpired).toBe(true)
-        const options = { resourceVersion: '0' }
+        const options = {
+          resourceVersion: '1',
+          resourceVersionMatch: 'NotOlderThan',
+        }
         const { metadata, items } = await listPager.list(options)
         expect(metadata).toEqual({
           resourceVersion: '2',
@@ -178,6 +193,17 @@ describe('kube-client', () => {
           paginated: true,
         })
         expect(items).toEqual([a, b])
+        expect(listWatcher.listOptions).toEqual([
+          {
+            limit: 1,
+            resourceVersion: '1',
+            resourceVersionMatch: 'NotOlderThan',
+          },
+          {
+            continue: 'b',
+            limit: 1,
+          },
+        ])
       })
 
       it('should return a full list', async () => {
@@ -257,6 +283,38 @@ describe('kube-client', () => {
         expect(reflector.relistResourceVersion).toBe('1')
       })
 
+      it('should return mostRecentPaginated list options', () => {
+        reflector = Reflector.create(listWatcher, store, {
+          strategy: 'mostRecentPaginated',
+          pageSize: 1,
+        })
+        expect(reflector.relistResourceVersion).toBe('')
+        expect(reflector.relistOptions).toEqual({})
+        reflector.lastSyncResourceVersion = '1'
+        expect(reflector.relistOptions).toEqual({
+          resourceVersion: '1',
+          resourceVersionMatch: 'NotOlderThan',
+        })
+        reflector.isLastSyncResourceVersionUnavailable = true
+        expect(reflector.relistOptions).toEqual({})
+      })
+
+      it.each([
+        [null, 'The reflector options must be a plain object'],
+        [[], 'The reflector options must be a plain object'],
+        [{ fallback: {} }, 'Unsupported reflector option "fallback"'],
+        [{ strategy: 'unsupported', pageSize: 1 }, 'Unsupported reflector strategy "unsupported"'],
+        [{ strategy: 'mostRecentPaginated' }, 'The reflector option "pageSize" must be a positive safe integer'],
+        [{ strategy: 'mostRecentPaginated', pageSize: 0 }, 'The reflector option "pageSize" must be a positive safe integer'],
+        [{ strategy: 'mostRecentPaginated', pageSize: Number.MAX_SAFE_INTEGER + 1 }, 'The reflector option "pageSize" must be a positive safe integer'],
+        [{ pageSize: 1 }, 'The reflector option "pageSize" requires a strategy'],
+      ])('should reject invalid reflector options before listing', (options, message) => {
+        const listStub = vi.spyOn(listWatcher, 'list')
+        expect(() => Reflector.create(listWatcher, store, options)).toThrow(message)
+        expect(listStub).not.toHaveBeenCalled()
+        listStub.mockRestore()
+      })
+
       describe('#watchHandler', () => {
         let stream
 
@@ -329,9 +387,20 @@ describe('kube-client', () => {
           listStub.mockRejectedValueOnce(unexpectedError)
           await reflector.listAndWatch()
           expect(createPagerStub).toHaveBeenCalledTimes(1)
+          expect(createPagerStub).toHaveBeenCalledWith(listWatcher)
           expect(listStub).toHaveBeenCalledTimes(1)
           expect(listStub.mock.calls).toEqual([
             [{ resourceVersion: '0' }],
+          ])
+        })
+
+        it('should retain unconfigured relist behavior for a known resource version', async () => {
+          reflector.lastSyncResourceVersion = '1'
+          listStub.mockRejectedValueOnce(unexpectedError)
+          await reflector.listAndWatch()
+          expect(pager.pageSize).toBe(0)
+          expect(listStub.mock.calls).toEqual([
+            [{ resourceVersion: '1' }],
           ])
         })
 
@@ -424,6 +493,112 @@ describe('kube-client', () => {
           expect(listStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(1)
           expect(store.listKeys()).toEqual(['a', 'b', 'c'])
+        })
+      })
+
+      describe('#listAndWatch with mostRecentPaginated', () => {
+        const expiredError = new ApiErrors.StatusError({ code: 410, reason: 'Expired' })
+        const unexpectedError = new Error('Failed')
+        let watchStub
+
+        function createReflector (pageSize) {
+          reflector = Reflector.create(listWatcher, store, {
+            strategy: 'mostRecentPaginated',
+            pageSize,
+          })
+          reflector.minWatchTimeout = 30
+          reflector.setAbortSignal(ac.signal)
+          watchStub = vi.spyOn(listWatcher, 'watch').mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+        }
+
+        afterEach(() => {
+          watchStub?.mockRestore()
+        })
+
+        it('should paginate the initial list without a resource version', async () => {
+          createReflector(1)
+
+          await reflector.listAndWatch()
+
+          expect(listWatcher.listOptions).toEqual([
+            { limit: 1 },
+            { continue: 'b', limit: 1 },
+          ])
+          expect(watchStub).toHaveBeenCalledWith({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '2',
+          })
+        })
+
+        it('should paginate a relist from a known resource version', async () => {
+          createReflector(2)
+          reflector.lastSyncResourceVersion = '1'
+
+          await reflector.listAndWatch()
+
+          expect(listWatcher.listOptions).toEqual([{
+            limit: 2,
+            resourceVersion: '1',
+            resourceVersionMatch: 'NotOlderThan',
+          }])
+          expect(watchStub).toHaveBeenCalledWith({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '2',
+          })
+        })
+
+        it('should recover successfully with a fresh paginated list', async () => {
+          createReflector(2)
+          reflector.lastSyncResourceVersion = '1'
+          listWatcher.listErrors.push(expiredError)
+
+          await reflector.listAndWatch()
+
+          expect(listWatcher.listOptions).toEqual([
+            {
+              limit: 2,
+              resourceVersion: '1',
+              resourceVersionMatch: 'NotOlderThan',
+            },
+            { limit: 2 },
+          ])
+          expect(store.listKeys()).toEqual(['a', 'b'])
+          expect(watchStub).toHaveBeenCalledTimes(1)
+        })
+
+        it('should discard partial pages and restart an expired continuation', async () => {
+          createReflector(1)
+          reflector.lastSyncResourceVersion = '1'
+          listWatcher.expiredErrorForToken = 'b'
+          listWatcher.expireOnce = true
+          const replaceStub = vi.spyOn(store, 'replace')
+
+          await reflector.listAndWatch()
+
+          expect(listWatcher.listOptions).toEqual([
+            {
+              limit: 1,
+              resourceVersion: '1',
+              resourceVersionMatch: 'NotOlderThan',
+            },
+            { continue: 'b', limit: 1 },
+            { limit: 1 },
+            { continue: 'b', limit: 1 },
+          ])
+          expect(replaceStub).toHaveBeenCalledTimes(1)
+          expect(replaceStub).toHaveBeenCalledWith([a, b], '2')
+          expect(watchStub).toHaveBeenCalledWith({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '2',
+          })
+          replaceStub.mockRestore()
         })
       })
 

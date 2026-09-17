@@ -5,6 +5,7 @@
 //
 
 import EventEmitter from 'events'
+import { isPlainObject } from 'lodash-es'
 import Reflector from './Reflector.js'
 import Store from './Store.js'
 
@@ -13,8 +14,13 @@ class Informer extends EventEmitter {
   #abortController = new AbortController()
   #store
 
-  constructor (listWatcher, { keyPath } = {}) {
+  constructor (listWatcher, options = {}) {
     super()
+    if (!isPlainObject(options)) {
+      throw new TypeError('The informer options must be a plain object')
+    }
+    const { keyPath, strategy, pageSize } = options
+    const reflectorOptions = { strategy, pageSize }
     const store = this.#store = new Store({ keyPath })
     const emitter = this
     this.#reflector = Reflector.create(listWatcher, {
@@ -58,7 +64,7 @@ class Informer extends EventEmitter {
         store.delete(object)
         emitter.emit('delete', object)
       },
-    })
+    }, reflectorOptions)
   }
 
   get names () {
