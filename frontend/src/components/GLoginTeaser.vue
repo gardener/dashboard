@@ -30,7 +30,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-
 import DOMPurify from 'dompurify'
 
 import { useLoginStore } from '@/store/login'
