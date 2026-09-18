@@ -13,6 +13,7 @@ export default {
     fields: [
       {
         key: 'apiToken',
+        aliases: ['CLOUDFLARE_API_TOKEN'],
         label: 'Cloudflare API Token',
         type: 'text',
         sensitive: true,

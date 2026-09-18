@@ -14,10 +14,11 @@ export default {
       accessKeyIdDetail,
     ],
     fields: [
-      accessKeyIdField,
-      secretAccessKeyField,
+      { ...accessKeyIdField, aliases: ['AWS_ACCESS_KEY_ID'] },
+      { ...secretAccessKeyField, aliases: ['AWS_SECRET_ACCESS_KEY'] },
       {
-        key: 'AWS_REGION',
+        key: 'region',
+        aliases: ['AWS_REGION'],
         label: 'Region (optional)',
         hint: 'Overwrite default region of Route 53 endpoint. Required for certain regions. Example value: eu-central-1',
         type: 'text',
