@@ -31,8 +31,7 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 
 ## Vendor Branding
 
-You can customize the appearance of built-in vendors displayed in the dashboard. This includes overriding the display name, icon, sorting, and order of *cloud provider vendors* and *machine image vendors*. In addition, you can configure custom vendors.
-
+You can customize the appearance and visibility of built-in vendors displayed in the dashboard. This includes overriding the display name, icon, sorting, and order of *cloud provider vendors* and *machine image vendors*. In addition, you can configure custom vendors.
 
 Vendor customization is configured in the arrays
 `frontendConfig.branding.infraVendors`, `frontendConfig.branding.dnsVendors`, and `frontendConfig.branding.machineImageVendors`.
@@ -44,6 +43,20 @@ Each entry must be an object with a `name` key that identifies the vendor. The f
 | `displayName` | Name displayed in the dashboard |
 | `weight`      | Sorting weight. Lower values appear first. See the default weights in the built-in [infrastructure](../../frontend/src/data/vendors/infra), [DNS](../../frontend/src/data/vendors/dns), and [machine image](../../frontend/src/data/vendors/machineImage) vendor registries. |
 | `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
+| `hidden`      | Hides the vendor in the dashboard. Set it to `false` to show a vendor that is hidden by its built-in definition. This only controls dashboard visibility, not provider availability or authorization. |
+
+For example, the Google Distributed Cloud air-gapped DNS provider is hidden by default. It can be shown for a GDC air-gapped landscape while other providers are hidden explicitly:
+
+```yaml
+branding:
+  dnsVendors:
+    - name: gdch-dns
+      hidden: false
+    - name: aws-route53
+      hidden: true
+```
+
+Providers omitted from the branding configuration retain their built-in visibility. Landscape operators must therefore explicitly hide every provider that should not be offered and update the configuration when support for additional providers is added.
 
 ## Colors
 Gardener Dashboard has been built with Vuetify. We use Vuetify's built-in [theming support](https://vuetifyjs.com/en/features/theme/) to centrally configure colors that are used throughout the web application.
