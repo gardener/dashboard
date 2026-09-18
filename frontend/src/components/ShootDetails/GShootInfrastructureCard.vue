@@ -139,6 +139,14 @@ SPDX-License-Identifier: Apache-2.0
         </g-list-item>
       </template>
       <g-list-item>
+        <template #prepend>
+          <v-icon
+            v-if="!hasShootWorkerGroups"
+            color="primary"
+          >
+            mdi-ip-network
+          </v-icon>
+        </template>
         <g-list-item-content label="Services CIDR">
           {{ servicesCidr }}
         </g-list-item-content>
