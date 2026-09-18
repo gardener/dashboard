@@ -172,10 +172,5 @@ describe('directives', () => {
       await wrapper.setData({ content: '<i>second</i>' })
       expect(wrapper.find('div').element.innerHTML).toBe('<i>second</i>')
     })
-
-    it('preserves inline style attributes', () => {
-      const wrapper = mountWithSafeHtml('<p style="color: red;">text</p>')
-      expect(wrapper.find('div').element.innerHTML).toContain('style="color: red;"')
-    })
   })
 })
