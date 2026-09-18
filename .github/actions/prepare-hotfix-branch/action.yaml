@@ -104,6 +104,8 @@ runs:
 
     - name: Bump patch version
       uses: gardener/cc-utils/.github/actions/version@v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
+      env:
+        HOTFIX_BRANCH: ${{ steps.branches.outputs.hotfix-branch }}
       with:
         version-operation: bump-patch
         prerelease: dev
