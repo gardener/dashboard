@@ -143,6 +143,101 @@ const configMappings = [
   },
 ]
 
+const MOST_RECENT_PAGINATED = 'mostRecentPaginated'
+const dashboardReflectorResources = [
+  ['core.gardener.cloud', 'cloudprofiles'],
+  ['core.gardener.cloud', 'controllerregistrations'],
+  ['core.gardener.cloud', 'projects'],
+  ['core.gardener.cloud', 'quotas'],
+  ['core.gardener.cloud', 'seeds'],
+  ['core.gardener.cloud', 'shoots'],
+  ['seedmanagement.gardener.cloud', 'managedseeds'],
+  ['', 'resourcequotas'],
+]
+
+function reflectorResourceKey (apiGroup, resource) {
+  return `${apiGroup ?? ''}/${resource}`
+}
+
+function validateReflectorConfig (config) {
+  const { kubeClient } = config
+  if (kubeClient === undefined) {
+    return
+  }
+  if (!_.isPlainObject(kubeClient)) {
+    assert.fail("Configuration value 'kubeClient' must be an object")
+  }
+  const { reflector } = kubeClient
+  if (reflector === undefined) {
+    return
+  }
+  if (!_.isPlainObject(reflector)) {
+    assert.fail("Configuration value 'kubeClient.reflector' must be an object")
+  }
+  const unsupportedReflectorProperty = Object.keys(reflector).find(key => key !== 'resources')
+  if (unsupportedReflectorProperty) {
+    assert.fail(`Configuration value 'kubeClient.reflector.${unsupportedReflectorProperty}' is not supported`)
+  }
+  const { resources } = reflector
+  if (resources === undefined) {
+    return
+  }
+  if (!Array.isArray(resources)) {
+    assert.fail("Configuration value 'kubeClient.reflector.resources' must be an array")
+  }
+
+  const activeResources = new Set(dashboardReflectorResources.map(resource => reflectorResourceKey(...resource)))
+  if (config.gitHub?.webhookSecret) {
+    activeResources.add(reflectorResourceKey('coordination.k8s.io', 'leases'))
+  }
+  const configuredResources = new Set()
+  resources.forEach((entry, index) => {
+    const path = `kubeClient.reflector.resources[${index}]`
+    if (!_.isPlainObject(entry)) {
+      assert.fail(`Configuration value '${path}' must be an object`)
+    }
+    const unsupportedEntryProperty = Object.keys(entry).find(key => !['apiGroup', 'resource', 'strategy', 'pageSize'].includes(key))
+    if (unsupportedEntryProperty) {
+      assert.fail(`Configuration value '${path}.${unsupportedEntryProperty}' is not supported`)
+    }
+
+    const { apiGroup, resource, strategy, pageSize } = entry
+    if (apiGroup !== undefined && (typeof apiGroup !== 'string' || !apiGroup)) {
+      assert.fail(`Configuration value '${path}.apiGroup' must be a non-empty string`)
+    }
+    if (typeof resource !== 'string' || !resource) {
+      assert.fail(`Configuration value '${path}.resource' must be a non-empty string`)
+    }
+    if (strategy !== MOST_RECENT_PAGINATED) {
+      assert.fail(`Configuration value '${path}.strategy' must be '${MOST_RECENT_PAGINATED}'`)
+    }
+    if (!Number.isSafeInteger(pageSize) || pageSize <= 0) {
+      assert.fail(`Configuration value '${path}.pageSize' must be a positive safe integer`)
+    }
+
+    const resourceKey = reflectorResourceKey(apiGroup, resource)
+    if (configuredResources.has(resourceKey)) {
+      assert.fail(`Configuration value 'kubeClient.reflector.resources' contains duplicate entry '${resourceKey}'`)
+    }
+    configuredResources.add(resourceKey)
+    if (!activeResources.has(resourceKey)) {
+      assert.fail(`Configuration value '${path}' refers to resource '${resourceKey}' without an active Dashboard informer`)
+    }
+  })
+}
+
+function assignReflectorResourcesFromEnvironment (config, env) {
+  const value = env.KUBE_CLIENT_REFLECTOR_RESOURCES
+  if (value === undefined || value === '') {
+    return
+  }
+  try {
+    _.set(config, ['kubeClient', 'reflector', 'resources'], JSON.parse(value))
+  } catch (err) {
+    assert.fail(`Environment variable 'KUBE_CLIENT_REFLECTOR_RESOURCES' must contain valid JSON: ${err.message}`)
+  }
+}
+
 function parseConfigValue (value, type) {
   const parseArray = value => {
     if (value == null || typeof value !== 'string' || value.length === 0) {
@@ -225,6 +320,7 @@ export default {
       } catch (err) { /* ignore */ }
     }
     this.assignConfigFromEnvironmentAndFileSystem(config, env)
+    assignReflectorResourcesFromEnvironment(config, env)
     if (!_.has(config, ['metricsHost']) && _.has(config, ['host'])) {
       config.metricsHost = config.host
     }
@@ -297,6 +393,8 @@ export default {
     } else if (_.has(config, ['frontend', 'ticket'])) {
       _.set(config, ['frontend', 'ticket', 'avatarSource'], 'github')
     }
+
+    validateReflectorConfig(config)
 
     return config
   },

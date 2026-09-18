@@ -32,6 +32,7 @@ class ListPager {
       options.limit = this.pageSize
     }
     const requestedResourceVersion = options.resourceVersion
+    const requestedResourceVersionMatch = options.resourceVersionMatch
     let list
 
     while (true) {
@@ -51,6 +52,9 @@ class ListPager {
         delete options.limit
         delete options.continue
         options.resourceVersion = requestedResourceVersion
+        if (requestedResourceVersionMatch !== undefined) {
+          options.resourceVersionMatch = requestedResourceVersionMatch
+        }
         const fullList = await this.lister.list(options)
         if (list) {
           fullList.metadata.paginated = list.metadata.paginated
@@ -80,10 +84,11 @@ class ListPager {
 
       // set the next loop up
       options.continue = continueToken
-      // Clear the ResourceVersion on the subsequent List calls to avoid the
+      // Clear the ResourceVersion(Match) on the subsequent List calls to avoid the
       // `specifying resource version is not allowed when using continue` error.
       // See https://github.com/kubernetes/kubernetes/issues/85221#issuecomment-553748143.
       delete options.resourceVersion
+      delete options.resourceVersionMatch
       // At this point, result is already paginated.
       list.metadata.paginated = true
     }
