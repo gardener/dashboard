@@ -23,11 +23,24 @@ import { useShootContext } from '@/composables/useShootContext'
 
 import GNewShootInfrastructureCard from './GNewShootInfrastructureCard.vue'
 
+const props = defineProps({
+  scrollContainer: {
+    type: HTMLElement,
+    default: null,
+  },
+})
+
 const cloudProfileStore = useCloudProfileStore()
 
 const { providerType } = useShootContext()
 
 function setProviderType (value) {
+  const scrollTop = props.scrollContainer?.scrollTop ?? null
   providerType.value = value
+  if (scrollTop !== null && props.scrollContainer) {
+    requestAnimationFrame(() => {
+      props.scrollContainer.scrollTop = scrollTop
+    })
+  }
 }
 </script>

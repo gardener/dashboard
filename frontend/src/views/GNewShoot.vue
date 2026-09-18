@@ -10,13 +10,14 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
+      ref="scrollContainer"
       class="overflow-auto"
       fluid
     >
       <v-card>
         <g-toolbar title="Infrastructure" />
         <v-card-text>
-          <g-new-shoot-select-infrastructure />
+          <g-new-shoot-select-infrastructure :scroll-container="scrollContainer?.$el" />
         </v-card-text>
       </v-card>
       <v-card
@@ -62,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
           title="Worker"
         />
         <v-card-text>
-          <g-manage-workers />
+          <g-manage-workers :scroll-container="scrollContainer?.$el" />
         </v-card-text>
       </v-card>
       <v-card
@@ -127,7 +128,10 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import {
+  defineAsyncComponent,
+  ref,
+} from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import {
   mapActions,
@@ -198,6 +202,8 @@ export default {
     return true
   },
   setup () {
+    const scrollContainer = ref(null)
+
     const {
       shootNamespace,
       shootName,
@@ -210,6 +216,7 @@ export default {
 
     return {
       v$: useVuelidate(),
+      scrollContainer,
       shootNamespace,
       shootName,
       shootManifest,
