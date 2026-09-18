@@ -57,6 +57,22 @@ describe('kube-client', () => {
         expect(internalAbortController.abort).toHaveBeenCalledTimes(1)
       })
 
+      it('should pass reflector options separately from store options', () => {
+        informer = Informer.createTestingInformer(listWatcher, {
+          keyPath: 'uid',
+          strategy: 'mostRecentPaginated',
+          pageSize: 123,
+        })
+        expect(informer.reflector.strategy).toBe('mostRecentPaginated')
+        expect(informer.reflector.pageSize).toBe(123)
+        expect(informer.store.getKey(a)).toBe(1)
+      })
+
+      it('should reject malformed informer options before listing', () => {
+        expect(() => Informer.create(listWatcher, [])).toThrow('The informer options must be a plain object')
+        expect(listFunc).not.toHaveBeenCalled()
+      })
+
       it('should replace store data', async () => {
         reflector.store.replace([a, b, c])
         expect(store.list()).toEqual([a, b, c])

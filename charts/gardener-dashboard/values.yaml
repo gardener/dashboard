@@ -40,6 +40,18 @@ global:
       # Defaults to 300000 (5 minutes) when unset. Set to 0 to disable.
       requestTimeout: ~
 
+      reflector:
+        # Per-resource reflector synchronization strategies. Entries are opt-in.
+        # KUBE_CLIENT_REFLECTOR_RESOURCES can override these resources with a JSON array when injected externally;
+        # this chart does not emit the environment variable.
+        # Example (replace `resources: []` below):
+        # resources:
+        # - apiGroup: core.gardener.cloud # omit for the core API group
+        #   resource: shoots
+        #   strategy: mostRecentPaginated
+        #   pageSize: 500
+        resources: []
+
   # If configured, the dashboard deployment uses a projected volume which presents the kubeconfig to the garden cluster.
   # projectedKubeconfig:
   #   # Path the projected volume is mounted to. This is typically also the base path in the generic kubeconfig to refer to the token file.

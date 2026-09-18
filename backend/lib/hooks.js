@@ -70,24 +70,37 @@ class LifecycleHooks {
   }
 
   static createInformers (client) {
+    const resourceKey = (group, resource) => `${group ?? ''}/${resource}`
+    const resources = config.kubeClient?.reflector?.resources ?? []
+    const reflectorOptionsByResource = new Map(
+      resources.map(({ apiGroup, resource, ...options }) => [resourceKey(apiGroup, resource), options]),
+    )
+    const reflectorOptionsFor = observable => {
+      const { group, names: { plural } } = observable.constructor
+      return reflectorOptionsByResource.get(resourceKey(group, plural))
+    }
+    const gardenerResources = client['core.gardener.cloud']
+    const seedManagementResources = client['seedmanagement.gardener.cloud']
+    const coreResources = client.core
     const informers = {
       // core.gardener
-      cloudprofiles: client['core.gardener.cloud'].cloudprofiles.informer(),
-      controllerregistrations: client['core.gardener.cloud'].controllerregistrations.informer(),
-      projects: client['core.gardener.cloud'].projects.informer(),
-      quotas: client['core.gardener.cloud'].quotas.informerAllNamespaces(),
-      seeds: client['core.gardener.cloud'].seeds.informer(),
-      shoots: client['core.gardener.cloud'].shoots.informerAllNamespaces(),
+      cloudprofiles: gardenerResources.cloudprofiles.informer(undefined, reflectorOptionsFor(gardenerResources.cloudprofiles)),
+      controllerregistrations: gardenerResources.controllerregistrations.informer(undefined, reflectorOptionsFor(gardenerResources.controllerregistrations)),
+      projects: gardenerResources.projects.informer(undefined, reflectorOptionsFor(gardenerResources.projects)),
+      quotas: gardenerResources.quotas.informerAllNamespaces(undefined, reflectorOptionsFor(gardenerResources.quotas)),
+      seeds: gardenerResources.seeds.informer(undefined, reflectorOptionsFor(gardenerResources.seeds)),
+      shoots: gardenerResources.shoots.informerAllNamespaces(undefined, reflectorOptionsFor(gardenerResources.shoots)),
       // seedmanagement.gardener
-      managedseeds: client['seedmanagement.gardener.cloud'].managedseeds.informer('garden'),
+      managedseeds: seedManagementResources.managedseeds.informer('garden', undefined, reflectorOptionsFor(seedManagementResources.managedseeds)),
       // core
-      resourcequotas: client.core.resourcequotas.informerAllNamespaces(),
+      resourcequotas: coreResources.resourcequotas.informerAllNamespaces(undefined, reflectorOptionsFor(coreResources.resourcequotas)),
     }
 
     if (config.gitHub?.webhookSecret) {
       const informerOpts = { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
       const namespace = process.env.POD_NAMESPACE || 'garden'
-      informers.leases = client['coordination.k8s.io'].leases.informer(namespace, informerOpts)
+      const leases = client['coordination.k8s.io'].leases
+      informers.leases = leases.informer(namespace, informerOpts, reflectorOptionsFor(leases))
     }
 
     return informers

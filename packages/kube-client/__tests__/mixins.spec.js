@@ -22,6 +22,10 @@ describe('kube-client', () => {
     const dryRunOptions = {
       dryRun: true,
     }
+    const reflectorOptions = {
+      strategy: 'mostRecentPaginated',
+      pageSize: 123,
+    }
     const testInformer = {}
     Informer.create = vi.fn(() => testInformer)
 
@@ -117,6 +121,14 @@ describe('kube-client', () => {
           expect(searchParams.toString()).toBe('')
         })
 
+        it('should list with resourceVersionMatch', async () => {
+          const testObject = new TestObject()
+          const [, { searchParams }] = await testObject.list({
+            resourceVersionMatch: 'NotOlderThan',
+          })
+          expect(searchParams.toString()).toBe('resourceVersionMatch=NotOlderThan')
+        })
+
         it('should enrich listed items with apiVersion and kind', async () => {
           const body = {
             items: [
@@ -197,6 +209,15 @@ describe('kube-client', () => {
           const watchCall = testObject.watchList.mock.calls[0]
           expect(watchCall.length).toBe(1)
           expect(watchCall[0].searchParams.toString()).toBe('foo=bar')
+        })
+
+        it('should pass reflector options separately from the informer query', () => {
+          const testObject = new TestObject()
+          expect(testObject.informer(testOptions, reflectorOptions)).toBe(testInformer)
+          expect(Informer.create).toHaveBeenCalledTimes(1)
+          const [listWatcher, forwardedReflectorOptions] = Informer.create.mock.calls[0]
+          expect(listWatcher.searchParams.toString()).toBe('foo=bar')
+          expect(forwardedReflectorOptions).toBe(reflectorOptions)
         })
       })
 
@@ -420,6 +441,18 @@ describe('kube-client', () => {
           const watchCall = testObject.watchListAllNamespaces.mock.calls[0]
           expect(watchCall.length).toBe(1)
           expect(watchCall[0].searchParams.toString()).toBe('foo=bar')
+        })
+
+        it('should pass reflector options for namespaced informers', () => {
+          const testObject = new TestObject()
+          expect(testObject.informer('namespace', testOptions, reflectorOptions)).toBe(testInformer)
+          expect(testObject.informerAllNamespaces(testOptions, reflectorOptions)).toBe(testInformer)
+          expect(Informer.create.mock.calls).toEqual([
+            [expect.anything(), reflectorOptions],
+            [expect.anything(), reflectorOptions],
+          ])
+          expect(Informer.create.mock.calls[0][0].searchParams.toString()).toBe('foo=bar')
+          expect(Informer.create.mock.calls[1][0].searchParams.toString()).toBe('foo=bar')
         })
       })
 
