@@ -7,7 +7,7 @@
 import DOMPurify from 'dompurify'
 
 const PURIFY_CONFIG = {
-  ADD_ATTR: ['target', 'rel'],
+  ADD_ATTR: ['target', 'rel', 'style'],
 }
 
 export const safeHtml = {
