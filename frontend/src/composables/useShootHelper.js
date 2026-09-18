@@ -17,8 +17,6 @@ import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 import { useProjectStore } from '@/store/project'
 
-import { cloudProfileDisplayName } from '@/utils'
-
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
@@ -29,6 +27,8 @@ import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
+
+import { cloudProfileDisplayName } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
@@ -96,7 +96,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return sortBy(cloudProfileStore.cloudProfilesByProviderType(providerType.value),[cloudProfileDisplayName])
+    return sortBy(cloudProfileStore.cloudProfilesByProviderType(providerType.value), [cloudProfileDisplayName])
   })
 
   const defaultCloudProfileRef = computed(() => {
