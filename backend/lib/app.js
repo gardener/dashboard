@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-/* eslint-disable import-x/no-named-as-default-member -- helmet exposes sub-methods on its default export; this is the documented usage pattern */
 
 import express from 'express'
 import expressStaticGzip from 'express-static-gzip'
@@ -97,6 +96,7 @@ apiApp.use('/webhook', githubWebhookRouter)
 apiApp.use('/api', apiRouter)
 apiApp.use(renderError)
 
+/* eslint-disable import-x/no-named-as-default-member -- helmet exposes sub-methods on its default export; this is the documented usage pattern */
 app.use(helmet.xDnsPrefetchControl())
 app.use(helmet.xPermittedCrossDomainPolicies())
 app.use(helmet.xContentTypeOptions())
@@ -120,6 +120,7 @@ app.use(helmet.contentSecurityPolicy({
 app.use(helmet.referrerPolicy({
   policy: 'same-origin',
 }))
+/* eslint-enable import-x/no-named-as-default-member */
 
 if (existsSync(STATIC_ASSETS_OVERRIDE_FS_PATH)) {
   logger.debug(`Serving static asset overrides from ${STATIC_ASSETS_OVERRIDE_FS_PATH}`)
@@ -154,6 +155,7 @@ app.use(expressStaticGzip(PUBLIC_FS_PATH, {
 
 app.use([BUILD_ASSETS_URL_PATH, STATIC_ASSETS_URL_PATH], notFound)
 
+// eslint-disable-next-line import-x/no-named-as-default-member
 app.use(helmet.xFrameOptions({
   action: 'deny',
 }))
