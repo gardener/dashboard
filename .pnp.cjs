@@ -1099,6 +1099,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/xterm", "npm:6.0.0"],\
           ["culori", "npm:4.0.2"],\
           ["dayjs", "npm:1.11.23"],\
+          ["dompurify", "npm:3.4.15"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:10.10.0"],\
           ["eslint-plugin-import-newlines", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:2.0.0"],\
@@ -2702,6 +2703,15 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@types/node", "npm:22.13.1"],\
           ["undici-types", "npm:6.20.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@types/trusted-types", [\
+      ["npm:2.0.7", {\
+        "packageLocation": "./.yarn/cache/@types-trusted-types-npm-2.0.7-a07fc44f59-4c4855f10d.zip/node_modules/@types/trusted-types/",\
+        "packageDependencies": [\
+          ["@types/trusted-types", "npm:2.0.7"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -5877,6 +5887,16 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["domelementtype", "npm:3.0.0"],\
           ["domhandler", "npm:6.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["dompurify", [\
+      ["npm:3.4.15", {\
+        "packageLocation": "./.yarn/cache/dompurify-npm-3.4.15-1d152b5903-406b5f0f9c.zip/node_modules/dompurify/",\
+        "packageDependencies": [\
+          ["@types/trusted-types", "npm:2.0.7"],\
+          ["dompurify", "npm:3.4.15"]\
         ],\
         "linkType": "HARD"\
       }]\
