@@ -10,7 +10,7 @@ import {
 } from 'pinia'
 import {
   io,
-  mockSocket,
+  mockSocket, // eslint-disable-line import-x/named -- this is a mock, not a real socket.io-client export
 } from 'socket.io-client'
 
 import { useSocketStore } from '@/store/socket'

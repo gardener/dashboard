@@ -7,7 +7,12 @@
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
+const path = require('path')
+const pluginImport = require('eslint-plugin-import-x')
+
+const workspacePackageMap = new Map([
+  ['@gardener-dashboard/test-utils', '../packages/test-utils'],
+])
 
 module.exports = [
   ...neostandard({}),
@@ -19,23 +24,25 @@ module.exports = [
   },
   {
     settings: {
-      'import/resolver': {
-        [require.resolve('../eslint-import-resolver-local.cjs')]: {
-          map: [
-            ['@gardener-dashboard/test-utils', '../packages/test-utils'],
-          ],
-        },
-        node: {
+      'import-x/resolver-next': [
+        pluginImport.createNodeResolver({
           extensions: ['.js', '.cjs', '.mjs'],
+        }),
+        {
+          interfaceVersion: 3,
+          resolve (modulePath) {
+            const found = workspacePackageMap.has(modulePath)
+            return { found, path: found ? path.resolve(__dirname, workspacePackageMap.get(modulePath)) : undefined }
+          },
         },
-      },
+      ],
     },
     plugins: {
-      import: pluginImport,
+      'import-x': pluginImport,
     },
     rules: {
       ...pluginImport.flatConfigs.recommended.rules,
-      'import/no-named-as-default-member': 'off',
+      'import-x/no-named-as-default-member': 'off',
     },
   },
   {
@@ -70,7 +77,7 @@ module.exports = [
   {
     files: ['**/vitest.config.js'],
     rules: {
-      'import/no-unresolved': 'off',
+      'import-x/no-unresolved': 'off',
     },
   },
 ]

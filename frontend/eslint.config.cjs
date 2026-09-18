@@ -11,7 +11,7 @@ const pluginVue = require('eslint-plugin-vue')
 const stylistic = require('@stylistic/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
 const pluginLodash = require('eslint-plugin-lodash')
-const pluginImport = require('eslint-plugin-import')
+const pluginImport = require('eslint-plugin-import-x')
 const pluginVitest = require('@vitest/eslint-plugin')
 const importNewlines = require('eslint-plugin-import-newlines')
 
@@ -57,31 +57,29 @@ const importConfig = {
     'vitest.config.js',
   ],
   settings: {
-    'import/resolver': {
-      alias: {
-        map: [
-          ['@', './src'],
-        ],
+    'import-x/resolver-next': [
+      pluginImport.createNodeResolver({
+        alias: { '@': [path.resolve(__dirname, './src')] },
         extensions: ['.js', '.vue'],
-      },
-      [path.resolve('../eslint-import-resolver-local.cjs')]: {
-        map: [
-          ['unfonts.css', null],
-          ['vuetify/components', null],
-          ['vuetify/directives', null],
-          ['vuetify/styles', null],
-          ['vuetify/util/colors', null],
-          ['virtual:g-mdi-meta', null],
-        ],
-      },
-    },
+      }),
+    ],
   },
   plugins: {
-    import: pluginImport,
+    'import-x': pluginImport,
   },
   rules: {
     ...pluginImport.flatConfigs.recommended.rules,
-    'import/order': ['error', {
+    'import-x/no-unresolved': ['error', {
+      ignore: [
+        'unfonts\\.css',
+        'vuetify/components',
+        'vuetify/directives',
+        'vuetify/styles',
+        'vuetify/util/colors',
+        'virtual:g-mdi-meta',
+      ],
+    }],
+    'import-x/order': ['error', {
       groups: [
         'builtin',
         'external',

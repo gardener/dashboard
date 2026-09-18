@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+/* eslint-disable import-x/no-named-as-default-member -- set-cookie-parser exposes parse() on its default export; this is the documented usage pattern */
 
 import {
   describe,

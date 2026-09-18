@@ -7,7 +7,7 @@
 const neostandard = require('neostandard')
 const pluginVitest = require('@vitest/eslint-plugin')
 const pluginSecurity = require('eslint-plugin-security')
-const pluginImport = require('eslint-plugin-import')
+const pluginImport = require('eslint-plugin-import-x')
 const importNewlines = require('eslint-plugin-import-newlines')
 
 const importNewlinesConfig = {
@@ -53,14 +53,14 @@ module.exports = [
   },
   {
     plugins: {
-      import: pluginImport,
+      'import-x': pluginImport,
     },
     rules: pluginImport.flatConfigs.recommended.rules,
   },
   {
     files: ['hack/local-dashboard/vitest.config.mjs'],
     rules: {
-      'import/no-unresolved': 'off',
+      'import-x/no-unresolved': 'off',
     },
   },
   {
