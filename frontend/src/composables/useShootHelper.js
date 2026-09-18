@@ -17,6 +17,8 @@ import { useCredentialStore } from '@/store/credential'
 import { useSeedStore } from '@/store/seed'
 import { useProjectStore } from '@/store/project'
 
+import { cloudProfileDisplayName } from '@/utils'
+
 import { useCloudProviderEntityList } from '@/composables/credential/useCloudProviderEntityList'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
 import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
@@ -36,6 +38,7 @@ import mapValues from 'lodash/mapValues'
 import head from 'lodash/head'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import sortBy from 'lodash/sortBy'
 
 const shootPropertyMappings = Object.freeze({
   cloudProfileRef: ['spec', 'cloudProfile'],
@@ -93,7 +96,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
+    return sortBy(cloudProfileStore.cloudProfilesByProviderType(providerType.value),[cloudProfileDisplayName])
   })
 
   const defaultCloudProfileRef = computed(() => {
