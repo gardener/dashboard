@@ -20,6 +20,9 @@ export const useSanitizeUrl = (options = {}) => {
     try {
       const url = new URL(unref(value))
       if (allowedProtocolRegex.test(url.protocol)) {
+        if (url.protocol === 'mailto:') {
+          return `mailto:${url.pathname}`
+        }
         return url.toString()
       }
     } catch (err) {
