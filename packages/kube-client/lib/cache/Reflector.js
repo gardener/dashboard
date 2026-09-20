@@ -1,8 +1,11 @@
 //
+// SPDX-FileCopyrightText: 2014 The Kubernetes Authors
 // SPDX-FileCopyrightText: Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// This file contains code adapted from k8s.io/client-go/tools/cache/reflector.go.
 
 import { format as fmt } from 'node:util'
 import timers from 'timers/promises'
