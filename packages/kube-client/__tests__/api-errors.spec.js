@@ -12,6 +12,7 @@ import {
   isExpiredError,
   isResourceExpired,
   isGone,
+  isTooManyRequests,
   isTooLargeResourceVersionError,
   isGatewayTimeout,
 } from '../lib/ApiErrors.js'
@@ -69,6 +70,13 @@ describe('kube-client', () => {
       const error = new Error()
       error.reason = 'Expired'
       expect(isExpiredError(error)).toBe(false)
+    })
+
+    it('should identify too many requests errors', () => {
+      expect(isTooManyRequests(new StatusError({ code: 429 }))).toBe(true)
+      expect(isTooManyRequests(createHttpError({ statusCode: 429 }))).toBe(true)
+      expect(isTooManyRequests(createHttpError({ body: { code: 429 } }))).toBe(true)
+      expect(isTooManyRequests(new Error())).toBe(false)
     })
 
     it('should handle "Resource version too large" errors correctly', () => {

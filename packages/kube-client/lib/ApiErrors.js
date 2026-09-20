@@ -59,6 +59,10 @@ function isGone (err) {
   return getValue(err, 'code') === 410
 }
 
+function isTooManyRequests (err) {
+  return getValue(err, 'code') === 429
+}
+
 function isExpiredError (err) {
   return isResourceExpired(err) || isGone(err)
 }
@@ -103,6 +107,7 @@ export {
   CacheExpiredError,
   isResourceExpired,
   isGone,
+  isTooManyRequests,
   isExpiredError,
   isTooLargeResourceVersionError,
   isGatewayTimeout,
