@@ -6,6 +6,7 @@
 
 import { vi } from 'vitest'
 import { PassThrough, addAbortSignal } from 'node:stream'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 import * as ApiErrors from '../lib/ApiErrors.js'
 import { Reflector, Store, ListPager } from '../lib/cache/index.js'
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
@@ -27,8 +28,13 @@ describe('kube-client', () => {
     const a = createDummy({ uid: 'a', resourceVersion: '1' })
     const b = createDummy({ uid: 'b', resourceVersion: '2' })
     const c = createDummy({ uid: 'c', resourceVersion: '3' })
+    const d = createDummy({ uid: 'd', resourceVersion: '10' })
     const x = createDummy({ uid: 'a', resourceVersion: '4' })
     const bookmark = createDummy({ resourceVersion: '9' })
+    const initialEventsEndBookmark = createDummy({
+      resourceVersion: '9',
+      annotations: { 'k8s.io/initial-events-end': 'true' },
+    })
 
     class TestStream extends PassThrough {
       constructor () {
@@ -283,6 +289,14 @@ describe('kube-client', () => {
         expect(reflector.relistResourceVersion).toBe('1')
       })
 
+      it('should return a resourceVersion for WatchList', () => {
+        expect(reflector.rewatchResourceVersion).toBe('')
+        reflector.lastSyncResourceVersion = '1'
+        expect(reflector.rewatchResourceVersion).toBe('1')
+        reflector.isLastSyncResourceVersionUnavailable = true
+        expect(reflector.rewatchResourceVersion).toBe('')
+      })
+
       it('should return mostRecentPaginated list options', () => {
         reflector = Reflector.create(listWatcher, store, {
           strategy: 'mostRecentPaginated',
@@ -358,6 +372,350 @@ describe('kube-client', () => {
           expect(reflector.lastSyncResourceVersion).toBe('2')
           expect(store.listKeys()).toEqual(['a', 'b'])
         })
+
+        it('should stop at the initial events bookmark without closing an externally owned iterator', async () => {
+          const temporaryStore = new Store()
+          const iterator = stream[Symbol.asyncIterator]()
+          const resourceVersions = []
+          stream.write({ type: 'ADDED', object: a })
+          stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+          stream.end({ type: 'ADDED', object: c })
+
+          const result = await reflector.watchHandler(stream, 1000, {
+            iterator,
+            store: temporaryStore,
+            exitOnWatchListBookmarkReceived: true,
+            setLastSyncResourceVersion: (resourceVersion, eventReceivedBesidesAdded) => {
+              if (eventReceivedBesidesAdded) {
+                resourceVersions.push(resourceVersion)
+              }
+            },
+          })
+
+          expect(result).toEqual({
+            iterator,
+            watchListBookmarkReceived: true,
+          })
+          expect(stream.destroyed).toBe(false)
+          expect(temporaryStore.listKeys()).toEqual(['a'])
+          expect(store.listKeys()).toEqual([])
+          expect(resourceVersions).toEqual(['9'])
+
+          await reflector.watchHandler(stream, 1000, { iterator })
+          expect(store.listKeys()).toEqual(['c'])
+          expect(reflector.lastSyncResourceVersion).toBe('3')
+        })
+      })
+
+      describe('#listAndWatch with WatchList', () => {
+        const expiredError = new ApiErrors.StatusError({ code: 410, reason: 'Expired' })
+        const tooLargeResourceVersionError = new ApiErrors.StatusError({
+          code: 504,
+          reason: 'Timeout',
+          details: {
+            causes: [{ reason: 'ResourceVersionTooLarge' }],
+          },
+        })
+        const connectionRefusedError = Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' })
+        const tooManyRequestsError = new ApiErrors.StatusError({ code: 429 })
+        const unexpectedError = new Error('Failed')
+
+        beforeEach(() => {
+          reflector.minWatchTimeout = 30
+          reflector.setAbortSignal(ac.signal)
+        })
+
+        it('should publish initial events at the annotated bookmark and continue the same iterator', async () => {
+          store.replace([c])
+          const replaceStub = vi.spyOn(store, 'replace')
+          const listStub = vi.spyOn(listWatcher, 'list')
+          let stream
+          let iteratorStub
+          const watchStub = vi.spyOn(listWatcher, 'watch').mockImplementation(() => {
+            stream = new TestStream()
+            addAbortSignal(ac.signal, stream)
+            iteratorStub = vi.spyOn(stream, Symbol.asyncIterator)
+            return stream
+          })
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          await nextTick()
+
+          expect(watchStub).toHaveBeenCalledWith({
+            sendInitialEvents: true,
+            allowWatchBookmarks: true,
+            resourceVersion: '',
+            resourceVersionMatch: 'NotOlderThan',
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+          })
+          expect(listStub).not.toHaveBeenCalled()
+
+          stream.write({ type: 'ADDED', object: b })
+          stream.write({ type: 'ADDED', object: a })
+          stream.write({ type: 'MODIFIED', object: x })
+          stream.write({ type: 'DELETED', object: b })
+          await vi.waitFor(() => expect(stream.readableLength).toBe(0))
+
+          expect(store.list()).toEqual([c])
+          expect(replaceStub).not.toHaveBeenCalled()
+          expect(reflector.lastSyncResourceVersion).toBe('')
+
+          stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+          await vi.waitFor(() => expect(replaceStub).toHaveBeenCalledTimes(1))
+
+          expect(replaceStub).toHaveBeenCalledWith([x], '9')
+          expect(reflector.lastSyncResourceVersion).toBe('9')
+          expect(stream.destroyed).toBe(false)
+
+          stream.write({ type: 'ADDED', object: d })
+          await vi.waitFor(() => expect(store.list()).toEqual([x, d]))
+
+          expect(reflector.lastSyncResourceVersion).toBe('10')
+          expect(watchStub).toHaveBeenCalledTimes(1)
+          expect(iteratorStub).toHaveBeenCalledTimes(1)
+
+          ac.abort()
+          await listAndWatchPromise
+          replaceStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it('should ignore unannotated bookmarks and fall back to LIST on an initialization error', async () => {
+          store.replace([c])
+          const replaceStub = vi.spyOn(store, 'replace')
+          const watchStub = vi.spyOn(listWatcher, 'watch')
+          const watchListStream = new TestStream()
+          watchStub.mockReturnValueOnce(watchListStream)
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          watchListStream.write({ type: 'ADDED', object: d })
+          watchListStream.write({ type: 'BOOKMARK', object: bookmark })
+          watchListStream.write({
+            type: 'BOOKMARK',
+            object: createDummy({
+              resourceVersion: '9',
+              annotations: { 'k8s.io/initial-events-end': 'false' },
+            }),
+          })
+          await vi.waitFor(() => expect(watchListStream.readableLength).toBe(0))
+
+          expect(store.list()).toEqual([c])
+          expect(replaceStub).not.toHaveBeenCalled()
+          expect(listWatcher.listOptions).toEqual([])
+
+          watchListStream.end(unexpectedError)
+          await listAndWatchPromise
+
+          expect(listWatcher.listOptions).toEqual([{ limit: 500, resourceVersion: '0' }])
+          expect(replaceStub).toHaveBeenCalledTimes(1)
+          expect(replaceStub).toHaveBeenCalledWith([a, b], '2')
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls[1][0]).toEqual({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '2',
+          })
+          replaceStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it('should retry a clean premature closure with fresh temporary state', async () => {
+          const replaceStub = vi.spyOn(store, 'replace')
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchStub = vi.spyOn(listWatcher, 'watch')
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end({ type: 'ADDED', object: d })
+            return stream
+          })
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.write({ type: 'ADDED', object: b })
+            stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          await reflector.listAndWatch()
+
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(listStub).not.toHaveBeenCalled()
+          expect(replaceStub).toHaveBeenCalledTimes(1)
+          expect(replaceStub).toHaveBeenCalledWith([b], '9')
+          expect(store.list()).toEqual([b])
+          replaceStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it.each([
+          ['expired', expiredError],
+          ['too large', tooLargeResourceVersionError],
+        ])('should retry an %s resource version with an empty resource version', async (description, error) => {
+          reflector.lastSyncResourceVersion = '7'
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchStub = vi.spyOn(listWatcher, 'watch')
+          watchStub.mockRejectedValueOnce(error)
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          await reflector.listAndWatch()
+
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls.map(([options]) => options.resourceVersion)).toEqual(['7', ''])
+          expect(listStub).not.toHaveBeenCalled()
+          expect(reflector.lastSyncResourceVersion).toBe('9')
+          expect(reflector.isLastSyncResourceVersionUnavailable).toBe(false)
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it.each([
+          ['connection-refused request', connectionRefusedError, true],
+          ['429 stream', tooManyRequestsError, false],
+        ])('should back off and retry a %s failure', async (description, error, rejectRequest) => {
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchStub = vi.spyOn(listWatcher, 'watch')
+          const backoffStub = vi.spyOn(reflector.initConnBackoffManager, 'duration').mockReturnValue(0)
+          if (rejectRequest) {
+            watchStub.mockRejectedValueOnce(error)
+          } else {
+            watchStub.mockImplementationOnce(() => {
+              const stream = new TestStream()
+              stream.end(error)
+              return stream
+            })
+          }
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          await reflector.listAndWatch()
+
+          expect(backoffStub).toHaveBeenCalledTimes(1)
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(listStub).not.toHaveBeenCalled()
+          expect(reflector.lastSyncResourceVersion).toBe('9')
+          backoffStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it('should cancel a WatchList without publishing partial state or listing', async () => {
+          store.replace([c])
+          const replaceStub = vi.spyOn(store, 'replace')
+          const listStub = vi.spyOn(listWatcher, 'list')
+          let stream
+          const watchStub = vi.spyOn(listWatcher, 'watch').mockImplementationOnce(() => {
+            stream = new TestStream()
+            addAbortSignal(ac.signal, stream)
+            return stream
+          })
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          await vi.waitFor(() => expect(watchStub).toHaveBeenCalledTimes(1))
+          stream.write({ type: 'ADDED', object: d })
+          await vi.waitFor(() => expect(stream.readableLength).toBe(0))
+          ac.abort()
+          await listAndWatchPromise
+
+          expect(stream.destroyed).toBe(true)
+          expect(listStub).not.toHaveBeenCalled()
+          expect(replaceStub).not.toHaveBeenCalled()
+          expect(store.list()).toEqual([c])
+          replaceStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it('should cancel WatchList backoff without retrying or listing', async () => {
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchStub = vi.spyOn(listWatcher, 'watch').mockRejectedValueOnce(connectionRefusedError)
+          vi.spyOn(reflector.initConnBackoffManager, 'duration').mockReturnValue(60_000)
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          await vi.waitFor(() => expect(watchStub).toHaveBeenCalledTimes(1))
+          ac.abort()
+          await listAndWatchPromise
+
+          expect(watchStub).toHaveBeenCalledTimes(1)
+          expect(listStub).not.toHaveBeenCalled()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        describe('missing bookmark diagnostics', () => {
+          beforeEach(() => {
+            vi.useFakeTimers()
+          })
+
+          afterEach(() => {
+            vi.useRealTimers()
+          })
+
+          it('should warn about missing events and event inactivity, then stop at the bookmark', async () => {
+            const infoStub = vi.spyOn(logger, 'info').mockImplementation(() => {})
+            const stream = new TestStream()
+            const watchPromise = reflector.watchHandler(stream, 60_000, {
+              store: new Store(),
+              exitOnWatchListBookmarkReceived: true,
+            })
+
+            expect(vi.getTimerCount()).toBe(2)
+            await vi.advanceTimersByTimeAsync(10_000)
+            expect(infoStub).toHaveBeenCalledWith(
+              '%s: awaiting required bookmark event for initial events stream, no events received for %d seconds',
+              'v1, Kind=Dummy',
+              10,
+            )
+
+            stream.write({ type: 'ADDED', object: a })
+            await nextTick()
+            await vi.advanceTimersByTimeAsync(10_000)
+            expect(infoStub).toHaveBeenLastCalledWith(
+              "%s: hasn't received required bookmark event marking the end of initial events stream, received last event %d seconds ago",
+              'v1, Kind=Dummy',
+              10,
+            )
+
+            stream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+            await watchPromise
+            expect(vi.getTimerCount()).toBe(0)
+
+            await vi.advanceTimersByTimeAsync(20_000)
+            expect(infoStub).toHaveBeenCalledTimes(2)
+            stream.destroy()
+          })
+
+          it('should stop the missing-bookmark ticker on an error', async () => {
+            const infoStub = vi.spyOn(logger, 'info').mockImplementation(() => {})
+            const stream = new TestStream()
+            const watchPromise = reflector.watchHandler(stream, 60_000, {
+              store: new Store(),
+              exitOnWatchListBookmarkReceived: true,
+            })
+
+            stream.end(unexpectedError)
+            await expect(watchPromise).rejects.toThrow(unexpectedError)
+            expect(vi.getTimerCount()).toBe(0)
+
+            await vi.advanceTimersByTimeAsync(10_000)
+            expect(infoStub).not.toHaveBeenCalled()
+          })
+        })
       })
 
       describe('#listAndWatch', () => {
@@ -371,6 +729,7 @@ describe('kube-client', () => {
 
         beforeEach(() => {
           reflector.minWatchTimeout = 30 // 30 seconds
+          reflector.useWatchList = false
           reflector.setAbortSignal(ac.signal)
           pager = new TestPager()
           createPagerStub = vi.spyOn(ListPager, 'create').mockReturnValue(pager)
@@ -473,6 +832,38 @@ describe('kube-client', () => {
           expect(store.listKeys()).toEqual(['a', 'b', 'c'])
         })
 
+        it('should not propagate unordered added event resource versions when watching from resourceVersion 0', async () => {
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '0',
+              paginated: false,
+            },
+            items: [],
+          })
+          let stream
+          watchStub.mockImplementationOnce(() => {
+            stream = new TestStream()
+            addAbortSignal(ac.signal, stream)
+            return stream
+          })
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          await vi.waitFor(() => expect(watchStub).toHaveBeenCalledTimes(1))
+
+          stream.write({ type: 'ADDED', object: d })
+          stream.write({ type: 'ADDED', object: a })
+          await vi.waitFor(() => expect(stream.readableLength).toBe(0))
+          expect(reflector.lastSyncResourceVersion).toBe('0')
+
+          stream.write({ type: 'BOOKMARK', object: bookmark })
+          await vi.waitFor(() => expect(reflector.lastSyncResourceVersion).toBe('9'))
+          stream.write({ type: 'ADDED', object: d })
+          await vi.waitFor(() => expect(reflector.lastSyncResourceVersion).toBe('10'))
+
+          ac.abort()
+          await listAndWatchPromise
+        })
+
         it('should list, watch and fail', async () => {
           listStub.mockResolvedValueOnce({
             metadata: {
@@ -507,6 +898,7 @@ describe('kube-client', () => {
             pageSize,
           })
           reflector.minWatchTimeout = 30
+          reflector.useWatchList = false
           reflector.setAbortSignal(ac.signal)
           watchStub = vi.spyOn(listWatcher, 'watch').mockImplementationOnce(() => {
             const stream = new TestStream()
@@ -529,6 +921,39 @@ describe('kube-client', () => {
             { continue: 'b', limit: 1 },
           ])
           expect(watchStub).toHaveBeenCalledWith({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '2',
+          })
+        })
+
+        it('should preserve bounded pagination after WatchList fallback', async () => {
+          reflector = Reflector.create(listWatcher, store, {
+            strategy: 'mostRecentPaginated',
+            pageSize: 1,
+          })
+          reflector.minWatchTimeout = 30
+          reflector.setAbortSignal(ac.signal)
+          watchStub = vi.spyOn(listWatcher, 'watch')
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          await reflector.listAndWatch()
+
+          expect(listWatcher.listOptions).toEqual([
+            { limit: 1 },
+            { continue: 'b', limit: 1 },
+          ])
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls[1][0]).toEqual({
             allowWatchBookmarks: true,
             timeoutSeconds: expect.toBeWithinRange(30, 60),
             resourceVersion: '2',
@@ -620,6 +1045,7 @@ describe('kube-client', () => {
 
         it('should run a reflector', async () => {
           expect(reflector).toBeInstanceOf(Reflector)
+          reflector.useWatchList = false
           reflector.run(ac.signal)
           await store.untilHasSynced
           expect(store.listKeys()).toEqual(['a', 'b'])
