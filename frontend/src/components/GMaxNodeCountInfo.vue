@@ -26,10 +26,17 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <p>
           <ul>
-            <li> Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
-            <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2^({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }}) = 2^{{ getNodeCIDRMaskSize - podsCidrPrefix }} = {{ maxNodeCount }}</span> Nodes.</li>
-            <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2^{{ 32 - nodesCidrCidrPrefix }} = {{ maxNodeIps }}</span> Node ips</li>
+            <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
+            <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2<sup>({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }})</sup> = 2<sup>{{ getNodeCIDRMaskSize - podsCidrPrefix }}</sup> = {{ maxNodeCount }}</span> Nodes.</li>
+            <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2<sup>{{ 32 - nodesCidrCidrPrefix }}</sup> = {{ maxNodeIps }}</span> Node ips</li>
           </ul>
+        </p>
+        <p>
+          Further information about the shoot networking can be found
+          <g-external-link url="https://gardener.cloud/docs/gardener/networking/shoot_networking/">
+            here
+          </g-external-link>
+          .
         </p>
       </div>
     </template>
@@ -81,6 +88,9 @@ const maxNodeCount = computed(() => {
     margin-left: 10px;
   }
   li + li {
+    margin-top: 10px;
+  }
+  p + p {
     margin-top: 10px;
   }
   .wrapper {
