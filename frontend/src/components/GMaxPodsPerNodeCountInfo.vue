@@ -26,7 +26,14 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <p>
           Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
-          is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> allowing for <span class="font-family-monospace">2^{{ 32 - getNodeCIDRMaskSize }} = {{ maxPodsPerNodeCount }}</span> Pods per Node.
+          is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> allowing for <span class="font-family-monospace">2<sup>{{ 32 - getNodeCIDRMaskSize }}</sup> = {{ maxPodsPerNodeCount }}</span> Pods per Node.
+        </p>
+        <p>
+          Further information about the shoot networking can be found
+          <g-external-link url="https://gardener.cloud/docs/gardener/networking/shoot_networking/">
+            here
+          </g-external-link>
+          .
         </p>
       </div>
     </template>
@@ -59,5 +66,8 @@ const maxPodsPerNodeCount = computed(() => {
 <style scoped>
   .wrapper {
     max-width: 700px;
+  }
+  p + p {
+    margin-top: 10px;
   }
 </style>
