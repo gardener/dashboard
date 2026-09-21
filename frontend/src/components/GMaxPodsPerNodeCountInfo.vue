@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-large text-grey-darken-1 mb-4">
           Max Pods per Node
         </div>
-        <p>
+        <p v-if="hasIpv4 && getNodeCIDRMaskSize">
           Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
           is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> allowing for <span class="font-family-monospace">2<sup>{{ 32 - getNodeCIDRMaskSize }}</sup> = {{ maxPodsPerNodeCount }}</span> Pods per Node.
         </p>
@@ -52,6 +52,7 @@ const popover = ref(false)
 
 const {
   nodeCIDRMaskSize,
+  hasIpv4,
 } = useShootItem()
 
 const getNodeCIDRMaskSize = computed(() => {
