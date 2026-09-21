@@ -812,6 +812,26 @@ describe('kube-client', () => {
           backoffStub.mockRestore()
         })
 
+        it('should cancel watch connection backoff without retrying or relisting', async () => {
+          vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(60_000)
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '2',
+              paginated: true,
+            },
+            items: [a, b],
+          })
+          watchStub.mockRejectedValueOnce(connectionRefusedError)
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          await vi.waitFor(() => expect(watchStub).toHaveBeenCalledTimes(1))
+          ac.abort()
+          await listAndWatchPromise
+
+          expect(listStub).toHaveBeenCalledTimes(1)
+          expect(watchStub).toHaveBeenCalledTimes(1)
+        })
+
         it('should list, start watching and exit', async () => {
           listStub.mockResolvedValueOnce({
             metadata: {
@@ -1031,6 +1051,24 @@ describe('kube-client', () => {
       })
 
       describe('#run', () => {
+        it('should cancel restart backoff without restarting', async () => {
+          vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(60_000)
+          const listAndWatchStub = vi.spyOn(reflector, 'listAndWatch').mockResolvedValueOnce()
+          const infoStub = vi.spyOn(logger, 'info').mockImplementation(() => {})
+          const errorStub = vi.spyOn(logger, 'error').mockImplementation(() => {})
+
+          const runPromise = reflector.run(ac.signal)
+          await vi.waitFor(() => expect(listAndWatchStub).toHaveBeenCalledTimes(1))
+          ac.abort()
+          await runPromise
+
+          expect(listAndWatchStub).toHaveBeenCalledTimes(1)
+          expect(infoStub).not.toHaveBeenCalledWith('Restarting reflector %s', reflector.expectedTypeName)
+          expect(errorStub).not.toHaveBeenCalled()
+          infoStub.mockRestore()
+          errorStub.mockRestore()
+        })
+
         it('should run list and watch until stopped', async () => {
           const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
           const listAndWatchStub = vi.spyOn(reflector, 'listAndWatch')

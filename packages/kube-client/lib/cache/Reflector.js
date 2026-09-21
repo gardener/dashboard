@@ -153,7 +153,14 @@ class Reflector {
       if (this.signal.aborted) {
         break
       }
-      await delay(this.backoffManager.duration())
+      try {
+        await delay(this.backoffManager.duration(), this.signal)
+      } catch (err) {
+        if (isAbortError(err)) {
+          break
+        }
+        throw err
+      }
       logger.info('Restarting reflector %s', this.expectedTypeName)
     }
     logger.info('Stopped reflector %s', this.expectedTypeName)
@@ -296,7 +303,14 @@ class Reflector {
           } catch (err) {
             if (isWatchErrorRetriable(err)) {
               logger.info('Watch of %s failed with a retriable error: %s', this.expectedTypeName, err.message)
-              await delay(this.backoffManager.duration())
+              try {
+                await delay(this.backoffManager.duration(), this.signal)
+              } catch (err) {
+                if (isAbortError(err)) {
+                  return
+                }
+                throw err
+              }
               continue
             }
             throw err
