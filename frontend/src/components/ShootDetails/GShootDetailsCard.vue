@@ -127,17 +127,27 @@ SPDX-License-Identifier: Apache-2.0
           <g-worker-configuration />
         </template>
       </g-list-item>
-      <g-list-item v-if="hasIpv4 && podsCidr && nodeCIDRMaskSize">
+      <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          {{ maxNodeCount }}
+          <template v-if="hasIpv4 && podsCidr && nodeCIDRMaskSize">
+            {{ maxNodeCount }}
+          </template>
+          <template v-else>
+            Incalculable
+          </template>
         </g-list-item-content>
         <template #append>
           <g-max-node-count-info />
         </template>
       </g-list-item>
-      <g-list-item v-if="hasIpv4 && nodeCIDRMaskSize">
+      <g-list-item>
         <g-list-item-content label="Max Pods per Worker Node">
-          {{ maxPodsPerNodeCount }}
+          <template v-if="hasIpv4 && nodeCIDRMaskSize">
+            {{ maxPodsPerNodeCount }}
+          </template>
+          <template v-else>
+            Incalculable
+          </template>
         </g-list-item-content>
         <template #append>
           <g-max-pods-per-node-count-info />
@@ -326,7 +336,7 @@ const {
   shootAccessRestrictions,
   isSelfHostedShoot,
   podsCidr,
-  ipFamilies,
+  hasIpv4,
   nodeCIDRMaskSize,
 } = useShootItem()
 
@@ -378,9 +388,6 @@ const maxPodsPerNodeCount = computed(() => {
   return Math.pow(2, 32 - nodeCIDRMaskSize.value)
 })
 
-const hasIpv4 = computed(() => {
-  return ipFamilies?.value?.includes('IPv4')
-})
 </script>
 
 <style lang="scss" scoped>
