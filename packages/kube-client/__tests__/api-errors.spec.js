@@ -14,7 +14,6 @@ import {
   isGone,
   isTooManyRequests,
   isTooLargeResourceVersionError,
-  isGatewayTimeout,
 } from '../lib/ApiErrors.js'
 const { createHttpError } = request
 
@@ -88,27 +87,17 @@ describe('kube-client', () => {
           reason,
         },
       })
-      expect(isGatewayTimeout(error)).toBe(true)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      expect(isTooLargeResourceVersionError(error)).toBe(false)
       error = createHttpError({
         body: {
           code,
           reason,
-        },
-      })
-      expect(isGatewayTimeout(error)).toBe(true)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
-      error = createHttpError({
-        body: {
-          code,
-          reason: 'Gateway Timeout',
           details: {
             causes: [{ message: 'Too large resource version' }],
           },
         },
       })
-      expect(isGatewayTimeout(error)).toBe(false)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      expect(isTooLargeResourceVersionError(error)).toBe(false)
       error = createHttpError({
         body: {
           details: {
@@ -116,7 +105,12 @@ describe('kube-client', () => {
           },
         },
       })
-      expect(isGatewayTimeout(error)).toBe(false)
+      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      error = new StatusError({
+        details: {
+          causes: [{ reason: 'ResourceVersionTooLarge' }],
+        },
+      })
       expect(isTooLargeResourceVersionError(error)).toBe(true)
     })
   })

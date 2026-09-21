@@ -77,8 +77,8 @@ function isExpiredError (err) {
 function hasStatusCauseResourceVersionTooLarge (err) {
   const causes = getValue(err, 'details.causes')
   if (Array.isArray(causes)) {
-    for (const { reason, message } of causes) {
-      if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
+    for (const { reason } of causes) {
+      if (reason === 'ResourceVersionTooLarge') {
         return true
       }
     }
@@ -86,12 +86,8 @@ function hasStatusCauseResourceVersionTooLarge (err) {
   return false
 }
 
-function isGatewayTimeout (err) {
-  return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
-}
-
 function isTooLargeResourceVersionError (err) {
-  return hasStatusCauseResourceVersionTooLarge(err) || isGatewayTimeout(err)
+  return hasStatusCauseResourceVersionTooLarge(err)
 }
 
 function isConnectionRefused (err) {
@@ -110,7 +106,6 @@ export {
   isTooManyRequests,
   isExpiredError,
   isTooLargeResourceVersionError,
-  isGatewayTimeout,
   hasStatusCauseResourceVersionTooLarge,
   isConnectionRefused,
   isAbortError,
