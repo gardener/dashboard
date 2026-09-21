@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-list-item>
         <template #prepend>
           <v-icon
-            v-if="hasShootWorkerGroups"
+            v-if="!hasShootWorkerGroups"
             color="primary"
           >
             mdi-ip-network
