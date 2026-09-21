@@ -6,6 +6,9 @@
 
 class BackoffManager {
   constructor (options = {}) {
+    // Match client-go's reflector backoff policy for reducing load while the API server is unhealthy.
+    // Positive jitter is applied after the 30000 ms base cap, producing a [30000, 60000) ms
+    // terminal retry interval. The backoff resets after 120000 ms.
     const {
       min = 800,
       max = 30 * 1000,
@@ -23,18 +26,19 @@ class BackoffManager {
   }
 
   duration () {
-    this.clearTimeout()
-    this.timeoutId = setTimeout(() => this.reset(), this.resetDuration)
-    const attempt = this.attempt
+    if (this.timeoutId === undefined) {
+      this.timeoutId = setTimeout(() => {
+        this.reset()
+        this.timeoutId = undefined
+      }, this.resetDuration)
+    }
+
+    const base = Math.min(this.min * Math.pow(this.factor, this.attempt), this.max)
     this.attempt += 1
-    if (attempt > Math.floor(Math.log(this.max / this.min) / Math.log(this.factor))) {
-      return this.max
-    }
-    let duration = this.min * Math.pow(this.factor, attempt)
     if (this.jitter) {
-      duration = Math.floor((1 + this.jitter * (2 * Math.random() - 1)) * duration)
+      return Math.floor(base + this.jitter * Math.random() * base)
     }
-    return Math.min(Math.floor(duration), this.max)
+    return Math.floor(base)
   }
 
   reset () {
@@ -43,6 +47,7 @@ class BackoffManager {
 
   clearTimeout () {
     clearTimeout(this.timeoutId)
+    this.timeoutId = undefined
   }
 }
 

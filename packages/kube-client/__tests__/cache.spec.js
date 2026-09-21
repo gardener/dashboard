@@ -586,7 +586,7 @@ describe('kube-client', () => {
         ])('should back off and retry a %s failure', async (description, error, rejectRequest) => {
           const listStub = vi.spyOn(listWatcher, 'list')
           const watchStub = vi.spyOn(listWatcher, 'watch')
-          const backoffStub = vi.spyOn(reflector.initConnBackoffManager, 'duration').mockReturnValue(0)
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
           if (rejectRequest) {
             watchStub.mockRejectedValueOnce(error)
           } else {
@@ -644,7 +644,7 @@ describe('kube-client', () => {
         it('should cancel WatchList backoff without retrying or listing', async () => {
           const listStub = vi.spyOn(listWatcher, 'list')
           const watchStub = vi.spyOn(listWatcher, 'watch').mockRejectedValueOnce(connectionRefusedError)
-          vi.spyOn(reflector.initConnBackoffManager, 'duration').mockReturnValue(60_000)
+          vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(60_000)
 
           const listAndWatchPromise = reflector.listAndWatch()
           await vi.waitFor(() => expect(watchStub).toHaveBeenCalledTimes(1))
@@ -776,6 +776,7 @@ describe('kube-client', () => {
         })
 
         it('should list, retry to start watching and fail', async () => {
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
           listStub.mockResolvedValueOnce({
             metadata: {
               resourceVersion: '2',
@@ -793,6 +794,7 @@ describe('kube-client', () => {
           await reflector.listAndWatch()
           expect(createPagerStub).toHaveBeenCalledTimes(1)
           expect(listStub).toHaveBeenCalledTimes(1)
+          expect(backoffStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(2)
           expect(watchStub.mock.calls).toEqual([
             [{
@@ -807,6 +809,7 @@ describe('kube-client', () => {
             }],
           ])
           expect(store.listKeys()).toEqual(['a', 'b'])
+          backoffStub.mockRestore()
         })
 
         it('should list, start watching and exit', async () => {
@@ -1029,6 +1032,7 @@ describe('kube-client', () => {
 
       describe('#run', () => {
         it('should run list and watch until stopped', async () => {
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
           const listAndWatchStub = vi.spyOn(reflector, 'listAndWatch')
           listAndWatchStub.mockImplementationOnce(() => {
             throw new Error('foo')
@@ -1041,6 +1045,7 @@ describe('kube-client', () => {
           })
           await reflector.run(ac.signal)
           expect(listAndWatchStub).toHaveBeenCalledTimes(3)
+          expect(backoffStub).toHaveBeenCalledTimes(2)
         })
 
         it('should run a reflector', async () => {

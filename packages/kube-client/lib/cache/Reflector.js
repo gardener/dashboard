@@ -64,7 +64,6 @@ class Reflector {
     this.useWatchList = true
     this.stopRequested = false
     this.backoffManager = new BackoffManager()
-    this.initConnBackoffManager = new BackoffManager()
     this.signal = undefined
   }
 
@@ -128,7 +127,6 @@ class Reflector {
 
   destroy () {
     this.backoffManager.clearTimeout()
-    this.initConnBackoffManager.clearTimeout()
   }
 
   setAbortSignal (signal) {
@@ -155,7 +153,7 @@ class Reflector {
       if (this.signal.aborted) {
         break
       }
-      await delay(this.backoffManager.duration() + 1000)
+      await delay(this.backoffManager.duration())
       logger.info('Restarting reflector %s', this.expectedTypeName)
     }
     logger.info('Stopped reflector %s', this.expectedTypeName)
@@ -298,7 +296,7 @@ class Reflector {
           } catch (err) {
             if (isWatchErrorRetriable(err)) {
               logger.info('Watch of %s failed with a retriable error: %s', this.expectedTypeName, err.message)
-              await delay(this.initConnBackoffManager.duration())
+              await delay(this.backoffManager.duration())
               continue
             }
             throw err
@@ -339,8 +337,6 @@ class Reflector {
       }
     } finally {
       response?.destroy?.()
-      this.initConnBackoffManager.clearTimeout()
-      this.initConnBackoffManager.reset()
     }
   }
 
@@ -400,7 +396,7 @@ class Reflector {
         }
         if (isWatchErrorRetriable(err)) {
           logger.info('WatchList of %s failed with a retriable error, backing off: %s', this.expectedTypeName, err.message)
-          await delay(this.initConnBackoffManager.duration(), this.signal)
+          await delay(this.backoffManager.duration(), this.signal)
           continue
         }
         if (isExpiredError(err) || isTooLargeResourceVersionError(err)) {
