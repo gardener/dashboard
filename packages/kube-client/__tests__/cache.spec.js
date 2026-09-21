@@ -481,6 +481,68 @@ describe('kube-client', () => {
           watchStub.mockRestore()
         })
 
+        it('should retry a continued WatchList stream returning 429 with an ordinary watch', async () => {
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchListStream = new TestStream()
+          const watchStub = vi.spyOn(listWatcher, 'watch')
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
+          watchStub.mockReturnValueOnce(watchListStream)
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          watchListStream.write({ type: 'ADDED', object: a })
+          watchListStream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+          await vi.waitFor(() => expect(reflector.lastSyncResourceVersion).toBe('9'))
+          watchListStream.end(tooManyRequestsError)
+          await listAndWatchPromise
+
+          expect(backoffStub).toHaveBeenCalledTimes(1)
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls[0][0]).toEqual({
+            sendInitialEvents: true,
+            allowWatchBookmarks: true,
+            resourceVersion: '',
+            resourceVersionMatch: 'NotOlderThan',
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+          })
+          expect(watchStub.mock.calls[1][0]).toEqual({
+            allowWatchBookmarks: true,
+            timeoutSeconds: expect.toBeWithinRange(30, 60),
+            resourceVersion: '9',
+          })
+          expect(watchListStream.destroyed).toBe(true)
+          expect(listStub).not.toHaveBeenCalled()
+          backoffStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
+        it('should cancel a continued WatchList stream 429 backoff without retrying', async () => {
+          const listStub = vi.spyOn(listWatcher, 'list')
+          const watchListStream = new TestStream()
+          const watchStub = vi.spyOn(listWatcher, 'watch').mockReturnValueOnce(watchListStream)
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(60_000)
+
+          const listAndWatchPromise = reflector.listAndWatch()
+          watchListStream.write({ type: 'BOOKMARK', object: initialEventsEndBookmark })
+          await vi.waitFor(() => expect(reflector.lastSyncResourceVersion).toBe('9'))
+          watchListStream.end(tooManyRequestsError)
+          await vi.waitFor(() => expect(backoffStub).toHaveBeenCalledTimes(1))
+          ac.abort()
+          await listAndWatchPromise
+
+          expect(watchStub).toHaveBeenCalledTimes(1)
+          expect(watchListStream.destroyed).toBe(true)
+          expect(listStub).not.toHaveBeenCalled()
+          backoffStub.mockRestore()
+          listStub.mockRestore()
+          watchStub.mockRestore()
+        })
+
         it('should ignore unannotated bookmarks and fall back to LIST on an initialization error', async () => {
           store.replace([c])
           const replaceStub = vi.spyOn(store, 'replace')
@@ -721,6 +783,7 @@ describe('kube-client', () => {
       describe('#listAndWatch', () => {
         const expiredError = new ApiErrors.StatusError({ code: 410, reason: 'Expired' })
         const connectionRefusedError = Object.assign(new Error('Connection refused'), { code: 'ECONNREFUSED' })
+        const tooManyRequestsError = new ApiErrors.StatusError({ code: 429 })
         const unexpectedError = new Error('Failed')
         let pager
         let createPagerStub
@@ -830,6 +893,47 @@ describe('kube-client', () => {
 
           expect(listStub).toHaveBeenCalledTimes(1)
           expect(watchStub).toHaveBeenCalledTimes(1)
+        })
+
+        it('should retry a watch stream returning 429 without relisting', async () => {
+          const backoffStub = vi.spyOn(reflector.backoffManager, 'duration').mockReturnValue(0)
+          listStub.mockResolvedValueOnce({
+            metadata: {
+              resourceVersion: '2',
+              paginated: true,
+            },
+            items: [a, b],
+          })
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.write({ type: 'ADDED', object: c })
+            stream.end(tooManyRequestsError)
+            return stream
+          })
+          watchStub.mockImplementationOnce(() => {
+            const stream = new TestStream()
+            stream.end(unexpectedError)
+            return stream
+          })
+
+          await reflector.listAndWatch()
+
+          expect(backoffStub).toHaveBeenCalledTimes(1)
+          expect(listStub).toHaveBeenCalledTimes(1)
+          expect(watchStub).toHaveBeenCalledTimes(2)
+          expect(watchStub.mock.calls).toEqual([
+            [{
+              allowWatchBookmarks: true,
+              timeoutSeconds: expect.toBeWithinRange(30, 60),
+              resourceVersion: '2',
+            }],
+            [{
+              allowWatchBookmarks: true,
+              timeoutSeconds: expect.toBeWithinRange(30, 60),
+              resourceVersion: '3',
+            }],
+          ])
+          backoffStub.mockRestore()
         })
 
         it('should list, start watching and exit', async () => {

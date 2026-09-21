@@ -336,11 +336,25 @@ class Reflector {
             },
           })
         } catch (err) {
+          response?.destroy?.()
+          response = undefined
+          iterator = undefined
           if (isExpiredError(err)) {
             // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
             // So first try to LIST with setting RV to resource version of last observed object.
             logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
+          } else if (isTooManyRequests(err)) {
+            logger.info('Watch of %s returned 429 - backing off', this.expectedTypeName)
+            try {
+              await delay(this.backoffManager.duration(), this.signal)
+            } catch (err) {
+              if (isAbortError(err)) {
+                return
+              }
+              throw err
+            }
+            continue
           } else if (!isAbortError(err)) {
             logger.warn('Watch of %s ended with: %s', this.expectedTypeName, err.message)
           }
