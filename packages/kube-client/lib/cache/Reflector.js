@@ -270,8 +270,8 @@ class Reflector {
           if (this.signal.aborted || isAbortError(err)) {
             return
           }
-          logger.info(
-            'Data could not be fetched in WatchList mode for %s. Falling back to regular list: %s',
+          logger.debug(
+            "Data couldn't be fetched in WatchList mode for %s. Falling back to regular list. This is expected if WatchList is not supported or disabled in kube-apiserver: %s",
             this.expectedTypeName,
             err.message,
           )

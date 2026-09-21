@@ -546,6 +546,7 @@ describe('kube-client', () => {
         it('should ignore unannotated bookmarks and fall back to LIST on an initialization error', async () => {
           store.replace([c])
           const replaceStub = vi.spyOn(store, 'replace')
+          const debugStub = vi.spyOn(logger, 'debug').mockImplementation(() => {})
           const watchStub = vi.spyOn(listWatcher, 'watch')
           const watchListStream = new TestStream()
           watchStub.mockReturnValueOnce(watchListStream)
@@ -583,7 +584,13 @@ describe('kube-client', () => {
             timeoutSeconds: expect.toBeWithinRange(30, 60),
             resourceVersion: '2',
           })
+          expect(debugStub).toHaveBeenCalledWith(
+            "Data couldn't be fetched in WatchList mode for %s. Falling back to regular list. This is expected if WatchList is not supported or disabled in kube-apiserver: %s",
+            'v1, Kind=Dummy',
+            'Failed',
+          )
           replaceStub.mockRestore()
+          debugStub.mockRestore()
           watchStub.mockRestore()
         })
 
