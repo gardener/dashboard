@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Pods CIDR">
             <template
-              v-for="(cidr, index) in podsCidr || ['-']"
+              v-for="(cidr, index) in getPodsCidr || ['-']"
               :key="cidr"
             >
               <span v-if="index != 0">, <br></span>
@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
             <template
-              v-for="(cidr, index) in getNodeCidr || ['-']"
+              v-for="(cidr, index) in getNodesCidr || ['-']"
               :key="cidr"
             >
               <span v-if="index != 0">, <br></span>
@@ -161,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Services CIDR">
           <template
-            v-for="(cidr, index) in servicesCidr || ['-']"
+            v-for="(cidr, index) in getServicesCidr || ['-']"
             :key="cidr"
           >
             <span v-if="index != 0">, <br></span>
@@ -457,13 +457,13 @@ export default {
 
       return get(head(shootLBClasses), ['name'])
     },
-    getPodCidr () {
+    getPodsCidr () {
       return this.podsCidr ? this.podsCidr : [this.podsCidrSpec]
     },
-    getNodeCidr () {
+    getNodesCidr () {
       return this.nodesCidr ? this.nodesCidr : [this.nodesCidrSpec]
     },
-    getServiceCidr () {
+    getServicesCidr () {
       return this.servicesCidr ? this.servicesCidr : [this.servicesCidrSpec]
     },
     customDomainChipText () {
