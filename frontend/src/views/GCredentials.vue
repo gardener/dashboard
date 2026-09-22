@@ -37,9 +37,17 @@ SPDX-License-Identifier: Apache-2.0
             class="g-table-search-field mr-3"
             @keyup.esc="infraCredentialFilter = ''"
           />
+          <v-btn
+            v-if="canCreateCredentials && sortedInfraProviderTypeList.length === 1"
+            v-tooltip:top="'Create Infrastructure Secret'"
+            data-test="create-infra-credential-button"
+            icon="mdi-plus"
+            @click="onAddInfraBinding(sortedInfraProviderTypeList[0])"
+          />
           <v-menu
-            v-if="canCreateCredentials"
+            v-else-if="canCreateCredentials"
             v-model="createInfraCredentialMenu"
+            data-test="create-infra-credential-menu"
             location="left"
             absolute
           >
@@ -47,6 +55,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-btn
                 v-tooltip:top="'Create Infrastructure Secret'"
                 v-bind="menuProps"
+                data-test="create-infra-credential-button"
                 icon="mdi-plus"
               />
             </template>
@@ -163,9 +172,17 @@ SPDX-License-Identifier: Apache-2.0
             class="g-table-search-field mr-3"
             @keyup.esc="dnsCredentialFilter = ''"
           />
+          <v-btn
+            v-if="canCreateCredentials && dnsProviderTypes.length === 1"
+            v-tooltip:top="'Create DNS Credential'"
+            data-test="create-dns-credential-button"
+            icon="mdi-plus"
+            @click="onAddDnsCredential(dnsProviderTypes[0])"
+          />
           <v-menu
-            v-if="canCreateCredentials"
+            v-else-if="canCreateCredentials"
             v-model="createDnsCredentialMenu"
+            data-test="create-dns-credential-menu"
             location="left"
             absolute
           >
@@ -173,6 +190,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-btn
                 v-tooltip:top="'Create DNS Credential'"
                 v-bind="menuProps"
+                data-test="create-dns-credential-button"
                 icon="mdi-plus"
               />
             </template>
