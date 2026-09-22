@@ -351,7 +351,7 @@ const slaTitle = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  const netmask = new Netmask(podsCidr.value[0])
+  const netmask = new Netmask(podsCidr.value?.[0])
   return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
 })
 
