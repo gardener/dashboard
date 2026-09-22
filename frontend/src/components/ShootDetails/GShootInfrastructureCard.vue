@@ -174,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0
           <div class="d-flex">
             {{ shootDomain }}
             <g-dns-provider
-              v-if="shootDnsPrimaryProvider?.type"
+              v-if="shootDnsPrimaryProvider?.type && shootDnsPrimaryProviderCredential"
               class="ml-2"
               primary
               :credential="shootDnsPrimaryProviderCredential"
@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="hasDnsServiceExtension || isCustomShootDomain">
+      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShoots || shootDnsServiceExtensionProvidersWithCredentials?.length)">
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
@@ -191,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0
             class="d-flex"
           >
             <g-dns-provider
-              v-for="provider in shootDnsServiceExtensionProviders"
+              v-for="provider in shootDnsServiceExtensionProvidersWithCredentials"
               :key="dnsExtensionProviderResourceName(provider)"
               class="mr-2"
               :credential="dnsProviderCredential(provider)"
@@ -388,6 +388,7 @@ export default {
     ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
+      'canPatchShoots',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
@@ -446,6 +447,9 @@ export default {
         kind: credentialsRef?.kind,
         namespace: this.shootNamespace,
       })
+    },
+    shootDnsServiceExtensionProvidersWithCredentials () {
+      return this.shootDnsServiceExtensionProviders?.filter(provider => !!this.dnsProviderCredential(provider))
     },
   },
   methods: {
