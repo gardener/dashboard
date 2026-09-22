@@ -113,7 +113,7 @@ import { useProvideSecretContext } from '@/composables/credential/useSecretConte
 
 import get from 'lodash/get'
 
-function secretFieldValue (key) {
+function createSecretFieldValue (key) {
   return {
     get () {
       return get(this.secretFieldValues, [key], '')
@@ -181,14 +181,14 @@ export default {
         this.setSecretFieldValues(this.providerFields, value)
       },
     },
-    authURL: secretFieldValue('authURL'),
-    domainName: secretFieldValue('domainName'),
-    tenantName: secretFieldValue('tenantName'),
-    applicationCredentialID: secretFieldValue('applicationCredentialID'),
-    applicationCredentialName: secretFieldValue('applicationCredentialName'),
-    applicationCredentialSecret: secretFieldValue('applicationCredentialSecret'),
-    username: secretFieldValue('username'),
-    password: secretFieldValue('password'),
+    authURL: createSecretFieldValue('authURL'),
+    domainName: createSecretFieldValue('domainName'),
+    tenantName: createSecretFieldValue('tenantName'),
+    applicationCredentialID: createSecretFieldValue('applicationCredentialID'),
+    applicationCredentialName: createSecretFieldValue('applicationCredentialName'),
+    applicationCredentialSecret: createSecretFieldValue('applicationCredentialSecret'),
+    username: createSecretFieldValue('username'),
+    password: createSecretFieldValue('password'),
     authenticationMethod: {
       get () {
         return this.authenticationMethodInternal

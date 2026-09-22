@@ -329,8 +329,7 @@ export function isInfrastructureBinding ({ binding, infraProviderTypes }) {
   return infraProviderTypes.includes(bindingProviderType(binding))
 }
 
-// Resolve aliases before field decoding or detail extraction, without changing the Secret.
-export function resolveSecretDataAliases (data = {}, fields = []) {
+export function copySecretAliasesToKeys (data = {}, fields = []) {
   const resolvedData = { ...data }
   for (const { key, aliases = [] } of fields) {
     const sourceKey = [key, ...aliases].find(candidate => Object.hasOwn(data, candidate))
@@ -347,7 +346,7 @@ export function secretDetails ({ secret, providerConfig }) {
     return undefined
   }
 
-  const secretData = resolveSecretDataAliases(
+  const secretData = copySecretAliasesToKeys(
     secret?.data ?? {},
     get(providerConfig, ['secret', 'fields']),
   )
