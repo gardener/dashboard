@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShootsBinding || shootDnsServiceExtensionProvidersWithCredentials?.length)">
+      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShoots || shootDnsServiceExtensionProvidersWithCredentials?.length)">
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
@@ -388,6 +388,7 @@ export default {
     ]),
     ...mapState(useAuthzStore, [
       'canPatchShootsBinding',
+      'canPatchShoots',
     ]),
     showSeedInfo () {
       return !!this.shootSeedName
