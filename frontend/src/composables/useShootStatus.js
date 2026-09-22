@@ -141,7 +141,6 @@ export const useShootStatus = shootItem => {
     return get(shootStatus.value, ['networking', 'services'])
   })
 
-
   return {
     shootStatus,
     isShootStatusHibernated,
