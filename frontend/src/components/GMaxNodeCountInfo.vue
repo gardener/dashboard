@@ -56,7 +56,9 @@ const popover = ref(false)
 
 const {
   podsCidr,
+  podsCidrSpec,
   nodesCidr,
+  nodesCidrSpec,
   nodeCIDRMaskSize,
   hasIpv4,
 } = useShootItem()
@@ -66,11 +68,21 @@ const getNodeCIDRMaskSize = computed(() => {
 })
 
 const podsCidrPrefix = computed(() => {
-  return new Netmask(podsCidr.value?.[0]).bitmask
+  if(podsCidr.value?.length) {
+    return new Netmask(podsCidr.value?.[0]).bitmask
+  } else if (podsCidrSpec.value) {
+    return new Netmask(podsCidrSpec.value).bitmask
+  }
+  return false
 })
 
 const nodesCidrCidrPrefix = computed(() => {
-  return new Netmask(nodesCidr.value?.[0]).bitmask
+   if(nodesCidr.value?.length) {
+    return new Netmask(nodesCidr.value?.[0]).bitmask
+  } else if (nodesCidrSpec.value) {
+    return new Netmask(nodesCidrSpec.value).bitmask
+  }
+  return false
 })
 
 const ipBitLength = computed(() => {
