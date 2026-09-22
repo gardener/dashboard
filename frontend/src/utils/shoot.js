@@ -207,7 +207,9 @@ export function getKubernetesTemplate (providerType) {
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
-  if (numberOfNetworks < 1) {
+  // eslint-disable-next-line security/detect-unsafe-regex
+  const ipv4CidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,2}$/
+  if (numberOfNetworks < 1 || !cidrToSplitStr || !cidrToSplitStr.match(ipv4CidrRegex)) {
     return []
   }
   const cidrToSplit = new Netmask(cidrToSplitStr)
