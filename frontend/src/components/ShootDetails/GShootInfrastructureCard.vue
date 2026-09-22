@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Pods CIDR">
             <template
-              v-for="(cidr, index) in podsCidr"
+              v-for="(cidr, index) in podsCidr || ['-']"
               :key="cidr"
             >
               <span v-if="index != 0">, <br></span>
@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
             <template
-              v-for="(cidr, index) in nodesCidr"
+              v-for="(cidr, index) in getNodeCidr || ['-']"
               :key="cidr"
             >
               <span v-if="index != 0">, <br></span>
@@ -161,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Services CIDR">
           <template
-            v-for="(cidr, index) in servicesCidr"
+            v-for="(cidr, index) in servicesCidr || ['-']"
             :key="cidr"
           >
             <span v-if="index != 0">, <br></span>
@@ -352,6 +352,9 @@ export default {
       servicesCidr,
       nodesCidr,
       podsCidr,
+      servicesCidrSpec,
+      nodesCidrSpec,
+      podsCidrSpec,
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
@@ -388,6 +391,9 @@ export default {
       servicesCidr,
       nodesCidr,
       podsCidr,
+      servicesCidrSpec,
+      nodesCidrSpec,
+      podsCidrSpec,
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
@@ -450,6 +456,15 @@ export default {
       }
 
       return get(head(shootLBClasses), ['name'])
+    },
+    getPodCidr () {
+      return this.podsCidr ? this.podsCidr : [this.podsCidrSpec]
+    },
+    getNodeCidr () {
+      return this.nodesCidr ? this.nodesCidr : [this.nodesCidrSpec]
+    },
+   getServiceCidr () {
+      return this.servicesCidr ? this.servicesCidr : [this.servicesCidrSpec]
     },
     customDomainChipText () {
       if (this.isCustomShootDomain) {
