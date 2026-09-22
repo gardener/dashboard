@@ -474,7 +474,7 @@ export default {
     getNodeCidr () {
       return this.nodesCidr ? this.nodesCidr : [this.nodesCidrSpec]
     },
-   getServiceCidr () {
+    getServiceCidr () {
       return this.servicesCidr ? this.servicesCidr : [this.servicesCidrSpec]
     },
     customDomainChipText () {
