@@ -183,26 +183,22 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </g-list-item-content>
       </g-list-item>
-      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShootsBinding || isADnsProviderCredentialExisting)">
+      <g-list-item v-if="(hasDnsServiceExtension || isCustomShootDomain) && (canPatchShootsBinding || shootDnsServiceExtensionProvidersWithCredentials?.length)">
         <template #prepend />
         <g-list-item-content label="DNS Providers">
           <div
             v-if="shootDnsServiceExtensionProviders && shootDnsServiceExtensionProviders.length"
             class="d-flex"
           >
-            <template
-              v-for="provider in shootDnsServiceExtensionProviders"
+            <g-dns-provider
+              v-for="provider in shootDnsServiceExtensionProvidersWithCredentials"
               :key="dnsExtensionProviderResourceName(provider)"
-            >
-              <g-dns-provider 
-                v-if="dnsProviderCredential(provider)"
-                class="mr-2"
-                :credential="dnsProviderCredential(provider)"
-                :type="provider.type"
-                :domains="provider.domains"
-                :zones="provider.zones"
-              />
-            </template>
+              class="mr-2"
+              :credential="dnsProviderCredential(provider)"
+              :type="provider.type"
+              :domains="provider.domains"
+              :zones="provider.zones"
+            />
           </div>
           <span v-else>No DNS provider configured</span>
         </g-list-item-content>
@@ -451,11 +447,8 @@ export default {
         namespace: this.shootNamespace,
       })
     },
-    isADnsProviderCredentialExisting () {
-      if(this.shootDnsServiceExtensionProviders) {
-        return this.shootDnsServiceExtensionProviders.some(provider => !!this.dnsProviderCredential(provider))
-      }
-      return false
+    shootDnsServiceExtensionProvidersWithCredentials () {
+      return this.shootDnsServiceExtensionProviders.filter(provider => !!this.dnsProviderCredential(provider))
     },
   },
   methods: {
