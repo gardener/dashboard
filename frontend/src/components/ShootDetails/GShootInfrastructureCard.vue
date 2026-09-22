@@ -449,7 +449,7 @@ export default {
       })
     },
     shootDnsServiceExtensionProvidersWithCredentials () {
-      return this.shootDnsServiceExtensionProviders.filter(provider => !!this.dnsProviderCredential(provider))
+      return this.shootDnsServiceExtensionProviders?.filter(provider => !!this.dnsProviderCredential(provider))
     },
   },
   methods: {
