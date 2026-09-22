@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          <template v-if="podsCidr && nodeCIDRMaskSize">
+          <template v-if="(podsCidr || podsCidrSpec) && nodeCIDRMaskSize">
             {{ maxNodeCount }}
           </template>
           <template v-else>
@@ -337,6 +337,7 @@ const {
   shootAccessRestrictions,
   isSelfHostedShoot,
   podsCidr,
+  podsCidrSpec,
   hasIpv4,
   nodeCIDRMaskSize,
 } = useShootItem()
@@ -381,7 +382,12 @@ const slaTitle = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  const netmask = new Netmask(podsCidr.value?.[0])
+  let netmask = null
+  if(podsCidr.value?.length) {
+    netmask = new Netmask(podsCidr.value?.[0])
+  } else if (podsCidrSpec.value) {
+     netmask = new Netmask(podsCidrSpec.value)
+  }
   return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
 })
 
