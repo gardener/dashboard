@@ -28,6 +28,8 @@ import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenSt
 import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
+import { cloudProfileDisplayName } from '@/utils'
+
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
 
 import some from 'lodash/some'
@@ -36,6 +38,7 @@ import mapValues from 'lodash/mapValues'
 import head from 'lodash/head'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import sortBy from 'lodash/sortBy'
 
 const shootPropertyMappings = Object.freeze({
   cloudProfileRef: ['spec', 'cloudProfile'],
@@ -93,7 +96,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
   })
 
   const cloudProfiles = computed(() => {
-    return cloudProfileStore.cloudProfilesByProviderType(providerType.value)
+    return sortBy(cloudProfileStore.cloudProfilesByProviderType(providerType.value), [cloudProfileDisplayName])
   })
 
   const defaultCloudProfileRef = computed(() => {
