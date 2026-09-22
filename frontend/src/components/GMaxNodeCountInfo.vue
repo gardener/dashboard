@@ -66,11 +66,11 @@ const getNodeCIDRMaskSize = computed(() => {
 })
 
 const podsCidrPrefix = computed(() => {
-  return new Netmask(podsCidr.value[0]).bitmask
+  return new Netmask(podsCidr.value?.[0]).bitmask
 })
 
 const nodesCidrCidrPrefix = computed(() => {
-  return new Netmask(nodesCidr.value[0]).bitmask
+  return new Netmask(nodesCidr.value?.[0]).bitmask
 })
 
 const ipBitLength = computed(() => {
