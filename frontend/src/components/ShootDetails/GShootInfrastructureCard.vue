@@ -129,12 +129,24 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content label="Pods CIDR">
-            {{ podsCidr }}
+            <template
+              v-for="(cidr, index) in podsCidr"
+              :key="cidr"
+            >
+              <span v-if="index != 0">, <br></span>
+              {{ cidr }}
+            </template>
           </g-list-item-content>
         </g-list-item>
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
-            {{ nodesCidr }}
+            <template
+              v-for="(cidr, index) in nodesCidr"
+              :key="cidr"
+            >
+              <span v-if="index != 0">, <br></span>
+              {{ cidr }}
+            </template>
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -148,7 +160,13 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Services CIDR">
-          {{ servicesCidr }}
+          <template
+            v-for="(cidr, index) in servicesCidr"
+            :key="cidr"
+          >
+            <span v-if="index != 0">, <br></span>
+            {{ cidr }}
+          </template>
         </g-list-item-content>
       </g-list-item>
       <v-divider inset />

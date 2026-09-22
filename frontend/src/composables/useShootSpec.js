@@ -28,6 +28,10 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootItem.value, ['spec'], {})
   })
 
+  const shootStatus = computed(() => {
+    return get(shootItem.value, ['status'], {})
+  })
+
   const shootPurpose = computed(() => {
     return get(shootSpec.value, ['purpose'])
   })
@@ -126,11 +130,11 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const podsCidr = computed(() => {
-    return get(shootSpec.value, ['networking', 'pods'])
+    return get(shootStatus.value, ['networking', 'pods'])
   })
 
   const nodesCidr = computed(() => {
-    return get(shootSpec.value, ['networking', 'nodes'])
+    return get(shootStatus.value, ['networking', 'nodes'])
   })
 
   const ipFamilies = computed(() => {
@@ -146,7 +150,7 @@ export function useShootSpec (shootItem, options = {}) {
   })
 
   const servicesCidr = computed(() => {
-    return get(shootSpec.value, ['networking', 'services'])
+    return get(shootStatus.value, ['networking', 'services'])
   })
 
   const shootDomain = computed(() => {
