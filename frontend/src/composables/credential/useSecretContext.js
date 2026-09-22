@@ -22,7 +22,7 @@ import { cleanup } from '@/composables/helper'
 import { useObjectMetadata } from '@/composables/useObjectMetadata'
 import {
   credentialProviderType,
-  resolveSecretDataAliases,
+  copySecretAliasesToKeys,
 } from '@/composables/credential/helper'
 
 import {
@@ -170,7 +170,7 @@ export function createSecretContextComposable (options = {}) {
 
   function getSecretFieldValues (fieldDefinitions = []) {
     const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
-    const data = resolveSecretDataAliases(secretData.value ?? {}, fields)
+    const data = copySecretAliasesToKeys(secretData.value ?? {}, fields)
 
     return Object.fromEntries(
       fields

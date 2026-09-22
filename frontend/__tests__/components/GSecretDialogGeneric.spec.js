@@ -219,8 +219,8 @@ describe('GSecretDialogGeneric', () => {
 
     expect(wrapper.getComponent(GGenericInputFields).props('fields')).toEqual([
       {
-        key: 'NETLIFY_AUTH_TOKEN',
-        aliases: ['NETLIFY_API_TOKEN'],
+        key: 'apiToken',
+        aliases: ['NETLIFY_AUTH_TOKEN', 'NETLIFY_API_TOKEN'],
         label: 'Netlify API Token',
         type: 'text',
         sensitive: true,
@@ -243,7 +243,7 @@ describe('GSecretDialogGeneric', () => {
     await wrapper.get('input').setValue('new-token')
 
     expect(secretContext.secretManifest.value.data).toEqual({
-      NETLIFY_AUTH_TOKEN: encodeBase64('new-token'),
+      apiToken: encodeBase64('new-token'),
     })
     expect(getSecretValidations().$invalid).toBe(false)
 
@@ -281,20 +281,9 @@ describe('GSecretDialogGeneric', () => {
     await wrapper.get('input').setValue('new-token')
 
     expect(secretContext.secretManifest.value.data).toEqual({
-      NETLIFY_AUTH_TOKEN: encodeBase64('new-token'),
+      apiToken: encodeBase64('new-token'),
       unmanaged: unmanagedValue,
     })
-  })
-
-  it('does not read the unsupported legacy Netlify apiToken key', async () => {
-    const wrapper = mountDialog({
-      credential: { data: { apiToken: encodeBase64('unsupported-token') } },
-      providerType: 'netlify-dns',
-    })
-    await nextTick()
-
-    expect(wrapper.get('input').element.value).toBe('')
-    expect(getSecretValidations().$invalid).toBe(true)
   })
 
   it('renders the configured Netlify help as an external link', async () => {

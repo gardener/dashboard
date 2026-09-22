@@ -12,8 +12,8 @@ export default {
     ],
     fields: [
       {
-        key: 'NETLIFY_AUTH_TOKEN',
-        aliases: ['NETLIFY_API_TOKEN'],
+        key: 'apiToken',
+        aliases: ['NETLIFY_AUTH_TOKEN', 'NETLIFY_API_TOKEN'],
         label: 'Netlify API Token',
         type: 'text',
         sensitive: true,
