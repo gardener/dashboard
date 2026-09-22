@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          <template v-if="hasIpv4 && podsCidr && nodeCIDRMaskSize">
+          <template v-if="podsCidr && nodeCIDRMaskSize">
             {{ maxNodeCount }}
           </template>
           <template v-else>
@@ -142,7 +142,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Pods per Worker Node">
-          <template v-if="hasIpv4 && nodeCIDRMaskSize">
+          <template v-if="nodeCIDRMaskSize">
             {{ maxPodsPerNodeCount }}
           </template>
           <template v-else>
@@ -289,6 +289,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { Netmask } from 'netmask'
 
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
@@ -380,12 +381,13 @@ const slaTitle = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  const cidrPrefix = podsCidr.value?.split('/')[1]
-  return Math.pow(2, nodeCIDRMaskSize.value - cidrPrefix)
+  const netmask = new Netmask(podsCidr.value[0])
+  return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
 })
 
 const maxPodsPerNodeCount = computed(() => {
-  return Math.pow(2, 32 - nodeCIDRMaskSize.value)
+  const bitLength = hasIpv4.value ? 32 : 128
+  return Math.pow(2, bitLength - nodeCIDRMaskSize.value)
 })
 
 </script>
