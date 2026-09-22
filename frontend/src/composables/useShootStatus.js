@@ -129,6 +129,19 @@ export const useShootStatus = shootItem => {
     return get(caCertificateValiditiesAcceptableConstraint.value, ['message'], 'There is at least one CA certificate which expires in less than 1y. Consider schduling a Certificate Authorities Rotation for this cluster')
   })
 
+  const podsCidr = computed(() => {
+    return get(shootStatus.value, ['networking', 'pods'])
+  })
+
+  const nodesCidr = computed(() => {
+    return get(shootStatus.value, ['networking', 'nodes'])
+  })
+
+  const servicesCidr = computed(() => {
+    return get(shootStatus.value, ['networking', 'services'])
+  })
+
+
   return {
     shootStatus,
     isShootStatusHibernated,
@@ -139,6 +152,9 @@ export const useShootStatus = shootItem => {
     shootLastErrors,
     shootConditions,
     shootConstraints,
+    podsCidr,
+    nodesCidr,
+    servicesCidr,
     shootCredentialsRotation,
     shootReadiness,
     shootObservedGeneration,

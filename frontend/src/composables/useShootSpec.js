@@ -28,10 +28,6 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootItem.value, ['spec'], {})
   })
 
-  const shootStatus = computed(() => {
-    return get(shootItem.value, ['status'], {})
-  })
-
   const shootPurpose = computed(() => {
     return get(shootSpec.value, ['purpose'])
   })
@@ -129,12 +125,12 @@ export function useShootSpec (shootItem, options = {}) {
     return compact(uniq(flatMap(get(shootSpec.value, ['provider', 'workers']), 'zones')))
   })
 
-  const podsCidr = computed(() => {
-    return get(shootStatus.value, ['networking', 'pods'])
+  const podsCidrSpec = computed(() => {
+    return get(shootSpec.value, ['networking', 'pods'])
   })
 
-  const nodesCidr = computed(() => {
-    return get(shootStatus.value, ['networking', 'nodes'])
+  const nodesCidrSpec = computed(() => {
+    return get(shootSpec.value, ['networking', 'nodes'])
   })
 
   const ipFamilies = computed(() => {
@@ -149,8 +145,8 @@ export function useShootSpec (shootItem, options = {}) {
     return get(shootSpec.value, ['kubernetes', 'kubeControllerManager', 'nodeCIDRMaskSize'])
   })
 
-  const servicesCidr = computed(() => {
-    return get(shootStatus.value, ['networking', 'services'])
+  const servicesCidrSpec = computed(() => {
+    return get(shootSpec.value, ['networking', 'services'])
   })
 
   const shootDomain = computed(() => {
@@ -212,12 +208,12 @@ export function useShootSpec (shootItem, options = {}) {
     shootAddons,
     shootRegion,
     shootZones,
-    podsCidr,
-    nodesCidr,
+    podsCidrSpec,
+    nodesCidrSpec,
     ipFamilies,
     hasIpv4,
     nodeCIDRMaskSize,
-    servicesCidr,
+    servicesCidrSpec,
     shootDomain,
     isCustomShootDomain,
     shootDnsPrimaryProvider,
