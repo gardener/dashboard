@@ -24,11 +24,11 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-large text-grey-darken-1 mb-4">
           Max Worker Nodes
         </div>
-        <p v-if="hasIpv4 && getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
+        <p v-if="getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
           <ul>
             <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
             <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2<sup>({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }})</sup> = 2<sup>{{ getNodeCIDRMaskSize - podsCidrPrefix }}</sup> = {{ maxNodeCount }}</span> Nodes.</li>
-            <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2<sup>{{ 32 - nodesCidrCidrPrefix }}</sup> = {{ maxNodeIps }}</span> Node ips</li>
+            <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2<sup>{{ ipBitLength - nodesCidrCidrPrefix }}</sup> = {{ maxNodeIps }}</span> Node ips</li>
           </ul>
         </p>
         <p>
@@ -48,6 +48,7 @@ import {
   computed,
   ref,
 } from 'vue'
+import { Netmask } from 'netmask'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -65,15 +66,19 @@ const getNodeCIDRMaskSize = computed(() => {
 })
 
 const podsCidrPrefix = computed(() => {
-  return podsCidr?.value?.split('/')[1]
+  return new Netmask(podsCidr.value[0]).bitmask
 })
 
 const nodesCidrCidrPrefix = computed(() => {
-  return nodesCidr?.value?.split('/')[1]
+  return new Netmask(nodesCidr.value[0]).bitmask
+})
+
+const ipBitLength = computed(() => {
+  return hasIpv4.value ? 32 : 128
 })
 
 const maxNodeIps = computed(() => {
-  return Math.pow(2, 32 - nodesCidrCidrPrefix.value)
+  return Math.pow(2, ipBitLength.value - nodesCidrCidrPrefix.value)
 })
 
 const maxNodeCount = computed(() => {
