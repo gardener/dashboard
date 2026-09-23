@@ -365,11 +365,12 @@ function openProjectDialog () {
 
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
-
+  if (projectFilter.value){
+    refProjectVirtualScroll.value.scrollToIndex(0)
+  }
   if (!projectNameThatMatchesFilter.value) {
     return
   }
-
   highlightedProjectName.value = projectNameThatMatchesFilter.value
 }
 
