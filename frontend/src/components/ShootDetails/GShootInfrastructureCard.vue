@@ -129,24 +129,24 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content label="Pods CIDR">
-            <template
-              v-for="(cidr, index) in getPodsCidr || ['-']"
+            <v-chip
+              v-for="cidr in getPodsCidr || ['-']"
               :key="cidr"
+              size="small"
             >
-              <span v-if="index != 0">, <br></span>
               {{ cidr }}
-            </template>
+            </v-chip>
           </g-list-item-content>
         </g-list-item>
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
-            <template
-              v-for="(cidr, index) in getNodesCidr || ['-']"
+            <v-chip
+              v-for="cidr in getNodesCidr || ['-']"
               :key="cidr"
+              size="small"
             >
-              <span v-if="index != 0">, <br></span>
               {{ cidr }}
-            </template>
+            </v-chip>
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -160,13 +160,13 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Services CIDR">
-          <template
-            v-for="(cidr, index) in getServicesCidr || ['-']"
+          <v-chip
+            v-for="cidr in getServicesCidr || ['-']"
             :key="cidr"
+            size="small"
           >
-            <span v-if="index != 0">, <br></span>
             {{ cidr }}
-          </template>
+          </v-chip>
         </g-list-item-content>
       </g-list-item>
       <v-divider inset />
@@ -506,3 +506,9 @@ export default {
   },
 }
 </script>
+<style scoped>
+  .v-chip {
+    margin-left: 1px;
+    margin-right: 1px;
+  }
+</style>
