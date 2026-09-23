@@ -298,12 +298,14 @@ function defaultValidatorMessage (validator) {
   }
 
   if (validator.type === 'hasObjectProp') {
+    const key = Array.isArray(validator.key) ? validator.key.join('.') : validator.key
     if (Object.prototype.hasOwnProperty.call(validator, 'value')) {
-      return `Must contain a valid ${validator.key} property with value "${validator.value}"`
+      return `Key "${key}" must equal "${validator.value}"`
     }
     if (validator.pattern) {
-      return `Must contain a valid ${validator.key} property matching pattern ${validator.pattern}`
+      return `Key "${key}" must match pattern ${validator.pattern}`
     }
+    return `Key "${key}" is missing or empty`
   }
 
   return undefined
