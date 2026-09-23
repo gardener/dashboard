@@ -372,7 +372,7 @@ function onInputProjectFilter () {
   if (!projectNameThatMatchesFilter.value) {
     return
   }
-  
+
   highlightedProjectName.value = projectNameThatMatchesFilter.value
 }
 
