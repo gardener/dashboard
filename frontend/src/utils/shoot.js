@@ -17,6 +17,7 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
+import { isIpv4Cidr } from '.'
 
 export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
@@ -207,9 +208,7 @@ export function getKubernetesTemplate (providerType) {
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
-  // eslint-disable-next-line security/detect-unsafe-regex
-  const ipv4CidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,2}$/
-  if (numberOfNetworks < 1 || !cidrToSplitStr || !cidrToSplitStr.match(ipv4CidrRegex)) {
+  if (numberOfNetworks < 1 || !cidrToSplitStr || !isIpv4Cidr(cidrToSplitStr)) {
     return []
   }
   const cidrToSplit = new Netmask(cidrToSplitStr)
