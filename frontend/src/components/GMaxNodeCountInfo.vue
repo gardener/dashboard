@@ -86,14 +86,22 @@ const getNodeCIDRMaskSize = computed(() => {
 
 const podsCidrPrefix = computed(() => {
   const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
-  const netmask = new Netmask(cidr)
-  return netmask?.bitmask
+  
+  if (cidr) {
+    const netmask = new Netmask(cidr)
+    return netmask?.bitmask
+  }
+  return undefined
 })
 
 const nodesCidrCidrPrefix = computed(() => {
   const cidr = nodesCidr.value?.find(isIpv4Cidr) || nodesCidr.value?.[0] || nodesCidrSpec.value
-  const netmask = new Netmask(cidr)
-  return netmask?.bitmask
+  
+  if (cidr) {
+    const netmask = new Netmask(cidr)
+    return netmask?.bitmask
+  }
+  return undefined
 })
 
 const ipBitLength = computed(() => {
