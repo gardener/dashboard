@@ -842,7 +842,7 @@ export function normalizeVersion (version) {
   return [major, minor, patch].map(Number).join('.') + suffix
 }
 
-export function isIpv4Cidr(cidr) {
+export function isIpv4Cidr (cidr) {
   // eslint-disable-next-line security/detect-unsafe-regex
   const ipv4CidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,2}$/
   return !!cidr?.match(ipv4CidrRegex)

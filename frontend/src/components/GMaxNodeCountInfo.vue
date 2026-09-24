@@ -34,9 +34,15 @@ SPDX-License-Identifier: Apache-2.0
         <div v-else>
           The calculation is not possible because following values are missing:
           <ul>
-            <li v-if="!getNodeCIDRMaskSize">Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)</li>
-            <li v-if="!podsCidrPrefix">Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)</li>
-            <li v-if="!nodesCidrCidrPrefix">Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) </li>
+            <li v-if="!getNodeCIDRMaskSize">
+              Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
+            </li>
+            <li v-if="!podsCidrPrefix">
+              Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)
+            </li>
+            <li v-if="!nodesCidrCidrPrefix">
+              Node network (<span class="font-family-monospace">.spec.networking.nodes</span>)
+            </li>
           </ul>
         </div>
         <br>
