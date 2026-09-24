@@ -16,6 +16,9 @@ import testUtils from '@gardener-dashboard/test-utils'
 const { getOwnSymbolProperty } = testUtils.helper
 const {
   NGHTTP2_CANCEL,
+  NGHTTP2_INTERNAL_ERROR,
+  NGHTTP2_NO_ERROR,
+  NGHTTP2_REFUSED_STREAM,
   HTTP2_HEADER_STATUS,
 } = http2.constants
 
@@ -180,6 +183,155 @@ describe('SessionPool', () => {
       stream.emit('close')
       await expect(stream.getHeaders()).rejects.toThrow(StreamError)
     })
+
+    it('should classify a refused stream as never processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_REFUSED_STREAM
+      const error = Object.assign(new Error('Stream refused'), {
+        code: 'ERR_HTTP2_STREAM_ERROR',
+      })
+
+      stream.emit('error', error)
+
+      await expect(stream.getHeaders()).rejects.toBe(error)
+      const termination = {
+        streamId: 3,
+        rstCode: NGHTTP2_REFUSED_STREAM,
+        rstCodeName: 'NGHTTP2_REFUSED_STREAM',
+        goaway: null,
+        neverProcessed: true,
+        responseReceived: false,
+      }
+      expect(stream.getTermination()).toEqual(termination)
+      expect(error.message).toBe('Stream refused')
+      expect(error).not.toHaveProperty('termination')
+
+      stream.emit('close')
+      expect(stream.getTermination()).toEqual(termination)
+    })
+
+    it('should classify streams sharing one session error independently', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const first = await pool.request(requestHeaders)
+      const second = await pool.request(requestHeaders)
+      first.id = 1
+      second.id = 3
+      session.emit('goaway', NGHTTP2_INTERNAL_ERROR, 1)
+      const error = Object.assign(new Error('Session closed with error code 2'), {
+        code: 'ERR_HTTP2_SESSION_ERROR',
+      })
+
+      for (const stream of [first, second]) {
+        stream.rstCode = NGHTTP2_INTERNAL_ERROR
+        stream.emit('error', error)
+        stream.emit('close')
+      }
+
+      await expect(first.getHeaders()).rejects.toBe(error)
+      await expect(second.getHeaders()).rejects.toBe(error)
+      expect(error.message).toBe('Session closed with error code 2')
+      expect(error).not.toHaveProperty('termination')
+      expect(first.getTermination()).toMatchObject({
+        streamId: 1,
+        neverProcessed: false,
+      })
+      expect(second.getTermination()).toMatchObject({
+        streamId: 3,
+        neverProcessed: true,
+      })
+    })
+
+    it('should classify a stream cut by GOAWAY as never processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      session.emit('goaway', NGHTTP2_NO_ERROR, 1)
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_NO_ERROR
+
+      stream.emit('close')
+
+      const error = await stream.getHeaders().catch(err => err)
+      expect(error).toBeInstanceOf(StreamError)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_NO_ERROR,
+        rstCodeName: 'NGHTTP2_NO_ERROR',
+        goaway: {
+          errorCode: NGHTTP2_NO_ERROR,
+          lastStreamID: 1,
+          receivedAt: expect.any(Number),
+        },
+        neverProcessed: true,
+        responseReceived: false,
+      })
+      expect(error.termination).toBe(stream.getTermination())
+    })
+
+    it('should classify a reset after response headers as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_INTERNAL_ERROR
+
+      stream.emit('response', responseHeaders)
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_INTERNAL_ERROR,
+        rstCodeName: 'NGHTTP2_INTERNAL_ERROR',
+        goaway: null,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
+
+    it('should classify a stream refused after response headers as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+
+      stream.emit('response', responseHeaders)
+      session.emit('goaway', NGHTTP2_NO_ERROR, 1)
+      stream.rstCode = NGHTTP2_REFUSED_STREAM
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toMatchObject({
+        rstCode: NGHTTP2_REFUSED_STREAM,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
+
+    it('should classify a normal close as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_NO_ERROR
+
+      stream.emit('response', responseHeaders)
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_NO_ERROR,
+        rstCodeName: 'NGHTTP2_NO_ERROR',
+        goaway: null,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
   })
 
   describe('#getSession', () => {
@@ -283,10 +435,11 @@ describe('SessionPool', () => {
       ])
       clearTimeout.mockClear()
 
-      // listening on 'remoteSettings' and 'error' events
-      expect(session.on).toHaveBeenCalledTimes(2)
+      // listening on 'remoteSettings', 'goaway', and 'error' events
+      expect(session.on).toHaveBeenCalledTimes(3)
       expect(session.on.mock.calls).toEqual([
         ['remoteSettings', expect.any(Function)],
+        ['goaway', expect.any(Function)],
         ['error', expect.any(Function)],
       ])
       session.on.mockClear()

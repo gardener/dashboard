@@ -9,7 +9,13 @@ import net from 'net'
 import { omit } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import Semaphore from './Semaphore.js'
-import { TimeoutError, StreamError, isAbortError } from './errors.js'
+import {
+  TimeoutError,
+  StreamError,
+  createStreamTermination,
+  getHttp2ErrorName,
+  isAbortError,
+} from './errors.js'
 
 const {
   NGHTTP2_CANCEL,
@@ -20,6 +26,7 @@ const {
 const kSemaphore = Symbol('semaphore')
 const kTimeoutId = Symbol('timeoutId')
 const kHeartbeatCleanup = Symbol('heartbeatCleanup')
+const kGoaway = Symbol('goaway')
 
 function setSemaphore (session, value) {
   session[kSemaphore] = value // eslint-disable-line security/detect-object-injection
@@ -31,6 +38,10 @@ function setTimeoutId (session, value) {
 
 function setHeartbeatCleanup (session, value) {
   session[kHeartbeatCleanup] = value // eslint-disable-line security/detect-object-injection
+}
+
+function setGoaway (session, value) {
+  session[kGoaway] = value // eslint-disable-line security/detect-object-injection
 }
 
 class Timer {
@@ -139,6 +150,17 @@ class SessionPool {
       stream.once('finish', () => {
         logger.trace('Session %s - stream %d emitted "finish"', this.id, stream.id || -1)
       })
+      let responseReceived = false
+      let termination
+      const describeTermination = () => {
+        const { [kGoaway]: goaway } = session
+        return createStreamTermination({
+          streamId: stream.id,
+          rstCode: stream.rstCode,
+          goaway,
+          responseReceived,
+        })
+      }
       const headersPromise = new Promise((resolve, reject) => {
         let settled = false
         stream.on('error', err => {
@@ -151,6 +173,7 @@ class SessionPool {
           }
         })
         stream.once('close', () => {
+          termination = describeTermination()
           logger.trace('Session %s - stream %d closed', this.id, stream.id || -1)
           releaseStream()
           const { [kSemaphore]: semaphore } = session
@@ -159,10 +182,11 @@ class SessionPool {
           }
           if (!settled) {
             settled = true
-            reject(new StreamError('Stream unexpectedly closed'))
+            reject(new StreamError('Stream unexpectedly closed', { termination }))
           }
         })
         stream.once('response', headers => {
+          responseReceived = true
           logger.trace('Session %s - stream %d emitted "response"', this.id, stream.id)
           if (!settled) {
             settled = true
@@ -171,6 +195,8 @@ class SessionPool {
         })
       })
       stream.getHeaders = () => headersPromise
+      // callers read it while handling an error, which may happen before 'close' is emitted
+      stream.getTermination = () => termination ?? describeTermination()
       return stream
     } catch (err) {
       logger.error('Session %s - stream creation error: %s', this.id, err.message)
@@ -349,6 +375,21 @@ class SessionPool {
     })
     // handle remoteSettings
     session.on('remoteSettings', setMaxConcurrency)
+    // record the latest GOAWAY frame received from the server
+    session.on('goaway', (errorCode, lastStreamID) => {
+      setGoaway(session, {
+        errorCode,
+        lastStreamID,
+        receivedAt: Date.now(),
+      })
+      logger.debug(
+        'Session %s - received GOAWAY with error code %d (%s) and last stream id %d',
+        this.id,
+        errorCode,
+        getHttp2ErrorName(errorCode),
+        lastStreamID,
+      )
+    })
     return session
   }
 

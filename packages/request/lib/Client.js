@@ -12,7 +12,13 @@ import zlib from 'zlib'
 import typeis from 'type-is/index.js'
 import { pick, omit } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
-import { createHttpError, ParseError, TimeoutError } from './errors.js'
+import {
+  createHttpError,
+  isAbortError,
+  mapStreamTerminationError,
+  ParseError,
+  TimeoutError,
+} from './errors.js'
 import agent from './Agent.js'
 import { pipeline } from 'stream'
 
@@ -249,10 +255,30 @@ class Client {
 
     const timeoutSignal = createTimeoutSignal(requestTimeout)
     const effectiveSignal = combineSignals(signal, timeoutSignal)
-    const mapError = err => mapTimeoutAbortError(err, requestOptions, requestTimeout, timeoutSignal)
+    let stream
+    let destroyError
+    const mapError = err => {
+      // once the signal fired, any error is a consequence of the abort, whatever its shape
+      if (effectiveSignal?.aborted || isAbortError(err) || err === destroyError) {
+        return mapTimeoutAbortError(err, requestOptions, requestTimeout, timeoutSignal)
+      }
+      const termination = stream?.getTermination?.()
+      if (termination) {
+        err = mapStreamTerminationError(err, termination)
+        logger.error(
+          'Request %s %s [%s] failed: %s; termination=%j',
+          requestOptions.method,
+          requestOptions.url.pathname,
+          getHeader(requestOptions.headers, 'x-request-id') ?? '-',
+          err.message,
+          termination,
+        )
+      }
+      return err
+    }
 
     try {
-      const stream = await this.#agent.request(headers, {
+      stream = await this.#agent.request(headers, {
         ...this.#defaultOptions,
         ...options,
         signal: effectiveSignal,
@@ -292,6 +318,7 @@ class Client {
           return typeis.is(this.contentType, ['json', 'text'])
         },
         destroy (error) {
+          destroyError = error
           stream.destroy(error)
         },
         body () {
