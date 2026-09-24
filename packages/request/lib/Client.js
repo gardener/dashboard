@@ -15,6 +15,7 @@ import { globalLogger as logger } from '@gardener-dashboard/logger'
 import {
   createHttpError,
   isAbortError,
+  isStreamNeverProcessed,
   mapStreamTerminationError,
   ParseError,
   TimeoutError,
@@ -48,6 +49,11 @@ function setHeader (headers, key, value) {
 
 const EOL = '\n'
 const MAX_TIMEOUT = 2_147_483_647 // Node.js TIMEOUT_MAX (2^31 - 1)
+const DEFAULT_MAX_RETRIES = 2
+// set by request() on attempts it retries if the server never processed the stream
+const kRetry = Symbol('retry')
+// set by request() so all attempts share one timeout budget
+const kRequestTimeout = Symbol('requestTimeout')
 
 function combineSignals (a, b) {
   if (!a) {
@@ -57,6 +63,15 @@ function combineSignals (a, b) {
     return a
   }
   return AbortSignal.any([a, b])
+}
+
+// retry only when the server signalled that it did not process the stream: it refused the stream
+// (RST_STREAM with REFUSED_STREAM) or sent a GOAWAY with a lower lastStreamID. Both require a
+// stream id, which a stream gets when its request is submitted.
+// A stream without one was never sent and would be safe to resend, but it typically failed
+// with its connection, and a retry would likely fail the same way, just later
+function isRetryable (err) {
+  return isStreamNeverProcessed(err) && err.termination.streamId !== null
 }
 
 function createTimeoutSignal (requestTimeout) {
@@ -235,6 +250,8 @@ class Client {
     responseType = this.responseType,
     signal,
     requestTimeout = this.#options.requestTimeout ?? 60 * 1000,
+    [kRetry]: retry,
+    [kRequestTimeout]: sharedRequestTimeout,
     ...options
   } = {}) {
     headers = this.getRequestHeaders(path, {
@@ -253,31 +270,50 @@ class Client {
     }
     this.executeHooks('beforeRequest', requestOptions)
 
-    const timeoutSignal = createTimeoutSignal(requestTimeout)
+    const timeout = sharedRequestTimeout ?? {
+      requestTimeout,
+      timeoutSignal: createTimeoutSignal(requestTimeout),
+    }
+    const timeoutSignal = timeout.timeoutSignal
     const effectiveSignal = combineSignals(signal, timeoutSignal)
     let stream
     let destroyError
     const mapError = err => {
       // once the signal fired, any error is a consequence of the abort, whatever its shape
       if (effectiveSignal?.aborted || isAbortError(err) || err === destroyError) {
-        return mapTimeoutAbortError(err, requestOptions, requestTimeout, timeoutSignal)
+        return mapTimeoutAbortError(err, requestOptions, timeout.requestTimeout, timeoutSignal)
       }
       const termination = stream?.getTermination?.()
       if (termination) {
         err = mapStreamTerminationError(err, termination)
-        logger.error(
-          'Request %s %s [%s] failed: %s; termination=%j',
+        const request = [
           requestOptions.method,
           requestOptions.url.pathname,
           getHeader(requestOptions.headers, 'x-request-id') ?? '-',
-          err.message,
-          termination,
-        )
+        ]
+        if (retry && isRetryable(err)) {
+          logger.info(
+            'Request %s %s [%s] was not processed by the server, retrying (attempt %d of %d): %s; termination=%j',
+            ...request,
+            retry.attempt,
+            retry.maxAttempts,
+            err.message,
+            termination,
+          )
+        } else {
+          logger.error(
+            'Request %s %s [%s] failed: %s; termination=%j',
+            ...request,
+            err.message,
+            termination,
+          )
+        }
       }
       return err
     }
 
     try {
+      timeoutSignal?.throwIfAborted()
       stream = await this.#agent.request(headers, {
         ...this.#defaultOptions,
         ...options,
@@ -408,7 +444,14 @@ class Client {
     return response
   }
 
-  async request (path, { headers = {}, body, json, onWarning, ...options } = {}) {
+  async request (path, {
+    headers = {},
+    body,
+    json,
+    onWarning,
+    requestTimeout = this.#options.requestTimeout ?? 60 * 1000,
+    ...options
+  } = {}) {
     headers = this.constructor.normalizeHeaders(headers)
     if (json) {
       body = JSON.stringify(json)
@@ -416,7 +459,38 @@ class Client {
         setHeader(headers, HTTP2_HEADER_CONTENT_TYPE, 'application/json')
       }
     }
-    const response = await this.fetch(path, { headers, body, ...options })
+    const maxRetries = this.#options.maxRetries ?? DEFAULT_MAX_RETRIES
+    if (!Number.isSafeInteger(maxRetries) || maxRetries < 0) {
+      throw new TypeError('maxRetries must be a non-negative safe integer')
+    }
+    const timeout = {
+      requestTimeout,
+      timeoutSignal: createTimeoutSignal(requestTimeout),
+    }
+
+    const maxAttempts = maxRetries + 1
+    let response
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const retry = attempt < maxAttempts
+        ? { attempt: attempt + 1, maxAttempts }
+        : undefined
+      try {
+        response = await this.fetch(path, {
+          headers,
+          body,
+          ...options,
+          requestTimeout,
+          [kRetry]: retry,
+          [kRequestTimeout]: timeout,
+        })
+        break
+      } catch (err) {
+        if (!retry || !isRetryable(err)) {
+          throw err
+        }
+        options.signal?.throwIfAborted()
+      }
+    }
     const statusCode = response.statusCode
     headers = response.headers
     body = await response.body()

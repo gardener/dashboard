@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { vi } from 'vitest'
 import http from 'http'
 import http2 from 'http2'
 import zlib from 'zlib'
@@ -11,6 +12,7 @@ import stream from 'stream'
 import { once } from 'events'
 import { promisify } from 'util'
 import typeis from 'type-is'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 import request from '../lib/index.js'
 
 const { Client, Agent, isHttpError } = request
@@ -27,6 +29,7 @@ const {
   HTTP2_HEADER_CONTENT_LENGTH,
   HTTP2_HEADER_CONTENT_ENCODING,
   NGHTTP2_NO_ERROR,
+  NGHTTP2_REFUSED_STREAM,
 } = http2.constants
 
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
@@ -172,6 +175,16 @@ function createSecureServer ({ cert, key }) {
         stream.session.ping(() => {
           server.emit('draining', () => stream.end('"drained"}'))
         })
+      } else if (path === '/refuse-once' && !server.refused) {
+        server.refused = true
+        // the server stream reports its own reset as an error
+        stream.on('error', () => {})
+        stream.close(NGHTTP2_REFUSED_STREAM)
+      } else if (path === '/goaway-once' && !server.cutByGoaway) {
+        server.cutByGoaway = true
+        stream.on('error', () => {})
+        // Node replaces a lastStreamID of 0 with the last processed stream, so this must not be the first stream
+        stream.session.goaway(NGHTTP2_NO_ERROR, stream.id - 2)
       } else {
         body = JSON.stringify({
           headers,
@@ -328,6 +341,44 @@ describe('Acceptance Tests', function () {
         expect(body).toEqual({
           message: 'drained',
         })
+      })
+
+      it.each([
+        ['refused', 'refuse-once', 1],
+        ['cut by a GOAWAY', 'goaway-once', 2],
+      ])('should retry a POST request whose stream was %s', async function (_, path, sessionCount) {
+        const sessions = []
+        server.on('session', session => sessions.push(session))
+        await client.request('echo')
+        const json = { foo: 'bar' }
+
+        await expect(client.request(path, { method: 'POST', json })).resolves.toMatchObject({
+          body: json,
+        })
+        expect(sessions).toHaveLength(sessionCount)
+        const retryFormat = 'Request %s %s [%s] was not processed by the server, retrying (attempt %d of %d): %s; termination=%j'
+        expect(logger.info.mock.calls.filter(([format]) => format === retryFormat)).toHaveLength(1)
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+
+      it('should not retry a POST request whose connection failed', async function () {
+        const closedServer = await createSecureServer({ cert, key })
+        await closedServer.close()
+        const closedClient = new Client({
+          url: closedServer.origin,
+          agent,
+          ca: cert,
+        })
+        const agentRequest = vi.spyOn(agent, 'request')
+
+        await expect(closedClient.request('echo', { method: 'POST', json: { foo: 'bar' } })).rejects.toMatchObject({
+          name: 'StreamError',
+          termination: {
+            streamId: null,
+            neverProcessed: true,
+          },
+        })
+        expect(agentRequest).toHaveBeenCalledTimes(1)
       })
     })
 
