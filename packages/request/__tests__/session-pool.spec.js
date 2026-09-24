@@ -357,6 +357,60 @@ describe('SessionPool', () => {
       expect(pool.createSession).toHaveBeenCalledTimes(1)
     })
 
+    // Node marks a session closed on a graceful GOAWAY but keeps serving the
+    // streams the server accepted until they finish.
+    it('should neither destroy nor select a closed session with an open stream', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('response', responseHeaders)
+      session.closed = true
+      expect(pool.value).toBe(0)
+
+      pool.createSession = vi.fn()
+      pool.getSession()
+
+      expect(pool.createSession).toHaveBeenCalledTimes(1)
+      expect(session.destroy).not.toHaveBeenCalled()
+      expect(pool.sessions.has(session)).toBe(true)
+    })
+
+    it('should send the next request on a new session while a closed session drains', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const firstStream = await pool.request(requestHeaders)
+      firstStream.emit('response', responseHeaders)
+      session.closed = true
+
+      const secondStream = await pool.request(requestHeaders)
+
+      expect(mockHttp2Connect).toHaveBeenCalledTimes(2)
+      const newSession = mockHttp2Connect.mock.results[1].value
+      expect(session.request).toHaveBeenCalledTimes(1)
+      expect(newSession.request).toHaveBeenCalledTimes(1)
+      expect(newSession.request.mock.results[0].value).toBe(secondStream)
+      expect(pool.sessions.size).toBe(2)
+    })
+
+    it('should remove a closed session once it emits close', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('response', responseHeaders)
+      session.closed = true
+      const newSession = pool.getSession()
+      newSession.emit('connect')
+
+      stream.emit('close')
+      expect(pool.sessions.has(session)).toBe(true)
+      session.destroyed = true
+      session.emit('close')
+
+      expect(pool.sessions.has(session)).toBe(false)
+      expect(session.destroy).not.toHaveBeenCalled()
+      expect(pool.getSession()).toBe(newSession)
+    })
+
     it('should return the session with the highest load', async () => {
       options.peerMaxConcurrentStreams = 2
       const session = pool.getSession()

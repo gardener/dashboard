@@ -91,8 +91,10 @@ class SessionPool {
 
   get value () {
     let value = 0
-    for (const { [kSemaphore]: semaphore } of this.sessions) {
-      value += semaphore.value
+    for (const { closed, [kSemaphore]: semaphore } of this.sessions) {
+      if (!closed) {
+        value += semaphore.value
+      }
     }
     return value
   }
@@ -107,15 +109,20 @@ class SessionPool {
   getSession () {
     // ensure there are no already destroyed sessions in the pool
     for (const session of this.sessions) {
-      if (session.closed || session.destroyed) {
+      if (session.destroyed) {
         this.deleteSession(session)
+      } else if (session.closed) {
+        // after a graceful GOAWAY the server still completes the accepted streams,
+        // the session leaves the pool through its 'close' handler once they are done
+        const { [kSemaphore]: semaphore } = session
+        logger.debug('Session %s - skipped draining session with %d open streams', this.id, semaphore.concurrency)
       }
     }
     const sessionList = Array.from(this.sessions)
     let session = sessionList
-      // consider free sessions only
-      .filter(({ [kSemaphore]: semaphore }) => {
-        return semaphore.value > 0
+      // consider open and free sessions only
+      .filter(({ closed, [kSemaphore]: semaphore }) => {
+        return !closed && semaphore.value > 0
       })
       // session with the highest load first
       .sort(({ [kSemaphore]: a }, { [kSemaphore]: b }) => {
