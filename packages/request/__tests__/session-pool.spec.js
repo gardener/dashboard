@@ -12,6 +12,7 @@ import SessionId from '../lib/SessionId.js'
 import SessionPool from '../lib/SessionPool.js'
 import { StreamError } from '../lib/errors.js'
 import testUtils from '@gardener-dashboard/test-utils'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 
 const { getOwnSymbolProperty } = testUtils.helper
 const {
@@ -243,6 +244,32 @@ describe('SessionPool', () => {
         streamId: 3,
         neverProcessed: true,
       })
+    })
+
+    it('should log a stream error at error level only if the server may have processed the stream', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const first = await pool.request(requestHeaders)
+      const second = await pool.request(requestHeaders)
+      first.id = 1
+      second.id = 3
+      session.emit('goaway', NGHTTP2_INTERNAL_ERROR, 1)
+      const error = Object.assign(new Error('Session closed with error code 2'), {
+        code: 'ERR_HTTP2_SESSION_ERROR',
+      })
+
+      for (const stream of [first, second]) {
+        stream.rstCode = NGHTTP2_INTERNAL_ERROR
+        stream.emit('error', error)
+        stream.emit('close')
+      }
+
+      await expect(first.getHeaders()).rejects.toBe(error)
+      await expect(second.getHeaders()).rejects.toBe(error)
+      const format = 'Session %s - stream %d processing error: %s'
+      const callsWithFormat = mock => mock.mock.calls.filter(([value]) => value === format)
+      expect(callsWithFormat(logger.error)).toEqual([[format, pool.id, 1, error.message]])
+      expect(callsWithFormat(logger.debug)).toEqual([[format, pool.id, 3, error.message]])
     })
 
     it('should classify a stream cut by GOAWAY as never processed', async () => {

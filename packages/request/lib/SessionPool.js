@@ -172,7 +172,13 @@ class SessionPool {
         let settled = false
         stream.on('error', err => {
           if (!isAbortError(err)) {
-            logger.error('Session %s - stream %d processing error: %s', this.id, stream.id || -1, err.message)
+            const format = 'Session %s - stream %d processing error: %s'
+            // the client reports never-processed streams itself, as a retry or as a failure
+            if (describeTermination().neverProcessed) {
+              logger.debug(format, this.id, stream.id || -1, err.message)
+            } else {
+              logger.error(format, this.id, stream.id || -1, err.message)
+            }
           }
           if (!settled) {
             settled = true
