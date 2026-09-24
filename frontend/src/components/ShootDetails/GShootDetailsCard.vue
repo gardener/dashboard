@@ -294,7 +294,11 @@ import {
   getTimeStringTo,
   shootAddonList,
   transformHtml,
+<<<<<<< HEAD
   isEmail,
+=======
+  isIpv4Cidr,
+>>>>>>> 8605d604 (Corrected logic when ipv6 and ipv4 is enabled for shoot)
 } from '@/utils'
 
 import map from 'lodash/map'
@@ -358,12 +362,8 @@ const slaTitle = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  let netmask = null
-  if(podsCidr.value?.length) {
-    netmask = new Netmask(podsCidr.value?.[0])
-  } else if (podsCidrSpec.value) {
-     netmask = new Netmask(podsCidrSpec.value)
-  }
+  const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
+  const netmask = new Netmask(cidr)
   return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
 })
 
