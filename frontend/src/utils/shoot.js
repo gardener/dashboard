@@ -17,7 +17,7 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
-import { isIpv4Cidr } from '.'
+import { isIpv4Cidr } from '@/utils'
 
 export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
