@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          <template v-if="(podsCidr || podsCidrSpec) && nodeCIDRMaskSize">
+          <template v-if="(podsCidr?.length || podsCidrSpec) && nodeCIDRMaskSize">
             {{ maxNodeCount }}
           </template>
           <template v-else>
