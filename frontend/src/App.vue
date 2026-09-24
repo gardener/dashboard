@@ -64,13 +64,6 @@ provide('getColorCode', value => {
   return get(theme.current.value, ['colors', value])
 })
 
-const bus = useEventBus('esc-pressed')
-
-onKeyStroke('Escape', e => {
-  bus.emit()
-  e.preventDefault()
-})
-
 const documentTitle = computed(() => {
   let appTitle = process.env.VITE_APP_TITLE
   const branding = configStore.branding ?? loginStore.branding
