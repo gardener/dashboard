@@ -776,12 +776,15 @@ export function createShootContextComposable (options = {}) {
   /* hibernation */
   const noHibernationSchedules = computed({
     get () {
-      return getShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false') === 'true'
+      const noHibernationScheduleFallback = getShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false')
+      return getShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule', noHibernationScheduleFallback) === 'true'
     },
     set (value) {
       if (value) {
+        setShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule', 'true')
         setShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'true')
       } else {
+        unsetShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule')
         unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
       }
     },

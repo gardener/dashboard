@@ -96,6 +96,7 @@ export default {
             namespace: this.shootNamespace,
             name: this.shootName,
             data: {
+              'dashboard.gardener.cloud/no-hibernation-schedule': this.noHibernationSchedules ? 'true' : null,
               'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.noHibernationSchedules ? 'true' : null,
             },
           }),

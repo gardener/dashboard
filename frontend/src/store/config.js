@@ -496,7 +496,7 @@ export const useConfigStore = defineStore('config', () => {
     const purpose = get(shoot, ['spec', 'purpose'])
     const annotations = get(shoot, ['metadata', 'annotations'], {})
     if (purposeRequiresHibernationSchedule(purpose)) {
-      const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+      const hasNoScheduleFlag = !!annotations['dashboard.gardener.cloud/no-hibernation-schedule'] || !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
       if (!hasNoScheduleFlag && isEmpty(get(shoot, ['spec', 'hibernation', 'schedules']))) {
         return true
       }
