@@ -8,6 +8,7 @@ import http from 'http'
 import http2 from 'http2'
 import zlib from 'zlib'
 import stream from 'stream'
+import { once } from 'events'
 import { promisify } from 'util'
 import typeis from 'type-is'
 import request from '../lib/index.js'
@@ -25,6 +26,7 @@ const {
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
   HTTP2_HEADER_CONTENT_ENCODING,
+  NGHTTP2_NO_ERROR,
 } = http2.constants
 
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
@@ -158,6 +160,17 @@ function createSecureServer ({ cert, key }) {
         stream.respond({
           [HTTP2_HEADER_STATUS]: statusCode,
           [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
+        })
+      } else if (path === '/drain') {
+        stream.respond({
+          [HTTP2_HEADER_STATUS]: statusCode,
+          [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
+        })
+        stream.write('{"message":')
+        stream.session.goaway(NGHTTP2_NO_ERROR, stream.id)
+        // the client acknowledges a PING sent after the GOAWAY only once it has processed the GOAWAY
+        stream.session.ping(() => {
+          server.emit('draining', () => stream.end('"drained"}'))
         })
       } else {
         body = JSON.stringify({
@@ -296,6 +309,24 @@ describe('Acceptance Tests', function () {
             'x-requested-with': 'XmlHttpRequest',
             [HTTP2_HEADER_CONTENT_TYPE]: 'application/json',
           },
+        })
+      })
+
+      it('should complete a response streaming across a graceful GOAWAY despite a sibling request', async function () {
+        const draining = once(server, 'draining')
+        const sendSiblingRequest = async () => {
+          const [finishBody] = await draining
+          await expect(client.request('echo')).resolves.toMatchObject({
+            body: '',
+          })
+          finishBody()
+        }
+        const [body] = await Promise.all([
+          client.request('drain'),
+          sendSiblingRequest(),
+        ])
+        expect(body).toEqual({
+          message: 'drained',
         })
       })
     })
