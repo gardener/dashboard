@@ -16,8 +16,6 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
-  onKeyStroke,
-  useEventBus,
   useColorMode,
   useTitle,
 } from '@vueuse/core'
