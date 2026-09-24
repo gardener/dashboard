@@ -312,7 +312,7 @@ const sortedAndFilteredProjectItems = computed(() => {
 const projectNameThatMatchesFilter = computed(() => {
   const item = head(sortedAndFilteredProjectItems.value)
 
-  return item?.projectName;
+  return item?.projectName
 })
 
 function getProjectOwner (project) {
