@@ -24,20 +24,29 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-large text-grey-darken-1 mb-4">
           Max Worker Nodes
         </div>
-        <p v-if="getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
+        <div v-if="getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
           <ul>
             <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
             <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2<sup>({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }})</sup> = 2<sup>{{ getNodeCIDRMaskSize - podsCidrPrefix }}</sup> = {{ maxNodeCount }}</span> Nodes.</li>
             <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2<sup>{{ ipBitLength - nodesCidrCidrPrefix }}</sup> = {{ maxNodeIps }}</span> Node ips</li>
           </ul>
-        </p>
-        <p>
+        </div>
+        <div v-else>
+          The calculation is not possible because following values are missing:
+          <ul>
+            <li v-if="!getNodeCIDRMaskSize">Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)</li>
+            <li v-if="!podsCidrPrefix">Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)</li>
+            <li v-if="!nodesCidrCidrPrefix">Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) </li>
+          </ul>
+        </div>
+        <br>
+        <div>
           Further information about the shoot networking can be found
           <g-external-link url="https://gardener.cloud/docs/gardener/networking/shoot_networking/">
             here
           </g-external-link>
           .
-        </p>
+        </div>
       </div>
     </template>
   </g-popover>
@@ -51,6 +60,8 @@ import {
 import { Netmask } from 'netmask'
 
 import { useShootItem } from '@/composables/useShootItem'
+
+import { isIpv4Cidr } from '@/utils'
 
 const popover = ref(false)
 
@@ -68,21 +79,15 @@ const getNodeCIDRMaskSize = computed(() => {
 })
 
 const podsCidrPrefix = computed(() => {
-  if(podsCidr.value?.length) {
-    return new Netmask(podsCidr.value?.[0]).bitmask
-  } else if (podsCidrSpec.value) {
-    return new Netmask(podsCidrSpec.value).bitmask
-  }
-  return false
+  const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
+  const netmask = new Netmask(cidr)
+  return netmask?.bitmask
 })
 
 const nodesCidrCidrPrefix = computed(() => {
-   if(nodesCidr.value?.length) {
-    return new Netmask(nodesCidr.value?.[0]).bitmask
-  } else if (nodesCidrSpec.value) {
-    return new Netmask(nodesCidrSpec.value).bitmask
-  }
-  return false
+  const cidr = nodesCidr.value?.find(isIpv4Cidr) || nodesCidr.value?.[0] || nodesCidrSpec.value
+  const netmask = new Netmask(cidr)
+  return netmask?.bitmask
 })
 
 const ipBitLength = computed(() => {
@@ -100,9 +105,6 @@ const maxNodeCount = computed(() => {
 </script>
 <style scoped>
   ul {
-    margin-left: 10px;
-  }
-  li {
     margin-left: 10px;
   }
   li + li {
