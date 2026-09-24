@@ -6,6 +6,8 @@
 
 import { Netmask } from 'netmask'
 
+import { isIpv4Cidr } from '@/utils'
+
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
@@ -17,7 +19,6 @@ import filter from 'lodash/filter'
 import range from 'lodash/range'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
-import { isIpv4Cidr } from '@/utils'
 
 export function getSpecTemplate (providerType, defaultWorkerCIDR) {
   const spec = {
