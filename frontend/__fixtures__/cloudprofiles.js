@@ -158,7 +158,7 @@ export default [
     metadata: {
       name: 'alicloud',
       annotations: {
-        'garden.sapcloud.io/displayName': 'Alibaba Cloud',
+        'dashboard.gardener.cloud/displayName': 'Alibaba Cloud',
       },
     },
     spec: {
@@ -282,7 +282,7 @@ export default [
     metadata: {
       name: 'aws',
       annotations: {
-        'garden.sapcloud.io/displayName': 'aws',
+        'dashboard.gardener.cloud/displayName': 'aws',
       },
     },
     spec: {
@@ -470,7 +470,7 @@ export default [
     metadata: {
       name: 'az',
       annotations: {
-        'garden.sapcloud.io/displayName': 'Azure',
+        'dashboard.gardener.cloud/displayName': 'Azure',
       },
     },
     spec: {
@@ -581,7 +581,7 @@ export default [
     metadata: {
       name: 'openstack-1',
       annotations: {
-        'garden.sapcloud.io/displayName': 'Openstack 1',
+        'dashboard.gardener.cloud/displayName': 'Openstack 1',
       },
     },
     spec: {
@@ -740,7 +740,7 @@ export default [
     metadata: {
       name: 'openstack-2',
       annotations: {
-        'garden.sapcloud.io/displayName': 'Openstack 2',
+        'dashboard.gardener.cloud/displayName': 'Openstack 2',
       },
     },
     spec: {
@@ -923,7 +923,7 @@ export default [
     metadata: {
       name: 'gcp',
       annotations: {
-        'garden.sapcloud.io/displayName': 'Google Cloud',
+        'dashboard.gardener.cloud/displayName': 'Google Cloud',
       },
     },
     spec: {
@@ -1075,7 +1075,7 @@ export default [
     metadata: {
       name: 'ironcore',
       annotations: {
-        'garden.sapcloud.io/displayName': 'IronCore',
+        'dashboard.gardener.cloud/displayName': 'IronCore',
       },
     },
     spec: {

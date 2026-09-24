@@ -220,7 +220,8 @@ export function cloudProfileDisplayName (cloudProfile) {
     return ''
   }
   const name = get(cloudProfile, ['metadata', 'name'])
-  return get(cloudProfile, ['metadata', 'annotations', 'garden.sapcloud.io/displayName'], name)
+  const displayNameFallback = get(cloudProfile, ['metadata', 'annotations', 'garden.sapcloud.io/displayName'], name)
+  return get(cloudProfile, ['metadata', 'annotations', 'dashboard.gardener.cloud/displayName'], displayNameFallback)
 }
 
 export function convertToGibibyte (value) {
