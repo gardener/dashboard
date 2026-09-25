@@ -5,14 +5,15 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@apidevtools/json-schema-ref-parser@npm:15.3.6":
-  version: 15.3.6
-  resolution: "@apidevtools/json-schema-ref-parser@npm:15.3.6"
+"@apidevtools/json-schema-ref-parser@npm:^16.0.3":
+  version: 16.0.3
+  resolution: "@apidevtools/json-schema-ref-parser@npm:16.0.3"
   dependencies:
-    js-yaml: "npm:^4.2.0"
+    js-yaml: "npm:^5.4.2"
+    undici: "npm:^8.10.2"
   peerDependencies:
     "@types/json-schema": ^7.0.15
-  checksum: 10c0/05e81091d638ceae276cf96182a8737f9555a5129dea5067e1d0e4164d09d0ea6a48dea3c43e5d0f8fe2a8787b32b9f8ffb291494ed09449de7903bfb43784a6
+  checksum: 10c0/ce69272ba4939ab98d6c9572cddc7d0854c29c8d90afa05bd6c3d43ab1b45e1d80f85fc7283ad792a894ef517fa3d99160e6e236d63b091627fdc841cc4a45f1
   languageName: node
   linkType: hard
 
@@ -31,19 +32,19 @@ __metadata:
   linkType: hard
 
 "@apidevtools/swagger-parser@npm:^13.0.0":
-  version: 13.0.0
-  resolution: "@apidevtools/swagger-parser@npm:13.0.0"
+  version: 13.1.0
+  resolution: "@apidevtools/swagger-parser@npm:13.1.0"
   dependencies:
-    "@apidevtools/json-schema-ref-parser": "npm:15.3.6"
+    "@apidevtools/json-schema-ref-parser": "npm:^16.0.3"
     "@apidevtools/openapi-schemas": "npm:^2.1.0"
     "@apidevtools/swagger-methods": "npm:^3.0.2"
     "@types/json-schema": "npm:^7.0.15"
-    ajv: "npm:^8.17.1"
+    ajv: "npm:^8.20.0"
     ajv-draft-04: "npm:^1.0.0"
     call-me-maybe: "npm:^1.0.2"
   peerDependencies:
     openapi-types: ">=7"
-  checksum: 10c0/2a7c6ce5d49d3001120e44ae769a6c1432b5aa505080d941069093c0d95c156fe6a51cc420c53ca98cb3e7eca9dc4c39cabafe9ea03d8fb52bdae243c1076e78
+  checksum: 10c0/1c759c5f2d9946f462d6091dbe055853074c3d76d8a3c857366bf3ee391a357cb6f19ea732a81fe91b217da877115e2c757eb26a344c37f6410aefad081e8a07
   languageName: node
   linkType: hard
 
@@ -2966,15 +2967,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.17.1":
-  version: 8.17.1
-  resolution: "ajv@npm:8.17.1"
+"ajv@npm:^8.20.0":
+  version: 8.20.0
+  resolution: "ajv@npm:8.20.0"
   dependencies:
     fast-deep-equal: "npm:^3.1.3"
     fast-uri: "npm:^3.0.1"
     json-schema-traverse: "npm:^1.0.0"
     require-from-string: "npm:^2.0.2"
-  checksum: 10c0/ec3ba10a573c6b60f94639ffc53526275917a2df6810e4ab5a6b959d87459f9ef3f00d5e7865b82677cb7d21590355b34da14d1d0b9c32d75f95a187e76fff35
+  checksum: 10c0/5df9a1c8f83863cde1bd3a9ddb426f599718f88e3dc9153616c79fb28e0be455335830d7f21d745576519f057b371352daa31047b6a33d7036fe08777d60cf2a
   languageName: node
   linkType: hard
 
@@ -5707,7 +5708,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^4.1.0, js-yaml@npm:^4.2.0":
+"js-yaml@npm:^4.1.0":
   version: 4.3.2
   resolution: "js-yaml@npm:4.3.2"
   dependencies:
@@ -5718,7 +5719,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^5.0.0":
+"js-yaml@npm:^5.0.0, js-yaml@npm:^5.4.2":
   version: 5.4.2
   resolution: "js-yaml@npm:5.4.2"
   dependencies:
@@ -8642,10 +8643,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^8.0.0, undici@npm:^8.9.0":
-  version: 8.10.2
-  resolution: "undici@npm:8.10.2"
-  checksum: 10c0/66d7fc69149207cab570d6abbc9e965b6afe1ae889a7d46945b431165c973d6a56f3dd8b70a856e7ae1e550b6366a1cde6f06e68640587f0dadca38de72995ee
+"undici@npm:^8.0.0, undici@npm:^8.10.2, undici@npm:^8.9.0":
+  version: 8.11.2
+  resolution: "undici@npm:8.11.2"
+  checksum: 10c0/106f6991178fb7562fd90cdec7993c5f807a9428682306091f0c4b27fc474ec291f868e29972c6252988bf061ad193df943b3b99e775be157a28d92bbb95699d
   languageName: node
   linkType: hard
 
