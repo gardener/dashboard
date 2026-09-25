@@ -4,12 +4,10 @@ SPDX-FileCopyrightText: Contributors to the Gardener project
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-if="footerTemplate"
-    v-html="footerHtml"
+    v-safe-html="footerHtml"
   />
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-else-if="hasFooter"
     class="text-body-small text-center"
@@ -30,6 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
+import DOMPurify from 'dompurify'
 
 import { useLoginStore } from '@/store/login'
 
@@ -57,7 +56,8 @@ export default {
     footerHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.landingPageUrl = this.landingPageUrl
-      return this.compiledFooterTemplate(data)
+      const html = this.compiledFooterTemplate(data)
+      return DOMPurify.sanitize(html, { ADD_ATTR: ['target', 'rel', 'style'], ADD_TAGS: ['style'], FORCE_BODY: true })
     },
   },
 }

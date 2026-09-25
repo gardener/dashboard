@@ -27,13 +27,11 @@ SPDX-License-Identifier: Apache-2.0
           />
         </g-external-link>
       </div>
-      <!-- eslint-disable vue/no-v-html -->
       <div
+        v-safe-html="commentHtml"
         class="wrap-text comment-body"
         :class="gThemeClass"
-        v-html="commentHtml"
       />
-      <!-- eslint-enable vue/no-v-html -->
     </div>
   </div>
 </template>

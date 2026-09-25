@@ -20,6 +20,7 @@ import GSecretDialogGeneric from '@/components/Credentials/GSecretDialogGeneric'
 
 import { useSecretContext } from '@/composables/credential/useSecretContext'
 
+import { safeHtml } from '@/directives/safeHtml'
 import { encodeBase64 } from '@/utils'
 
 const TextareaStub = {
@@ -143,6 +144,9 @@ describe('GSecretDialogGeneric', () => {
         plugins: [
           pinia,
         ],
+        directives: {
+          safeHtml,
+        },
         stubs: {
           GSecretDialog: SecretDialogStub,
           VTextField: TextFieldStub,

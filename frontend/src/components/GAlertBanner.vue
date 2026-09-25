@@ -15,12 +15,10 @@ SPDX-License-Identifier: Apache-2.0
     closable
   >
     <slot name="message">
-      <!-- eslint-disable vue/no-v-html -->
       <div
+        v-safe-html="messageHtml"
         class="alert-banner-message"
-        v-html="messageHtml"
       />
-      <!-- eslint-enable vue/no-v-html -->
     </slot>
   </v-alert>
 </template>

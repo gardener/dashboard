@@ -792,6 +792,7 @@ __metadata:
     "@xterm/xterm": "npm:^6.0.0"
     culori: "npm:^4.0.2"
     dayjs: "npm:^1.11.10"
+    dompurify: "npm:^3.4.15"
     downloadjs: "npm:^1.4.7"
     eslint: "npm:^10.0.0"
     eslint-plugin-import-newlines: "npm:^2.0.0"
@@ -2006,6 +2007,13 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.20.0"
   checksum: 10c0/d4e56d41d8bd53de93da2651c0a0234e330bd7b1b6d071b1a94bd3b5ee2d9f387519e739c52a15c1faa4fb9d97e825b848421af4b2e50e6518011e7adb4a34b7
+  languageName: node
+  linkType: hard
+
+"@types/trusted-types@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/trusted-types@npm:2.0.7"
+  checksum: 10c0/4c4855f10de7c6c135e0d32ce462419d8abbbc33713b31d294596c0cc34ae1fa6112a2f9da729c8f7a20707782b0d69da3b1f8df6645b0366d08825ca1522e0c
   languageName: node
   linkType: hard
 
@@ -3863,6 +3871,18 @@ __metadata:
   dependencies:
     domelementtype: "npm:^3.0.0"
   checksum: 10c0/8655204dd9612b55813d5880e3e87e134d6dfb2de4bd80f342b3c97f41b167576a8c66c0449c2423999953aedfcda290f7be253a6f9bf71e815afa85f939d44e
+  languageName: node
+  linkType: hard
+
+"dompurify@npm:^3.4.15":
+  version: 3.4.15
+  resolution: "dompurify@npm:3.4.15"
+  dependencies:
+    "@types/trusted-types": "npm:^2.0.7"
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: 10c0/406b5f0f9c9dcbc80016367d33e73585b6a6f440815228d7e9cbe8abe71058183b1f4cb4207b79b8473637de4a106fc055eb6da271ef9db353d29679b891ecbc
   languageName: node
   linkType: hard
 

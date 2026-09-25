@@ -17,8 +17,7 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #content>
       <v-card-text>
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="messageHtml" />
+        <div v-safe-html="messageHtml" />
       </v-card-text>
     </template>
   </g-dialog>
