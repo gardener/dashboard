@@ -32,8 +32,8 @@ if ! which yarn > /dev/null; then
 fi
 
 # bump version
-yarn workspace @gardener-dashboard/frontend version "${EFFECTIVE_VERSION}"
-yarn workspace @gardener-dashboard/backend version "${EFFECTIVE_VERSION}"
+yarn workspace @gardener-dashboard/frontend version --force "${EFFECTIVE_VERSION}"
+yarn workspace @gardener-dashboard/backend version --force "${EFFECTIVE_VERSION}"
 
 # restore previous working directory
 cd "${WORK_DIR}"
