@@ -27,12 +27,19 @@ class StreamError extends Error {
 }
 
 class ParseError extends Error {
-  constructor (message, properties) {
+  constructor (message, { rawBody, ...properties } = {}) {
     super(message)
     Object.assign(this, {
       name: this.constructor.name,
       code: 'ERR_BODY_PARSE_FAILURE',
       ...properties,
+    })
+    // Non-enumerable, so that formatting or inspecting the error does not print
+    // the body, which can contain confidential data
+    Object.defineProperty(this, 'rawBody', {
+      value: rawBody,
+      writable: true,
+      configurable: true,
     })
     Error.captureStackTrace(this, this.constructor)
   }
