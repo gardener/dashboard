@@ -1,8 +1,11 @@
 //
+// SPDX-FileCopyrightText: 2014 The Kubernetes Authors
 // SPDX-FileCopyrightText: Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// This file contains code adapted from k8s.io/client-go/tools/cache/reflector.go.
 
 import { format as fmt } from 'node:util'
 import timers from 'timers/promises'
@@ -10,9 +13,11 @@ import { isPlainObject } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import ListPager from './ListPager.js'
 import BackoffManager from './BackoffManager.js'
+import Store from './Store.js'
 import {
   isExpiredError,
   isConnectionRefused,
+  isTooManyRequests,
   isTooLargeResourceVersionError,
   isAbortError,
   StatusError,
@@ -20,9 +25,10 @@ import {
 import { getResourceApiVersion, normalizeResourceListItems } from '../resource.js'
 
 const MOST_RECENT_PAGINATED = 'mostRecentPaginated'
+const INITIAL_EVENTS_END_BOOKMARK_WARNING_INTERVAL = 10_000
 
-function delay (milliseconds) {
-  return timers.setTimeout(milliseconds)
+function delay (milliseconds, signal) {
+  return timers.setTimeout(milliseconds, undefined, { signal })
 }
 
 function randomize (duration) {
@@ -31,6 +37,17 @@ function randomize (duration) {
 
 function getTypeName (apiVersion, kind) {
   return `${apiVersion}, Kind=${kind}`
+}
+
+// isWatchErrorRetriable determines if it is safe to retry
+// a watch error retrieved from the server.
+function isWatchErrorRetriable (err) {
+  // If this is "connection refused" error, it means that most likely apiserver is not responsive.
+  // It doesn't make sense to re-list all objects because most likely we will be able to restart
+  // watch where we ended.
+  // If that's the case begin exponentially backing off and resend watch request.
+  // Do the same for "429" errors.
+  return isConnectionRefused(err) || isTooManyRequests(err)
 }
 
 class Reflector {
@@ -44,6 +61,7 @@ class Reflector {
     this.isLastSyncResourceVersionUnavailable = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
+    this.useWatchList = true
     this.stopRequested = false
     this.backoffManager = new BackoffManager()
     this.initConnBackoffManager = new BackoffManager()
@@ -98,6 +116,16 @@ class Reflector {
     }
   }
 
+  // rewatchResourceVersion determines the resource version the reflector should start streaming from.
+  get rewatchResourceVersion () {
+    if (this.isLastSyncResourceVersionUnavailable) {
+      // Initial stream should return data at the most recent resource version.
+      // The returned data must be consistent i.e. as if served from etcd via a quorum read.
+      return ''
+    }
+    return this.lastSyncResourceVersion
+  }
+
   destroy () {
     this.backoffManager.clearTimeout()
     this.initConnBackoffManager.clearTimeout()
@@ -138,7 +166,7 @@ class Reflector {
     this.store.replace(items, resourceVersion)
   }
 
-  async listAndWatch () {
+  async list () {
     const pager = this.strategy === MOST_RECENT_PAGINATED
       ? ListPager.create(this.listWatcher, {
         pageSize: this.pageSize,
@@ -188,11 +216,11 @@ class Reflector {
           list = await pager.list(options)
         } catch (err) {
           logger.error('Failed to call recovery list %s: %s', this.expectedTypeName, err.message)
-          return
+          return false
         }
       } else {
         logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
-        return
+        return false
       }
     }
 
@@ -221,58 +249,226 @@ class Reflector {
     this.isLastSyncResourceVersionUnavailable = false
     this.syncWith(list.items, resourceVersion)
     this.lastSyncResourceVersion = resourceVersion
+    return true
+  }
 
-    while (!this.signal.aborted) {
+  async listAndWatch () {
+    let response
+    let iterator
+    let timeoutSeconds
+
+    try {
+      if (this.useWatchList) {
+        try {
+          ({ response, iterator, timeoutSeconds } = await this.watchList())
+        } catch (err) {
+          if (this.signal.aborted || isAbortError(err)) {
+            return
+          }
+          logger.info(
+            'Data could not be fetched in WatchList mode for %s. Falling back to regular list: %s',
+            this.expectedTypeName,
+            err.message,
+          )
+        }
+      }
+
+      if (this.signal.aborted || (!response && !await this.list())) {
+        return
+      }
+
+      while (!this.signal.aborted) {
+        const gracePeriod = 5
+        let propagateResourceVersionFromStart = true
+        if (!response) {
+          timeoutSeconds = randomize(this.minWatchTimeout)
+          const options = {
+            allowWatchBookmarks: true,
+            timeoutSeconds,
+            resourceVersion: this.lastSyncResourceVersion,
+          }
+          if (options.resourceVersion === '' || options.resourceVersion === '0') {
+            // If we're starting the watch at a resource version that will get synthetic ADDED events in non-rv order,
+            // wait until we're through that set of events before propagating the RV.
+            propagateResourceVersionFromStart = false
+          }
+          try {
+            logger.debug('Watch %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
+            response = await this.listWatcher.watch(options)
+          } catch (err) {
+            if (isWatchErrorRetriable(err)) {
+              logger.info('Watch of %s failed with a retriable error: %s', this.expectedTypeName, err.message)
+              await delay(this.initConnBackoffManager.duration())
+              continue
+            }
+            throw err
+          }
+        }
+        try {
+          await this.watchHandler(response, (timeoutSeconds + gracePeriod) * 1000, {
+            iterator,
+            setLastSyncResourceVersion: (resourceVersion, eventReceivedBesidesAdded) => {
+              // We update the resource version only if we have received at least one event that is
+              // not an added event, or if the resource version has been set previously. This is because we can
+              // encounter 2 scenarios:
+              // 1. The watch is started from a resource version specified by the lastSyncResourceVersion field.
+              //    In this case, we can update the resource version without worrying about it being
+              //    out of order since we will not receive any synthetic added events for resources that may be
+              //    out of order.
+              // 2. The watch is started when the lastSyncResourceVersion field is empty. In this case, we may not
+              //    update the lastSyncResourceVersion until we receive at least one event that is not an added
+              //    event, since that is the only way to ensure that the watch has exited the initial list phase.
+              if (propagateResourceVersionFromStart || eventReceivedBesidesAdded) {
+                this.lastSyncResourceVersion = resourceVersion
+              }
+            },
+          })
+        } catch (err) {
+          if (isExpiredError(err)) {
+            // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
+            // has a semantic that it returns data at least as fresh as provided RV.
+            // So first try to LIST with setting RV to resource version of last observed object.
+            logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
+          } else if (!isAbortError(err)) {
+            logger.warn('Watch of %s ended with: %s', this.expectedTypeName, err.message)
+          }
+          return
+        }
+        response = undefined
+        iterator = undefined
+      }
+    } finally {
+      response?.destroy?.()
+      this.initConnBackoffManager.clearTimeout()
+      this.initConnBackoffManager.reset()
+    }
+  }
+
+  async watchList () {
+    while (true) {
+      this.signal.throwIfAborted()
       const timeoutSeconds = randomize(this.minWatchTimeout)
       const gracePeriod = 5
       const options = {
+        sendInitialEvents: true,
         allowWatchBookmarks: true,
+        resourceVersion: this.rewatchResourceVersion,
+        resourceVersionMatch: 'NotOlderThan',
         timeoutSeconds,
-        resourceVersion: this.lastSyncResourceVersion,
       }
+      const temporaryStore = new Store()
       let response
+
       try {
-        logger.debug('Watch %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
+        logger.debug('WatchList %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
         response = await this.listWatcher.watch(options)
+        const iterator = response[Symbol.asyncIterator]()
+        let resourceVersion = ''
+        const { watchListBookmarkReceived } = await this.watchHandler(
+          response,
+          (timeoutSeconds + gracePeriod) * 1000,
+          {
+            iterator,
+            store: temporaryStore,
+            exitOnWatchListBookmarkReceived: true,
+            setLastSyncResourceVersion: (value, eventReceivedBesidesAdded, initialEventsEndBookmarkReceived) => {
+              if (eventReceivedBesidesAdded && initialEventsEndBookmarkReceived) {
+                resourceVersion = value
+              }
+            },
+          },
+        )
+        if (!watchListBookmarkReceived) {
+          response.destroy?.()
+          continue
+        }
+        if (!resourceVersion) {
+          throw new Error(`WatchList ${this.expectedTypeName} received an initial-events-end bookmark without a resource version`)
+        }
+
+        // We successfully got initial state from WatchList confirmed by the
+        // "k8s.io/initial-events-end" bookmark.
+        this.isLastSyncResourceVersionUnavailable = false
+        this.syncWith(temporaryStore.list(), resourceVersion)
+        this.lastSyncResourceVersion = resourceVersion
+        logger.debug('WatchList of %s successfully streamed %d items', this.expectedTypeName, temporaryStore.list().length)
+        return { response, iterator, timeoutSeconds }
       } catch (err) {
-        if (isConnectionRefused(err)) {
-          // If this is "connection refused" error, it means that most likely apiserver is not responsive.
-          // It doesn't make sense to re-list all objects because most likely we will be able to restart
-          // watch where we ended.
-          // If that's the case begin exponentially backing off and resend watch request.
-          logger.info('Watch of %s refused connection with: %s', this.expectedTypeName, err.message)
-          await delay(this.initConnBackoffManager.duration())
+        response?.destroy?.()
+        if (this.signal.aborted || isAbortError(err)) {
+          throw err
+        }
+        if (isWatchErrorRetriable(err)) {
+          logger.info('WatchList of %s failed with a retriable error, backing off: %s', this.expectedTypeName, err.message)
+          await delay(this.initConnBackoffManager.duration(), this.signal)
+          continue
+        }
+        if (isExpiredError(err) || isTooLargeResourceVersionError(err)) {
+          // We tried to re-establish a watch request but the provided RV has either expired
+          // or it is greater than the server knows about. Reset the RV and try to get a
+          // consistent snapshot from the watch cache.
+          this.isLastSyncResourceVersionUnavailable = true
           continue
         }
         throw err
       }
-      try {
-        await this.watchHandler(response, (timeoutSeconds + gracePeriod) * 1000)
-      } catch (err) {
-        if (isExpiredError(err)) {
-          // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
-          // has a semantic that it returns data at least as fresh as provided RV.
-          // So first try to LIST with setting RV to resource version of last observed object.
-          logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
-        } else if (!isAbortError(err)) {
-          logger.warn('Watch of %s ended with: %s', this.expectedTypeName, err.message)
-        }
-        return
-      }
     }
   }
 
-  async watchHandler (response, timeout) {
+  // watchHandler consumes events from a response, updates the Store, and records the last
+  // seen ResourceVersion, to allow continuing from that ResourceVersion on retry.
+  // If exitOnWatchListBookmarkReceived is true, the watch events will be consumed until a
+  // bookmark event is received with the WatchList annotation present. The iterator remains
+  // open in that case, allowing the caller to continue consuming the same watch stream.
+  async watchHandler (response, timeout, options = {}) {
+    const {
+      iterator = response[Symbol.asyncIterator](),
+      store = this.store,
+      exitOnWatchListBookmarkReceived = false,
+      setLastSyncResourceVersion = resourceVersion => {
+        this.lastSyncResourceVersion = resourceVersion
+      },
+    } = options
     const begin = Date.now()
     let count = 0
+    let eventReceivedBesidesAdded = false
+    let watchListBookmarkReceived = false
+    let iteratorDone = false
+    let leaveIteratorOpen = false
+    let lastEventTime
     const timeoutCallack = () => {
       const message = `Forcefully destroying watch ${this.expectedTypeName} after ${timeout} ms`
       logger.error(message)
       response.destroy(new Error(message))
     }
     const timeoutId = setTimeout(timeoutCallack, timeout)
+    const bookmarkWarningIntervalId = exitOnWatchListBookmarkReceived
+      ? setInterval(() => {
+        if (lastEventTime === undefined) {
+          logger.info(
+            '%s: awaiting required bookmark event for initial events stream, no events received for %d seconds',
+            this.expectedTypeName,
+            Math.floor((Date.now() - begin) / 1000),
+          )
+          return
+        }
+        const elapsed = Date.now() - lastEventTime
+        if (elapsed >= INITIAL_EVENTS_END_BOOKMARK_WARNING_INTERVAL) {
+          logger.info(
+            "%s: hasn't received required bookmark event marking the end of initial events stream, received last event %d seconds ago",
+            this.expectedTypeName,
+            Math.floor(elapsed / 1000),
+          )
+        }
+      }, INITIAL_EVENTS_END_BOOKMARK_WARNING_INTERVAL)
+      : undefined
     try {
-      for await (const event of response) {
+      while (true) {
+        const { value: event, done } = await iterator.next()
+        if (done) {
+          iteratorDone = true
+          break
+        }
         count++
         if (event instanceof Error) {
           throw event
@@ -289,33 +485,49 @@ class Reflector {
         }
         switch (type) {
           case 'ADDED':
-            this.store.add(object)
+            store.add(object)
             break
           case 'MODIFIED':
-            this.store.update(object)
+            eventReceivedBesidesAdded = true
+            store.update(object)
             break
           case 'DELETED':
-            this.store.delete(object)
+            eventReceivedBesidesAdded = true
+            store.delete(object)
             break
           case 'BOOKMARK':
+            eventReceivedBesidesAdded = true
+            if (object.metadata?.annotations?.['k8s.io/initial-events-end'] === 'true') {
+              watchListBookmarkReceived = true
+            }
             break
           default:
             logger.error('Unable to understand event %s for watch %s', type, this.expectedTypeName)
         }
         if (resourceVersion) {
-          this.lastSyncResourceVersion = resourceVersion
+          setLastSyncResourceVersion(resourceVersion, eventReceivedBesidesAdded, watchListBookmarkReceived)
         } else {
           logger.error('Received event object without resource version for watch %s', this.expectedTypeName)
+        }
+        lastEventTime = Date.now()
+        if (exitOnWatchListBookmarkReceived && watchListBookmarkReceived) {
+          leaveIteratorOpen = true
+          return { iterator, watchListBookmarkReceived }
         }
       }
     } finally {
       clearTimeout(timeoutId)
+      clearInterval(bookmarkWarningIntervalId)
+      if (!iteratorDone && !leaveIteratorOpen) {
+        await iterator.return?.()
+      }
     }
     const duration = Date.now() - begin
     if (duration < 1000 && count === 0) {
       throw new Error(fmt('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName))
     }
     logger.info('Watch %s closed - total %d items received within %s seconds', this.expectedTypeName, count, Math.floor(duration / 1000))
+    return { iterator, watchListBookmarkReceived }
   }
 
   static create (...args) {

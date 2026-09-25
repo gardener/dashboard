@@ -12,8 +12,8 @@ import {
   isExpiredError,
   isResourceExpired,
   isGone,
+  isTooManyRequests,
   isTooLargeResourceVersionError,
-  isGatewayTimeout,
 } from '../lib/ApiErrors.js'
 const { createHttpError } = request
 
@@ -71,6 +71,13 @@ describe('kube-client', () => {
       expect(isExpiredError(error)).toBe(false)
     })
 
+    it('should identify too many requests errors', () => {
+      expect(isTooManyRequests(new StatusError({ code: 429 }))).toBe(true)
+      expect(isTooManyRequests(createHttpError({ statusCode: 429 }))).toBe(true)
+      expect(isTooManyRequests(createHttpError({ body: { code: 429 } }))).toBe(true)
+      expect(isTooManyRequests(new Error())).toBe(false)
+    })
+
     it('should handle "Resource version too large" errors correctly', () => {
       const code = 504
       const reason = 'Timeout'
@@ -80,27 +87,17 @@ describe('kube-client', () => {
           reason,
         },
       })
-      expect(isGatewayTimeout(error)).toBe(true)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      expect(isTooLargeResourceVersionError(error)).toBe(false)
       error = createHttpError({
         body: {
           code,
           reason,
-        },
-      })
-      expect(isGatewayTimeout(error)).toBe(true)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
-      error = createHttpError({
-        body: {
-          code,
-          reason: 'Gateway Timeout',
           details: {
             causes: [{ message: 'Too large resource version' }],
           },
         },
       })
-      expect(isGatewayTimeout(error)).toBe(false)
-      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      expect(isTooLargeResourceVersionError(error)).toBe(false)
       error = createHttpError({
         body: {
           details: {
@@ -108,7 +105,12 @@ describe('kube-client', () => {
           },
         },
       })
-      expect(isGatewayTimeout(error)).toBe(false)
+      expect(isTooLargeResourceVersionError(error)).toBe(true)
+      error = new StatusError({
+        details: {
+          causes: [{ reason: 'ResourceVersionTooLarge' }],
+        },
+      })
       expect(isTooLargeResourceVersionError(error)).toBe(true)
     })
   })

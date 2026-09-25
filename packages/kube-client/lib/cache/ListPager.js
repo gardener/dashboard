@@ -1,8 +1,11 @@
 //
+// SPDX-FileCopyrightText: 2017 The Kubernetes Authors
 // SPDX-FileCopyrightText: Contributors to the Gardener project
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// This file contains code adapted from k8s.io/client-go/tools/pager/pager.go.
 
 import { isResourceExpired } from '../ApiErrors.js'
 

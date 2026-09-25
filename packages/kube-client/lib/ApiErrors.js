@@ -59,6 +59,10 @@ function isGone (err) {
   return getValue(err, 'code') === 410
 }
 
+function isTooManyRequests (err) {
+  return getValue(err, 'code') === 429
+}
+
 function isExpiredError (err) {
   return isResourceExpired(err) || isGone(err)
 }
@@ -73,8 +77,8 @@ function isExpiredError (err) {
 function hasStatusCauseResourceVersionTooLarge (err) {
   const causes = getValue(err, 'details.causes')
   if (Array.isArray(causes)) {
-    for (const { reason, message } of causes) {
-      if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
+    for (const { reason } of causes) {
+      if (reason === 'ResourceVersionTooLarge') {
         return true
       }
     }
@@ -82,12 +86,8 @@ function hasStatusCauseResourceVersionTooLarge (err) {
   return false
 }
 
-function isGatewayTimeout (err) {
-  return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
-}
-
 function isTooLargeResourceVersionError (err) {
-  return hasStatusCauseResourceVersionTooLarge(err) || isGatewayTimeout(err)
+  return hasStatusCauseResourceVersionTooLarge(err)
 }
 
 function isConnectionRefused (err) {
@@ -103,9 +103,9 @@ export {
   CacheExpiredError,
   isResourceExpired,
   isGone,
+  isTooManyRequests,
   isExpiredError,
   isTooLargeResourceVersionError,
-  isGatewayTimeout,
   hasStatusCauseResourceVersionTooLarge,
   isConnectionRefused,
   isAbortError,
