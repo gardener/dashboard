@@ -962,7 +962,7 @@ __metadata:
     http-errors: "npm:^2.0.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:0.14.0-next.1"
-    type-is: "npm:^2.0.0"
+    type-is: "npm:^3.0.0"
     vite: "npm:^7.0.0"
     vitest: "npm:^5.0.0"
   peerDependencies:
@@ -3520,10 +3520,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"content-type@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "content-type@npm:3.0.0"
-  checksum: 10c0/4ecb17b151ef272fe3143d2414b78edeea9c7baa45724e2bbcbfc0dbd4bbc5b68d654733df6df2d9c600016af841a25aa26b0a4d290e366b5120705796072d98
+"content-type@npm:^3.0.0, content-type@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "content-type@npm:3.1.1"
+  checksum: 10c0/a9ff3f2afac5aae1356f545e19fc0d6dca644ee3bf694b788f178185954bfe46ba51ca309950e40e07681290da0b7934652fdb5b7fa4ec1e7d43cb71bd703e1f
   languageName: node
   linkType: hard
 
@@ -8595,7 +8595,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-is@npm:^2.0.0, type-is@npm:^2.0.1, type-is@npm:^2.1.0":
+"type-is@npm:^2.0.1, type-is@npm:^2.1.0":
   version: 2.1.0
   resolution: "type-is@npm:2.1.0"
   dependencies:
@@ -8603,6 +8603,15 @@ __metadata:
     media-typer: "npm:^1.1.0"
     mime-types: "npm:^3.0.0"
   checksum: 10c0/a6018f8f509de48f2c7429305e3a920e73b374fa93127dd0877ae1c2df65a5d33907caac8afb0c37a9b9fc7c49f29e3f55d668963dc845d966930b667c07f50e
+  languageName: node
+  linkType: hard
+
+"type-is@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "type-is@npm:3.0.0"
+  dependencies:
+    content-type: "npm:^3.1.1"
+  checksum: 10c0/5ad958098d3da7d09aa8c2ccdb5978b6f044fab3d5f6bc5a9b99771aab59b040e280b4766b593ccae4b642073795aed8eea78cda98744b8f3d22380db9a76c20
   languageName: node
   linkType: hard
 
