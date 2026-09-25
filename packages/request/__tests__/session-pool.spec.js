@@ -12,10 +12,14 @@ import SessionId from '../lib/SessionId.js'
 import SessionPool from '../lib/SessionPool.js'
 import { StreamError } from '../lib/errors.js'
 import testUtils from '@gardener-dashboard/test-utils'
+import { globalLogger as logger } from '@gardener-dashboard/logger'
 
 const { getOwnSymbolProperty } = testUtils.helper
 const {
   NGHTTP2_CANCEL,
+  NGHTTP2_INTERNAL_ERROR,
+  NGHTTP2_NO_ERROR,
+  NGHTTP2_REFUSED_STREAM,
   HTTP2_HEADER_STATUS,
 } = http2.constants
 
@@ -180,6 +184,181 @@ describe('SessionPool', () => {
       stream.emit('close')
       await expect(stream.getHeaders()).rejects.toThrow(StreamError)
     })
+
+    it('should classify a refused stream as never processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_REFUSED_STREAM
+      const error = Object.assign(new Error('Stream refused'), {
+        code: 'ERR_HTTP2_STREAM_ERROR',
+      })
+
+      stream.emit('error', error)
+
+      await expect(stream.getHeaders()).rejects.toBe(error)
+      const termination = {
+        streamId: 3,
+        rstCode: NGHTTP2_REFUSED_STREAM,
+        rstCodeName: 'NGHTTP2_REFUSED_STREAM',
+        goaway: null,
+        neverProcessed: true,
+        responseReceived: false,
+      }
+      expect(stream.getTermination()).toEqual(termination)
+      expect(error.message).toBe('Stream refused')
+      expect(error).not.toHaveProperty('termination')
+
+      stream.emit('close')
+      expect(stream.getTermination()).toEqual(termination)
+    })
+
+    it('should classify streams sharing one session error independently', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const first = await pool.request(requestHeaders)
+      const second = await pool.request(requestHeaders)
+      first.id = 1
+      second.id = 3
+      session.emit('goaway', NGHTTP2_INTERNAL_ERROR, 1)
+      const error = Object.assign(new Error('Session closed with error code 2'), {
+        code: 'ERR_HTTP2_SESSION_ERROR',
+      })
+
+      for (const stream of [first, second]) {
+        stream.rstCode = NGHTTP2_INTERNAL_ERROR
+        stream.emit('error', error)
+        stream.emit('close')
+      }
+
+      await expect(first.getHeaders()).rejects.toBe(error)
+      await expect(second.getHeaders()).rejects.toBe(error)
+      expect(error.message).toBe('Session closed with error code 2')
+      expect(error).not.toHaveProperty('termination')
+      expect(first.getTermination()).toMatchObject({
+        streamId: 1,
+        neverProcessed: false,
+      })
+      expect(second.getTermination()).toMatchObject({
+        streamId: 3,
+        neverProcessed: true,
+      })
+    })
+
+    it('should log a stream error at error level only if the server may have processed the stream', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const first = await pool.request(requestHeaders)
+      const second = await pool.request(requestHeaders)
+      first.id = 1
+      second.id = 3
+      session.emit('goaway', NGHTTP2_INTERNAL_ERROR, 1)
+      const error = Object.assign(new Error('Session closed with error code 2'), {
+        code: 'ERR_HTTP2_SESSION_ERROR',
+      })
+
+      for (const stream of [first, second]) {
+        stream.rstCode = NGHTTP2_INTERNAL_ERROR
+        stream.emit('error', error)
+        stream.emit('close')
+      }
+
+      await expect(first.getHeaders()).rejects.toBe(error)
+      await expect(second.getHeaders()).rejects.toBe(error)
+      const format = 'Session %s - stream %d processing error: %s'
+      const callsWithFormat = mock => mock.mock.calls.filter(([value]) => value === format)
+      expect(callsWithFormat(logger.error)).toEqual([[format, pool.id, 1, error.message]])
+      expect(callsWithFormat(logger.debug)).toEqual([[format, pool.id, 3, error.message]])
+    })
+
+    it('should classify a stream cut by GOAWAY as never processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      session.emit('goaway', NGHTTP2_NO_ERROR, 1)
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_NO_ERROR
+
+      stream.emit('close')
+
+      const error = await stream.getHeaders().catch(err => err)
+      expect(error).toBeInstanceOf(StreamError)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_NO_ERROR,
+        rstCodeName: 'NGHTTP2_NO_ERROR',
+        goaway: {
+          errorCode: NGHTTP2_NO_ERROR,
+          lastStreamID: 1,
+          receivedAt: expect.any(Number),
+        },
+        neverProcessed: true,
+        responseReceived: false,
+      })
+      expect(error.termination).toBe(stream.getTermination())
+    })
+
+    it('should classify a reset after response headers as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_INTERNAL_ERROR
+
+      stream.emit('response', responseHeaders)
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_INTERNAL_ERROR,
+        rstCodeName: 'NGHTTP2_INTERNAL_ERROR',
+        goaway: null,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
+
+    it('should classify a stream refused after response headers as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+
+      stream.emit('response', responseHeaders)
+      session.emit('goaway', NGHTTP2_NO_ERROR, 1)
+      stream.rstCode = NGHTTP2_REFUSED_STREAM
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toMatchObject({
+        rstCode: NGHTTP2_REFUSED_STREAM,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
+
+    it('should classify a normal close as processed', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.id = 3
+      stream.rstCode = NGHTTP2_NO_ERROR
+
+      stream.emit('response', responseHeaders)
+      stream.emit('close')
+
+      await expect(stream.getHeaders()).resolves.toBe(responseHeaders)
+      expect(stream.getTermination()).toEqual({
+        streamId: 3,
+        rstCode: NGHTTP2_NO_ERROR,
+        rstCodeName: 'NGHTTP2_NO_ERROR',
+        goaway: null,
+        neverProcessed: false,
+        responseReceived: true,
+      })
+    })
   })
 
   describe('#getSession', () => {
@@ -203,6 +382,60 @@ describe('SessionPool', () => {
       pool.createSession = vi.fn()
       pool.getSession()
       expect(pool.createSession).toHaveBeenCalledTimes(1)
+    })
+
+    // Node marks a session closed on a graceful GOAWAY but keeps serving the
+    // streams the server accepted until they finish.
+    it('should neither destroy nor select a closed session with an open stream', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('response', responseHeaders)
+      session.closed = true
+      expect(pool.value).toBe(0)
+
+      pool.createSession = vi.fn()
+      pool.getSession()
+
+      expect(pool.createSession).toHaveBeenCalledTimes(1)
+      expect(session.destroy).not.toHaveBeenCalled()
+      expect(pool.sessions.has(session)).toBe(true)
+    })
+
+    it('should send the next request on a new session while a closed session drains', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const firstStream = await pool.request(requestHeaders)
+      firstStream.emit('response', responseHeaders)
+      session.closed = true
+
+      const secondStream = await pool.request(requestHeaders)
+
+      expect(mockHttp2Connect).toHaveBeenCalledTimes(2)
+      const newSession = mockHttp2Connect.mock.results[1].value
+      expect(session.request).toHaveBeenCalledTimes(1)
+      expect(newSession.request).toHaveBeenCalledTimes(1)
+      expect(newSession.request.mock.results[0].value).toBe(secondStream)
+      expect(pool.sessions.size).toBe(2)
+    })
+
+    it('should remove a closed session once it emits close', async () => {
+      const session = pool.getSession()
+      session.emit('connect')
+      const stream = await pool.request(requestHeaders)
+      stream.emit('response', responseHeaders)
+      session.closed = true
+      const newSession = pool.getSession()
+      newSession.emit('connect')
+
+      stream.emit('close')
+      expect(pool.sessions.has(session)).toBe(true)
+      session.destroyed = true
+      session.emit('close')
+
+      expect(pool.sessions.has(session)).toBe(false)
+      expect(session.destroy).not.toHaveBeenCalled()
+      expect(pool.getSession()).toBe(newSession)
     })
 
     it('should return the session with the highest load', async () => {
@@ -283,10 +516,11 @@ describe('SessionPool', () => {
       ])
       clearTimeout.mockClear()
 
-      // listening on 'remoteSettings' and 'error' events
-      expect(session.on).toHaveBeenCalledTimes(2)
+      // listening on 'remoteSettings', 'goaway', and 'error' events
+      expect(session.on).toHaveBeenCalledTimes(3)
       expect(session.on.mock.calls).toEqual([
         ['remoteSettings', expect.any(Function)],
+        ['goaway', expect.any(Function)],
         ['error', expect.any(Function)],
       ])
       session.on.mockClear()
