@@ -220,6 +220,7 @@ describe('GSecretDialogGeneric', () => {
     expect(wrapper.getComponent(GGenericInputFields).props('fields')).toEqual([
       {
         key: 'apiToken',
+        aliases: ['NETLIFY_AUTH_TOKEN', 'NETLIFY_API_TOKEN'],
         label: 'Netlify API Token',
         type: 'text',
         sensitive: true,
@@ -253,7 +254,7 @@ describe('GSecretDialogGeneric', () => {
     })
   })
 
-  it('updates a Netlify token without dropping unmanaged Secret data', async () => {
+  it('reads a supported Netlify alias and writes the primary key without dropping unmanaged data', async () => {
     const unmanagedValue = encodeBase64('keep-me')
     const credential = {
       apiVersion: 'v1',
@@ -264,7 +265,7 @@ describe('GSecretDialogGeneric', () => {
       },
       type: 'Opaque',
       data: {
-        apiToken: encodeBase64('old-token'),
+        NETLIFY_API_TOKEN: encodeBase64('old-token'),
         unmanaged: unmanagedValue,
       },
     }
@@ -275,6 +276,7 @@ describe('GSecretDialogGeneric', () => {
     await nextTick()
 
     expect(wrapper.get('input').element.value).toBe('old-token')
+    expect(secretContext.secretManifest.value.data).toEqual(credential.data)
 
     await wrapper.get('input').setValue('new-token')
 
@@ -363,12 +365,16 @@ describe('GSecretDialogGeneric', () => {
   })
 
   it('omits an empty optional Route53 region', async () => {
-    const wrapper = mountDialog({ providerType: 'aws-route53' })
+    const hiddenData = { AWS_SESSION_TOKEN: encodeBase64('keep-session-token') }
+    const wrapper = mountDialog({
+      providerType: 'aws-route53',
+      credential: { data: hiddenData },
+    })
     await nextTick()
 
     const fields = wrapper.getComponent(GGenericInputFields).props('fields')
     expect(fields[2]).toMatchObject({
-      key: 'AWS_REGION',
+      key: 'region',
       omitWhenEmpty: true,
     })
 
@@ -379,6 +385,7 @@ describe('GSecretDialogGeneric', () => {
     await inputs[2].setValue('')
 
     expect(secretContext.secretManifest.value.data).toEqual({
+      ...hiddenData,
       accessKeyID: encodeBase64('AKIAIOSFODNN7EXAMPLE'),
       secretAccessKey: encodeBase64('wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY'),
     })

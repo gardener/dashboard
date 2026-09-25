@@ -8,8 +8,6 @@ import {
   ref,
   shallowRef,
   computed,
-  watch,
-  watchEffect,
   inject,
   provide,
 } from 'vue'
@@ -22,7 +20,10 @@ import { useAuthzStore } from '@/store/authz'
 
 import { cleanup } from '@/composables/helper'
 import { useObjectMetadata } from '@/composables/useObjectMetadata'
-import { credentialProviderType } from '@/composables/credential/helper'
+import {
+  credentialProviderType,
+  copySecretAliasesToKeys,
+} from '@/composables/credential/helper'
 
 import {
   decodeBase64,
@@ -37,6 +38,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import isEqual from 'lodash/isEqual'
 import set from 'lodash/set'
+import unset from 'lodash/unset'
 import mapValues from 'lodash/mapValues'
 
 function parseSecretFieldValue (value, field) {
@@ -167,8 +169,8 @@ export function createSecretContextComposable (options = {}) {
   })
 
   function getSecretFieldValues (fieldDefinitions = []) {
-    const data = secretData.value ?? {}
     const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
+    const data = copySecretAliasesToKeys(secretData.value ?? {}, fields)
 
     return Object.fromEntries(
       fields
@@ -188,6 +190,9 @@ export function createSecretContextComposable (options = {}) {
     const fields = Array.isArray(fieldDefinitions) ? fieldDefinitions : []
 
     for (const field of fields) {
+      for (const alias of field.aliases ?? []) {
+        unset(nextData, [alias])
+      }
       const encodedValue = encodeSecretFieldValue(fieldValues?.[field.key], field)
       if (encodedValue === undefined) {
         delete nextData[field.key]
@@ -197,44 +202,6 @@ export function createSecretContextComposable (options = {}) {
     }
 
     secretData.value = nextData
-  }
-
-  /**
-   * Creates refs that two-way sync with Secret data keys.
-   * Keys in `keyMapping` map Secret data keys to ref names.
-   *
-   * Example: { accessKey: 'accessKeyRef', secretKey: 'secretKeyRef' }
-   */
-  function secretStringDataRefs (keyMapping) {
-    const refs = {}
-
-    // Initialize each variable name as a Vue ref
-    for (const [, variableName] of Object.entries(keyMapping)) {
-      set(refs, [variableName], ref(''))
-    }
-
-    // Watch changes in secretData to decode them into the refs
-    watch(
-      secretStringData,
-      newValue => {
-        for (const [dataKey, variableName] of Object.entries(keyMapping)) {
-          set(refs, [variableName, 'value'], get(newValue, [dataKey], ''))
-        }
-      },
-      { immediate: true, deep: true },
-    )
-
-    // Whenever the refs change, encode them back into base64 in `secretData`
-    watchEffect(() => {
-      secretStringData.value = Object.fromEntries(
-        Object.entries(keyMapping).map(([dataKey, variableName]) => [
-          dataKey,
-          get(refs, [variableName, 'value']),
-        ]),
-      )
-    })
-
-    return refs
   }
 
   return {
@@ -248,7 +215,6 @@ export function createSecretContextComposable (options = {}) {
     secretStringData,
     getSecretFieldValues,
     setSecretFieldValues,
-    secretStringDataRefs,
     dnsSecretProviderType,
   }
 }

@@ -1,13 +1,7 @@
-import {
-  clientIdField,
-  clientSecretField,
-  subscriptionIdDetail,
-  subscriptionIdField,
-  tenantIdField,
-} from '../infra/azure'
+import { subscriptionIdDetail } from '../infra/azure'
 
 import {
-  cloudField,
+  fields,
   help,
 } from './azure-dns'
 
@@ -20,13 +14,7 @@ export default {
     details: [
       subscriptionIdDetail,
     ],
-    fields: [
-      clientIdField,
-      clientSecretField,
-      tenantIdField,
-      subscriptionIdField,
-      cloudField,
-    ],
+    fields,
     help,
   },
 }
