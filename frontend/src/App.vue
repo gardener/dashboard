@@ -16,8 +16,6 @@ import {
 } from 'vue'
 import { useTheme } from 'vuetify'
 import {
-  onKeyStroke,
-  useEventBus,
   useColorMode,
   useTitle,
 } from '@vueuse/core'
@@ -62,13 +60,6 @@ const { system } = useColorMode({
 
 provide('getColorCode', value => {
   return get(theme.current.value, ['colors', value])
-})
-
-const bus = useEventBus('esc-pressed')
-
-onKeyStroke('Escape', e => {
-  bus.emit()
-  e.preventDefault()
 })
 
 const documentTitle = computed(() => {
