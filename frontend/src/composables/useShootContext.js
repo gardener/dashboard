@@ -782,7 +782,7 @@ export function createShootContextComposable (options = {}) {
     set (value) {
       if (value) {
         setShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule', 'true')
-        setShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'true')
+        unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
       } else {
         unsetShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule')
         unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
