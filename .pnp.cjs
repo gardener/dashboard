@@ -1031,7 +1031,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.3"],\
           ["socket.io-client", "npm:4.8.3"],\
           ["supertest", "npm:7.2.2"],\
-          ["undici", "npm:8.10.2"],\
+          ["undici", "npm:8.11.2"],\
           ["unified", "npm:11.0.5"],\
           ["uuid", "npm:14.0.1"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
@@ -8083,7 +8083,7 @@ const RAW_RUNTIME_STATE =
           ["saxes", "npm:6.0.0"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["tough-cookie", "npm:6.0.2"],\
-          ["undici", "npm:8.10.2"],\
+          ["undici", "npm:8.11.2"],\
           ["w3c-xmlserializer", "npm:5.0.0"],\
           ["webidl-conversions", "npm:8.0.1"],\
           ["whatwg-mimetype", "npm:5.0.0"],\
@@ -11304,10 +11304,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:8.10.2", {\
-        "packageLocation": "./.yarn/cache/undici-npm-8.10.2-8fc19cba7c-66d7fc6914.zip/node_modules/undici/",\
+      ["npm:8.11.2", {\
+        "packageLocation": "./.yarn/cache/undici-npm-8.11.2-527c40428e-106f699117.zip/node_modules/undici/",\
         "packageDependencies": [\
-          ["undici", "npm:8.10.2"]\
+          ["undici", "npm:8.11.2"]\
         ],\
         "linkType": "HARD"\
       }]\
