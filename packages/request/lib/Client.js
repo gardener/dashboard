@@ -103,6 +103,26 @@ function mapTimeoutAbortError (err, { method, url } = {}, requestTimeout, timeou
   return err
 }
 
+function describeFirstCharacter (text) {
+  const code = text.codePointAt(0)
+  if (code === undefined) {
+    return 'none'
+  }
+  const isPrintableAscii = code >= 0x20 && code < 0x7f
+  return isPrintableAscii ? JSON.stringify(text[0]) : `0x${code.toString(16)}`
+}
+
+function logParseError (response, text) {
+  logger.error(
+    'Failed to parse response body (status %s, content-type %s, content-length %s, received %d bytes, first character %s)',
+    response.statusCode,
+    response.contentType,
+    response.contentLength,
+    Buffer.byteLength(text),
+    describeFirstCharacter(text),
+  )
+}
+
 class Client {
   #options
   #agent
@@ -305,10 +325,11 @@ class Client {
                 case 'json':
                   try {
                     return JSON.parse(text)
-                  } catch (err) {
-                    logger.error('Failed to parse response body: %s', text)
+                  } catch {
+                    // The body can be confidential, and JSON.parse messages quote it
+                    logParseError(this, text)
                     if (this.ok) {
-                      throw new ParseError(err.message, {
+                      throw new ParseError('Invalid JSON in response body', {
                         headers,
                         rawBody: text,
                       })
