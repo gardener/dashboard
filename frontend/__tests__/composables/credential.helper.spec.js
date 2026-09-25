@@ -16,7 +16,10 @@ function createSecretData () {
     tenantName: encode('example-tenant'),
     accessKeyID: encode('example-access-key-id'),
     subscriptionID: encode('example-subscription-id'),
-    'serviceaccount.json': encode(JSON.stringify({ project_id: 'example-gcp-project-id' })),
+    'serviceaccount.json': encode(JSON.stringify({
+      project_id: 'example-gcp-project-id',
+      name: 'example-gdch-service-identity',
+    })),
     metalAPIURL: encode('https://metal.example.org'),
     Server: encode('dns.example.org:53'),
     TSIGKeyName: encode('key.example.org.'),
@@ -84,6 +87,21 @@ describe('secretDetails', () => {
         expect(detail).not.toHaveProperty('decode')
       }
     }
+  })
+
+  it('defines the required GDCH credential fields', () => {
+    expect(secretField('gdch', 'serviceaccount.json')).toMatchObject({
+      type: 'json',
+      sensitive: true,
+    })
+    expect(secretField('gdch-dns', 'gdch-config')).toMatchObject({
+      type: 'text',
+      sensitive: true,
+      validators: {
+        required: { type: 'required' },
+        base64: { type: 'base64' },
+      },
+    })
   })
 
   it('resolves single and fallback key paths without mutating the source configuration', () => {

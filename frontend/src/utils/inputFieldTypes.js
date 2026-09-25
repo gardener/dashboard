@@ -9,6 +9,10 @@ export const structuredFieldTypes = new Set([
   'yaml',
 ])
 
+export function isPemFieldType (type) {
+  return type === 'pem'
+}
+
 export function isJsonFieldType (type) {
   return type === 'json'
 }
