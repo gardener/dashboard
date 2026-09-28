@@ -172,5 +172,25 @@ describe('directives', () => {
       await wrapper.setData({ content: '<i>second</i>' })
       expect(wrapper.find('div').element.innerHTML).toBe('<i>second</i>')
     })
+
+    it('renders empty string for nullish value', () => {
+      const wrapper = mountWithSafeHtml(undefined)
+      expect(wrapper.find('div').element.innerHTML).toBe('')
+    })
+
+    it('keeps style tags when allowStyleTags is set', () => {
+      const wrapper = mountWithSafeHtml({
+        html: '<style>.a { color: red; }</style><div>text</div>',
+        allowStyleTags: true,
+      })
+      expect(wrapper.find('div').element.innerHTML).toContain('<style>')
+    })
+
+    it('strips style tags without allowStyleTags', () => {
+      const wrapper = mountWithSafeHtml({
+        html: '<style>.a { color: red; }</style><div>text</div>',
+      })
+      expect(wrapper.find('div').element.innerHTML).not.toContain('<style>')
+    })
   })
 })
