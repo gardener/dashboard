@@ -98,6 +98,15 @@ describe('composables', () => {
       expect(shootContextStore.providerType).toBe('aws')
     })
 
+    it('should create a clean draft without provider defaults when no infrastructure provider is available', () => {
+      const cloudProfileStore = useCloudProfileStore()
+      cloudProfileStore.setCloudProfiles([])
+
+      expect(() => shootContextStore.createShootManifest()).not.toThrow()
+      expect(shootContextStore.providerType).toBeUndefined()
+      expect(shootContextStore.isShootDirty).toBe(false)
+    })
+
     it('should omit spec.addons if no addon is enabled', () => {
       createShootManifest('aws')
 
