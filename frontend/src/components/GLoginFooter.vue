@@ -59,7 +59,7 @@ const compiledFooterTemplate = computed(() => {
 
 const footerHtml = computed(() => {
   const data = omitKeysWithSuffix(branding.value, 'Template')
-  data.landingPageUrl = landingPageUrl.value
+  data.landingPageUrl = sanitizeUrl(landingPageUrl.value)
   return compiledFooterTemplate.value(data)
 })
 </script>

@@ -40,6 +40,7 @@ import { omitKeysWithSuffix } from '@/utils'
 import template from 'lodash/template'
 
 export default {
+  inject: ['sanitizeUrl'],
   props: {
     minHeight: {
       type: Number,
@@ -62,7 +63,7 @@ export default {
     teaserHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.minHeight = this.minHeight
-      data.landingPageUrl = this.landingPageUrl
+      data.landingPageUrl = this.sanitizeUrl(this.landingPageUrl)
       return this.compiledTeaserTemplate(data)
     },
     logoSize () {

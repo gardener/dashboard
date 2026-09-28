@@ -26,6 +26,7 @@ import { mapState } from 'pinia'
 import { useLoginStore } from '@/store/login'
 
 export default {
+  inject: ['sanitizeUrl'],
   props: {
     minHeight: {
       type: Number,
@@ -40,7 +41,7 @@ export default {
       const items = this.branding.loginHints ?? []
       return items.map(item => {
         const { title, href, disabled = false } = item
-        return { title, href, disabled }
+        return { title, href: this.sanitizeUrl(href), disabled }
       })
     },
   },
