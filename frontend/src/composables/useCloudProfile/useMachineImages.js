@@ -99,7 +99,7 @@ export function useMachineImages (cloudProfile) {
       const displayName = machineImage.vendor.displayName || machineImage.name
       const vendorHint = findVendorHint(configStore.vendorHints, machineImage.vendor.name)
 
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
+      return map(versions, ({ version, expirationDate, cri, classification, architectures, capabilityFlavors }) => {
         if (isEmpty(architectures)) {
           architectures = ['amd64'] // default if not maintained
         }
@@ -116,6 +116,7 @@ export function useMachineImages (cloudProfile) {
           expirationDate,
           vendorHint,
           architectures,
+          capabilityFlavors,
         }
         return addClassificationHelpers(image)
       })

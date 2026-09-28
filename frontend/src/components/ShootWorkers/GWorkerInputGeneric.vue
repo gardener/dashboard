@@ -182,7 +182,6 @@ import {
 } from '@/utils'
 
 import isEmpty from 'lodash/isEmpty'
-import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
@@ -372,7 +371,10 @@ export default {
       return !isEmpty(this.volumeTypes)
     },
     filteredMachineImages () {
-      return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
+      return this.machineImages.filter(machineImage => {
+        return !machineImage.isExpired &&
+        this.matchesMachineTypeCapabilities(machineImage)
+      })
     },
     minVolumeSizeGi () {
       const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
@@ -505,6 +507,15 @@ export default {
     },
   },
   methods: {
+    matchesMachineTypeCapabilities (machineImage) {
+      const capabilities = this.selectedMachineType.capabilities
+      return machineImage.capabilityFlavors.some(capabilityFlavor => {
+        return Object.entries(capabilityFlavor).every(([name, values]) => {
+          // eslint-disable-next-line security/detect-object-injection
+          return values?.some(value => capabilities[name]?.includes(value))
+        })
+      })
+    },
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
         set(this.worker, ['volume', 'size'], this.volumeSize)
