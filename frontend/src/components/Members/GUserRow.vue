@@ -24,12 +24,16 @@ SPDX-License-Identifier: Apache-2.0
             {{ item.displayName }}
           </v-list-item-title>
           <v-list-item-subtitle :class="{ 'inherit-opacity': item.isEmail }">
-            <a
-              v-if="item.isEmail"
-              :href="`mailto:${item.username}`"
-              class="text-anchor"
-            >{{ item.username }}</a>
-            <span v-else>{{ item.username }}</span>
+            <div>
+              <span
+                v-if="item.isEmail"
+                class="d-inline-flex align-center"
+              >{{ item.username }}
+                <g-copy-btn
+                  :clipboard-text="item.username"
+                /></span>
+              <span v-else>{{ item.username }}</span>
+            </div>
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>
@@ -85,6 +89,7 @@ import { useAuthzStore } from '@/store/authz'
 
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GAvatar from '@/components/GAvatar.vue'
 
 import { mapTableHeader } from '@/utils'
