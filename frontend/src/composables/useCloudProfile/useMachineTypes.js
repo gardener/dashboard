@@ -119,8 +119,10 @@ export function useMachineTypes (cloudProfile) {
     return computed(() => {
       const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
-
-      const architectures = uniq(map(types, 'architecture'))
+      let architectures = uniq(map(types, 'capabilities').flatMap(capability => capability.architecture))
+      if (!architectures.length) {
+        architectures = uniq(map(types, 'architecture'))
+      }
       return architectures.sort()
     })
   }
