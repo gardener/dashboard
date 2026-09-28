@@ -508,11 +508,11 @@ export default {
   },
   methods: {
     matchesMachineTypeCapabilities (machineImage) {
-      const capabilities = this.selectedMachineType.capabilities
-      return machineImage.capabilityFlavors.some(capabilityFlavor => {
+      const capabilities = this.selectedMachineType?.capabilities
+      return machineImage?.capabilityFlavors?.some(capabilityFlavor => {
         return Object.entries(capabilityFlavor).every(([name, values]) => {
           // eslint-disable-next-line security/detect-object-injection
-          return values?.some(value => capabilities[name]?.includes(value))
+          return values?.some(value => capabilities?.[name]?.includes(value))
         })
       })
     },
