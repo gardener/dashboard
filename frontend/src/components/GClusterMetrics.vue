@@ -91,7 +91,6 @@ import GLinkListTile from '@/components/GLinkListTile'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 import { useShootStatus } from '@/composables/useShootStatus'
-import { useShootAdvertisedAddresses } from '@/composables/useShootAdvertisedAddresses'
 
 import {
   getSeedPlutonoUrl,
@@ -131,10 +130,6 @@ export default {
       shootTechnicalId,
     } = useShootStatus(shootItem)
 
-    const {
-      shootVictoriaLogsUrl,
-    } = useShootAdvertisedAddresses(shootItem)
-
     return {
       shootItem,
       shootInfo,
@@ -144,7 +139,6 @@ export default {
       isOidcObservabilityUrlsEnabled,
       canViewLandscape,
       isTestingCluster,
-      shootVictoriaLogsUrl,
     }
   },
   computed: {
@@ -176,12 +170,6 @@ export default {
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
     },
     victoriaLogsUrl () {
-      // Prefer the advertised address; fall back to the hardcoded url until
-      // the migration to advertisedAddresses is complete.
-      if (this.shootVictoriaLogsUrl) {
-        return this.shootVictoriaLogsUrl
-      }
-
       if (this.isOidcObservabilityUrlsEnabled) {
         return `${this.getOidcDeploymentUrl('victoria-logs')}/select/vmui`
       }
