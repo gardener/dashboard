@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="footerTemplate"
-    v-safe-html="footerHtml"
+    v-safe-html="{ html: footerHtml, allowStyleTags: true }"
   />
   <div
     v-else-if="hasFooter"
@@ -28,7 +28,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import DOMPurify from 'dompurify'
 
 import { useLoginStore } from '@/store/login'
 
@@ -56,8 +55,7 @@ export default {
     footerHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.landingPageUrl = this.landingPageUrl
-      const html = this.compiledFooterTemplate(data)
-      return DOMPurify.sanitize(html, { ADD_ATTR: ['target', 'rel', 'style'], ADD_TAGS: ['style'], FORCE_BODY: true })
+      return this.compiledFooterTemplate(data)
     },
   },
 }

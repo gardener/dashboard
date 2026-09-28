@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div
     v-if="teaserTemplate"
-    v-safe-html="teaserHtml"
+    v-safe-html="{ html: teaserHtml, allowStyleTags: true }"
   />
   <div
     v-else
@@ -30,7 +30,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { mapState } from 'pinia'
-import DOMPurify from 'dompurify'
 
 import { useLoginStore } from '@/store/login'
 
@@ -62,8 +61,7 @@ export default {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.minHeight = this.minHeight
       data.landingPageUrl = this.landingPageUrl
-      const html = this.compiledTeaserTemplate(data)
-      return DOMPurify.sanitize(html, { ADD_ATTR: ['target', 'rel', 'style'], ADD_TAGS: ['style'], FORCE_BODY: true })
+      return this.compiledTeaserTemplate(data)
     },
     logoSize () {
       return this.minHeight - 100
