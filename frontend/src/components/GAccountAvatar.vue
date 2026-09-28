@@ -12,16 +12,19 @@ SPDX-License-Identifier: Apache-2.0
       :alt="`avatar of ${accountName}`"
       class="mr-1"
     />
-    <span v-if="accountName">{{ accountName }}
+    <span
+      v-if="accountName"
+      class="d-inline-flex align-center"
+    >{{ accountName }}
+      <g-copy-btn
+        v-if="mailTo && isAccountNameEmail"
+        :clipboard-text="accountName"
+      />
     </span>
     <span
       v-else
       class="font-weight-light text-disabled"
     >Unknown</span>
-    <g-copy-btn
-      v-if="accountName && mailTo && isAccountNameEmail"
-      :clipboard-text="accountName"
-    />
   </div>
 </template>
 
