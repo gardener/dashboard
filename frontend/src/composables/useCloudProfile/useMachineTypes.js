@@ -97,12 +97,12 @@ export function useMachineTypes (cloudProfile) {
 
       if (architecture?.value) {
         return filter(types, type => {
-            const capabilityArchitecutres = type.capabilities?.architecture
-              if(capabilityArchitecutres) {
-                return includes(capabilityArchitecutres, architecture.value)
-              }
-              return type.architecture === architecture.value
-            })
+          const capabilityArchitecutres = type.capabilities?.architecture
+          if (capabilityArchitecutres) {
+            return includes(capabilityArchitecutres, architecture.value)
+          }
+          return type.architecture === architecture.value
+        })
       }
 
       return types
