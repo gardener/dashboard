@@ -29,6 +29,8 @@ SPDX-License-Identifier: Apache-2.0
               class="d-inline-flex align-center"
             >{{ item.username }}
               <g-copy-btn
+                density="compact"
+                :icon-size-px="16"
                 :clipboard-text="item.username"
               /></span>
             <span v-else>{{ item.username }}</span>
