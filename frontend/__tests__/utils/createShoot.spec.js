@@ -147,6 +147,10 @@ describe('utils', () => {
     })
 
     describe('#getDefaultNetworkConfigurationForAllZones', () => {
+      it('should not create GDCH zone CIDRs without a configured node CIDR', () => {
+        expect(getDefaultNetworkConfigurationForAllZones(2, 'gdch')).toBeUndefined()
+      })
+
       it('should create GDCH zone CIDRs', () => {
         expect(getDefaultNetworkConfigurationForAllZones(2, 'gdch', '10.250.0.0/16')).toEqual([
           { CIDR: '10.250.0.0/17' },
@@ -183,7 +187,7 @@ describe('utils', () => {
     })
 
     describe('GDCH templates', () => {
-      it('should create matching infrastructure and networking node CIDRs', () => {
+      it('should not default infrastructure or networking node CIDRs', () => {
         const provider = getProviderTemplate('gdch', '10.250.0.0/16')
         const networking = getNetworkingTemplate('gdch', '10.250.0.0/16')
 
@@ -193,7 +197,6 @@ describe('utils', () => {
             apiVersion: 'gdch.provider.extensions.gardener.gdc.goog/v1alpha1',
             enableEgress: true,
             networks: {
-              nodeCIDR: '10.250.0.0/16',
               parentReference: {
                 name: '',
                 type: 'SingleSubnet',
@@ -203,9 +206,10 @@ describe('utils', () => {
         })
         expect(networking).toMatchObject({
           type: 'calico',
-          nodes: '10.250.0.0/16',
           ipFamilies: ['IPv4'],
         })
+        expect(provider.infrastructureConfig.networks).not.toHaveProperty('nodeCIDR')
+        expect(networking).not.toHaveProperty('nodes')
       })
     })
 

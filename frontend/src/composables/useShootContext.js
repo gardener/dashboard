@@ -570,8 +570,8 @@ export function createShootContextComposable (options = {}) {
     },
   })
 
-  // GDCH-specific: nodeCIDR under infrastructureConfig.networks must equal spec.networking.nodes.
-  // Setting this ref writes both fields simultaneously so they never diverge.
+  // GDCH-specific: changes made through the infrastructure form are written to both
+  // infrastructureConfig.networks.nodeCIDR and spec.networking.nodes.
   const providerInfrastructureConfigNodeCIDR = computed({
     get () {
       return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'])
@@ -580,12 +580,6 @@ export function createShootContextComposable (options = {}) {
       set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
       networkingNodes.value = value
     },
-  })
-
-  watch(networkingNodes, value => {
-    if (providerType.value === 'gdch' && providerInfrastructureConfigNodeCIDR.value !== value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
-    }
   })
 
   const workerless = computed({
@@ -722,9 +716,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   const freeNetworks = computed(() => {
+    const workerCIDR = providerType.value === 'gdch'
+      ? networkingNodes.value
+      : networkingNodes.value ?? defaultNodesCIDR.value
     return findFreeNetworks(
       providerInfrastructureConfigNetworksZones.value,
-      networkingNodes.value ?? defaultNodesCIDR.value,
+      workerCIDR,
       providerType.value,
       size(allZones.value),
     )

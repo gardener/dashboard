@@ -165,7 +165,6 @@ export function getProviderTemplate (providerType, defaultWorkerCIDR) {
           kind: 'InfrastructureConfig',
           enableEgress: true,
           networks: {
-            nodeCIDR: defaultWorkerCIDR,
             parentReference: {
               name: '',
               type: 'SingleSubnet',
@@ -208,7 +207,6 @@ export function getNetworkingTemplate (providerType, defaultWorkerCIDR) {
     case 'gdch':
       return {
         type: 'calico',
-        nodes: defaultWorkerCIDR,
         ipFamilies: ['IPv4'],
         providerConfig: {
           apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
@@ -288,6 +286,9 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, provid
       })
     }
     case 'gdch': {
+      if (!workerCIDR) {
+        return undefined
+      }
       const zoneNetworksGdch = splitCIDR(workerCIDR, numberOfZones)
       return map(range(numberOfZones), index => {
         const zoneNetwork = zoneNetworksGdch[index] // eslint-disable-line security/detect-object-injection

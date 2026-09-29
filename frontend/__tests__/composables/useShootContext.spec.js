@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  nextTick,
-  reactive,
-} from 'vue'
+import { reactive } from 'vue'
 import {
   setActivePinia,
   createPinia,
@@ -156,7 +153,7 @@ describe('composables', () => {
       expect(createShootManifest('openstack')).toMatchSnapshot()
     })
 
-    it('should synchronize the GDCH infrastructure and networking node CIDRs', async () => {
+    it('should write a GDCH infrastructure node CIDR to both fields without reverse synchronization', () => {
       shootContextStore.setShootManifest({
         metadata: {
           creationTimestamp: '2026-08-25T12:00:00Z',
@@ -182,8 +179,7 @@ describe('composables', () => {
       })
 
       shootContextStore.networkingNodes = '10.1.0.0/18'
-      await nextTick()
-      expect(shootContextStore.providerInfrastructureConfigNodeCIDR).toBe('10.1.0.0/18')
+      expect(shootContextStore.providerInfrastructureConfigNodeCIDR).toBe('10.250.0.0/16')
 
       shootContextStore.providerInfrastructureConfigNodeCIDR = '10.2.0.0/18'
       expect(shootContextStore.networkingNodes).toBe('10.2.0.0/18')

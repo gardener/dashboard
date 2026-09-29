@@ -83,6 +83,10 @@ describe('components', () => {
               emits: ['blur'],
               template: '<button class="v-text-field" :data-label="label" @click="$emit(\'blur\')" />',
             },
+            VCheckbox: {
+              props: ['label'],
+              template: '<div class="v-checkbox" :data-label="label" />',
+            },
             GSelectCloudProfile: {
               template: '<div data-test="cloud-profile" />',
             },
@@ -189,8 +193,12 @@ describe('components', () => {
       await wrapper.find('.v-select[data-label="Firewall Size"]').trigger('blur')
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(true)
     })
-    it('should validate GDCH infrastructure fields and keep both node CIDRs consistent', async () => {
+    it('should validate GDCH infrastructure fields and render Cloud NAT egress as a checkbox', async () => {
       shootContext.providerType.value = 'gdch'
+      await nextTick()
+
+      expect(wrapper.find('.v-checkbox[data-label="Enable Cloud NAT egress"]').exists()).toBe(true)
+
       shootContext.providerInfrastructureConfigParentReferenceName.value = 'parent-subnet'
       shootContext.providerInfrastructureConfigParentReferenceType.value = 'SingleSubnet'
       shootContext.providerInfrastructureConfigNodeCIDR.value = '10.0.0.1/18'

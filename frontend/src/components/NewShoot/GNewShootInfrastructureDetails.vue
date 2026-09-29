@@ -206,13 +206,13 @@ SPDX-License-Identifier: Apache-2.0
           />
         </v-col>
         <v-col cols="3">
-          <v-switch
+          <v-checkbox
             v-model="enableEgress"
-            color="primary"
             label="Enable Cloud NAT egress"
+            color="primary"
+            density="compact"
             hint="Recommended. Disable only if your project does not use Cloud NAT egress."
             persistent-hint
-            inset
           />
         </v-col>
       </template>
