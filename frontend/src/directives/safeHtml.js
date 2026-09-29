@@ -8,11 +8,13 @@ import DOMPurify from 'dompurify'
 
 const BASE_CONFIG = {
   ADD_ATTR: ['target', 'rel', 'style'],
+  FORBID_TAGS: ['style'],
 }
 
 const STYLE_TAGS_CONFIG = {
   ...BASE_CONFIG,
   ADD_TAGS: ['style'],
+  FORBID_TAGS: [],
   FORCE_BODY: true,
 }
 

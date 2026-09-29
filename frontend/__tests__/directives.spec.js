@@ -192,5 +192,12 @@ describe('directives', () => {
       })
       expect(wrapper.find('div').element.innerHTML).not.toContain('<style>')
     })
+
+    it('strips nested style tags without allowStyleTags', () => {
+      const wrapper = mountWithSafeHtml({
+        html: '<div><style>.a { color: red; }</style>text</div>',
+      })
+      expect(wrapper.find('div').element.innerHTML).not.toContain('<style>')
+    })
   })
 })
