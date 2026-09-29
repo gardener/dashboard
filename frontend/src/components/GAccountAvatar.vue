@@ -19,6 +19,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-copy-btn
         v-if="mailTo && isAccountNameEmail"
         :clipboard-text="accountName"
+        :icon-size-px="16"
       />
     </span>
     <span
