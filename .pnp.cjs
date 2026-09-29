@@ -291,7 +291,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.4"],\
           ["@codemirror/state", "npm:6.7.6"],\
           ["@codemirror/view", "npm:6.43.13"],\
-          ["@lezer/common", "npm:1.5.2"]\
+          ["@lezer/common", "npm:1.5.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -304,7 +304,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.4"],\
           ["@codemirror/state", "npm:6.7.6"],\
           ["@codemirror/view", "npm:6.43.13"],\
-          ["@lezer/common", "npm:1.5.2"]\
+          ["@lezer/common", "npm:1.5.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -317,7 +317,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/lang-yaml", "npm:6.1.3"],\
           ["@codemirror/language", "npm:6.12.4"],\
           ["@codemirror/state", "npm:6.7.6"],\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
@@ -332,7 +332,7 @@ const RAW_RUNTIME_STATE =
           ["@codemirror/language", "npm:6.12.4"],\
           ["@codemirror/state", "npm:6.7.6"],\
           ["@codemirror/view", "npm:6.43.13"],\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["style-mod", "npm:4.1.2"]\
@@ -1075,7 +1075,7 @@ const RAW_RUNTIME_STATE =
           ["@fontsource/roboto", "npm:5.3.0"],\
           ["@gardener-dashboard/frontend", "workspace:frontend"],\
           ["@kyvg/vue3-notification", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:3.4.2"],\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@mdi/font", "npm:7.4.47"],\
           ["@mdi/svg", "npm:7.4.47"],\
           ["@microsoft/eslint-formatter-sarif", "npm:3.1.0"],\
@@ -1638,10 +1638,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@lezer/common", [\
-      ["npm:1.5.2", {\
-        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.5.2-92d3236aa4-e39b46d748.zip/node_modules/@lezer/common/",\
+      ["npm:1.5.3", {\
+        "packageLocation": "./.yarn/cache/@lezer-common-npm-1.5.3-c8d076ace6-f06d64cd72.zip/node_modules/@lezer/common/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.2"]\
+          ["@lezer/common", "npm:1.5.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1650,7 +1650,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.2.1", {\
         "packageLocation": "./.yarn/cache/@lezer-highlight-npm-1.2.1-e7943f0de4-51b4c08596.zip/node_modules/@lezer/highlight/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@lezer/highlight", "npm:1.2.1"]\
         ],\
         "linkType": "HARD"\
@@ -1660,7 +1660,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.4.2", {\
         "packageLocation": "./.yarn/cache/@lezer-lr-npm-1.4.2-3bce75dd47-22bb5d0d4b.zip/node_modules/@lezer/lr/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@lezer/lr", "npm:1.4.2"]\
         ],\
         "linkType": "HARD"\
@@ -1670,7 +1670,7 @@ const RAW_RUNTIME_STATE =
       ["npm:1.0.3", {\
         "packageLocation": "./.yarn/cache/@lezer-yaml-npm-1.0.3-30ba8f36a4-cef3d0c0a2.zip/node_modules/@lezer/yaml/",\
         "packageDependencies": [\
-          ["@lezer/common", "npm:1.5.2"],\
+          ["@lezer/common", "npm:1.5.3"],\
           ["@lezer/highlight", "npm:1.2.1"],\
           ["@lezer/lr", "npm:1.4.2"],\
           ["@lezer/yaml", "npm:1.0.3"]\
