@@ -9,7 +9,7 @@ import http2 from 'http2'
 import zlib from 'zlib'
 import stream from 'stream'
 import { promisify } from 'util'
-import typeis from 'type-is'
+import { TypeIs } from 'type-is'
 import request from '../lib/index.js'
 
 const { Client, Agent, isHttpError } = request
@@ -96,7 +96,7 @@ function createSecureServer ({ cert, key }) {
       for await (const chunk of stream) {
         body += chunk
       }
-      if (typeis.is(contentType, ['json']) === 'json') {
+      if (contentType && new TypeIs(['json']).is(contentType) === 'json') {
         body = JSON.parse(body)
       }
       let statusCode = 200
