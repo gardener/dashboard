@@ -97,19 +97,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/json-schema-ref-parser", [\
-      ["npm:15.3.6", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-15.3.6-0e0bcd69a6-05e81091d6.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
+      ["npm:16.0.3", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-json-schema-ref-parser-npm-16.0.3-cddf734d61-ce69272ba4.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "npm:15.3.6"]\
+          ["@apidevtools/json-schema-ref-parser", "npm:16.0.3"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:15.3.6", {\
-        "packageLocation": "./.yarn/__virtual__/@apidevtools-json-schema-ref-parser-virtual-4117522436/0/cache/@apidevtools-json-schema-ref-parser-npm-15.3.6-0e0bcd69a6-05e81091d6.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
+      ["virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:16.0.3", {\
+        "packageLocation": "./.yarn/__virtual__/@apidevtools-json-schema-ref-parser-virtual-07fcdfc357/0/cache/@apidevtools-json-schema-ref-parser-npm-16.0.3-cddf734d61-ce69272ba4.zip/node_modules/@apidevtools/json-schema-ref-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:15.3.6"],\
+          ["@apidevtools/json-schema-ref-parser", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:16.0.3"],\
           ["@types/json-schema", "npm:7.0.15"],\
-          ["js-yaml", "npm:4.3.2"]\
+          ["js-yaml", "npm:5.4.2"],\
+          ["undici", "npm:8.11.2"]\
         ],\
         "packagePeers": [\
           "@types/json-schema"\
@@ -136,24 +137,24 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@apidevtools/swagger-parser", [\
-      ["npm:13.0.0", {\
-        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-13.0.0-ce38150a21-2a7c6ce5d4.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["npm:13.1.0", {\
+        "packageLocation": "./.yarn/cache/@apidevtools-swagger-parser-npm-13.1.0-228e37dec0-1c759c5f2d.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "npm:13.0.0"]\
+          ["@apidevtools/swagger-parser", "npm:13.1.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-0c65deb3e9/0/cache/@apidevtools-swagger-parser-npm-13.0.0-ce38150a21-2a7c6ce5d4.zip/node_modules/@apidevtools/swagger-parser/",\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.1.0", {\
+        "packageLocation": "./.yarn/__virtual__/@apidevtools-swagger-parser-virtual-a7cba7ab82/0/cache/@apidevtools-swagger-parser-npm-13.1.0-228e37dec0-1c759c5f2d.zip/node_modules/@apidevtools/swagger-parser/",\
         "packageDependencies": [\
-          ["@apidevtools/json-schema-ref-parser", "virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:15.3.6"],\
+          ["@apidevtools/json-schema-ref-parser", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:16.0.3"],\
           ["@apidevtools/openapi-schemas", "npm:2.1.0"],\
           ["@apidevtools/swagger-methods", "npm:3.0.2"],\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.0.0"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.1.0"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["@types/openapi-types", null],\
-          ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:1.0.0"],\
+          ["ajv", "npm:8.20.0"],\
+          ["ajv-draft-04", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:1.0.0"],\
           ["call-me-maybe", "npm:1.0.2"],\
           ["openapi-types", "npm:12.1.3"]\
         ],\
@@ -968,7 +969,7 @@ const RAW_RUNTIME_STATE =
       ["workspace:backend", {\
         "packageLocation": "./backend/",\
         "packageDependencies": [\
-          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.0.0"],\
+          ["@apidevtools/swagger-parser", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:13.1.0"],\
           ["@gardener-dashboard/backend", "workspace:backend"],\
           ["@gardener-dashboard/kube-client", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#workspace:packages/kube-client"],\
           ["@gardener-dashboard/kube-config", "workspace:packages/kube-config"],\
@@ -4793,10 +4794,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:8.17.1", {\
-        "packageLocation": "./.yarn/cache/ajv-npm-8.17.1-12ade7edc6-ec3ba10a57.zip/node_modules/ajv/",\
+      ["npm:8.20.0", {\
+        "packageLocation": "./.yarn/cache/ajv-npm-8.20.0-d622223dad-5df9a1c8f8.zip/node_modules/ajv/",\
         "packageDependencies": [\
-          ["ajv", "npm:8.17.1"],\
+          ["ajv", "npm:8.20.0"],\
           ["fast-deep-equal", "npm:3.1.3"],\
           ["fast-uri", "npm:3.1.8"],\
           ["json-schema-traverse", "npm:1.0.0"],\
@@ -4813,12 +4814,12 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:1.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-3407d91632/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
+      ["virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:1.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/ajv-draft-04-virtual-e27ced4024/0/cache/ajv-draft-04-npm-1.0.0-6fc962dbab-6044310bd3.zip/node_modules/ajv-draft-04/",\
         "packageDependencies": [\
           ["@types/ajv", null],\
-          ["ajv", "npm:8.17.1"],\
-          ["ajv-draft-04", "virtual:0c65deb3e9ebcdeca058b8914291d5476b39a17c4455352c4ebdce96ac13c148e05807dd82524559af0f256fe64fb68fd283993948d32fba9a40cf4f5d17932e#npm:1.0.0"]\
+          ["ajv", "npm:8.20.0"],\
+          ["ajv-draft-04", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:1.0.0"]\
         ],\
         "packagePeers": [\
           "@types/ajv",\
