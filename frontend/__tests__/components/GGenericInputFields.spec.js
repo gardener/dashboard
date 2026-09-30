@@ -571,6 +571,71 @@ describe('GGenericInputField', () => {
     expect(wrapper.findComponent(TextareaStub).props('errorMessages')).toEqual([])
   })
 
+  it.each([
+    ['missing', {}],
+    ['empty', { project: '' }],
+  ])('shows the default message for a %s object property without a pattern or value', async (name, modelValue) => {
+    const wrapper = mountStructuredInputField({
+      field: {
+        key: 'secret',
+        label: 'Secret',
+        type: 'json',
+        validators: {
+          project: {
+            type: 'hasObjectProp',
+            key: 'project',
+          },
+        },
+      },
+      modelValue,
+    })
+
+    await wrapper.find('textarea').trigger('blur')
+    await nextTick()
+
+    expect(wrapper.findComponent(TextareaStub).props('errorMessages')).toEqual([
+      'Key "project" is missing or empty',
+    ])
+  })
+
+  it.each([
+    {
+      name: 'expected value with a nested key',
+      validator: {
+        type: 'hasObjectProp',
+        key: ['credentials', 'type'],
+        value: 'service_account',
+      },
+      modelValue: { credentials: { type: 'other' } },
+      message: 'Key "credentials.type" must equal "service_account"',
+    },
+    {
+      name: 'pattern',
+      validator: {
+        type: 'hasObjectProp',
+        key: 'project_id',
+        pattern: /^[a-z]+$/,
+      },
+      modelValue: { project_id: '123' },
+      message: 'Key "project_id" must match pattern /^[a-z]+$/',
+    },
+  ])('shows the key first for a failed object-property $name validator', async ({ validator, modelValue, message }) => {
+    const wrapper = mountStructuredInputField({
+      field: {
+        key: 'secret',
+        label: 'Secret',
+        type: 'json',
+        validators: { property: validator },
+      },
+      modelValue,
+    })
+
+    await wrapper.find('textarea').trigger('blur')
+    await nextTick()
+
+    expect(wrapper.findComponent(TextareaStub).props('errorMessages')).toEqual([message])
+  })
+
   it('supports nested array paths for object-property validation', async () => {
     const wrapper = mountStructuredInputField({
       field: {

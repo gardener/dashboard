@@ -160,6 +160,26 @@ describe('composables', () => {
         expect(deprecatedImageWithNoExpiration.isDeprecated).toBe(true)
         expect(deprecatedImageWithNoExpiration.isExpirationWarning).toBe(false)
       })
+
+      it('hides machine image vendors using vendor branding', () => {
+        configStore.setConfiguration({
+          branding: {
+            machineImageVendors: [{
+              name: 'gardenlinux',
+              hidden: true,
+            }],
+          },
+        })
+
+        const { machineImages, visibleMachineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+
+        expect(machineImages.value).toHaveLength(8)
+        expect(find(machineImages.value, { name: 'gardenlinux', version: '1.1.5' })).toBeDefined()
+
+        expect(visibleMachineImages.value).toHaveLength(3)
+        expect(visibleMachineImages.value.every(({ name }) => name === 'foo')).toBe(true)
+        expect(useDefaultMachineImage(ref('amd64')).value.name).toBe('foo')
+      })
     })
   })
 })

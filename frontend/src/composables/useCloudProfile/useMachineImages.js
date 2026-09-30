@@ -53,7 +53,7 @@ export function useMachineImages (cloudProfile) {
   /**
    * Flattens and processes machine images from cloud profile format.
    * Validates semver versions, normalizes where possible, and decorates with vendor information.
-   * Sorts machine images by vendor weight and filters out hidden vendors.
+   * Sorts machine images by vendor weight.
    *
    * @param {Array} machineImages - Raw machine images from cloud profile spec
    * @returns {Array} Flattened array of decorated machine image objects
@@ -98,6 +98,7 @@ export function useMachineImages (cloudProfile) {
       const icon = machineImage.vendor.icon
       const displayName = machineImage.vendor.displayName || machineImage.name
       const vendorHint = findVendorHint(configStore.vendorHints, machineImage.vendor.name)
+      const hidden = Boolean(machineImage.vendor.hidden)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
         if (isEmpty(architectures)) {
@@ -115,6 +116,7 @@ export function useMachineImages (cloudProfile) {
           classification,
           expirationDate,
           vendorHint,
+          hidden,
           architectures,
         }
         return addClassificationHelpers(image)
@@ -131,6 +133,14 @@ export function useMachineImages (cloudProfile) {
   })
 
   /**
+   * Returns the machine images of vendors that are not hidden by vendor branding.
+   * Use for selection only, existing workers may still reference images of hidden vendors.
+   */
+  const visibleMachineImages = computed(() => {
+    return filter(machineImages.value, ({ hidden }) => !hidden)
+  })
+
+  /**
    * Returns the default machine image for a given machine type based on architecture.
    * Selects the first matching version classification (typically latest supported version).
    *
@@ -144,8 +154,7 @@ export function useMachineImages (cloudProfile) {
     }
 
     return computed(() => {
-      const allMachineImages = machineImages.value
-      const machineImagesForArchitecture = filter(allMachineImages, ({ architectures }) =>
+      const machineImagesForArchitecture = filter(visibleMachineImages.value, ({ architectures }) =>
         includes(architectures, architecture.value),
       )
       return firstItemMatchingVersionClassification(machineImagesForArchitecture)
@@ -154,6 +163,7 @@ export function useMachineImages (cloudProfile) {
 
   return {
     machineImages,
+    visibleMachineImages,
     useDefaultMachineImage,
   }
 }

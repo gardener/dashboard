@@ -30,6 +30,7 @@ import camelCase from 'lodash/camelCase'
 import find from 'lodash/find'
 import uniq from 'lodash/uniq'
 import pick from 'lodash/pick'
+import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 
 const logger = useLogger()
@@ -38,6 +39,7 @@ const configurableVendorProperties = [
   'displayName',
   'weight',
   'icon',
+  'hidden',
 ]
 
 const wellKnownConditions = {
@@ -586,7 +588,8 @@ export const useConfigStore = defineStore('config', () => {
 
   const sortedDnsProviderTypeList = computed(() => {
     const dnsProviderVendors = map(dnsProviderTypesList.value, name => vendorDetails({ type: 'dns', name }))
-    const sortedVisibleDnsVendors = sortBy(dnsProviderVendors, 'weight')
+    const visibleDnsProviderVendors = filter(dnsProviderVendors, vendor => !vendor.hidden)
+    const sortedVisibleDnsVendors = sortBy(visibleDnsProviderVendors, 'weight')
     return map(sortedVisibleDnsVendors, 'name')
   })
 

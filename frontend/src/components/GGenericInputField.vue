@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
   />
 
   <v-textarea
-    v-else-if="isStructuredLike"
+    v-else-if="isTextAreaLike"
     ref="fieldRef"
     v-model="v$.localValue.$model"
     color="primary"
@@ -90,6 +90,7 @@ import {
 } from '@/utils'
 import {
   isJsonFieldType,
+  isPemFieldType,
   isStructuredFieldType,
   isYamlFieldType,
 } from '@/utils/inputFieldTypes'
@@ -123,10 +124,14 @@ const dropErrorMessage = ref()
 const fieldType = computed(() => props.field.type)
 const isYaml = computed(() => isYamlFieldType(fieldType.value))
 const isJson = computed(() => isJsonFieldType(fieldType.value))
+const isPem = computed(() => isPemFieldType(fieldType.value))
 const isSensitive = computed(() => props.field.sensitive === true)
 const isTextLike = computed(() => fieldType.value === 'text')
 const isSelectLike = computed(() => ['select', 'select-multiple'].includes(fieldType.value))
 const isStructuredLike = computed(() => isStructuredFieldType(fieldType.value))
+const isTextAreaLike = computed(() => {
+  return isStructuredLike.value || isPem.value
+})
 
 const inputAutocomplete = computed(() => {
   if (props.field.autocomplete) {
@@ -293,12 +298,14 @@ function defaultValidatorMessage (validator) {
   }
 
   if (validator.type === 'hasObjectProp') {
+    const key = Array.isArray(validator.key) ? validator.key.join('.') : validator.key
     if (Object.prototype.hasOwnProperty.call(validator, 'value')) {
-      return `Must contain a valid ${validator.key} property with value "${validator.value}"`
+      return `Key "${key}" must equal "${validator.value}"`
     }
     if (validator.pattern) {
-      return `Must contain a valid ${validator.key} property matching pattern ${validator.pattern}`
+      return `Key "${key}" must match pattern ${validator.pattern}`
     }
+    return `Key "${key}" is missing or empty`
   }
 
   return undefined
@@ -340,6 +347,14 @@ const items = computed(() => {
 })
 
 const dropFileValidation = computed(() => {
+  if (isPem.value) {
+    return {
+      acceptedFileDescription: 'a PEM file (.pem)',
+      acceptedFileExtensions: ['.pem'],
+      pattern: /pem/,
+    }
+  }
+
   if (isYaml.value) {
     return {
       acceptedFileDescription: 'a YAML file (.yaml or .yml)',
@@ -358,7 +373,7 @@ const dropFileValidation = computed(() => {
 let disposeTextFieldDrop
 
 onMounted(() => {
-  if (!isStructuredLike.value) {
+  if (!isStructuredLike.value && !isPem.value) {
     return
   }
 

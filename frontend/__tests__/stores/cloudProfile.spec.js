@@ -79,5 +79,27 @@ describe('stores', () => {
         })
       })
     })
+
+    it('allows hiding infrastructure providers using vendor branding', () => {
+      cloudProfileStore.setCloudProfiles([{
+        spec: {
+          type: 'aws',
+        },
+      }, {
+        spec: {
+          type: 'azure',
+        },
+      }])
+      configStore.setConfiguration({
+        branding: {
+          infraVendors: [{
+            name: 'aws',
+            hidden: true,
+          }],
+        },
+      })
+
+      expect(cloudProfileStore.sortedInfraProviderTypeList).toEqual(['azure'])
+    })
   })
 })

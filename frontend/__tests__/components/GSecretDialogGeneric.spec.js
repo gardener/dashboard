@@ -253,6 +253,37 @@ describe('GSecretDialogGeneric', () => {
     })
   })
 
+  it('rejects GDCH service account JSON without a name', async () => {
+    const wrapper = mountDialog({
+      providerType: 'gdch',
+      vendorType: 'infra',
+    })
+    await nextTick()
+
+    const textarea = wrapper.get('textarea')
+    const credentials = {
+      project: 'example-project',
+      type: 'gdch_service_account',
+      private_key_id: 'example-private-key-id',
+      private_key: 'example-private-key',
+    }
+
+    await textarea.setValue(JSON.stringify(credentials))
+    await textarea.trigger('blur')
+    await nextTick()
+
+    expect(getSecretValidations().$invalid).toBe(true)
+
+    await textarea.setValue(JSON.stringify({
+      ...credentials,
+      name: 'example-service-identity',
+    }))
+    await textarea.trigger('blur')
+    await nextTick()
+
+    expect(getSecretValidations().$invalid).toBe(false)
+  })
+
   it('updates a Netlify token without dropping unmanaged Secret data', async () => {
     const unmanagedValue = encodeBase64('keep-me')
     const credential = {
