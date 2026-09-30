@@ -13,9 +13,6 @@ const gdchConfigField = {
     required: {
       type: 'required',
     },
-    base64: {
-      type: 'base64',
-    },
   },
 }
 

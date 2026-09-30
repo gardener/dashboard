@@ -99,7 +99,6 @@ describe('secretDetails', () => {
       sensitive: true,
       validators: {
         required: { type: 'required' },
-        base64: { type: 'base64' },
       },
     })
   })
