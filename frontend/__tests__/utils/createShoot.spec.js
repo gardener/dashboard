@@ -147,8 +147,13 @@ describe('utils', () => {
     })
 
     describe('#getDefaultNetworkConfigurationForAllZones', () => {
-      it('should not create GDCH zone CIDRs without a configured node CIDR', () => {
-        expect(getDefaultNetworkConfigurationForAllZones(2, 'gdch')).toBeUndefined()
+      it.each([
+        undefined,
+        '10.',
+        '10.0.0.0/33',
+        '10.0.0.0/31',
+      ])('should not create GDCH zone CIDRs for node CIDR %s', workerCIDR => {
+        expect(getDefaultNetworkConfigurationForAllZones(3, 'gdch', workerCIDR)).toBeUndefined()
       })
 
       it('should create GDCH zone CIDRs', () => {

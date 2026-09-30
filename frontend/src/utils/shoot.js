@@ -286,16 +286,14 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, provid
       })
     }
     case 'gdch': {
-      if (!workerCIDR) {
+      // workerCIDR comes from a free-text field and may be incomplete or too small to split
+      let zoneNetworksGdch
+      try {
+        zoneNetworksGdch = splitCIDR(workerCIDR, numberOfZones)
+      } catch {
         return undefined
       }
-      const zoneNetworksGdch = splitCIDR(workerCIDR, numberOfZones)
-      return map(range(numberOfZones), index => {
-        const zoneNetwork = zoneNetworksGdch[index] // eslint-disable-line security/detect-object-injection
-        return {
-          CIDR: zoneNetwork,
-        }
-      })
+      return map(zoneNetworksGdch, CIDR => ({ CIDR }))
     }
   }
 }
