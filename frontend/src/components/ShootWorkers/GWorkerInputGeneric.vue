@@ -228,7 +228,7 @@ export default {
       volumeTypes,
     } = useShootContext()
 
-    const { machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+    const { visibleMachineImages: machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize } = useVolumeTypes(cloudProfile)

@@ -43,7 +43,7 @@ Each entry must be an object with a `name` key that identifies the vendor. The f
 | `displayName` | Name displayed in the dashboard |
 | `weight`      | Sorting weight. Lower values appear first. See the default weights in the built-in [infrastructure](../../frontend/src/data/vendors/infra), [DNS](../../frontend/src/data/vendors/dns), and [machine image](../../frontend/src/data/vendors/machineImage) vendor registries. |
 | `icon`        | File name of the icon located in the `public/static/assets` folder. See [Logos and Icons](#logos-and-icons) for instructions on replacing assets |
-| `hidden`      | Hides the vendor in the dashboard. Set it to `false` to show a vendor that is hidden by its built-in definition. This only controls dashboard visibility, not provider availability or authorization. |
+| `hidden`      | Hides the vendor in the dashboard. Set it to `false` to show a vendor that is hidden by its built-in definition. Existing credentials of hidden infrastructure and DNS vendors are no longer listed. Machine images of hidden vendors are no longer offered for selection, but existing clusters using them are unaffected. This only controls dashboard visibility, not provider availability or authorization. |
 
 For example, the Google Distributed Cloud air-gapped DNS provider is hidden by default. It can be shown for a GDC air-gapped landscape while other providers are hidden explicitly:
 

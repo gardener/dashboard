@@ -171,10 +171,14 @@ describe('composables', () => {
           },
         })
 
-        const { machineImages: decoratedAndSortedMachineImages } = useMachineImages(cloudProfile)
+        const { machineImages, visibleMachineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
 
-        expect(decoratedAndSortedMachineImages.value).toHaveLength(3)
-        expect(decoratedAndSortedMachineImages.value.every(({ name }) => name === 'foo')).toBe(true)
+        expect(machineImages.value).toHaveLength(8)
+        expect(find(machineImages.value, { name: 'gardenlinux', version: '1.1.5' })).toBeDefined()
+
+        expect(visibleMachineImages.value).toHaveLength(3)
+        expect(visibleMachineImages.value.every(({ name }) => name === 'foo')).toBe(true)
+        expect(useDefaultMachineImage(ref('amd64')).value.name).toBe('foo')
       })
     })
   })
