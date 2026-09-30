@@ -18,7 +18,7 @@ import { pipeline } from 'stream'
 
 const { globalAgent } = agent
 
-const responseTypeIs = new TypeIs(['application/json', 'text/*'])
+const responseTypeIs = new TypeIs(['application/json', 'text/plain'])
 
 const {
   HTTP2_HEADER_STATUS,
@@ -295,7 +295,7 @@ class Client {
           if (match === 'application/json') {
             return 'json'
           }
-          if (match === 'text/*') {
+          if (match === 'text/plain') {
             return 'text'
           }
           return false
