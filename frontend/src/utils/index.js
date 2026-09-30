@@ -458,6 +458,12 @@ export function getSeedPlutonoUrl (ingressDomain, oidcObservabilityUrlsEnabled) 
   return `https://${prefix}.${ingressDomain}`
 }
 
+export function getVictoriaLogsUrl (ingressDomain) {
+  return ingressDomain
+    ? `https://victoria-logs-garden.${ingressDomain}`
+    : ''
+}
+
 export function isStatusHibernated (status) {
   return get(status, ['hibernated'], false)
 }
