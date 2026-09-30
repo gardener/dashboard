@@ -62,7 +62,7 @@ export default {
     teaserHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.minHeight = this.minHeight
-      data.landingPageUrl = this.sanitizeUrl(this.landingPageUrl)
+      data.landingPageUrl = this.landingPageUrl ? this.sanitizeUrl(this.landingPageUrl) : undefined
       return this.compiledTeaserTemplate(data)
     },
     logoSize () {

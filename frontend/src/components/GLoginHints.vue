@@ -41,7 +41,11 @@ export default {
       const items = this.branding.loginHints ?? []
       return items.map(item => {
         const { title, href, disabled = false } = item
-        return { title, href: this.sanitizeUrl(href), disabled }
+        return {
+          title,
+          href: href ? this.sanitizeUrl(href) : undefined,
+          disabled,
+        }
       })
     },
   },
