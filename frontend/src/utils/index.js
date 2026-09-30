@@ -460,7 +460,7 @@ export function getSeedPlutonoUrl (ingressDomain, oidcObservabilityUrlsEnabled) 
 
 export function getVictoriaLogsUrl (ingressDomain) {
   return ingressDomain
-    ? `https://victoria-logs-garden.${ingressDomain}`
+    ? `https://vlsingle-victoria-logs-garden.${ingressDomain}`
     : ''
 }
 
