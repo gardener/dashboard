@@ -4948,15 +4948,6 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
-    ["base64id", [\
-      ["npm:2.0.0", {\
-        "packageLocation": "./.yarn/cache/base64id-npm-2.0.0-ef4afeee0a-6919efd237.zip/node_modules/base64id/",\
-        "packageDependencies": [\
-          ["base64id", "npm:2.0.0"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
     ["base64url", [\
       ["npm:3.0.1", {\
         "packageLocation": "./.yarn/cache/base64url-npm-3.0.1-4c171c4917-5ca9d6064e.zip/node_modules/base64url/",\
@@ -6018,20 +6009,19 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["engine.io", [\
-      ["npm:6.6.9", {\
-        "packageLocation": "./.yarn/cache/engine.io-npm-6.6.9-cc77a5a132-8e4a64b6e3.zip/node_modules/engine.io/",\
+      ["npm:6.6.11", {\
+        "packageLocation": "./.yarn/cache/engine.io-npm-6.6.11-bc5bdd748f-b15b395dbb.zip/node_modules/engine.io/",\
         "packageDependencies": [\
           ["@types/cors", "npm:2.8.17"],\
           ["@types/node", "npm:22.13.1"],\
           ["@types/ws", "npm:8.18.1"],\
           ["accepts", "npm:1.3.8"],\
-          ["base64id", "npm:2.0.0"],\
           ["cookie", "npm:0.7.2"],\
           ["cors", "npm:2.8.5"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
-          ["engine.io", "npm:6.6.9"],\
+          ["engine.io", "npm:6.6.11"],\
           ["engine.io-parser", "npm:5.2.3"],\
-          ["ws", "virtual:cc77a5a1324504135ac402b4ba7a87b4d3499a4baacb394026df47665e8698a68693df19f134e6ba0be86fda753b6c75b95efa2ea60c58030fbc351f3b69a3ab#npm:8.21.1"]\
+          ["ws", "virtual:bc5bdd748f6c15007ce071117cafe053be2d4ff70ce4dc940a992dd3108a08763575ea37c089949feb96b4cee839ab59e9a7974700a196771a52e21caebd5934#npm:8.21.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10684,7 +10674,7 @@ const RAW_RUNTIME_STATE =
           ["accepts", "npm:1.3.8"],\
           ["cors", "npm:2.8.5"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
-          ["engine.io", "npm:6.6.9"],\
+          ["engine.io", "npm:6.6.11"],\
           ["socket.io", "npm:4.8.4"],\
           ["socket.io-adapter", "npm:2.5.5"],\
           ["socket.io-parser", "npm:4.2.7"]\
@@ -13264,14 +13254,14 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:cc77a5a1324504135ac402b4ba7a87b4d3499a4baacb394026df47665e8698a68693df19f134e6ba0be86fda753b6c75b95efa2ea60c58030fbc351f3b69a3ab#npm:8.21.1", {\
-        "packageLocation": "./.yarn/__virtual__/ws-virtual-70f07b3d5c/0/cache/ws-npm-8.21.1-15d3d5537c-c4c6f1d95f.zip/node_modules/ws/",\
+      ["virtual:bc5bdd748f6c15007ce071117cafe053be2d4ff70ce4dc940a992dd3108a08763575ea37c089949feb96b4cee839ab59e9a7974700a196771a52e21caebd5934#npm:8.21.1", {\
+        "packageLocation": "./.yarn/__virtual__/ws-virtual-b3408ee13a/0/cache/ws-npm-8.21.1-15d3d5537c-c4c6f1d95f.zip/node_modules/ws/",\
         "packageDependencies": [\
           ["@types/bufferutil", null],\
           ["@types/utf-8-validate", null],\
           ["bufferutil", null],\
           ["utf-8-validate", null],\
-          ["ws", "virtual:cc77a5a1324504135ac402b4ba7a87b4d3499a4baacb394026df47665e8698a68693df19f134e6ba0be86fda753b6c75b95efa2ea60c58030fbc351f3b69a3ab#npm:8.21.1"]\
+          ["ws", "virtual:bc5bdd748f6c15007ce071117cafe053be2d4ff70ce4dc940a992dd3108a08763575ea37c089949feb96b4cee839ab59e9a7974700a196771a52e21caebd5934#npm:8.21.1"]\
         ],\
         "packagePeers": [\
           "@types/bufferutil",\
