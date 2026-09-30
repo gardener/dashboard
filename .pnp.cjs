@@ -1029,8 +1029,8 @@ const RAW_RUNTIME_STATE =
           ["sanitize-html", "npm:2.17.7"],\
           ["semver", "npm:7.8.5"],\
           ["set-cookie-parser", "npm:3.1.2"],\
-          ["socket.io", "npm:4.8.3"],\
-          ["socket.io-client", "npm:4.8.3"],\
+          ["socket.io", "npm:4.8.4"],\
+          ["socket.io-client", "npm:4.8.4"],\
           ["supertest", "npm:7.2.2"],\
           ["undici", "npm:8.11.2"],\
           ["unified", "npm:11.0.5"],\
@@ -1123,7 +1123,7 @@ const RAW_RUNTIME_STATE =
           ["rollup-plugin-visualizer", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:7.1.1"],\
           ["sass", "npm:1.79.6"],\
           ["semver", "npm:7.8.5"],\
-          ["socket.io-client", "npm:4.8.3"],\
+          ["socket.io-client", "npm:4.8.4"],\
           ["splitpanes", "virtual:8d919ffb8fd728f827df3f6a566e8e923223ffcec68f7450d83bbbc2dc25d6b8c987e111cbab484b209f253bdf2f2e00663b01a986262c44511128466462a76f#npm:4.1.2"],\
           ["statuses", "npm:2.0.2"],\
           ["symbol-tree", "npm:3.2.4"],\
@@ -10678,15 +10678,14 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["socket.io", [\
-      ["npm:4.8.3", {\
-        "packageLocation": "./.yarn/cache/socket.io-npm-4.8.3-d0fc5a94f4-1f7c4118cd.zip/node_modules/socket.io/",\
+      ["npm:4.8.4", {\
+        "packageLocation": "./.yarn/cache/socket.io-npm-4.8.4-6f0d4f4a5f-08aa50d997.zip/node_modules/socket.io/",\
         "packageDependencies": [\
           ["accepts", "npm:1.3.8"],\
-          ["base64id", "npm:2.0.0"],\
           ["cors", "npm:2.8.5"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
           ["engine.io", "npm:6.6.9"],\
-          ["socket.io", "npm:4.8.3"],\
+          ["socket.io", "npm:4.8.4"],\
           ["socket.io-adapter", "npm:2.5.5"],\
           ["socket.io-parser", "npm:4.2.7"]\
         ],\
@@ -10705,13 +10704,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["socket.io-client", [\
-      ["npm:4.8.3", {\
-        "packageLocation": "./.yarn/cache/socket.io-client-npm-4.8.3-6800638250-76c0d86de0.zip/node_modules/socket.io-client/",\
+      ["npm:4.8.4", {\
+        "packageLocation": "./.yarn/cache/socket.io-client-npm-4.8.4-cb678c2836-53f6266d85.zip/node_modules/socket.io-client/",\
         "packageDependencies": [\
           ["@socket.io/component-emitter", "npm:3.1.2"],\
           ["debug", "virtual:1ff4b5f90832ba0a9c93ba1223af226e44ba70c1126a3740d93562b97bc36544e896a5e95908196f7458713e6a6089a34bfc67362fc6df7fa093bd06c878be47#npm:4.4.3"],\
           ["engine.io-client", "npm:6.6.3"],\
-          ["socket.io-client", "npm:4.8.3"],\
+          ["socket.io-client", "npm:4.8.4"],\
           ["socket.io-parser", "npm:4.2.7"]\
         ],\
         "linkType": "HARD"\
