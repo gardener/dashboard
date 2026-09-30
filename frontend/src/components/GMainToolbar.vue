@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0
                 variant="text"
                 color="primary"
                 class="justify-start"
-                :href="item.url"
+                :href="sanitizeUrl(item.url)"
                 :target="helpTarget(item)"
                 :title="item.title"
               >
@@ -297,6 +297,7 @@ import {
   ref,
   computed,
   toRef,
+  inject,
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
@@ -318,6 +319,7 @@ import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 import get from 'lodash/get'
 
 const route = useRoute()
+const sanitizeUrl = inject('sanitizeUrl')
 
 const appStore = useAppStore()
 const authnStore = useAuthnStore()
