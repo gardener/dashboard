@@ -171,7 +171,7 @@ export default {
     },
     victoriaLogsUrl () {
       if (this.isOidcObservabilityUrlsEnabled) {
-        return `${this.getOidcDeploymentUrl('victoria-logs')}/select/vmui`
+        return `${this.getOidcDeploymentUrl('vlsingle-victoria-logs')}/select/vmui`
       }
 
       return `https://vl-${this.prefix}.${this.seedIngressDomain}/select/vmui`
