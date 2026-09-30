@@ -131,3 +131,10 @@ function onDelete () {
 }
 
 </script>
+
+<style lang="scss" scoped>
+.d-inline-flex :deep(.copy-button) {
+  height: 0;
+}
+
+</style>
