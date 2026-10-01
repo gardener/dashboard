@@ -93,6 +93,8 @@ SPDX-License-Identifier: Apache-2.0
             @update:model-value="onInputProjectFilter"
             @keydown.down.prevent="highlightProjectWithKeys('down')"
             @keydown.up.prevent="highlightProjectWithKeys('up')"
+            name="project-filter"
+            autocomplete="suppress"
           >
             <template #prepend>
               <v-icon
