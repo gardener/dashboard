@@ -88,6 +88,8 @@ SPDX-License-Identifier: Apache-2.0
             hide-details
             class="project-filter"
             spellcheck="false"
+            name="project-filter"
+            autocomplete="suppress"
             @keyup.esc="projectFilter = ''"
             @keyup.enter="selectHighlightedProject"
             @update:model-value="onInputProjectFilter"
@@ -311,11 +313,8 @@ const sortedAndFilteredProjectItems = computed(() => {
 
 const projectNameThatMatchesFilter = computed(() => {
   const item = head(sortedAndFilteredProjectItems.value)
-  const singleMatch = sortedAndFilteredProjectItems.value?.length === 1
 
-  return singleMatch
-    ? item.projectName
-    : undefined
+  return item?.projectName
 })
 
 function getProjectOwner (project) {
@@ -366,11 +365,15 @@ function openProjectDialog () {
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
 
-  if (!projectNameThatMatchesFilter.value) {
+  if (!projectFilter.value) {
     return
   }
 
-  highlightedProjectName.value = projectNameThatMatchesFilter.value
+  refProjectVirtualScroll.value.scrollToIndex(0)
+
+  if (projectNameThatMatchesFilter.value) {
+    highlightedProjectName.value = projectNameThatMatchesFilter.value
+  }
 }
 
 function highlightProjectWithKeys (keyDirection) {
