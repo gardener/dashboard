@@ -363,14 +363,15 @@ function openProjectDialog () {
 function onInputProjectFilter () {
   highlightedProjectName.value = undefined
 
-  if (projectFilter.value) {
-    refProjectVirtualScroll.value.scrollToIndex(0)
-  }
-  if (!projectNameThatMatchesFilter.value) {
+  if (!projectFilter.value) {
     return
   }
 
-  highlightedProjectName.value = projectNameThatMatchesFilter.value
+  refProjectVirtualScroll.value.scrollToIndex(0)
+
+  if (projectNameThatMatchesFilter.value) {
+    highlightedProjectName.value = projectNameThatMatchesFilter.value
+  }
 }
 
 function highlightProjectWithKeys (keyDirection) {
