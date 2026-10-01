@@ -88,13 +88,13 @@ SPDX-License-Identifier: Apache-2.0
             hide-details
             class="project-filter"
             spellcheck="false"
+            name="project-filter"
+            autocomplete="suppress"
             @keyup.esc="projectFilter = ''"
             @keyup.enter="selectHighlightedProject"
             @update:model-value="onInputProjectFilter"
             @keydown.down.prevent="highlightProjectWithKeys('down')"
             @keydown.up.prevent="highlightProjectWithKeys('up')"
-            name="project-filter"
-            autocomplete="suppress"
           >
             <template #prepend>
               <v-icon
