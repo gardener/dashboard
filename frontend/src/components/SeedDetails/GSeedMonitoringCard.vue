@@ -46,6 +46,12 @@ SPDX-License-Identifier: Apache-2.0
         :url="seedPlutonoUrl"
         :url-text="seedPlutonoUrl"
       />
+      <g-link-list-tile
+        v-if="seedVictoriaLogsUrl"
+        app-title="VictoriaLogs"
+        :url="seedVictoriaLogsUrl"
+        :url-text="seedVictoriaLogsUrl"
+      />
       <g-list-item v-else>
         <template #prepend>
           <v-icon color="primary">
@@ -93,7 +99,7 @@ import GLinkListTile from '@/components/GLinkListTile.vue'
 import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useSeedItem } from '@/composables/useSeedItem/index'
 
-import { getSeedPlutonoUrl } from '@/utils'
+import { getSeedPlutonoUrl, getVictoriaLogsUrl } from '@/utils'
 
 const {
   isOidcObservabilityUrlsEnabled,
@@ -111,5 +117,6 @@ const {
 } = useManagedSeedShoot()
 
 const seedPlutonoUrl = computed(() => getSeedPlutonoUrl(seedIngressDomain.value, isOidcObservabilityUrlsEnabled))
+const seedVictoriaLogsUrl = computed(() => getVictoriaLogsUrl(seedIngressDomain.value))
 
 </script>
