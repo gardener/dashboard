@@ -26,10 +26,10 @@ SPDX-License-Identifier: Apache-2.0
       />
       <g-link-list-tile
         v-if="canViewLandscape"
-        icon="mdi-developer-board"
         app-title="Seed VictoriaLogs"
         :url="seedVictoriaLogsUrl"
         :url-text="seedVictoriaLogsUrl"
+        content-class="pt-0"
       />
       <template v-if="!isTestingCluster">
         <g-link-list-tile
