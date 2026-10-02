@@ -501,6 +501,7 @@ const allowedSearchParamsMap = new Map(Object.entries({
     'resourceVersionMatch',
     'timeoutSeconds',
     'includeUninitialized',
+    'sendInitialEvents',
     'allowWatchBookmarks',
     'pretty',
   ],
