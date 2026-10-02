@@ -10,6 +10,7 @@ import zlib from 'zlib'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import client from '../lib/index.js'
 import { isRequestTimeoutAbort, mapTimeoutAbortError } from '../lib/Client.js'
+import { isStreamNeverProcessed, StreamError } from '../lib/errors.js'
 
 const { Client, extend } = client
 
@@ -21,6 +22,7 @@ const {
   HTTP2_HEADER_PATH,
   HTTP2_HEADER_CONTENT_TYPE,
   HTTP2_HEADER_CONTENT_LENGTH,
+  HTTP2_HEADER_CONTENT_ENCODING,
   HTTP2_HEADER_ACCEPT_ENCODING,
   HTTP2_METHOD_GET,
   HTTP2_METHOD_POST,
@@ -236,6 +238,236 @@ describe('Client', () => {
       expect(body).toEqual(stream.mockBody())
     })
 
+    describe('when the stream terminates', () => {
+      const termination = {
+        streamId: 3,
+        rstCode: 2,
+        rstCodeName: 'NGHTTP2_INTERNAL_ERROR',
+        goaway: null,
+        neverProcessed: false,
+        responseReceived: true,
+      }
+      const createStreamError = (message, properties) => Object.assign(new Error(message), properties)
+      const readBody = {
+        body: response => response.body(),
+        iterator: response => response[Symbol.asyncIterator]().next(),
+      }
+      const terminationFormat = 'Request %s %s [%s] failed: %s; termination=%j'
+      const expectTerminationLogged = (message, termination) => {
+        const calls = logger.error.mock.calls.filter(([format]) => format === terminationFormat)
+        expect(calls).toEqual([
+          [terminationFormat, HTTP2_METHOD_GET, url.pathname, xRequestId, message, termination],
+        ])
+      }
+
+      beforeEach(() => {
+        stream.getTermination = vi.fn().mockReturnValue(termination)
+      })
+
+      it.each([
+        ['body', 'ERR_STREAM_PREMATURE_CLOSE', {}],
+        ['iterator', 'ERR_STREAM_PREMATURE_CLOSE', {}],
+        ['body', 'ERR_HTTP2_STREAM_ERROR', {}],
+        ['iterator', 'ERR_HTTP2_SESSION_ERROR', {}],
+        ['body', 'ECONNRESET', { syscall: 'read' }],
+      ])('should classify a %s read failure with code %s', async (method, code, properties) => {
+        const cause = createStreamError('Stream failed', { code, ...properties })
+        stream[Symbol.asyncIterator] = async function * () {
+          throw cause
+        }
+
+        const response = await client.fetch()
+        const error = await readBody[method](response).catch(err => err)
+
+        expect(error).toMatchObject({
+          name: 'StreamError',
+          code,
+          termination,
+          message: 'Stream failed',
+        })
+        expect(error.cause).toBe(cause)
+        expectTerminationLogged('Stream failed', termination)
+      })
+
+      it('should classify a failure before the response headers without changing the shared error', async () => {
+        const preHeaderTermination = {
+          ...termination,
+          streamId: 5,
+          neverProcessed: true,
+          responseReceived: false,
+        }
+        stream.getTermination.mockReturnValue(preHeaderTermination)
+        const cause = createStreamError('Session closed with error code 2', { code: 'ERR_HTTP2_SESSION_ERROR' })
+        stream.getHeaders = () => Promise.reject(cause)
+
+        const error = await client.fetch().catch(err => err)
+
+        expect(error).toMatchObject({
+          name: 'StreamError',
+          code: cause.code,
+          termination: preHeaderTermination,
+        })
+        expect(isStreamNeverProcessed(error)).toBe(true)
+        expect(error.message).toBe(cause.message)
+        expect(error.cause).toBe(cause)
+        expect(cause).not.toHaveProperty('termination')
+        expectTerminationLogged(cause.message, preHeaderTermination)
+      })
+
+      it('should keep an error that already carries its termination', async () => {
+        const error = new StreamError('Stream unexpectedly closed', { termination })
+        stream.getHeaders = () => Promise.reject(error)
+
+        await expect(client.fetch()).rejects.toBe(error)
+        expectTerminationLogged('Stream unexpectedly closed', termination)
+      })
+
+      it('should log a parse error with the termination without changing it', async () => {
+        const rawBody = '{"partial":'
+        stream[Symbol.asyncIterator] = function * () {
+          yield rawBody
+        }
+
+        const response = await client.fetch()
+        const error = await response.body().catch(err => err)
+
+        const message = (() => {
+          try {
+            JSON.parse(rawBody)
+          } catch (err) {
+            return err.message
+          }
+        })()
+        expect(error).toMatchObject({
+          name: 'ParseError',
+          code: 'ERR_BODY_PARSE_FAILURE',
+          message,
+          rawBody,
+        })
+        expect(error).not.toHaveProperty('termination')
+        expectTerminationLogged(message, termination)
+      })
+
+      it('should log a decompression error with the termination without changing it', async () => {
+        stream.mockHeaders.mockReturnValue({
+          [HTTP2_HEADER_STATUS]: statusCode,
+          [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+          [HTTP2_HEADER_CONTENT_ENCODING]: 'gzip',
+        })
+        stream[Symbol.asyncIterator] = function * () {
+          yield Buffer.from('not gzip')
+        }
+
+        const response = await client.fetch()
+        const error = await response.body().catch(err => err)
+
+        expect(error).toMatchObject({ code: 'Z_DATA_ERROR' })
+        expect(error).not.toBeInstanceOf(StreamError)
+        expect(error).not.toHaveProperty('termination')
+        expectTerminationLogged(error.message, termination)
+      })
+
+      it.each([
+        ['body', 'a default', undefined],
+        ['iterator', 'a default', undefined],
+        ['body', 'a custom', new Error('custom reason')],
+      ])('should keep a caller abort during a %s read with %s reason', async (method, _, reason) => {
+        const controller = new AbortController()
+        let signal
+        agent.request.mockImplementation(async (headers, options) => {
+          signal = options.signal
+          return stream
+        })
+        stream[Symbol.asyncIterator] = async function * () {
+          await new Promise(resolve => signal.addEventListener('abort', resolve, { once: true }))
+          throw signal.reason
+        }
+
+        const response = await client.fetch('foo/bar', { signal: controller.signal })
+        const promise = readBody[method](response)
+        controller.abort(reason)
+
+        await expect(promise).rejects.toBe(controller.signal.reason)
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+
+      it('should keep the signal reason when the caller aborts before the response headers', async () => {
+        const controller = new AbortController()
+        agent.request.mockImplementation(async (headers, { signal }) => {
+          const headersPromise = new Promise((resolve, reject) => {
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+          })
+          stream.getHeaders = () => headersPromise
+          return stream
+        })
+
+        const promise = client.fetch('foo/bar', { signal: controller.signal })
+        controller.abort()
+
+        await expect(promise).rejects.toBe(controller.signal.reason)
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+
+      it.each(['body', 'iterator'])('should keep an AbortError during a %s read', async method => {
+        const abortError = Object.assign(new Error('The operation was aborted'), {
+          name: 'AbortError',
+          code: 'ABORT_ERR',
+        })
+        stream[Symbol.asyncIterator] = async function * () {
+          throw abortError
+        }
+
+        const response = await client.fetch()
+
+        await expect(readBody[method](response)).rejects.toBe(abortError)
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+
+      it('should keep reporting a request timeout during a body read', async () => {
+        const requestTimeout = 10
+        client = new Client({
+          url,
+          agent,
+          requestTimeout,
+        })
+        let signal
+        agent.request.mockImplementation(async (headers, options) => {
+          signal = options.signal
+          return stream
+        })
+        stream[Symbol.asyncIterator] = async function * () {
+          await new Promise(resolve => signal.addEventListener('abort', resolve, { once: true }))
+          throw Object.assign(new Error('The operation was aborted'), {
+            name: 'AbortError',
+            code: 'ABORT_ERR',
+            cause: signal.reason,
+          })
+        }
+
+        const response = await client.fetch('foo/bar')
+
+        await expect(response.body()).rejects.toMatchObject({
+          name: 'TimeoutError',
+          code: 'ETIMEDOUT',
+          message: `Request exceeded ${requestTimeout} ms for GET /test/foo/bar`,
+        })
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+
+      it('should keep the error passed to destroy', async () => {
+        const destroyError = new Error('The condition was not met')
+        stream[Symbol.asyncIterator] = async function * () {
+          throw destroyError
+        }
+
+        const response = await client.fetch()
+        response.destroy(destroyError)
+
+        await expect(readBody.iterator(response)).rejects.toBe(destroyError)
+        expect(logger.error).not.toHaveBeenCalled()
+      })
+    })
+
     it('should timeout when a request exceeds its deadline before headers arrive', async () => {
       const requestTimeout = 10
       const message = `Request exceeded ${requestTimeout} ms for GET /test/foo/bar`
@@ -402,6 +634,311 @@ describe('Client', () => {
     })
   })
 
+  const retryFormat = 'Request %s %s [%s] was not processed by the server, retrying (attempt %d of %d): %s; termination=%j'
+  const failureFormat = 'Request %s %s [%s] failed: %s; termination=%j'
+  const callsWithFormat = (mock, format) => mock.mock.calls.filter(([value]) => value === format)
+  const createTermination = (streamId, properties) => ({
+    streamId,
+    rstCode: 7,
+    rstCodeName: 'NGHTTP2_REFUSED_STREAM',
+    goaway: null,
+    neverProcessed: true,
+    responseReceived: false,
+    ...properties,
+  })
+  const streamErrorMessage = termination => `Stream closed with error code ${termination.rstCodeName}`
+  const createFailedStream = termination => ({
+    ...stream,
+    getHeaders: () => Promise.reject(Object.assign(new Error(streamErrorMessage(termination)), {
+      code: 'ERR_HTTP2_STREAM_ERROR',
+    })),
+    getTermination: () => termination,
+  })
+
+  describe('#request', () => {
+    const createRefusedError = streamId => new StreamError('Stream refused', {
+      termination: createTermination(streamId),
+    })
+
+    it.each([
+      ['GET', {}, []],
+      ['POST', { method: HTTP2_METHOD_POST, json: { foo: 'bar' } }, [['{"foo":"bar"}'], ['{"foo":"bar"}']]],
+    ])('should retry a refused %s request', async (method, options, writes) => {
+      stream.write = vi.fn()
+      const termination = createTermination(1)
+      agent.request
+        .mockResolvedValueOnce(createFailedStream(termination))
+        .mockResolvedValueOnce(stream)
+
+      await expect(client.request('/resource', options)).resolves.toEqual(stream.mockBody())
+
+      expect(agent.request).toHaveBeenCalledTimes(2)
+      expect(agent.request.mock.calls[1][0]).toEqual(agent.request.mock.calls[0][0])
+      expect(stream.write.mock.calls).toEqual(writes)
+      expect(callsWithFormat(logger.info, retryFormat)).toEqual([
+        [retryFormat, method, '/resource', xRequestId, 2, 3, streamErrorMessage(termination), termination],
+      ])
+      expect(callsWithFormat(logger.error, failureFormat)).toEqual([])
+    })
+
+    it.each([
+      [undefined, 3],
+      [1, 2],
+      [0, 1],
+    ])('should give up after maxRetries %s with the final classified error', async (maxRetries, attempts) => {
+      client = new Client({
+        url,
+        agent,
+        maxRetries,
+        headers: {
+          'X-Request-Id': xRequestId,
+        },
+      })
+      const terminations = Array.from({ length: attempts }, (_, i) => createTermination(2 * i + 1))
+      for (const termination of terminations) {
+        agent.request.mockResolvedValueOnce(createFailedStream(termination))
+      }
+      const finalTermination = terminations.at(-1)
+
+      const error = await client.request('/resource').catch(err => err)
+
+      expect(error).toBeInstanceOf(StreamError)
+      expect(error).toMatchObject({
+        code: 'ERR_HTTP2_STREAM_ERROR',
+        message: streamErrorMessage(finalTermination),
+        termination: finalTermination,
+      })
+      expect(error.cause).toMatchObject({ code: 'ERR_HTTP2_STREAM_ERROR' })
+      expect(agent.request).toHaveBeenCalledTimes(attempts)
+      expect(callsWithFormat(logger.info, retryFormat)).toHaveLength(attempts - 1)
+      expect(callsWithFormat(logger.error, failureFormat)).toEqual([
+        [failureFormat, HTTP2_METHOD_GET, '/resource', xRequestId, streamErrorMessage(finalTermination), finalTermination],
+      ])
+    })
+
+    it.each([
+      ['GET', {}],
+      ['POST', { method: HTTP2_METHOD_POST, json: { foo: 'bar' } }],
+    ])('should not retry a %s request the server may have processed', async (method, options) => {
+      stream.write = vi.fn()
+      const termination = createTermination(1, {
+        rstCode: 2,
+        rstCodeName: 'NGHTTP2_INTERNAL_ERROR',
+        neverProcessed: false,
+      })
+      agent.request.mockResolvedValueOnce(createFailedStream(termination))
+
+      await expect(client.request('/resource', options)).rejects.toMatchObject({
+        name: 'StreamError',
+        termination,
+      })
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(callsWithFormat(logger.info, retryFormat)).toEqual([])
+      expect(callsWithFormat(logger.error, failureFormat)).toEqual([
+        [failureFormat, method, '/resource', xRequestId, streamErrorMessage(termination), termination],
+      ])
+    })
+
+    it('should not retry a stream that failed with its connection before getting an id', async () => {
+      const termination = createTermination(null, {
+        rstCode: 10,
+        rstCodeName: 'NGHTTP2_CONNECT_ERROR',
+      })
+      agent.request.mockResolvedValueOnce(createFailedStream(termination))
+
+      await expect(client.request('/resource')).rejects.toMatchObject({
+        name: 'StreamError',
+        termination,
+      })
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(callsWithFormat(logger.info, retryFormat)).toEqual([])
+      expect(callsWithFormat(logger.error, failureFormat)).toEqual([
+        [failureFormat, HTTP2_METHOD_GET, '/resource', xRequestId, streamErrorMessage(termination), termination],
+      ])
+    })
+
+    it('should not retry a failure without a termination', async () => {
+      const error = Object.assign(new Error('read ECONNRESET'), {
+        code: 'ECONNRESET',
+        syscall: 'read',
+      })
+      agent.request.mockRejectedValueOnce(error)
+
+      await expect(client.request('/resource')).rejects.toBe(error)
+      expect(agent.request).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not retry a request timeout', async () => {
+      client = new Client({
+        url,
+        agent,
+        requestTimeout: 10,
+      })
+      agent.request.mockImplementation(async (headers, { signal }) => ({
+        ...stream,
+        getHeaders: () => new Promise((resolve, reject) => {
+          signal.addEventListener('abort', () => {
+            reject(Object.assign(new Error('The operation was aborted'), {
+              name: 'AbortError',
+              code: 'ABORT_ERR',
+              cause: signal.reason,
+            }))
+          }, { once: true })
+        }),
+        getTermination: () => createTermination(1),
+      }))
+
+      await expect(client.request('/resource')).rejects.toMatchObject({
+        name: 'TimeoutError',
+        code: 'ETIMEDOUT',
+      })
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(logger.info).not.toHaveBeenCalled()
+    })
+
+    it('should not retry once the caller aborted', async () => {
+      const controller = new AbortController()
+      client.fetch = vi.fn().mockImplementationOnce(async () => {
+        controller.abort()
+        throw createRefusedError(1)
+      })
+
+      await expect(client.request('/resource', { signal: controller.signal })).rejects.toBe(controller.signal.reason)
+      expect(client.fetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('should surface a caller abort during a retry attempt', async () => {
+      const controller = new AbortController()
+      let retryStarted
+      const retryStartedPromise = new Promise(resolve => {
+        retryStarted = resolve
+      })
+      client.fetch = vi.fn()
+        .mockRejectedValueOnce(createRefusedError(1))
+        .mockImplementationOnce((path, { signal }) => {
+          retryStarted()
+          return new Promise((resolve, reject) => {
+            signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+          })
+        })
+
+      const promise = client.request('/resource', { signal: controller.signal })
+      await retryStartedPromise
+      controller.abort()
+
+      await expect(promise).rejects.toBe(controller.signal.reason)
+      expect(client.fetch).toHaveBeenCalledTimes(2)
+    })
+
+    it('should share one requestTimeout signal across attempts', async () => {
+      const requestTimeout = 1000
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      agent.request.mockResolvedValueOnce(createFailedStream(createTermination(1)))
+      const timeout = vi.spyOn(AbortSignal, 'timeout')
+
+      try {
+        await expect(client.request('/resource')).resolves.toEqual(stream.mockBody())
+        expect(timeout).toHaveBeenCalledExactlyOnceWith(requestTimeout)
+        expect(agent.request.mock.calls[0][1].signal).toBe(agent.request.mock.calls[1][1].signal)
+      } finally {
+        timeout.mockRestore()
+      }
+    })
+
+    it('should timeout during a retry body read using the full requestTimeout', async () => {
+      const requestTimeout = 10
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      agent.request
+        .mockResolvedValueOnce(createFailedStream(createTermination(1)))
+        .mockImplementationOnce(async (headers, { signal }) => ({
+          ...stream,
+          [Symbol.asyncIterator]: async function * () {
+            await new Promise(resolve => signal.addEventListener('abort', resolve, { once: true }))
+            throw Object.assign(new Error('The operation was aborted'), {
+              name: 'AbortError',
+              code: 'ABORT_ERR',
+              cause: signal.reason,
+            })
+          },
+        }))
+
+      await expect(client.request('/resource')).rejects.toMatchObject({
+        name: 'TimeoutError',
+        code: 'ETIMEDOUT',
+        message: `Request exceeded ${requestTimeout} ms for GET /resource`,
+      })
+      expect(agent.request).toHaveBeenCalledTimes(2)
+    })
+
+    it('should not make another agent call when the requestTimeout is exhausted', async () => {
+      const requestTimeout = 1000
+      const controller = new AbortController()
+      const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal)
+      client = new Client({
+        url,
+        agent,
+        requestTimeout,
+      })
+      agent.request.mockResolvedValueOnce(createFailedStream(createTermination(1)))
+      logger.info.mockImplementationOnce(() => {
+        controller.abort(new DOMException('The operation was aborted due to timeout', 'TimeoutError'))
+      })
+
+      try {
+        await expect(client.request('/resource')).rejects.toMatchObject({
+          name: 'TimeoutError',
+          code: 'ETIMEDOUT',
+          message: `Request exceeded ${requestTimeout} ms for GET /resource`,
+        })
+        expect(agent.request).toHaveBeenCalledTimes(1)
+      } finally {
+        timeout.mockRestore()
+      }
+    })
+
+    it('should retry with no timeout signal when requestTimeout is 0', async () => {
+      agent.request.mockResolvedValueOnce(createFailedStream(createTermination(1)))
+      const timeout = vi.spyOn(AbortSignal, 'timeout')
+
+      try {
+        await expect(client.request('/resource', { requestTimeout: 0 })).resolves.toEqual(stream.mockBody())
+        expect(timeout).not.toHaveBeenCalled()
+        expect(agent.request).toHaveBeenCalledTimes(2)
+        expect(agent.request.mock.calls[0][1].signal).toBeUndefined()
+        expect(agent.request.mock.calls[1][1].signal).toBeUndefined()
+      } finally {
+        timeout.mockRestore()
+      }
+    })
+
+    it('should pass the requestTimeout to fetch', async () => {
+      client.fetch = vi.fn().mockResolvedValue({
+        statusCode,
+        headers: {},
+        body: vi.fn().mockResolvedValue('body'),
+      })
+
+      await expect(client.request('/resource', { requestTimeout: 100 })).resolves.toBe('body')
+      expect(client.fetch).toHaveBeenCalledWith('/resource', expect.objectContaining({ requestTimeout: 100 }))
+    })
+
+    it.each([-1, 1.5, Number.POSITIVE_INFINITY])('should reject invalid maxRetries %s', async maxRetries => {
+      client = new Client({ url, agent, maxRetries })
+      await expect(client.request('/resource')).rejects.toThrow(
+        'maxRetries must be a non-negative safe integer',
+      )
+      expect(agent.request).not.toHaveBeenCalled()
+    })
+  })
+
   describe('#stream', () => {
     it('should successfully return a response', async () => {
       const statusCode = 200
@@ -441,6 +978,21 @@ describe('Client', () => {
         statusCode,
         body,
       }))
+    })
+
+    it('should not retry a never-processed stream', async () => {
+      const termination = createTermination(1)
+      agent.request.mockResolvedValueOnce(createFailedStream(termination))
+
+      await expect(client.stream('/events')).rejects.toMatchObject({
+        name: 'StreamError',
+        termination,
+      })
+      expect(agent.request).toHaveBeenCalledTimes(1)
+      expect(callsWithFormat(logger.info, retryFormat)).toEqual([])
+      expect(callsWithFormat(logger.error, failureFormat)).toEqual([
+        [failureFormat, HTTP2_METHOD_GET, '/events', xRequestId, streamErrorMessage(termination), termination],
+      ])
     })
   })
 
