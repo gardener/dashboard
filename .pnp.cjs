@@ -982,7 +982,7 @@ const RAW_RUNTIME_STATE =
           ["@octokit/auth-app", "npm:8.3.1"],\
           ["@octokit/core", "npm:7.0.8"],\
           ["@octokit/plugin-paginate-graphql", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:6.0.0"],\
-          ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:15.0.0"],\
+          ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:16.0.0"],\
           ["@octokit/plugin-request-log", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:6.0.0"],\
           ["@octokit/plugin-rest-endpoint-methods", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:18.0.0"],\
           ["@vitest/coverage-v8", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:5.0.0"],\
@@ -1986,19 +1986,19 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@octokit/plugin-paginate-rest", [\
-      ["npm:15.0.0", {\
-        "packageLocation": "./.yarn/cache/@octokit-plugin-paginate-rest-npm-15.0.0-56edaba478-d88142538b.zip/node_modules/@octokit/plugin-paginate-rest/",\
+      ["npm:16.0.0", {\
+        "packageLocation": "./.yarn/cache/@octokit-plugin-paginate-rest-npm-16.0.0-7f2637d7a8-c1785b61ea.zip/node_modules/@octokit/plugin-paginate-rest/",\
         "packageDependencies": [\
-          ["@octokit/plugin-paginate-rest", "npm:15.0.0"]\
+          ["@octokit/plugin-paginate-rest", "npm:16.0.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:15.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/@octokit-plugin-paginate-rest-virtual-ca6b9169c5/0/cache/@octokit-plugin-paginate-rest-npm-15.0.0-56edaba478-d88142538b.zip/node_modules/@octokit/plugin-paginate-rest/",\
+      ["virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:16.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/@octokit-plugin-paginate-rest-virtual-edc84dc13a/0/cache/@octokit-plugin-paginate-rest-npm-16.0.0-7f2637d7a8-c1785b61ea.zip/node_modules/@octokit/plugin-paginate-rest/",\
         "packageDependencies": [\
           ["@octokit/core", "npm:7.0.8"],\
-          ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:15.0.0"],\
-          ["@octokit/types", "npm:17.0.0"],\
+          ["@octokit/plugin-paginate-rest", "virtual:91da830b29af2704bfc9679729fb85d00ca0b8eeb24a837747a5bc0b5aec0e922594580a901a48c34c06a65b9b376f23fa3cbb88dc9fd35cddc5076ab48a067f#npm:16.0.0"],\
+          ["@octokit/types", "npm:18.0.0"],\
           ["@types/octokit__core", null]\
         ],\
         "packagePeers": [\
