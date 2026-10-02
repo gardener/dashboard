@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import util from 'util'
 import createError from 'http-errors'
 import {
   TimeoutError,
@@ -41,6 +42,18 @@ describe('errors', () => {
       expect(error.message).toBe(message)
       expect(error.code).toBe('ERR_BODY_PARSE_FAILURE')
       expect(error.foo).toBe(foo)
+    })
+
+    it('should not format or inspect the raw body', () => {
+      const sensitiveValue = 'do-not-log-this-value'
+      const rawBody = `{"kind":"Secret","data":{"token":"${sensitiveValue}`
+      const error = new ParseError('Unexpected end of JSON input', {
+        headers: { 'content-type': 'application/json' },
+        rawBody,
+      })
+      expect(error.rawBody).toBe(rawBody)
+      expect(util.format('%s', error)).not.toContain(sensitiveValue)
+      expect(util.inspect(error)).not.toContain(sensitiveValue)
     })
   })
 
