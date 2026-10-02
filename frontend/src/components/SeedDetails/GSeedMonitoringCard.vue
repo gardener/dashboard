@@ -84,6 +84,8 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { computed } from 'vue'
 
+import { useConfigStore } from '@/store/config'
+
 import GSeedStatus from '@/components/GSeedStatus.vue'
 import GSeedStatusTags from '@/components/GSeedStatusTags.vue'
 import GLinkListTile from '@/components/GLinkListTile.vue'
@@ -92,6 +94,10 @@ import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useSeedItem } from '@/composables/useSeedItem/index'
 
 import { getSeedPlutonoUrl } from '@/utils'
+
+const {
+  isOidcObservabilityUrlsEnabled,
+} = useConfigStore()
 
 const {
   seedName,
@@ -104,6 +110,6 @@ const {
   managedSeedShootVictoriaLogsUrl,
 } = useManagedSeedShoot()
 
-const seedPlutonoUrl = computed(() => getSeedPlutonoUrl(seedIngressDomain.value))
+const seedPlutonoUrl = computed(() => getSeedPlutonoUrl(seedIngressDomain.value, isOidcObservabilityUrlsEnabled))
 
 </script>

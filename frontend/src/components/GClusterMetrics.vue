@@ -177,7 +177,7 @@ export default {
       return `https://vl-${this.prefix}.${this.seedIngressDomain}/select/vmui`
     },
     seedPlutonoUrl () {
-      return getSeedPlutonoUrl(this.seedIngressDomain)
+      return getSeedPlutonoUrl(this.seedIngressDomain, this.isOidcObservabilityUrlsEnabled)
     },
     username () {
       return get(this.shootInfo, ['monitoringUsername'], '')

@@ -316,6 +316,8 @@ global:
         # The oidcObservabilityUrlsEnabled feature flag controls whether OIDC observability URLs are displayed in the dashboard.
         # This requires the gardener/oidc-apps-controller extension to be deployed and assumes the hostPrefix (https://github.com/gardener/oidc-apps-controller/blob/653add2e304c382c1b8ba4e4b775477e288826a3/example/config.yaml#L64) is empty.
         # When enabled, it shows the OIDC URLs; when disabled, it displays the current observability URLs for basic auth login along with the credentials.
+        # When enabled, the Seed Plutono link points to `plutono-garden.<seed-ingress-domain>`, which requires an oidc-apps-controller target for the `plutono` deployment in the `garden` namespace of the seed.
+        # When disabled, it points to the Plutono exposed by gardenlet at `g-seed.<seed-ingress-domain>`.
         oidcObservabilityUrlsEnabled: false
 
       shootAdminKubeconfig:

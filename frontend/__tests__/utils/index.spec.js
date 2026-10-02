@@ -11,6 +11,7 @@ import {
   isHtmlColorCode,
   defaultCriNameByKubernetesVersion,
   getIssueSince,
+  getSeedPlutonoUrl,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
@@ -560,6 +561,20 @@ describe('utils', () => {
 
     it('should return issue since for allIssues', () => {
       expect(getIssueSince(status)).toBe('2000-01-01T00:00:01Z')
+    })
+  })
+
+  describe('getSeedPlutonoUrl', () => {
+    it('should return the gardenlet seed plutono url', () => {
+      expect(getSeedPlutonoUrl('ingress.seed.example.org', false)).toBe('https://g-seed.ingress.seed.example.org')
+    })
+
+    it('should return the oidc-apps-controller seed plutono url', () => {
+      expect(getSeedPlutonoUrl('ingress.seed.example.org', true)).toBe('https://plutono-garden.ingress.seed.example.org')
+    })
+
+    it('should return an empty string without ingress domain', () => {
+      expect(getSeedPlutonoUrl(undefined, true)).toBe('')
     })
   })
   describe('randomMaintenanceBegin', () => {
