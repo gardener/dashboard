@@ -12,12 +12,16 @@ SPDX-License-Identifier: Apache-2.0
       :alt="`avatar of ${accountName}`"
       class="mr-1"
     />
-    <a
-      v-if="mailTo && isAccountNameEmail"
-      :href="`mailto:${accountName}`"
-      class="text-anchor"
-    >{{ accountName }}</a>
-    <span v-else-if="accountName">{{ accountName }}</span>
+    <span
+      v-if="accountName"
+      class="d-inline-flex align-center"
+    >{{ accountName }}
+      <g-copy-btn
+        v-if="mailTo && isAccountNameEmail"
+        :clipboard-text="accountName"
+        :icon-size-px="16"
+      />
+    </span>
     <span
       v-else
       class="font-weight-light text-disabled"
@@ -31,6 +35,7 @@ import {
   toRefs,
 } from 'vue'
 
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GAvatar from '@/components/GAvatar.vue'
 
 import { isEmail } from '@/utils'
