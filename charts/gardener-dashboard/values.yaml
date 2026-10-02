@@ -318,6 +318,7 @@ global:
         # When enabled, it shows the OIDC URLs; when disabled, it displays the current observability URLs for basic auth login along with the credentials.
         # When enabled, the Seed Plutono link points to `plutono-garden.<seed-ingress-domain>`, which requires an oidc-apps-controller target for the `plutono` deployment in the `garden` namespace of the seed.
         # When disabled, it points to the Plutono exposed by gardenlet at `g-seed.<seed-ingress-domain>`.
+        # The Seed VictoriaLogs link is only shown when enabled, as gardenlet does not expose the seed VictoriaLogs. It points to `vlsingle-victoria-logs-garden.<seed-ingress-domain>`, which requires an oidc-apps-controller target for the `vlsingle-victoria-logs` deployment in the `garden` namespace of the seed.
         oidcObservabilityUrlsEnabled: false
 
       shootAdminKubeconfig:

@@ -46,12 +46,6 @@ SPDX-License-Identifier: Apache-2.0
         :url="seedPlutonoUrl"
         :url-text="seedPlutonoUrl"
       />
-      <g-link-list-tile
-        v-if="seedVictoriaLogsUrl"
-        app-title="VictoriaLogs"
-        :url="seedVictoriaLogsUrl"
-        :url-text="seedVictoriaLogsUrl"
-      />
       <g-list-item v-else>
         <template #prepend>
           <v-icon color="primary">
@@ -62,6 +56,13 @@ SPDX-License-Identifier: Apache-2.0
           Not available
         </g-list-item-content>
       </g-list-item>
+      <g-link-list-tile
+        v-if="seedVictoriaLogsUrl"
+        app-title="VictoriaLogs"
+        :url="seedVictoriaLogsUrl"
+        :url-text="seedVictoriaLogsUrl"
+        content-class="pt-0"
+      />
       <g-link-list-tile
         v-if="managedSeedShootPlutonoUrl"
         app-title="Shoot Plutono"
@@ -101,7 +102,7 @@ import { useSeedItem } from '@/composables/useSeedItem/index'
 
 import {
   getSeedPlutonoUrl,
-  getVictoriaLogsUrl,
+  getSeedVictoriaLogsUrl,
 } from '@/utils'
 
 const {
@@ -120,6 +121,6 @@ const {
 } = useManagedSeedShoot()
 
 const seedPlutonoUrl = computed(() => getSeedPlutonoUrl(seedIngressDomain.value, isOidcObservabilityUrlsEnabled))
-const seedVictoriaLogsUrl = computed(() => getVictoriaLogsUrl(seedIngressDomain.value))
+const seedVictoriaLogsUrl = computed(() => getSeedVictoriaLogsUrl(seedIngressDomain.value, isOidcObservabilityUrlsEnabled))
 
 </script>

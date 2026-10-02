@@ -458,10 +458,12 @@ export function getSeedPlutonoUrl (ingressDomain, oidcObservabilityUrlsEnabled) 
   return `https://${prefix}.${ingressDomain}`
 }
 
-export function getVictoriaLogsUrl (ingressDomain) {
-  return ingressDomain
-    ? `https://vlsingle-victoria-logs-garden.${ingressDomain}`
-    : ''
+export function getSeedVictoriaLogsUrl (ingressDomain, oidcObservabilityUrlsEnabled) {
+  // gardenlet does not expose the seed VictoriaLogs, only the oidc-apps-controller does
+  if (!ingressDomain || !oidcObservabilityUrlsEnabled) {
+    return ''
+  }
+  return `https://vlsingle-victoria-logs-garden.${ingressDomain}`
 }
 
 export function isStatusHibernated (status) {

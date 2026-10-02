@@ -12,6 +12,7 @@ import {
   defaultCriNameByKubernetesVersion,
   getIssueSince,
   getSeedPlutonoUrl,
+  getSeedVictoriaLogsUrl,
   randomMaintenanceBegin,
   maintenanceWindowWithBeginAndTimezone,
   getDurationInMinutes,
@@ -575,6 +576,20 @@ describe('utils', () => {
 
     it('should return an empty string without ingress domain', () => {
       expect(getSeedPlutonoUrl(undefined, true)).toBe('')
+    })
+  })
+
+  describe('getSeedVictoriaLogsUrl', () => {
+    it('should return the oidc-apps-controller seed victorialogs url', () => {
+      expect(getSeedVictoriaLogsUrl('ingress.seed.example.org', true)).toBe('https://vlsingle-victoria-logs-garden.ingress.seed.example.org')
+    })
+
+    it('should return an empty string if oidc observability urls are disabled', () => {
+      expect(getSeedVictoriaLogsUrl('ingress.seed.example.org', false)).toBe('')
+    })
+
+    it('should return an empty string without ingress domain', () => {
+      expect(getSeedVictoriaLogsUrl(undefined, true)).toBe('')
     })
   })
   describe('randomMaintenanceBegin', () => {
