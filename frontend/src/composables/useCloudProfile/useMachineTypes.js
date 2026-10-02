@@ -96,7 +96,13 @@ export function useMachineTypes (cloudProfile) {
       const types = filterMachineTypes(region.value, zones)
 
       if (architecture?.value) {
-        return filter(types, { architecture: architecture.value })
+        return filter(types, type => {
+          const capabilityArchitecutres = type.capabilities?.architecture
+          if (capabilityArchitecutres) {
+            return includes(capabilityArchitecutres, architecture.value)
+          }
+          return type.architecture === architecture.value
+        })
       }
 
       return types
@@ -119,8 +125,11 @@ export function useMachineTypes (cloudProfile) {
     return computed(() => {
       const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
-
-      const architectures = uniq(map(types, 'architecture'))
+      const capabilities = map(types, 'capabilities').filter(Boolean)
+      let architectures = uniq(capabilities.flatMap(capability => capability.architecture).filter(Boolean))
+      if (!architectures.length) {
+        architectures = uniq(map(types, 'architecture'))
+      }
       return architectures.sort()
     })
   }
