@@ -99,7 +99,10 @@ import GLinkListTile from '@/components/GLinkListTile.vue'
 import { useManagedSeedShoot } from '@/composables/useManagedSeedShootForSeed'
 import { useSeedItem } from '@/composables/useSeedItem/index'
 
-import { getSeedPlutonoUrl, getVictoriaLogsUrl } from '@/utils'
+import {
+  getSeedPlutonoUrl,
+  getVictoriaLogsUrl,
+} from '@/utils'
 
 const {
   isOidcObservabilityUrlsEnabled,
