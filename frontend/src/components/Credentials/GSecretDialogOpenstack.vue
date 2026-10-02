@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     :secret-validations="v$"
     :binding="binding"
+    :credential="credential"
     :provider-type="providerType"
     :vendor-type="vendorType"
   >
@@ -110,6 +111,22 @@ import GGenericInputField from '@/components/GGenericInputField'
 
 import { useProvideSecretContext } from '@/composables/credential/useSecretContext'
 
+import get from 'lodash/get'
+
+function createSecretFieldValue (key) {
+  return {
+    get () {
+      return get(this.secretFieldValues, [key], '')
+    },
+    set (value) {
+      this.secretFieldValues = {
+        ...this.secretFieldValues,
+        [key]: value,
+      }
+    },
+  }
+}
+
 export default {
   components: {
     GSecretDialog,
@@ -124,6 +141,9 @@ export default {
     binding: {
       type: Object,
     },
+    credential: {
+      type: Object,
+    },
     providerType: {
       type: String,
     },
@@ -136,37 +156,14 @@ export default {
     'update:modelValue',
   ],
   setup () {
-    const { secretStringDataRefs } = useProvideSecretContext()
-
     const {
-      domainName,
-      tenantName,
-      applicationCredentialID,
-      applicationCredentialName,
-      applicationCredentialSecret,
-      username,
-      password,
-      authURL,
-    } = secretStringDataRefs({
-      domainName: 'domainName',
-      tenantName: 'tenantName',
-      applicationCredentialID: 'applicationCredentialID',
-      applicationCredentialName: 'applicationCredentialName',
-      applicationCredentialSecret: 'applicationCredentialSecret',
-      username: 'username',
-      password: 'password',
-      authURL: 'authURL',
-    })
+      getSecretFieldValues,
+      setSecretFieldValues,
+    } = useProvideSecretContext()
 
     return {
-      domainName,
-      tenantName,
-      applicationCredentialID,
-      applicationCredentialName,
-      applicationCredentialSecret,
-      username,
-      password,
-      authURL,
+      getSecretFieldValues,
+      setSecretFieldValues,
       v$: useVuelidate(),
     }
   },
@@ -176,6 +173,22 @@ export default {
     }
   },
   computed: {
+    secretFieldValues: {
+      get () {
+        return this.getSecretFieldValues(this.providerFields)
+      },
+      set (value) {
+        this.setSecretFieldValues(this.providerFields, value)
+      },
+    },
+    authURL: createSecretFieldValue('authURL'),
+    domainName: createSecretFieldValue('domainName'),
+    tenantName: createSecretFieldValue('tenantName'),
+    applicationCredentialID: createSecretFieldValue('applicationCredentialID'),
+    applicationCredentialName: createSecretFieldValue('applicationCredentialName'),
+    applicationCredentialSecret: createSecretFieldValue('applicationCredentialSecret'),
+    username: createSecretFieldValue('username'),
+    password: createSecretFieldValue('password'),
     authenticationMethod: {
       get () {
         return this.authenticationMethodInternal

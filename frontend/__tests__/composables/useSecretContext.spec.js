@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import {
-  reactive,
-  nextTick,
-} from 'vue'
+import { reactive } from 'vue'
 import {
   setActivePinia,
   createPinia,
@@ -61,53 +58,6 @@ describe('composables', () => {
       expect(secretContext.isSecretDirty).toBe(false)
       secretContext.secretName = 'changed-secret'
       expect(secretContext.isSecretDirty).toBe(true)
-    })
-
-    it('should update secretStringDataRefs via secretData', async () => {
-      secretContext.createSecretManifest()
-
-      const keyMapping = { password: 'pwdVar', token: 'tokenVar' }
-      const refs = secretContext.secretStringDataRefs(keyMapping)
-
-      await nextTick()
-      expect(refs.pwdVar.value).toBe('')
-      expect(refs.tokenVar.value).toBe('')
-
-      const password = encodeBase64('mypassword')
-      const token = encodeBase64('mytoken')
-
-      secretContext.secretData = { password, token }
-
-      await nextTick()
-      expect(refs.pwdVar.value).toBe('mypassword')
-      expect(refs.tokenVar.value).toBe('mytoken')
-    })
-
-    it('should update secretData via secretStringDataRefs', async () => {
-      secretContext.setSecretManifest({
-        metadata: {
-          name: 'my-secret',
-          namespace: testNamespace,
-        },
-        data: {
-          password: encodeBase64('initial'),
-        },
-      })
-
-      const keyMapping = { password: 'pwdVar', token: 'tokenVar' }
-      const refs = secretContext.secretStringDataRefs(keyMapping)
-
-      await nextTick()
-      expect(refs.pwdVar.value).toBe('initial')
-
-      refs.pwdVar.value = 'mypassword'
-      refs.tokenVar.value = 'mytoken'
-
-      await nextTick()
-      expect(secretContext.secretData).toEqual({
-        password: encodeBase64('mypassword'),
-        token: encodeBase64('mytoken'),
-      })
     })
 
     it('keeps the legacy falsy-value behavior of secretStringData unchanged', () => {
@@ -232,6 +182,43 @@ describe('composables', () => {
       expect(secretContext.getSecretFieldValues(fields)).toEqual({
         retainedEmpty: '',
       })
+    })
+
+    it.each([
+      [{ token: 'primary', TOKEN: 'fallback' }, { token: 'primary' }],
+      [{ token: '', TOKEN: 'fallback' }, { token: '' }],
+      [{ TOKEN: 'first', API_TOKEN: 'second' }, { token: 'first' }],
+      [{ API_TOKEN: 'last' }, { token: 'last' }],
+      [{}, {}],
+    ])('reads field aliases in order without modifying %j', (values, expected) => {
+      const fields = [{ key: 'token', aliases: ['TOKEN', 'API_TOKEN'], type: 'text' }]
+      const data = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, encodeBase64(value)]))
+      secretContext.setSecretManifest({ data })
+
+      expect(secretContext.getSecretFieldValues(fields)).toEqual(expected)
+      expect(secretContext.secretData).toEqual(data)
+      expect(secretContext.isSecretDirty).toBe(false)
+    })
+
+    it.each(['new-token', '', undefined])('writes %j using the primary key and preserves hidden data', value => {
+      const fields = [{ key: 'token', aliases: ['TOKEN', 'API_TOKEN'], type: 'text', omitWhenEmpty: true }]
+      const hiddenData = { AWS_SESSION_TOKEN: encodeBase64('keep-me') }
+      secretContext.setSecretManifest({
+        data: {
+          token: encodeBase64('primary'),
+          TOKEN: encodeBase64('first'),
+          API_TOKEN: encodeBase64('second'),
+          ...hiddenData,
+        },
+      })
+
+      secretContext.setSecretFieldValues(fields, { token: value })
+
+      expect(secretContext.secretData).toEqual({
+        ...hiddenData,
+        ...(value ? { token: encodeBase64(value) } : {}),
+      })
+      expect(secretContext.getSecretFieldValues(fields)).toEqual(value ? { token: value } : {})
     })
 
     describe('dnsSecretProviderType', () => {

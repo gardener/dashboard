@@ -8,28 +8,19 @@ export default {
       {
         label: 'Server',
         valueFrom: {
-          keys: [
-            ['Server'],
-            ['server'],
-          ],
+          key: ['Server'],
         },
       },
       {
         label: 'TSIG Key Name',
         valueFrom: {
-          keys: [
-            ['TSIGKeyName'],
-            ['tsigKeyName'],
-          ],
+          key: ['TSIGKeyName'],
         },
       },
       {
         label: 'Zone',
         valueFrom: {
-          keys: [
-            ['Zone'],
-            ['zone'],
-          ],
+          key: ['Zone'],
         },
       },
     ],
@@ -120,10 +111,6 @@ export default {
           {
             title: 'HMAC-SHA1',
             value: 'hmac-sha1',
-          },
-          {
-            title: 'HMAC-MD5',
-            value: 'hmac-md5',
           },
         ],
       },
