@@ -4,10 +4,9 @@ SPDX-FileCopyrightText: Contributors to the Gardener project
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-if="footerTemplate"
-    v-html="footerHtml"
+    v-safe-html="{ html: footerHtml, allowStyleTags: true }"
   />
   <div
     v-else-if="hasFooter"

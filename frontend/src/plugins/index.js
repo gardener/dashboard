@@ -6,7 +6,10 @@
 
 import '@/sass/main.scss'
 
-import { messagesColor } from '../directives'
+import {
+  messagesColor,
+  safeHtml,
+} from '../directives'
 
 import store from './store'
 import router from './router'
@@ -33,4 +36,5 @@ export function registerPlugins (app) {
     .use(utils)
     .use(components)
     .directive('messagesColor', messagesColor)
+    .directive('safe-html', safeHtml)
 }

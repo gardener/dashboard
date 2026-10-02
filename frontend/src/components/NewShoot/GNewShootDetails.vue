@@ -68,10 +68,9 @@ SPDX-License-Identifier: Apache-2.0
     <v-row v-if="slaDescriptionHtml">
       <v-col cols="12">
         <label>{{ slaTitle }}</label>
-        <!-- eslint-disable vue/no-v-html -->
         <p
+          v-safe-html="slaDescriptionHtml"
           class="text-body-large"
-          v-html="slaDescriptionHtml"
         />
       </v-col>
     </v-row>
