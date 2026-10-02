@@ -7,19 +7,23 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     Kubernetes <span class="font-weight-bold">version {{ version }}</span> of this cluster
-    <span v-if="isValidTerminationDate">
-      expires
-      <g-time-string
-        :date-time="expirationDate"
-        mode="future"
-        date-tooltip
-        content-class="font-weight-bold"
-      />
-      <span>. </span>
+    <template v-if="!regularUpdate">
+      <span v-if="isValidTerminationDate">
+        expires
+        <g-time-string
+          :date-time="expirationDate"
+          mode="future"
+          date-tooltip
+          content-class="font-weight-bold"
+        />
+        <span>. </span>
+      </span>
+      <span v-else-if="isExpired">is expired. </span>
+      <span v-else>will expire soon. </span>
+    </template>
+    <span v-if="regularUpdate">
+      has a newer supported patch version available and will be updated automatically in the next maintenance window.
     </span>
-    <span v-else-if="isExpired">is expired. </span>
-    <span v-else>will expire soon. </span>
-    <span v-if="regularUpdate">Version will be updated in the next maintenance window</span>
     <template v-else-if="forcedUpdate">
       <span v-if="isValidTerminationDate">Version update will be enforced after that date</span>
       <span v-else>Version update will be enforced soon</span>

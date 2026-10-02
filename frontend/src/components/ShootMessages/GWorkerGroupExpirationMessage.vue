@@ -7,19 +7,23 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div>
     Machine image <span class="font-weight-bold">{{ name }} | version {{ version }}</span> of worker group <span class="font-weight-bold">{{ workerName }}</span>
-    <span v-if="isValidTerminationDate">
-      expires
-      <g-time-string
-        :date-time="expirationDate"
-        mode="future"
-        date-tooltip
-        content-class="font-weight-bold"
-      />
-      <span>. </span>
+    <template v-if="!regularUpdate">
+      <span v-if="isValidTerminationDate">
+        expires
+        <g-time-string
+          :date-time="expirationDate"
+          mode="future"
+          date-tooltip
+          content-class="font-weight-bold"
+        />
+        <span>. </span>
+      </span>
+      <span v-else-if="isExpired"> is expired. </span>
+      <span v-else>will expire soon. </span>
+    </template>
+    <span v-if="regularUpdate">
+      has a newer supported version available and will be updated automatically in the next maintenance window.
     </span>
-    <span v-else-if="isExpired"> is expired. </span>
-    <span v-else>will expire soon. </span>
-    <span v-if="regularUpdate">Version will be updated in the next maintenance window</span>
     <template v-else-if="forcedUpdate">
       <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
       <span v-else>Machine Image update will be enforced soon</span>
