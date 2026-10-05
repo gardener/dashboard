@@ -678,7 +678,7 @@ __metadata:
     "@octokit/auth-app": "npm:^8.0.0"
     "@octokit/core": "npm:^7.0.0"
     "@octokit/plugin-paginate-graphql": "npm:^6.0.0"
-    "@octokit/plugin-paginate-rest": "npm:^15.0.0"
+    "@octokit/plugin-paginate-rest": "npm:^16.0.0"
     "@octokit/plugin-request-log": "npm:^6.0.0"
     "@octokit/plugin-rest-endpoint-methods": "npm:^18.0.0"
     "@vitest/coverage-v8": "npm:^5.0.0"
@@ -1436,14 +1436,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/plugin-paginate-rest@npm:^15.0.0":
-  version: 15.0.0
-  resolution: "@octokit/plugin-paginate-rest@npm:15.0.0"
+"@octokit/plugin-paginate-rest@npm:^16.0.0":
+  version: 16.0.0
+  resolution: "@octokit/plugin-paginate-rest@npm:16.0.0"
   dependencies:
-    "@octokit/types": "npm:^17.0.0"
+    "@octokit/types": "npm:^18.0.0"
   peerDependencies:
     "@octokit/core": ">=6"
-  checksum: 10c0/d88142538b0d1abe4549d86225ebbd2054e9a2c20f3603d4f332f54449bc5355a8edd931a34106b4b910d700c64dfacfd5a2b6b9c25f984372a7d8a71511bf57
+  checksum: 10c0/c1785b61ea2c2aede6f310ab120ae969991a9a79c53ddc759bc50f0e908b0fab2424ccee31b21fcb2e0814ca4f28d52365389b39afa9226385a3b92d2130ae28
   languageName: node
   linkType: hard
 
