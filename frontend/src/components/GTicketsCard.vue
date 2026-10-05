@@ -9,29 +9,52 @@ SPDX-License-Identifier: Apache-2.0
     v-if="gitHubRepoUrl"
     class="mb-4"
   >
-    <template v-if="tickets.length">
-      <g-ticket
-        v-for="ticket in tickets"
-        :key="ticket.metadata.issueNumber"
-        :ticket="ticket"
-      />
-      <div class="d-flex align-center justify-center">
-        <v-btn
-          variant="tonal"
-          color="tonal-primary"
-          :href="sanitizeUrl(ticketLink)"
-          target="_blank"
-          rel="noopener"
-          title="Create Ticket"
-          append-icon="mdi-open-in-new"
+    <v-card
+      v-if="tickets.length"
+      class="mb-4"
+    >
+      <g-toolbar>
+        <div class="d-flex">
+          <div
+            class="ticket-title d-flex align-center"
+          >
+            Tickets
+          </div>
+        </div>
+      </g-toolbar>
+      <template v-if="openTickets.length || closedTickets.length">
+        <div
+          v-if="openTickets.length"
+          class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
         >
-          Create Ticket
-        </v-btn>
-      </div>
-    </template>
+          Open
+        </div>
+        <g-ticket-list :tickets="openTickets" />
+        <div
+          v-if="closedTickets.length"
+          class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+        >
+          Closed
+        </div>
+        <g-ticket-list :tickets="closedTickets" />
+        <div class="d-flex align-center justify-center create-ticket">
+          <v-btn
+            variant="tonal"
+            color="tonal-primary"
+            :href="sanitizeUrl(ticketLink)"
+            target="_blank"
+            rel="noopener"
+            title="Create Ticket"
+            append-icon="mdi-open-in-new"
+          >
+            Create Ticket
+          </v-btn>
+        </div>
+      </template>
+    </v-card>
     <v-card v-else>
       <g-toolbar title="Tickets" />
-      <div class="d-flex justify-center pa-4">
+      <div class="d-flex justify-center pa-4 create-ticket">
         <v-btn
           variant="tonal"
           color="tonal-primary"
@@ -57,7 +80,7 @@ import {
 import { useConfigStore } from '@/store/config'
 import { useTicketStore } from '@/store/ticket'
 
-import GTicket from '@/components/ShootTickets/GTicket'
+import GTicketList from '@/components/ShootTickets/GTicketList.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -68,10 +91,11 @@ import map from 'lodash/map'
 import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 import cloneDeep from 'lodash/cloneDeep'
+import orderBy from 'lodash/orderBy'
 
 export default {
   components: {
-    GTicket,
+    GTicketList,
   },
   inject: ['sanitizeUrl'],
   setup () {
@@ -104,10 +128,25 @@ export default {
       ticketConfig: 'ticket',
     }),
     tickets () {
-      return this.ticketsByProjectAndName({
+      const tickets = this.ticketsByProjectAndName({
         projectName: this.shootProjectName,
         name: this.shootName,
       })
+      return orderBy(tickets, ['metadata.state'], ['desc'])
+    },
+    openTickets () {
+      const tickets = this.ticketsByProjectAndName({
+        projectName: this.shootProjectName,
+        name: this.shootName,
+      }).filter(ticket => ticket.metadata.state === 'open')
+      return orderBy(tickets, ['metadata.state'], ['desc'])
+    },
+    closedTickets () {
+      const tickets = this.ticketsByProjectAndName({
+        projectName: this.shootProjectName,
+        name: this.shootName,
+      }).filter(ticket => ticket.metadata.state === 'closed')
+      return orderBy(tickets, ['metadata.state'], ['desc'])
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
@@ -181,5 +220,8 @@ export default {
   .link-icon {
     font-size: 1.2em;
     text-decoration: none;
+  }
+  .create-ticket {
+    padding: 10px;
   }
 </style>

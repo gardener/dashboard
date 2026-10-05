@@ -5,61 +5,60 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-card class="mb-4">
-    <g-toolbar>
-      <div class="d-flex">
-        <div
-          class="ticket-title d-flex align-center"
-        >
-          Ticket {{ ticketTitle }}
-        </div>
-        <div
-          v-if="labels.length"
-          class="d-flex flex-wrap ml-2 ticket-labels"
-        >
-          <g-ticket-label
-            v-for="label in labels"
-            :key="label.id"
-            :label="label"
-          />
-        </div>
-      </div>
-    </g-toolbar>
-    <v-container>
-      <span class="font-weight-bold">{{ login }}</span> created this
-      <g-external-link :url="ticketHtmlUrl">
-        ticket
-      </g-external-link>
-      <g-time-string
-        :date-time="ticket.metadata.created_at"
-        mode="past"
-        content-class="ml-1"
-      />
-    </v-container>
-    <g-ticket-comment
-      :comment="ticket"
+  <v-chip
+    :color="ticket.metadata.closed_at ? 'secondary' : 'primary'"
+    variant="flat"
+    class="ticket-status-chip"
+  >
+    <v-icon>
+      {{ ticket.metadata.closed_at ? 'mdi-check-circle-outline' : 'mdi-record-circle-outline' }}
+    </v-icon>
+    {{ ticket.metadata.state === 'open' ? 'Open' : 'Closed' }}
+  </v-chip>
+  <g-ticket-comment
+    :comment="ticket"
+    :timeline="commentsForTicket?.length"
+    initial="true"
+  />
+  <g-ticket-comment
+    v-for="(comment, index) in commentsForTicket"
+    :key="comment.metadata.id"
+    :comment="comment"
+    :timeline="index != commentsForTicket.length - 1 || ticket.metadata.state === 'closed' "
+  />
+  <div v-if="ticket.metadata.closed_at">
+    <v-chip
+      color="secondary"
+      variant="flat"
+      class="ticket-closed-chip"
+    >
+      <v-icon>
+        {{ ticket.metadata.closed_at ? 'mdi-check-circle-outline' : 'mdi-record-circle-outline' }}
+      </v-icon>
+    </v-chip>
+    closed<g-time-string
+      :date-time="ticket.metadata.closed_at"
+      mode="past"
+      content-class="ml-1"
     />
-    <g-ticket-comment
-      v-for="comment in commentsForTicket"
-      :key="comment.metadata.id"
-      :comment="comment"
-    />
-    <v-card-actions v-if="!!gitHubRepoUrl">
-      <v-spacer />
-      <v-btn
-        variant="text"
-        color="primary"
-        :href="sanitizeUrl(addCommentLink)"
-        target="_blank"
-        rel="noopener"
-        title="Add Comment"
-        append-icon="mdi-open-in-new"
-      >
-        Add Comment
-      </v-btn>
-      <v-spacer />
-    </v-card-actions>
-  </v-card>
+  </div>
+
+  <v-card-actions v-if="!!gitHubRepoUrl">
+    <v-spacer />
+    <v-btn
+      variant="text"
+      color="primary"
+      :href="sanitizeUrl(addCommentLink)"
+      target="_blank"
+      rel="noopener"
+      title="Add Comment"
+      append-icon="mdi-open-in-new"
+    >
+      Add Comment
+    </v-btn>
+    <v-spacer />
+  </v-card-actions>
+  <!-- </v-card> -->
 </template>
 
 <script>
@@ -72,18 +71,14 @@ import { useConfigStore } from '@/store/config'
 import { useTicketStore } from '@/store/ticket'
 
 import GTimeString from '@/components/GTimeString.vue'
-import GTicketLabel from '@/components/ShootTickets/GTicketLabel.vue'
 import GTicketComment from '@/components/ShootTickets/GTicketComment.vue'
-import GExternalLink from '@/components/GExternalLink.vue'
 
 import get from 'lodash/get'
 
 export default {
   components: {
     GTimeString,
-    GTicketLabel,
     GTicketComment,
-    GExternalLink,
   },
   inject: ['sanitizeUrl'],
   props: {
@@ -140,5 +135,15 @@ export default {
   .link-icon {
     font-size: 120%;
     text-decoration: none;
+  }
+  .v-expansion-panel {
+    margin-top: 0px;
+  }
+  .ticket-status-chip {
+    margin-left:64px;
+    margin-bottom: 10px;
+  }
+  .ticket-closed-chip {
+    margin-left: 65px
   }
 </style>
