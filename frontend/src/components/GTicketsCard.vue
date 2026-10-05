@@ -141,7 +141,7 @@ export default {
       }).filter(ticket => ticket.metadata.state === 'open')
       return orderBy(tickets, ['metadata.state'], ['desc'])
     },
-    closedTickets () {
+    closedTickets () {
       const tickets = this.ticketsByProjectAndName({
         projectName: this.shootProjectName,
         name: this.shootName,
