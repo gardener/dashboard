@@ -51,7 +51,7 @@ describe('api', function () {
       fixtures.github.createComment(1, 2),
       fixtures.github.createComment(2, 4),
     ])
-    await tickets.loadOpenIssues()
+    await tickets.loadIssues()
   })
 
   afterEach(() => {
@@ -63,7 +63,7 @@ describe('api', function () {
       id: 'foo@example.org',
     })
 
-    it('should fetch open issues for all namespaces when user can list projects', async () => {
+    it('should fetch open and closed issues for all namespaces when user can list projects', async () => {
       const namespace = '_all'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(true)
 
@@ -73,13 +73,13 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockListIssues).toHaveBeenCalledTimes(1)
+      expect(mockListIssues).toHaveBeenCalledTimes(2)
       expect(mockListComments).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should fetch only member project issues for all namespaces when user cannot list projects', async () => {
+    it('should fetch only member project issues (open and closed) for all namespaces when user cannot list projects', async () => {
       const namespace = '_all'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(false)
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewToken())
@@ -94,7 +94,7 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
-    it('should fetch open issues for namespace foo', async () => {
+    it('should fetch open and closed issues for namespace foo', async () => {
       const namespace = 'garden-foo'
       vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(true)
 
@@ -104,7 +104,7 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockListIssues).toHaveBeenCalledTimes(1)
+      expect(mockListIssues).toHaveBeenCalledTimes(2)
       expect(mockListComments).not.toHaveBeenCalled()
 
       expect(res.body).toMatchSnapshot()
@@ -151,6 +151,39 @@ describe('api', function () {
       expect(res.body).toEqual({
         issues: [],
       })
+    })
+
+    it('should include closed issues in the response', async () => {
+      const namespace = '_all'
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(true)
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/tickets`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      const closedIssues = res.body.issues.filter(issue => issue.metadata.state === 'closed')
+      expect(closedIssues).toHaveLength(1)
+      expect(closedIssues[0].metadata.number).toBe(4)
+      expect(closedIssues[0].metadata.projectName).toBe('foo')
+    })
+
+    it('should include both open and closed issues for a specific namespace', async () => {
+      const namespace = 'garden-foo'
+      vi.spyOn(authorization, 'canListProjects').mockResolvedValueOnce(true)
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/tickets`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      const openIssues = res.body.issues.filter(issue => issue.metadata.state === 'open')
+      const closedIssues = res.body.issues.filter(issue => issue.metadata.state === 'closed')
+      expect(openIssues).toHaveLength(1)
+      expect(closedIssues).toHaveLength(1)
+      expect(closedIssues[0].metadata.number).toBe(4)
     })
 
     it('should fetch open issues and comments for shoot cluster test in namespace bar', async () => {

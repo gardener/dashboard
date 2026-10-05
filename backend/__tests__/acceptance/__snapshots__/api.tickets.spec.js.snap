@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`api > tickets > should fetch only member project issues for all namespaces when user cannot list projects 1`] = `
+exports[`api > tickets > should fetch only member project issues (open and closed) for all namespaces when user cannot list projects 1`] = `
 {
   "issues": [
     {
@@ -59,6 +59,194 @@ exports[`api > tickets > should fetch only member project issues for all namespa
         "projectName": "bar",
         "state": "open",
         "updated_at": "2018-07-02T20:20:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The fourth bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/4",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:22:32Z",
+        "id": 327883530,
+        "name": "test",
+        "number": 4,
+        "projectName": "foo",
+        "state": "closed",
+        "updated_at": "2018-07-02T20:22:32Z",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api > tickets > should fetch open and closed issues for all namespaces when user can list projects 1`] = `
+{
+  "issues": [
+    {
+      "data": {
+        "body": "<p>The first bug</p>",
+        "comments": 0,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:19:32Z",
+        "id": 327883527,
+        "name": "test",
+        "number": 1,
+        "projectName": "foo",
+        "state": "open",
+        "updated_at": "2018-07-02T20:19:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The second bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/2",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:20:32Z",
+        "id": 327883528,
+        "name": "test",
+        "number": 2,
+        "projectName": "bar",
+        "state": "open",
+        "updated_at": "2018-07-02T20:20:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The fourth bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/4",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:22:32Z",
+        "id": 327883530,
+        "name": "test",
+        "number": 4,
+        "projectName": "foo",
+        "state": "closed",
+        "updated_at": "2018-07-02T20:22:32Z",
+      },
+    },
+  ],
+}
+`;
+
+exports[`api > tickets > should fetch open and closed issues for namespace foo 1`] = `
+{
+  "issues": [
+    {
+      "data": {
+        "body": "<p>The first bug</p>",
+        "comments": 0,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:19:32Z",
+        "id": 327883527,
+        "name": "test",
+        "number": 1,
+        "projectName": "foo",
+        "state": "open",
+        "updated_at": "2018-07-02T20:19:32Z",
+      },
+    },
+    {
+      "data": {
+        "body": "<p>The fourth bug</p>",
+        "comments": 1,
+        "html_url": "https://github.com/gardener/ticket-dev/issues/4",
+        "labels": [
+          {
+            "color": "d73a4a",
+            "id": 949737505,
+            "name": "bug",
+          },
+        ],
+        "ticketTitle": "title",
+        "user": {
+          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
+          "login": "johndoe",
+        },
+      },
+      "kind": "issue",
+      "metadata": {
+        "created_at": "2018-07-02T20:22:32Z",
+        "id": 327883530,
+        "name": "test",
+        "number": 4,
+        "projectName": "foo",
+        "state": "closed",
+        "updated_at": "2018-07-02T20:22:32Z",
       },
     },
   ],
@@ -116,107 +304,6 @@ exports[`api > tickets > should fetch open issues and comments for shoot cluster
         "projectName": "bar",
         "state": "open",
         "updated_at": "2018-07-02T20:20:32Z",
-      },
-    },
-  ],
-}
-`;
-
-exports[`api > tickets > should fetch open issues for all namespaces when user can list projects 1`] = `
-{
-  "issues": [
-    {
-      "data": {
-        "body": "<p>The first bug</p>",
-        "comments": 0,
-        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
-        "labels": [
-          {
-            "color": "d73a4a",
-            "id": 949737505,
-            "name": "bug",
-          },
-        ],
-        "ticketTitle": "title",
-        "user": {
-          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
-          "login": "johndoe",
-        },
-      },
-      "kind": "issue",
-      "metadata": {
-        "created_at": "2018-07-02T20:19:32Z",
-        "id": 327883527,
-        "name": "test",
-        "number": 1,
-        "projectName": "foo",
-        "state": "open",
-        "updated_at": "2018-07-02T20:19:32Z",
-      },
-    },
-    {
-      "data": {
-        "body": "<p>The second bug</p>",
-        "comments": 1,
-        "html_url": "https://github.com/gardener/ticket-dev/issues/2",
-        "labels": [
-          {
-            "color": "d73a4a",
-            "id": 949737505,
-            "name": "bug",
-          },
-        ],
-        "ticketTitle": "title",
-        "user": {
-          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
-          "login": "johndoe",
-        },
-      },
-      "kind": "issue",
-      "metadata": {
-        "created_at": "2018-07-02T20:20:32Z",
-        "id": 327883528,
-        "name": "test",
-        "number": 2,
-        "projectName": "bar",
-        "state": "open",
-        "updated_at": "2018-07-02T20:20:32Z",
-      },
-    },
-  ],
-}
-`;
-
-exports[`api > tickets > should fetch open issues for namespace foo 1`] = `
-{
-  "issues": [
-    {
-      "data": {
-        "body": "<p>The first bug</p>",
-        "comments": 0,
-        "html_url": "https://github.com/gardener/ticket-dev/issues/1",
-        "labels": [
-          {
-            "color": "d73a4a",
-            "id": 949737505,
-            "name": "bug",
-          },
-        ],
-        "ticketTitle": "title",
-        "user": {
-          "avatar_url": "https://avatars1.githubusercontent.com/u/21031061?v=4",
-          "login": "johndoe",
-        },
-      },
-      "kind": "issue",
-      "metadata": {
-        "created_at": "2018-07-02T20:19:32Z",
-        "id": 327883527,
-        "name": "test",
-        "number": 1,
-        "projectName": "foo",
-        "state": "open",
-        "updated_at": "2018-07-02T20:19:32Z",
       },
     },
   ],
