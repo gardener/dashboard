@@ -6,6 +6,7 @@
 
 import { vi } from 'vitest'
 import http2 from 'http2'
+import util from 'util'
 import zlib from 'zlib'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import client from '../lib/index.js'
@@ -341,13 +342,6 @@ describe('Client', () => {
       const contentType = 'text/plain'
       const chunks = ['foo', '-', 'bar']
       const rawBody = chunks.join('')
-      const parseErrorMessage = () => {
-        try {
-          JSON.parse(rawBody)
-        } catch (err) {
-          return err.message
-        }
-      }
 
       let statusCode
 
@@ -373,7 +367,7 @@ describe('Client', () => {
         expect(response.contentType).toBe(contentType)
         await expect(response.body()).rejects.toMatchObject({
           name: 'ParseError',
-          message: parseErrorMessage(),
+          message: 'Invalid JSON in response body',
           rawBody,
         })
       })
@@ -383,6 +377,102 @@ describe('Client', () => {
         const response = await client.fetch()
         expect(response.contentType).toBe(contentType)
         await expect(response.body()).resolves.toBe(rawBody)
+      })
+    })
+
+    describe('when the response body cannot be parsed', () => {
+      const contentLength = '4096'
+      const parseErrorMessage = text => {
+        try {
+          JSON.parse(text)
+        } catch (err) {
+          return err.message
+        }
+      }
+      const loggedLine = () => util.format(...logger.error.mock.calls[0])
+
+      let statusCode
+      let contentType
+      let chunks
+
+      beforeEach(() => {
+        stream.mockHeaders.mockImplementation(() => {
+          return {
+            [HTTP2_HEADER_STATUS]: statusCode,
+            [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+            [HTTP2_HEADER_CONTENT_LENGTH]: contentLength,
+          }
+        })
+        stream[Symbol.asyncIterator] = function * () {
+          yield * chunks
+        }
+        client.responseType = 'json'
+      })
+
+      it.each([
+        'application/json',
+        'text/plain; charset=utf-8',
+        undefined,
+      ])('should keep a corrupted body with content type %s out of the log and the error', async type => {
+        statusCode = 200
+        contentType = type
+        const sensitiveValue = 'do-not-log-this-value'
+        const sensitivePrefix = sensitiveValue.slice(0, 8)
+        chunks = ['{"kind":"Secret",', `"data":{"token":${sensitiveValue}}}`]
+        const text = chunks.join('')
+        // V8 quotes the input around the unexpected token
+        expect(parseErrorMessage(text)).toContain(sensitivePrefix)
+
+        const response = await client.fetch()
+        const err = await response.body().catch(err => err)
+
+        expect(err).toMatchObject({
+          name: 'ParseError',
+          message: 'Invalid JSON in response body',
+          rawBody: text,
+        })
+        expect(err.cause).toBeUndefined()
+        expect(util.inspect(err)).not.toContain(sensitivePrefix)
+        expect(logger.error).toHaveBeenCalledTimes(1)
+        expect(loggedLine()).toBe(
+          `Failed to parse response body (status 200, content-type ${type}, content-length 4096, received ${Buffer.byteLength(text)} bytes, first character "{")`,
+        )
+        expect(loggedLine()).not.toContain(sensitivePrefix)
+      })
+
+      it('should log only the metadata and the first character of an error page', async () => {
+        statusCode = 503
+        contentType = 'text/html'
+        chunks = ['<html><body>', 'do-not-log-this-value', '</body></html>']
+        const text = chunks.join('')
+
+        const response = await client.fetch()
+        await expect(response.body()).resolves.toBe(text)
+
+        expect(logger.error).toHaveBeenCalledTimes(1)
+        expect(loggedLine()).toBe(
+          `Failed to parse response body (status 503, content-type text/html, content-length 4096, received ${Buffer.byteLength(text)} bytes, first character "<")`,
+        )
+      })
+
+      it.each([
+        { name: 'a body starting with a newline', body: ['\n', '2026-09-25 00:00:00.000 error: forged line'], expected: '0xa' },
+        { name: 'a body starting with a byte order mark', body: ['\ufeff{}'], expected: '0xfeff' },
+        { name: 'an empty body', body: [], expected: 'none' },
+      ])('should describe the first character of $name as $expected', async ({ body, expected }) => {
+        statusCode = 502
+        contentType = 'text/plain'
+        chunks = body
+        const text = chunks.join('')
+
+        const response = await client.fetch()
+        await expect(response.body()).resolves.toBe(text)
+
+        expect(logger.error).toHaveBeenCalledTimes(1)
+        expect(loggedLine()).toBe(
+          `Failed to parse response body (status 502, content-type text/plain, content-length 4096, received ${Buffer.byteLength(text)} bytes, first character ${expected})`,
+        )
+        expect(loggedLine()).not.toContain('\n')
       })
     })
 
