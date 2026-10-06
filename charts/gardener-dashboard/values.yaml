@@ -41,7 +41,9 @@ global:
       requestTimeout: ~
 
       reflector:
-        # Per-resource reflector synchronization strategies. Entries are opt-in.
+        # All reflectors attempt WatchList initialization, regardless of the resource entries below.
+        # Optional per-resource entries configure the regular LIST fallback/relist strategy used when
+        # WatchList is unavailable or initialization fails.
         # KUBE_CLIENT_REFLECTOR_RESOURCES can override these resources with a JSON array when injected externally;
         # this chart does not emit the environment variable.
         # Example (replace `resources: []` below):
