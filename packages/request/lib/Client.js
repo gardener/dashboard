@@ -9,7 +9,7 @@ import { isIP } from 'net'
 import http from 'http'
 import http2 from 'http2'
 import zlib from 'zlib'
-import typeis from 'type-is/index.js'
+import { TypeIs } from 'type-is'
 import { pick, omit } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import { createHttpError, ParseError, TimeoutError } from './errors.js'
@@ -17,6 +17,8 @@ import agent from './Agent.js'
 import { pipeline } from 'stream'
 
 const { globalAgent } = agent
+
+const responseTypeIs = new TypeIs(['application/json', 'text/plain'])
 
 const {
   HTTP2_HEADER_STATUS,
@@ -309,7 +311,14 @@ class Client {
           if (['json', 'text'].includes(responseType)) {
             return responseType
           }
-          return typeis.is(this.contentType, ['json', 'text'])
+          const match = this.contentType && responseTypeIs.is(this.contentType)
+          if (match === 'application/json') {
+            return 'json'
+          }
+          if (match === 'text/plain') {
+            return 'text'
+          }
+          return false
         },
         destroy (error) {
           stream.destroy(error)
