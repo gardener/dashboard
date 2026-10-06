@@ -64,7 +64,6 @@ class Reflector {
     this.useWatchList = true
     this.stopRequested = false
     this.backoffManager = new BackoffManager()
-    this.initConnBackoffManager = new BackoffManager()
     this.signal = undefined
   }
 
@@ -128,7 +127,6 @@ class Reflector {
 
   destroy () {
     this.backoffManager.clearTimeout()
-    this.initConnBackoffManager.clearTimeout()
   }
 
   setAbortSignal (signal) {
@@ -155,7 +153,14 @@ class Reflector {
       if (this.signal.aborted) {
         break
       }
-      await delay(this.backoffManager.duration() + 1000)
+      try {
+        await delay(this.backoffManager.duration(), this.signal)
+      } catch (err) {
+        if (isAbortError(err)) {
+          break
+        }
+        throw err
+      }
       logger.info('Restarting reflector %s', this.expectedTypeName)
     }
     logger.info('Stopped reflector %s', this.expectedTypeName)
@@ -265,8 +270,8 @@ class Reflector {
           if (this.signal.aborted || isAbortError(err)) {
             return
           }
-          logger.info(
-            'Data could not be fetched in WatchList mode for %s. Falling back to regular list: %s',
+          logger.debug(
+            "Data couldn't be fetched in WatchList mode for %s. Falling back to regular list. This is expected if WatchList is not supported or disabled in kube-apiserver: %s",
             this.expectedTypeName,
             err.message,
           )
@@ -298,7 +303,14 @@ class Reflector {
           } catch (err) {
             if (isWatchErrorRetriable(err)) {
               logger.info('Watch of %s failed with a retriable error: %s', this.expectedTypeName, err.message)
-              await delay(this.initConnBackoffManager.duration())
+              try {
+                await delay(this.backoffManager.duration(), this.signal)
+              } catch (err) {
+                if (isAbortError(err)) {
+                  return
+                }
+                throw err
+              }
               continue
             }
             throw err
@@ -324,11 +336,25 @@ class Reflector {
             },
           })
         } catch (err) {
+          response?.destroy?.()
+          response = undefined
+          iterator = undefined
           if (isExpiredError(err)) {
             // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
             // So first try to LIST with setting RV to resource version of last observed object.
             logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
+          } else if (isTooManyRequests(err)) {
+            logger.info('Watch of %s returned 429 - backing off', this.expectedTypeName)
+            try {
+              await delay(this.backoffManager.duration(), this.signal)
+            } catch (err) {
+              if (isAbortError(err)) {
+                return
+              }
+              throw err
+            }
+            continue
           } else if (!isAbortError(err)) {
             logger.warn('Watch of %s ended with: %s', this.expectedTypeName, err.message)
           }
@@ -339,8 +365,6 @@ class Reflector {
       }
     } finally {
       response?.destroy?.()
-      this.initConnBackoffManager.clearTimeout()
-      this.initConnBackoffManager.reset()
     }
   }
 
@@ -400,7 +424,7 @@ class Reflector {
         }
         if (isWatchErrorRetriable(err)) {
           logger.info('WatchList of %s failed with a retriable error, backing off: %s', this.expectedTypeName, err.message)
-          await delay(this.initConnBackoffManager.duration(), this.signal)
+          await delay(this.backoffManager.duration(), this.signal)
           continue
         }
         if (isExpiredError(err) || isTooLargeResourceVersionError(err)) {
