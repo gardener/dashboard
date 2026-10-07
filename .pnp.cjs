@@ -1363,7 +1363,6 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.0-next.1"],\
-          ["type-is", "npm:2.1.0"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
           ["vitest", "virtual:da5c259967d05763f37b857188cc51d834f07841d7f256ee31fca651fde6eb0ee4baf7a619bba67c191201184011519f8e83142e0030ce0ac1ed9b709ad7dfc2#npm:5.0.0"]\
         ],\
@@ -1388,7 +1387,6 @@ const RAW_RUNTIME_STATE =
           ["http-errors", "npm:2.0.1"],\
           ["lodash-es", "npm:4.18.1"],\
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.0-next.1"],\
-          ["type-is", "npm:2.1.0"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
           ["vitest", "virtual:167c898d89436663a7a547cd240a0f77e183060e54bab1fd8e9ad3b783292e7bee2c1aaecd5e22bd0f54c8b102c8a6713b919970f45193ff335a90f5b65daa58#npm:5.0.0"]\
         ],\
