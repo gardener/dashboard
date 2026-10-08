@@ -38,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
       </g-list-item-content>
     </g-list-item>
-    <g-list-item v-if="canViewLandscape">
+    <g-list-item v-if="canViewLandscape && !isSelfHostedShoot">
       <g-list-item-content label="Seed Readiness">
         <div class="d-flex align-center pt-1">
           <span v-if="!shootConditions.length">-</span>
@@ -88,6 +88,7 @@ const shootItem = useShootItem()
 const {
   shootUid,
   shootConditions,
+  isSelfHostedShoot,
 } = shootItem
 
 const showMetricsSection = computed(() => {

@@ -34,6 +34,19 @@ SPDX-License-Identifier: Apache-2.0
                   :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
                   :text="shootName"
                 />
+                <v-tooltip
+                  v-if="isSelfHostedShoot"
+                  text="Self-hosted shoot cluster"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-icon
+                      v-bind="tooltipProps"
+                      class="ml-1"
+                      icon="mdi-atom"
+                      size="small"
+                    />
+                  </template>
+                </v-tooltip>
               </template>
               <g-copy-btn :clipboard-text="shootName" />
             </g-auto-hide>
@@ -73,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
         </g-auto-hide>
       </template>
       <template v-if="cell.header.key === 'workers'">
-        <g-scroll-container class="d-flex flex-wrap justify-center large-container">
+        <g-scroll-container class="d-flex flex-wrap justify-center large-container pt-2">
           <g-collapsible-items
             :items="shootWorkerGroups"
             :uid="shootUid"
@@ -81,10 +94,14 @@ SPDX-License-Identifier: Apache-2.0
             inject-key="expandedWorkerGroups"
           >
             <template #item="{ item }">
-              <g-worker-group
-                :worker-group="item"
+              <v-badge
+                :model-value="item.controlPlane != null"
+                icon="mdi-atom"
+                color="primary"
                 class="ma-1"
-              />
+              >
+                <g-worker-group :worker-group="item" />
+              </v-badge>
             </template>
           </g-collapsible-items>
         </g-scroll-container>
@@ -340,6 +357,7 @@ const {
   shootWorkerGroups,
   shootUid,
   shootCloudProfileRef,
+  isSelfHostedShoot,
 } = useProvideShootItem(shootItem, {
   cloudProfileStore,
   projectStore,
@@ -483,6 +501,14 @@ const hasShootWorkerGroupWarning = computed(() => {
 
   .project-cell {
     max-width: 200px;
+    overflow: hidden;
+  }
+
+  .name-cell {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    height: 100%;
     overflow: hidden;
   }
 
