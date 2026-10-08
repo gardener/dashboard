@@ -85,13 +85,13 @@ describe('stores', () => {
         name: 'infra1-seed',
         unhealthyFilterMask: 3,
       })
-      expect(seedStatStore.list).toEqual([
-        expect.objectContaining({
+      expect(seedStatStore.list).toEqual(new Map([
+        ['infra1-seed', expect.objectContaining({
           metadata: expect.objectContaining({
             name: 'infra1-seed',
           }),
-        }),
-      ])
+        })],
+      ]))
       expect(seedStatStore.unhealthyShootsForSeed('infra1-seed')).toBe(2)
     })
 
@@ -176,7 +176,9 @@ describe('stores', () => {
 
       // Final state should reflect B
       expect(seedStatStore.subscription).toEqual({ unhealthyFilterMask: 2 })
-      expect(seedStatStore.list).toEqual([{ metadata: { name: 'seed-b' } }])
+      expect(seedStatStore.list).toEqual(new Map([
+        ['seed-b', { metadata: { name: 'seed-b' } }],
+      ]))
       expect(emitSubscribe).toHaveBeenCalledWith('seedstats', { unhealthyFilterMask: 2 })
     })
 
