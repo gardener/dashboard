@@ -6,10 +6,11 @@
 
 import { ref } from 'vue'
 
-import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 
-describe('composables', () => {
+import { useMetalConstraints } from '@/providers/infra/metal/cloudProfile.js'
+
+describe('Metal CloudProfile constraints', () => {
   describe('useMetalConstraints', () => {
     const machineTypes = [
       {

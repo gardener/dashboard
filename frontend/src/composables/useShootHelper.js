@@ -24,10 +24,11 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useDefaultNodesCIDR } from '@/composables/useCloudProfile/useDefaultNodesCIDR.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
-import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
-import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
+import { useMetalConstraints } from '@/providers/infra/metal/cloudProfile.js'
+import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
+import { useOpenStackCredentialDomainName } from '@/providers/infra/openstack/credentials'
 import { cloudProfileDisplayName } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
@@ -184,10 +185,9 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 
-  const {
-    selfTerminationDays,
-    openStackDomainName,
-  } = useCloudProviderBinding(infrastructureBinding)
+  const infrastructureBindingContext = useCloudProviderBinding(infrastructureBinding)
+  const { selfTerminationDays } = infrastructureBindingContext
+  const openStackDomainName = useOpenStackCredentialDomainName(infrastructureBindingContext)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
