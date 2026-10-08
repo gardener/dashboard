@@ -50,6 +50,15 @@ SPDX-License-Identifier: Apache-2.0
       </v-tab>
     </v-tabs>
     <v-card-text>
+      <v-alert
+        v-if="workerGroup.controlPlane != null"
+        class="mb-3"
+        type="info"
+        variant="tonal"
+        density="compact"
+        icon="mdi-atom"
+        text="Control plane worker pool of the self-hosted shoot cluster."
+      />
       <v-window
         v-model="tab"
         class="group-window"
