@@ -283,12 +283,13 @@ import GCredentialConfiguration from '@/components/Credentials/GShootCredentialC
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 import {
   getDnsPrimaryProviderCredentialsRef,
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
 
+import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
+import { useOpenStackCredentialDomainName } from '@/providers/infra/openstack/credentials'
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
@@ -342,11 +343,12 @@ export default {
 
     const { getResourceRef } = useShootResources(shootItem)
 
+    const cloudProviderBindingContext = useCloudProviderBinding(shootCloudProviderBinding)
     const {
       credential,
       isSharedBinding,
-      openStackDomainName,
-    } = useCloudProviderBinding(shootCloudProviderBinding)
+    } = cloudProviderBindingContext
+    const openStackDomainName = useOpenStackCredentialDomainName(cloudProviderBindingContext)
 
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
     const { useFloatingPools } = useOpenStackConstraints(cloudProfile)

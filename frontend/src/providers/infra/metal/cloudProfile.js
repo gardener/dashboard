@@ -17,7 +17,7 @@ import map from 'lodash/map'
 import toPairs from 'lodash/toPairs'
 
 /**
- * Composable for managing Metal-specific constraints from a cloud profile.
+ * Provider-owned composable for managing Metal-specific constraints from a cloud profile.
  * Provides functions for working with partition IDs, firewall sizes, firewall images,
  * and firewall networks specific to Metal infrastructure.
  *
