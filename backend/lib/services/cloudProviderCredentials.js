@@ -177,7 +177,7 @@ export async function removeDns ({ user, params }) {
     switch (credentialKind) {
       case 'Secret':
         await client.core.secrets.delete(credentialNamespace, credentialName)
-        removeOldDnsBindingIfExists(client, credentialNamespace, credentialName)
+        await removeOldDnsBindingIfExists(client, credentialNamespace, credentialName)
         break
       case 'WorkloadIdentity':
         await client['security.gardener.cloud'].workloadidentities.delete(credentialNamespace, credentialName)
