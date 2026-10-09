@@ -15,17 +15,29 @@ import * as local from './local/shoot'
 import * as metal from './metal/shoot'
 import * as openstack from './openstack/shoot'
 import * as stackit from './stackit/shoot'
+import { createGdchInfrastructureDetailsContext } from './gdch/useShootInfrastructureDetails'
+import { createMetalInfrastructureDetailsContext } from './metal/useShootInfrastructureDetails'
+import { createOpenstackInfrastructureDetailsContext } from './openstack/useShootInfrastructureDetails'
 
 const registry = new Map([
   ['alicloud', alicloud],
   ['aws', aws],
   ['azure', azure],
   ['gcp', gcp],
-  ['gdch', gdch],
+  ['gdch', {
+    ...gdch,
+    createInfrastructureDetailsContext: createGdchInfrastructureDetailsContext,
+  }],
   ['hcloud', hcloud],
   ['local', local],
-  ['metal', metal],
-  ['openstack', openstack],
+  ['metal', {
+    ...metal,
+    createInfrastructureDetailsContext: createMetalInfrastructureDetailsContext,
+  }],
+  ['openstack', {
+    ...openstack,
+    createInfrastructureDetailsContext: createOpenstackInfrastructureDetailsContext,
+  }],
   ['stackit', stackit],
 ])
 
@@ -34,4 +46,15 @@ export function getInfrastructureProviderExtension (providerType) {
     ...defaultExtension,
     ...registry.get(providerType),
   }
+}
+
+export function createInfrastructureDetailsContexts (options) {
+  return new Map(
+    [...registry]
+      .filter(([, extension]) => extension.createInfrastructureDetailsContext)
+      .map(([providerType, extension]) => [
+        providerType,
+        extension.createInfrastructureDetailsContext(options),
+      ]),
+  )
 }

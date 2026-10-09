@@ -26,9 +26,6 @@ import { useDefaultNodesCIDR } from '@/composables/useCloudProfile/useDefaultNod
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes'
 
-import { useMetalConstraints } from '@/providers/infra/metal/cloudProfile.js'
-import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
-import { useOpenStackCredentialDomainName } from '@/providers/infra/openstack/credentials'
 import { cloudProfileDisplayName } from '@/utils'
 
 import { useShootAccessRestrictions } from './useShootAccessRestrictions'
@@ -37,7 +34,6 @@ import some from 'lodash/some'
 import find from 'lodash/find'
 import mapValues from 'lodash/mapValues'
 import head from 'lodash/head'
-import map from 'lodash/map'
 import get from 'lodash/get'
 import sortBy from 'lodash/sortBy'
 
@@ -135,17 +131,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
   } = useMachineTypes(cloudProfile, useZones)
 
   const {
-    useFloatingPoolNames,
-    useLoadBalancerProviderNames,
-  } = useOpenStackConstraints(cloudProfile)
-
-  const {
-    usePartitionIDs,
-    firewallImages,
-    useFirewallSizes,
-  } = useMetalConstraints(cloudProfile, useZones)
-
-  const {
     volumeTypes: allVolumeTypes,
     useFilteredVolumeTypes,
   } = useVolumeTypes(cloudProfile)
@@ -185,9 +170,7 @@ export function createShootHelperComposable (shootItem, options = {}) {
 
   const kubernetesVersionIsNotLatestPatch = useKubernetesVersionIsNotLatestPatch(kubernetesVersion)
 
-  const infrastructureBindingContext = useCloudProviderBinding(infrastructureBinding)
-  const { selfTerminationDays } = infrastructureBindingContext
-  const openStackDomainName = useOpenStackCredentialDomainName(infrastructureBindingContext)
+  const { selfTerminationDays } = useCloudProviderBinding(infrastructureBinding)
 
   const allPurposes = computed(() => {
     if (some(addons.value, 'enabled')) {
@@ -197,17 +180,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
       ? ['evaluation']
       : configStore.defaultPurposes
   })
-
-  const allLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
-
-  const partitionIDs = usePartitionIDs(region)
-
-  const sizes = useFirewallSizes(region)
-  const firewallSizes = computed(() => {
-    return map(sizes.value, 'name')
-  })
-
-  const allFloatingPoolNames = useFloatingPoolNames(region, openStackDomainName)
 
   const machineArchitectures = useMachineArchitectures(region)
 
@@ -247,11 +219,6 @@ export function createShootHelperComposable (shootItem, options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFloatingPoolNames,
     accessRestrictionDefinitionList,
     accessRestrictionDefinitions,
     accessRestrictionOptionDefinitions,

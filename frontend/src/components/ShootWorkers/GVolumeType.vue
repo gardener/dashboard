@@ -30,41 +30,29 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
       </template>
     </v-select>
-    <v-text-field
-      v-if="isAWS && worker.volume.type !== 'gp2'"
-      v-model.number="workerIops"
-      class="ml-1"
-      color="primary"
-      :error-messages="getErrorMessages(v$.workerIops)"
-      type="number"
-      min="100"
-      label="IOPS"
-      variant="underlined"
-      @update:model-value="onInputIops"
-      @blur="v$.workerIops.$touch()"
+    <component
+      :is="workerVolumeComponent"
+      v-if="workerVolumeComponent"
+      :worker="worker"
+      :field-name="fieldName"
+      @update-volume-type="$emit('updateVolumeType')"
     />
   </div>
 </template>
 
 <script>
 import { mapActions } from 'pinia'
-import {
-  required,
-  requiredIf,
-  minValue,
-} from '@vuelidate/validators'
+import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
-import { getInfrastructureProviderExtension } from '@/providers/infra'
+import { getInfrastructureProviderUi } from '@/providers/infra/ui'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
-import set from 'lodash/set'
-import unset from 'lodash/unset'
 
 export default {
   props: {
@@ -91,11 +79,6 @@ export default {
       v$: useVuelidate(),
     }
   },
-  data () {
-    return {
-      workerIops: undefined,
-    }
-  },
   validations () {
     return {
       worker: {
@@ -105,12 +88,6 @@ export default {
           }),
         },
       },
-      workerIops: withFieldName(() => `${this.fieldName} IOPS`, {
-        required: requiredIf(() => {
-          return this.isAWS && (this.worker.volume.type === 'io1' || this.worker.volume.type === 'io2')
-        }),
-        minValue: minValue(100),
-      }),
     }
   },
   computed: {
@@ -133,18 +110,12 @@ export default {
       }
       return ''
     },
-    isAWS () {
+    providerType () {
       const cloudProfile = this.cloudProfileByRef(this.cloudProfileRef)
-      return get(cloudProfile, ['spec', 'type']) === 'aws'
+      return get(cloudProfile, ['spec', 'type'])
     },
-  },
-  watch: {
-    'worker.providerConfig.volume.iops': {
-      handler (iops) {
-        this.workerIops = iops
-        this.v$.workerIops?.$touch()
-      },
-      immediate: true,
+    workerVolumeComponent () {
+      return getInfrastructureProviderUi(this.providerType)?.workerVolumeComponent
     },
   },
   methods: {
@@ -153,19 +124,6 @@ export default {
     ]),
     onInputVolumeType () {
       this.v$.worker.volume.type.$touch()
-      this.$emit('updateVolumeType')
-    },
-    onInputIops (value) {
-      const iopsValue = parseInt(value)
-      if (value && iopsValue > 0) {
-        if (!this.worker.providerConfig) {
-          this.worker.providerConfig = getInfrastructureProviderExtension('aws').createWorkerConfig()
-        }
-        set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
-      } else {
-        unset(this.worker.providerConfig, ['volume', 'iops'])
-      }
-      this.v$.workerIops.$touch()
       this.$emit('updateVolumeType')
     },
     getErrorMessages,

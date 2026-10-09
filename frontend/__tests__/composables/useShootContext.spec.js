@@ -189,10 +189,11 @@ describe('composables', () => {
         },
       })
 
+      const gdchInfrastructureContext = shootContextStore.providerInfrastructureContext
       shootContextStore.networkingNodes = '10.1.0.0/18'
-      expect(shootContextStore.providerInfrastructureConfigNodeCIDR).toBe('10.250.0.0/16')
+      expect(gdchInfrastructureContext.nodeCIDR.value).toBe('10.250.0.0/16')
 
-      shootContextStore.providerInfrastructureConfigNodeCIDR = '10.2.0.0/18'
+      gdchInfrastructureContext.nodeCIDR.value = '10.2.0.0/18'
       expect(shootContextStore.networkingNodes).toBe('10.2.0.0/18')
     })
 
