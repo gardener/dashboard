@@ -10,8 +10,7 @@ import http2 from 'http2'
 import zlib from 'zlib'
 import stream from 'stream'
 import { once } from 'events'
-import { promisify } from 'util'
-import typeis from 'type-is'
+import { MIMEType, promisify } from 'node:util'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import request from '../lib/index.js'
 
@@ -101,7 +100,7 @@ function createSecureServer ({ cert, key }) {
       for await (const chunk of stream) {
         body += chunk
       }
-      if (typeis.is(contentType, ['json']) === 'json') {
+      if (MIMEType.parse(contentType)?.essence === 'application/json') {
         body = JSON.parse(body)
       }
       let statusCode = 200
