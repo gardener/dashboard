@@ -6,9 +6,9 @@
 
 import { ref } from 'vue'
 
-import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
+import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
 
-describe('composables', () => {
+describe('OpenStack CloudProfile constraints', () => {
   describe('useOpenStackConstraints', () => {
     const floatingPools = [
       {
