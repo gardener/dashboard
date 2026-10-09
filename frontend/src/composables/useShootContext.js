@@ -35,12 +35,14 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
-import { getInfrastructureProviderExtension } from '@/providers/infra'
+import {
+  createInfrastructureDetailsContexts,
+  getInfrastructureProviderExtension,
+} from '@/providers/infra'
 import {
   findFreeNetworks,
   getZonesNetworkConfiguration,
 } from '@/providers/infra/common/zoneNetworking'
-import { useMetalConstraints } from '@/providers/infra/metal/cloudProfile.js'
 import {
   scheduleEventsFromCrontabBlocks,
   crontabBlocksFromScheduleEvents,
@@ -54,10 +56,6 @@ import {
   convertToGi,
   defaultCriNameByKubernetesVersion,
 } from '@/utils'
-import {
-  bestMatchForString,
-  wildcardObjectsFromStrings,
-} from '@/utils/wildcard'
 
 import { useShootDns } from './useShootDns'
 import {
@@ -247,8 +245,7 @@ export function createShootContextComposable (options = {}) {
     resetKubernetesVersion()
     resetBindingName()
     resetRegion()
-    resetProviderInfrastructureConfigProjectID()
-    resetProviderInfrastructureConfigFirewallImage()
+    providerInfrastructureContext.value?.resetCloudProfileDependentValues?.()
   }
 
   /* secretBindingName */
@@ -331,9 +328,7 @@ export function createShootContextComposable (options = {}) {
     set (value) {
       set(manifest.value, ['spec', 'region'], value)
       resetProviderWorkers()
-      resetProviderControlPlaneConfigLoadBalancerProviderName()
-      resetProviderInfrastructureConfigPartitionID()
-      resetProviderInfrastructureConfigFloatingPoolName()
+      providerInfrastructureContext.value?.resetRegionDependentValues?.()
     },
   })
 
@@ -424,165 +419,6 @@ export function createShootContextComposable (options = {}) {
       } else {
         unset(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'])
       }
-    },
-  })
-
-  const providerControlPlaneConfigLoadBalancerProviderName = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerProvider'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerProvider'], value)
-    },
-  })
-
-  function resetProviderControlPlaneConfigLoadBalancerProviderName () {
-    const configuredDefault = configStore.defaultLoadBalancerProvider
-    providerControlPlaneConfigLoadBalancerProviderName.value = includes(allLoadBalancerProviderNames.value, configuredDefault)
-      ? configuredDefault
-      : head(allLoadBalancerProviderNames.value)
-  }
-
-  const providerInfrastructureConfigPartitionID = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'partitionID'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'partitionID'], value)
-      resetProviderInfrastructureConfigFirewallSize()
-      resetProviderInfrastructureConfigFirewallNetworks()
-    },
-  })
-
-  function resetProviderInfrastructureConfigPartitionID () {
-    providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
-  }
-
-  const providerInfrastructureConfigProjectID = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'projectID'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'projectID'], value)
-    },
-  })
-
-  function resetProviderInfrastructureConfigProjectID () {
-    providerInfrastructureConfigProjectID.value = undefined
-  }
-
-  const providerInfrastructureConfigFloatingPoolName = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'], value)
-    },
-  })
-
-  function resetProviderInfrastructureConfigFloatingPoolName () {
-    const configuredDefault = configStore.defaultFloatingPool
-    const floatingPoolPatterns = wildcardObjectsFromStrings(allFloatingPoolNames.value)
-    const configuredDefaultMatches = configuredDefault && bestMatchForString(floatingPoolPatterns, configuredDefault)
-    providerInfrastructureConfigFloatingPoolName.value = configuredDefaultMatches
-      ? configuredDefault
-      : head(allFloatingPoolNames.value)
-  }
-
-  const providerInfrastructureConfigFirewallImage = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'image'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'image'], value)
-    },
-  })
-
-  function resetProviderInfrastructureConfigFirewallImage () {
-    providerInfrastructureConfigFirewallImage.value = head(firewallImages.value)
-  }
-
-  const providerInfrastructureConfigFirewallSize = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'size'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'size'], value)
-    },
-  })
-
-  function resetProviderInfrastructureConfigFirewallSize () {
-    providerInfrastructureConfigFirewallSize.value = head(firewallSizes.value)
-  }
-
-  const providerInfrastructureConfigFirewallNetworks = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'networks'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'firewall', 'networks'], value)
-    },
-  })
-
-  function resetProviderInfrastructureConfigFirewallNetworks () {
-    const internetFirewallNetwork = find(allFirewallNetworks.value, ['key', 'internet'])
-    providerInfrastructureConfigFirewallNetworks.value = internetFirewallNetwork
-      ? [internetFirewallNetwork.value]
-      : undefined
-  }
-
-  // GDCH-specific: parentReference points at a GDC `Subnet` or `SubnetGroup` that scopes
-  // worker-pool IP allocation.
-  const providerInfrastructureConfigParentReferenceName = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'], value)
-    },
-  })
-
-  const providerInfrastructureConfigParentReferenceNamespace = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
-    },
-    set (value) {
-      if (value) {
-        set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'], value)
-      } else {
-        unset(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
-      }
-    },
-  })
-
-  const providerInfrastructureConfigParentReferenceType = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'], value)
-    },
-  })
-
-  // GDCH-specific: enableEgress controls Cloud NAT egress.
-  const providerInfrastructureConfigEnableEgress = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'], value)
-    },
-  })
-
-  // GDCH-specific: changes made through the infrastructure form are written to both
-  // infrastructureConfig.networks.nodeCIDR and spec.networking.nodes.
-  const providerInfrastructureConfigNodeCIDR = computed({
-    get () {
-      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'])
-    },
-    set (value) {
-      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
-      networkingNodes.value = value
     },
   })
 
@@ -996,11 +832,6 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFloatingPoolNames,
     accessRestrictionDefinitions,
     accessRestrictionNoItemsText,
     allMachineTypes,
@@ -1022,9 +853,18 @@ export function createShootContextComposable (options = {}) {
   } = useKubernetesVersions(cloudProfile)
 
   const { useZones } = useRegions(cloudProfile)
-  const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
-
-  const allFirewallNetworks = useFirewallNetworks(providerInfrastructureConfigPartitionID)
+  const providerInfrastructureContexts = createInfrastructureDetailsContexts({
+    manifest,
+    region,
+    networkingNodes,
+    cloudProfile,
+    infrastructureBinding,
+    configStore,
+    useZones,
+  })
+  const providerInfrastructureContext = computed(() => {
+    return providerInfrastructureContexts.get(providerType.value)
+  })
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
@@ -1127,22 +967,11 @@ export function createShootContextComposable (options = {}) {
     /* provider */
     providerType,
     /* provider - controlPlaneConfig */
-    providerControlPlaneConfigLoadBalancerProviderName,
     providerControlPlaneConfigZone,
     /* provider - infrastructureConfig */
-    providerInfrastructureConfigFirewallImage,
-    providerInfrastructureConfigFirewallNetworks,
-    providerInfrastructureConfigFirewallSize,
-    providerInfrastructureConfigFloatingPoolName,
+    providerInfrastructureContext,
     providerInfrastructureConfigNetworksZones,
     initialProviderInfrastructureConfigNetworksZones,
-    providerInfrastructureConfigPartitionID,
-    providerInfrastructureConfigProjectID,
-    providerInfrastructureConfigParentReferenceName,
-    providerInfrastructureConfigParentReferenceNamespace,
-    providerInfrastructureConfigParentReferenceType,
-    providerInfrastructureConfigEnableEgress,
-    providerInfrastructureConfigNodeCIDR,
     /* provider - workers */
     providerWorkers,
     addProviderWorker,
@@ -1216,12 +1045,6 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFirewallNetworks,
-    allFloatingPoolNames,
     allMachineTypes,
     machineArchitectures,
     volumeTypes,

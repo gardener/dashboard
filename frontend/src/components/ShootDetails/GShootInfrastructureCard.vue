@@ -219,51 +219,17 @@ SPDX-License-Identifier: Apache-2.0
           </g-list-item-content>
         </g-list-item>
       </template>
-      <template v-if="!!shootLoadbalancerClasses">
-        <v-divider inset />
-        <g-list-item>
-          <template #prepend>
-            <v-icon color="primary">
-              mdi-ip-network-outline
-            </v-icon>
-          </template>
-          <g-list-item-content label="Available Load Balancer Classes">
-            <div class="d-flex align-center pt-1">
-              <v-chip
-                v-for="{ name } in shootLoadbalancerClasses"
-                :key="name"
-                size="small"
-                class="mr-2"
-                variant="tonal"
-                color="tonal-primary"
-              >
-                {{ name }}
-                <v-icon
-                  v-if="name === defaultLoadbalancerClass"
-                  size="small"
-                >
-                  mdi-star
-                </v-icon>
-                <span
-                  v-tooltip:top="{
-                    text: 'Default Load Balancer Class',
-                    disabled: name !== defaultLoadbalancerClass
-                  }"
-                />
-              </v-chip>
-            </div>
-          </g-list-item-content>
-        </g-list-item>
-      </template>
+      <component
+        :is="shootInfrastructureCardComponent"
+        v-if="shootInfrastructureCardComponent"
+      />
     </g-list>
   </v-card>
 </template>
 
 <script>
 import { mapState } from 'pinia'
-import { computed } from 'vue'
 
-import { useCloudProfileStore } from '@/store/cloudProfile'
 import { useAuthzStore } from '@/store/authz'
 import { useGardenerExtensionStore } from '@/store/gardenerExtension'
 import { useCredentialStore } from '@/store/credential'
@@ -288,17 +254,9 @@ import {
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
 
-import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
-import { useOpenStackCredentialDomainName } from '@/providers/infra/openstack/credentials'
-import {
-  wildcardObjectsFromStrings,
-  bestMatchForString,
-} from '@/utils/wildcard'
+import { getInfrastructureProviderUi } from '@/providers/infra/ui'
 
-import head from 'lodash/head'
-import map from 'lodash/map'
 import get from 'lodash/get'
-import find from 'lodash/find'
 
 export default {
   components: {
@@ -315,15 +273,12 @@ export default {
     GCredentialConfiguration,
   },
   setup () {
-    const cloudProfileStore = useCloudProfileStore()
     const credentialStore = useCredentialStore()
 
     const {
       shootItem,
-      shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
@@ -348,19 +303,10 @@ export default {
       credential,
       isSharedBinding,
     } = cloudProviderBindingContext
-    const openStackDomainName = useOpenStackCredentialDomainName(cloudProviderBindingContext)
-
-    const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-    const { useFloatingPools } = useOpenStackConstraints(cloudProfile)
-
-    const availableFloatingPools = useFloatingPools(shootRegion, openStackDomainName)
-
     return {
       shootItem,
-      shootName,
       shootNamespace,
       shootSeedName,
-      shootCloudProfileRef,
       shootRegion,
       shootZones,
       shootDomain,
@@ -379,7 +325,6 @@ export default {
       dnsExtensionProviderResourceName,
       credential,
       isSharedBinding,
-      availableFloatingPools,
       shootSecretBindingName,
       credentialStore,
     }
@@ -402,39 +347,8 @@ export default {
       }
       return `*.ingress.${this.shootDomain}`
     },
-    shootLoadbalancerClasses () {
-      const shootLBClasses = get(this.shootItem, ['spec', 'provider', 'controlPlaneConfig', 'loadBalancerClasses'])
-      if (shootLBClasses) {
-        // If the user defines the LB classes in the shoot mainfest, they completely replace the ones defined in the cloudprofile
-        return shootLBClasses
-      }
-
-      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(this.availableFloatingPools, 'name'))
-
-      const shootFloatingPoolName = get(this.shootItem, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
-      const floatingPoolWildcardName = bestMatchForString(floatingPoolWildCardObjects, shootFloatingPoolName)
-
-      if (!floatingPoolWildcardName) {
-        return
-      }
-
-      const shootFloatingPool = find(this.availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
-      return get(shootFloatingPool, ['loadBalancerClasses'])
-    },
-    defaultLoadbalancerClass () {
-      const shootLBClasses = this.shootLoadbalancerClasses
-
-      let defaultLoadbalancerClass = find(shootLBClasses, ['purpose', 'default'])
-      if (defaultLoadbalancerClass) {
-        return defaultLoadbalancerClass.name
-      }
-
-      defaultLoadbalancerClass = find(shootLBClasses, ['name', 'default'])
-      if (defaultLoadbalancerClass) {
-        return defaultLoadbalancerClass.name
-      }
-
-      return get(head(shootLBClasses), ['name'])
+    shootInfrastructureCardComponent () {
+      return getInfrastructureProviderUi(this.shootProviderType)?.shootInfrastructureCardComponent
     },
     customDomainChipText () {
       if (this.isCustomShootDomain) {

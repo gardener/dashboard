@@ -66,156 +66,10 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.networkingType.$touch()"
         />
       </v-col>
-      <template v-if="!workerless && providerType === 'openstack'">
-        <v-col cols="3">
-          <g-wildcard-select
-            v-model="floatingPoolName"
-            :wildcard-select-items="allFloatingPoolNames"
-            wildcard-select-label="Floating Pool"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-select
-            v-model="v$.loadBalancerProviderName.$model"
-            color="primary"
-            item-color="primary"
-            label="Load Balancer Provider"
-            :items="allLoadBalancerProviderNames"
-            :error-messages="getErrorMessages(v$.loadBalancerProviderName)"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.loadBalancerProviderName.$touch()"
-          />
-        </v-col>
-      </template>
-      <template v-else-if="!workerless && providerType === 'metal'">
-        <v-col cols="3">
-          <v-text-field
-            v-model="v$.projectID.$model"
-            color="primary"
-            item-color="primary"
-            label="Project ID"
-            :error-messages="getErrorMessages(v$.projectID)"
-            hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.projectID.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-select
-            v-model="v$.partitionID.$model"
-            color="primary"
-            item-color="primary"
-            label="Partition ID"
-            :items="partitionIDs"
-            :error-messages="getErrorMessages(v$.partitionID)"
-            hint="Partion ID equals zone on other infrastructures"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.partitionID.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-select
-            v-model="v$.firewallImage.$model"
-            color="primary"
-            item-color="primary"
-            label="Firewall Image"
-            :items="firewallImages"
-            :error-messages="getErrorMessages(v$.firewallImage)"
-            variant="underlined"
-            @blur="v$.firewallImage.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-select
-            v-model="v$.firewallSize.$model"
-            color="primary"
-            item-color="primary"
-            label="Firewall Size"
-            :items="firewallSizes"
-            :error-messages="getErrorMessages(v$.firewallSize)"
-            variant="underlined"
-            @blur="v$.firewallSize.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-select
-            v-model="v$.firewallNetworks.$model"
-            color="primary"
-            item-color="primary"
-            label="Firewall Networks"
-            :items="allFirewallNetworks"
-            :error-messages="getErrorMessages(v$.firewallNetworks)"
-            chips
-            closable-chips
-            multiple
-            variant="underlined"
-            @blur="v$.firewallNetworks.$touch()"
-          />
-        </v-col>
-      </template>
-      <template v-else-if="!workerless && providerType === 'gdch'">
-        <v-col cols="3">
-          <v-select
-            v-model="v$.parentReferenceType.$model"
-            color="primary"
-            item-color="primary"
-            label="Parent Reference Type"
-            :items="parentReferenceTypes"
-            :error-messages="getErrorMessages(v$.parentReferenceType)"
-            hint="Reference type for the parent resource: SingleSubnet or SubnetGroup"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.parentReferenceType.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-text-field
-            v-model="v$.parentReferenceName.$model"
-            color="primary"
-            label="Parent Reference Name"
-            :error-messages="getErrorMessages(v$.parentReferenceName)"
-            hint="Name of the parent GDC Subnet or SubnetGroup"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.parentReferenceName.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-text-field
-            v-model="parentReferenceNamespace"
-            color="primary"
-            label="Parent Reference Namespace (optional)"
-            hint="Namespace of the parent reference, if it is in another GDC project"
-            persistent-hint
-            variant="underlined"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-text-field
-            v-model="v$.nodeCIDR.$model"
-            color="primary"
-            label="Node CIDR"
-            :error-messages="getErrorMessages(v$.nodeCIDR)"
-            hint="CIDR range used for worker nodes. The GDC provider extension creates a subnet for this range from the parent reference (e.g. 10.0.0.0/18)"
-            persistent-hint
-            variant="underlined"
-            @blur="v$.nodeCIDR.$touch()"
-          />
-        </v-col>
-        <v-col cols="3">
-          <v-checkbox
-            v-model="enableEgress"
-            label="Enable Cloud NAT egress"
-            color="primary"
-            density="compact"
-            hint="Recommended. Disable only if your project does not use Cloud NAT egress."
-            persistent-hint
-          />
-        </v-col>
-      </template>
+      <component
+        :is="createInfrastructureDetailsComponent"
+        v-if="createInfrastructureDetailsComponent"
+      />
     </v-row>
   </v-container>
 </template>
@@ -226,19 +80,15 @@ import {
   requiredIf,
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
-import { Netmask } from 'netmask'
 
 import GSelectCloudProfile from '@/components/GSelectCloudProfile'
-import GWildcardSelect from '@/components/GWildcardSelect'
 import GSelectCredential from '@/components/Credentials/GSelectCredential'
 
 import { useShootContext } from '@/composables/useShootContext'
 
+import { getInfrastructureProviderUi } from '@/providers/infra/ui'
 import { getErrorMessages } from '@/utils'
-import {
-  withFieldName,
-  withMessage,
-} from '@/utils/validators'
+import { withFieldName } from '@/utils/validators'
 
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
@@ -247,7 +97,6 @@ import isEmpty from 'lodash/isEmpty'
 export default {
   components: {
     GSelectCloudProfile,
-    GWildcardSelect,
     GSelectCredential,
   },
   setup () {
@@ -257,31 +106,12 @@ export default {
       infrastructureBinding,
       region,
       networkingType,
-      providerControlPlaneConfigLoadBalancerProviderName,
-      providerInfrastructureConfigFloatingPoolName,
-      providerInfrastructureConfigPartitionID,
-      providerInfrastructureConfigProjectID,
-      providerInfrastructureConfigFirewallImage,
-      providerInfrastructureConfigFirewallSize,
-      providerInfrastructureConfigFirewallNetworks,
-      providerInfrastructureConfigParentReferenceName,
-      providerInfrastructureConfigParentReferenceNamespace,
-      providerInfrastructureConfigParentReferenceType,
-      providerInfrastructureConfigEnableEgress,
-      providerInfrastructureConfigNodeCIDR,
-      networkingNodes,
       cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,
       networkingTypes,
-      allLoadBalancerProviderNames,
-      partitionIDs,
-      firewallImages,
-      firewallSizes,
-      allFirewallNetworks,
-      allFloatingPoolNames,
       workerless,
     } = useShootContext()
 
@@ -292,90 +122,22 @@ export default {
       cloudProfileRef,
       region,
       networkingType,
-      loadBalancerProviderName: providerControlPlaneConfigLoadBalancerProviderName,
-      floatingPoolName: providerInfrastructureConfigFloatingPoolName,
-      partitionID: providerInfrastructureConfigPartitionID,
-      projectID: providerInfrastructureConfigProjectID,
-      firewallImage: providerInfrastructureConfigFirewallImage,
-      firewallSize: providerInfrastructureConfigFirewallSize,
-      firewallNetworks: providerInfrastructureConfigFirewallNetworks,
-      parentReferenceName: providerInfrastructureConfigParentReferenceName,
-      parentReferenceNamespace: providerInfrastructureConfigParentReferenceNamespace,
-      parentReferenceType: providerInfrastructureConfigParentReferenceType,
-      enableEgress: providerInfrastructureConfigEnableEgress,
-      nodeCIDR: providerInfrastructureConfigNodeCIDR,
-      networkingNodes,
       cloudProfiles,
       infrastructureBindings,
       regionsWithSeed,
       regionsWithoutSeed,
       showAllRegions,
       networkingTypes,
-      allLoadBalancerProviderNames,
-      partitionIDs,
-      firewallImages,
-      firewallSizes,
-      allFirewallNetworks,
-      allFloatingPoolNames,
       workerless,
     }
   },
   validations () {
-    const infrastructureRequired = providerType => !this.workerless && this.providerType === providerType
-    const requiresInfrastructure = providerType => {
-      return requiredIf(() => infrastructureRequired(providerType))
-    }
     return {
       region: withFieldName('Region', {
         required,
       }),
       networkingType: withFieldName('Networking Type', {
         required: requiredIf(() => !this.workerless),
-      }),
-      loadBalancerProviderName: withFieldName('Load Balancer Provider', {
-        required: requiresInfrastructure('openstack'),
-      }),
-      partitionID: withFieldName('Partition ID', {
-        required: requiresInfrastructure('metal'),
-      }),
-      firewallImage: withFieldName('Firewall Image', {
-        required: requiresInfrastructure('metal'),
-      }),
-      firewallSize: withFieldName('Firewall Size', {
-        required: requiresInfrastructure('metal'),
-      }),
-      firewallNetworks: withFieldName('Firewall Networks', {
-        required: requiresInfrastructure('metal'),
-      }),
-      projectID: withFieldName('Project ID', {
-        required: requiresInfrastructure('metal'),
-      }),
-      parentReferenceName: withFieldName('Parent Reference Name', {
-        required: requiresInfrastructure('gdch'),
-      }),
-      parentReferenceType: withFieldName('Parent Reference Type', {
-        required: requiresInfrastructure('gdch'),
-      }),
-      nodeCIDR: withFieldName('Node CIDR', {
-        required: requiresInfrastructure('gdch'),
-        cidr: withMessage('Must be a valid IPv4 CIDR range', value => {
-          if (!infrastructureRequired('gdch') || !value) {
-            return true
-          }
-          const [address, prefix, ...remainder] = value.split('/')
-          const octets = address?.split('.') ?? []
-          if (remainder.length || !prefix || octets.length !== 4 || octets.some(octet => !/^\d{1,3}$/.test(octet))) {
-            return false
-          }
-          try {
-            return new Netmask(value).toString() === value
-          } catch {
-            return false
-          }
-        }),
-        matchesNetworkingNodes: withMessage('Must match the shoot networking node CIDR', value => {
-          return !infrastructureRequired('gdch') || value === this.networkingNodes
-        }),
       }),
     }
   },
@@ -402,12 +164,9 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    parentReferenceTypes () {
-      return ['SingleSubnet', 'SubnetGroup']
+    createInfrastructureDetailsComponent () {
+      return getInfrastructureProviderUi(this.providerType)?.createInfrastructureDetailsComponent
     },
-  },
-  mounted () {
-    this.v$.projectID.$touch() // project id is a required field (for metal). We want to show the error immediatley
   },
   methods: {
     getErrorMessages,
