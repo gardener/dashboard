@@ -129,12 +129,24 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
           </template>
           <g-list-item-content label="Pods CIDR">
-            {{ podsCidr }}
+            <v-chip
+              v-for="cidr in getPodsCidr || ['-']"
+              :key="cidr"
+              size="small"
+            >
+              {{ cidr }}
+            </v-chip>
           </g-list-item-content>
         </g-list-item>
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
-            {{ nodesCidr }}
+            <v-chip
+              v-for="cidr in getNodesCidr || ['-']"
+              :key="cidr"
+              size="small"
+            >
+              {{ cidr }}
+            </v-chip>
           </g-list-item-content>
         </g-list-item>
       </template>
@@ -148,7 +160,13 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Services CIDR">
-          {{ servicesCidr }}
+          <v-chip
+            v-for="cidr in getServicesCidr || ['-']"
+            :key="cidr"
+            size="small"
+          >
+            {{ cidr }}
+          </v-chip>
         </g-list-item-content>
       </g-list-item>
       <v-divider inset />
@@ -334,6 +352,9 @@ export default {
       servicesCidr,
       nodesCidr,
       podsCidr,
+      servicesCidrSpec,
+      nodesCidrSpec,
+      podsCidrSpec,
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
@@ -370,6 +391,9 @@ export default {
       servicesCidr,
       nodesCidr,
       podsCidr,
+      servicesCidrSpec,
+      nodesCidrSpec,
+      podsCidrSpec,
       shootTechnicalId,
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
@@ -434,6 +458,15 @@ export default {
 
       return get(head(shootLBClasses), ['name'])
     },
+    getPodsCidr () {
+      return this.podsCidr ? this.podsCidr : [this.podsCidrSpec]
+    },
+    getNodesCidr () {
+      return this.nodesCidr ? this.nodesCidr : [this.nodesCidrSpec]
+    },
+    getServicesCidr () {
+      return this.servicesCidr ? this.servicesCidr : [this.servicesCidrSpec]
+    },
     customDomainChipText () {
       if (this.isCustomShootDomain) {
         return 'custom'
@@ -477,3 +510,9 @@ export default {
   },
 }
 </script>
+<style scoped>
+  .v-chip {
+    margin-left: 1px;
+    margin-right: 1px;
+  }
+</style>

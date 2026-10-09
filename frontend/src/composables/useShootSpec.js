@@ -125,15 +125,27 @@ export function useShootSpec (shootItem, options = {}) {
     return compact(uniq(flatMap(get(shootSpec.value, ['provider', 'workers']), 'zones')))
   })
 
-  const podsCidr = computed(() => {
+  const podsCidrSpec = computed(() => {
     return get(shootSpec.value, ['networking', 'pods'])
   })
 
-  const nodesCidr = computed(() => {
+  const nodesCidrSpec = computed(() => {
     return get(shootSpec.value, ['networking', 'nodes'])
   })
 
-  const servicesCidr = computed(() => {
+  const ipFamilies = computed(() => {
+    return get(shootSpec.value, ['networking', 'ipFamilies'])
+  })
+
+  const hasIpv4 = computed(() => {
+    return ipFamilies?.value?.includes('IPv4')
+  })
+
+  const nodeCIDRMaskSize = computed(() => {
+    return get(shootSpec.value, ['kubernetes', 'kubeControllerManager', 'nodeCIDRMaskSize'])
+  })
+
+  const servicesCidrSpec = computed(() => {
     return get(shootSpec.value, ['networking', 'services'])
   })
 
@@ -196,9 +208,12 @@ export function useShootSpec (shootItem, options = {}) {
     shootAddons,
     shootRegion,
     shootZones,
-    podsCidr,
-    nodesCidr,
-    servicesCidr,
+    podsCidrSpec,
+    nodesCidrSpec,
+    ipFamilies,
+    hasIpv4,
+    nodeCIDRMaskSize,
+    servicesCidrSpec,
     shootDomain,
     isCustomShootDomain,
     shootDnsPrimaryProvider,
