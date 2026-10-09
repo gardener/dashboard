@@ -11,12 +11,10 @@ SPDX-License-Identifier: Apache-2.0
     }"
   >
     <slot />
-    <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="teaserTemplate"
-      v-html="teaserHtml"
+      v-safe-html="teaserHtml"
     />
-    <!-- eslint-enable vue/no-v-html -->
     <div
       v-else
       class="g-teaser__content"

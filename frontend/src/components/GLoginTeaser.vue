@@ -4,10 +4,9 @@ SPDX-FileCopyrightText: Contributors to the Gardener project
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-if="teaserTemplate"
-    v-html="teaserHtml"
+    v-safe-html="{ html: teaserHtml, allowStyleTags: true }"
   />
   <div
     v-else

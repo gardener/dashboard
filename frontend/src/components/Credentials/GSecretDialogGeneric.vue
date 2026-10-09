@@ -27,11 +27,10 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #help-slot>
       <slot name="help">
-        <!-- eslint-disable vue/no-v-html -- HTML comes exclusively from static vendor definitions and cannot be controlled by users. -->
         <div
           v-if="helpHtml"
+          v-safe-html="helpHtml"
           class="markdown"
-          v-html="helpHtml"
         />
         <div v-else>
           <p>
