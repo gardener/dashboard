@@ -14,6 +14,7 @@ import {
 
 import {
   createListOperator,
+  createMapOperator,
   useSocketEventHandler,
 } from '@/composables/useSocketEventHandler'
 
@@ -306,6 +307,45 @@ describe('composables', () => {
 
     it('requires an initialized array list for list operators', () => {
       expect(() => createListOperator(null)).toThrow('Argument `list` must be an array')
+    })
+
+    it('sets Map items by name and deletes them by uid', () => {
+      const firstItem = {
+        metadata: {
+          name: 'first',
+          uid: 'uid-1',
+        },
+      }
+      const secondItem = {
+        metadata: {
+          name: 'second',
+          uid: 'uid-2',
+        },
+      }
+      const map = new Map([
+        ['first', firstItem],
+        ['second', secondItem],
+      ])
+      const operator = createMapOperator(map)
+      const updatedFirstItem = {
+        metadata: {
+          name: 'first',
+          uid: 'uid-1',
+        },
+        updated: true,
+      }
+
+      operator.set('uid-1', updatedFirstItem)
+      operator.delete('uid-2')
+
+      expect(map).toEqual(new Map([
+        ['first', updatedFirstItem],
+      ]))
+    })
+
+    it('requires an initialized Map for Map operators', () => {
+      expect(() => createMapOperator(null)).toThrow('store not yet initialized')
+      expect(() => createMapOperator([])).toThrow('Argument `map` must be a Map')
     })
   })
 })

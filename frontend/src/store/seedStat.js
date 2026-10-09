@@ -20,9 +20,11 @@ import { useSocketStore } from '@/store/socket'
 import { useApi } from '@/composables/useApi'
 import { useLogger } from '@/composables/useLogger'
 import { useShootListFilters } from '@/composables/useShootListFilters'
-import { useSocketEventHandler } from '@/composables/useSocketEventHandler'
+import {
+  createMapOperator,
+  useSocketEventHandler,
+} from '@/composables/useSocketEventHandler'
 
-import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 
 export const useSeedStatStore = defineStore('seedstat', () => {
@@ -60,7 +62,7 @@ export const useSeedStatStore = defineStore('seedstat', () => {
     const data = options.name
       ? [response.data]
       : response.data
-    return data
+    return new Map(data.map(item => [item.metadata.name, item]))
   }
 
   async function openSubscription (options) {
@@ -132,7 +134,7 @@ export const useSeedStatStore = defineStore('seedstat', () => {
   }
 
   function statByName (name) {
-    return find(list.value, ['metadata.name', name])
+    return list.value?.get(name)
   }
 
   function shootCountForSeed (name) {
@@ -147,6 +149,9 @@ export const useSeedStatStore = defineStore('seedstat', () => {
 
   const socketEventHandler = useSocketEventHandler(useSeedStatStore, {
     logger,
+    createOperator (state) {
+      return createMapOperator(state.list)
+    },
     getSynchronizeOptions (store) {
       return store.synchronizeOptions
     },

@@ -57,6 +57,28 @@ export function createListOperator (list) {
   }
 }
 
+export function createMapOperator (map) {
+  if (map === null) {
+    throw new StoreNotInitializedError()
+  }
+  if (!(map instanceof Map)) {
+    throw new TypeError('Argument `map` must be a Map')
+  }
+  return {
+    delete (uid) {
+      for (const [name, item] of map) {
+        if (item.metadata.uid === uid) {
+          map.delete(name)
+          break
+        }
+      }
+    },
+    set (...[, item]) {
+      map.set(item.metadata.name, item)
+    },
+  }
+}
+
 function isStoreInitialized (store) {
   return store.isInitial !== true
 }
