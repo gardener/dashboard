@@ -24,20 +24,35 @@ function createStore (items) {
   return store
 }
 
+function seedShootsByNamespaceIndex (shoots) {
+  const handlers = new Map()
+  cache.indexShootsByNamespace({
+    on (event, handler) {
+      handlers.set(event, handler)
+    },
+  })
+  const add = handlers.get('add')
+  for (const shoot of shoots) {
+    add(shoot)
+  }
+}
+
 describe('api', function () {
   let agent
 
   beforeAll(async () => {
     agent = await createAgent()
 
+    const shoots = fixtures.shoots.list()
     cache.initialize({
       managedseeds: {
         store: createStore(fixtures.managedseeds.list()),
       },
       shoots: {
-        store: createStore(fixtures.shoots.list()),
+        store: createStore(shoots),
       },
     })
+    seedShootsByNamespaceIndex(shoots)
   })
 
   afterAll(() => {
