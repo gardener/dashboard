@@ -7,14 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <div class="d-flex flex-nowrap align-center ga-4">
     <div class="d-flex flex-wrap">
-      <div class="regular-input">
+      <div class="regular-input name-input">
         <v-text-field
           v-model="worker.name"
+          v-messages-color="{ color: 'warning' }"
           color="primary"
           :error-messages="getErrorMessages(v$.worker.name)"
           counter="15"
           label="Group Name"
           variant="underlined"
+          :hint="worker.controlPlane != null ? 'Control Plane Worker Pool' : undefined"
+          :persistent-hint="worker.controlPlane != null"
           @input="v$.worker.name.$touch()"
           @blur="v$.worker.name.$touch()"
         />
@@ -541,5 +544,10 @@ export default {
 <style lang="scss" scoped>
   :deep(.v-chip--disabled) {
     opacity: 1;
+  }
+
+  // Pin the name field to its min-width so the control plane hint wraps instead of widening the input.
+  .name-input {
+    max-width: 180px;
   }
 </style>

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-card>
     <g-toolbar title="Lifecycle" />
     <g-list>
-      <g-list-item>
+      <g-list-item v-if="!isSelfHostedShoot">
         <template #prepend>
           <v-icon color="primary">
             mdi-sleep
@@ -36,7 +36,10 @@ SPDX-License-Identifier: Apache-2.0
           />
         </template>
       </g-list-item>
-      <v-divider inset />
+      <v-divider
+        v-if="!isSelfHostedShoot"
+        inset
+      />
       <g-list-item>
         <template #prepend>
           <v-icon color="primary">
@@ -108,7 +111,7 @@ SPDX-License-Identifier: Apache-2.0
           <g-shoot-action-reconcile-start />
         </template>
       </g-list-item>
-      <template v-if="canPatchShoots">
+      <template v-if="canPatchShoots && !isSelfHostedShoot">
         <v-divider inset />
         <g-list-item>
           <template #prepend>
@@ -187,6 +190,7 @@ const {
   shootPurpose,
   shootMaintenance,
   canForceDeleteShoot,
+  isSelfHostedShoot,
 } = useShootItem()
 
 const hibernationConfiguration = ref(null)
