@@ -119,10 +119,10 @@ function createSecretFieldValue (key) {
       return get(this.secretFieldValues, [key], '')
     },
     set (value) {
-      this.secretFieldValues = {
+      this.setSecretFieldValues(this.providerFields, {
         ...this.secretFieldValues,
         [key]: value,
-      }
+      })
     },
   }
 }
@@ -173,13 +173,8 @@ export default {
     }
   },
   computed: {
-    secretFieldValues: {
-      get () {
-        return this.getSecretFieldValues(this.providerFields)
-      },
-      set (value) {
-        this.setSecretFieldValues(this.providerFields, value)
-      },
+    secretFieldValues () {
+      return this.getSecretFieldValues(this.providerFields)
     },
     authURL: createSecretFieldValue('authURL'),
     domainName: createSecretFieldValue('domainName'),
