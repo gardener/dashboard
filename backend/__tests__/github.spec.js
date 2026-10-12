@@ -139,7 +139,6 @@ describe('github', () => {
 
     describe('verify', () => {
       const req = {}
-      const res = {}
       const body = 'foo'
 
       const setHubSignatureHeader = body => {
@@ -148,20 +147,21 @@ describe('github', () => {
 
       beforeEach(() => {
         req.headers = {}
+        req.body = body
       })
 
       it('should succeed if signatures match', () => {
         setHubSignatureHeader(body)
-        expect(() => verify(req, res, body)).not.toThrow()
+        expect(verify(req)).toBe(true)
       })
 
-      it('should fail in case of an invalid signature', () => {
+      it('should return false in case of an invalid signature', () => {
         setHubSignatureHeader('baz')
-        expect(() => verify(req, res, body)).toThrow(createError(403, 'Signatures didn\'t match!'))
+        expect(verify(req)).toBe(false)
       })
 
       it('should fail if signature is missing', () => {
-        expect(() => verify(req, res, body)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
+        expect(() => verify(req)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
       })
 
       describe('when webhookSecret is not configured', () => {
@@ -176,7 +176,7 @@ describe('github', () => {
         })
 
         it('should fail with an assertion error', () => {
-          expect(() => verify(req, res, body)).toThrow(
+          expect(() => verify(req)).toThrow(
             expect.objectContaining({
               message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend',
               code: 'ERR_ASSERTION',
