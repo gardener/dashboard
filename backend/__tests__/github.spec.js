@@ -20,7 +20,10 @@ import { dashboardClient } from '@gardener-dashboard/kube-client'
 import logger from '../lib/logger/index.js'
 import config from '../lib/config/index.js'
 import handleGithubEvent from '../lib/github/webhook/handler.js'
-import verify from '../lib/github/webhook/verify.js'
+import {
+  verify,
+  ensureJsonContentType,
+} from '../lib/github/webhook/verify.js'
 import SyncManager from '../lib/github/SyncManager.js'
 import { getComments } from '../lib/github/index.js'
 
@@ -179,6 +182,35 @@ describe('github', () => {
               code: 'ERR_ASSERTION',
             }),
           )
+        })
+      })
+    })
+
+    describe('ensureJsonContentType', () => {
+      it('should call next if content type is json', () => {
+        const req = { is: vi.fn().mockReturnValue(true) }
+        const res = {}
+        const next = vi.fn()
+
+        ensureJsonContentType(req, res, next)
+
+        expect(req.is).toHaveBeenCalledWith('json')
+        expect(next).toHaveBeenCalledTimes(1)
+      })
+
+      it('should respond with 415 if content type is not json', () => {
+        const req = { is: vi.fn().mockReturnValue(false) }
+        const json = vi.fn()
+        const res = { status: vi.fn().mockReturnValue({ json }) }
+        const next = vi.fn()
+
+        ensureJsonContentType(req, res, next)
+
+        expect(req.is).toHaveBeenCalledWith('json')
+        expect(next).not.toHaveBeenCalled()
+        expect(res.status).toHaveBeenCalledWith(415)
+        expect(json).toHaveBeenCalledWith({
+          message: 'Unsupported Media Type: Content-Type must be application/json',
         })
       })
     })
