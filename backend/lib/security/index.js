@@ -300,6 +300,7 @@ async function createAccessToken (payload, idToken) {
     aud: [GARDENER_AUDIENCE],
     isAdmin,
     canListShootsAllNamespaces,
+    ith: digest(idToken, 32),
   })
   const idTokenPayload = decode(idToken)
   if (idTokenPayload) {
@@ -470,6 +471,9 @@ async function getTokenSet (cookies) {
     throw createError(401, 'The decrypted bearer token must not be empty', { code: 'ERR_JWE_DECRYPTION_FAILED' })
   }
   const [idToken, refreshToken] = values.split(',')
+  if (!isNonEmptyString(idToken) || digest(idToken, 32) !== decode(accessToken).ith) {
+    throw createError(401, 'Session cookie binding is invalid', { code: 'ERR_SESSION_COOKIE_BINDING_INVALID' })
+  }
   const tokenSet = {
     id_token: idToken,
     refresh_token: refreshToken,

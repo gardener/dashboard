@@ -12,6 +12,7 @@ import {
   beforeEach,
 } from 'vitest'
 import { merge } from 'lodash-es'
+import { createHash } from 'node:crypto'
 
 const { default: createJose } = await import('../lib/security/jose.js')
 
@@ -399,6 +400,7 @@ describe('security', function () {
           exp: iat + 24 * expiresIn,
           refresh_at: oldIdTokenPayload.exp,
           aud: ['gardener'],
+          ith: createHash('sha256').update(oldIdToken).digest('hex').slice(0, 32),
         }
         const oldAccessToken = await jose.sign(oldAccessTokenPayload)
 
@@ -482,6 +484,8 @@ describe('security', function () {
           }),
         )
         expect(Object.hasOwn(user, 'groups')).toBe(false)
+        const newIdToken = (await refreshTokenGrant.mock.results[0].value).id_token
+        expect(user.ith).toBe(createHash('sha256').update(newIdToken).digest('hex').slice(0, 32))
       })
     })
 

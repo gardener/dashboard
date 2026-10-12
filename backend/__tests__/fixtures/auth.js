@@ -9,6 +9,7 @@ import {
   join,
   reduce,
 } from 'lodash-es'
+import { createHash } from 'node:crypto'
 import createError from 'http-errors'
 import pathToRegexp from 'path-to-regexp'
 
@@ -27,6 +28,7 @@ const { sign, encrypt, decode } = jose(sessionSecrets)
 const iat = 1577836800
 const expiresIn = '50y'
 const jwtid = 'jti'
+const digest = data => createHash('sha256').update(data).digest('hex').slice(0, 32)
 
 async function getCookieValue (accessToken, idToken = accessToken) {
   const [bearer, encryptedBearer] = await Promise.all([accessToken, idToken])
@@ -59,7 +61,6 @@ const auth = {
     if (!rest.jti) {
       options.jwtid = jwtid
     }
-    const accessToken = sign({ id, iat, aud, ...rest }, secret, options)
     const idTokenPayload = {
       id: bearerId ?? id,
       iat,
@@ -69,9 +70,10 @@ const auth = {
     if (groups !== undefined) {
       idTokenPayload.groups = groups
     }
-    const idToken = (groups !== undefined || bearerId !== undefined)
-      ? sign(idTokenPayload, secret, options)
-      : accessToken
+    const idToken = sign(idTokenPayload, secret, options)
+    const accessToken = idToken.then(idToken => {
+      return sign({ id, iat, aud, ith: digest(idToken), ...rest }, secret, options)
+    })
     return {
       isAdmin () {
         return /^admin/.test(id)
