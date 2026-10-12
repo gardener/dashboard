@@ -36,4 +36,16 @@ function verify (req, res, body) {
   }
 }
 
-export default verify
+function ensureJsonContentType (req, res, next) {
+  if (req.is('json')) {
+    return next()
+  }
+  res.status(415).json({
+    message: 'Unsupported Media Type: Content-Type must be application/json',
+  })
+}
+
+export {
+  verify,
+  ensureJsonContentType,
+}

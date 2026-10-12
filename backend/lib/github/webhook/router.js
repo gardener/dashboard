@@ -9,7 +9,10 @@ import bodyParser from 'body-parser'
 import { requestLogger } from '../../middleware.js'
 import monitorModule from '@gardener-dashboard/monitor'
 import handleGithubEvent from './handler.js'
-import verify from './verify.js'
+import {
+  verify,
+  ensureJsonContentType,
+} from './verify.js'
 const { monitorResponseTimes } = monitorModule
 
 const router = express.Router()
@@ -19,6 +22,7 @@ const router = express.Router()
 const middlewares = [
   requestLogger,
   monitorResponseTimes(),
+  ensureJsonContentType,
   bodyParser.json({ verify }),
 ]
 
