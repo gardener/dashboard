@@ -9,7 +9,7 @@ import { isIP } from 'net'
 import http from 'http'
 import http2 from 'http2'
 import zlib from 'zlib'
-import typeis from 'type-is/index.js'
+import { MIMEType } from 'node:util'
 import { pick, omit } from 'lodash-es'
 import { globalLogger as logger } from '@gardener-dashboard/logger'
 import {
@@ -371,7 +371,14 @@ class Client {
           if (['json', 'text'].includes(responseType)) {
             return responseType
           }
-          return typeis.is(this.contentType, ['json', 'text'])
+          switch (MIMEType.parse(this.contentType)?.essence) {
+            case 'application/json':
+              return 'json'
+            case 'text/plain':
+              return 'text'
+            default:
+              return false
+          }
         },
         destroy (error) {
           destroyError = error

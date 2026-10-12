@@ -463,6 +463,32 @@ describe('Client', () => {
       })
     })
 
+    it.each([
+      ['application/json', 'json'],
+      ['application/json; charset=utf-8', 'json'],
+      ['Application/JSON; charset=UTF-8', 'json'],
+      ['text/plain', 'text'],
+      ['text/plain; charset=utf-8', 'text'],
+      ['TEXT/PLAIN; charset=UTF-8', 'text'],
+      ['text/html', false],
+      ['application/problem+json', false],
+      ['application/jsonp', false],
+      ['text/plainish', false],
+      [undefined, false],
+      ['', false],
+      ['invalid', false],
+    ])('should detect response type for content type %s as %s', async (contentType, type) => {
+      stream.mockHeaders.mockReturnValue({
+        [HTTP2_HEADER_STATUS]: statusCode,
+        [HTTP2_HEADER_CONTENT_TYPE]: contentType,
+      })
+      const response = await client.fetch()
+      expect(response.type).toBe(type)
+      const text = JSON.stringify(stream.mockBody())
+      const body = type === 'json' ? stream.mockBody() : type === 'text' ? text : Buffer.from(text)
+      await expect(response.body()).resolves.toEqual(body)
+    })
+
     it('should timeout when a request exceeds its deadline before headers arrive', async () => {
       const requestTimeout = 10
       const message = `Request exceeded ${requestTimeout} ms for GET /test/foo/bar`
