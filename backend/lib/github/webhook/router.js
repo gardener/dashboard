@@ -6,6 +6,7 @@
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import createError from 'http-errors'
 import { requestLogger } from '../../middleware.js'
 import monitorModule from '@gardener-dashboard/monitor'
 import handleGithubEvent from './handler.js'
@@ -23,21 +24,26 @@ const middlewares = [
   requestLogger,
   monitorResponseTimes(),
   ensureJsonContentType,
-  bodyParser.json({ verify }),
+  bodyParser.raw({ type: '*/*' }),
 ]
 
 router.route('/')
   .post(middlewares, async (req, res, next) => {
-    try {
-      const eventName = req.headers['x-github-event']
-      await handleGithubEvent(eventName)
-      res.status(204).end()
-    } catch (err) {
-      next(err)
+    if (verify(req)) {
+      try {
+        const eventName = req.headers['x-github-event']
+        await handleGithubEvent(eventName)
+        res.status(204).end()
+      } catch (err) {
+        next(err)
+      }
+    } else {
+      throw createError(403, 'Signatures didn\'t match!')
     }
   })
   .all((req, res) => {
     res.set('Allow', 'POST').status(405).end()
-  })
+  },
+  )
 
 export default router
