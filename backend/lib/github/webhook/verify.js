@@ -19,7 +19,7 @@ function digestsEqual (a, b) {
   return timingSafeEqual(a, b)
 }
 
-function verify (req, res, body) {
+function verify (req) {
   const webhookSecret = config.gitHub?.webhookSecret
   assert.ok(webhookSecret, 'Property \'gitHub.webhookSecret\' not configured on dashboard backend')
 
@@ -30,10 +30,8 @@ function verify (req, res, body) {
   const requestSignatureHash = requestSignatureHeader.slice('sha256='.length)
   const requestSignature = Buffer.from(requestSignatureHash, 'hex')
 
-  const signature = createHmac('sha256', webhookSecret).update(body).digest()
-  if (!digestsEqual(requestSignature, signature)) {
-    throw createError(403, 'Signatures didn\'t match!')
-  }
+  const signature = createHmac('sha256', webhookSecret).update(req.body).digest()
+  return digestsEqual(requestSignature, signature)
 }
 
 function ensureJsonContentType (req, res, next) {
