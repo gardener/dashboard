@@ -372,7 +372,7 @@ export default {
     },
     filteredMachineImages () {
       return this.machineImages.filter(machineImage => {
-        return !machineImage.isExpired &&
+        return machineImage && !machineImage.isExpired &&
         this.matchesMachineTypeCapabilities(machineImage)
       })
     },
@@ -509,7 +509,7 @@ export default {
   methods: {
     matchesMachineTypeCapabilities (machineImage) {
       const capabilities = this.selectedMachineType?.capabilities
-      return machineImage?.capabilityFlavors?.some(capabilityFlavor => {
+      return !machineImage.capabilityFlavors || machineImage.capabilityFlavors.some(capabilityFlavor => {
         return Object.entries(capabilityFlavor).every(([name, values]) => {
           return values?.some(value => get(capabilities, [name])?.includes(value))
         })
