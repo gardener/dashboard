@@ -76,14 +76,15 @@ function init (httpServer, cache) {
     // handle 'subscribe' events
     socket.on('subscribe', async (key, ...args) => {
       logger.debug('Socket %s subscribed to %s', socket.id, key)
-      const done = args.pop()
+      const hasCallback = typeof args[args.length - 1] === 'function'
+      const done = hasCallback ? args.pop() : null
       try {
         await dispatcher.subscribe(socket, key, ...args)
-        done({ statusCode: 200 })
+        done?.({ statusCode: 200 })
       } catch (err) {
         logger.error('Socket %s subscribe error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
-        done({ statusCode, name, message })
+        done?.({ statusCode, name, message })
       }
     })
 
@@ -91,24 +92,25 @@ function init (httpServer, cache) {
     socket.on('unsubscribe', async (key, done) => {
       try {
         await dispatcher.unsubscribe(socket, key)
-        done({ statusCode: 200 })
+        done?.({ statusCode: 200 })
       } catch (err) {
         logger.error('Socket %s unsubscribe error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
-        done({ statusCode, name, message })
+        done?.({ statusCode, name, message })
       }
     })
 
     // handle 'synchronize' events
     socket.on('synchronize', async (key, ...args) => {
-      const done = args.pop()
+      const hasCallback = typeof args[args.length - 1] === 'function'
+      const done = hasCallback ? args.pop() : null
       try {
         const items = await dispatcher.synchronize(socket, key, ...args)
-        done({ statusCode: 200, items })
+        done?.({ statusCode: 200, items })
       } catch (err) {
         logger.error('Socket %s synchronize error: %s', socket.id, err.message)
         const { statusCode = 500, name, message } = err
-        done({ statusCode, name, message })
+        done?.({ statusCode, name, message })
       }
     })
 
