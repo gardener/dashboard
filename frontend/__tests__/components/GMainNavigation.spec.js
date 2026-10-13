@@ -18,9 +18,13 @@ import {
 import { createPinia } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
+import { useAuthnStore } from '@/store/authn'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GMainNavigation from '@/components/GMainNavigation.vue'
+
+import { useApi } from '@/composables/useApi'
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
@@ -67,25 +71,46 @@ function createTestRouter () {
   return createRouter({
     history: createMemoryHistory(),
     routes: [
+      { name: 'Home', path: '/', component: {} },
       {
         name: 'ShootList',
-        path: '/namespace/:namespace/shoots',
+        path: '/projects/:projectName/clusters',
         component: {},
-        meta: {
-          namespaced: true,
-          projectScope: false,
-          menu: {
-            icon: 'mdi-view-dashboard',
-            title: 'Clusters',
-          },
-        },
+        meta: { projectScoped: true },
       },
       {
         name: 'ShootItem',
-        path: '/namespace/:namespace/shoots/:name',
+        path: '/projects/:projectName/clusters/:name',
         component: {},
+        meta: { projectScoped: true },
       },
+      { name: 'Credentials', path: '/projects/:projectName/credentials', component: {}, meta: { projectScoped: true } },
+      { name: 'Members', path: '/projects/:projectName/members', component: {}, meta: { projectScoped: true } },
+      { name: 'Administration', path: '/projects/:projectName', component: {}, meta: { projectScoped: true } },
+      { name: 'GardenTerminal', path: '/projects/:projectName/garden-cluster', component: {}, meta: { projectScoped: true } },
+      { name: 'AllClusters', path: '/clusters', component: {} },
+      { name: 'SeedList', path: '/seeds', component: {} },
     ],
+  })
+}
+
+function mountNavigation (pinia, router) {
+  return shallowMount(GMainNavigation, {
+    global: {
+      plugins: [
+        createVuetifyPlugin(),
+        pinia,
+        router,
+      ],
+      stubs: {
+        GMainProjectSelection: GMainProjectSelectionStub,
+        GProjectDialog: true,
+        GTeaser: SlotStub,
+        VList: SlotStub,
+        VListItem: VListItemStub,
+        VNavigationDrawer: SlotStub,
+      },
+    },
   })
 }
 
@@ -103,37 +128,24 @@ async function setup () {
   const router = createTestRouter()
   router.afterEach((to, from, failure) => {
     if (!failure) {
-      authzStore._setNamespace(to.params.namespace)
+      const project = projectStore.projectByName(to.params.projectName)
+      authzStore._setNamespace(project?.spec.namespace)
+      projectStore.rememberProject(to.params.projectName)
     }
   })
   await router.push({
     name: 'ShootItem',
     params: {
-      namespace: sourceProject.spec.namespace,
+      projectName: sourceProject.metadata.name,
       name: 'source-shoot',
     },
   })
 
-  const wrapper = shallowMount(GMainNavigation, {
-    global: {
-      plugins: [
-        createVuetifyPlugin(),
-        pinia,
-        router,
-      ],
-      stubs: {
-        GMainProjectSelection: GMainProjectSelectionStub,
-        GProjectDialog: true,
-        GTeaser: SlotStub,
-        VList: SlotStub,
-        VListItem: VListItemStub,
-        VNavigationDrawer: SlotStub,
-      },
-    },
-  })
+  const wrapper = mountNavigation(pinia, router)
 
   return {
     authzStore,
+    pinia,
     projectStore,
     router,
     sourceProject,
@@ -154,6 +166,42 @@ function sidebarTargets (wrapper) {
 
 describe('components', () => {
   describe('g-main-navigation', () => {
+    beforeEach(() => {
+      window.localStorage.clear()
+    })
+
+    it('shows only Home when no Projects are accessible', async () => {
+      const pinia = createPinia()
+      const router = createTestRouter()
+      await router.push({ name: 'Home' })
+
+      const wrapper = mountNavigation(pinia, router)
+
+      expect(projectSelection(wrapper).exists()).toBe(false)
+      expect(sidebarTargets(wrapper)).toEqual([
+        { name: 'Home' },
+      ])
+    })
+
+    it('shows the Project selection and Home when only Pending Projects exist', async () => {
+      const pinia = createPinia()
+      const projectStore = useProjectStore(pinia)
+      const pendingProject = createProject('pending')
+      pendingProject.status.phase = 'Pending'
+      projectStore.list = [pendingProject]
+      const router = createTestRouter()
+      await router.push({ name: 'Home' })
+
+      const wrapper = mountNavigation(pinia, router)
+
+      expect(projectStore.lastProject).toBeUndefined()
+      expect(projectSelection(wrapper).exists()).toBe(true)
+      expect(projectSelection(wrapper).props('selectedProject')).toBeUndefined()
+      expect(sidebarTargets(wrapper)).toEqual([
+        { name: 'Home' },
+      ])
+    })
+
     it('keeps project selection and sidebar targets on the committed namespace after cancelled navigation', async () => {
       const {
         router,
@@ -165,7 +213,7 @@ describe('components', () => {
 
       let continueTargetNavigation
       const removeGuard = router.beforeEach(to => {
-        if (to.params.namespace === targetProject.spec.namespace) {
+        if (to.params.projectName === targetProject.metadata.name) {
           return new Promise(resolve => {
             continueTargetNavigation = resolve
           })
@@ -178,7 +226,7 @@ describe('components', () => {
       const sourceNavigation = router.push({
         name: 'ShootList',
         params: {
-          namespace: sourceProject.spec.namespace,
+          projectName: sourceProject.metadata.name,
         },
       })
       continueTargetNavigation()
@@ -187,12 +235,12 @@ describe('components', () => {
       removeGuard()
 
       expect(isNavigationFailure(failure, NavigationFailureType.cancelled)).toBe(true)
-      expect(router.currentRoute.value.params.namespace).toBe(sourceProject.spec.namespace)
+      expect(router.currentRoute.value.params.projectName).toBe(sourceProject.metadata.name)
       expect(projectSelection(wrapper).props('selectedProject')).toBe(sourceProject)
       expect(sidebarTargets(wrapper)).toContainEqual({
         name: 'ShootList',
         params: {
-          namespace: sourceProject.spec.namespace,
+          projectName: sourceProject.metadata.name,
         },
       })
     })
@@ -207,13 +255,34 @@ describe('components', () => {
       projectSelection(wrapper).vm.$emit('projectSelect', targetProject)
       await flushPromises()
 
-      expect(router.currentRoute.value.params.namespace).toBe(targetProject.spec.namespace)
+      expect(router.currentRoute.value.params.projectName).toBe(targetProject.metadata.name)
       expect(projectSelection(wrapper).props('selectedProject')).toBe(targetProject)
       expect(sidebarTargets(wrapper)).toContainEqual({
         name: 'ShootList',
         params: {
-          namespace: targetProject.spec.namespace,
+          projectName: targetProject.metadata.name,
         },
+      })
+    })
+
+    it('keeps the Project page when switching Projects', async () => {
+      const {
+        router,
+        sourceProject,
+        targetProject,
+        wrapper,
+      } = await setup()
+      await router.push({
+        name: 'Members',
+        params: { projectName: sourceProject.metadata.name },
+      })
+
+      projectSelection(wrapper).vm.$emit('projectSelect', targetProject)
+      await flushPromises()
+
+      expect(router.currentRoute.value).toMatchObject({
+        name: 'Members',
+        params: { projectName: targetProject.metadata.name },
       })
     })
 
@@ -237,32 +306,160 @@ describe('components', () => {
       expect(projectSelection(wrapper).props('selectedProject')).toBe(projectStore.list[0])
     })
 
-    it('selects all projects and updates sidebar targets for the _all namespace', async () => {
+    it('preserves the effective q value when switching Project Cluster collections', async () => {
       const {
-        authzStore,
+        router,
+        sourceProject,
+        targetProject,
+        wrapper,
+      } = await setup()
+      await router.push({
+        name: 'ShootList',
+        params: { projectName: sourceProject.metadata.name },
+        query: { q: '' },
+      })
+
+      projectSelection(wrapper).vm.$emit('projectSelect', targetProject)
+      await flushPromises()
+
+      expect(router.currentRoute.value.name).toBe('ShootList')
+      expect(router.currentRoute.value.params.projectName).toBe(targetProject.metadata.name)
+      expect(router.currentRoute.value.query).toEqual({ q: '' })
+    })
+
+    it('selects All Projects on the All Clusters route', async () => {
+      const {
+        router,
         wrapper,
       } = await setup()
 
-      authzStore._setNamespace('_all')
+      await router.push({ name: 'AllClusters' })
+
+      expect(projectSelection(wrapper).props('selectedProject')).toMatchObject({
+        spec: { namespace: '_all' },
+      })
+      expect(sidebarTargets(wrapper)).toEqual([
+        { name: 'AllClusters' },
+      ])
+    })
+
+    it('opens All Clusters when All Projects is selected', async () => {
+      const {
+        router,
+        wrapper,
+      } = await setup()
+
+      projectSelection(wrapper).vm.$emit('projectSelect', {
+        metadata: { name: 'All Projects' },
+        spec: { namespace: '_all' },
+      })
+      await flushPromises()
+
+      expect(router.currentRoute.value.name).toBe('AllClusters')
+    })
+
+    it('keeps the remembered Project and its targets on a global route', async () => {
+      const {
+        router,
+        sourceProject,
+        wrapper,
+      } = await setup()
+
+      await router.push({ name: 'SeedList' })
+
+      expect(projectSelection(wrapper).props('selectedProject')).toBe(sourceProject)
+      expect(sidebarTargets(wrapper)).toContainEqual({
+        name: 'ShootList',
+        params: { projectName: sourceProject.metadata.name },
+      })
+    })
+
+    it('keeps permission-gated Project entries visible on a global route', async () => {
+      const resourceRules = [
+        {
+          apiGroups: [''],
+          resources: ['secrets', 'serviceaccounts'],
+          verbs: ['create', 'list', 'patch'],
+        },
+        {
+          apiGroups: ['security.gardener.cloud'],
+          resources: ['workloadidentities'],
+          verbs: ['list'],
+        },
+        {
+          apiGroups: ['dashboard.gardener.cloud'],
+          resources: ['terminals'],
+          verbs: ['create'],
+        },
+      ]
+      vi.spyOn(useApi(), 'getSubjectRules').mockImplementation(({ namespace }) => Promise.resolve({
+        data: {
+          resourceRules: namespace ? resourceRules : [],
+        },
+      }))
+
+      const {
+        authzStore,
+        pinia,
+        router,
+        sourceProject,
+        wrapper,
+      } = await setup()
+      useAuthnStore(pinia).user = { isAdmin: true }
+      useConfigStore(pinia).setConfiguration({ features: { terminalEnabled: true } })
+      await authzStore.fetchRules(sourceProject.spec.namespace)
+      await flushPromises()
+
+      await router.push({ name: 'SeedList' })
+      await Promise.all([
+        authzStore.prepareRules(),
+        authzStore.prepareRules(sourceProject.spec.namespace),
+      ])
+      authzStore.activateRules(undefined, sourceProject.spec.namespace)
+      await flushPromises()
+
+      expect(authzStore.namespace).toBeNull()
+      expect(authzStore.hasRulesForNamespace(sourceProject.spec.namespace)).toBe(true)
+      expect(sidebarTargets(wrapper)).toEqual(expect.arrayContaining([
+        {
+          name: 'Credentials',
+          params: { projectName: sourceProject.metadata.name },
+        },
+        {
+          name: 'GardenTerminal',
+          params: { projectName: sourceProject.metadata.name },
+        },
+      ]))
+    })
+
+    it('restores the remembered Project after navigating to a global route and reloading', async () => {
+      const {
+        projectStore,
+        router,
+        sourceProject,
+        wrapper,
+      } = await setup()
+
+      await router.push({ name: 'SeedList' })
       await nextTick()
 
-      expect(projectSelection(wrapper).props('selectedProject')).toEqual({
-        metadata: {
-          name: 'All Projects',
-        },
-        spec: {
-          namespace: '_all',
-        },
-        status: {
-          phase: 'Ready',
-        },
-      })
-      expect(sidebarTargets(wrapper)).toEqual([{
+      expect(router.currentRoute.value.fullPath).toBe('/seeds')
+      wrapper.unmount()
+
+      const pinia = createPinia()
+      const reconstructedProjectStore = useProjectStore(pinia)
+
+      expect(reconstructedProjectStore.lastProject).toBeUndefined()
+
+      reconstructedProjectStore.list = [...projectStore.list]
+      await nextTick()
+      const reconstructedWrapper = mountNavigation(pinia, router)
+
+      expect(projectSelection(reconstructedWrapper).props('selectedProject')).toEqual(sourceProject)
+      expect(sidebarTargets(reconstructedWrapper)).toContainEqual({
         name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-      }])
+        params: { projectName: sourceProject.metadata.name },
+      })
     })
   })
 })

@@ -54,8 +54,8 @@ const useLazyLocalStorage = route => {
   const keys = {
     get terminalSplitpaneTree () {
       const routeName = getRouteName(route)
-      const { name, namespace } = route.params
-      const keys = [routeName, namespace]
+      const { name } = route.params
+      const keys = [routeName, route.meta.namespace]
       if (name) {
         keys.push(name)
       }
@@ -121,6 +121,11 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
 
   const operatorFeatures = useLocalStorage('global/operator-features', false, {
     serializer: StorageSerializers.flag,
+    writeDefaults: false,
+  })
+
+  const lastProjectName = useLocalStorage('global/last-project-name', null, {
+    serializer: StorageSerializers.string,
     writeDefaults: false,
   })
 
@@ -260,6 +265,7 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     colorScheme,
     autoLogin,
     operatorFeatures,
+    lastProjectName,
     logLevel,
     hiddenMessages,
     editorShortcuts,

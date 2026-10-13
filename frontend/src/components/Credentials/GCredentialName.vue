@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-text-router-link
           v-if="canLinkToCredential && renderLink"
           v-bind="tProps"
-          :to="{ name: 'Credentials', params: { namespace: resourceNamespace }, hash: resourceHash }"
+          :to="{ name: 'Credentials', params: { projectName }, hash: resourceHash }"
           :text="resourceName"
         />
         <span
@@ -52,6 +52,7 @@ import {
 import { storeToRefs } from 'pinia'
 
 import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
 
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import GCredentialDetailsItemContent from '@/components/Credentials/GCredentialDetailsItemContent'
@@ -68,6 +69,7 @@ const props = defineProps({
 const credential = toRef(props, 'credential')
 
 const authzStore = useAuthzStore()
+const projectStore = useProjectStore()
 const { canGetCloudProviderCredentials } = storeToRefs(authzStore)
 
 const {
@@ -81,6 +83,7 @@ const resourceHash = computed(() => {
   const uid = resourceUid.value
   return uid ? `#credential-uid=${encodeURIComponent(uid)}` : ''
 })
+const projectName = computed(() => projectStore.projectNameByNamespace(resourceNamespace.value))
 
 const canLinkToCredential = computed(() => canGetCloudProviderCredentials.value && resourceUid.value)
 

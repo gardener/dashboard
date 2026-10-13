@@ -113,7 +113,7 @@ export default {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
     },
     shootUrl () {
-      const url = new URL(`/namespace/${this.shootNamespace}/shoots/${this.shootName}`, window.location)
+      const url = new URL(`/projects/${this.shootProjectName}/clusters/${this.shootName}`, window.location)
       return url.toString()
     },
     shootMachineImageNames () {

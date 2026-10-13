@@ -7,6 +7,8 @@
 import { shallowMount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 
+import { useProjectStore } from '@/store/project'
+
 import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
 
 const { createVuetifyPlugin } = global.fixtures.helper
@@ -61,6 +63,30 @@ describe('components', () => {
       expect(wrapper.emitted('projectSelect')).toEqual([[targetProject]])
       expect(wrapper.vm.selectedProjectName).toBe('source')
       expect(wrapper.vm.projectMenu).toBe(false)
+    })
+
+    it('does not select a Pending Project', () => {
+      const pinia = createPinia()
+      const pendingProject = {
+        metadata: { name: 'pending', uid: 'pending-uid' },
+        spec: { namespace: 'garden-pending' },
+        status: { phase: 'Pending' },
+      }
+      const projectStore = useProjectStore(pinia)
+      projectStore.list = [pendingProject]
+      const wrapper = shallowMount(GMainProjectSelection, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+            pinia,
+          ],
+        },
+      })
+
+      wrapper.vm.selectProject(pendingProject)
+
+      expect(wrapper.vm.sortedAndFilteredProjectItems.map(project => project.spec.namespace)).toEqual(['_all'])
+      expect(wrapper.emitted('projectSelect')).toBeUndefined()
     })
 
     it('handles a cleared project filter', () => {

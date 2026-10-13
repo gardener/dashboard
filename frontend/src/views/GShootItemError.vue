@@ -48,14 +48,15 @@ export default {
   computed: {
     ...mapState(useProjectStore, [
       'defaultNamespace',
+      'projectNameByNamespace',
     ]),
     fallbackRoute () {
-      const namespace = get(this.$route, ['params', 'namespace'], this.defaultNamespace)
-      if (namespace) {
+      const projectName = get(this.$route, ['params', 'projectName']) ?? this.projectNameByNamespace(this.defaultNamespace)
+      if (projectName) {
         return {
           name: 'ShootList',
           params: {
-            namespace,
+            projectName,
           },
         }
       }

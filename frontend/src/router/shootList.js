@@ -7,20 +7,20 @@
 import { buildSearchTerms } from '@/store/shoot/search'
 
 /**
- * Materializes the saved All Projects Shoot-list default as an explicit `q`.
+ * Materializes the saved All Clusters default as an explicit `q`.
  *
  * A missing `q` means "apply my saved default", whereas an existing `q`,
  * including `q=`, is an explicit search that must remain unchanged. Returning
  * a replacement target makes the effective default part of the URL so it can
  * be bookmarked or shared without depending on another user's settings.
- * Project-scoped Shoot lists do not use the All Projects default.
+ * Project-scoped Cluster lists do not use the All Clusters default.
  */
 export function normalizeShootListRoute (route, shootListFilters) {
-  if (route.name !== 'ShootList') {
+  if (route.name !== 'AllClusters') {
     return
   }
 
-  if (Object.hasOwn(route.query, 'q') || route.params.namespace !== '_all') {
+  if (Object.hasOwn(route.query, 'q')) {
     return
   }
 
@@ -44,7 +44,13 @@ export function getShootListContext (route) {
     : value ?? ''
 
   return {
-    namespace: route.params.namespace,
+    namespace: route.name === 'AllClusters'
+      ? '_all'
+      : route.meta.namespace,
     search,
   }
+}
+
+export function isShootListRoute (route) {
+  return route.name === 'ShootList' || route.name === 'AllClusters'
 }

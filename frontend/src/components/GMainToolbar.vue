@@ -312,8 +312,6 @@ import GAvatar from '@/components/GAvatar.vue'
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
 
-import { useNamespace } from '@/composables/useNamespace'
-
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 
 import get from 'lodash/get'
@@ -326,8 +324,6 @@ const authnStore = useAuthnStore()
 const authzStore = useAuthzStore()
 const configStore = useConfigStore()
 const localStorageStore = useLocalStorageStore()
-
-const namespace = useNamespace(route)
 
 const help = ref(false)
 const menu = ref(false)
@@ -392,11 +388,7 @@ const settingsLink = computed(() => {
 })
 
 function targetRoute (name) {
-  let query
-  if (namespace.value) {
-    query = { namespace: namespace.value }
-  }
-  return { name, query }
+  return { name }
 }
 
 function handleLogout () {

@@ -388,7 +388,7 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="text-body-medium text-medium-emphasis">
                     Go to
                     <g-text-router-link
-                      :to="{ name: 'Account', query: { namespace } }"
+                      :to="{ name: 'Account' }"
                       text="My Account"
                     />
                     to download the <span class="font-family-monospace">kubeconfig</span> for this project.
@@ -687,7 +687,7 @@ async function showDialog () {
       await projectStore.deleteProject(projectStore.project)
       if (projectsNotMarkedForDeletion.value.length > 0) {
         const p1 = projectsNotMarkedForDeletion.value[0]
-        router.push({ name: 'ShootList', params: { namespace: p1.spec.namespace } })
+        router.push({ name: 'ShootList', params: { projectName: p1.metadata.name } })
       } else {
         router.push({ name: 'Home', params: {} })
       }

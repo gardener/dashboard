@@ -622,8 +622,7 @@ async function onRemoveUser ({ username }) {
   if (isCurrentUser(username) && !canViewLandscape.value) {
     if (projectsNotMarkedForDeletion.value.length > 0) {
       const project = projectsNotMarkedForDeletion.value[0]
-      const namespace = project.spec.namespace
-      await router.push({ name: 'ShootList', params: { namespace } })
+      await router.push({ name: 'ShootList', params: { projectName: project.metadata.name } })
     } else {
       await router.push({ name: 'Home', params: {} })
     }

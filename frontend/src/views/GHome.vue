@@ -62,7 +62,7 @@ export default {
     },
   },
   mounted () {
-    if (this.$route.path === '/namespace/+') {
+    if (this.$route.name === 'NewProject') {
       this.projectDialog = true
     }
   },

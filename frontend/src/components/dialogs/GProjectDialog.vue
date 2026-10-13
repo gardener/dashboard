@@ -234,7 +234,7 @@ async function submit () {
     router.push({
       name: 'Credentials',
       params: {
-        namespace: project.spec.namespace,
+        projectName: project.metadata.name,
       },
     })
   } catch (err) {

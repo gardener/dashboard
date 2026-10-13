@@ -19,18 +19,11 @@ import {
   computed,
   toRefs,
 } from 'vue'
-import {
-  useRoute,
-  useRouter,
-} from 'vue-router'
-
-import { useProjectStore } from '@/store/project'
+import { useRouter } from 'vue-router'
 
 import GError from '@/components/GError.vue'
 
-const route = useRoute()
 const router = useRouter()
-const projectStore = useProjectStore()
 
 const props = defineProps({
   code: {
@@ -62,20 +55,7 @@ const {
   buttonText,
 } = toRefs(props)
 
-const seedListFallbackRoute = computed(() => {
-  const namespace = route.query.namespace || projectStore.defaultNamespace
-  if (namespace) {
-    return {
-      name: 'SeedList',
-      query: {
-        namespace,
-      },
-    }
-  }
-  return {
-    name: 'SeedList',
-  }
-})
+const seedListFallbackRoute = computed(() => ({ name: 'SeedList' }))
 
 async function onClick () {
   await router.push(props.fallbackRoute ?? seedListFallbackRoute.value)

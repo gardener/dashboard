@@ -157,3 +157,7 @@ export function useProjectPhase (projectItem) {
     return get(projectItem.value, ['status', 'phase'], '')
   })
 }
+
+export function isProjectPending (project) {
+  return !!project && get(project, ['status', 'phase'], 'Pending') === 'Pending'
+}

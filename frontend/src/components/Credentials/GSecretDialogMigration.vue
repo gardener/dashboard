@@ -141,7 +141,7 @@ SPDX-License-Identifier: Apache-2.0
                   class="mr-2"
                   size="small"
                   prepend-icon="mdi-hexagon-multiple"
-                  :to="{ name: 'ShootItem', params: { name, namespace } }"
+                  :to="{ name: 'ShootItem', params: { name, projectName: projectNameByNamespace(namespace) } }"
                   target="_blank"
                 >
                   {{ name }}
@@ -205,6 +205,7 @@ import {
 } from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
+import { useProjectStore } from '@/store/project'
 
 import GMessage from '@/components/GMessage.vue'
 import GToolbar from '@/components/GToolbar.vue'
@@ -227,6 +228,8 @@ const visible = defineModel({
 })
 
 const logger = inject('logger')
+const projectStore = useProjectStore()
+const { projectNameByNamespace } = projectStore
 
 const secretBinding = toRef(props, 'binding')
 

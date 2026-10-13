@@ -29,14 +29,14 @@ const route = useRoute()
 const router = useRouter()
 
 const fallbackRoute = computed(() => {
-  const namespace = route.params.namespace ?? store.defaultNamespace
+  const projectName = route.params.projectName ?? store.projectNameByNamespace(store.defaultNamespace)
   const name = route.params.name
-  if (namespace) {
+  if (projectName) {
     if (name) {
       return {
         name: 'ShootItem',
         params: {
-          namespace,
+          projectName,
           name,
         },
       }
@@ -44,7 +44,7 @@ const fallbackRoute = computed(() => {
     return {
       name: 'ShootList',
       params: {
-        namespace,
+        projectName,
       },
     }
   }
