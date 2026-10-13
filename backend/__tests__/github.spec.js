@@ -21,7 +21,7 @@ import logger from '../lib/logger/index.js'
 import config from '../lib/config/index.js'
 import handleGithubEvent from '../lib/github/webhook/handler.js'
 import {
-  verify,
+  hasValidSignature,
   ensureJsonContentType,
 } from '../lib/github/webhook/verify.js'
 import SyncManager from '../lib/github/SyncManager.js'
@@ -137,7 +137,7 @@ describe('github', () => {
       })
     })
 
-    describe('verify', () => {
+    describe('hasValidSignature', () => {
       const req = {}
       const body = 'foo'
 
@@ -152,16 +152,16 @@ describe('github', () => {
 
       it('should succeed if signatures match', () => {
         setHubSignatureHeader(body)
-        expect(verify(req)).toBe(true)
+        expect(hasValidSignature(req)).toBe(true)
       })
 
       it('should return false in case of an invalid signature', () => {
         setHubSignatureHeader('baz')
-        expect(verify(req)).toBe(false)
+        expect(hasValidSignature(req)).toBe(false)
       })
 
-      it('should fail if signature is missing', () => {
-        expect(() => verify(req)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
+      it('should return false if signature is missing', () => {
+        expect(hasValidSignature(req)).toBe(false)
       })
 
       describe('when webhookSecret is not configured', () => {
@@ -176,7 +176,7 @@ describe('github', () => {
         })
 
         it('should fail with an assertion error', () => {
-          expect(() => verify(req)).toThrow(
+          expect(() => hasValidSignature(req)).toThrow(
             expect.objectContaining({
               message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend',
               code: 'ERR_ASSERTION',
@@ -198,20 +198,18 @@ describe('github', () => {
         expect(next).toHaveBeenCalledTimes(1)
       })
 
-      it('should respond with 415 if content type is not json', () => {
+      it('should call next with 415 error if content type is not json', () => {
         const req = { is: vi.fn().mockReturnValue(false) }
-        const json = vi.fn()
-        const res = { status: vi.fn().mockReturnValue({ json }) }
+        const res = {}
         const next = vi.fn()
 
         ensureJsonContentType(req, res, next)
 
         expect(req.is).toHaveBeenCalledWith('json')
-        expect(next).not.toHaveBeenCalled()
-        expect(res.status).toHaveBeenCalledWith(415)
-        expect(json).toHaveBeenCalledWith({
-          message: 'Unsupported Media Type: Content-Type must be application/json',
-        })
+        expect(next).toHaveBeenCalledTimes(1)
+        const error = next.mock.calls[0][0]
+        expect(error.status).toBe(415)
+        expect(error.message).toBe('Content-Type must be application/json')
       })
     })
   })
