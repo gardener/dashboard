@@ -11,7 +11,7 @@ import { requestLogger } from '../../middleware.js'
 import monitorModule from '@gardener-dashboard/monitor'
 import handleGithubEvent from './handler.js'
 import {
-  verify,
+  hasValidSignature,
   ensureJsonContentType,
 } from './verify.js'
 const { monitorResponseTimes } = monitorModule
@@ -29,21 +29,19 @@ const middlewares = [
 
 router.route('/')
   .post(middlewares, async (req, res, next) => {
-    if (verify(req)) {
-      try {
-        const eventName = req.headers['x-github-event']
-        await handleGithubEvent(eventName)
-        res.status(204).end()
-      } catch (err) {
-        next(err)
-      }
-    } else {
-      throw createError(403, 'Signatures didn\'t match!')
+    if (!hasValidSignature(req)) {
+      throw createError(403, 'Invalid GitHub webhook signature')
+    }
+    try {
+      const eventName = req.headers['x-github-event']
+      await handleGithubEvent(eventName)
+      res.status(204).end()
+    } catch (err) {
+      next(err)
     }
   })
   .all((req, res) => {
     res.set('Allow', 'POST').status(405).end()
-  },
-  )
+  })
 
 export default router
