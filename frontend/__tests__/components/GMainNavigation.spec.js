@@ -286,6 +286,45 @@ describe('components', () => {
       })
     })
 
+    it('ignores a superseded Project selection whose rules resolve late', async () => {
+      const {
+        authzStore,
+        projectStore,
+        router,
+        sourceProject,
+        targetProject,
+        wrapper,
+      } = await setup()
+      projectStore.list.push(createProject('latest'))
+      const latestProject = projectStore.list[2]
+      await router.push({
+        name: 'Credentials',
+        params: { projectName: sourceProject.metadata.name },
+      })
+
+      let resolveTargetRules
+      vi.spyOn(authzStore, 'prepareRules').mockImplementation(namespace => {
+        if (namespace === targetProject.spec.namespace) {
+          return new Promise(resolve => {
+            resolveTargetRules = resolve
+          })
+        }
+        return Promise.resolve()
+      })
+      vi.spyOn(authzStore, 'canGetCloudProviderCredentialsForNamespace').mockReturnValue(true)
+
+      projectSelection(wrapper).vm.$emit('projectSelect', targetProject)
+      projectSelection(wrapper).vm.$emit('projectSelect', latestProject)
+      await flushPromises()
+      resolveTargetRules()
+      await flushPromises()
+
+      expect(router.currentRoute.value).toMatchObject({
+        name: 'Credentials',
+        params: { projectName: latestProject.metadata.name },
+      })
+    })
+
     it('propagates a replaced project object to the project selection', async () => {
       const {
         projectStore,

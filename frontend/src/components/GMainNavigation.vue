@@ -250,15 +250,21 @@ function projectSwitchTarget (project) {
   return projectMenuRoute('ShootList', project)
 }
 
+let projectSelectionId = 0
+
 async function onSelectProject (project) {
   if (!project) {
     return
   }
+  const selectionId = ++projectSelectionId
 
   let target = projectSwitchTarget(project)
   if (target.name === 'Credentials') {
     const namespace = project.spec.namespace
     await authzStore.prepareRules(namespace)
+    if (selectionId !== projectSelectionId) {
+      return
+    }
     if (!authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
       target = projectMenuRoute('ShootList', project)
     }
