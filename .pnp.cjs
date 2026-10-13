@@ -1142,7 +1142,7 @@ const RAW_RUNTIME_STATE =
           ["@xterm/xterm", "npm:6.0.0"],\
           ["culori", "npm:4.0.2"],\
           ["dayjs", "npm:1.11.23"],\
-          ["dompurify", "npm:3.4.15"],\
+          ["dompurify", "npm:3.4.17"],\
           ["downloadjs", "npm:1.4.7"],\
           ["eslint", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:10.10.0"],\
           ["eslint-plugin-import-newlines", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:2.0.0"],\
@@ -5933,11 +5933,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["dompurify", [\
-      ["npm:3.4.15", {\
-        "packageLocation": "./.yarn/cache/dompurify-npm-3.4.15-1d152b5903-406b5f0f9c.zip/node_modules/dompurify/",\
+      ["npm:3.4.17", {\
+        "packageLocation": "./.yarn/cache/dompurify-npm-3.4.17-925de8a518-6a12251ef5.zip/node_modules/dompurify/",\
         "packageDependencies": [\
           ["@types/trusted-types", "npm:2.0.7"],\
-          ["dompurify", "npm:3.4.15"]\
+          ["dompurify", "npm:3.4.17"]\
         ],\
         "linkType": "HARD"\
       }]\
