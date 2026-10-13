@@ -535,7 +535,10 @@ import GShootCustomFieldsConfiguration from '@/components/GShootCustomFieldsConf
 import GResourceQuotaHelp from '@/components/GResourceQuotaHelp.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
-import { useProvideProjectItem } from '@/composables/useProjectItem'
+import {
+  useProvideProjectItem,
+  isProjectPending,
+} from '@/composables/useProjectItem'
 import { useProvideProjectContext } from '@/composables/useProjectContext'
 import { useLogger } from '@/composables/useLogger'
 
@@ -548,6 +551,7 @@ import {
 import { errorDetailsFromError } from '@/utils/error'
 import { annotations } from '@/utils/annotations.js'
 
+import find from 'lodash/find'
 import includes from 'lodash/includes'
 import set from 'lodash/set'
 
@@ -685,8 +689,8 @@ async function showDialog () {
   if (confirmed) {
     try {
       await projectStore.deleteProject(projectStore.project)
-      if (projectsNotMarkedForDeletion.value.length > 0) {
-        const p1 = projectsNotMarkedForDeletion.value[0]
+      const p1 = find(projectsNotMarkedForDeletion.value, item => !isProjectPending(item))
+      if (p1) {
         router.push({ name: 'ShootList', params: { projectName: p1.metadata.name } })
       } else {
         router.push({ name: 'Home', params: {} })
