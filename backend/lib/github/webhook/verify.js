@@ -19,13 +19,13 @@ function digestsEqual (a, b) {
   return timingSafeEqual(a, b)
 }
 
-function verify (req) {
+function hasValidSignature (req) {
   const webhookSecret = config.gitHub?.webhookSecret
   assert.ok(webhookSecret, 'Property \'gitHub.webhookSecret\' not configured on dashboard backend')
 
   const requestSignatureHeader = req.headers['x-hub-signature-256']
   if (!requestSignatureHeader?.startsWith('sha256=')) {
-    throw createError(403, 'Header \'x-hub-signature-256\' not provided or invalid')
+    return false
   }
   const requestSignatureHash = requestSignatureHeader.slice('sha256='.length)
   const requestSignature = Buffer.from(requestSignatureHash, 'hex')
@@ -35,15 +35,13 @@ function verify (req) {
 }
 
 function ensureJsonContentType (req, res, next) {
-  if (req.is('json')) {
-    return next()
+  if (!req.is('json')) {
+    return next(createError(415, 'Content-Type must be application/json'))
   }
-  res.status(415).json({
-    message: 'Unsupported Media Type: Content-Type must be application/json',
-  })
+  next()
 }
 
 export {
-  verify,
+  hasValidSignature,
   ensureJsonContentType,
 }
