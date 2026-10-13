@@ -47,12 +47,16 @@ describe('views', () => {
       expect(wrapper.vm.projectDialog).toBe(open)
     })
 
-    it('opens the Project dialog when navigating from Home to NewProject', async () => {
+    it('updates the Project dialog when navigating between Home and NewProject', async () => {
       const { router, wrapper } = await mountHome('Home')
 
       await router.push({ name: 'NewProject' })
 
       expect(wrapper.vm.projectDialog).toBe(true)
+
+      await router.push({ name: 'Home' })
+
+      expect(wrapper.vm.projectDialog).toBe(false)
     })
   })
 })

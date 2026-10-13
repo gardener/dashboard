@@ -64,9 +64,7 @@ export default {
   watch: {
     '$route.name': {
       handler (routeName) {
-        if (routeName === 'NewProject') {
-          this.projectDialog = true
-        }
+        this.projectDialog = routeName === 'NewProject'
       },
       immediate: true,
     },
