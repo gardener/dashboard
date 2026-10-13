@@ -24,7 +24,7 @@ async function mountHome (routeName) {
     ],
   })
   await router.push({ name: routeName })
-  return shallowMount(GHome, {
+  const wrapper = shallowMount(GHome, {
     global: {
       plugins: [
         createVuetifyPlugin(),
@@ -33,6 +33,7 @@ async function mountHome (routeName) {
       ],
     },
   })
+  return { router, wrapper }
 }
 
 describe('views', () => {
@@ -41,9 +42,17 @@ describe('views', () => {
       ['Home', false],
       ['NewProject', true],
     ])('opens the Project dialog on %s: %s', async (routeName, open) => {
-      const wrapper = await mountHome(routeName)
+      const { wrapper } = await mountHome(routeName)
 
       expect(wrapper.vm.projectDialog).toBe(open)
+    })
+
+    it('opens the Project dialog when navigating from Home to NewProject', async () => {
+      const { router, wrapper } = await mountHome('Home')
+
+      await router.push({ name: 'NewProject' })
+
+      expect(wrapper.vm.projectDialog).toBe(true)
     })
   })
 })

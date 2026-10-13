@@ -61,10 +61,15 @@ export default {
       return this.hasProjects ? 'Create Project' : 'Create your first Project'
     },
   },
-  mounted () {
-    if (this.$route.name === 'NewProject') {
-      this.projectDialog = true
-    }
+  watch: {
+    '$route.name': {
+      handler (routeName) {
+        if (routeName === 'NewProject') {
+          this.projectDialog = true
+        }
+      },
+      immediate: true,
+    },
   },
 }
 </script>
