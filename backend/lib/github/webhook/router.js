@@ -6,10 +6,14 @@
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import createError from 'http-errors'
 import { requestLogger } from '../../middleware.js'
 import monitorModule from '@gardener-dashboard/monitor'
 import handleGithubEvent from './handler.js'
-import verify from './verify.js'
+import {
+  hasValidSignature,
+  ensureJsonContentType,
+} from './verify.js'
 const { monitorResponseTimes } = monitorModule
 
 const router = express.Router()
@@ -19,11 +23,15 @@ const router = express.Router()
 const middlewares = [
   requestLogger,
   monitorResponseTimes(),
-  bodyParser.json({ verify }),
+  ensureJsonContentType,
+  bodyParser.raw({ type: '*/*' }),
 ]
 
 router.route('/')
   .post(middlewares, async (req, res, next) => {
+    if (!hasValidSignature(req)) {
+      throw createError(403, 'Invalid GitHub webhook signature')
+    }
     try {
       const eventName = req.headers['x-github-event']
       await handleGithubEvent(eventName)
