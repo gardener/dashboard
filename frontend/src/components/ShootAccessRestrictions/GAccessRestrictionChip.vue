@@ -19,8 +19,7 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!description"
         max-width="600px"
       >
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="transformHtml(description)" />
+        <div v-safe-html="transformHtml(description)" />
       </v-tooltip>
     </v-chip>
 
@@ -39,8 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         :disabled="!option.description"
         max-width="600px"
       >
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div v-html="transformHtml(option.description)" />
+        <div v-safe-html="transformHtml(option.description)" />
       </v-tooltip>
     </v-chip>
   </div>

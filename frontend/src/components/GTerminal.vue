@@ -121,8 +121,7 @@ SPDX-License-Identifier: Apache-2.0
                   />
                 </template>
                 <template #text>
-                  <!-- eslint-disable-next-line vue/no-v-html -->
-                  <span v-html="imageHelpHtml" />
+                  <span v-safe-html="imageHelpHtml" />
                 </template>
               </g-popover>
             </template>

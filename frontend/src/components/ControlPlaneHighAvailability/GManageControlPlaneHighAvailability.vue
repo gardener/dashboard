@@ -66,11 +66,10 @@ SPDX-License-Identifier: Apache-2.0
     </div>
   </v-expand-transition>
   <div class="mt-3">
-    <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="!!controlPlaneHighAvailabilityHelpHtml"
+      v-safe-html="controlPlaneHighAvailabilityHelpHtml"
       class="wrap-text"
-      v-html="controlPlaneHighAvailabilityHelpHtml"
     />
     <g-external-link
       v-else
