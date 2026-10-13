@@ -13,6 +13,7 @@ import {
   beforeEach,
 } from 'vitest'
 import request from '@gardener-dashboard/request'
+import { encrypt } from '../../lib/security/index.js'
 
 const { mockRequest } = request
 
@@ -32,6 +33,65 @@ describe('api', function () {
   })
   describe('user', function () {
     const user = fixtures.auth.createUser({ id: 'bar@example.org' })
+
+    it('should reject cookies from different sessions', async function () {
+      const otherUser = fixtures.auth.createUser({ id: 'other@example.org' })
+      const cookies = await user.cookie
+      const otherCookies = await otherUser.cookie
+      const otherTokenCookie = otherCookies.split(';').find(cookie => cookie.startsWith('__Host-gTkn='))
+      const splicedCookies = cookies
+        .split(';')
+        .map(cookie => cookie.startsWith('__Host-gTkn=') ? otherTokenCookie : cookie)
+        .join(';')
+
+      const res = await agent
+        .get('/api/user/kubeconfig')
+        .set('cookie', splicedCookies)
+        .expect('content-type', /json/)
+        .expect(401)
+
+      expect(res.body).toEqual(expect.objectContaining({
+        code: 401,
+        reason: 'Unauthorized',
+        message: 'Session cookie binding is invalid',
+      }))
+    })
+
+    it('should reject a legacy session without an id token hash', async function () {
+      const legacyUser = fixtures.auth.createUser({ id: 'legacy@example.org', ith: undefined })
+
+      const res = await agent
+        .get('/api/user/kubeconfig')
+        .set('cookie', await legacyUser.cookie)
+        .expect('content-type', /json/)
+        .expect(401)
+
+      expect(res.body).toEqual(expect.objectContaining({
+        code: 401,
+        reason: 'Unauthorized',
+        message: 'Session cookie binding is invalid',
+      }))
+    })
+
+    it('should reject an empty decrypted id token', async function () {
+      const emptyTokenCookie = `__Host-gTkn=${await encrypt('')}`
+      const cookies = (await user.cookie)
+        .split(';')
+        .map(cookie => cookie.startsWith('__Host-gTkn=') ? emptyTokenCookie : cookie)
+        .join(';')
+
+      const res = await agent
+        .get('/api/user/kubeconfig')
+        .set('cookie', cookies)
+        .expect('content-type', /json/)
+        .expect(401)
+
+      expect(res.body).toEqual(expect.objectContaining({
+        code: 401,
+        reason: 'Unauthorized',
+        message: 'The decrypted bearer token must not be empty',
+      }))
+    })
 
     it('should return selfsubjectrules for the user', async function () {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectRules())
