@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
     <slot />
     <div
       v-if="teaserTemplate"
-      v-safe-html="teaserHtml"
+      v-safe-html="{ html: teaserHtml, allowStyleTags: true }"
     />
     <div
       v-else

@@ -36,5 +36,5 @@ export function registerPlugins (app) {
     .use(utils)
     .use(components)
     .directive('messagesColor', messagesColor)
-    .directive('safe-html', safeHtml)
+    .directive('safeHtml', safeHtml)
 }
