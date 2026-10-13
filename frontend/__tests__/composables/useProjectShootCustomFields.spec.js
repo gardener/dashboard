@@ -20,6 +20,7 @@ import { useProjectShootCustomFields } from '@/composables/useProjectShootCustom
 import {
   formatValue,
   isCustomField,
+  isSafeFieldPath,
 } from '@/composables/useProjectShootCustomFields/helper'
 
 // Mock dependencies
@@ -168,6 +169,21 @@ describe('useProjectShootCustomFields', () => {
     expect(shootCustomFields.value).toMatchSnapshot()
   })
 
+  it('should skip custom fields with unsafe paths', () => {
+    annotations = reactive({
+      'dashboard.gardener.cloud/shootCustomFields': JSON.stringify([
+        { name: 'Proto', path: '__proto__' },
+        { name: 'Constructor', path: 'metadata.constructor' },
+        { name: 'Prototype', path: 'a["prototype"].b' },
+        { name: 'Labels', path: 'metadata.labels["foo.bar/baz"]' },
+      ]),
+    })
+
+    const { shootCustomFields } = useProjectShootCustomFields(projectItem, options)
+    expect(shootCustomFields.value).toHaveLength(1)
+    expect(shootCustomFields.value[0].name).toBe('Labels')
+  })
+
   it('should ensure the key is not part of the rendered JSON.stringify annotation when adding a new entry', () => {
     const { shootCustomFields, addShootCustomField } = useProjectShootCustomFields(projectItem, options)
     const customField = { name: 'Field1', path: 'path1' }
@@ -212,6 +228,21 @@ describe('useProjectShootCustomFields', () => {
       it('should return false for keys not starting with "Z_"', () => {
         const result = isCustomField('customField')
         expect(result).toBe(false)
+      })
+    })
+
+    describe('isSafeFieldPath', () => {
+      it.each([
+        ['metadata.name', true],
+        ['metadata.labels["foo.bar/baz"]', true],
+        ['__proto__', false],
+        ['metadata.constructor', false],
+        ['a["prototype"].b', false],
+        ['', false],
+        [null, false],
+        [42, false],
+      ])('should validate %j as %s', (path, expected) => {
+        expect(isSafeFieldPath(path)).toBe(expected)
       })
     })
   })
