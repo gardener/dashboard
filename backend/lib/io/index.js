@@ -89,7 +89,9 @@ function init (httpServer, cache) {
     })
 
     // handle 'unsubscribe' events
-    socket.on('unsubscribe', async (key, done) => {
+    socket.on('unsubscribe', async (key, ...args) => {
+      const hasCallback = typeof args[args.length - 1] === 'function'
+      const done = hasCallback ? args.pop() : null
       try {
         await dispatcher.unsubscribe(socket, key)
         done?.({ statusCode: 200 })
