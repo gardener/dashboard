@@ -5,12 +5,21 @@ SPDX-License-Identifier: Apache-2.0
  -->
 
 <template>
-  <g-account-avatar
+  <div
     v-if="readOnly"
-    :account-name="modelValue"
-    :color="color"
-    mail-to
-  />
+    class="d-flex align-center justify-space-between"
+  >
+    <g-account-avatar
+      :account-name="modelValue"
+      :color="color"
+      :copyable="false"
+    />
+    <g-copy-btn
+      v-if="isEmail(modelValue)"
+      :clipboard-text="modelValue"
+      tooltip-text="Copy email address to clipboard"
+    />
+  </div>
   <v-menu
     v-else
     ref="menu"
@@ -32,10 +41,15 @@ SPDX-License-Identifier: Apache-2.0
           <g-account-avatar
             :account-name="modelValue"
             :color="color"
-            mail-to
+            :copyable="false"
           />
         </div>
-        <div>
+        <div class="d-flex align-center flex-nowrap">
+          <g-copy-btn
+            v-if="isEmail(modelValue)"
+            :clipboard-text="modelValue"
+            tooltip-text="Copy email address to clipboard"
+          />
           <v-btn
             :icon="activatorIcon"
             variant="text"
@@ -80,6 +94,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-account-avatar
               :account-name="item"
               :size="24"
+              copyable
             />
           </v-list-item>
         </template>
@@ -109,10 +124,12 @@ SPDX-License-Identifier: Apache-2.0
 import { useVuelidate } from '@vuelidate/core'
 
 import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 
 import {
   setDelayedInputFocus,
   getErrorMessages,
+  isEmail,
 } from '@/utils'
 
 import GErrorMessage from './GErrorMessage.vue'
@@ -121,6 +138,7 @@ export default {
   components: {
     GErrorMessage,
     GAccountAvatar,
+    GCopyBtn,
   },
   props: {
     modelValue: {
@@ -238,6 +256,7 @@ export default {
     },
   },
   methods: {
+    isEmail,
     clearMessages () {
       this.messages = []
     },

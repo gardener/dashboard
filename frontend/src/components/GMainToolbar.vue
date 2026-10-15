@@ -165,8 +165,23 @@ SPDX-License-Identifier: Apache-2.0
             <div class="text-title-large">
               {{ displayName }}
             </div>
-            <div class="text-body-small">
-              {{ username }}
+            <div class="d-flex justify-center text-body-small">
+              <g-auto-hide
+                v-if="isEmail(username)"
+                right
+                class="toolbar-email-copy"
+              >
+                <template #activator>
+                  <span>{{ username }}</span>
+                </template>
+                <g-copy-btn
+                  :clipboard-text="username"
+                  density="compact"
+                  :icon-size-px="16"
+                  tooltip-text="Copy email address to clipboard"
+                />
+              </g-auto-hide>
+              <span v-else>{{ username }}</span>
             </div>
             <div
               v-if="avatarRole"
@@ -309,8 +324,12 @@ import { useConfigStore } from '@/store/config'
 import { useLocalStorageStore } from '@/store/localStorage'
 
 import GAvatar from '@/components/GAvatar.vue'
+import GAutoHide from '@/components/GAutoHide.vue'
 import GBreadcrumb from '@/components/GBreadcrumb.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GInfoDialog from '@/components/dialogs/GInfoDialog.vue'
+
+import { isEmail } from '@/utils'
 
 import GShootSubscriptionStatus from './GShootSubscriptionStatus.vue'
 
@@ -416,6 +435,10 @@ function helpTarget (item) {
   .role-label {
     color: white;
     font-weight: bold;
+  }
+
+  .toolbar-email-copy :deep(.copy-button) {
+    height: 0;
   }
 
   .tabs-bar-background {
