@@ -103,12 +103,10 @@ export function useMachineTypes (cloudProfile) {
           if (capabilityArchitectures) {
             return includes(capabilityArchitectures, architecture.value)
           }
-          // Fallback to profile-level default capabilities
           const defaultArchitectures = machineCapabilities.value.architecture
           if (defaultArchitectures?.length) {
             return includes(defaultArchitectures, architecture.value)
           }
-          // Deprecated fallback to type.architecture
           return type.architecture === architecture.value
         })
       }

@@ -22,12 +22,10 @@ import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachine
 
 import { normalizeVersion } from '@/utils/index.js'
 
-import filter from 'lodash/filter'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
-import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
 
 /**
