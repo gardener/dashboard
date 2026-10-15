@@ -167,6 +167,7 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
+import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities'
 
 import {
   withFieldName,
@@ -227,6 +228,7 @@ export default {
     } = useShootContext()
 
     const { machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+    const machineCapabilities = useMachineCapabilities(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize, volumeTypes } = useVolumeTypes(cloudProfile)
@@ -283,6 +285,7 @@ export default {
       volumeTypes,
       providerWorkers,
       machineImages,
+      machineCapabilities,
       machineArchitecture,
       machineTypes,
       selectedMachineType,
@@ -511,7 +514,11 @@ export default {
       const capabilities = this.selectedMachineType?.capabilities
       return !machineImage.capabilityFlavors || machineImage.capabilityFlavors.some(capabilityFlavor => {
         return Object.entries(capabilityFlavor).every(([name, values]) => {
-          return values?.some(value => get(capabilities, [name])?.includes(value))
+          return values?.some(value => {
+            const capability = get(capabilities, [name])
+            return capability?.includes(value) ||
+            (!capability && get(this.machineCapabilities, [name])?.includes(value)) // Fallback to default Machine capabilities if MachineType capabilities do not exist
+          })
         })
       })
     },
