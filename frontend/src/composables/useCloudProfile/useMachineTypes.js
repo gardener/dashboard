@@ -10,6 +10,7 @@ import {
 } from 'vue'
 
 import { getZones } from '@/composables/helper.js'
+import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import filter from 'lodash/filter'
 import map from 'lodash/map'
@@ -39,6 +40,7 @@ export function useMachineTypes (cloudProfile) {
   }
 
   const machineTypes = computed(() => get(cloudProfile.value, ['spec', 'machineTypes'], []))
+  const machineCapabilities = useMachineCapabilities(cloudProfile)
 
   function filterMachineTypes (region, zones) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -97,10 +99,16 @@ export function useMachineTypes (cloudProfile) {
 
       if (architecture?.value) {
         return filter(types, type => {
-          const capabilityArchitecutres = type.capabilities?.architecture
-          if (capabilityArchitecutres) {
-            return includes(capabilityArchitecutres, architecture.value)
+          const capabilityArchitectures = type.capabilities?.architecture
+          if (capabilityArchitectures) {
+            return includes(capabilityArchitectures, architecture.value)
           }
+          // Fallback to profile-level default capabilities
+          const defaultArchitectures = machineCapabilities.value.architecture
+          if (defaultArchitectures?.length) {
+            return includes(defaultArchitectures, architecture.value)
+          }
+          // Deprecated fallback to type.architecture
           return type.architecture === architecture.value
         })
       }
@@ -125,11 +133,21 @@ export function useMachineTypes (cloudProfile) {
     return computed(() => {
       const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
-      const capabilities = map(types, 'capabilities').filter(Boolean)
-      let architectures = uniq(capabilities.flatMap(capability => capability.architecture).filter(Boolean))
-      if (!architectures.length) {
-        architectures = uniq(map(types, 'architecture'))
-      }
+      const defaultArchitectures = machineCapabilities.value.architecture
+
+      const architectures = uniq(types.flatMap(type => {
+        // 1. Explicit capabilities.architecture on the machine type
+        if (type.capabilities?.architecture?.length) {
+          return type.capabilities.architecture
+        }
+        // 2. Profile-level default from spec.machineCapabilities
+        if (defaultArchitectures?.length) {
+          return defaultArchitectures
+        }
+        // 3. Deprecated fallback to type.architecture
+        return [type.architecture]
+      }))
+
       return architectures.sort()
     })
   }

@@ -18,6 +18,7 @@ import {
   findVendorHint,
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
+import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import { normalizeVersion } from '@/utils/index.js'
 
@@ -49,6 +50,7 @@ export function useMachineImages (cloudProfile) {
 
   const logger = useLogger()
   const configStore = useConfigStore()
+  const machineCapabilities = useMachineCapabilities(cloudProfile)
 
   /**
    * Flattens and processes machine images from cloud profile format.
@@ -131,30 +133,48 @@ export function useMachineImages (cloudProfile) {
     return flattenAndSortMachineImages(rawImages)
   })
 
+  function useFilteredMachineImages (machineType) {
+    function matchesMachineTypeCapabilities (machineImage, machineType) {
+      const capabilities = machineType?.capabilities
+      return !machineImage.capabilityFlavors || machineImage.capabilityFlavors.some(capabilityFlavor => {
+        return Object.entries(capabilityFlavor).every(([name, values]) => {
+          return values?.some(value => {
+            const capability = get(capabilities, [name])
+            return capability?.includes(value) ||
+            (!capability && get(machineCapabilities, [name])?.includes(value)) // Fallback to default Machine capabilities if MachineType capabilities do not exist
+          })
+        })
+      })
+    }
+
+    return machineImages.value.filter(machineImage => {
+      return machineImage && !machineImage.isExpired &&
+        matchesMachineTypeCapabilities(machineImage, machineType)
+    })
+  }
+
   /**
-   * Returns the default machine image for a given machine type based on architecture.
+   * Returns the default machine image for a given machine type based on machineType.
    * Selects the first matching version classification (typically latest supported version).
    *
-   * @param {Ref<object>} architecture - A Vue ref containing the architecture
+   * @param {Ref<object>} machineType - A Vue ref containing the machineType
    * @returns {ComputedRef<object|undefined>} Computed ref with the default machine image or undefined
    * @throws {Error} If machineType is not a ref
    */
-  function useDefaultMachineImage (architecture) {
-    if (!isRef(architecture)) {
+  function useDefaultMachineImage (machineType) {
+    if (!isRef(machineType)) {
       throw new Error('architecture must be a ref!')
     }
 
     return computed(() => {
-      const allMachineImages = machineImages.value
-      const machineImagesForArchitecture = filter(allMachineImages, ({ architectures }) =>
-        includes(architectures, architecture.value),
-      )
-      return firstItemMatchingVersionClassification(machineImagesForArchitecture)
+      const machineImagesMachineType = useFilteredMachineImages(machineType.value)
+      return firstItemMatchingVersionClassification(machineImagesMachineType)
     })
   }
 
   return {
     machineImages,
     useDefaultMachineImage,
+    useFilteredMachineImages,
   }
 }
