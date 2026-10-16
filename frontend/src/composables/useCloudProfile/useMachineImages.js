@@ -139,7 +139,7 @@ export function useMachineImages (cloudProfile) {
           return values?.some(value => {
             const capability = get(capabilities, [name])
             return capability?.includes(value) ||
-            (!capability && get(machineCapabilities, [name])?.includes(value)) // Fallback to default Machine capabilities if MachineType capabilities do not exist
+            (!capability && get(machineCapabilities.value, [name])?.includes(value)) // Fallback to default Machine capabilities if MachineType capabilities do not exist
           })
         })
       })
