@@ -1062,8 +1062,7 @@ export function createShootContextComposable (options = {}) {
   const machineType = computed(() => head(machineTypesForZone.value) || {})
   const volumeType = computed(() => head(volumeTypesForZone.value) || {})
   const minVolumeSize = useMinimumVolumeSize(machineType, volumeType)
-  const machineTypeArchitecture = computed(() => get(machineType.value, ['architecture']))
-  const machineImage = useDefaultMachineImage(machineTypeArchitecture)
+  const machineImage = useDefaultMachineImage(machineType)
 
   function generateWorker (availableZones) {
     const id = uuidv4()

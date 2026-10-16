@@ -110,6 +110,155 @@ describe('composables', () => {
       })
     })
 
+    describe('#useFilteredMachineImages', () => {
+      it('should fall back to profile default capabilities when machine type has no capabilities', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ hypervisorType: ['gen2'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'hypervisorType', values: ['gen2', 'gen1'] },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type without capabilities — should fall back to profile defaults
+        const filteredImages = useFilteredMachineImages({})
+        expect(filteredImages).toHaveLength(1)
+        expect(filteredImages[0].name).toBe('gardenlinux')
+      })
+
+      it('should reject image when neither machine type nor profile defaults include required capability', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ hypervisorType: ['gen2'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'hypervisorType', values: ['gen1'] },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Profile default only has gen1, image requires gen2
+        const filteredImages = useFilteredMachineImages({})
+        expect(filteredImages).toHaveLength(0)
+      })
+
+      it('should use machine type capabilities over profile defaults', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ hypervisorType: ['gen2'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'hypervisorType', values: ['gen1'] }, // Profile default does NOT include gen2
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type explicitly supports gen2 — should match directly
+        const filteredImages = useFilteredMachineImages({
+          capabilities: { hypervisorType: ['gen2'] },
+        })
+        expect(filteredImages).toHaveLength(1)
+        expect(filteredImages[0].name).toBe('gardenlinux')
+      })
+
+      it('should reject image when machine type explicitly lacks required capability even if profile default includes it', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ hypervisorType: ['gen2'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'hypervisorType', values: ['gen2', 'gen1'] }, // Profile default includes gen2
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type explicitly supports only gen1 — profile default must NOT be consulted
+        const filteredImages = useFilteredMachineImages({
+          capabilities: { hypervisorType: ['gen1'] },
+        })
+        expect(filteredImages).toHaveLength(0)
+      })
+
+      it('should include images without capabilityFlavors regardless of capabilities', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    // No capabilityFlavors — should always be included
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        const filteredImages = useFilteredMachineImages({})
+        expect(filteredImages).toHaveLength(1)
+      })
+    })
+
     describe('#machineImages', () => {
       it('should transform machine images from cloud profile', () => {
         const { machineImages: decoratedAndSortedMachineImages } = useMachineImages(cloudProfile)
@@ -171,13 +320,14 @@ describe('composables', () => {
           },
         })
 
-        const { machineImages, visibleMachineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+        const { machineImages, useFilteredMachineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
 
         expect(machineImages.value).toHaveLength(8)
         expect(find(machineImages.value, { name: 'gardenlinux', version: '1.1.5' })).toBeDefined()
 
-        expect(visibleMachineImages.value).toHaveLength(3)
-        expect(visibleMachineImages.value.every(({ name }) => name === 'foo')).toBe(true)
+        const filteredImages = useFilteredMachineImages({})
+        expect(filteredImages).toHaveLength(3)
+        expect(filteredImages.every(({ name }) => name === 'foo')).toBe(true)
         expect(useDefaultMachineImage(ref('amd64')).value.name).toBe('foo')
       })
     })
