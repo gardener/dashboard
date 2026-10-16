@@ -35,6 +35,12 @@ describe('components', () => {
         providerInfrastructureConfigFirewallImage: ref(),
         providerInfrastructureConfigFirewallSize: ref(),
         providerInfrastructureConfigFirewallNetworks: refList(),
+        providerInfrastructureConfigParentReferenceName: ref(),
+        providerInfrastructureConfigParentReferenceNamespace: ref(),
+        providerInfrastructureConfigParentReferenceType: ref(),
+        providerInfrastructureConfigEnableEgress: ref(true),
+        providerInfrastructureConfigNodeCIDR: ref(),
+        networkingNodes: ref(),
         cloudProfiles: refList(),
         infrastructureBindings: refList(),
         regionsWithSeed: ref(['region-1']),
@@ -76,6 +82,10 @@ describe('components', () => {
               props: ['label'],
               emits: ['blur'],
               template: '<button class="v-text-field" :data-label="label" @click="$emit(\'blur\')" />',
+            },
+            VCheckbox: {
+              props: ['label'],
+              template: '<div class="v-checkbox" :data-label="label" />',
             },
             GSelectCloudProfile: {
               template: '<div data-test="cloud-profile" />',
@@ -182,6 +192,43 @@ describe('components', () => {
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(false)
       await wrapper.find('.v-select[data-label="Firewall Size"]').trigger('blur')
       expect(wrapper.vm.v$.firewallSize.$dirty).toBe(true)
+    })
+    it('should validate GDCH infrastructure fields and render Cloud NAT egress as a checkbox', async () => {
+      shootContext.providerType.value = 'gdch'
+      await nextTick()
+
+      expect(wrapper.find('.v-checkbox[data-label="Enable Cloud NAT egress"]').exists()).toBe(true)
+
+      shootContext.providerInfrastructureConfigParentReferenceName.value = 'parent-subnet'
+      shootContext.providerInfrastructureConfigParentReferenceType.value = 'SingleSubnet'
+      shootContext.providerInfrastructureConfigNodeCIDR.value = '10.0.0.1/18'
+      shootContext.networkingNodes.value = '10.0.0.0/18'
+      await nextTick()
+      await wrapper.vm.v$.$validate()
+
+      expect(wrapper.vm.v$.nodeCIDR.cidr.$invalid).toBe(true)
+      expect(wrapper.vm.v$.nodeCIDR.matchesNetworkingNodes.$invalid).toBe(true)
+
+      shootContext.providerInfrastructureConfigNodeCIDR.value = '10.0.0.0/18'
+      await nextTick()
+      await wrapper.vm.v$.$validate()
+
+      expect(wrapper.vm.v$.nodeCIDR.cidr.$invalid).toBe(false)
+      expect(wrapper.vm.v$.nodeCIDR.matchesNetworkingNodes.$invalid).toBe(false)
+    })
+
+    it('should not show or require GDC infrastructure fields for workerless shoots', async () => {
+      shootContext.providerType.value = 'gdch'
+      shootContext.workerless.value = true
+      await nextTick()
+      await wrapper.vm.v$.$validate()
+
+      expect(wrapper.vm.v$.nodeCIDR.required.$invalid).toBe(false)
+      expect(wrapper.find('[data-label="Parent Reference Type"]').exists()).toBe(false)
+      expect(wrapper.find('[data-label="Parent Reference Name"]').exists()).toBe(false)
+      expect(wrapper.find('[data-label="Parent Reference Namespace (optional)"]').exists()).toBe(false)
+      expect(wrapper.find('[data-label="Node CIDR"]').exists()).toBe(false)
+      expect(wrapper.find('[data-label="Enable Cloud NAT egress"]').exists()).toBe(false)
     })
   })
 })

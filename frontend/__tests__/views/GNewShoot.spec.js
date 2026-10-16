@@ -52,6 +52,12 @@ describe('views', () => {
             logger: {},
           },
           stubs: {
+            VAlert: {
+              props: {
+                type: String,
+              },
+              template: '<div :type="type"><slot /></div>',
+            },
             VCard: {
               template: '<div data-test="card"><slot /></div>',
             },
@@ -92,6 +98,20 @@ describe('views', () => {
       mountComponent(['aws', 'gcp'])
       expect(wrapper.vm.sortedInfraProviderTypeList).toEqual(['aws', 'gcp'])
       expect(infrastructureCard()).toBeDefined()
+    })
+
+    it('shows information instead of the create form when no cloud provider is available', () => {
+      mountComponent([])
+
+      const alert = wrapper.get('[data-test="no-cloud-providers"]')
+      expect(alert.attributes()).toMatchObject({
+        type: 'warning',
+        color: 'tonal-warning',
+        variant: 'tonal',
+        border: 'start',
+      })
+      expect(alert.text()).toContain('No cloud providers are available')
+      expect(wrapper.find('[data-test="card"]').exists()).toBe(false)
     })
   })
 })

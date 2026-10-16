@@ -4,12 +4,10 @@ SPDX-FileCopyrightText: Contributors to the Gardener project
 SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-if="teaserTemplate"
-    v-html="teaserHtml"
+    v-safe-html="{ html: teaserHtml, allowStyleTags: true }"
   />
-  <!-- eslint-disable vue/no-v-html -->
   <div
     v-else
     class="v-theme--dark d-flex flex-column align-center justify-center bg-main-background-darken-1 pa-3"
@@ -40,6 +38,7 @@ import { omitKeysWithSuffix } from '@/utils'
 import template from 'lodash/template'
 
 export default {
+  inject: ['sanitizeUrl'],
   props: {
     minHeight: {
       type: Number,
@@ -62,7 +61,7 @@ export default {
     teaserHtml () {
       const data = omitKeysWithSuffix(this.branding, 'Template')
       data.minHeight = this.minHeight
-      data.landingPageUrl = this.landingPageUrl
+      data.landingPageUrl = this.landingPageUrl ? this.sanitizeUrl(this.landingPageUrl) : undefined
       return this.compiledTeaserTemplate(data)
     },
     logoSize () {

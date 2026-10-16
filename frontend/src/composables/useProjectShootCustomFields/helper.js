@@ -6,6 +6,16 @@
 
 import isObject from 'lodash/isObject'
 import startsWith from 'lodash/startsWith'
+import toPath from 'lodash/toPath'
+
+const FORBIDDEN_PATH_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype'])
+
+export function isSafeFieldPath (path) {
+  if (typeof path !== 'string' || !path) {
+    return false
+  }
+  return !toPath(path).some(segment => FORBIDDEN_PATH_SEGMENTS.has(segment))
+}
 
 // formatValue formats a value by joining array elements with a separator or returning the value as is.
 // Returns undefined for object values.

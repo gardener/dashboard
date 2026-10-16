@@ -53,7 +53,7 @@ export function useVolumeTypes (cloudProfile) {
         return []
       }
 
-      const items = volumeTypes.value
+      const items = filter(volumeTypes.value, item => item.usable !== false)
       if (!region.value) {
         return items
       }
@@ -66,9 +66,6 @@ export function useVolumeTypes (cloudProfile) {
       const unavailableVolumeTypesInAllZones = intersection(...unavailableVolumeTypes)
 
       return filter(items, item => {
-        if (item.usable === false) {
-          return false
-        }
         if (includes(unavailableVolumeTypesInAllZones, item.name)) {
           return false
         }

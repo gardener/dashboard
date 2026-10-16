@@ -27,6 +27,7 @@ path = [
   "frontend/index.html",
   "OWNERS",
   "OWNERS_ALIASES",
+  "docs/OWNERS",
   "VERSION",
   ".editorconfig",
   ".gitignore",

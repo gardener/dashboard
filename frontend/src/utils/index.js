@@ -447,10 +447,23 @@ export function getIssueSince (shootStatus) {
   return head(issueTimestamps.sort())
 }
 
-export function getSeedPlutonoUrl (ingressDomain) {
-  return ingressDomain
-    ? `https://plutono-garden.${ingressDomain}`
-    : ''
+export function getSeedPlutonoUrl (ingressDomain, oidcObservabilityUrlsEnabled) {
+  if (!ingressDomain) {
+    return ''
+  }
+  // gardenlet exposes the seed Plutono as `g-seed`; the oidc-apps-controller names its host `<deployment>-<namespace>`
+  const prefix = oidcObservabilityUrlsEnabled
+    ? 'plutono-garden'
+    : 'g-seed'
+  return `https://${prefix}.${ingressDomain}`
+}
+
+export function getSeedVictoriaLogsUrl (ingressDomain, oidcObservabilityUrlsEnabled) {
+  // gardenlet does not expose the seed VictoriaLogs, only the oidc-apps-controller does
+  if (!ingressDomain || !oidcObservabilityUrlsEnabled) {
+    return ''
+  }
+  return `https://vlsingle-victoria-logs-garden.${ingressDomain}`
 }
 
 export function isStatusHibernated (status) {

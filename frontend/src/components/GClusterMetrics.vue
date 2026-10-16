@@ -24,6 +24,13 @@ SPDX-License-Identifier: Apache-2.0
         :url="seedPlutonoUrl"
         :url-text="seedPlutonoUrl"
       />
+      <g-link-list-tile
+        v-if="canViewLandscape && seedVictoriaLogsUrl"
+        app-title="Seed VictoriaLogs"
+        :url="seedVictoriaLogsUrl"
+        :url-text="seedVictoriaLogsUrl"
+        content-class="pt-0"
+      />
       <template v-if="!isTestingCluster">
         <g-link-list-tile
           :icon="plutonoIcon"
@@ -91,10 +98,10 @@ import GLinkListTile from '@/components/GLinkListTile'
 import { useShootItem } from '@/composables/useShootItem'
 import { useShootHelper } from '@/composables/useShootHelper'
 import { useShootStatus } from '@/composables/useShootStatus'
-import { useShootAdvertisedAddresses } from '@/composables/useShootAdvertisedAddresses'
 
 import {
   getSeedPlutonoUrl,
+  getSeedVictoriaLogsUrl,
   isTruthyValue,
 } from '@/utils'
 
@@ -131,10 +138,6 @@ export default {
       shootTechnicalId,
     } = useShootStatus(shootItem)
 
-    const {
-      shootVictoriaLogsUrl,
-    } = useShootAdvertisedAddresses(shootItem)
-
     return {
       shootItem,
       shootInfo,
@@ -144,7 +147,6 @@ export default {
       isOidcObservabilityUrlsEnabled,
       canViewLandscape,
       isTestingCluster,
-      shootVictoriaLogsUrl,
     }
   },
   computed: {
@@ -176,20 +178,17 @@ export default {
       return `https://au-${this.prefix}.${this.seedIngressDomain}`
     },
     victoriaLogsUrl () {
-      // Prefer the advertised address; fall back to the hardcoded url until
-      // the migration to advertisedAddresses is complete.
-      if (this.shootVictoriaLogsUrl) {
-        return this.shootVictoriaLogsUrl
-      }
-
       if (this.isOidcObservabilityUrlsEnabled) {
-        return `${this.getOidcDeploymentUrl('victoria-logs')}/select/vmui`
+        return `${this.getOidcDeploymentUrl('vlsingle-victoria-logs')}/select/vmui`
       }
 
       return `https://vl-${this.prefix}.${this.seedIngressDomain}/select/vmui`
     },
     seedPlutonoUrl () {
-      return getSeedPlutonoUrl(this.seedIngressDomain)
+      return getSeedPlutonoUrl(this.seedIngressDomain, this.isOidcObservabilityUrlsEnabled)
+    },
+    seedVictoriaLogsUrl () {
+      return getSeedVictoriaLogsUrl(this.seedIngressDomain, this.isOidcObservabilityUrlsEnabled)
     },
     username () {
       return get(this.shootInfo, ['monitoringUsername'], '')

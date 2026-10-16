@@ -15,14 +15,11 @@ describe('kube-client', () => {
       const resetDuration = 120 * 1000
       const factor = 2
       const jitter = 1
-      const attempts = 7
       let mockRandom
       let backoffManager
 
       beforeAll(() => {
         vi.useFakeTimers()
-        vi.spyOn(globalThis, 'setTimeout')
-        vi.spyOn(globalThis, 'clearTimeout')
       })
 
       afterAll(() => {
@@ -31,36 +28,69 @@ describe('kube-client', () => {
 
       beforeEach(() => {
         backoffManager = new BackoffManager()
-        mockRandom = vi.spyOn(Math, 'random').mockReturnValue(0.5)
+        mockRandom = vi.spyOn(Math, 'random')
       })
 
       afterEach(() => {
         backoffManager.clearTimeout()
       })
 
-      it('should create a default BackoffManager instance', async () => {
+      it('should create a default BackoffManager instance', () => {
         expect(backoffManager.min).toBe(min)
         expect(backoffManager.max).toBe(max)
         expect(backoffManager.resetDuration).toBe(resetDuration)
         expect(backoffManager.factor).toBe(factor)
         expect(backoffManager.jitter).toBe(jitter)
-        const durations = []
-        const expectedDurations = []
-        for (let i = 0; i < attempts; i++) {
-          durations.push(backoffManager.duration())
-          expectedDurations.push(Math.min(min * Math.pow(2, i), max))
-        }
-        expect(clearTimeout).toHaveBeenCalledTimes(attempts)
-        clearTimeout.mockClear()
-        expect(setTimeout).toHaveBeenCalledTimes(attempts)
-        expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), resetDuration)
-        expect(mockRandom).toHaveBeenCalledTimes(Math.floor(Math.log(max / min) / Math.log(factor)) + 1)
-        expect(backoffManager.attempt).toBe(attempts)
-        expect(durations).toEqual(expectedDurations)
-        vi.runAllTimers()
-        expect(backoffManager.attempt).toBe(0)
-        backoffManager.clearTimeout()
-        expect(clearTimeout).toHaveBeenCalledTimes(1)
+      })
+
+      it.each([
+        [0, 800],
+        [0.5, 1200],
+        [1 - Number.EPSILON, 1599],
+      ])('should add positive jitter for a random sample of %s', (sample, expected) => {
+        mockRandom.mockReturnValue(sample)
+        expect(backoffManager.duration()).toBe(expected)
+      })
+
+      it('should never return less than the current base', () => {
+        mockRandom.mockReturnValue(0)
+        expect(Array.from({ length: 8 }, () => backoffManager.duration())).toEqual([
+          800,
+          1600,
+          3200,
+          6400,
+          12800,
+          25600,
+          30000,
+          30000,
+        ])
+      })
+
+      it('should cap the exponential base before applying jitter', () => {
+        mockRandom.mockReturnValue(1 - Number.EPSILON)
+        const durations = Array.from({ length: 8 }, () => backoffManager.duration())
+        expect(durations.slice(-2)).toEqual([59999, 59999])
+        expect(durations.every((duration, attempt) => {
+          const base = Math.min(min * Math.pow(factor, attempt), max)
+          return duration >= base && duration < 2 * base
+        })).toBe(true)
+      })
+
+      it('should reset to the initial base after the reset interval', async () => {
+        mockRandom.mockReturnValue(0)
+        expect(backoffManager.duration()).toBe(800)
+        expect(backoffManager.duration()).toBe(1600)
+
+        await vi.advanceTimersByTimeAsync(resetDuration)
+
+        expect(backoffManager.duration()).toBe(800)
+      })
+
+      it('should use one reset timer for repeated calls in the same backoff window', () => {
+        mockRandom.mockReturnValue(0)
+        backoffManager.duration()
+        backoffManager.duration()
+        expect(vi.getTimerCount()).toBe(1)
       })
     })
   })

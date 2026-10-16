@@ -35,12 +35,10 @@ SPDX-License-Identifier: Apache-2.0
         variant="tonal"
         color="tonal-primary"
       >
-        <!-- eslint-disable vue/no-v-html -->
         <div
+          v-safe-html="costObjectDescriptionHtml"
           class="alert-banner-message"
-          v-html="costObjectDescriptionHtml"
         />
-        <!-- eslint-enable vue/no-v-html -->
       </v-alert>
     </v-col>
   </v-row>

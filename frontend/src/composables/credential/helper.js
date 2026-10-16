@@ -10,6 +10,7 @@ import {
 } from '@/utils'
 
 import get from 'lodash/get'
+import set from 'lodash/set'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
@@ -328,12 +329,27 @@ export function isInfrastructureBinding ({ binding, infraProviderTypes }) {
   return infraProviderTypes.includes(bindingProviderType(binding))
 }
 
+export function copySecretAliasesToKeys (data = {}, fields = []) {
+  const resolvedData = { ...data }
+  for (const { key, aliases = [] } of fields) {
+    const sourceKey = [key, ...aliases].find(candidate => Object.hasOwn(data, candidate))
+    if (sourceKey !== undefined) {
+      set(resolvedData, [key], get(data, [sourceKey]))
+    }
+  }
+  return resolvedData
+}
+
 // Secret Details
 export function secretDetails ({ secret, providerConfig }) {
-  const secretData = secret?.data || {}
   if (!providerConfig) {
     return undefined
   }
+
+  const secretData = copySecretAliasesToKeys(
+    secret?.data ?? {},
+    get(providerConfig, ['secret', 'fields']),
+  )
 
   return resolveSecretDetailsFromVendorConfig({
     secretData,

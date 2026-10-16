@@ -184,7 +184,12 @@ export function createShootContextComposable (options = {}) {
     hibernationSchedules.value = []
     workerless.value = get(options, ['workerless'], configStore.defaultWorkerlessCluster)
     const defaultProviderType = head(cloudProfileStore.sortedInfraProviderTypeList)
-    providerType.value = get(options, ['providerType'], defaultProviderType)
+    const selectedProviderType = get(options, ['providerType'], defaultProviderType)
+    if (!selectedProviderType) {
+      initialManifest.value = cloneDeep(normalizedManifest.value)
+      return
+    }
+    providerType.value = selectedProviderType
     resetControlPlaneHighAvailability()
     resetMaintenanceAutoUpdate()
     resetMaintenanceTimeWindow()
@@ -300,8 +305,13 @@ export function createShootContextComposable (options = {}) {
   }
 
   /* networking */
-  const networkingNodes = computed(() => {
-    return get(manifest.value, ['spec', 'networking', 'nodes'])
+  const networkingNodes = computed({
+    get () {
+      return get(manifest.value, ['spec', 'networking', 'nodes'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'networking', 'nodes'], value)
+    },
   })
 
   const networkingType = computed({
@@ -522,6 +532,61 @@ export function createShootContextComposable (options = {}) {
       : undefined
   }
 
+  // GDCH-specific: parentReference points at a GDC `Subnet` or `SubnetGroup` that scopes
+  // worker-pool IP allocation.
+  const providerInfrastructureConfigParentReferenceName = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'name'], value)
+    },
+  })
+
+  const providerInfrastructureConfigParentReferenceNamespace = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
+    },
+    set (value) {
+      if (value) {
+        set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'], value)
+      } else {
+        unset(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'namespace'])
+      }
+    },
+  })
+
+  const providerInfrastructureConfigParentReferenceType = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'parentReference', 'type'], value)
+    },
+  })
+
+  // GDCH-specific: enableEgress controls Cloud NAT egress.
+  const providerInfrastructureConfigEnableEgress = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'enableEgress'], value)
+    },
+  })
+
+  // GDCH-specific: changes made through the infrastructure form are written to both
+  // infrastructureConfig.networks.nodeCIDR and spec.networking.nodes.
+  const providerInfrastructureConfigNodeCIDR = computed({
+    get () {
+      return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'])
+    },
+    set (value) {
+      set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'nodeCIDR'], value)
+      networkingNodes.value = value
+    },
+  })
+
   const workerless = computed({
     get () {
       return providerState.workerless
@@ -656,9 +721,12 @@ export function createShootContextComposable (options = {}) {
   })
 
   const freeNetworks = computed(() => {
+    const workerCIDR = providerType.value === 'gdch'
+      ? networkingNodes.value
+      : networkingNodes.value ?? defaultNodesCIDR.value
     return findFreeNetworks(
       providerInfrastructureConfigNetworksZones.value,
-      networkingNodes.value ?? defaultNodesCIDR.value,
+      workerCIDR,
       providerType.value,
       size(allZones.value),
     )
@@ -776,12 +844,15 @@ export function createShootContextComposable (options = {}) {
   /* hibernation */
   const noHibernationSchedules = computed({
     get () {
-      return getShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false') === 'true'
+      const noHibernationScheduleFallback = getShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'false')
+      return getShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule', noHibernationScheduleFallback) === 'true'
     },
     set (value) {
       if (value) {
-        setShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule', 'true')
+        setShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule', 'true')
+        unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
       } else {
+        unsetShootAnnotation('dashboard.gardener.cloud/no-hibernation-schedule')
         unsetShootAnnotation('dashboard.garden.sapcloud.io/no-hibernation-schedule')
       }
     },
@@ -1075,6 +1146,11 @@ export function createShootContextComposable (options = {}) {
     initialProviderInfrastructureConfigNetworksZones,
     providerInfrastructureConfigPartitionID,
     providerInfrastructureConfigProjectID,
+    providerInfrastructureConfigParentReferenceName,
+    providerInfrastructureConfigParentReferenceNamespace,
+    providerInfrastructureConfigParentReferenceType,
+    providerInfrastructureConfigEnableEgress,
+    providerInfrastructureConfigNodeCIDR,
     /* provider - workers */
     providerWorkers,
     addProviderWorker,

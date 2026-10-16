@@ -7,11 +7,18 @@
 import {
   defineComponent,
   nextTick,
+  onMounted,
 } from 'vue'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 
 import GSecretDialogOpenstack from '@/components/Credentials/GSecretDialogOpenstack'
+
+import { useSecretContext } from '@/composables/credential/useSecretContext'
+
+import { encodeBase64 } from '@/utils'
+
+let secretContext
 
 const GenericInputFieldStub = defineComponent({
   name: 'GGenericInputField',
@@ -38,6 +45,21 @@ const GenericInputFieldStub = defineComponent({
 
 const SecretDialogStub = defineComponent({
   name: 'GSecretDialog',
+  props: {
+    credential: {
+      type: Object,
+    },
+  },
+  setup (props) {
+    secretContext = useSecretContext()
+    onMounted(() => {
+      if (props.credential) {
+        secretContext.setSecretManifest(props.credential)
+      } else {
+        secretContext.createSecretManifest()
+      }
+    })
+  },
   template: '<div><slot name="secret-slot" /></div>',
 })
 
@@ -61,12 +83,14 @@ const RadioGroupStub = defineComponent({
 
 describe('GSecretDialogOpenstack', () => {
   function mountDialog ({
+    credential,
     providerType = 'openstack',
     vendorType = 'infra',
   } = {}) {
     return mount(GSecretDialogOpenstack, {
       props: {
         modelValue: true,
+        credential,
         providerType,
         vendorType,
       },
@@ -146,5 +170,50 @@ describe('GSecretDialogOpenstack', () => {
       'applicationCredentialSecret',
     ])
     expect(wrapper.vm.fields.applicationCredentialSecret.sensitive).toBe(true)
+  })
+
+  it('hydrates Designate aliases and writes camel case keys without dropping unmanaged data', async () => {
+    const credential = {
+      apiVersion: 'v1',
+      kind: 'Secret',
+      metadata: {
+        name: 'designate-secret',
+        namespace: 'garden-project',
+      },
+      data: {
+        OS_AUTH_URL: encodeBase64('https://identity.example.org'),
+        OS_DOMAIN_NAME: encodeBase64('example-domain'),
+        OS_PROJECT_NAME: encodeBase64('example-project'),
+        OS_USERNAME: encodeBase64('old-user'),
+        OS_PASSWORD: encodeBase64('old-password'),
+        OS_REGION_NAME: encodeBase64('region-one'),
+        CACERT: encodeBase64('keep-certificate'),
+      },
+    }
+    const wrapper = mountDialog({
+      credential,
+      providerType: 'openstack-designate',
+      vendorType: 'dns',
+    })
+    await nextTick()
+
+    expect(wrapper.vm.authURL).toBe('https://identity.example.org')
+    expect(wrapper.vm.domainName).toBe('example-domain')
+    expect(wrapper.vm.tenantName).toBe('example-project')
+    expect(wrapper.vm.username).toBe('old-user')
+
+    expect(secretContext.secretManifest.value.data).toEqual(credential.data)
+
+    await wrapper.get('[data-field="username"]').setValue('new-user')
+
+    expect(secretContext.secretManifest.value.data).toEqual({
+      authURL: encodeBase64('https://identity.example.org'),
+      domainName: encodeBase64('example-domain'),
+      tenantName: encodeBase64('example-project'),
+      username: encodeBase64('new-user'),
+      password: encodeBase64('old-password'),
+      OS_REGION_NAME: encodeBase64('region-one'),
+      CACERT: encodeBase64('keep-certificate'),
+    })
   })
 })

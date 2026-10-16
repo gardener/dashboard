@@ -28,6 +28,7 @@ describe('stores', () => {
           }, {
             name: 'custom-infra',
             displayName: 'Custom Infrastructure Provider',
+            hidden: true,
             secret: {
               details: [{ label: 'Injected Detail' }],
             },
@@ -49,6 +50,7 @@ describe('stores', () => {
             displayName: 'Custom DNS Provider',
             weight: 2,
             icon: 'custom-dns.svg',
+            hidden: false,
             secret: {
               fields: [],
               help: '<p>Injected help</p>',
@@ -59,6 +61,7 @@ describe('stores', () => {
             displayName: 'Custom Image',
             weight: 2,
             icon: 'custom-image.svg',
+            hidden: true,
             secret: {
               fields: [],
             },
@@ -94,7 +97,7 @@ describe('stores', () => {
       })).toBe('Branded Netlify')
     })
 
-    it('allows custom infrastructure and DNS vendors using documented properties only', () => {
+    it('allows custom vendors using documented properties only', () => {
       expect(configStore.sortedDnsProviderTypeList).toContain('custom-dns')
       expect(configStore.vendorDetails({
         type: 'infra',
@@ -103,6 +106,7 @@ describe('stores', () => {
         type: 'infra',
         name: 'custom-infra',
         displayName: 'Custom Infrastructure Provider',
+        hidden: true,
         weight: Number.MAX_SAFE_INTEGER,
       })
       expect(configStore.vendorDetails({
@@ -114,7 +118,38 @@ describe('stores', () => {
         displayName: 'Custom DNS Provider',
         weight: 2,
         icon: 'custom-dns.svg',
+        hidden: false,
       })
+    })
+
+    it('hides gdch-dns by default', () => {
+      expect(configStore.sortedDnsProviderTypeList).not.toContain('gdch-dns')
+    })
+
+    it('allows showing a DNS provider that is hidden by default', () => {
+      configStore.setConfiguration({
+        branding: {
+          dnsVendors: [{
+            name: 'gdch-dns',
+            hidden: false,
+          }],
+        },
+      })
+
+      expect(configStore.sortedDnsProviderTypeList).toContain('gdch-dns')
+    })
+
+    it('allows hiding a DNS provider using vendor branding', () => {
+      configStore.setConfiguration({
+        branding: {
+          dnsVendors: [{
+            name: 'aws-route53',
+            hidden: true,
+          }],
+        },
+      })
+
+      expect(configStore.sortedDnsProviderTypeList).not.toContain('aws-route53')
     })
 
     it('allows branding CloudProfile-provided machine image names using documented properties only', () => {
@@ -127,6 +162,7 @@ describe('stores', () => {
         displayName: 'Custom Image',
         weight: 2,
         icon: 'custom-image.svg',
+        hidden: true,
       })
     })
 

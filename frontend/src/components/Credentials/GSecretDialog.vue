@@ -9,6 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     v-model="visible"
     max-width="850"
     scrollable
+    persistent
   >
     <v-card>
       <g-toolbar

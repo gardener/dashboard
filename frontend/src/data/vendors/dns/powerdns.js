@@ -19,6 +19,7 @@ export default {
     fields: [
       {
         key: 'server',
+        aliases: ['Server'],
         label: 'Server',
         type: 'text',
         validators: {
@@ -32,6 +33,7 @@ export default {
       },
       {
         key: 'apiKey',
+        aliases: ['ApiKey'],
         label: 'API Key',
         type: 'text',
         sensitive: true,

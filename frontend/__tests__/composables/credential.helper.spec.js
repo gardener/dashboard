@@ -16,7 +16,10 @@ function createSecretData () {
     tenantName: encode('example-tenant'),
     accessKeyID: encode('example-access-key-id'),
     subscriptionID: encode('example-subscription-id'),
-    'serviceaccount.json': encode(JSON.stringify({ project_id: 'example-gcp-project-id' })),
+    'serviceaccount.json': encode(JSON.stringify({
+      project_id: 'example-gcp-project-id',
+      name: 'example-gdch-service-identity',
+    })),
     metalAPIURL: encode('https://metal.example.org'),
     Server: encode('dns.example.org:53'),
     TSIGKeyName: encode('key.example.org.'),
@@ -86,6 +89,20 @@ describe('secretDetails', () => {
     }
   })
 
+  it('defines the required GDCH credential fields', () => {
+    expect(secretField('gdch', 'serviceaccount.json')).toMatchObject({
+      type: 'json',
+      sensitive: true,
+    })
+    expect(secretField('gdch-dns', 'gdch-config')).toMatchObject({
+      type: 'text',
+      sensitive: true,
+      validators: {
+        required: { type: 'required' },
+      },
+    })
+  })
+
   it('resolves single and fallback key paths without mutating the source configuration', () => {
     const literalKeySource = Object.freeze({
       key: Object.freeze(['literal.key']),
@@ -116,6 +133,56 @@ describe('secretDetails', () => {
       },
       valueFrom: fallbackKeysSource,
     })).toBe('fallback-value')
+  })
+
+  it.each([
+    ['aws-route53', 'AWS_ACCESS_KEY_ID', 'Access Key ID'],
+    ['azure-dns', 'AZURE_SUBSCRIPTION_ID', 'Subscription ID'],
+    ['azure-private-dns', 'AZURE_SUBSCRIPTION_ID', 'Subscription ID'],
+    ['alicloud-dns', 'ACCESS_KEY_ID', 'Access Key ID'],
+    ['openstack-designate', 'OS_DOMAIN_NAME', 'Domain Name'],
+    ['powerdns', 'Server', 'Server'],
+  ])('resolves %s field aliases before reading details', (name, alias, label) => {
+    const secret = { data: { [alias]: encode('alias-value') } }
+    expect(secretDetails({ secret, providerConfig: providerConfig(name) }))
+      .toContainEqual({ label, value: 'alias-value' })
+    expect(secret.data).toEqual({ [alias]: encode('alias-value') })
+  })
+
+  it.each([
+    ['aws', 'AWS_ACCESS_KEY_ID'],
+    ['azure', 'AZURE_SUBSCRIPTION_ID'],
+    ['alicloud', 'ACCESS_KEY_ID'],
+    ['openstack', 'OS_DOMAIN_NAME'],
+  ])('keeps DNS-only aliases out of %s infrastructure credentials', (name, alias) => {
+    const secret = { data: { [alias]: encode('dns-only') } }
+    expect(secretDetails({ secret, providerConfig: providerConfig(name) })[0].value).toBeUndefined()
+  })
+
+  it('does not resolve unsupported Azure and RFC2136 spellings', () => {
+    expect(secretDetails({
+      secret: {
+        data: {
+          subscriptionId: encode('unsupported-subscription'),
+        },
+      },
+      providerConfig: providerConfig('azure'),
+    })[0].value).toBeUndefined()
+
+    expect(secretDetails({
+      secret: {
+        data: {
+          server: encode('unsupported-server'),
+          tsigKeyName: encode('unsupported-key-name'),
+          zone: encode('unsupported-zone'),
+        },
+      },
+      providerConfig: providerConfig('rfc2136'),
+    })).toEqual([
+      { label: 'Server', value: undefined },
+      { label: 'TSIG Key Name', value: undefined },
+      { label: 'Zone', value: undefined },
+    ])
   })
 
   it('supports parsing raw values when decoding is disabled', () => {
@@ -251,6 +318,8 @@ describe('secretDetails', () => {
       defaultValue: '',
       omitWhenEmpty: true,
     })
+    expect(secretField('rfc2136', 'TSIGSecretAlgorithm').values)
+      .not.toContainEqual(expect.objectContaining({ value: 'hmac-md5' }))
   })
 
   it('limits GCP project IDs to the documented length', () => {

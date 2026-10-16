@@ -40,6 +40,14 @@ export const help = `
   </p>
 `
 
+export const fields = [
+  { ...clientIdField, aliases: ['AZURE_CLIENT_ID'] },
+  { ...clientSecretField, aliases: ['AZURE_CLIENT_SECRET'] },
+  { ...tenantIdField, aliases: ['AZURE_TENANT_ID'] },
+  { ...subscriptionIdField, aliases: ['AZURE_SUBSCRIPTION_ID'] },
+  cloudField,
+]
+
 export default {
   name: 'azure-dns',
   displayName: 'Azure DNS',
@@ -49,13 +57,7 @@ export default {
     details: [
       subscriptionIdDetail,
     ],
-    fields: [
-      clientIdField,
-      clientSecretField,
-      tenantIdField,
-      subscriptionIdField,
-      cloudField,
-    ],
+    fields,
     help,
   },
 }

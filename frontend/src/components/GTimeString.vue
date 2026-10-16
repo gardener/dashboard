@@ -21,7 +21,10 @@ import {
   ref,
   toValue,
 } from 'vue'
-import { useNow } from '@vueuse/core'
+import {
+  useIntervalFn,
+  useNow,
+} from '@vueuse/core'
 
 import {
   getTimeStringFrom,
@@ -32,15 +35,15 @@ import {
 } from '@/utils'
 
 const clockSecondsAccuracy = useNow({
-  interval: 1000,
+  scheduler: callback => useIntervalFn(callback, 1000),
   controls: true,
 })
 const clockHalfAMinuteAccuracy = useNow({
-  interval: 30 * 1000,
+  scheduler: callback => useIntervalFn(callback, 30 * 1000),
   controls: true,
 })
 const clockHalfAnHourAccuracy = useNow({
-  interval: 30 * 60 * 1000,
+  scheduler: callback => useIntervalFn(callback, 30 * 60 * 1000),
   controls: true,
 })
 

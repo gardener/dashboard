@@ -390,6 +390,7 @@ import GMessage from '@/components/GMessage.vue'
 import GIconPicker from '@/components/GIconPicker.vue'
 
 import { useProjectContext } from '@/composables/useProjectContext'
+import { isSafeFieldPath } from '@/composables/useProjectShootCustomFields/helper'
 import { useScrollBar } from '@/composables/useScrollBar'
 import { useLogger } from '@/composables/useLogger'
 
@@ -564,6 +565,11 @@ const isKnownIconOrEmpty = helpers.withMessage(
   value => !value || isMdiIcon(value),
 )
 
+const hasSafePath = helpers.withMessage(
+  'Path must not contain __proto__, constructor, or prototype',
+  value => !value || isSafeFieldPath(value),
+)
+
 const eitherShowColumnOrDetails = helpers.withMessage(
   'Either "Show Column" or "Show Details" must be checked',
   (value, vm) => vm.showColumn || vm.showDetails,
@@ -571,7 +577,7 @@ const eitherShowColumnOrDetails = helpers.withMessage(
 
 const rules = {
   name: { required, isUniqueName },
-  path: { required },
+  path: { required, hasSafePath },
   icon: { isKnownIconOrEmpty },
   showColumn: { eitherShowColumnOrDetails },
   showDetails: { eitherShowColumnOrDetails },

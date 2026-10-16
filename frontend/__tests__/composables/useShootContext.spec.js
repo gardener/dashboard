@@ -98,6 +98,15 @@ describe('composables', () => {
       expect(shootContextStore.providerType).toBe('aws')
     })
 
+    it('should create a clean draft without provider defaults when no infrastructure provider is available', () => {
+      const cloudProfileStore = useCloudProfileStore()
+      cloudProfileStore.setCloudProfiles([])
+
+      expect(() => shootContextStore.createShootManifest()).not.toThrow()
+      expect(shootContextStore.providerType).toBeUndefined()
+      expect(shootContextStore.isShootDirty).toBe(false)
+    })
+
     it('should omit spec.addons if no addon is enabled', () => {
       createShootManifest('aws')
 
@@ -162,6 +171,38 @@ describe('composables', () => {
 
     it('should create a default "openstack" shoot manifest', async () => {
       expect(createShootManifest('openstack')).toMatchSnapshot()
+    })
+
+    it('should write a GDCH infrastructure node CIDR to both fields without reverse synchronization', () => {
+      shootContextStore.setShootManifest({
+        metadata: {
+          creationTimestamp: '2026-08-25T12:00:00Z',
+        },
+        spec: {
+          networking: {
+            nodes: '10.250.0.0/16',
+          },
+          provider: {
+            type: 'gdch',
+            infrastructureConfig: {
+              networks: {
+                nodeCIDR: '10.250.0.0/16',
+              },
+            },
+            workers: [{
+              name: 'worker-a',
+              minimum: 1,
+              maximum: 2,
+            }],
+          },
+        },
+      })
+
+      shootContextStore.networkingNodes = '10.1.0.0/18'
+      expect(shootContextStore.providerInfrastructureConfigNodeCIDR).toBe('10.250.0.0/16')
+
+      shootContextStore.providerInfrastructureConfigNodeCIDR = '10.2.0.0/18'
+      expect(shootContextStore.networkingNodes).toBe('10.2.0.0/18')
     })
 
     it('should create a default "ironcore" shoot manifest', async () => {

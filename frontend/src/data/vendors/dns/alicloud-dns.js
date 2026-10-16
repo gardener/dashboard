@@ -14,8 +14,8 @@ export default {
       accessKeyIdDetail,
     ],
     fields: [
-      accessKeyIdField,
-      accessKeySecretField,
+      { ...accessKeyIdField, aliases: ['ACCESS_KEY_ID'] },
+      { ...accessKeySecretField, aliases: ['ACCESS_KEY_SECRET'] },
     ],
     help: `
       <p>

@@ -114,10 +114,14 @@ SPDX-License-Identifier: Apache-2.0
   </div>
   <v-alert
     v-else
+    data-test="no-cloud-providers"
     class="ma-3"
     type="warning"
+    color="tonal-warning"
+    variant="tonal"
+    border="start"
   >
-    There must be at least one cloud profile that is supported by the dashboard and visible.
+    No cloud providers are available. A cluster can only be created when at least one visible cloud profile is supported by the dashboard.
   </v-alert>
 </template>
 
