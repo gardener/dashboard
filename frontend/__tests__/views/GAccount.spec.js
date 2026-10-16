@@ -21,6 +21,9 @@ import { useProjectStore } from '@/store/project'
 
 import GAccount from '@/views/GAccount.vue'
 
+import GAccountAvatar from '@/components/GAccountAvatar.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
+
 import { notify as notifyPlugin } from '@/plugins'
 
 const { createVuetifyPlugin } = global.fixtures.helper
@@ -97,6 +100,17 @@ describe('views', () => {
 
     it('should keep account identity independent of cookie groups', () => {
       expect(Object.hasOwn(authnStore.user, 'groups')).toBe(false)
+    })
+
+    it('should render the email copy button in the list item action slot', () => {
+      api.getUserGroups.mockResolvedValue({ data: groups })
+
+      mountComponent()
+
+      expect(wrapper.findComponent(GAccountAvatar).props('copyable')).toBe(false)
+      expect(wrapper.findAllComponents(GCopyBtn).some(component => {
+        return component.props('clipboardText') === 'foo@example.org'
+      })).toBe(true)
     })
 
     it('should show a loading indicator until groups resolve', async () => {

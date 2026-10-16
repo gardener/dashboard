@@ -24,11 +24,21 @@ SPDX-License-Identifier: Apache-2.0
             {{ item.displayName }}
           </v-list-item-title>
           <v-list-item-subtitle :class="{ 'inherit-opacity': item.isEmail }">
-            <a
+            <g-auto-hide
               v-if="item.isEmail"
-              :href="`mailto:${item.username}`"
-              class="text-anchor"
-            >{{ item.username }}</a>
+              right
+              class="user-email-copy"
+            >
+              <template #activator>
+                <span>{{ item.username }}</span>
+              </template>
+              <g-copy-btn
+                density="compact"
+                :icon-size-px="16"
+                :clipboard-text="item.username"
+                tooltip-text="Copy email address to clipboard"
+              />
+            </g-auto-hide>
             <span v-else>{{ item.username }}</span>
           </v-list-item-subtitle>
         </v-list-item>
@@ -85,7 +95,9 @@ import { useAuthzStore } from '@/store/authz'
 
 import GAccountRoles from '@/components/Members/GAccountRoles.vue'
 import GActionButton from '@/components/GActionButton.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GAvatar from '@/components/GAvatar.vue'
+import GAutoHide from '@/components/GAutoHide.vue'
 
 import { mapTableHeader } from '@/utils'
 
@@ -126,3 +138,10 @@ function onDelete () {
 }
 
 </script>
+
+<style lang="scss" scoped>
+.user-email-copy :deep(.copy-button) {
+  height: 0;
+}
+
+</style>

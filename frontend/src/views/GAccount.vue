@@ -30,10 +30,17 @@ SPDX-License-Identifier: Apache-2.0
               <div class="content">
                 <g-account-avatar
                   :account-name="username"
-                  mail-to
+                  :copyable="false"
                   :size="32"
                 />
               </div>
+              <template #append>
+                <g-copy-btn
+                  v-if="isUsernameEmail"
+                  :clipboard-text="username"
+                  tooltip-text="Copy email address to clipboard"
+                />
+              </template>
             </g-list-item>
             <g-list-item v-if="!!fullDisplayName">
               <div class="label text-medium-emphasis">
@@ -260,6 +267,8 @@ import GTimeString from '@/components/GTimeString.vue'
 
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
+import { isEmail } from '@/utils'
+
 import head from 'lodash/head'
 
 export default {
@@ -327,6 +336,9 @@ export default {
     },
     icon () {
       return this.isAdmin ? 'mdi-account-supervisor' : 'mdi-account'
+    },
+    isUsernameEmail () {
+      return isEmail(this.username)
     },
     id () {
       return this.user.id
