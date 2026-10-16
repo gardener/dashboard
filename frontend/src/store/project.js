@@ -12,6 +12,7 @@ import {
   ref,
   computed,
   toRef,
+  watch,
 } from 'vue'
 
 import { useApi } from '@/composables/useApi'
@@ -21,9 +22,11 @@ import {
   formatProjectNameAndTitle,
   getProjectTitle,
 } from '@/composables/useProjectMetadata/helper.js'
+import { isProjectPending } from '@/composables/useProjectItem'
 
 import { useAuthzStore } from './authz'
 import { useAppStore } from './app'
+import { useLocalStorageStore } from './localStorage'
 
 import filter from 'lodash/filter'
 import find from 'lodash/find'
@@ -38,6 +41,7 @@ export const useProjectStore = defineStore('project', () => {
   const logger = useLogger()
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
+  const localStorageStore = useLocalStorageStore()
 
   const list = ref(null)
 
@@ -73,11 +77,25 @@ export const useProjectStore = defineStore('project', () => {
     return projects
   })
 
+  const projectByNameMap = computed(() => {
+    const projects = {}
+    if (Array.isArray(list.value)) {
+      for (const project of list.value) {
+        set(projects, [project.metadata.name], project)
+      }
+    }
+    return projects
+  })
+
   const defaultNamespace = computed(() => {
-    if (namespaces.value) {
-      return namespaces.value.includes('garden')
+    const navigableNamespaces = map(
+      filter(list.value ?? [], project => !isProjectPending(project)),
+      'spec.namespace',
+    )
+    if (navigableNamespaces.length) {
+      return navigableNamespaces.includes('garden')
         ? 'garden'
-        : namespaces.value[0]
+        : navigableNamespaces[0]
     }
     return ''
   })
@@ -148,9 +166,59 @@ export const useProjectStore = defineStore('project', () => {
     return get(projectMap.value, [namespace])
   }
 
+  function projectByName (name) {
+    return get(projectByNameMap.value, [name])
+  }
+
+  const lastProject = computed(() => {
+    if (list.value === null) {
+      return
+    }
+    const project = projectByName(localStorageStore.lastProjectName)
+    return isProjectPending(project) ? undefined : project
+  })
+
+  function setLastProject (project) {
+    localStorageStore.lastProjectName = project?.metadata.name ?? null
+  }
+
+  function restoreLastProject () {
+    if (list.value === null) {
+      return
+    }
+
+    const project = lastProject.value ??
+      projectByNamespace(defaultNamespace.value)
+    setLastProject(project)
+  }
+
+  function rememberProject (name) {
+    const project = projectByName(name)
+    if (project && !isProjectPending(project)) {
+      setLastProject(project)
+    }
+  }
+
+  function namespaceByProjectName (name) {
+    return get(projectByName(name), ['spec', 'namespace'])
+  }
+
   async function fetchProjects () {
     const response = await api.getProjects()
     list.value = response.data
+    restoreLastProject()
+  }
+
+  const projectNavigationState = computed(() => {
+    return map(projectList.value, project => `${project.metadata.name}:${get(project, ['status', 'phase'], '')}`).join(',')
+  })
+
+  watch(projectNavigationState, restoreLastProject)
+
+  async function synchronize () {
+    if (!isInitial.value) {
+      await fetchProjects()
+    }
   }
 
   async function createProject (project) {
@@ -194,6 +262,7 @@ export const useProjectStore = defineStore('project', () => {
 
   async function $reset () {
     list.value = null
+    setLastProject()
   }
 
   return {
@@ -210,14 +279,19 @@ export const useProjectStore = defineStore('project', () => {
     projectsNotMarkedForDeletion,
     project,
     projectNames,
+    lastProject,
+    rememberProject,
     isCurrentNamespace,
     fetchProjects,
+    synchronize,
     createProject,
     patchProject,
     updateProject,
     deleteProject,
     projectNameByNamespace,
     projectByNamespace,
+    projectByName,
+    namespaceByProjectName,
     handleEvent: socketEventHandler.listener,
     $reset,
   }

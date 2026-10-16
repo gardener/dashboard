@@ -16,8 +16,10 @@ import {
   setActivePinia,
 } from 'pinia'
 
+import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
+import { useProjectStore } from '@/store/project'
 import { useShootStore } from '@/store/shoot'
 
 import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
@@ -25,6 +27,7 @@ import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 import {
   createGlobalAfterHooks,
   createGlobalBeforeGuards,
+  createGlobalResolveGuards,
 } from '@/router/guards'
 
 function createTestRouter () {
@@ -32,9 +35,18 @@ function createTestRouter () {
     history: createMemoryHistory(),
     routes: [
       {
-        name: 'ShootList',
-        path: '/namespace/:namespace/shoots',
+        name: 'AllClusters',
+        path: '/clusters',
         component: {},
+        meta: { namespace: '_all' },
+      },
+      {
+        name: 'ShootList',
+        path: '/projects/:projectName/clusters',
+        component: {},
+        beforeEnter (to) {
+          to.meta.namespace = `garden-${to.params.projectName}`
+        },
       },
       {
         name: 'Settings',
@@ -60,6 +72,62 @@ async function waitForRoute (router, routeName, navigate) {
 }
 
 describe('router', () => {
+  it('treats the _all Project name like any inaccessible Project', async () => {
+    setActivePinia(createPinia())
+    const appStore = useAppStore()
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
+
+    await ensureDataLoaded({
+      name: 'ShootList',
+      meta: { projectScoped: true },
+      params: { projectName: '_all' },
+    })
+
+    expect(appStore.routerError).toMatchObject({
+      status: 403,
+      reason: 'Forbidden',
+    })
+  })
+
+  it('prepares remembered Project rules before committing a global route', async () => {
+    setActivePinia(createPinia())
+    const authzStore = useAuthzStore()
+    const projectStore = useProjectStore()
+    projectStore.list = [{
+      metadata: { name: 'source' },
+      spec: { namespace: 'garden-source' },
+      status: { phase: 'Ready' },
+    }]
+    projectStore.rememberProject('source')
+    const prepareRules = vi.spyOn(authzStore, 'prepareRules').mockResolvedValue()
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
+
+    await ensureDataLoaded({ name: 'SeedList', meta: {} })
+
+    expect(prepareRules).toHaveBeenNthCalledWith(1, null)
+    expect(prepareRules).toHaveBeenNthCalledWith(2, 'garden-source')
+  })
+
+  it('redirects direct navigation to a Pending Project', async () => {
+    setActivePinia(createPinia())
+    const projectStore = useProjectStore()
+    projectStore.list = [{
+      metadata: { name: 'pending' },
+      spec: { namespace: 'garden-pending' },
+      status: { phase: 'Pending' },
+    }]
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
+
+    await expect(ensureDataLoaded({
+      name: 'ShootList',
+      meta: { projectScoped: true },
+      params: { projectName: 'pending' },
+    })).resolves.toEqual({
+      name: 'Home',
+      replace: true,
+    })
+  })
+
   describe('global after hook', () => {
     let authzStore
     let app
@@ -97,10 +165,7 @@ describe('router', () => {
 
     it('reactivates the latest shallow context after navigating away and Back', async () => {
       await router.push({
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
+        name: 'AllClusters',
         query: {
           q: 'provider:aws',
         },
@@ -114,7 +179,7 @@ describe('router', () => {
       expect(shootStore.shootListContext).toBeNull()
       expect(searchQuery.value).toBe('')
 
-      await waitForRoute(router, 'ShootList', () => router.back())
+      await waitForRoute(router, 'AllClusters', () => router.back())
 
       expect(router.options.history.location).toBe(editedLocation)
       expect(authzStore.namespace).toBe('_all')
@@ -125,11 +190,29 @@ describe('router', () => {
       })
     })
 
+    it('ignores namespace query when activating global rules', async () => {
+      const projectStore = useProjectStore()
+      projectStore.list = [{
+        metadata: { name: 'source' },
+        spec: { namespace: 'garden-source' },
+        status: { phase: 'Ready' },
+      }]
+      projectStore.rememberProject('source')
+
+      await router.push({
+        name: 'Settings',
+        query: { namespace: 'garden-ignored' },
+      })
+
+      expect(authzStore.activateRules).toHaveBeenLastCalledWith(undefined, 'garden-source')
+      expect(router.currentRoute.value.fullPath).toBe('/settings?namespace=garden-ignored')
+    })
+
     it('keeps the source authorization, context, search, and URL after cancellation', async () => {
       await router.push({
         name: 'ShootList',
         params: {
-          namespace: 'garden-source',
+          projectName: 'source',
         },
         query: {
           q: 'provider:aws',
@@ -138,12 +221,12 @@ describe('router', () => {
       const { searchQuery } = useShootListSearch()
       searchQuery.value = 'seed:latest'
       const editedLocation = router.options.history.location
-      router.beforeEach(to => to.params.namespace !== 'garden-target')
+      router.beforeEach(to => to.params.projectName !== 'target')
 
       const failure = await router.push({
         name: 'ShootList',
         params: {
-          namespace: 'garden-target',
+          projectName: 'target',
         },
       })
 

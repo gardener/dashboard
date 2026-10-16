@@ -50,7 +50,7 @@ const managedSeedShootItemLink = computed(() => {
   return {
     name: 'ShootItem',
     params: {
-      namespace: 'garden',
+      projectName: 'garden',
       name: props.managedSeedShootName,
     },
   }

@@ -366,27 +366,6 @@ export async function gravatarUrl (value, image, size) {
   return `https://www.gravatar.com/avatar/${hash}?d=${image}&s=${size}`
 }
 
-export function routes (router, includeRoutesWithProjectScope) {
-  const hasChildren = ({ children }) => {
-    return children && children.length
-  }
-  const hasMenu = ({ meta: { menu, projectScope } = {} }) => {
-    return menu && (includeRoutesWithProjectScope || projectScope === false)
-  }
-  const traverseRoutes = routes => {
-    for (const route of routes) {
-      if (hasMenu(route)) {
-        menuRoutes.push(route)
-      } else if (hasChildren(route)) {
-        traverseRoutes(route.children)
-      }
-    }
-  }
-  const menuRoutes = []
-  traverseRoutes(router.options.routes)
-  return menuRoutes
-}
-
 export function routeName (route) {
   if (route.name) {
     return route.name

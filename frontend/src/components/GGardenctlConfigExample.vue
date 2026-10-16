@@ -76,10 +76,7 @@ export default {
       'clusterIdentity',
     ]),
     accountRoute () {
-      return {
-        name: 'Account',
-        query: { namespace: this.shootNamespace },
-      }
+      return { name: 'Account' }
     },
     gardenctlConfigYaml () {
       return `gardens:

@@ -148,7 +148,7 @@ describe('components', () => {
       expect(createButton.props('variant')).toBe('text')
       expect(createButton.props('to')).toEqual({
         name: 'NewShoot',
-        params: { namespace: 'garden' },
+        params: { projectName: 'garden' },
       })
     })
 

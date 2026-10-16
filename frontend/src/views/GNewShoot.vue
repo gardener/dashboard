@@ -199,6 +199,7 @@ export default {
   setup () {
     const {
       shootNamespace,
+      shootProjectName,
       shootName,
       shootManifest,
       isShootDirty,
@@ -210,6 +211,7 @@ export default {
     return {
       v$: useVuelidate(),
       shootNamespace,
+      shootProjectName,
       shootName,
       shootManifest,
       isShootDirty,
@@ -256,7 +258,7 @@ export default {
         this.$router.push({
           name: 'ShootItem',
           params: {
-            namespace: this.shootNamespace,
+            projectName: this.shootProjectName,
             name: this.shootName,
           },
         })

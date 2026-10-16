@@ -95,13 +95,12 @@ export function seedListBreadcrumbs () {
   ]
 }
 
-export function seedItemBreadcrumbs ({ params, query }) {
+export function seedItemBreadcrumbs ({ params }) {
   return [
     {
       title: 'Seeds',
       to: {
         name: 'SeedList',
-        query: pick(query, ['namespace']),
       },
     },
     {
@@ -135,7 +134,7 @@ export function shootItemBreadcrumbs ({ params }) {
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['namespace']),
+          params: pick(params, ['projectName']),
         }
       },
     },
@@ -154,7 +153,7 @@ export function shootItemTerminalBreadcrumbs ({ params }) {
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['namespace']),
+          params: pick(params, ['projectName']),
         }
       },
     },

@@ -61,10 +61,13 @@ export default {
       return this.hasProjects ? 'Create Project' : 'Create your first Project'
     },
   },
-  mounted () {
-    if (this.$route.path === '/namespace/+') {
-      this.projectDialog = true
-    }
+  watch: {
+    '$route.name': {
+      handler (routeName) {
+        this.projectDialog = routeName === 'NewProject'
+      },
+      immediate: true,
+    },
   },
 }
 </script>

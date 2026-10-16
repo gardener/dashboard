@@ -116,6 +116,9 @@ export function createSocket (state, context) {
     state.active = socket.active
     setConnected(socket.connected)
     shootStore.synchronize()
+    projectStore.synchronize().catch(err => {
+      logger.error('Failed to synchronize projects after reconnect: %s', err.message)
+    })
     seedStatStore.synchronize()
   })
 

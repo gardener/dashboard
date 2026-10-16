@@ -137,7 +137,7 @@ SPDX-License-Identifier: Apache-2.0
                 Settings
               </v-list-subheader>
               <v-list-item
-                :to="{ name: 'Settings', query: { namespace }, hash: '#setting=default-cluster-view' }"
+                :to="{ name: 'Settings', hash: '#setting=default-cluster-view' }"
                 data-test="operations-view-default-cluster-view"
                 tabindex="0"
               >
@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0
               </v-list-item>
               <v-list-item
                 v-if="canViewLandscape"
-                :to="{ name: 'Settings', query: { namespace }, hash: '#setting=cluster-operations' }"
+                :to="{ name: 'Settings', hash: '#setting=cluster-operations' }"
                 data-test="operations-view-exclusion-criteria"
                 tabindex="0"
               >
@@ -240,7 +240,7 @@ SPDX-License-Identifier: Apache-2.0
           icon="mdi-plus"
           color="toolbar-title"
           variant="text"
-          :to="{ name: 'NewShoot', params: { namespace } }"
+          :to="{ name: 'NewShoot', params: { projectName } }"
         />
         <g-table-column-selection
           activator-color="toolbar-title"
@@ -262,6 +262,7 @@ import {
 
 import { parseShootSearch } from '@/store/shoot/helper'
 import { buildSearchTerms } from '@/store/shoot/search'
+import { useProjectStore } from '@/store/project'
 
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GDetailTooltip from '@/components/GDetailTooltip.vue'
@@ -310,6 +311,9 @@ const props = defineProps({
     default: () => [],
   },
 })
+
+const projectStore = useProjectStore()
+const projectName = computed(() => projectStore.projectNameByNamespace(props.namespace))
 
 const emit = defineEmits([
   'update:modelValue',

@@ -76,7 +76,7 @@ const documentTitle = computed(() => {
     titleItems.push(pageTitle)
   }
 
-  if (route.meta.namespaced !== false) {
+  if (route.meta.projectScoped) {
     const projectNameAndTitle = projectStore.projectNameAndTitle
     const routeParamName = route.params.name
     if (routeParamName) {

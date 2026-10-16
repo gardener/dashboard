@@ -59,12 +59,12 @@ export default {
   },
   setup () {
     const {
-      shootNamespace,
+      shootProjectName,
       shootName,
     } = useShootItem()
 
     return {
-      shootNamespace,
+      shootProjectName,
       shootName,
     }
   },
@@ -73,7 +73,7 @@ export default {
       return {
         name: 'ShootItemTerminal',
         params: {
-          namespace: this.shootNamespace,
+          projectName: this.shootProjectName,
           name: this.shootName,
         },
       }

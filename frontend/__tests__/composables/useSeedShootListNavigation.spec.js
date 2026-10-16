@@ -15,10 +15,7 @@ describe('composables', () => {
   describe('useSeedShootListNavigation', () => {
     it('should create an assigned-shoots route with only the seed filter', () => {
       expect(createSeedShootListRoute('infra1-seed')).toEqual({
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
+        name: 'AllClusters',
         query: {
           q: 'seed:"infra1-seed"',
         },
@@ -34,10 +31,7 @@ describe('composables', () => {
       }
 
       expect(createSeedShootListRoute('infra1-seed', shootListFilters)).toEqual({
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
+        name: 'AllClusters',
         query: {
           q: 'seed:"infra1-seed" health:unhealthy',
         },
@@ -61,8 +55,8 @@ describe('composables', () => {
       const router = createRouter({
         history: createMemoryHistory(),
         routes: [{
-          name: 'ShootList',
-          path: '/namespace/:namespace/shoots',
+          name: 'AllClusters',
+          path: '/clusters',
           component: {},
         }],
       })
@@ -76,7 +70,7 @@ describe('composables', () => {
       const href = router.resolve(route).href
       const searchParams = new URLSearchParams(href.split('?')[1])
 
-      expect(href).toBe('/namespace/_all/shoots?q=seed:%22aws-ha%22+health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
+      expect(href).toBe('/clusters?q=seed:%22aws-ha%22+health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
       expect(searchParams.get('q')).toBe('seed:"aws-ha" health:unhealthy progressing:false operatorAction:true allTicketsIgnored:false')
     })
   })

@@ -21,10 +21,12 @@ import { useShootStore } from '@/store/shoot'
 import { useTerminalStore } from '@/store/terminal'
 
 import { useLogger } from '@/composables/useLogger'
+import { isProjectPending } from '@/composables/useProjectItem'
 import { useShootListFilters } from '@/composables/useShootListFilters'
 
 import {
   getShootListContext,
+  isShootListRoute,
   normalizeShootListRoute,
 } from './shootList'
 
@@ -140,8 +142,34 @@ export function createGlobalResolveGuards () {
       }
 
       try {
-        const namespace = to.params.namespace ?? to.query.namespace
-        await authzStore.prepareRules(namespace)
+        let namespace = null
+        if (to.name === 'AllClusters') {
+          namespace = '_all'
+        } else if (to.meta.projectScoped) {
+          const project = projectStore.projectByName(to.params.projectName)
+          if (isProjectPending(project)) {
+            return { name: 'Home', replace: true }
+          }
+          namespace = project?.spec.namespace
+          if (!namespace) {
+            const message = `User ${authnStore.username} has no authorization for Project ${to.params.projectName}`
+            logger.error(message)
+            throw Object.assign(new Error(message), {
+              status: 403,
+              reason: 'Forbidden',
+            })
+          }
+        }
+        to.meta.namespace = namespace
+        const projectNavigationNamespace = to.meta.projectScoped
+          ? undefined
+          : projectStore.lastProject?.spec.namespace
+        await Promise.all([
+          authzStore.prepareRules(namespace),
+          projectNavigationNamespace && projectNavigationNamespace !== namespace
+            ? authzStore.prepareRules(projectNavigationNamespace)
+            : undefined,
+        ])
 
         if (namespace && namespace !== '_all' && !projectStore.namespaces.includes(namespace)) {
           authzStore.$reset()
@@ -173,7 +201,8 @@ export function createGlobalResolveGuards () {
             }
             break
           }
-          case 'ShootList': {
+          case 'ShootList':
+          case 'AllClusters': {
             const promises = []
             if (authzStore.canUseProjectTerminalShortcutsForNamespace(namespace)) {
               promises.push(terminalStore.ensureProjectTerminalShortcutsLoaded(namespace))
@@ -217,6 +246,7 @@ export function createGlobalResolveGuards () {
 export function createGlobalAfterHooks () {
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
+  const projectStore = useProjectStore()
   const shootStore = useShootStore()
 
   return [
@@ -225,10 +255,16 @@ export function createGlobalAfterHooks () {
         if (to.meta?.public) {
           shootStore.deactivateShootList()
         } else {
-          const namespace = to.params.namespace ?? to.query.namespace
-          authzStore.activateRules(namespace)
+          const namespace = to.meta.namespace
+          const retainedNamespace = to.meta.projectScoped
+            ? undefined
+            : projectStore.lastProject?.spec.namespace
+          authzStore.activateRules(namespace, retainedNamespace)
+          if (to.meta.projectScoped) {
+            projectStore.rememberProject(to.params.projectName)
+          }
 
-          if (to.name === 'ShootList') {
+          if (isShootListRoute(to)) {
             shootStore.activateShootList(getShootListContext(to))
           } else {
             shootStore.deactivateShootList()

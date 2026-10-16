@@ -199,6 +199,7 @@ import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
 import GNotReadyProjectWarning from '@/components/GNotReadyProjectWarning.vue'
 import GProjectTooltip from '@/components/GProjectTooltip.vue'
 
+import { isProjectPending } from '@/composables/useProjectItem'
 import { getProjectTitle } from '@/composables/useProjectMetadata/helper.js'
 
 import {
@@ -270,7 +271,8 @@ const selectedProjectTitle = computed(() => {
 })
 
 const sortedAndFilteredProjectItems = computed(() => {
-  const projectItems = map([allProjectsItem, ...projectList.value], project => {
+  const navigableProjects = filter(projectList.value, project => !isProjectPending(project))
+  const projectItems = map([allProjectsItem, ...navigableProjects], project => {
     const projectOwner = getProjectOwner(project)
     const projectTitle = getProjectTitle(project)
     const projectName = project.metadata.name
@@ -350,6 +352,9 @@ function onProjectClick (event, project) {
 }
 
 function selectProject (project) {
+  if (isProjectPending(project)) {
+    return
+  }
   projectMenu.value = false
 
   if (project?.spec.namespace !== selectedProject.value?.spec.namespace) {

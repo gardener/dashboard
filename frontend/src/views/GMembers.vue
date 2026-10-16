@@ -291,7 +291,10 @@ import GActionButton from '@/components/GActionButton.vue'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
 import { useApi } from '@/composables/useApi'
-import { useProvideProjectItem } from '@/composables/useProjectItem'
+import {
+  useProvideProjectItem,
+  isProjectPending,
+} from '@/composables/useProjectItem'
 import { useTwoTableLayout } from '@/composables/useTwoTableLayout'
 
 import {
@@ -315,6 +318,7 @@ import head from 'lodash/head'
 import get from 'lodash/get'
 import forEach from 'lodash/forEach'
 import filter from 'lodash/filter'
+import find from 'lodash/find'
 
 const renderComponent = inject('renderComponent')
 
@@ -620,10 +624,9 @@ async function onRemoveUser ({ username }) {
   }
   await memberStore.deleteMember(username)
   if (isCurrentUser(username) && !canViewLandscape.value) {
-    if (projectsNotMarkedForDeletion.value.length > 0) {
-      const project = projectsNotMarkedForDeletion.value[0]
-      const namespace = project.spec.namespace
-      await router.push({ name: 'ShootList', params: { namespace } })
+    const project = find(projectsNotMarkedForDeletion.value, item => !isProjectPending(item))
+    if (project) {
+      await router.push({ name: 'ShootList', params: { projectName: project.metadata.name } })
     } else {
       await router.push({ name: 'Home', params: {} })
     }

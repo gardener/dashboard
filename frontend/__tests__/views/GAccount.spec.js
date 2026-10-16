@@ -17,6 +17,7 @@ import {
 import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useConfigStore } from '@/store/config'
+import { useProjectStore } from '@/store/project'
 
 import GAccount from '@/views/GAccount.vue'
 
@@ -136,6 +137,54 @@ describe('views', () => {
       expect(wrapper.findAll('.v-chip')).toHaveLength(0)
       expect(appStore.setError).toHaveBeenCalledTimes(1)
       expect(appStore.setError).toHaveBeenCalledWith(error)
+    })
+
+    describe('kubeconfig', () => {
+      let projectStore
+
+      beforeEach(() => {
+        api.getUserGroups.mockResolvedValue({ data: groups })
+        projectStore = useProjectStore()
+        projectStore.list = [
+          {
+            metadata: { name: 'core' },
+            spec: { namespace: 'garden-core' },
+            status: { phase: 'Ready' },
+          },
+          {
+            metadata: { name: 'team' },
+            spec: { namespace: 'garden-team' },
+            status: { phase: 'Ready' },
+          },
+        ]
+        projectStore.rememberProject('team')
+      })
+
+      function kubeconfigContext () {
+        return wrapper.vm.kubeconfig.contexts[0].context
+      }
+
+      it('should preselect the last Project without an active Project', () => {
+        mountComponent()
+
+        expect(projectStore.project).toBeUndefined()
+        expect(wrapper.vm.internalProjectName).toBe('team')
+        expect(kubeconfigContext().namespace).toBe('garden-team')
+      })
+
+      it('should use the namespace of the selected Project', async () => {
+        mountComponent()
+
+        await wrapper.setData({ internalProjectName: 'core' })
+        expect(kubeconfigContext()).toEqual({
+          cluster: 'garden-core',
+          user: 'oidc-login',
+          namespace: 'garden-core',
+        })
+
+        await wrapper.setData({ internalProjectName: '' })
+        expect(kubeconfigContext()).not.toHaveProperty('namespace')
+      })
     })
   })
 })
