@@ -16,6 +16,7 @@ import {
   setActivePinia,
 } from 'pinia'
 
+import { useAppStore } from '@/store/app'
 import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
@@ -71,16 +72,20 @@ async function waitForRoute (router, routeName, navigate) {
 }
 
 describe('router', () => {
-  it('redirects the reserved _all Project name even when reusing the Project route record', () => {
+  it('treats the _all Project name like any inaccessible Project', async () => {
     setActivePinia(createPinia())
-    const [redirectReservedProjectName] = createGlobalResolveGuards()
+    const appStore = useAppStore()
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
 
-    expect(redirectReservedProjectName({
+    await ensureDataLoaded({
+      name: 'ShootList',
       meta: { projectScoped: true },
       params: { projectName: '_all' },
-    })).toEqual({
-      name: 'AllClusters',
-      replace: true,
+    })
+
+    expect(appStore.routerError).toMatchObject({
+      status: 403,
+      reason: 'Forbidden',
     })
   })
 
@@ -95,7 +100,7 @@ describe('router', () => {
     }]
     projectStore.rememberProject('source')
     const prepareRules = vi.spyOn(authzStore, 'prepareRules').mockResolvedValue()
-    const [, , ensureDataLoaded] = createGlobalResolveGuards()
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
 
     await ensureDataLoaded({ name: 'SeedList', meta: {} })
 
@@ -111,7 +116,7 @@ describe('router', () => {
       spec: { namespace: 'garden-pending' },
       status: { phase: 'Pending' },
     }]
-    const [, , ensureDataLoaded] = createGlobalResolveGuards()
+    const [, ensureDataLoaded] = createGlobalResolveGuards()
 
     await expect(ensureDataLoaded({
       name: 'ShootList',

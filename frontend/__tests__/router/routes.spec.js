@@ -16,7 +16,6 @@ import {
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
-import { createGlobalResolveGuards } from '@/router/guards'
 import { createRoutes } from '@/router/routes'
 
 // Navigating the real routes would load every view's component tree without
@@ -63,26 +62,10 @@ function createTestRouter () {
     history: createMemoryHistory(),
     routes: createRoutes(),
   })
-  const [redirectReservedProjectName] = createGlobalResolveGuards()
-  router.beforeEach(redirectReservedProjectName)
   return { projectStore, router }
 }
 
 describe('router routes', () => {
-  it('reserves /projects/_all for global All Clusters', async () => {
-    const { router } = createTestRouter()
-    await router.push('/projects/_all')
-    expect(router.currentRoute.value.name).toBe('AllClusters')
-    expect(router.currentRoute.value.path).toBe('/clusters')
-  })
-
-  it('reserves _all when only the Project name of the current route changes', async () => {
-    const { router } = createTestRouter()
-    await router.push('/projects/core/clusters')
-    await router.push('/projects/_all/clusters')
-    expect(router.currentRoute.value.name).toBe('AllClusters')
-  })
-
   it('uses the canonical Project route for the root entry point', async () => {
     const { router } = createTestRouter()
     await router.push('/')

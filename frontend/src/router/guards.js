@@ -130,14 +130,6 @@ export function createGlobalResolveGuards () {
   const terminalStore = useTerminalStore()
   const { shootListFilters } = useShootListFilters()
 
-  function redirectReservedProjectName () {
-    return to => {
-      if (to.meta.projectScoped && to.params.projectName === '_all') {
-        return { name: 'AllClusters', replace: true }
-      }
-    }
-  }
-
   function applyShootListRouteDefaults () {
     return to => normalizeShootListRoute(to, shootListFilters.value)
   }
@@ -246,7 +238,6 @@ export function createGlobalResolveGuards () {
   }
 
   return [
-    redirectReservedProjectName(),
     applyShootListRouteDefaults(),
     ensureDataLoaded(),
   ]
