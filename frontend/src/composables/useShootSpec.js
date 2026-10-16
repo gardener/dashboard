@@ -109,6 +109,10 @@ export function useShootSpec (shootItem, options = {}) {
     return !!shootWorkerGroups.value.length
   })
 
+  const isSelfHostedShoot = computed(() => {
+    return shootWorkerGroups.value.some(w => w.controlPlane != null)
+  })
+
   const sshAccessEnabled = computed(() => {
     return get(shootSpec.value, ['provider', 'workersSettings', 'sshAccess', 'enabled'], false)
   })
@@ -192,6 +196,7 @@ export function useShootSpec (shootItem, options = {}) {
     shootProviderType,
     shootWorkerGroups,
     hasShootWorkerGroups,
+    isSelfHostedShoot,
     sshAccessEnabled,
     shootAddons,
     shootRegion,
