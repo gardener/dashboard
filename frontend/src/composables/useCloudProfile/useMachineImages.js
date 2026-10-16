@@ -148,13 +148,12 @@ export function useMachineImages (cloudProfile) {
     }
 
     return machineImages.value.filter(machineImage => {
-      return machineImage && 
+      return machineImage &&
         !machineImage.isExpired &&
         !machineImage.hidden &&
         matchesMachineTypeCapabilities(machineImage, machineType)
     })
   }
-
 
   /**
    * Returns the default machine image for a given machine type.
