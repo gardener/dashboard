@@ -30,8 +30,8 @@
     },
     {
       customType: 'regex',
-      fileMatch: [
-        '^hack/local-dashboard/internal/configuration\\.mjs$',
+      managerFilePatterns: [
+        '/^hack/local-dashboard/internal/configuration\\.mjs$/',
       ],
       matchStrings: [
         "export const GARDENERLESS_COMMIT = '(?<currentDigest>[0-9a-f]{40})'",
