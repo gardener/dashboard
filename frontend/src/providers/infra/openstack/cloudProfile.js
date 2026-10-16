@@ -18,7 +18,7 @@ import map from 'lodash/map'
 import uniq from 'lodash/uniq'
 
 /**
- * Composable for managing OpenStack-specific constraints from a cloud profile.
+ * Provider-owned composable for managing OpenStack-specific constraints from a cloud profile.
  * Provides functions for working with floating pools and load balancer providers
  * specific to OpenStack infrastructure.
  *

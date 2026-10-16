@@ -209,6 +209,27 @@ describe('composables', () => {
       expect(createShootManifest('ironcore')).toMatchSnapshot()
     })
 
+    it('should create a default manifest for an unregistered CloudProfile provider', () => {
+      const cloudProfileStore = useCloudProfileStore()
+      const cloudProfile = cloneDeep(global.fixtures.cloudprofiles[0])
+      cloudProfile.metadata.name = 'unregistered'
+      cloudProfile.spec.type = 'unregistered'
+      cloudProfileStore.setCloudProfiles([
+        ...cloneDeep(global.fixtures.cloudprofiles),
+        cloudProfile,
+      ])
+
+      const shootManifest = createShootManifest('unregistered')
+
+      expect(shootManifest.spec.provider.type).toBe('unregistered')
+      expect(shootManifest.spec.provider.infrastructureConfig).toBeUndefined()
+      expect(shootManifest.spec.provider.controlPlaneConfig).toBeUndefined()
+      expect(shootManifest.spec.networking.nodes).toBe(shootContextStore.defaultNodesCIDR)
+      expect(shootContextStore.isZonedCluster).toBe(true)
+      expect(shootContextStore.providerInfrastructureConfigNetworksZones).toBeUndefined()
+      expect(shootContextStore.providerControlPlaneConfigZone).toBeUndefined()
+    })
+
     it('should not mutate high availability state when reading or disabling it', () => {
       createShootManifest('aws')
 
