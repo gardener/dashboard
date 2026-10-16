@@ -202,6 +202,37 @@ describe('composables', () => {
         expect(filteredImages[0].name).toBe('gardenlinux')
       })
 
+      it('should reject image when machine type explicitly lacks required capability even if profile default includes it', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ hypervisorType: ['gen2'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'hypervisorType', values: ['gen2', 'gen1'] }, // Profile default includes gen2
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type explicitly supports only gen1 — profile default must NOT be consulted
+        const filteredImages = useFilteredMachineImages({
+          capabilities: { hypervisorType: ['gen1'] },
+        })
+        expect(filteredImages).toHaveLength(0)
+      })
+
       it('should include images without capabilityFlavors regardless of capabilities', () => {
         cloudProfile.value = {
           ...cloudProfile.value,
