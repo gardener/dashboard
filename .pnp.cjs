@@ -110,7 +110,7 @@ const RAW_RUNTIME_STATE =
           ["@apidevtools/json-schema-ref-parser", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:16.0.3"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["js-yaml", "npm:5.4.3"],\
-          ["undici", "npm:8.11.2"]\
+          ["undici", "npm:8.12.2"]\
         ],\
         "packagePeers": [\
           "@types/json-schema"\
@@ -1073,7 +1073,7 @@ const RAW_RUNTIME_STATE =
           ["socket.io", "npm:4.8.4"],\
           ["socket.io-client", "npm:4.8.4"],\
           ["supertest", "npm:7.2.2"],\
-          ["undici", "npm:8.11.2"],\
+          ["undici", "npm:8.12.2"],\
           ["unified", "npm:11.0.5"],\
           ["uuid", "npm:14.0.1"],\
           ["vite", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:7.3.6"],\
@@ -8142,7 +8142,7 @@ const RAW_RUNTIME_STATE =
           ["saxes", "npm:6.0.0"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["tough-cookie", "npm:6.0.2"],\
-          ["undici", "npm:8.11.2"],\
+          ["undici", "npm:8.12.2"],\
           ["w3c-xmlserializer", "npm:5.0.0"],\
           ["webidl-conversions", "npm:8.0.1"],\
           ["whatwg-mimetype", "npm:5.0.0"],\
@@ -11362,10 +11362,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:8.11.2", {\
-        "packageLocation": "./.yarn/cache/undici-npm-8.11.2-527c40428e-106f699117.zip/node_modules/undici/",\
+      ["npm:8.12.2", {\
+        "packageLocation": "./.yarn/cache/undici-npm-8.12.2-da27240666-25b0e0a695.zip/node_modules/undici/",\
         "packageDependencies": [\
-          ["undici", "npm:8.11.2"]\
+          ["undici", "npm:8.12.2"]\
         ],\
         "linkType": "HARD"\
       }]\
