@@ -235,7 +235,7 @@ export default {
     const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetMachineImageIfInvalid (machineType, defaultImage) {
-      const filteredImages = useFilteredMachineImages(machineType)
+      const filteredImages = useFilteredMachineImages(machineType, props.worker.machine.architecture)
       const currentImageStillValid = props.worker.machine.image && find(filteredImages, props.worker.machine.image)
       if (!currentImageStillValid) {
         props.worker.machine.image = defaultImage
@@ -257,7 +257,7 @@ export default {
         }
 
         const effectiveType = find(machineTypes.value, ['name', props.worker.machine.type])
-        resetMachineImageIfInvalid(effectiveType, defaultMachineImage.value)
+        resetMachineImageIfInvalid(effectiveType, selectedDefaultMachineImage.value)
       },
     })
 
@@ -387,7 +387,7 @@ export default {
       return !isEmpty(this.volumeTypes)
     },
     filteredMachineImages () {
-      return this.useFilteredMachineImages(this.selectedMachineType)
+      return this.useFilteredMachineImages(this.selectedMachineType, this.machineArchitecture)
     },
     minVolumeSizeGi () {
       const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)

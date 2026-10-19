@@ -133,7 +133,24 @@ export function useMachineImages (cloudProfile) {
     return flattenAndSortMachineImages(rawImages)
   })
 
-  function useFilteredMachineImages (machineType) {
+  /**
+   * Filters a machine image by a specific architecture.
+   * Checks capabilityFlavors first, falls back to the architectures array.
+   *
+   * @param {object} image - A machine image object
+   * @param {string} architecture - The architecture to match (e.g. 'amd64', 'arm64')
+   * @returns {boolean} Whether the image supports the given architecture
+   */
+  function matchesArchitecture (image, architecture) {
+    if (image.capabilityFlavors) {
+      return image.capabilityFlavors.some(flavor =>
+        flavor.architecture?.includes(architecture),
+      )
+    }
+    return includes(image.architectures, architecture)
+  }
+
+  function useFilteredMachineImages (machineType, architecture) {
     function matchesMachineTypeCapabilities (machineImage, machineType) {
       const capabilities = machineType?.capabilities
       if (!machineImage.capabilityFlavors) {
@@ -156,12 +173,16 @@ export function useMachineImages (cloudProfile) {
       })
     }
 
-    return machineImages.value.filter(machineImage => {
+    let filtered = machineImages.value.filter(machineImage => {
       return machineImage &&
         !machineImage.isExpired &&
         !machineImage.hidden &&
         matchesMachineTypeCapabilities(machineImage, machineType)
     })
+    if (architecture) {
+      filtered = filtered.filter(image => matchesArchitecture(image, architecture))
+    }
+    return filtered
   }
 
   /**
@@ -179,17 +200,7 @@ export function useMachineImages (cloudProfile) {
     }
 
     return computed(() => {
-      let machineImagesMachineType = useFilteredMachineImages(machineType.value)
-      if (architecture?.value) {
-        machineImagesMachineType = machineImagesMachineType.filter(image => {
-          if (image.capabilityFlavors) {
-            return image.capabilityFlavors.some(flavor =>
-              flavor.architecture?.includes(architecture.value),
-            )
-          }
-          return includes(image.architectures, architecture.value)
-        })
-      }
+      const machineImagesMachineType = useFilteredMachineImages(machineType.value, architecture?.value)
       return firstItemMatchingVersionClassification(machineImagesMachineType)
     })
   }
