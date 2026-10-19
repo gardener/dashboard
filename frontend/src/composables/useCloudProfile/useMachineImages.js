@@ -146,11 +146,12 @@ export function useMachineImages (cloudProfile) {
       }
       return machineImage.capabilityFlavors.some(capabilityFlavor => {
         return Object.entries(capabilityFlavor).every(([name, values]) => {
-          return values?.some(value => {
-            const capability = get(capabilities, [name])
-            return capability?.includes(value) ||
-            (!capability && get(machineCapabilities.value, [name])?.includes(value)) // Fallback to default Machine capabilities if MachineType capabilities do not exist
-          })
+          const capability = get(capabilities, [name])
+          const effectiveCapability = capability ?? get(machineCapabilities.value, [name]) // Fallback to default Machine capabilities if MachineType capabilities do not exist
+          if (!effectiveCapability) {
+            return true // No constraint from machine type or profile defaults — accept
+          }
+          return values?.some(value => effectiveCapability.includes(value))
         })
       })
     }
@@ -180,9 +181,14 @@ export function useMachineImages (cloudProfile) {
     return computed(() => {
       let machineImagesMachineType = useFilteredMachineImages(machineType.value)
       if (architecture?.value) {
-        machineImagesMachineType = machineImagesMachineType.filter(image =>
-          includes(image.architectures, architecture.value),
-        )
+        machineImagesMachineType = machineImagesMachineType.filter(image => {
+          if (image.capabilityFlavors) {
+            return image.capabilityFlavors.some(flavor =>
+              flavor.architecture?.includes(architecture.value),
+            )
+          }
+          return includes(image.architectures, architecture.value)
+        })
       }
       return firstItemMatchingVersionClassification(machineImagesMachineType)
     })

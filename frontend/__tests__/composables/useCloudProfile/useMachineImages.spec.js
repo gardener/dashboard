@@ -358,6 +358,132 @@ describe('composables', () => {
       })
     })
 
+    describe('#useDefaultMachineImage', () => {
+      it('should return image with capabilityFlavors architecture when legacy architectures field is omitted', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ architecture: ['amd64'] }],
+                    // No deprecated architectures field
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+        const machineType = ref({})
+        const architecture = ref('amd64')
+
+        const defaultImage = useDefaultMachineImage(machineType, architecture)
+        expect(defaultImage.value).toBeDefined()
+        expect(defaultImage.value.name).toBe('gardenlinux')
+      })
+
+      it('should reject image with capabilityFlavors architecture when architecture does not match any flavor', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ architecture: ['amd64'] }],
+                    // No deprecated architectures field
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+        const machineType = ref({})
+        const architecture = ref('arm64')
+
+        const defaultImage = useDefaultMachineImage(machineType, architecture)
+        expect(defaultImage.value).toBeUndefined()
+      })
+
+      it('should fall back to legacy architectures field when capabilityFlavors is absent', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    architectures: ['arm64'],
+                    // No capabilityFlavors
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+        const machineType = ref({})
+
+        // Matching legacy architecture
+        const matchingImage = useDefaultMachineImage(machineType, ref('arm64'))
+        expect(matchingImage.value).toBeDefined()
+        expect(matchingImage.value.name).toBe('gardenlinux')
+
+        // Non-matching legacy architecture
+        const noImage = useDefaultMachineImage(machineType, ref('amd64'))
+        expect(noImage.value).toBeUndefined()
+      })
+
+      it('should match multi-flavor image when one flavor supports the selected architecture', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [
+                      { architecture: ['amd64'], hypervisorType: ['gen1'] },
+                      { architecture: ['arm64'], hypervisorType: ['gen2'] },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useDefaultMachineImage } = useMachineImages(cloudProfile)
+        const machineType = ref({})
+
+        const arm64Image = useDefaultMachineImage(machineType, ref('arm64'))
+        expect(arm64Image.value).toBeDefined()
+        expect(arm64Image.value.name).toBe('gardenlinux')
+
+        const amd64Image = useDefaultMachineImage(machineType, ref('amd64'))
+        expect(amd64Image.value).toBeDefined()
+        expect(amd64Image.value.name).toBe('gardenlinux')
+      })
+    })
+
     describe('#machineImages', () => {
       it('should transform machine images from cloud profile', () => {
         const { machineImages: decoratedAndSortedMachineImages } = useMachineImages(cloudProfile)
