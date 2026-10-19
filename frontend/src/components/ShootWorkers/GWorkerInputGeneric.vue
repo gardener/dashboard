@@ -240,7 +240,7 @@ export default {
       if (!currentImageStillValid) {
         props.worker.machine.image = defaultImage
           ? pick(defaultImage, ['name', 'version'])
-          : {}
+          : null
       }
     }
 
