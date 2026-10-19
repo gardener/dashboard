@@ -29,7 +29,6 @@ import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
 import sortBy from 'lodash/sortBy'
 
 /**
