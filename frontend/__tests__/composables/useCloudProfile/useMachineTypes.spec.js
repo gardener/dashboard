@@ -106,15 +106,20 @@ describe('composables', () => {
         expect(dashboardMachineTypes.value[0].name).toBe('machineType4')
       })
 
-      it('should return all machine types when architecture is not specified', () => {
+      it('should return raw machine types without default architecture when architecture is not specified', () => {
         const { useFilteredMachineTypes } = useMachineTypes(cloudProfile)
 
         const region = ref('region2')
         const architecture = ref(undefined)
         const dashboardMachineTypes = useFilteredMachineTypes(region, architecture)
 
-        // When no architecture filter is set, all machine types for the region are returned
+        // When no architecture filter is set, all machine types for the region are returned as-is.
+        // Machine types without an architecture field are NOT assigned a default (e.g. amd64).
         expect(dashboardMachineTypes.value).toHaveLength(4)
+        const mt2 = dashboardMachineTypes.value.find(t => t.name === 'machineType2')
+        const mt3 = dashboardMachineTypes.value.find(t => t.name === 'machineType3')
+        expect(mt2).not.toHaveProperty('architecture')
+        expect(mt3).not.toHaveProperty('architecture')
       })
 
       it('should include machine types that inherit architecture from spec.machineCapabilities', () => {
