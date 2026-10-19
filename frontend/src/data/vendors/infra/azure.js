@@ -1,10 +1,7 @@
 export const subscriptionIdDetail = {
   label: 'Subscription ID',
   valueFrom: {
-    keys: [
-      ['subscriptionID'],
-      ['subscriptionId'],
-    ],
+    key: ['subscriptionID'],
   },
 }
 

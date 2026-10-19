@@ -167,11 +167,16 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const hasGardenTerminalAccess = computed(() => {
-    return configStore.isTerminalEnabled &&
-    canCreateTerminals.value &&
-    canPatchServiceAccounts.value &&
-    canCreateServiceAccounts.value
+    return hasGardenTerminalAccessForNamespace(currentNamespace.value)
   })
+
+  function hasGardenTerminalAccessForNamespace (namespace) {
+    const status = statusForNamespace(namespace)
+    return configStore.isTerminalEnabled &&
+      canCreateTerminalsForNamespace(namespace) &&
+      canI(status, 'patch', '', 'serviceaccounts') &&
+      canI(status, 'create', '', 'serviceaccounts')
+  }
 
   // Landscape-wide operator read views currently use the seed stats access
   // contract: list access to seeds plus cluster-wide list access to shoots.
@@ -215,9 +220,12 @@ export const useAuthzStore = defineStore('authz', () => {
   })
 
   const hasShootTerminalAccess = computed(() => {
-    return configStore.isTerminalEnabled &&
-      canCreateTerminals.value
+    return hasShootTerminalAccessForNamespace(currentNamespace.value)
   })
+
+  function hasShootTerminalAccessForNamespace (namespace) {
+    return configStore.isTerminalEnabled && canCreateTerminalsForNamespace(namespace)
+  }
 
   async function getRules (namespace) {
     const body = { namespace }
@@ -243,13 +251,13 @@ export const useAuthzStore = defineStore('authz', () => {
     }
   }
 
-  function activateRules (namespace) {
+  function activateRules (namespace, retainedNamespace) {
     namespace = normalizeNamespace(namespace)
     if (!rulesMap.value.has(namespace)) {
       return false
     }
     for (const key of rulesMap.value.keys()) {
-      if (key !== GARDEN_NAMESPACE && key !== namespace) {
+      if (key !== GARDEN_NAMESPACE && key !== namespace && key !== retainedNamespace) {
         rulesMap.value.delete(key)
       }
     }
@@ -319,8 +327,10 @@ export const useAuthzStore = defineStore('authz', () => {
     canGetProjectTerminalShortcuts,
     canUseProjectTerminalShortcuts,
     hasGardenTerminalAccess,
+    hasGardenTerminalAccessForNamespace,
     hasControlPlaneTerminalAccess,
     hasShootTerminalAccess,
+    hasShootTerminalAccessForNamespace,
     // Garden-namespace selectors
     canGetManagedSeedAndShootInGarden,
     canViewLandscape,

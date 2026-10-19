@@ -11,6 +11,8 @@ import { useProjectMetadata } from '@/composables/useProjectMetadata'
 
 import { isMdiIcon } from '@/utils/mdiIcons'
 
+import { isSafeFieldPath } from './helper'
+
 import cloneDeep from 'lodash/cloneDeep'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
@@ -74,7 +76,7 @@ export function useProjectShootCustomFields (projectItem, options = {}) {
       if (some(customField, isObject)) {
         return false // omit custom fields with object values
       }
-      return customField.name && customField.path
+      return customField.name && isSafeFieldPath(customField.path)
     })
 
     const defaultProperties = {

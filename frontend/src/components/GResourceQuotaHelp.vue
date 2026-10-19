@@ -19,12 +19,10 @@ SPDX-License-Identifier: Apache-2.0
     </template>
     <template #content>
       <v-card-text>
-        <!-- eslint-disable vue/no-v-html -->
         <div
+          v-safe-html="resourceQuotaHelpHtml"
           class="wrap-text"
-          v-html="resourceQuotaHelpHtml"
         />
-        <!-- eslint-enable vue/no-v-html -->
       </v-card-text>
     </template>
   </g-generic-action-button-dialog>

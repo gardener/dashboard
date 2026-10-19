@@ -39,7 +39,6 @@ import GTextRouterLink from '@/components/GTextRouterLink.vue'
 import { useShootItem } from '@/composables/useShootItem'
 
 const {
-  shootNamespace,
   shootSeedName,
   isShootLastOperationTypeControlPlaneMigrating,
   shootLastOperationTypeControlPlaneMigrationMessage,
@@ -52,9 +51,6 @@ const seedItemLink = computed(() => ({
   name: 'SeedItem',
   params: {
     name: shootSeedName.value,
-  },
-  query: {
-    namespace: shootNamespace.value,
   },
 }))
 </script>

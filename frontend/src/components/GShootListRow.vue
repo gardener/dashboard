@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'project'">
         <g-project-tooltip :project="project">
           <g-text-router-link
-            :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
+            :to="{ name: 'ShootList', params: { projectName: shootProjectName } }"
             :text="shootProjectName"
           />
           <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
             <g-auto-hide right>
               <template #activator>
                 <g-text-router-link
-                  :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }"
+                  :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
                   :text="shootName"
                 />
               </template>

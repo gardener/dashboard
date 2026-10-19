@@ -24,7 +24,7 @@ Custom fields can be shown in a dedicated card (`Custom Fields`) on the cluster 
 | Property | Type | Default | Required | Description |
 |---|---|---|---|---|
 | name | String | | ✔️ | Name of the custom field |
-| path | String | | ✔️ | Path in shoot resource, of which the value must be of primitive type (no object / array). Use [lodash get](https://lodash.com/docs/4.17.15#get) path syntax, e.g. `metadata.labels["shoot.gardener.cloud/status"]` or `spec.networking.type` |
+| path | String | | ✔️ | Path in shoot resource, of which the value must be of primitive type (no object / array). Use [lodash get](https://lodash.com/docs/4.17.15#get) path syntax, e.g. `metadata.labels["shoot.gardener.cloud/status"]` or `spec.networking.type`. Paths containing a `__proto__`, `constructor` or `prototype` segment are not allowed; such custom fields are ignored |
 | icon | String | | | MDI icon for field on the cluster details page. See https://materialdesignicons.com/ for available icons. Must be in the format: `mdi-<icon-name>`. |
 | tooltip | String | | | Tooltip for the custom field that appears when hovering with the mouse over the value  |
 | defaultValue | String/Number | | | Default value, in case there is no value for the given `path` |

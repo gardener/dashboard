@@ -190,6 +190,25 @@ describe('kube-client', () => {
           expect(searchParams.toString()).toBe('watch=true')
         })
 
+        it('should preserve WatchList search parameters', () => {
+          const testObject = new TestObject()
+          const [, { searchParams }] = testObject.watchList({
+            sendInitialEvents: true,
+            allowWatchBookmarks: true,
+            resourceVersion: '',
+            resourceVersionMatch: 'NotOlderThan',
+            timeoutSeconds: 300,
+          })
+          expect(Object.fromEntries(searchParams)).toEqual({
+            sendInitialEvents: 'true',
+            allowWatchBookmarks: 'true',
+            resourceVersion: '',
+            resourceVersionMatch: 'NotOlderThan',
+            timeoutSeconds: '300',
+            watch: 'true',
+          })
+        })
+
         it('should create an informer', () => {
           const testObject = new TestObject()
           testObject.list = vi.fn()

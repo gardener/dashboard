@@ -49,51 +49,46 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </template>
       </v-list-item>
-      <template v-if="namespace">
-        <template
-          v-for="route in namespacedRoutes"
-          :key="`${namespace}-${route.path}`"
+      <template v-if="selectedProject">
+        <v-list-item
+          v-for="item in visibleProjectItems"
+          :key="item.name"
+          :to="item.to"
+          :exact="item.exact"
+          class="bg-main-background"
         >
-          <v-list-item
-            :to="namespacedMenuRoute(route)"
-            class="bg-main-background"
-          >
-            <template #prepend>
-              <v-icon
-                size="x-small"
-                color="main-navigation-title"
-                :icon="route.meta.menu.icon"
-              />
-            </template>
-            <v-list-item-title class="text-uppercase text-main-navigation-title">
-              {{ route.meta.menu.title }}
-            </v-list-item-title>
-          </v-list-item>
-        </template>
+          <template #prepend>
+            <v-icon
+              size="x-small"
+              color="main-navigation-title"
+              :icon="item.icon"
+            />
+          </template>
+          <v-list-item-title class="text-uppercase text-main-navigation-title">
+            {{ item.title }}
+          </v-list-item-title>
+        </v-list-item>
         <v-divider
-          v-if="nonNamespacedRoutes.length"
+          v-if="visibleGlobalItems.length"
           class="my-2"
         />
-        <template
-          v-for="route in nonNamespacedRoutes"
-          :key="`${namespace}-${route.path}`"
+        <v-list-item
+          v-for="item in visibleGlobalItems"
+          :key="item.name"
+          :to="{ name: item.name }"
+          class="bg-main-background"
         >
-          <v-list-item
-            :to="nonNamespacedMenuRoute(route)"
-            class="bg-main-background"
-          >
-            <template #prepend>
-              <v-icon
-                size="x-small"
-                color="main-navigation-title"
-                :icon="route.meta.menu.icon"
-              />
-            </template>
-            <v-list-item-title class="text-uppercase text-main-navigation-title">
-              {{ route.meta.menu.title }}
-            </v-list-item-title>
-          </v-list-item>
-        </template>
+          <template #prepend>
+            <v-icon
+              size="x-small"
+              color="main-navigation-title"
+              :icon="item.icon"
+            />
+          </template>
+          <v-list-item-title class="text-uppercase text-main-navigation-title">
+            {{ item.title }}
+          </v-list-item-title>
+        </v-list-item>
       </template>
     </v-list>
 
@@ -115,21 +110,15 @@ import {
 import { useDisplay } from 'vuetify'
 
 import { useAppStore } from '@/store/app'
+import { useAuthnStore } from '@/store/authn'
+import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
 import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
 import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTeaser from '@/components/GTeaser.vue'
 
-import { isSameRouteIgnoringShallowQuery } from '@/composables/useRouteSearchQuery'
-
-import {
-  routes as getRoutes,
-  routeName as getRouteName,
-} from '@/utils'
-
-import get from 'lodash/get'
-import has from 'lodash/has'
+import { isProjectPending } from '@/composables/useProjectItem'
 
 const allProjectsItem = {
   metadata: {
@@ -144,6 +133,8 @@ const allProjectsItem = {
 }
 
 const projectStore = useProjectStore()
+const authnStore = useAuthnStore()
+const authzStore = useAuthzStore()
 const appStore = useAppStore()
 const router = useRouter()
 const currentRoute = useRoute()
@@ -151,114 +142,134 @@ const { mdAndDown } = useDisplay()
 
 const projectDialog = ref(false)
 
-const namespace = toRef(projectStore, 'namespace')
 const projectList = toRef(projectStore, 'projectList')
 const sidebar = toRef(appStore, 'sidebar')
 
 const selectedProject = computed(() => {
-  if (namespace.value === allProjectsItem.spec.namespace) {
+  if (currentRoute.name === 'AllClusters') {
     return allProjectsItem
   }
-  return projectStore.project
+  if (currentRoute.meta.projectScoped) {
+    return projectStore.projectByName(currentRoute.params.projectName)
+  }
+  return projectStore.lastProject
 })
 
-const visibleRoutes = computed(() => {
-  if (!selectedProject.value) {
+const projectItems = computed(() => {
+  const project = selectedProject.value
+  if (!project) {
     return []
   }
-  return routes.value.filter(route => {
-    return !route.meta.menu.hidden
-  })
+  if (project === allProjectsItem) {
+    return [
+      {
+        name: 'AllClusters',
+        title: 'Clusters',
+        icon: 'mdi-hexagon-multiple',
+        to: { name: 'AllClusters' },
+      },
+    ]
+  }
+  const namespace = project.spec.namespace
+  return [
+    {
+      name: 'ShootList',
+      title: 'Clusters',
+      icon: 'mdi-hexagon-multiple',
+    },
+    {
+      name: 'Credentials',
+      title: 'Credentials',
+      icon: 'mdi-key',
+      hidden: !authzStore.canGetCloudProviderCredentialsForNamespace(namespace),
+    },
+    {
+      name: 'Members',
+      title: 'Members',
+      icon: 'mdi-account-multiple-outline',
+    },
+    {
+      name: 'Administration',
+      title: 'Administration',
+      icon: 'mdi-cog',
+      exact: true,
+    },
+    {
+      name: 'GardenTerminal',
+      title: 'Garden Cluster',
+      icon: 'mdi-console',
+      hidden: !(authzStore.hasGardenTerminalAccessForNamespace(namespace) && authnStore.isAdmin),
+    },
+  ].map(item => ({
+    ...item,
+    to: projectMenuRoute(item.name, project),
+  }))
 })
 
-const namespacedRoutes = computed(() => {
-  return visibleRoutes.value.filter(route => get(route, ['meta', 'namespaced']) !== false)
-})
+const visibleProjectItems = computed(() => projectItems.value.filter(item => !item.hidden))
 
-const nonNamespacedRoutes = computed(() => {
-  return visibleRoutes.value.filter(route => get(route, ['meta', 'namespaced']) === false)
-})
+const globalItems = computed(() => [
+  {
+    name: 'SeedList',
+    title: 'Seeds',
+    icon: 'mdi-sprout',
+    hidden: !authzStore.canViewLandscape,
+  },
+])
+
+const visibleGlobalItems = computed(() => globalItems.value.filter(item => !item.hidden))
 
 const hasNoProjects = computed(() => {
-  return !projectList.value.length
+  return !projectList.value.some(project => !isProjectPending(project))
 })
 
-const routes = computed(() => {
-  const hasProjectScope = get(selectedProject.value, ['spec', 'namespace']) !== allProjectsItem.spec.namespace
-  return getRoutes(router, hasProjectScope)
-})
-
-function namespacedMenuRoute (route) {
-  return {
-    name: getRouteName(route),
-    params: {
-      namespace: namespace.value,
-    },
-  }
-}
-
-function nonNamespacedMenuRoute (route) {
-  return {
-    name: getRouteName(route),
-    query: {
-      namespace: namespace.value,
-    },
-  }
-}
-
-function getProjectMenuTargetRoute (namespace) {
-  const fallbackToShootList = route => {
-    if (namespace === '_all' && get(route, ['meta', 'projectScope']) !== false) {
-      return true
-    }
-    if (get(route, ['name']) === 'SeedList') {
-      return true
-    }
-    if (has(route, ['params', 'name'])) {
-      return true
-    }
-    if (get(route, ['name']) === 'NewShoot' || get(route, ['name']) === 'NewShootEditor') {
-      return true
-    }
-    if (get(route, ['name']) === 'GardenTerminal') {
-      return true
-    }
-    return false
-  }
-  if (fallbackToShootList(currentRoute)) {
-    return {
-      name: 'ShootList',
-      params: {
-        namespace,
-      },
-    }
-  }
-  const name = getRouteName(currentRoute)
-  const key = get(currentRoute, ['meta', 'namespaced']) === false
-    ? 'query'
-    : 'params'
+function projectMenuRoute (name, project) {
   return {
     name,
-    [key]: {
-      namespace,
-    },
+    params: { projectName: project.metadata.name },
   }
 }
 
-function isCurrentProjectRoute (target) {
-  return isSameRouteIgnoringShallowQuery(router, currentRoute, target)
+function projectSwitchTarget (project) {
+  if (project.spec.namespace === allProjectsItem.spec.namespace) {
+    return { name: 'AllClusters' }
+  }
+  if (currentRoute.name === 'ShootList') {
+    const route = router.resolve(router.options.history.location)
+    const query = Object.hasOwn(route.query, 'q')
+      ? { q: route.query.q }
+      : undefined
+    return {
+      ...projectMenuRoute('ShootList', project),
+      query,
+    }
+  }
+  if (['Credentials', 'Members', 'Administration'].includes(currentRoute.name)) {
+    return projectMenuRoute(currentRoute.name, project)
+  }
+  return projectMenuRoute('ShootList', project)
 }
 
-function onSelectProject (project) {
-  const namespace = project?.spec?.namespace
-  if (!namespace) {
-    return
-  }
-  const target = getProjectMenuTargetRoute(namespace)
+let projectSelectionId = 0
 
-  if (isCurrentProjectRoute(target)) {
+async function onSelectProject (project) {
+  if (!project) {
     return
   }
+  const selectionId = ++projectSelectionId
+
+  let target = projectSwitchTarget(project)
+  if (target.name === 'Credentials') {
+    const namespace = project.spec.namespace
+    await authzStore.prepareRules(namespace)
+    if (selectionId !== projectSelectionId) {
+      return
+    }
+    if (!authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
+      target = projectMenuRoute('ShootList', project)
+    }
+  }
+
   router.push(target)
 }
 

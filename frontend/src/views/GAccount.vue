@@ -259,7 +259,6 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GTimeString from '@/components/GTimeString.vue'
 
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
-import { useProjectNamespace } from '@/composables/useProjectItem'
 
 import head from 'lodash/head'
 
@@ -276,14 +275,13 @@ export default {
     const configStore = useConfigStore()
 
     const {
-      project,
+      lastProject,
       projectNames,
     } = storeToRefs(projectStore)
 
-    const projectNamespace = useProjectNamespace(project)
     const {
       projectName,
-    } = useProjectMetadata(project)
+    } = useProjectMetadata(lastProject)
 
     const grantTypes = toRef(configStore, 'grantTypes')
     const grantType = ref(head(grantTypes.value))
@@ -291,7 +289,6 @@ export default {
     return {
       projectName,
       projectNames,
-      projectNamespace,
       grantTypes,
       grantType,
     }
@@ -351,7 +348,7 @@ export default {
     kubeconfig () {
       const projectName = this.internalProjectName || 'none'
       const name = 'garden-' + projectName
-      const namespace = this.projectNamespace
+      const namespace = this.namespaceByProjectName(this.internalProjectName)
       const {
         server,
         certificateAuthorityData,
@@ -440,6 +437,9 @@ export default {
   methods: {
     ...mapActions(useAppStore, [
       'setError',
+    ]),
+    ...mapActions(useProjectStore, [
+      'namespaceByProjectName',
     ]),
     async fetchGroups () {
       try {

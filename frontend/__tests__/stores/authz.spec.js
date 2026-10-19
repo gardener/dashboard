@@ -52,6 +52,19 @@ describe('stores', () => {
       expect(authzStore.namespace).toBe('garden-target')
     })
 
+    it('retains prepared Project rules when activating global rules', async () => {
+      mockGetSubjectRules
+        .mockResolvedValueOnce(createRulesResponse([]))
+        .mockResolvedValueOnce(createRulesResponse([]))
+
+      await authzStore.fetchRules('garden-source')
+      await authzStore.prepareRules()
+      authzStore.activateRules(undefined, 'garden-source')
+
+      expect(authzStore.namespace).toBeNull()
+      expect(authzStore.hasRulesForNamespace('garden-source')).toBe(true)
+    })
+
     it('evaluates landscape access against prepared rules before activation', async () => {
       authnStore.user = { canListShootsAllNamespaces: true }
       mockGetSubjectRules

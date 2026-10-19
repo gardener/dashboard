@@ -15,10 +15,7 @@ import {
   NavigationFailureType,
 } from 'vue-router'
 
-import {
-  isSameRouteIgnoringShallowQuery,
-  useShallowRouteSearchQuery,
-} from '@/composables/useRouteSearchQuery'
+import { useShallowRouteSearchQuery } from '@/composables/useRouteSearchQuery'
 
 function createRouteContext () {
   const routerHistory = createMemoryHistory()
@@ -466,81 +463,6 @@ describe('composables', () => {
       })
       expect(shootSearch.value).toBe('')
       projectShootListScope.stop()
-    })
-  })
-
-  describe('isSameRouteIgnoringShallowQuery', () => {
-    it('normalizes non-search query key order when comparing routes', () => {
-      const { router } = createRouteContext()
-      const current = router.resolve({
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-        query: {
-          view: 'compact',
-          namespace: 'garden-local',
-          q: 'stale search',
-        },
-      })
-
-      expect(isSameRouteIgnoringShallowQuery(router, current, {
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-        query: {
-          namespace: 'garden-local',
-          view: 'compact',
-          q: 'current search',
-        },
-      })).toBe(true)
-    })
-
-    it('ignores only q when comparing resolved routes', () => {
-      const { router } = createRouteContext()
-      const current = router.resolve({
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-        query: {
-          q: 'stale search',
-          view: 'compact',
-        },
-        hash: '#details',
-      })
-
-      expect(isSameRouteIgnoringShallowQuery(router, current, {
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-        query: {
-          view: 'compact',
-        },
-        hash: '#details',
-      })).toBe(true)
-      expect(isSameRouteIgnoringShallowQuery(router, current, {
-        name: 'ShootList',
-        params: {
-          namespace: 'garden-local',
-        },
-        query: {
-          view: 'compact',
-        },
-        hash: '#details',
-      })).toBe(false)
-      expect(isSameRouteIgnoringShallowQuery(router, current, {
-        name: 'ShootList',
-        params: {
-          namespace: '_all',
-        },
-        query: {
-          view: 'full',
-        },
-        hash: '#details',
-      })).toBe(false)
     })
   })
 })

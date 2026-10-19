@@ -144,26 +144,3 @@ export function useShallowRouteSearchQuery ({ onWrite, onRouteCommitted } = {}) 
     onRouteCommitted,
   })
 }
-
-/**
- * Compares route identity while ignoring the deliberately stale shallow q.
- */
-export function isSameRouteIgnoringShallowQuery (router, first, second) {
-  const resolveWithoutSearch = location => {
-    const route = router.resolve(location)
-    const query = Object.fromEntries(
-      Object.entries(route.query)
-        .filter(([key]) => key !== 'q')
-        .sort(([firstKey], [secondKey]) => firstKey.localeCompare(secondKey)),
-    )
-
-    return router.resolve({
-      name: route.name,
-      params: route.params,
-      query,
-      hash: route.hash,
-    }).fullPath
-  }
-
-  return resolveWithoutSearch(first) === resolveWithoutSearch(second)
-}

@@ -77,19 +77,49 @@ describe('cache', function () {
     expect(() => cache.getShoots()).toThrow(TypeError)
   })
 
-  it('should dispatch "getShoot" to internal cache', function () {
-    const store = new Store()
-    store.replace(fixtures.shoots.list())
-    internalCache.set('shoots', store)
-    expect(cache.getShoot('garden-foo', 'fooShoot')).toBe(store.getByKey(1))
+  it('should look up "getShoot" in the namespace index', function () {
+    const handlers = new Map()
+    internalCache.indexShootsByNamespace({
+      on (event, handler) {
+        handlers.set(event, handler)
+      },
+    })
+    const shoots = fixtures.shoots.list()
+    for (const shoot of shoots) {
+      handlers.get('add')(shoot)
+    }
+    const [shoot] = shoots
+    expect(cache.getShoot('garden-foo', 'fooShoot')).toBe(shoot)
+    expect(cache.getShoot('garden', 'fooShoot')).toBeUndefined()
+    expect(cache.getShoot('garden-missing', 'fooShoot')).toBeUndefined()
+
+    handlers.get('delete')(shoot)
+    expect(cache.getShoot('garden-foo', 'fooShoot')).toBeUndefined()
   })
 
-  it('should dispatch "getShootByUid" to internal cache', function () {
+  it('should look up "getSeed" by name without copying', function () {
     const store = new Store()
-    store.replace(fixtures.shoots.list())
-    internalCache.set('shoots', store)
-    const object = store.getByKey(1)
-    expect(cache.getShootByUid(object.metadata.uid)).toBe(object)
+    const seeds = fixtures.seeds.list()
+    store.replace(seeds)
+    internalCache.set('seeds', store)
+    const seed = seeds.at(-1)
+    expect(cache.getSeed(seed.metadata.name)).toBe(seed)
+    expect(cache.getSeed('missing-seed')).toBeUndefined()
+  })
+
+  it.each([
+    ['getProjectByUid', 'projects', () => fixtures.projects.list()],
+    ['getSeedByUid', 'seeds', () => fixtures.seeds.list()],
+    ['getShootByUid', 'shoots', () => fixtures.shoots.list()],
+    ['getManagedSeedByUid', 'managedseeds', () => fixtures.managedseeds.list()],
+  ])('should look up "%s" by store key', function (method, key, list) {
+    const store = new Store()
+    const items = list()
+    store.replace(items)
+    internalCache.set(key, store)
+    const object = items.at(-1)
+    expect(cache[method](object.metadata.uid)).toBe(object)
+    expect(cache[method]('missing-uid')).toBeUndefined()
   })
 
   it('should dispatch "getControllerRegistrations" to internal cache', function () {
@@ -142,6 +172,39 @@ describe('cache', function () {
         expect(Array.from(cache.getShootsBySeedName('infra1-seed'))).toHaveLength(3)
         expect(Array.from(cache.getShootsBySeedName('soil-infra1'))).toHaveLength(1)
       })
+    })
+
+    it('should maintain the shoot namespace index across add, update, and delete', () => {
+      const handlers = new Map()
+      cache.indexShootsByNamespace({
+        on (event, handler) {
+          handlers.set(event, handler)
+        },
+      })
+      const oldShoot = {
+        metadata: {
+          name: 'shoot-1',
+          namespace: 'garden-foo',
+          uid: 'shoot-1',
+        },
+      }
+      const newShoot = {
+        metadata: {
+          name: 'shoot-1',
+          namespace: 'garden-bar',
+          uid: 'shoot-1',
+        },
+      }
+
+      handlers.get('add')(oldShoot)
+      expect(cache.getShoot('garden-foo', 'shoot-1')).toBe(oldShoot)
+
+      handlers.get('update')(newShoot, oldShoot)
+      expect(cache.getShoot('garden-foo', 'shoot-1')).toBeUndefined()
+      expect(cache.getShoot('garden-bar', 'shoot-1')).toBe(newShoot)
+
+      handlers.get('delete')(newShoot)
+      expect(cache.getShoot('garden-bar', 'shoot-1')).toBeUndefined()
     })
   })
 })

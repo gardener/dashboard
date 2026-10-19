@@ -35,23 +35,20 @@ export default {
     const projectStore = useProjectStore()
 
     const project = toRef(projectStore, 'project')
-    const namespace = toRef(projectStore, 'namespace')
-
     const fallbackRoute = ref(null)
 
-    const projectItem = computed(() => namespace.value === '_all' || project.value)
+    const projectItem = computed(() => project.value)
 
     function load (route, { setError }) {
       fallbackRoute.value = null
       const routeName = route.name
-      const routeParams = route.params
-      const namespace = routeParams.namespace
+      const namespace = projectStore.namespaceByProjectName(route.params.projectName)
       if (!authzStore.hasRulesForNamespace(namespace)) {
         setError(new Error('An unexpected error occurred'))
         fallbackRoute.value = {
           name: 'Home',
         }
-      } else if (!projectStore.namespaces.includes(namespace) && namespace !== '_all') {
+      } else if (!projectStore.namespaces.includes(namespace)) {
         setError(Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
           code: 404,
           reason: 'Project not found',
@@ -59,7 +56,7 @@ export default {
         fallbackRoute.value = {
           name: 'Home',
         }
-      } else if (['Secrets', 'Secret'].includes(routeName) && !authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
+      } else if (routeName === 'Credentials' && !authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
         setError(Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
           code: 403,
           reason: 'Forbidden',
@@ -67,7 +64,7 @@ export default {
         fallbackRoute.value = {
           name: 'ShootList',
           params: {
-            namespace,
+            projectName: route.params.projectName,
           },
         }
       }

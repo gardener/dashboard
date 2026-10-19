@@ -22,6 +22,7 @@ const { NotFound } = httpErrors
 
 class Cache extends Map {
   #namespaceToProject = new Map()
+  #namespaceToShoots = new Map()
   #seedNameToShoots = new Map()
 
   constructor () {
@@ -98,6 +99,46 @@ class Cache extends Map {
     return this.#seedNameToShoots.get(seedName)?.values() ?? []
   }
 
+  indexShootsByNamespace (informer) {
+    const add = shoot => {
+      const namespace = shoot?.metadata?.namespace
+      const uid = shoot?.metadata?.uid
+      if (!namespace || !uid) {
+        return
+      }
+      let shoots = this.#namespaceToShoots.get(namespace)
+      if (!shoots) {
+        shoots = new Map()
+        this.#namespaceToShoots.set(namespace, shoots)
+      }
+      shoots.set(uid, shoot)
+    }
+    const del = shoot => {
+      const namespace = shoot?.metadata?.namespace
+      const uid = shoot?.metadata?.uid
+      if (!namespace || !uid) {
+        return
+      }
+      const shoots = this.#namespaceToShoots.get(namespace)
+      if (shoots) {
+        shoots.delete(uid)
+        if (shoots.size === 0) {
+          this.#namespaceToShoots.delete(namespace)
+        }
+      }
+    }
+    informer.on('add', add)
+    informer.on('update', (shoot, oldShoot) => {
+      del(oldShoot)
+      add(shoot)
+    })
+    informer.on('delete', del)
+  }
+
+  getShoot (namespace, name) {
+    return this.#namespaceToShoots.get(namespace)?.values().find(shoot => shoot.metadata.name === name)
+  }
+
   getCloudProfiles () {
     return this.get('cloudprofiles').list()
   }
@@ -165,14 +206,10 @@ export default {
     return cache.getSeeds()
   },
   getSeed (name) {
-    return _
-      .chain(cache.getSeeds())
-      .find(['metadata.name', name])
-      .cloneDeep()
-      .value()
+    return cache.get('seeds').find(['metadata.name', name])
   },
   getSeedByUid (uid) {
-    return cache.get('seeds').find(['metadata.uid', uid])
+    return cache.get('seeds').getByKey(uid)
   },
   getProject (name) {
     const project = cache.get('projects').find(['metadata.name', name])
@@ -182,7 +219,7 @@ export default {
     return project
   },
   getProjectByUid (uid) {
-    return cache.get('projects').find(['metadata.uid', uid])
+    return cache.get('projects').getByKey(uid)
   },
   getProjects () {
     return cache.getProjects()
@@ -209,10 +246,10 @@ export default {
     return items
   },
   getShoot (namespace, name) {
-    return cache.get('shoots').find({ metadata: { namespace, name } })
+    return cache.getShoot(namespace, name)
   },
   getShootByUid (uid) {
-    return cache.get('shoots').find(['metadata.uid', uid])
+    return cache.get('shoots').getByKey(uid)
   },
   getControllerRegistrations () {
     return cache.getControllerRegistrations()
@@ -230,7 +267,7 @@ export default {
     return cache.get('managedseeds').find({ metadata: { namespace: 'garden', name } })
   },
   getManagedSeedByUid (uid) {
-    return cache.get('managedseeds').find(['metadata.uid', uid])
+    return cache.get('managedseeds').getByKey(uid)
   },
   getManagedSeedForShootInGardenNamespace (shootName) {
     return cache.get('managedseeds').find({
@@ -263,5 +300,8 @@ export default {
   },
   indexShootsBySeedName (informer) {
     cache.indexShootsBySeedName(informer)
+  },
+  indexShootsByNamespace (informer) {
+    cache.indexShootsByNamespace(informer)
   },
 }

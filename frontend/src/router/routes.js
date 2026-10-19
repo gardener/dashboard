@@ -5,7 +5,6 @@
 //
 
 import { useAppStore } from '@/store/app'
-import { useAuthnStore } from '@/store/authn'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
@@ -62,9 +61,20 @@ const GSeedItemEditor = () => import('@/views/GSeedItemEditor.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
+const shootNamespaceRouteNames = new Map([
+  ['yaml', 'ShootItemEditor'],
+  ['hibernation', 'ShootItemHibernationSettings'],
+  ['term', 'ShootItemTerminal'],
+])
+const namespaceRouteNames = new Map([
+  ['credentials', 'Credentials'],
+  ['members', 'Members'],
+  ['administration', 'Administration'],
+  ['term', 'GardenTerminal'],
+])
+
 export function createRoutes () {
   const appStore = useAppStore()
-  const authnStore = useAuthnStore()
   const authzStore = useAuthzStore()
   const projectStore = useProjectStore()
 
@@ -82,15 +92,15 @@ export function createRoutes () {
       settingsRoute('settings'),
       seedListRoute('seeds'),
       seedItemHierarchy('seeds/:name'),
-      projectsRoute('namespace'),
-      newProjectRoute('namespace/+'),
-      projectHierarchy('namespace/:namespace'),
+      shootListRoute('clusters', 'AllClusters'),
+      projectsRoute('projects'),
+      newProjectRoute('projects/+'),
+      projectHierarchy('projects/:projectName'),
+      namespaceRoute('namespace/:pathMatch(.*)*'),
       {
         path: ':pathMatch(.*)*',
         component: GNotFound,
         meta: {
-          namespaced: false,
-          projectScope: false,
           breadcrumbs: notFoundBreadcrumbs,
         },
       },
@@ -102,21 +112,22 @@ export function createRoutes () {
     }
   }
 
-  /* Project Hierachy "/namespace/:namespace" */
+  /* Project Hierachy "/projects/:projectName" */
   function projectHierarchy (path) {
     return {
       path,
       component: GProjectPlaceholder,
+      meta: {
+        projectScoped: true,
+      },
       children: [
-        { path: '', redirect: 'shoots' },
-        shootListRoute('shoots'),
-        newShootHierarchy('shoots/+'),
-        shootItemHierarchy('shoots/:name'),
+        administrationRoute(''),
+        shootListRoute('clusters', 'ShootList'),
+        newShootHierarchy('clusters/+'),
+        shootItemHierarchy('clusters/:name'),
         credentialListRoute('credentials'),
         membersRoute('members'),
-        administrationRoute('administration'),
-        { path: 'term', redirect: 'term/garden' },
-        gardenTerminalRoute('term/garden'),
+        gardenTerminalRoute('garden-cluster'),
         {
           path: ':pathMatch(.*)*',
           component: GNotFound,
@@ -128,7 +139,7 @@ export function createRoutes () {
     }
   }
 
-  /* New Shoot Hierachy "/namespace/:namespace/shoots/+" */
+  /* New Shoot Hierachy "/projects/:projectName/clusters/+" */
   function newShootHierarchy (path) {
     return {
       path,
@@ -166,7 +177,7 @@ export function createRoutes () {
     }
   }
 
-  /* Shoot Item Hierachy "/namespace/:namespace/shoots/:name" */
+  /* Shoot Item Hierachy "/projects/:projectName/clusters/:name" */
   function shootItemHierarchy (path) {
     return {
       path,
@@ -175,7 +186,7 @@ export function createRoutes () {
         shootItemRoute(''),
         shootItemEditorRoute('yaml'),
         shootItemHibernationRoute('hibernation'),
-        shootItemTerminalRoute('term'),
+        shootItemTerminalRoute('terminal'),
         {
           path: ':pathMatch(.*)*',
           component: GNotFound,
@@ -191,11 +202,9 @@ export function createRoutes () {
      * Route Meta fields type definition
      * @typedef {Object} RouteMeta
      * @prop {boolean} [public]                   - Determines whether route needs authorization
-     * @prop {boolean} [namespaced]               - Determines whether route is namespace specific and has namespace in path
-     * @prop {boolean} [projectScope]             - Determines whether route can be accessed in store of mutiple projects (_all)
+     * @prop {boolean} [projectScoped]            - Determines whether route belongs to a Project and has projectName in path
      * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
-     * @prop {string}  [title]                    - Main menu title
-     * @prop {string}  [icon]                     - Main menu icon
+     * @prop {string}  [title]                    - Document title
      * @prop {RouteFn} [breadcrumbText]           - Property or function that returns the breadcrumb title
      * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
      */
@@ -228,8 +237,6 @@ export function createRoutes () {
       name: 'Home',
       component: GHome,
       meta: {
-        namespaced: false,
-        projectScope: false,
         breadcrumbs: homeBreadcrumbs,
       },
       beforeEnter: redirectToShootList,
@@ -243,8 +250,6 @@ export function createRoutes () {
       component: GHome,
       meta: {
         title: 'New Project',
-        namespaced: false,
-        projectScope: false,
         breadcrumbs: newProjectBreadcrumbs,
       },
     }
@@ -258,17 +263,22 @@ export function createRoutes () {
     }
   }
 
+  function namespaceRoute (path) {
+    return {
+      path,
+      name: 'Namespace',
+      beforeEnter: namespaceTarget,
+    }
+  }
+
   function accountRoute (path) {
     return {
       path,
       name: 'Account',
       component: GAccount,
       meta: {
-        namespaced: false,
-        projectScope: false,
         breadcrumbs: accountBreadcrumbs,
       },
-      beforeEnter: addNamespaceToUrl,
     }
   }
 
@@ -278,26 +288,18 @@ export function createRoutes () {
       name: 'Settings',
       component: GSettings,
       meta: {
-        namespaced: false,
-        projectScope: false,
         breadcrumbs: settingsBreadcrumbs,
       },
-      beforeEnter: addNamespaceToUrl,
     }
   }
 
-  function shootListRoute (path) {
+  function shootListRoute (path, name) {
     return {
       path,
-      name: 'ShootList',
+      name,
       component: GShootList,
       meta: {
-        menu: {
-          title: 'Clusters',
-          icon: 'mdi-hexagon-multiple',
-        },
         title: 'Clusters',
-        projectScope: false,
         breadcrumbs: shootListBreadcrumbs,
       },
     }
@@ -309,16 +311,7 @@ export function createRoutes () {
       name: 'SeedList',
       component: GSeedList,
       meta: {
-        namespaced: false,
-        menu: {
-          title: 'Seeds',
-          icon: 'mdi-sprout',
-          get hidden () {
-            return !authzStore.canViewLandscape
-          },
-        },
         title: 'Seeds',
-        projectScope: false,
         breadcrumbs: seedListBreadcrumbs,
       },
       beforeEnter (to, from) {
@@ -326,7 +319,6 @@ export function createRoutes () {
         if (fallbackRedirect) {
           return fallbackRedirect
         }
-        return addNamespaceToUrl(to)
       },
     }
   }
@@ -351,9 +343,7 @@ export function createRoutes () {
       name: 'SeedItem',
       component: GSeedItem,
       meta: {
-        namespaced: false,
         title: 'Seed Details',
-        projectScope: false,
         breadcrumbs: seedItemBreadcrumbs,
         tabKey: 'seedOverview',
         tabs: seedItemTabs,
@@ -363,7 +353,6 @@ export function createRoutes () {
         if (fallbackRedirect) {
           return fallbackRedirect
         }
-        return addNamespaceToUrl(to)
       },
     }
   }
@@ -374,9 +363,7 @@ export function createRoutes () {
       name: 'SeedItemEditor',
       component: GSeedItemEditor,
       meta: {
-        namespaced: false,
         title: 'Seed YAML',
-        projectScope: false,
         breadcrumbs: seedItemBreadcrumbs,
         tabKey: 'seedYaml',
         tabs: seedItemTabs,
@@ -386,7 +373,6 @@ export function createRoutes () {
         if (fallbackRedirect) {
           return fallbackRedirect
         }
-        return addNamespaceToUrl(to)
       },
     }
   }
@@ -457,7 +443,7 @@ export function createRoutes () {
         breadcrumbs: shootItemTerminalBreadcrumbs,
       },
       beforeEnter (to, from) {
-        if (!authzStore.hasShootTerminalAccess) {
+        if (!authzStore.hasShootTerminalAccessForNamespace(to.meta.namespace)) {
           appStore.setError({
             text: 'Access to cluster terminal is not allowed',
           })
@@ -473,13 +459,6 @@ export function createRoutes () {
       name: 'Credentials',
       component: GCredentials,
       meta: {
-        menu: {
-          title: 'Credentials',
-          icon: 'mdi-key',
-          get hidden () {
-            return !authzStore.canGetCloudProviderCredentials
-          },
-        },
         breadcrumbs: credentialsBreadcrumbs,
       },
     }
@@ -491,10 +470,6 @@ export function createRoutes () {
       name: 'Members',
       component: GMembers,
       meta: {
-        menu: {
-          title: 'Members',
-          icon: 'mdi-account-multiple-outline',
-        },
         breadcrumbs: membersBreadcrumbs,
       },
     }
@@ -506,10 +481,6 @@ export function createRoutes () {
       name: 'Administration',
       component: GAdministration,
       meta: {
-        menu: {
-          title: 'Administration',
-          icon: 'mdi-cog',
-        },
         breadcrumbs: administrationBreadcrumbs,
       },
     }
@@ -521,18 +492,11 @@ export function createRoutes () {
       name: 'GardenTerminal',
       component: GShootItemTerminal,
       meta: {
-        menu: {
-          title: 'Garden Cluster',
-          icon: 'mdi-console',
-          get hidden () {
-            return !(authzStore.hasGardenTerminalAccess && authnStore.isAdmin)
-          },
-        },
         title: 'Garden Cluster Terminal',
         breadcrumbs: terminalBreadcrumbs,
       },
       beforeEnter (to, from) {
-        if (!authzStore.hasGardenTerminalAccess) {
+        if (!authzStore.hasGardenTerminalAccessForNamespace(to.meta.namespace)) {
           appStore.setError({
             text: 'Access to garden terminal is not allowed.',
           })
@@ -544,8 +508,62 @@ export function createRoutes () {
   }
 
   /* Helper functions */
+  function namespaceTarget (to) {
+    const path = to.path.replace(/^\/namespace\/?/, '')
+    if (!path) {
+      return redirectToShootList()
+    }
+    if (path === '+') {
+      return { name: 'NewProject', replace: true }
+    }
+
+    const [namespace, resource, name, subresource] = path.split('/')
+    if (namespace === '_all') {
+      return {
+        name: 'AllClusters',
+        query: !resource || (resource === 'shoots' && !name)
+          ? shootListQuery(to.query)
+          : undefined,
+        replace: true,
+      }
+    }
+
+    const project = projectStore.projectByNamespace(namespace)
+    if (!project) {
+      const message = `The namespace ${namespace} is not associated with an accessible Project`
+      throw Object.assign(new Error(message), {
+        status: 403,
+        reason: 'Forbidden',
+      })
+    }
+
+    const target = {
+      name: 'ShootList',
+      params: { projectName: project.metadata.name },
+      replace: true,
+    }
+    if (resource === 'shoots') {
+      target.query = shootListQuery(to.query)
+      if (name === '+') {
+        target.name = subresource === 'yaml' ? 'NewShootEditor' : 'NewShoot'
+      } else if (name) {
+        target.name = shootNamespaceRouteNames.get(subresource) ?? 'ShootItem'
+        target.params.name = name
+      }
+    } else if (resource) {
+      target.name = namespaceRouteNames.get(resource) ?? 'ShootList'
+    } else {
+      target.query = shootListQuery(to.query)
+    }
+    return target
+  }
+
+  function shootListQuery (query) {
+    return Object.hasOwn(query, 'q') ? { q: query.q } : undefined
+  }
+
   function getFallbackRedirectIfNoSeedAccess (to, from) {
-    if (authzStore.canViewLandscapeForNamespace(to.params.namespace ?? to.query.namespace)) {
+    if (authzStore.canViewLandscapeForNamespace(null)) {
       return
     }
 
@@ -559,26 +577,14 @@ export function createRoutes () {
   }
 
   function redirectToShootList (to) {
-    const namespace = authzStore.namespace || projectStore.defaultNamespace
-    if (namespace) {
+    const project = projectStore.lastProject ??
+      projectStore.projectByNamespace(authzStore.namespace) ??
+      projectStore.projectByNamespace(projectStore.defaultNamespace)
+    if (project) {
       return {
         name: 'ShootList',
-        params: { namespace },
-      }
-    }
-  }
-
-  function addNamespaceToUrl (to) {
-    const namespace = authzStore.namespace || projectStore.defaultNamespace
-    if (!to.query.namespace && namespace) {
-      return {
-        name: to.name,
-        params: to.params,
-        hash: to.hash,
-        query: {
-          namespace,
-          ...to.query,
-        },
+        params: { projectName: project.metadata.name },
+        replace: true,
       }
     }
   }

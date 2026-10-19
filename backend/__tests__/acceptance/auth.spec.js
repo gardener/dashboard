@@ -20,6 +20,7 @@ import {
   head,
 } from 'lodash-es'
 import assert from 'assert/strict'
+import { createHash } from 'node:crypto'
 import setCookieParser from 'set-cookie-parser'
 import request from '@gardener-dashboard/request'
 
@@ -83,6 +84,7 @@ async function parseCookies (res) {
   assert.strictEqual(cookieToken.httpOnly, true)
   const accessToken = [...cookieHeaderPayload.value.split('.'), cookieSignature.value].join('.')
   const [idToken, refreshToken] = (await decrypt(cookieToken.value)).split(',')
+  assert.strictEqual(decode(accessToken).ith, createHash('sha256').update(idToken).digest('hex').slice(0, 32))
   return [accessToken, idToken, refreshToken]
 }
 
@@ -474,9 +476,10 @@ describe('auth', function () {
     }
     const tokenSet = {
       id_token: await sign(idTokenPayload),
-      access_token: await sign(accessTokenPayload),
       refresh_token: await sign(refreshTokenPayload),
     }
+    accessTokenPayload.ith = createHash('sha256').update(tokenSet.id_token).digest('hex').slice(0, 32)
+    tokenSet.access_token = await sign(accessTokenPayload)
 
     refreshTokenGrant.mockResolvedValueOnce({
       id_token: tokenSet.refresh_token,
@@ -572,6 +575,7 @@ describe('auth', function () {
       canListShootsAllNamespaces: true,
       refresh_at: refreshTokenPayload.exp,
       rti: expect.stringMatching(/^[a-z0-9]{7}$/),
+      ith: createHash('sha256').update(idToken).digest('hex').slice(0, 32),
     })
     expect(Object.hasOwn(payload, 'groups')).toBe(false)
   })

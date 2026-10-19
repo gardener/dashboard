@@ -20,7 +20,10 @@ import { dashboardClient } from '@gardener-dashboard/kube-client'
 import logger from '../lib/logger/index.js'
 import config from '../lib/config/index.js'
 import handleGithubEvent from '../lib/github/webhook/handler.js'
-import verify from '../lib/github/webhook/verify.js'
+import {
+  hasValidSignature,
+  ensureJsonContentType,
+} from '../lib/github/webhook/verify.js'
 import SyncManager from '../lib/github/SyncManager.js'
 import { getComments } from '../lib/github/index.js'
 
@@ -134,9 +137,8 @@ describe('github', () => {
       })
     })
 
-    describe('verify', () => {
+    describe('hasValidSignature', () => {
       const req = {}
-      const res = {}
       const body = 'foo'
 
       const setHubSignatureHeader = body => {
@@ -145,20 +147,21 @@ describe('github', () => {
 
       beforeEach(() => {
         req.headers = {}
+        req.body = body
       })
 
       it('should succeed if signatures match', () => {
         setHubSignatureHeader(body)
-        expect(() => verify(req, res, body)).not.toThrow()
+        expect(hasValidSignature(req)).toBe(true)
       })
 
-      it('should fail in case of an invalid signature', () => {
+      it('should return false in case of an invalid signature', () => {
         setHubSignatureHeader('baz')
-        expect(() => verify(req, res, body)).toThrow(createError(403, 'Signatures didn\'t match!'))
+        expect(hasValidSignature(req)).toBe(false)
       })
 
-      it('should fail if signature is missing', () => {
-        expect(() => verify(req, res, body)).toThrow(createError(403, 'Header \'x-hub-signature-256\' not provided or invalid'))
+      it('should return false if signature is missing', () => {
+        expect(hasValidSignature(req)).toBe(false)
       })
 
       describe('when webhookSecret is not configured', () => {
@@ -173,13 +176,40 @@ describe('github', () => {
         })
 
         it('should fail with an assertion error', () => {
-          expect(() => verify(req, res, body)).toThrow(
+          expect(() => hasValidSignature(req)).toThrow(
             expect.objectContaining({
               message: 'Property \'gitHub.webhookSecret\' not configured on dashboard backend',
               code: 'ERR_ASSERTION',
             }),
           )
         })
+      })
+    })
+
+    describe('ensureJsonContentType', () => {
+      it('should call next if content type is json', () => {
+        const req = { is: vi.fn().mockReturnValue(true) }
+        const res = {}
+        const next = vi.fn()
+
+        ensureJsonContentType(req, res, next)
+
+        expect(req.is).toHaveBeenCalledWith('json')
+        expect(next).toHaveBeenCalledTimes(1)
+      })
+
+      it('should call next with 415 error if content type is not json', () => {
+        const req = { is: vi.fn().mockReturnValue(false) }
+        const res = {}
+        const next = vi.fn()
+
+        ensureJsonContentType(req, res, next)
+
+        expect(req.is).toHaveBeenCalledWith('json')
+        expect(next).toHaveBeenCalledTimes(1)
+        const error = next.mock.calls[0][0]
+        expect(error.status).toBe(415)
+        expect(error.message).toBe('Content-Type must be application/json')
       })
     })
   })

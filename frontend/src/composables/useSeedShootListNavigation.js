@@ -24,10 +24,7 @@ export function createSeedShootListRoute (seedName, shootListFilters) {
   const search = terms.filter(Boolean).join(' ')
 
   return {
-    name: 'ShootList',
-    params: {
-      namespace: '_all',
-    },
+    name: 'AllClusters',
     query: {
       q: search,
     },

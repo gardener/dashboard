@@ -11,6 +11,7 @@ import {
   beforeEach,
 } from 'vitest'
 import { find } from 'lodash-es'
+import createError from 'http-errors'
 import { Store } from '@gardener-dashboard/kube-client'
 import request from '@gardener-dashboard/request'
 import cache from '../../lib/cache/index.js'
@@ -385,6 +386,25 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body).toMatchSnapshot()
+    })
+
+    it('should propagate errors when removing old DNS bindings fails', async function () {
+      const params = {
+        credentialKind: 'Secret',
+        credentialNamespace: namespace,
+        credentialName: 'dns-secret',
+      }
+      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
+      mockRequest.mockRejectedValueOnce(createError(403))
+      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+
+      await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params })
+        .expect(403)
+
+      expect(mockRequest).toHaveBeenCalledTimes(3)
     })
 
     it('should delete a cloudProvider DNS credential (workloadidentity / no binding)', async function () {

@@ -127,10 +127,7 @@ describe('views', () => {
 
     async function mountComponent () {
       const target = {
-        name: 'ShootList',
-        params: {
-          namespace: authzStore.namespace,
-        },
+        name: 'AllClusters',
         query: initialQuery,
       }
       const route = router.resolve(target)
@@ -242,13 +239,13 @@ describe('views', () => {
       router = createRouter({
         history: createMemoryHistory(),
         routes: [{
-          name: 'ShootList',
-          path: '/namespace/:namespace/shoots',
+          name: 'AllClusters',
+          path: '/clusters',
           component: {},
         }],
       })
       router.afterEach(to => {
-        if (to.name === 'ShootList') {
+        if (to.name === 'AllClusters') {
           shootStore.activateShootList(getShootListContext(to))
         }
       })
@@ -297,7 +294,6 @@ describe('views', () => {
       expect(defaultClusterViewItem.attributes('tabindex')).toBe('0')
       expect(defaultClusterViewItem.props('to')).toEqual({
         name: 'Settings',
-        query: { namespace: '_all' },
         hash: '#setting=default-cluster-view',
       })
 
@@ -306,7 +302,6 @@ describe('views', () => {
       expect(exclusionCriteriaItem.attributes('tabindex')).toBe('0')
       expect(exclusionCriteriaItem.props('to')).toEqual({
         name: 'Settings',
-        query: { namespace: '_all' },
         hash: '#setting=cluster-operations',
       })
       expect(wrapper.text()).toContain('Settings')

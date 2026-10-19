@@ -115,7 +115,6 @@ import {
   computed,
   toRef,
 } from 'vue'
-import { useRoute } from 'vue-router'
 
 import GManagedSeedShootLink from '@/components/GManagedSeedShootLink.vue'
 import GSeedCapacityIndicator from '@/components/Seeds/GSeedCapacityIndicator.vue'
@@ -145,8 +144,6 @@ const props = defineProps({
 })
 
 const seedItem = toRef(props, 'modelValue')
-const route = useRoute()
-
 const {
   seedName,
   seedProviderType,
@@ -178,9 +175,6 @@ const seedItemLink = computed(() => ({
   name: 'SeedItem',
   params: {
     name: seedName.value,
-  },
-  query: {
-    namespace: route.query.namespace,
   },
 }))
 
