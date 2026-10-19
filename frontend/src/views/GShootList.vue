@@ -33,6 +33,7 @@ SPDX-License-Identifier: Apache-2.0
         :loading="loading || !connected"
         :custom-key-sort="customKeySort"
         density="compact"
+        :item-height="36"
         hover
         :item-key="getItemKey"
         must-sort

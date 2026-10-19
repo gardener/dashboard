@@ -86,9 +86,10 @@ SPDX-License-Identifier: Apache-2.0
         :item-height="itemHeight"
         fixed-header
       >
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-user-row
             :key="item.username"
+            :ref="itemRef"
             :item="item"
             :headers="userAccountTableHeaders"
             @delete="onRemoveUser"
@@ -174,9 +175,10 @@ SPDX-License-Identifier: Apache-2.0
         :item-height="itemHeight"
         fixed-header
       >
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-service-account-row
             :key="`${item.namespace}_${item.username}`"
+            :ref="itemRef"
             :item="item"
             :headers="serviceAccountTableHeaders"
             @download="onDownload"
