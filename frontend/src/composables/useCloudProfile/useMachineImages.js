@@ -105,9 +105,6 @@ export function useMachineImages (cloudProfile) {
       const hidden = Boolean(machineImage.vendor.hidden)
 
       return map(versions, ({ version, expirationDate, cri, classification, architectures, capabilityFlavors }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
-        }
         const image = {
           key: name + '/' + version,
           name,

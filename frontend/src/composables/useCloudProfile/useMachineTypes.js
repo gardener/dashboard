@@ -60,12 +60,6 @@ export function useMachineTypes (cloudProfile) {
 
     const items = machineTypes.value
 
-    items.forEach(item => {
-      if (!item.architecture) {
-        item.architecture = 'amd64' // default if not maintained
-      }
-    })
-
     if (!region) {
       return items
     }
