@@ -38,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         :loading="loading || !connected"
         :custom-key-sort="customKeySort"
         density="compact"
+        :item-height="36"
         hover
         :item-key="getItemKey"
         must-sort
@@ -50,8 +51,9 @@ SPDX-License-Identifier: Apache-2.0
         <template #no-data>
           No seeds to show
         </template>
-        <template #item="{ item }">
+        <template #item="{ item, itemRef }">
           <g-seed-list-row
+            :ref="itemRef"
             :model-value="item"
             :headers="visibleHeaders"
           />
