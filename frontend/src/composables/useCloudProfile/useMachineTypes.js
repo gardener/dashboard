@@ -10,7 +10,10 @@ import {
 } from 'vue'
 
 import { getZones } from '@/composables/helper.js'
-import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities.js'
+import {
+  useMachineCapabilities,
+  resolveArchitectures,
+} from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import filter from 'lodash/filter'
 import map from 'lodash/map'
@@ -99,15 +102,7 @@ export function useMachineTypes (cloudProfile) {
 
       if (architecture?.value) {
         return filter(types, type => {
-          const capabilityArchitectures = type.capabilities?.architecture
-          if (capabilityArchitectures) {
-            return includes(capabilityArchitectures, architecture.value)
-          }
-          const defaultArchitectures = machineCapabilities.value.architecture
-          if (defaultArchitectures?.length) {
-            return includes(defaultArchitectures, architecture.value)
-          }
-          return type.architecture === architecture.value
+          return includes(resolveArchitectures(type, machineCapabilities.value), architecture.value)
         })
       }
 
@@ -131,19 +126,9 @@ export function useMachineTypes (cloudProfile) {
     return computed(() => {
       const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
-      const defaultArchitectures = machineCapabilities.value.architecture
 
       const architectures = uniq(types.flatMap(type => {
-        // 1. Explicit capabilities.architecture on the machine type
-        if (type.capabilities?.architecture?.length) {
-          return type.capabilities.architecture
-        }
-        // 2. Profile-level default from spec.machineCapabilities
-        if (defaultArchitectures?.length) {
-          return defaultArchitectures
-        }
-        // 3. Deprecated fallback to type.architecture
-        return [type.architecture]
+        return resolveArchitectures(type, machineCapabilities.value)
       }))
 
       return architectures.sort()

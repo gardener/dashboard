@@ -234,9 +234,14 @@ export default {
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
 
-    function resetWorkerMachine () {
-      props.worker.machine.type = get(defaultMachineType.value, ['name'])
-      props.worker.machine.image = pick(defaultMachineImage.value, ['name', 'version'])
+    function resetMachineImageIfInvalid (machineType, defaultImage) {
+      const filteredImages = useFilteredMachineImages(machineType)
+      const currentImageStillValid = props.worker.machine.image && find(filteredImages, props.worker.machine.image)
+      if (!currentImageStillValid) {
+        props.worker.machine.image = defaultImage
+          ? pick(defaultImage, ['name', 'version'])
+          : {}
+      }
     }
 
     const machineArchitecture = computed({
@@ -246,8 +251,13 @@ export default {
       set (architecture) {
         props.worker.machine.architecture = architecture
 
-        // Reset machine type and image to default as they won't be supported by new architecture
-        resetWorkerMachine()
+        const typeStillValid = props.worker.machine.type && find(machineTypes.value, ['name', props.worker.machine.type])
+        if (!typeStillValid) {
+          props.worker.machine.type = get(defaultMachineType.value, ['name'])
+        }
+
+        const effectiveType = find(machineTypes.value, ['name', props.worker.machine.type])
+        resetMachineImageIfInvalid(effectiveType, defaultMachineImage.value)
       },
     })
 
@@ -294,6 +304,7 @@ export default {
       selectedVolumeType,
       minimumVolumeSize,
       useFilteredMachineTypes,
+      resetMachineImageIfInvalid,
     }
   },
   data () {
@@ -485,10 +496,8 @@ export default {
       },
       set (value) {
         this.worker.machine.type = value
-        const defaultImage = this.selectedDefaultMachineImage
-        this.worker.machine.image = defaultImage
-          ? pick(defaultImage, ['name', 'version'])
-          : {}
+        const newMachineType = find(this.machineTypes, ['name', value])
+        this.resetMachineImageIfInvalid(newMachineType, this.selectedDefaultMachineImage)
         this.onInputVolumeSize()
       },
     },

@@ -18,13 +18,17 @@ import {
   findVendorHint,
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
-import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities.js'
+import {
+  useMachineCapabilities,
+  resolveArchitectures,
+} from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import { normalizeVersion } from '@/utils/index.js'
 
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
+import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import sortBy from 'lodash/sortBy'
 
@@ -136,7 +140,15 @@ export function useMachineImages (cloudProfile) {
   function useFilteredMachineImages (machineType) {
     function matchesMachineTypeCapabilities (machineImage, machineType) {
       const capabilities = machineType?.capabilities
-      return !machineImage.capabilityFlavors || machineImage.capabilityFlavors.some(capabilityFlavor => {
+      if (!machineImage.capabilityFlavors) {
+        // No capabilityFlavors: fall back to architecture check
+        const architectures = resolveArchitectures(machineType, machineCapabilities.value)
+        if (architectures.length) {
+          return architectures.some(arch => includes(machineImage.architectures, arch))
+        }
+        return true
+      }
+      return machineImage.capabilityFlavors.some(capabilityFlavor => {
         return Object.entries(capabilityFlavor).every(([name, values]) => {
           return values?.some(value => {
             const capability = get(capabilities, [name])

@@ -233,7 +233,7 @@ describe('composables', () => {
         expect(filteredImages).toHaveLength(0)
       })
 
-      it('should include images without capabilityFlavors regardless of capabilities', () => {
+      it('should include images without capabilityFlavors when machine type has no architecture info', () => {
         cloudProfile.value = {
           ...cloudProfile.value,
           spec: {
@@ -244,7 +244,7 @@ describe('composables', () => {
                   {
                     version: '1.0.0',
                     classification: 'supported',
-                    // No capabilityFlavors — should always be included
+                    // No capabilityFlavors — falls back to architecture check
                   },
                 ],
               },
@@ -254,8 +254,107 @@ describe('composables', () => {
 
         const { useFilteredMachineImages } = useMachineImages(cloudProfile)
 
+        // Machine type has no architecture info and no profile defaults — image should be included
         const filteredImages = useFilteredMachineImages({})
         expect(filteredImages).toHaveLength(1)
+      })
+
+      it('should filter images without capabilityFlavors by machine type capabilities.architecture', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    architectures: ['amd64'],
+                    // No capabilityFlavors
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type with matching architecture
+        const matchingImages = useFilteredMachineImages({
+          capabilities: { architecture: ['amd64'] },
+        })
+        expect(matchingImages).toHaveLength(1)
+        expect(matchingImages[0].name).toBe('gardenlinux')
+
+        // Machine type with non-matching architecture
+        const nonMatchingImages = useFilteredMachineImages({
+          capabilities: { architecture: ['arm64'] },
+        })
+        expect(nonMatchingImages).toHaveLength(0)
+      })
+
+      it('should filter images without capabilityFlavors by profile default architecture', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    architectures: ['arm64'],
+                    // No capabilityFlavors
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'architecture', values: ['arm64'] },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type without capabilities — should use profile default architecture
+        const filteredImages = useFilteredMachineImages({})
+        expect(filteredImages).toHaveLength(1)
+        expect(filteredImages[0].name).toBe('gardenlinux')
+      })
+
+      it('should filter images without capabilityFlavors by deprecated type.architecture', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    architectures: ['arm64'],
+                    // No capabilityFlavors
+                  },
+                ],
+              },
+            ],
+          },
+        }
+
+        const { useFilteredMachineImages } = useMachineImages(cloudProfile)
+
+        // Machine type with deprecated architecture field — should reject amd64 image
+        const nonMatchingImages = useFilteredMachineImages({ architecture: 'amd64' })
+        expect(nonMatchingImages).toHaveLength(0)
+
+        // Machine type with matching deprecated architecture field
+        const matchingImages = useFilteredMachineImages({ architecture: 'arm64' })
+        expect(matchingImages).toHaveLength(1)
       })
     })
 
