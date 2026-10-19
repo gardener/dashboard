@@ -119,7 +119,7 @@ const maxNodeCount = computed(() => {
 </script>
 <style scoped>
   ul {
-    margin-left: 10px;
+    margin-left: 20px;
   }
   li + li {
     margin-top: 10px;
