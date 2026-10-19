@@ -427,7 +427,7 @@ describe('composables', () => {
         const filteredImages = useFilteredMachineImages({})
         expect(filteredImages).toHaveLength(3)
         expect(filteredImages.every(({ name }) => name === 'foo')).toBe(true)
-        expect(useDefaultMachineImage(ref('amd64')).value.name).toBe('foo')
+        expect(useDefaultMachineImage(ref({})).value.name).toBe('foo')
       })
     })
   })
