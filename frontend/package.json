@@ -77,7 +77,7 @@
     "uuid": "^14.0.0",
     "vue": "3.5.44",
     "vue-router": "^5.0.0",
-    "vuetify": "4.2.4"
+    "vuetify": "4.2.6"
   },
   "devDependencies": {
     "@mdi/svg": "7.4.47",
