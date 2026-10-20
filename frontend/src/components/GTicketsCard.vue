@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     class="mb-4"
   >
     <v-card
-      v-if="tickets.length"
+      v-if="openTickets.length || closedTickets.length"
       class="mb-4"
     >
       <g-toolbar>
@@ -22,7 +22,6 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </div>
       </g-toolbar>
-      <template v-if="openTickets.length || closedTickets.length">
         <div
           v-if="openTickets.length"
           class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
@@ -50,7 +49,6 @@ SPDX-License-Identifier: Apache-2.0
             Create Ticket
           </v-btn>
         </div>
-      </template>
     </v-card>
     <v-card v-else>
       <g-toolbar title="Tickets" />
@@ -127,13 +125,6 @@ export default {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',
     }),
-    tickets () {
-      const tickets = this.ticketsByProjectAndName({
-        projectName: this.shootProjectName,
-        name: this.shootName,
-      })
-      return orderBy(tickets, ['metadata.state'], ['desc'])
-    },
     openTickets () {
       const tickets = this.ticketsByProjectAndName({
         projectName: this.shootProjectName,
