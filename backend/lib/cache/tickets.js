@@ -94,9 +94,11 @@ function init () {
     if (oldIssue) {
       removeFromShootIndex(oldIssue)
     }
-    updateIfNewer('issue', issues, issue)
+    const updated = updateIfNewer('issue', issues, issue)
     // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
     addToShootIndex(issues.get(number))
+
+    return updated
   }
 
   function addOrUpdateComment ({ issueNumber, comment }) {
@@ -163,6 +165,7 @@ function init () {
   }
 
   function updateIfNewer (kind, cachedMap, item) {
+    let updated = false
     const identifier = kind === 'issue'
       ? item.metadata.number
       : item.metadata.id
@@ -172,6 +175,7 @@ function init () {
         if (!_.isEqual(cachedItem, item)) {
           logger.trace('updating', kind, identifier)
           cachedMap.set(identifier, item)
+          updated = true
           emitModified(kind, item)
         }
       } else {
@@ -180,9 +184,10 @@ function init () {
     } else {
       logger.trace('adding new', kind, identifier)
       cachedMap.set(identifier, item)
+      updated = true
       emitAdded(kind, item)
     }
-    return item
+    return updated
   }
 
   function isCachedItemOlder (cachedItem, item) {
