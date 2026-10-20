@@ -48,18 +48,18 @@ SPDX-License-Identifier: Apache-2.0
         <br>
         <div>
           <p>
-          Further information about the shoot networking can be found
-          <g-external-link url="https://gardener.cloud/docs/gardener/networking/shoot_networking/">
-            here
-          </g-external-link>
-          .
+            Further information about the shoot networking can be found
+            <g-external-link url="https://gardener.cloud/docs/gardener/networking/shoot_networking/">
+              here
+            </g-external-link>
+            .
           </p>
           <p>
-          Actual limits may differ. You can find more information
-          <g-external-link url=" https://kubernetes.io/docs/setup/best-practices/cluster-large/">
-            here
-          </g-external-link>
-          </p>
+            Actual limits may differ. You can find more information
+            <g-external-link url=" https://kubernetes.io/docs/setup/best-practices/cluster-large/">
+              here
+            </g-external-link>
+            </p>
         </div>
       </div>
     </template>
