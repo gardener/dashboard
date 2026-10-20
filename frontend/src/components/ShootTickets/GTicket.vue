@@ -33,7 +33,7 @@ SPDX-License-Identifier: Apache-2.0
       class="ticket-closed-chip"
     >
       <v-icon>
-        {{ ticket.metadata.closed_at ? 'mdi-check-circle-outline' : 'mdi-record-circle-outline' }}
+        mdi-check-circle-outline
       </v-icon>
     </v-chip>
     closed<g-time-string
