@@ -70,7 +70,7 @@ export function useShootStatusCredentialRotation (state, options = {}) {
 
   const isSshKeypairRotationApplicable = computed(() => {
     const workerGroups = get(state.value, ['spec', 'provider', 'workers'], [])
-    const sshAccessEnabled = get(state.value, ['spec', 'provider', 'workersSettings', 'sshAccess', 'enabled'], false)
+    const sshAccessEnabled = get(state.value, ['spec', 'provider', 'workersSettings', 'sshAccess', 'enabled'], true)
     return workerGroups.length > 0 && sshAccessEnabled
   })
 
