@@ -26,6 +26,7 @@ function searchIssues ({ state, title } = {}) {
   }
   const options = octokit.rest.search.issuesAndPullRequests.endpoint.merge({
     q: q.join(' '),
+    per_page: 100,
   })
   return octokit.paginate(options)
 }

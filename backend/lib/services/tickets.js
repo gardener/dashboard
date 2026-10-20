@@ -122,8 +122,12 @@ export async function getOpenIssues ({ name, projectName } = {}) {
 export async function loadOpenIssues (...args) {
   const issues = await getOpenIssues(...args)
   const ticketCache = cache.getTicketCache()
+  const updatedTickets = []
   for (const issue of issues) {
-    ticketCache.addOrUpdateIssue({ issue })
+    const updated = ticketCache.addOrUpdateIssue({ issue })
+    if(updated) {
+      updatedTickets.push(issue)
+    }
   }
 
   const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, 'metadata.number')
@@ -131,7 +135,7 @@ export async function loadOpenIssues (...args) {
     ticketCache.removeIssue({ issue })
   }
 
-  return issues
+  return updatedTickets
 }
 
 export const list = loadOpenIssues
