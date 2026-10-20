@@ -138,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0
           </template>
           <g-list-item-content label="Pods CIDR">
             <v-chip
-              v-for="cidr in getPodsCidr || ['-']"
+              v-for="cidr in getPodsCidr || []"
               :key="cidr"
               size="small"
             >
@@ -149,7 +149,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item content-class="py-0">
           <g-list-item-content label="Nodes CIDR">
             <v-chip
-              v-for="cidr in getNodesCidr || ['-']"
+              v-for="cidr in getNodesCidr || []"
               :key="cidr"
               size="small"
             >
@@ -169,7 +169,7 @@ SPDX-License-Identifier: Apache-2.0
         </template>
         <g-list-item-content label="Services CIDR">
           <v-chip
-            v-for="cidr in getServicesCidr || ['-']"
+            v-for="cidr in getServicesCidr || []"
             :key="cidr"
             size="small"
           >

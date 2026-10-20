@@ -38,6 +38,12 @@ SPDX-License-Identifier: Apache-2.0
           </g-external-link>
           .
         </p>
+        <p>
+          Actual limits may differ. You can find more information
+          <g-external-link url=" https://kubernetes.io/docs/setup/best-practices/cluster-large/">
+            here
+          </g-external-link>
+          </p>
       </div>
     </template>
   </g-popover>
