@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-expansion-panels>
     <v-expansion-panel
       v-for="ticket in tickets"
-      :key="ticket.metadata.issueNumber"
+      :key="ticket.metadata.id"
     >
       <v-expansion-panel-title expand-icon="mdi-menu-down">
         <g-external-link
