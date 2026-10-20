@@ -148,7 +148,7 @@ export function createGlobalResolveGuards () {
         } else if (to.meta.projectScoped) {
           const project = projectStore.projectByName(to.params.projectName)
           if (isProjectPending(project)) {
-            return { name: 'Home', replace: true }
+            return { name: 'ProjectList', replace: true }
           }
           namespace = project?.spec.namespace
           if (!namespace) {

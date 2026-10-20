@@ -221,6 +221,19 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     writeDefaults: false,
   })
 
+  const projectSelectedColumns = useLocalStorage('projects/project-list/selected-columns', {}, {
+    serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
+  const projectSortBy = useLocalStorage('projects/project-list/sortBy', [{
+    key: 'title',
+    order: 'asc',
+  }], {
+    serializer: StorageSerializers.json,
+    writeDefaults: false,
+  })
+
   const seedSelectedColumns = useLocalStorage('seeds/seed-list/selected-columns', {}, {
     serializer: StorageSerializers.json,
     writeDefaults: false,
@@ -281,6 +294,8 @@ export const useLocalStorageStore = defineStore('localStorage', () => {
     dnsCredentialSortBy,
     shootSelectedColumns,
     shootSortBy,
+    projectSelectedColumns,
+    projectSortBy,
     seedSelectedColumns,
     seedSortBy,
     allProjectsShootFilter,

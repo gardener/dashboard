@@ -39,7 +39,7 @@ const GMainProjectSelectionStub = {
   },
   emits: [
     'projectSelect',
-    'openProjectDialog',
+    'navigate',
   ],
   template: '<div />',
 }
@@ -88,6 +88,7 @@ function createTestRouter () {
       { name: 'Members', path: '/projects/:projectName/members', component: {}, meta: { projectScoped: true } },
       { name: 'Administration', path: '/projects/:projectName', component: {}, meta: { projectScoped: true } },
       { name: 'GardenTerminal', path: '/projects/:projectName/garden-cluster', component: {}, meta: { projectScoped: true } },
+      { name: 'ProjectList', path: '/projects', component: {} },
       { name: 'AllClusters', path: '/clusters', component: {} },
       { name: 'SeedList', path: '/seeds', component: {} },
     ],
@@ -170,27 +171,27 @@ describe('components', () => {
       window.localStorage.clear()
     })
 
-    it('shows only Home when no Projects are accessible', async () => {
+    it('shows Projects when no Projects are accessible', async () => {
       const pinia = createPinia()
       const router = createTestRouter()
-      await router.push({ name: 'Home' })
+      await router.push({ name: 'ProjectList' })
 
       const wrapper = mountNavigation(pinia, router)
 
       expect(projectSelection(wrapper).exists()).toBe(false)
       expect(sidebarTargets(wrapper)).toEqual([
-        { name: 'Home' },
+        { name: 'ProjectList' },
       ])
     })
 
-    it('shows the Project selection and Home when only Pending Projects exist', async () => {
+    it('shows the Project selection and Projects when only Pending Projects exist', async () => {
       const pinia = createPinia()
       const projectStore = useProjectStore(pinia)
       const pendingProject = createProject('pending')
       pendingProject.status.phase = 'Pending'
       projectStore.list = [pendingProject]
       const router = createTestRouter()
-      await router.push({ name: 'Home' })
+      await router.push({ name: 'ProjectList' })
 
       const wrapper = mountNavigation(pinia, router)
 
@@ -198,7 +199,7 @@ describe('components', () => {
       expect(projectSelection(wrapper).exists()).toBe(true)
       expect(projectSelection(wrapper).props('selectedProject')).toBeUndefined()
       expect(sidebarTargets(wrapper)).toEqual([
-        { name: 'Home' },
+        { name: 'ProjectList' },
       ])
     })
 
@@ -379,7 +380,20 @@ describe('components', () => {
       })
       expect(sidebarTargets(wrapper)).toEqual([
         { name: 'AllClusters' },
+        { name: 'ProjectList' },
       ])
+    })
+
+    it('opens Projects from the Project selector', async () => {
+      const {
+        router,
+        wrapper,
+      } = await setup()
+
+      projectSelection(wrapper).vm.$emit('navigate', 'ProjectList')
+      await flushPromises()
+
+      expect(router.currentRoute.value.name).toBe('ProjectList')
     })
 
     it('opens All Clusters when All Projects is selected', async () => {

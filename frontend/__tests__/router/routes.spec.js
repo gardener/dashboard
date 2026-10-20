@@ -33,7 +33,7 @@ vi.mock('@/views/GShootItemEditor.vue', () => ({ default: {} }))
 vi.mock('@/views/GAccount.vue', () => ({ default: {} }))
 vi.mock('@/views/GSettings.vue', () => ({ default: {} }))
 vi.mock('@/views/GMembers.vue', () => ({ default: {} }))
-vi.mock('@/views/GHome.vue', () => ({ default: {} }))
+vi.mock('@/views/GProjectList.vue', () => ({ default: {} }))
 vi.mock('@/views/GCredentials.vue', () => ({ default: {} }))
 vi.mock('@/views/GAdministration.vue', () => ({ default: {} }))
 vi.mock('@/views/GNewShoot.vue', () => ({ default: {} }))
@@ -47,6 +47,7 @@ vi.mock('@/views/GShootItemTerminal.vue', () => ({ default: {} }))
 function createTestRouter () {
   setActivePinia(createPinia())
   const authzStore = useAuthzStore()
+  vi.spyOn(authzStore, 'canCreateProjectForNamespace').mockReturnValue(true)
   vi.spyOn(authzStore, 'hasGardenTerminalAccessForNamespace').mockReturnValue(true)
   vi.spyOn(authzStore, 'hasShootTerminalAccessForNamespace').mockReturnValue(true)
   const projectStore = useProjectStore()
@@ -79,14 +80,22 @@ describe('router routes', () => {
       spec: { namespace: 'garden-pending' },
       status: { phase: 'Pending' },
     }]],
-  ])('stays on Home when %s', async (_, list) => {
+  ])('uses Projects as the root entry point when %s', async (_, list) => {
     const { projectStore, router } = createTestRouter()
     projectStore.list = list
 
     await router.push('/')
 
-    expect(router.currentRoute.value.name).toBe('Home')
-    expect(router.currentRoute.value.fullPath).toBe('/')
+    expect(router.currentRoute.value.fullPath).toBe('/projects')
+  })
+
+  it('keeps the Projects overview when a Project is remembered', async () => {
+    const { projectStore, router } = createTestRouter()
+    projectStore.rememberProject('core')
+
+    await router.push('/projects')
+
+    expect(router.currentRoute.value.name).toBe('ProjectList')
   })
 
   it.each([
@@ -103,18 +112,13 @@ describe('router routes', () => {
     expect(router.currentRoute.value.name).toBe('NewProject')
   })
 
-  it('redirects the Projects route to the last valid Project', async () => {
-    const { projectStore, router } = createTestRouter()
-    projectStore.list.push({
-      metadata: { name: 'team', uid: 'team-uid' },
-      spec: { namespace: 'garden-team' },
-      status: { phase: 'Ready' },
-    })
-    projectStore.rememberProject('team')
+  it('opens Projects instead of Project creation without permission', async () => {
+    const { router } = createTestRouter()
+    useAuthzStore().canCreateProjectForNamespace.mockReturnValue(false)
 
-    await router.push('/projects')
+    await router.push('/projects/+')
 
-    expect(router.currentRoute.value.fullPath).toBe('/projects/team/clusters')
+    expect(router.currentRoute.value.fullPath).toBe('/projects')
   })
 
   it.each([
@@ -180,7 +184,7 @@ describe('router routes', () => {
     })
     projectStore.rememberProject('team')
 
-    await router.push('/settings')
+    await router.push('/projects')
     await router.push('/')
 
     expect(router.currentRoute.value.fullPath).toBe('/projects/team/clusters')

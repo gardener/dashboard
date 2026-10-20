@@ -46,7 +46,7 @@ export default {
       if (!authzStore.hasRulesForNamespace(namespace)) {
         setError(new Error('An unexpected error occurred'))
         fallbackRoute.value = {
-          name: 'Home',
+          name: 'ProjectList',
         }
       } else if (!projectStore.namespaces.includes(namespace)) {
         setError(Object.assign(new Error('The project you are looking for doesn\'t exist or you are not authorized to view this project!'), {
@@ -54,7 +54,7 @@ export default {
           reason: 'Project not found',
         }))
         fallbackRoute.value = {
-          name: 'Home',
+          name: 'ProjectList',
         }
       } else if (routeName === 'Credentials' && !authzStore.canGetCloudProviderCredentialsForNamespace(namespace)) {
         setError(Object.assign(new Error('You do not have the necessary permissions to list secrets!'), {
@@ -82,7 +82,7 @@ export default {
       loadingComponent: 'div',
       getGoneError: () => {
         fallbackRoute.value = {
-          name: 'Home',
+          name: 'ProjectList',
         }
         return Object.assign(new Error('The project you are looking for is no longer available'), {
           code: 410,

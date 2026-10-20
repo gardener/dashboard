@@ -49,7 +49,7 @@ const fallbackRoute = computed(() => {
     }
   }
   return {
-    name: 'Home',
+    name: 'ProjectList',
   }
 })
 

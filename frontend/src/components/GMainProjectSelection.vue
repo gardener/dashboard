@@ -159,7 +159,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-virtual-scroll>
       </v-list>
-      <v-card-actions>
+      <v-card-actions class="flex-column align-stretch">
+        <v-btn
+          variant="text"
+          block
+          class="project-add text-left text-primary"
+          prepend-icon="mdi-view-grid-outline"
+          @click.stop="navigate('ProjectList')"
+        >
+          View all Projects
+        </v-btn>
         <div
           v-tooltip:top="{
             text: 'You are not authorized to create projects',
@@ -172,7 +181,7 @@ SPDX-License-Identifier: Apache-2.0
             block
             class="project-add text-left text-primary"
             :disabled="!canCreateProject"
-            @click.stop="openProjectDialog"
+            @click.stop="navigate('NewProject')"
           >
             <v-icon>mdi-plus</v-icon>
             <span class="ml-2">Create Project</span>
@@ -220,7 +229,7 @@ import map from 'lodash/map'
 
 const emit = defineEmits([
   'projectSelect',
-  'openProjectDialog',
+  'navigate',
 ])
 const componentProps = defineProps({
   selectedProject: {
@@ -362,9 +371,9 @@ function selectProject (project) {
   }
 }
 
-function openProjectDialog () {
+function navigate (name) {
   projectMenu.value = false
-  emit('openProjectDialog')
+  emit('navigate', name)
 }
 
 function onInputProjectFilter () {

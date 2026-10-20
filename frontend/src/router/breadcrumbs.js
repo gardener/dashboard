@@ -7,10 +7,10 @@
 import get from 'lodash/get'
 import pick from 'lodash/pick'
 
-export function homeBreadcrumbs () {
+export function projectListBreadcrumbs () {
   return [
     {
-      title: 'Home',
+      title: 'Projects',
     },
   ]
 }
