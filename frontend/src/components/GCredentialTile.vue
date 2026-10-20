@@ -153,12 +153,24 @@ export default {
       isCACertificateValiditiesAcceptable,
     } = useShootItem()
 
+    const {
+      phase,
+      phaseType,
+      rotationType,
+      lastCompletionTime,
+      lastInitiationTime,
+    } = useShootStatusCredentialRotation(shootItem, {
+      type: props.type,
+    })
+
     return {
       rotateCredentialsDialog,
       isCACertificateValiditiesAcceptable,
-      ...useShootStatusCredentialRotation(shootItem, {
-        type: props.type,
-      }),
+      phase,
+      phaseType,
+      rotationType,
+      lastCompletionTime,
+      lastInitiationTime,
     }
   },
   computed: {

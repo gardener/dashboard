@@ -68,6 +68,12 @@ export function useShootStatusCredentialRotation (state, options = {}) {
 
   const shootCredentialsRotation = computed(() => get(state.value, ['status', 'credentials', 'rotation'], {}))
 
+  const isSshKeypairRotationApplicable = computed(() => {
+    const workerGroups = get(state.value, ['spec', 'provider', 'workers'], [])
+    const sshAccessEnabled = get(state.value, ['spec', 'provider', 'workersSettings', 'sshAccess', 'enabled'], false)
+    return workerGroups.length > 0 && sshAccessEnabled
+  })
+
   const shootCredentialsRotationAggregatedPhase = computed(() => {
     let preparedRotationsCount = 0
     let completedPhasesCount = 0
@@ -164,10 +170,17 @@ export function useShootStatusCredentialRotation (state, options = {}) {
     if (options.type !== 'ALL_CREDENTIALS') {
       return rotationStatus.value.lastCompletionTime
     }
-    const allCompletionTimestamps = compact(flatMap(shootCredentialsRotation.value, 'lastCompletionTime')).sort()
-    const requiredNumberOfRotationTimestamps = filter(rotationTypes, 'hasRotationStatus').length
+    const requiredRotationTypes = filter(rotationTypes, rotationType => {
+      if (!rotationType.hasRotationStatus) {
+        return false
+      }
+      return rotationType.type !== 'sshKeypair' || isSshKeypairRotationApplicable.value
+    })
+    const allCompletionTimestamps = compact(flatMap(requiredRotationTypes, rotationType => {
+      return get(shootCredentialsRotation.value, [rotationType.type, 'lastCompletionTime'])
+    })).sort()
 
-    if (requiredNumberOfRotationTimestamps === allCompletionTimestamps.length) {
+    if (requiredRotationTypes.length === allCompletionTimestamps.length) {
       return head(allCompletionTimestamps)
     }
     return undefined
