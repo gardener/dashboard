@@ -148,6 +148,9 @@ export function useShootSpec (shootItem, options = {}) {
   const nodeCIDRMaskSize = computed(() => {
     return get(shootSpec.value, ['kubernetes', 'kubeControllerManager', 'nodeCIDRMaskSize'])
   })
+  const nodeCIDRMaskSizeIPv6 = computed(() => {
+    return get(shootSpec.value, ['kubernetes', 'kubeControllerManager', 'nodeCIDRMaskSizeIPv6'])
+  })
 
   const servicesCidrSpec = computed(() => {
     return get(shootSpec.value, ['networking', 'services'])
@@ -218,6 +221,7 @@ export function useShootSpec (shootItem, options = {}) {
     ipFamilies,
     hasIpv4,
     nodeCIDRMaskSize,
+    nodeCIDRMaskSizeIPv6,
     servicesCidrSpec,
     shootDomain,
     isCustomShootDomain,

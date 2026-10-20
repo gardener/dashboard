@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
         </div>
         <div v-if="getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
           <ul>
-            <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
+            <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize{{ !nodeCIDRMaskSize ? 'IPv6' : '' }}</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
             <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2<sup>({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }})</sup> = 2<sup>{{ getNodeCIDRMaskSize - podsCidrPrefix }}</sup> = {{ maxNodeCount }}</span> Nodes.</li>
             <li>Your Node network (<span class="font-family-monospace">.spec.networking.nodes</span>) is configured with a <span class="font-family-monospace">/{{ nodesCidrCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace"> 2<sup>{{ ipBitLength - nodesCidrCidrPrefix }}</sup> = {{ maxNodeIps }}</span> Node ips</li>
           </ul>
@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
           The calculation is not possible because following values are missing:
           <ul>
             <li v-if="!getNodeCIDRMaskSize">
-              Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
+              Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span> or <span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSizeIPv6</span>)
             </li>
             <li v-if="!podsCidrPrefix">
               Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)
@@ -85,11 +85,12 @@ const {
   nodesCidr,
   nodesCidrSpec,
   nodeCIDRMaskSize,
+  nodeCIDRMaskSizeIPv6,
   hasIpv4,
 } = useShootItem()
 
 const getNodeCIDRMaskSize = computed(() => {
-  return nodeCIDRMaskSize.value
+  return nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value
 })
 
 const podsCidrPrefix = computed(() => {
@@ -121,7 +122,7 @@ const maxNodeIps = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  return Math.pow(2, nodeCIDRMaskSize.value - podsCidrPrefix.value)
+  return Math.pow(2, (nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value) - podsCidrPrefix.value)
 })
 
 </script>

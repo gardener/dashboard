@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          <template v-if="(podsCidr?.length || podsCidrSpec) && nodeCIDRMaskSize">
+          <template v-if="(podsCidr?.length || podsCidrSpec) && defaultNodeCIDRMaskSize">
             <span v-if="maxNodeCount > 65536">2<sup>{{ Math.log2(maxNodeCount) }}</sup></span>
             <span v-else>{{ maxNodeCount }}</span>
           </template>
@@ -143,7 +143,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Pods per Worker Node">
-          <template v-if="nodeCIDRMaskSize">
+          <template v-if="defaultNodeCIDRMaskSize">
             <span v-if="maxPodsPerNodeCount > 65536">2<sup>{{ Math.log2(maxPodsPerNodeCount) }}</sup></span>
             <span v-else>{{ maxPodsPerNodeCount }}</span>
           </template>
@@ -346,6 +346,7 @@ const {
   podsCidrSpec,
   hasIpv4,
   nodeCIDRMaskSize,
+  nodeCIDRMaskSizeIPv6,
 } = useShootItem()
 
 const configStore = useConfigStore()
@@ -387,15 +388,17 @@ const slaTitle = computed(() => {
   return sla.value.title
 })
 
+const defaultNodeCIDRMaskSize = nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value
+
 const maxNodeCount = computed(() => {
   const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
   const netmask = new Netmask(cidr)
-  return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
+  return Math.pow(2, defaultNodeCIDRMaskSize - netmask.bitmask)
 })
 
 const maxPodsPerNodeCount = computed(() => {
   const bitLength = hasIpv4.value ? 32 : 128
-  return Math.pow(2, bitLength - nodeCIDRMaskSize.value)
+  return Math.pow(2, bitLength - defaultNodeCIDRMaskSize)
 })
 
 </script>
