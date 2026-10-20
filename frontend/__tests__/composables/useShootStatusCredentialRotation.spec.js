@@ -80,5 +80,73 @@ describe('composables', () => {
         })
       })
     })
+
+    describe('#lastCompletionTime', () => {
+      beforeEach(() => {
+        shootItem.value = {
+          spec: {
+            provider: {
+              workers: [
+                {},
+              ],
+              workersSettings: {
+                sshAccess: {
+                  enabled: true,
+                },
+              },
+            },
+          },
+          status: {
+            credentials: {
+              rotation: {
+                certificateAuthorities: {
+                  lastCompletionTime: '2022-07-02T00:00:00Z',
+                },
+                observability: {
+                  lastCompletionTime: '2022-07-03T00:00:00Z',
+                },
+                sshKeypair: {
+                  lastCompletionTime: '2022-07-01T00:00:00Z',
+                },
+                etcdEncryptionKey: {
+                  lastCompletionTime: '2022-07-04T00:00:00Z',
+                },
+                serviceAccountKey: {
+                  lastCompletionTime: '2022-07-05T00:00:00Z',
+                },
+              },
+            },
+          },
+        }
+      })
+
+      it('should include SSH key pair rotation when SSH access is enabled', () => {
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-01T00:00:00Z')
+
+        unset(shootItem.value, ['status', 'credentials', 'rotation', 'sshKeypair'])
+        expect(reactiveShootItem.lastCompletionTime).toBeUndefined()
+      })
+
+      it('should include SSH key pair rotation by default', () => {
+        unset(shootItem.value, ['spec', 'provider', 'workersSettings'])
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-01T00:00:00Z')
+
+        unset(shootItem.value, ['status', 'credentials', 'rotation', 'sshKeypair'])
+        expect(reactiveShootItem.lastCompletionTime).toBeUndefined()
+      })
+
+      it('should exclude SSH key pair rotation when SSH access is disabled', () => {
+        set(shootItem.value, ['spec', 'provider', 'workersSettings', 'sshAccess', 'enabled'], false)
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-02T00:00:00Z')
+
+        unset(shootItem.value, ['status', 'credentials', 'rotation', 'sshKeypair'])
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-02T00:00:00Z')
+      })
+
+      it('should exclude SSH key pair rotation when there are no worker groups', () => {
+        set(shootItem.value, ['spec', 'provider', 'workers'], [])
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-02T00:00:00Z')
+      })
+    })
   })
 })
