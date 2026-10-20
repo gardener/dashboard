@@ -22,33 +22,33 @@ SPDX-License-Identifier: Apache-2.0
           </div>
         </div>
       </g-toolbar>
-        <div
-          v-if="openTickets.length"
-          class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+      <div
+        v-if="openTickets.length"
+        class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+      >
+        Open
+      </div>
+      <g-ticket-list :tickets="openTickets" />
+      <div
+        v-if="closedTickets.length"
+        class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+      >
+        Closed
+      </div>
+      <g-ticket-list :tickets="closedTickets" />
+      <div class="d-flex align-center justify-center create-ticket">
+        <v-btn
+          variant="tonal"
+          color="tonal-primary"
+          :href="sanitizeUrl(ticketLink)"
+          target="_blank"
+          rel="noopener"
+          title="Create Ticket"
+          append-icon="mdi-open-in-new"
         >
-          Open
-        </div>
-        <g-ticket-list :tickets="openTickets" />
-        <div
-          v-if="closedTickets.length"
-          class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
-        >
-          Closed
-        </div>
-        <g-ticket-list :tickets="closedTickets" />
-        <div class="d-flex align-center justify-center create-ticket">
-          <v-btn
-            variant="tonal"
-            color="tonal-primary"
-            :href="sanitizeUrl(ticketLink)"
-            target="_blank"
-            rel="noopener"
-            title="Create Ticket"
-            append-icon="mdi-open-in-new"
-          >
-            Create Ticket
-          </v-btn>
-        </div>
+          Create Ticket
+        </v-btn>
+      </div>
     </v-card>
     <v-card v-else>
       <g-toolbar title="Tickets" />
