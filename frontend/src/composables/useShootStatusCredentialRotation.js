@@ -174,7 +174,10 @@ export function useShootStatusCredentialRotation (state, options = {}) {
       if (!rotationType.hasRotationStatus) {
         return false
       }
-      return rotationType.type !== 'sshKeypair' || isSshKeypairRotationApplicable.value
+      if (rotationType.type === 'sshKeypair') {
+        return isSshKeypairRotationApplicable.value
+      }
+      return true
     })
     const allCompletionTimestamps = compact(flatMap(requiredRotationTypes, rotationType => {
       return get(shootCredentialsRotation.value, [rotationType.type, 'lastCompletionTime'])
