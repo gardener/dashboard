@@ -150,10 +150,16 @@ describe('utils', () => {
       it.each([
         undefined,
         '10.',
-        '10.0.0.0/33',
-        '10.0.0.0/31',
       ])('should not create GDCH zone CIDRs for node CIDR %s', workerCIDR => {
-        expect(getDefaultNetworkConfigurationForAllZones(3, 'gdch', workerCIDR)).toBeUndefined()
+        expect(getDefaultNetworkConfigurationForAllZones(3, 'gdch', workerCIDR)).toEqual([])
+      })
+
+      it('should not create GDCH zone CIDRs for node CIDR 10.0.0.0/33', () => {
+        expect(getDefaultNetworkConfigurationForAllZones(3, 'gdch', '10.0.0.0/33')).toBeUndefined()
+      })
+
+      it('should not create GDCH zone CIDRs for node CIDR 10.0.0.0/31', () => {
+        expect(getDefaultNetworkConfigurationForAllZones(3, 'gdch', '10.0.0.0/31')).toBeUndefined()
       })
 
       it('should create GDCH zone CIDRs', () => {
