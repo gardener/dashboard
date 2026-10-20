@@ -127,6 +127,14 @@ describe('composables', () => {
         expect(reactiveShootItem.lastCompletionTime).toBeUndefined()
       })
 
+      it('should include SSH key pair rotation by default', () => {
+        unset(shootItem.value, ['spec', 'provider', 'workersSettings'])
+        expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-01T00:00:00Z')
+
+        unset(shootItem.value, ['status', 'credentials', 'rotation', 'sshKeypair'])
+        expect(reactiveShootItem.lastCompletionTime).toBeUndefined()
+      })
+
       it('should exclude SSH key pair rotation when SSH access is disabled', () => {
         set(shootItem.value, ['spec', 'provider', 'workersSettings', 'sshAccess', 'enabled'], false)
         expect(reactiveShootItem.lastCompletionTime).toBe('2022-07-02T00:00:00Z')

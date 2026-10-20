@@ -147,6 +147,15 @@ describe('components', () => {
         expect(sshKeyWrapper).toBeDefined()
       })
 
+      it('should include SSH key rotation by default', () => {
+        delete shootItem.spec.provider.workersSettings
+        const wrapper = mountShootCredentialRotationCard(shootItem)
+        const credentialWrappers = wrapper.findAllComponents(GCredentialTile)
+
+        const sshKeyWrapper = credentialWrappers.find(wrapper => wrapper.vm.type === 'sshKeypair')
+        expect(sshKeyWrapper).toBeDefined()
+      })
+
       it('should compute phases', () => {
         const wrapper = mountShootCredentialRotationCard(shootItem)
         const [
