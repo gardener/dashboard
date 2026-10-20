@@ -125,7 +125,7 @@ export async function loadOpenIssues (...args) {
   const updatedTickets = []
   for (const issue of issues) {
     const updated = ticketCache.addOrUpdateIssue({ issue })
-    if(updated) {
+    if (updated) {
       updatedTickets.push(issue)
     }
   }
