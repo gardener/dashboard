@@ -82,12 +82,6 @@ function init () {
     return commentsForIssues.get(issueNumber)
   }
 
-  function addOrUpdateIssues ({ issues }) {
-    for (const issue of issues) {
-      addOrUpdateIssue({ issue })
-    }
-  }
-
   function addOrUpdateIssue ({ issue, mapFn }) {
     const number = issue.number
     const oldIssue = issues.get(number)
@@ -208,7 +202,6 @@ function init () {
     getIssueNumbers,
     getIssueNumbersForNameAndProjectName,
     getIssuesForShoot,
-    addOrUpdateIssues,
     addOrUpdateIssue,
     addOrUpdateComment,
     removeIssue,
