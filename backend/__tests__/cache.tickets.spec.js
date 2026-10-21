@@ -59,7 +59,11 @@ describe('cache', function () {
       cache = createTicketCache()
       emitter = cache.emitter
       emitSpy = vi.spyOn(emitter, 'emit')
-      cache.addOrUpdateIssues({ issues: allIssues })
+      // cache.addOrUpdateIssues({ issues: allIssues })
+      for(const issue of allIssues) {
+         cache.addOrUpdateIssue({issue})
+      }
+     
       cache.addOrUpdateComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
       assert.strictEqual(emitSpy.mock.calls.length, 4)
       emitSpy.mockClear()
