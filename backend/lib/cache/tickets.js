@@ -88,13 +88,13 @@ function init () {
     }
   }
 
-  function addOrUpdateIssue ({ issue }) {
-    const number = issue.metadata.number
+  function addOrUpdateIssue ({ issue, mapFn }) {
+    const number = issue.number
     const oldIssue = issues.get(number)
     if (oldIssue) {
       removeFromShootIndex(oldIssue)
     }
-    const updated = updateIfNewer('issue', issues, issue)
+    const updated = updateIfNewer('issue', issues, issue, mapFn)
     // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
     addToShootIndex(issues.get(number))
 
@@ -164,34 +164,39 @@ function init () {
     }
   }
 
-  function updateIfNewer (kind, cachedMap, item) {
+  function updateIfNewer (kind, cachedMap, item, mapFn) {
     let updated = false
     const identifier = kind === 'issue'
-      ? item.metadata.number
+      ? item.number
       : item.metadata.id
     const cachedItem = cachedMap.get(identifier)
     if (cachedItem) {
-      if (isCachedItemOlder(cachedItem, item)) {
-        if (!_.isEqual(cachedItem, item)) {
+      if (isCachedItemOlder(kind, cachedItem, item)) {
+        const updatedItem = mapFn ? mapFn(item) : item
+        if (!_.isEqual(cachedItem, updatedItem)) {
           logger.trace('updating', kind, identifier)
-          cachedMap.set(identifier, item)
+          cachedMap.set(identifier, updatedItem)
           updated = true
-          emitModified(kind, item)
+          emitModified(kind, updatedItem)
         }
       } else {
-        logger.warn(`skipped updating ${kind} with id ${identifier} as it was older`)
+        logger.debug(`skipped updating ${kind} with id ${identifier} as updated_at has not changed`)
       }
     } else {
       logger.trace('adding new', kind, identifier)
-      cachedMap.set(identifier, item)
+      const updatedItem = mapFn ? mapFn(item) : item
+      cachedMap.set(identifier, updatedItem)
       updated = true
-      emitAdded(kind, item)
+      emitAdded(kind, updatedItem)
     }
     return updated
   }
 
-  function isCachedItemOlder (cachedItem, item) {
-    return new Date(item.metadata.updated_at) >= new Date(cachedItem.metadata.updated_at)
+  function isCachedItemOlder (kind, cachedItem, item) {
+    const newItemDate = kind === 'issue'
+      ? item.updated_at
+      : item.metadata.updated_at
+    return new Date(newItemDate) > new Date(cachedItem.metadata.updated_at)
   }
 
   return {
