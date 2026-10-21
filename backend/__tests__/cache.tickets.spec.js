@@ -22,6 +22,8 @@ function timestamp (secondsFromNow = 0) {
 function createIssue ({ number, name = 'foo', projectName = 'test', updatedAt }) {
   updatedAt = updatedAt || timestamp()
   return {
+    number,
+    updated_at: updatedAt,
     metadata: {
       number,
       updated_at: updatedAt,
@@ -99,9 +101,11 @@ describe('cache', function () {
 
     describe('#addOrUpdateIssue', function () {
       it('should update the first issue', function () {
+        const newTimestamp = timestamp(+60)
         const issue = chain(firstIssue)
           .cloneDeep()
-          .set(['metadata', 'updated_at'], timestamp(+60))
+          .set(['metadata', 'updated_at'], newTimestamp)
+          .set(['updated_at'], newTimestamp)
           .value()
         cache.addOrUpdateIssue({ issue })
         expect(emitSpy).toHaveBeenCalledTimes(1)
@@ -113,9 +117,11 @@ describe('cache', function () {
       })
 
       it('should not update the first issue', function () {
+        const oldTimestamp = timestamp(-60)
         const issue = chain(firstIssue)
           .cloneDeep()
-          .set(['metadata', 'updated_at'], timestamp(-60))
+          .set(['metadata', 'updated_at'], oldTimestamp)
+          .set(['updated_at'], oldTimestamp)
           .value()
         cache.addOrUpdateIssue({ issue })
         expect(emitSpy).not.toHaveBeenCalled()
@@ -168,7 +174,7 @@ describe('cache', function () {
 
     describe('#removeComment', function () {
       it('should remove the first comment', function () {
-        cache.removeComment({ comment: firstComment })
+        cache.removeComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
@@ -205,10 +211,13 @@ describe('cache', function () {
       })
 
       it('should update index when issue is updated with new shoot', function () {
+        const newTimestamp = new Date(Date.now() + 60000).toISOString()
         const updatedIssue = {
+          number: 1,
+          updated_at: newTimestamp,
           metadata: {
             number: 1,
-            updated_at: new Date(Date.now() + 60000).toISOString(),
+            updated_at: newTimestamp,
             name: 'bar',
             projectName: 'test',
           },
