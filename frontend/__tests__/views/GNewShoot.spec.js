@@ -61,6 +61,9 @@ describe('views', () => {
             VCard: {
               template: '<div data-test="card"><slot /></div>',
             },
+            VCardText: {
+              template: '<div><slot /></div>',
+            },
             VContainer: {
               template: '<div><slot /></div>',
             },
@@ -69,6 +72,12 @@ describe('views', () => {
                 title: String,
               },
               template: '<div data-test="toolbar" :data-title="title">{{ title }}</div>',
+            },
+            GManageWorkers: {
+              props: {
+                expandByDefault: Boolean,
+              },
+              template: '<div data-test="manage-workers" :data-expand-by-default="expandByDefault" />',
             },
           },
         },
@@ -112,6 +121,12 @@ describe('views', () => {
       })
       expect(alert.text()).toContain('No cloud providers are available')
       expect(wrapper.find('[data-test="card"]').exists()).toBe(false)
+    })
+
+    it('expands worker groups by default', () => {
+      mountComponent(['aws'])
+
+      expect(wrapper.get('[data-test="manage-workers"]').attributes('data-expand-by-default')).toBe('true')
     })
   })
 })
