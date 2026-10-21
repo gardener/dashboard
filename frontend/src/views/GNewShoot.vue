@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <v-container
       ref="scrollContainer"
-      class="overflow-auto"
+      class="card-container overflow-auto"
       fluid
     >
       <v-card v-if="sortedInfraProviderTypeList.length > 1">
@@ -59,7 +59,7 @@ SPDX-License-Identifier: Apache-2.0
           title="Worker"
         />
         <v-card-text>
-          <g-manage-workers :scroll-container="scrollContainer?.$el" />
+          <g-manage-workers expand-by-default />
         </v-card-text>
       </v-card>
       <v-card
