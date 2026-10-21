@@ -39,7 +39,7 @@ class SyncManager {
       const start = Date.now()
       await this.#load()
       const end = Date.now()
-      logger.info(`GitHub issues and comments successfully synchronized within ${end-start}ms`)
+      logger.info(`GitHub issues and comments successfully synchronized within ${end - start}ms`)
       this.ready = true
     } catch (err) {
       logger.error('Failed to load open GitHub issues and comments: %s', err.message)
