@@ -40,10 +40,10 @@ export function buildConverterOptions ({ apiUrl, org, repository } = {}) {
 
 export const converter = createConverter(buildConverterOptions(config.gitHub ?? {}))
 
-export function fromIssue (issue) {
+export async function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
   const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
-  const body = converter.makeSanitizedHtml(issue.body)
+  const body = await converter.makeSanitizedHtml(issue.body)
   return {
     kind: 'issue',
     metadata: _
@@ -124,7 +124,7 @@ export async function loadOpenIssues (...args) {
   const ticketCache = cache.getTicketCache()
   const updatedTickets = []
   for (const issue of issues) {
-    const updated = ticketCache.addOrUpdateIssue({ issue, mapFn: fromIssue })
+    const updated = await ticketCache.addOrUpdateIssue({ issue, mapFn: fromIssue })
     if (updated) {
       updatedTickets.push(ticketCache.getIssue(issue.number))
     }
@@ -153,7 +153,7 @@ export async function loadIssueComments ({ number }) {
   const comments = await getIssueComments({ number })
   const ticketCache = cache.getTicketCache()
   for (const comment of comments) {
-    ticketCache.addOrUpdateComment({ issueNumber: number, comment })
+    await ticketCache.addOrUpdateComment({ issueNumber: number, comment })
   }
 
   const deletedComments = _.differenceBy(ticketCache.getCommentsForIssue({ issueNumber: number }), comments, 'metadata.id')

@@ -5,7 +5,7 @@ exports[`api > tickets > should fetch only member project issues for all namespa
   "issues": [
     {
       "data": {
-        "body": {},
+        "body": "<p>The first bug</p>",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/1",
         "labels": [
@@ -34,7 +34,7 @@ exports[`api > tickets > should fetch only member project issues for all namespa
     },
     {
       "data": {
-        "body": {},
+        "body": "<p>The second bug</p>",
         "comments": 1,
         "html_url": "https://github.com/gardener/ticket-dev/issues/2",
         "labels": [
@@ -91,7 +91,7 @@ exports[`api > tickets > should fetch open issues and comments for shoot cluster
   "issues": [
     {
       "data": {
-        "body": {},
+        "body": "<p>The second bug</p>",
         "comments": 1,
         "html_url": "https://github.com/gardener/ticket-dev/issues/2",
         "labels": [
@@ -127,7 +127,7 @@ exports[`api > tickets > should fetch open issues for all namespaces when user c
   "issues": [
     {
       "data": {
-        "body": {},
+        "body": "<p>The first bug</p>",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/1",
         "labels": [
@@ -156,7 +156,7 @@ exports[`api > tickets > should fetch open issues for all namespaces when user c
     },
     {
       "data": {
-        "body": {},
+        "body": "<p>The second bug</p>",
         "comments": 1,
         "html_url": "https://github.com/gardener/ticket-dev/issues/2",
         "labels": [
@@ -192,7 +192,7 @@ exports[`api > tickets > should fetch open issues for namespace foo 1`] = `
   "issues": [
     {
       "data": {
-        "body": {},
+        "body": "<p>The first bug</p>",
         "comments": 0,
         "html_url": "https://github.com/gardener/ticket-dev/issues/1",
         "labels": [

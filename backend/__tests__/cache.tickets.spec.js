@@ -55,15 +55,15 @@ describe('cache', function () {
     let emitter
     let emitSpy
 
-    beforeEach(function () {
+    beforeEach(async function () {
       cache = createTicketCache()
       emitter = cache.emitter
       emitSpy = vi.spyOn(emitter, 'emit')
       for (const issue of allIssues) {
-        cache.addOrUpdateIssue({ issue })
+        await cache.addOrUpdateIssue({ issue })
       }
 
-      cache.addOrUpdateComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
+      await cache.addOrUpdateComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
       assert.strictEqual(emitSpy.mock.calls.length, 4)
       emitSpy.mockClear()
     })
@@ -103,14 +103,14 @@ describe('cache', function () {
     })
 
     describe('#addOrUpdateIssue', function () {
-      it('should update the first issue', function () {
+      it('should update the first issue', async function () {
         const newTimestamp = timestamp(+60)
         const issue = chain(firstIssue)
           .cloneDeep()
           .set(['metadata', 'updated_at'], newTimestamp)
           .set(['updated_at'], newTimestamp)
           .value()
-        cache.addOrUpdateIssue({ issue })
+        await cache.addOrUpdateIssue({ issue })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['issue', {
           kind: 'issue',
@@ -119,14 +119,14 @@ describe('cache', function () {
         }])
       })
 
-      it('should not update the first issue', function () {
+      it('should not update the first issue', async function () {
         const oldTimestamp = timestamp(-60)
         const issue = chain(firstIssue)
           .cloneDeep()
           .set(['metadata', 'updated_at'], oldTimestamp)
           .set(['updated_at'], oldTimestamp)
           .value()
-        cache.addOrUpdateIssue({ issue })
+        await cache.addOrUpdateIssue({ issue })
         expect(emitSpy).not.toHaveBeenCalled()
       })
     })
@@ -149,13 +149,13 @@ describe('cache', function () {
     })
 
     describe('#addOrUpdateComment', function () {
-      it('should update the first comment', function () {
+      it('should update the first comment', async function () {
         const comment = chain(firstComment)
           .cloneDeep()
           .set(['metadata', 'updated_at'], timestamp(+60))
           .value()
         const issueNumber = comment.metadata.number
-        cache.addOrUpdateComment({ issueNumber, comment })
+        await cache.addOrUpdateComment({ issueNumber, comment })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
@@ -164,13 +164,13 @@ describe('cache', function () {
         }])
       })
 
-      it('should not update the first comment', function () {
+      it('should not update the first comment', async function () {
         const comment = chain(firstComment)
           .cloneDeep()
           .set(['metadata', 'updated_at'], timestamp(-60))
           .value()
         const issueNumber = comment.metadata.number
-        cache.addOrUpdateComment({ issueNumber, comment })
+        await cache.addOrUpdateComment({ issueNumber, comment })
         expect(emitSpy).not.toHaveBeenCalled()
       })
     })
@@ -213,7 +213,7 @@ describe('cache', function () {
         expect(result).toEqual([secondIssue])
       })
 
-      it('should update index when issue is updated with new shoot', function () {
+      it('should update index when issue is updated with new shoot', async function () {
         const newTimestamp = new Date(Date.now() + 60000).toISOString()
         const updatedIssue = {
           number: 1,
@@ -225,7 +225,7 @@ describe('cache', function () {
             projectName: 'test',
           },
         }
-        cache.addOrUpdateIssue({ issue: updatedIssue })
+        await cache.addOrUpdateIssue({ issue: updatedIssue })
         expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toEqual([secondIssue])
         expect(cache.getIssuesForShoot({ projectName: 'test', name: 'bar' })).toEqual([thirdIssue, updatedIssue])
       })
