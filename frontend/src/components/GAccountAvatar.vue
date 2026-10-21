@@ -12,11 +12,21 @@ SPDX-License-Identifier: Apache-2.0
       :alt="`avatar of ${accountName}`"
       class="mr-1"
     />
-    <a
-      v-if="mailTo && isAccountNameEmail"
-      :href="`mailto:${accountName}`"
-      class="text-anchor"
-    >{{ accountName }}</a>
+    <g-auto-hide
+      v-if="accountName && copyable && isAccountNameEmail"
+      right
+      class="account-name-copy"
+    >
+      <template #activator>
+        <span>{{ accountName }}</span>
+      </template>
+      <g-copy-btn
+        :clipboard-text="accountName"
+        density="compact"
+        :icon-size-px="16"
+        tooltip-text="Copy email address to clipboard"
+      />
+    </g-auto-hide>
     <span v-else-if="accountName">{{ accountName }}</span>
     <span
       v-else
@@ -31,7 +41,9 @@ import {
   toRefs,
 } from 'vue'
 
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GAvatar from '@/components/GAvatar.vue'
+import GAutoHide from '@/components/GAutoHide.vue'
 
 import { isEmail } from '@/utils'
 
@@ -40,9 +52,9 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  mailTo: {
+  copyable: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   size: {
     type: Number,
@@ -56,3 +68,9 @@ const isAccountNameEmail = computed(() => {
   return isEmail(accountName.value)
 })
 </script>
+
+<style lang="scss" scoped>
+.account-name-copy :deep(.copy-button) {
+  height: 0;
+}
+</style>

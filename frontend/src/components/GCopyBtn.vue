@@ -5,12 +5,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="copy-button d-flex align-center justify-center">
+  <div
+    class="copy-button d-flex align-center justify-center"
+    :style="iconSizePx != null ? { '--copy-btn-icon-size': iconSizePx + 'px' } : null"
+  >
     <g-action-button
       :icon="icon"
       :color="btnColor"
       :loading="loading"
       :tooltip="tooltipText"
+      :density="density"
       @click="copyText"
     />
     <v-snackbar
@@ -60,6 +64,12 @@ const props = defineProps({
   },
   loading: {
     type: Boolean,
+  },
+  density: {
+    type: String,
+  },
+  iconSizePx: {
+    type: Number,
   },
 })
 
@@ -119,7 +129,7 @@ const copyText = async () => {
 <style lang="scss" scoped>
 .copy-button {
   :deep(.v-icon) {
-    font-size: 18px;
+    font-size: var(--copy-btn-icon-size, 18px);
   }
 }
 </style>

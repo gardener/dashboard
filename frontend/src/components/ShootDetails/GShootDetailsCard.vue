@@ -114,9 +114,16 @@ SPDX-License-Identifier: Apache-2.0
         <g-list-item-content label="Created by">
           <g-account-avatar
             :account-name="shootCreatedBy"
-            mail-to
+            :copyable="false"
           />
         </g-list-item-content>
+        <template #append>
+          <g-copy-btn
+            v-if="isEmail(shootCreatedBy)"
+            :clipboard-text="shootCreatedBy"
+            tooltip-text="Copy email address to clipboard"
+          />
+        </template>
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Created at">
@@ -258,6 +265,7 @@ import {
   getTimeStringTo,
   shootAddonList,
   transformHtml,
+  isEmail,
 } from '@/utils'
 
 import map from 'lodash/map'

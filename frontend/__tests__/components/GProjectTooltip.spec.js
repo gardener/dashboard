@@ -46,8 +46,8 @@ describe('components', () => {
               template: '<div class="detail-tooltip" :data-activator="activator"><slot name="activator" :props="{ \'data-tooltip-activator\': \'true\' }" /><slot /><slot name="footer" /></div>',
             },
             GAccountAvatar: {
-              props: ['accountName'],
-              template: '<span class="account-avatar">{{ accountName }}</span>',
+              props: ['accountName', 'copyable'],
+              template: '<span class="account-avatar" :data-copyable="copyable">{{ accountName }}</span>',
             },
             GTimeString: {
               template: '<span class="time-string" />',
@@ -70,6 +70,8 @@ describe('components', () => {
       expect(wrapper.find('.project-details').text()).toContain('Ownerowner@example.com')
       expect(wrapper.find('.project-details').text()).toContain('Purposeevaluation')
       expect(wrapper.find('.project-metadata').text()).toContain('Created bycreator@example.com')
+      expect(wrapper.findAll('.account-avatar')).toHaveLength(2)
+      expect(wrapper.findAll('.account-avatar').every(avatar => avatar.attributes('data-copyable') === 'false')).toBe(true)
       expect(wrapper.find('.time-string').exists()).toBe(true)
     })
 

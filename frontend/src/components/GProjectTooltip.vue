@@ -55,6 +55,7 @@ SPDX-License-Identifier: Apache-2.0
         <dd>
           <g-account-avatar
             :account-name="projectOwner"
+            :copyable="false"
           />
         </dd>
       </div>
@@ -73,6 +74,7 @@ SPDX-License-Identifier: Apache-2.0
           <dd>
             <g-account-avatar
               :account-name="projectCreatedBy"
+              :copyable="false"
               :size="20"
             />
           </dd>

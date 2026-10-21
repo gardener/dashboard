@@ -176,9 +176,16 @@ SPDX-License-Identifier: Apache-2.0
                   <div class="text-body-large">
                     <g-account-avatar
                       :account-name="createdBy"
-                      mail-to
+                      :copyable="false"
                     />
                   </div>
+                  <template #append>
+                    <g-copy-btn
+                      v-if="isEmail(createdBy)"
+                      :clipboard-text="createdBy"
+                      tooltip-text="Copy email address to clipboard"
+                    />
+                  </template>
                 </g-list-item>
                 <g-list-item>
                   <template #prepend>
@@ -546,6 +553,7 @@ import { withMessage } from '@/utils/validators'
 import {
   transformHtml,
   isServiceAccountUsername,
+  isEmail,
   getDateFormatted,
 } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'

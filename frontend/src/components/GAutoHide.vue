@@ -33,7 +33,8 @@ export default {
 
 <style lang="scss" scoped>
   .auto-hide-wrapper {
-    &:hover {
+    &:hover,
+    &:focus-within {
       .auto-hide-slot {
         opacity: 1;
         &:after {
