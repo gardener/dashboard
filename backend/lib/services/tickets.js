@@ -40,10 +40,10 @@ export function buildConverterOptions ({ apiUrl, org, repository } = {}) {
 
 export const converter = createConverter(buildConverterOptions(config.gitHub ?? {}))
 
-export async function fromIssue (issue) {
+export function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
   const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
-  const body = await converter.makeSanitizedHtml(issue.body)
+  const body = converter.makeSanitizedHtml(issue.body)
   return {
     kind: 'issue',
     metadata: _
@@ -116,7 +116,7 @@ export async function getOpenIssues ({ name, projectName } = {}) {
     title = `[${projectName}/${name}]`
   }
   const githubIssues = await searchIssues({ state: 'open', title })
-  return Promise.all(_.map(githubIssues || [], fromIssue))
+  return Promise.all(githubIssues || [])
 }
 
 export async function loadOpenIssues (...args) {
@@ -124,13 +124,13 @@ export async function loadOpenIssues (...args) {
   const ticketCache = cache.getTicketCache()
   const updatedTickets = []
   for (const issue of issues) {
-    const updated = ticketCache.addOrUpdateIssue({ issue })
+    const updated = ticketCache.addOrUpdateIssue({ issue, mapFn: fromIssue })
     if (updated) {
-      updatedTickets.push(issue)
+      updatedTickets.push(ticketCache.getIssue(issue.number))
     }
   }
 
-  const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, 'metadata.number')
+  const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, (issue) => issue.metadata ? issue.metadata.number : issue.number)
   for (const issue of deletedIssues) {
     ticketCache.removeIssue({ issue })
   }
