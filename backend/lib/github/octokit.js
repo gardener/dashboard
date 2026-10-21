@@ -101,11 +101,7 @@ function init (options) {
       timeout,
     },
   }, options)
-  const instance = new Octokit(options)
-  instance.hook.after('request', async (response, options) => {
-    logger.trace('GitHub API response headers:', response.headers)
-  })
-  return instance
+  return new Octokit(options)
 }
 
 export default init
