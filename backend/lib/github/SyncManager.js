@@ -36,8 +36,10 @@ class SyncManager {
     clearTimeout(this.#idleSyncTimeoutId)
     try {
       logger.debug('Starting synchronization of GitHub issues and comments')
+      const start = Date.now()
       await this.#load()
-      logger.info('GitHub issues and comments successfully synchronized')
+      const end = Date.now()
+      logger.info(`GitHub issues and comments successfully synchronized within ${end - start}ms`)
       this.ready = true
     } catch (err) {
       logger.error('Failed to load open GitHub issues and comments: %s', err.message)
