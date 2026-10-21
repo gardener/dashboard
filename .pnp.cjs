@@ -1045,7 +1045,7 @@ const RAW_RUNTIME_STATE =
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:8.3.0"],\
           ["http-errors", "npm:2.0.1"],\
-          ["jose", "npm:6.2.12"],\
+          ["jose", "npm:6.2.13"],\
           ["js-yaml", "npm:5.4.3"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
@@ -1054,7 +1054,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.0-next.1"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:6.8.5"],\
+          ["openid-client", "npm:6.8.8"],\
           ["p-event", "npm:7.1.0"],\
           ["p-limit", "npm:7.3.3"],\
           ["p-retry", "npm:8.0.1"],\
@@ -8028,10 +8028,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:6.2.12", {\
-        "packageLocation": "./.yarn/cache/jose-npm-6.2.12-f072c26995-e8582b946f.zip/node_modules/jose/",\
+      ["npm:6.2.13", {\
+        "packageLocation": "./.yarn/cache/jose-npm-6.2.13-401e7cef3d-a7a175057f.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:6.2.12"]\
+          ["jose", "npm:6.2.13"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9559,10 +9559,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["oauth4webapi", [\
-      ["npm:3.8.7", {\
-        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.8.7-afa7ce0150-7e581e2457.zip/node_modules/oauth4webapi/",\
+      ["npm:3.8.8", {\
+        "packageLocation": "./.yarn/cache/oauth4webapi-npm-3.8.8-327c266d72-1f7d35ba8d.zip/node_modules/oauth4webapi/",\
         "packageDependencies": [\
-          ["oauth4webapi", "npm:3.8.7"]\
+          ["oauth4webapi", "npm:3.8.8"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9657,12 +9657,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:6.8.5", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-6.8.5-914a70dc33-287ddd9188.zip/node_modules/openid-client/",\
+      ["npm:6.8.8", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-6.8.8-5129be0d2e-b1d60ca456.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["jose", "npm:6.2.12"],\
-          ["oauth4webapi", "npm:3.8.7"],\
-          ["openid-client", "npm:6.8.5"]\
+          ["jose", "npm:6.2.13"],\
+          ["oauth4webapi", "npm:3.8.8"],\
+          ["openid-client", "npm:6.8.8"]\
         ],\
         "linkType": "HARD"\
       }]\
