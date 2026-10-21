@@ -44,9 +44,7 @@ SPDX-License-Identifier: Apache-2.0
           value="overview"
         >
           <v-card-text>
-            <g-manage-workers
-              :disable-worker-animation="disableWorkerAnimation"
-            />
+            <g-manage-workers />
           </v-card-text>
         </v-window-item>
         <v-window-item value="yaml">
@@ -158,7 +156,6 @@ export default {
     const open = ref(false)
     const overviewTabHeight = ref(0)
     const componentKey = ref(uuidv4())
-    const disableWorkerAnimation = ref(false)
     const newZonesAlert = ref(true)
 
     const newZoneNetworks = computed(() => {
@@ -229,7 +226,6 @@ export default {
       lazyTab,
       overviewTabHeight,
       componentKey,
-      disableWorkerAnimation,
       newZonesAlert,
       newZonesYaml,
       editorData,
@@ -249,17 +245,12 @@ export default {
           case 'overview': {
             this.touched = false
             this.editorData = this.getEditorValue()
-            setTimeout(() => {
-              // enable worker group animations after tab navigation animation completed
-              this.disableWorkerAnimation = false
-            }, 1500)
             break
           }
           case 'yaml': {
             // set current height as min-height for yaml tab to avoid
             // dialog downsize as editor not yet rendered
             this.overviewTabHeight = this.$refs.overviewTab.$el.getBoundingClientRect().height
-            this.disableWorkerAnimation = true
             this.refreshEditor()
             break
           }
