@@ -89,7 +89,7 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^5.0.0",
     "@vitest/eslint-plugin": "^1.6.15",
-    "@vitest/ui": "^5.0.0",
+    "@vitest/ui": "^5.0.5",
     "@vue/test-utils": "^2.4.5",
     "eslint": "^10.0.0",
     "eslint-plugin-import-newlines": "^2.0.0",
