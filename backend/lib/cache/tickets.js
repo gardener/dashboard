@@ -82,22 +82,22 @@ function init () {
     return commentsForIssues.get(issueNumber)
   }
 
-  function addOrUpdateIssue ({ issue, mapFn }) {
+  async function addOrUpdateIssue ({ issue, mapFn }) {
     const number = issue.number
     const oldIssue = issues.get(number)
     if (oldIssue) {
       removeFromShootIndex(oldIssue)
     }
-    const updated = updateIfNewer('issue', issues, issue, mapFn)
+    const updated = await updateIfNewer('issue', issues, issue, mapFn)
     // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
     addToShootIndex(issues.get(number))
 
     return updated
   }
 
-  function addOrUpdateComment ({ issueNumber, comment }) {
+  async function addOrUpdateComment ({ issueNumber, comment }) {
     const comments = getCommentsForIssueCache({ issueNumber })
-    updateIfNewer('comment', comments, comment)
+    await updateIfNewer('comment', comments, comment)
   }
 
   function removeIssue ({ issue }) {
@@ -158,7 +158,7 @@ function init () {
     }
   }
 
-  function updateIfNewer (kind, cachedMap, item, mapFn) {
+  async function updateIfNewer (kind, cachedMap, item, mapFn) {
     let updated = false
     const identifier = kind === 'issue'
       ? item.number
@@ -166,7 +166,7 @@ function init () {
     const cachedItem = cachedMap.get(identifier)
     if (cachedItem) {
       if (isCachedItemOlder(kind, cachedItem, item)) {
-        const updatedItem = mapFn ? mapFn(item) : item
+        const updatedItem = mapFn ? await mapFn(item) : item
         if (!_.isEqual(cachedItem, updatedItem)) {
           logger.trace('updating', kind, identifier)
           cachedMap.set(identifier, updatedItem)
@@ -178,7 +178,7 @@ function init () {
       }
     } else {
       logger.trace('adding new', kind, identifier)
-      const updatedItem = mapFn ? mapFn(item) : item
+      const updatedItem = mapFn ? await mapFn(item) : item
       cachedMap.set(identifier, updatedItem)
       updated = true
       emitAdded(kind, updatedItem)
