@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Worker Nodes">
-          <template v-if="(podsCidr?.length || podsCidrSpec) && defaultNodeCIDRMaskSize">
+          <template v-if="hasIpv4 && (podsCidr?.length || podsCidrSpec) && defaultNodeCIDRMaskSize">
             <span v-if="maxNodeCount > 65536">2<sup>{{ Math.log2(maxNodeCount) }}</sup></span>
             <span v-else>{{ maxNodeCount }}</span>
           </template>
@@ -143,7 +143,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <g-list-item>
         <g-list-item-content label="Max Pods per Worker Node">
-          <template v-if="defaultNodeCIDRMaskSize">
+          <template v-if="hasIpv4 && defaultNodeCIDRMaskSize">
             <span v-if="maxPodsPerNodeCount > 65536">2<sup>{{ Math.log2(maxPodsPerNodeCount) }}</sup></span>
             <span v-else>{{ maxPodsPerNodeCount }}</span>
           </template>

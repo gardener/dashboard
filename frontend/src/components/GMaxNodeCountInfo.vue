@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-large text-grey-darken-1 mb-4">
           Max Worker Nodes
         </div>
-        <div v-if="getNodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
+        <div v-if="hasIpv4 && nodeCIDRMaskSize && podsCidrPrefix && nodesCidrCidrPrefix">
           <ul>
             <li>Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize{{ !nodeCIDRMaskSize ? 'IPv6' : '' }}</span>) is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> mask size.</li>
             <li>Your Pod network (<span class="font-family-monospace">.spec.networking.pods</span>) is configured with a <span class="font-family-monospace">/{{ podsCidrPrefix }}</span> mask size, allowing for  <span class="font-family-monospace">2<sup>({{ getNodeCIDRMaskSize }}-{{ podsCidrPrefix }})</sup> = 2<sup>{{ getNodeCIDRMaskSize - podsCidrPrefix }}</sup> = {{ maxNodeCount }}</span> Nodes.</li>
@@ -32,18 +32,23 @@ SPDX-License-Identifier: Apache-2.0
           </ul>
         </div>
         <div v-else>
-          The calculation is not possible because following values are missing:
-          <ul>
-            <li v-if="!getNodeCIDRMaskSize">
-              Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span> or <span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSizeIPv6</span>)
-            </li>
-            <li v-if="!podsCidrPrefix">
-              Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)
-            </li>
-            <li v-if="!nodesCidrCidrPrefix">
-              Node network (<span class="font-family-monospace">.spec.networking.nodes</span>)
-            </li>
-          </ul>
+          <div v-if="hasIpv4">
+            The calculation is not possible because following values are missing:
+            <ul>
+              <li v-if="!nodeCIDRMaskSize">
+                Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
+              </li>
+              <li v-if="!podsCidrPrefix">
+                Pod network (<span class="font-family-monospace">.spec.networking.pods</span>)
+              </li>
+              <li v-if="!nodesCidrCidrPrefix">
+                Node network (<span class="font-family-monospace">.spec.networking.nodes</span>)
+              </li>
+            </ul>
+          </div>
+          <div>
+            The calculation is only possible for IPv4
+          </div>
         </div>
         <br>
         <div>
@@ -85,12 +90,11 @@ const {
   nodesCidr,
   nodesCidrSpec,
   nodeCIDRMaskSize,
-  nodeCIDRMaskSizeIPv6,
   hasIpv4,
 } = useShootItem()
 
 const getNodeCIDRMaskSize = computed(() => {
-  return nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value
+  return nodeCIDRMaskSize.value
 })
 
 const podsCidrPrefix = computed(() => {
@@ -122,7 +126,7 @@ const maxNodeIps = computed(() => {
 })
 
 const maxNodeCount = computed(() => {
-  return Math.pow(2, (nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value) - podsCidrPrefix.value)
+  return Math.pow(2, (nodeCIDRMaskSize.value) - podsCidrPrefix.value)
 })
 
 </script>

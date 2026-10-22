@@ -24,12 +24,12 @@ SPDX-License-Identifier: Apache-2.0
         <div class="text-title-large text-grey-darken-1 mb-4">
           Max Pods per Node
         </div>
-        <p v-if="getNodeCIDRMaskSize">
-          Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize{{ !nodeCIDRMaskSize ? 'IPv6' : '' }}</span>)
-          is configured with <span class="font-family-monospace">/{{ getNodeCIDRMaskSize }}</span> allowing for <span class="font-family-monospace">2<sup>{{ ipBitLength - getNodeCIDRMaskSize }}</sup> = {{ maxPodsPerNodeCount }}</span> Pods per Node.
+        <p v-if="nodeCIDRMaskSize && hasIpv4">
+          Your Node CIDR mask size (<span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span>)
+          is configured with <span class="font-family-monospace">/{{ nodeCIDRMaskSize }}</span> allowing for <span class="font-family-monospace">2<sup>{{ ipBitLength - nodeCIDRMaskSize }}</sup> = {{ maxPodsPerNodeCount }}</span> Pods per Node.
         </p>
         <p v-else>
-          The calculation is only possible when <span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span> or <span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSizeIPv6</span> is defined.
+          The calculation is only possible for IPv4 when <span class="font-family-monospace">.spec.kubernetes.kubeControllerManager.nodeCIDRMaskSize</span> is defined.
         </p>
         <p>
           Further information about the shoot networking can be found
@@ -61,20 +61,15 @@ const popover = ref(false)
 
 const {
   nodeCIDRMaskSize,
-  nodeCIDRMaskSizeIPv6,
   hasIpv4,
 } = useShootItem()
-
-const getNodeCIDRMaskSize = computed(() => {
-  return nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value
-})
 
 const ipBitLength = computed(() => {
   return hasIpv4.value ? 32 : 128
 })
 
 const maxPodsPerNodeCount = computed(() => {
-  return Math.pow(2, ipBitLength.value - (nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value))
+  return Math.pow(2, ipBitLength.value - (nodeCIDRMaskSize.value))
 })
 </script>
 
