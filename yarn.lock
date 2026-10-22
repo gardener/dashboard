@@ -774,7 +774,7 @@ __metadata:
     undici: "npm:^8.0.0"
     unified: "npm:^11.0.5"
     uuid: "npm:^14.0.0"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -792,7 +792,7 @@ __metadata:
     js-yaml: "npm:^5.0.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -867,7 +867,7 @@ __metadata:
     unplugin-fonts: "npm:^2.0.0"
     url-template: "npm:^3.1.1"
     uuid: "npm:^14.0.0"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vite-plugin-compression: "npm:^0.5.1"
     vite-plugin-vuetify: "npm:^2.1.3"
     vitest: "npm:^5.0.0"
@@ -900,7 +900,7 @@ __metadata:
     mixwith: "npm:^0.1.1"
     neostandard: "npm:0.14.0-next.1"
     uuid: "npm:^14.0.0"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   peerDependencies:
     "@gardener-dashboard/kube-config": "workspace:^"
@@ -925,7 +925,7 @@ __metadata:
     js-yaml: "npm:^5.0.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -942,7 +942,7 @@ __metadata:
     eslint-plugin-lodash: "npm:^8.0.0"
     eslint-plugin-security: "npm:^4.0.0"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -965,7 +965,7 @@ __metadata:
     prom-client: "npm:^15.1.0"
     response-time: "npm:^2.3.2"
     supertest: "npm:^7.0.0"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
@@ -985,7 +985,7 @@ __metadata:
     eslint-plugin-lodash: "npm:^8.0.0"
     eslint-plugin-security: "npm:^4.0.0"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
@@ -1007,7 +1007,7 @@ __metadata:
     http-errors: "npm:^2.0.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   peerDependencies:
     "@gardener-dashboard/logger": "workspace:^"
@@ -5096,7 +5096,7 @@ __metadata:
     jsdom: "npm:^30.0.0"
     lodash-es: "npm:^4.17.21"
     neostandard: "npm:0.14.0-next.1"
-    vite: "npm:^7.0.0"
+    vite: "npm:^7.3.7"
     vitest: "npm:^5.0.0"
   dependenciesMeta:
     deasync:
@@ -9077,9 +9077,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.0.0":
-  version: 7.3.6
-  resolution: "vite@npm:7.3.6"
+"vite@npm:^7.3.7":
+  version: 7.3.7
+  resolution: "vite@npm:7.3.7"
   dependencies:
     esbuild: "npm:^0.27.0 || ^0.28.0"
     fdir: "npm:^6.5.0"
@@ -9128,7 +9128,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/c6d359f84ad362f5c97ff7988b77c90add04162c60cdf6059375a7d9e3217848c53a8cb6b6c48517bef84b6bba4c9bc85319a889b5236acb7d5a2bc8cb7b9a8d
+  checksum: 10c0/6a3f868a33b849383e29c4e39550155563cf0522b5b6504ab60ff5e44dd07ad472ff87a4d5d2c08f1f70cc6602357f95c38d27371b7612d84801cb790f325a7e
   languageName: node
   linkType: hard
 
