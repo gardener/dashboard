@@ -85,10 +85,10 @@ function init () {
   async function addOrUpdateIssue ({ issue, mapFn }) {
     const number = issue.number
     const oldIssue = issues.get(number)
+    const updated = await updateIfNewer('issue', issues, issue, mapFn)
     if (oldIssue) {
       removeFromShootIndex(oldIssue)
     }
-    const updated = await updateIfNewer('issue', issues, issue, mapFn)
     // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
     addToShootIndex(issues.get(number))
 
@@ -167,7 +167,15 @@ function init () {
     if (cachedItem) {
       if (isCachedItemOlder(kind, cachedItem, item)) {
         const updatedItem = mapFn ? await mapFn(item) : item
-        if (!_.isEqual(cachedItem, updatedItem)) {
+        // Re-read the current cached item after the async mapFn call. A concurrent
+        // update for the same identifier may have written a newer version while we
+        // were awaiting mapFn. Without this check the slower, older mapping could
+        // overwrite the already-committed newer update (stale data).
+        const currentCachedItem = cachedMap.get(identifier)
+        if (currentCachedItem && currentCachedItem !== cachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
+          return false
+        }
+        if (!_.isEqual(currentCachedItem, updatedItem)) {
           logger.trace('updating', kind, identifier)
           cachedMap.set(identifier, updatedItem)
           updated = true
@@ -179,6 +187,15 @@ function init () {
     } else {
       logger.trace('adding new', kind, identifier)
       const updatedItem = mapFn ? await mapFn(item) : item
+      // Re-read after the async mapFn call — another concurrent call may have
+      // already inserted this identifier while we were mapping. If the existing
+      // entry is newer or equal, discard this result to preserve the strictly-newer
+      // timestamp rule.
+      const currentCachedItem = cachedMap.get(identifier)
+      if (currentCachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
+        logger.debug(`skipped adding ${kind} with id ${identifier} as a newer update was committed concurrently`)
+        return false
+      }
       cachedMap.set(identifier, updatedItem)
       updated = true
       emitAdded(kind, updatedItem)
