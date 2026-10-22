@@ -48,7 +48,9 @@ SPDX-License-Identifier: Apache-2.0
             <v-expansion-panel
               :value="key"
             >
-              <v-expansion-panel-title>
+              <v-expansion-panel-title
+                :class="{ 'worker-group-title--error': workersValidation[key]?.$errors.length }"
+              >
                 <v-icon
                   size="small"
                   class="mr-2 flex-grow-0 flex-shrink-0"
@@ -56,6 +58,23 @@ SPDX-License-Identifier: Apache-2.0
                   {{ isWorkerExpanded(key) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
                 </v-icon>
                 <span class="text-body-2 font-weight-medium">{{ worker.name }}</span>
+                <v-tooltip
+                  v-if="workersValidation[key]?.$errors.length"
+                  location="top"
+                  max-width="600"
+                  :text="getWorkerValidationMessage(workersValidation[key])"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <v-icon
+                      v-bind="tooltipProps"
+                      data-test="worker-validation-error"
+                      class="ml-2"
+                      color="error"
+                      icon="mdi-alert-circle-outline"
+                      size="small"
+                    />
+                  </template>
+                </v-tooltip>
                 <template v-if="!isWorkerExpanded(key)">
                   <template v-if="workerSummaries[key]?.machineLabel">
                     <span class="mx-2 text-medium-emphasis">/</span>
@@ -144,6 +163,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-expansion-panel-text>
                 <g-worker-input-generic
                   :worker="worker"
+                  :validation="workersValidation[key]"
                 />
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -196,6 +216,9 @@ import GWorkerInputGeneric from '@/components/ShootWorkers/GWorkerInputGeneric'
 import { useKeyedVirtualList } from '@/composables/useKeyedVirtualList'
 import { useShootContext } from '@/composables/useShootContext'
 import { useHeightTransitions } from '@/composables/useHeightTransitions'
+import { useWorkersValidation } from '@/composables/useWorkersValidation'
+
+import { messageFromErrors } from '@/utils/validators'
 
 const props = defineProps({
   expandByDefault: {
@@ -213,6 +236,7 @@ const {
   duplicateProviderWorker,
   removeProviderWorker,
 } = useShootContext()
+const workersValidation = useWorkersValidation()
 
 const workerSummaries = computed(() => {
   const summaries = {}
@@ -287,6 +311,23 @@ const remainingWorkerCount = computed(() =>
 
 function isWorkerExpanded (uid) {
   return expandedWorkerUids.value.has(uid)
+}
+
+function getWorkerValidationMessage (validation) {
+  const localErrors = (validation?.$errors ?? []).map(error => {
+    const fieldName = error.$params.fieldName
+    const prefixEnd = fieldName?.startsWith('[Worker Group')
+      ? fieldName.indexOf('] ')
+      : -1
+    return {
+      ...error,
+      $params: {
+        ...error.$params,
+        fieldName: prefixEnd >= 0 ? fieldName.slice(prefixEnd + 2) : fieldName,
+      },
+    }
+  })
+  return messageFromErrors(localErrors)
 }
 
 function scrollToWorker (uid) {
@@ -425,6 +466,10 @@ onBeforeUnmount(() => {
 
 .worker-group--highlighted :deep(.v-expansion-panel) {
   background-color: rgb(var(--v-theme-accent));
+}
+
+.worker-group-title--error {
+  background-color: rgba(var(--v-theme-error), 0.12);
 }
 
 .worker-actions {
