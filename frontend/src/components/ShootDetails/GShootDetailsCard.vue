@@ -360,7 +360,7 @@ const slaTitle = computed(() => {
   return sla.value.title
 })
 
-const defaultNodeCIDRMaskSize = nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.value
+const defaultNodeCIDRMaskSize = nodeCIDRMaskSize.value
 
 const maxNodeCount = computed(() => {
   const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
