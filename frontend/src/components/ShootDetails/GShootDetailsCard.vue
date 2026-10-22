@@ -319,11 +319,8 @@ import {
   getTimeStringTo,
   shootAddonList,
   transformHtml,
-<<<<<<< HEAD
   isEmail,
-=======
   isIpv4Cidr,
->>>>>>> 8605d604 (Corrected logic when ipv6 and ipv4 is enabled for shoot)
 } from '@/utils'
 
 import map from 'lodash/map'
@@ -346,7 +343,6 @@ const {
   podsCidrSpec,
   hasIpv4,
   nodeCIDRMaskSize,
-  nodeCIDRMaskSizeIPv6,
 } = useShootItem()
 
 const configStore = useConfigStore()
@@ -393,12 +389,12 @@ const defaultNodeCIDRMaskSize = nodeCIDRMaskSize.value || nodeCIDRMaskSizeIPv6.v
 const maxNodeCount = computed(() => {
   const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
   const netmask = new Netmask(cidr)
-  return Math.pow(2, defaultNodeCIDRMaskSize - netmask.bitmask)
+  return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
 })
 
 const maxPodsPerNodeCount = computed(() => {
   const bitLength = hasIpv4.value ? 32 : 128
-  return Math.pow(2, bitLength - defaultNodeCIDRMaskSize)
+  return Math.pow(2, bitLength - nodeCIDRMaskSize.value)
 })
 
 </script>
