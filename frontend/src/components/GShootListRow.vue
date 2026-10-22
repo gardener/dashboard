@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative project-cell"
+      class="position-relative"
     >
       <template v-if="cell.header.key === 'project'">
         <g-project-tooltip :project="project">
@@ -481,8 +481,13 @@ const hasShootWorkerGroupWarning = computed(() => {
     pointer-events: none;
   }
 
-  .project-cell {
+  .width-limited {
     max-width: 200px;
+    overflow: hidden;
+  }
+
+  .width-limited-large {
+    max-width: 300px;
     overflow: hidden;
   }
 
