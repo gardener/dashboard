@@ -117,7 +117,7 @@ export async function getIssues ({ name, projectName } = {}) {
     title = `[${projectName}/${name}]`
   }
   const closedIssuesLookbackDays = config.gitHub.closedIssuesLookbackDays || 0
-  const closedTicketSince = new Date(_.now() - (closedTicketSinceDays * 3600 * 24 * 1000))
+  const closedTicketSince = new Date(_.now() - (closedIssuesLookbackDays * 3600 * 24 * 1000))
 
   const openIssues = await searchIssues({ state: 'open', title })
   const closedIssues = closedIssuesLookbackDays === 0 ? [] : await searchIssues({ state: 'closed', title, since: closedTicketSince.toISOString() })
