@@ -129,6 +129,28 @@ describe('cache', function () {
         await cache.addOrUpdateIssue({ issue })
         expect(emitSpy).not.toHaveBeenCalled()
       })
+
+      it('should update and index an issue without metadata.updated_at', async function () {
+        const newTimestamp = timestamp(+120)
+        const issue = {
+          number: 1,
+          updated_at: newTimestamp,
+          metadata: {
+            number: 1,
+            name: 'foo',
+            projectName: 'test',
+          },
+        }
+        await cache.addOrUpdateIssue({ issue })
+        expect(emitSpy).toHaveBeenCalledTimes(1)
+        expect(emitSpy.mock.calls[0]).toEqual(['issue', {
+          kind: 'issue',
+          type: 'MODIFIED',
+          object: issue,
+        }])
+        expect(cache.getIssue(1)).toBe(issue)
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toContain(issue)
+      })
     })
 
     describe('#removeIssue', function () {
