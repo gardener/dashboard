@@ -52,6 +52,7 @@ export async function fromIssue (issue) {
         'id',
         'created_at',
         'updated_at',
+        'closed_at',
         'number',
         'state',
       ])
@@ -110,17 +111,22 @@ export async function fromComment (number, name, projectName, item) {
   }
 }
 
-export async function getOpenIssues ({ name, projectName } = {}) {
+export async function getIssues ({ name, projectName } = {}) {
   let title
   if (name && projectName) {
     title = `[${projectName}/${name}]`
   }
-  const githubIssues = await searchIssues({ state: 'open', title })
-  return Promise.all(_.map(githubIssues || [], fromIssue))
+  const closedIssuesLookbackDays = config.gitHub.closedIssuesLookbackDays || 0
+  const closedTicketSince = new Date(_.now() - (closedIssuesLookbackDays * 3600 * 24 * 1000))
+
+  const openIssues = await searchIssues({ state: 'open', title })
+  const closedIssues = closedIssuesLookbackDays === 0 ? [] : await searchIssues({ state: 'closed', title, since: closedTicketSince.toISOString() })
+  const issues = openIssues.concat(closedIssues)
+  return Promise.all(_.map(issues, fromIssue))
 }
 
-export async function loadOpenIssues (...args) {
-  const issues = await getOpenIssues(...args)
+export async function loadIssues (...args) {
+  const issues = await getIssues(...args)
   const ticketCache = cache.getTicketCache()
   const updatedTickets = []
   for (const issue of issues) {
@@ -138,7 +144,7 @@ export async function loadOpenIssues (...args) {
   return updatedTickets
 }
 
-export const list = loadOpenIssues
+export const list = loadIssues
 
 export async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
