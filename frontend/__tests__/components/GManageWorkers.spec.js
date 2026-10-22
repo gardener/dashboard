@@ -5,10 +5,12 @@
 //
 
 import {
+  defineComponent,
   nextTick,
   ref,
 } from 'vue'
 import { mount } from '@vue/test-utils'
+import { useVuelidate } from '@vuelidate/core'
 
 import GManageWorkers from '@/components/ShootWorkers/GManageWorkers.vue'
 
@@ -19,6 +21,10 @@ vi.mock('@/components/ShootWorkers/GWorkerInputGeneric', () => ({
     name: 'GWorkerInputGeneric',
     props: {
       worker: {
+        type: Object,
+        required: true,
+      },
+      validation: {
         type: Object,
         required: true,
       },
@@ -71,6 +77,7 @@ describe('components', () => {
       isWorkerless = false,
       expandByDefault = false,
       attachTo,
+      component = GManageWorkers,
     } = {}) {
       providerWorkers = ref(workers)
       workerless = ref(isWorkerless)
@@ -93,7 +100,7 @@ describe('components', () => {
         providerWorkers.value = providerWorkers.value.filter((_, workerIndex) => workerIndex !== index)
       })
 
-      wrapper = mount(GManageWorkers, {
+      wrapper = mount(component, {
         attachTo,
         props: {
           expandByDefault,
@@ -106,7 +113,16 @@ describe('components', () => {
             'shoot-context': {
               providerWorkers,
               workerless,
+              isZonedCluster: ref(true),
+              providerType: ref('aws'),
+              cloudProfile: ref({
+                spec: {
+                  type: 'aws',
+                  volumeTypes: [],
+                },
+              }),
               allMachineTypes: ref(machineTypes),
+              volumeTypes: ref([]),
               machineImages: ref([{
                 name: 'gardenlinux',
                 version: '1592.4.0',
@@ -162,6 +178,73 @@ describe('components', () => {
       expect(wrapper.find('[data-test="worker-input"]').text()).toBe('worker-one')
       expect(wrapper.findAll('button').some(button => button.text() === 'Duplicate')).toBe(true)
       expect(wrapper.findAll('button').some(button => button.text() === 'Remove')).toBe(true)
+    })
+
+    it('keeps collapsed workers in the parent validation tree', async () => {
+      const ValidationHost = defineComponent({
+        components: {
+          GManageWorkers,
+        },
+        setup () {
+          return {
+            v$: useVuelidate(),
+          }
+        },
+        template: '<g-manage-workers />',
+      })
+
+      wrapper.unmount()
+      mountComponent({ component: ValidationHost })
+      await nextTick()
+
+      expect(wrapper.findAll('[data-test="worker-input"]')).toHaveLength(0)
+      await expect(wrapper.vm.v$.$validate()).resolves.toBe(false)
+      expect(wrapper.findAll('[data-test="worker-validation-error"]')).toHaveLength(2)
+    })
+
+    it('shows an error on a collapsed worker when one invalid field was touched', async () => {
+      providerWorkers.value[0].machine.type = ''
+      await nextTick()
+      await expandWorker('worker-one')
+
+      const workerInput = wrapper.getComponent({ name: 'GWorkerInputGeneric' })
+      workerInput.props('validation').machine.type.$touch()
+      await nextTick()
+
+      const expandedTitle = findWorkerGroup('worker-one').find('.v-expansion-panel-title')
+      expect(expandedTitle.classes()).toContain('worker-group-title--error')
+      await expandedTitle.trigger('click')
+      await nextTick()
+
+      const workerGroup = findWorkerGroup('worker-one')
+      expect(workerGroup.find('.v-expansion-panel-title').classes()).toContain('worker-group-title--error')
+      expect(workerGroup.find('[data-test="worker-validation-error"]').exists()).toBe(true)
+      expect(workerGroup.findComponent({ name: 'VTooltip' }).props('text')).toBe(
+        'Machine Type: Value is required',
+      )
+    })
+
+    it('does not validate retained workers in workerless mode', async () => {
+      const ValidationHost = defineComponent({
+        components: {
+          GManageWorkers,
+        },
+        setup () {
+          return {
+            v$: useVuelidate(),
+          }
+        },
+        template: '<g-manage-workers />',
+      })
+
+      wrapper.unmount()
+      mountComponent({
+        component: ValidationHost,
+        isWorkerless: true,
+      })
+      await nextTick()
+
+      await expect(wrapper.vm.v$.$validate()).resolves.toBe(true)
     })
 
     it('expands existing and newly introduced workers by default when requested', async () => {

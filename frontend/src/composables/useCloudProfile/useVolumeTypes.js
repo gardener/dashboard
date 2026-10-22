@@ -9,6 +9,8 @@ import {
   isRef,
 } from 'vue'
 
+import { convertToGi } from '@/utils'
+
 import { useRegions } from './useRegions.js'
 
 import get from 'lodash/get'
@@ -17,6 +19,26 @@ import includes from 'lodash/includes'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import intersection from 'lodash/intersection'
+
+export function getWorkerMinimumVolumeSizeGi (worker, machineTypes, volumeTypes) {
+  const machineType = find(machineTypes, machineType => {
+    return machineType.name === worker.machine?.type &&
+      machineType.architecture === worker.machine?.architecture
+  }) ?? find(machineTypes, ['name', worker.machine?.type])
+  const volumeType = find(volumeTypes, ['name', worker.volume?.type])
+  const minimumVolumeSize = volumeType?.name
+    ? volumeType.minSize ?? '0Gi'
+    : machineType?.storage?.minSize ?? '0Gi'
+  const minimumVolumeSizeGi = convertToGi(minimumVolumeSize)
+  const defaultVolumeSizeGi = machineType?.storage?.size
+    ? convertToGi(machineType.storage.size)
+    : undefined
+
+  if (defaultVolumeSizeGi > 0 && defaultVolumeSizeGi < minimumVolumeSizeGi) {
+    return defaultVolumeSizeGi
+  }
+  return minimumVolumeSizeGi
+}
 
 /**
  * Composable for cloud profile volume type management

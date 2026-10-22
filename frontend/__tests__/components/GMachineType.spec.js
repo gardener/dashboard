@@ -50,9 +50,14 @@ describe('components', () => {
     }
 
     it('should filter machine types and select a different one', async () => {
+      const validation = {
+        $errors: [],
+        $touch: vi.fn(),
+      }
       const wrapper = mountMachineType({
         modelValue: 'foo',
         machineTypes,
+        validation,
       })
       const autocompleteWrapper = wrapper.findComponent({
         ref: 'autocomplete',
@@ -72,24 +77,21 @@ describe('components', () => {
       expect(wrapper.vm.notInList).toBe(false)
       expect(getFilteredItems()).toEqual(['foo', 'bar'])
       expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo']])
-      expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue('256Gi')
       expect(getFilteredItems()).toEqual(['bar'])
       expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi']])
-      expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue('bar')
       expect(getFilteredItems()).toEqual(['bar'])
       expect(autocompleteWrapper.emitted('update:search')).toEqual([['foo'], ['256Gi'], ['bar']])
-      expect(wrapper.vm.v$.$invalid).toBe(false)
 
       await setInputValue(null)
       autocompleteWrapper.vm.isFocused = false
       await autocompleteWrapper.vm.$nextTick()
       expect(getFilteredItems()).toEqual(['foo', 'bar'])
-      expect(wrapper.vm.v$.$invalid).toBe(true)
-      expect(wrapper.vm.v$.internalValue.required.$message).toBe('Value is required')
+      expect(wrapper.vm.internalValue).toBe('')
+      expect(validation.$touch).toHaveBeenCalled()
     })
   })
 })

@@ -12,13 +12,13 @@ SPDX-License-Identifier: Apache-2.0
     :items="machineImageItems"
     item-value="key"
     return-object
-    :error-messages="getErrorMessages(v$.worker.machine.image)"
+    :error-messages="getErrorMessages(validation)"
     label="Machine Image"
     :hint="hint"
     persistent-hint
     variant="underlined"
     @update:model-value="onInputMachineImage"
-    @blur="v$.worker.machine.image.$touch()"
+    @blur="validation.$touch()"
   >
     <template #item="{ props, item }">
       <v-list-item
@@ -47,9 +47,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { required } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
-
 import GVendorIcon from '@/components/GVendorIcon'
 import GMultiMessage from '@/components/GMultiMessage'
 
@@ -58,7 +55,6 @@ import {
   machineImageHasUpdateForAutoUpdateStrategy,
   transformHtml,
 } from '@/utils'
-import { withFieldName } from '@/utils/validators'
 
 import join from 'lodash/join'
 import find from 'lodash/find'
@@ -81,18 +77,14 @@ export default {
     autoUpdate: {
       type: Boolean,
     },
-    fieldName: {
-      type: String,
+    validation: {
+      type: Object,
+      required: true,
     },
   },
   emits: [
     'updateMachineImage',
   ],
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   computed: {
     machineImageItems () {
       const machineImages = [...this.machineImages]
@@ -171,23 +163,12 @@ export default {
       return machineImageHasUpdateForAutoUpdateStrategy(this.machineImage, this.machineImages)
     },
   },
-  validations () {
-    return {
-      worker: {
-        machine: {
-          image: withFieldName(() => this.fieldName, {
-            required,
-          }),
-        },
-      },
-    }
-  },
   mounted () {
-    this.v$.$touch()
+    this.validation.$touch()
   },
   methods: {
     onInputMachineImage () {
-      this.v$.worker.machine.image.$touch()
+      this.validation.$touch()
       this.$emit('updateMachineImage', this.worker.machine.image)
     },
     itemDescription (machineImage) {

@@ -16,13 +16,13 @@ SPDX-License-Identifier: Apache-2.0
       color="primary"
       item-color="primary"
       :items="criItems"
-      :error-messages="getErrorMessages(v$.criName)"
+      :error-messages="getErrorMessages(validation)"
       label="Container Runtime"
       :hint="hint"
       persistent-hint
       variant="underlined"
       @update:model-value="onInputCriName"
-      @blur="v$.criName.$touch()"
+      @blur="validation.$touch()"
     />
     <v-select
       v-if="criContainerRuntimeTypes.length"
@@ -43,11 +43,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { required } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
-
 import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
 
 import find from 'lodash/find'
 import map from 'lodash/map'
@@ -71,21 +67,10 @@ export default {
       type: String,
       required: true,
     },
-    fieldName: {
-      type: String,
+    validation: {
+      type: Object,
+      required: true,
     },
-  },
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
-  validations () {
-    return {
-      criName: withFieldName(() => this.fieldName, {
-        required,
-      }),
-    }
   },
   computed: {
     validCriNames () {
@@ -154,16 +139,16 @@ export default {
   },
   watch: {
     criItems (criItems) {
-      this.v$.$touch()
+      this.validation.$touch()
     },
   },
   mounted () {
-    this.v$.$touch()
+    this.validation.$touch()
   },
   methods: {
     onInputCriName (value) {
       this.selectedCriContainerRuntimeTypes = undefined
-      this.v$.criName.$touch()
+      this.validation.$touch()
     },
     getErrorMessages,
   },
