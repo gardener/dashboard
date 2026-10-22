@@ -141,15 +141,37 @@ describe('cache', function () {
             projectName: 'test',
           },
         }
-        await cache.addOrUpdateIssue({ issue })
+        const mapFn = async (item) => ({
+          ...item,
+          metadata: {
+            ...item.metadata,
+            updated_at: item.updated_at,
+          },
+        })
+        await cache.addOrUpdateIssue({ issue, mapFn })
+        expect(emitSpy).toHaveBeenCalledTimes(1)
+        const mappedIssue = emitSpy.mock.calls[0][1].object
+        expect(emitSpy.mock.calls[0]).toEqual(['issue', {
+          kind: 'issue',
+          type: 'MODIFIED',
+          object: mappedIssue,
+        }])
+        expect(mappedIssue.metadata.updated_at).toBe(newTimestamp)
+        expect(cache.getIssue(1)).toBe(mappedIssue)
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toContain(mappedIssue)
+
+        // A subsequent newer update must still succeed
+        emitSpy.mockClear()
+        const newerTimestamp = timestamp(+180)
+        const newerIssue = createIssue({ number: 1, updatedAt: newerTimestamp })
+        await cache.addOrUpdateIssue({ issue: newerIssue })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['issue', {
           kind: 'issue',
           type: 'MODIFIED',
-          object: issue,
+          object: newerIssue,
         }])
-        expect(cache.getIssue(1)).toBe(issue)
-        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toContain(issue)
+        expect(cache.getIssue(1)).toBe(newerIssue)
       })
     })
 
