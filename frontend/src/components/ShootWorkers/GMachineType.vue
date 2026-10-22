@@ -16,13 +16,13 @@ SPDX-License-Identifier: Apache-2.0
     item-title="name"
     item-value="name"
     :search="search"
-    :error-messages="getErrorMessages(v$.internalValue)"
+    :error-messages="getErrorMessages(validation)"
     :custom-filter="customFilter"
     label="Machine Type"
     :hint="hint"
     persistent-hint
     variant="underlined"
-    @blur="v$.internalValue.$touch()"
+    @blur="validation.$touch()"
   >
     <template #item="{ item, props }">
       <v-list-item v-bind="props">
@@ -38,11 +38,7 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { required } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
-
 import { getErrorMessages } from '@/utils'
-import { withFieldName } from '@/utils/validators'
 
 import find from 'lodash/find'
 
@@ -56,18 +52,14 @@ export default {
       type: Array,
       default: () => [],
     },
-    fieldName: {
-      type: String,
+    validation: {
+      type: Object,
+      required: true,
     },
   },
   emits: [
     'update:modelValue',
   ],
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   data () {
     return {
       lazyValue: this.modelValue,
@@ -81,7 +73,7 @@ export default {
       },
       set (value) {
         this.lazyValue = value ?? ''
-        this.v$.internalValue.$touch()
+        this.validation.$touch()
         this.$emit('update:modelValue', this.lazyValue)
       },
     },
@@ -104,13 +96,6 @@ export default {
       return this.notInList ? 'This machine type may not be supported by your worker as it is not supported by your current worker settings' : ''
     },
   },
-  validations () {
-    return {
-      internalValue: withFieldName(() => this.fieldName, {
-        required,
-      }),
-    }
-  },
   watch: {
     modelValue (value) {
       if (this.lazyValue !== value) {
@@ -119,7 +104,7 @@ export default {
     },
   },
   mounted () {
-    this.v$.internalValue.$touch()
+    this.validation.$touch()
     const input = this.$refs.autocomplete?.$refs.input
     if (input) {
       input.spellcheck = false

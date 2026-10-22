@@ -32,12 +32,12 @@ SPDX-License-Identifier: Apache-2.0
               <v-text-field
                 v-model="worker.name"
                 color="primary"
-                :error-messages="getErrorMessages(v$.worker.name)"
+                :error-messages="getErrorMessages(v$.name)"
                 counter="15"
                 label="Group Name"
                 variant="underlined"
-                @input="v$.worker.name.$touch()"
-                @blur="v$.worker.name.$touch()"
+                @input="v$.name.$touch()"
+                @blur="v$.name.$touch()"
               />
             </v-col>
             <v-col
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0
                 item-color="primary"
                 label="Zones"
                 :items="zoneItems"
-                :error-messages="getErrorMessages(v$.selectedZones)"
+                :error-messages="getErrorMessages(v$.zones)"
                 multiple
                 chips
                 closable-chips
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0
                 item-title="text"
                 variant="underlined"
                 @update:model-value="onInputZones"
-                @blur="v$.selectedZones.$touch()"
+                @blur="v$.zones.$touch()"
               />
             </v-col>
           </v-row>
@@ -90,10 +90,10 @@ SPDX-License-Identifier: Apache-2.0
                 color="primary"
                 item-color="primary"
                 :items="machineArchitectures"
-                :error-messages="getErrorMessages(v$.machineArchitecture)"
+                :error-messages="getErrorMessages(v$.machine.architecture)"
                 label="Architecture"
                 variant="underlined"
-                @blur="v$.machineArchitecture.$touch()"
+                @blur="v$.machine.architecture.$touch()"
               />
             </v-col>
             <v-col
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-machine-type
                 v-model="machineTypeValue"
                 :machine-types="machineTypes"
-                :field-name="`${workerGroupName} Machine Type`"
+                :validation="v$.machine.type"
               />
             </v-col>
           </v-row>
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0
                 :worker="worker"
                 :machine-type="selectedMachineType"
                 :auto-update="maintenanceAutoUpdateMachineImageVersion"
-                :field-name="`${workerGroupName} Machine Image`"
+                :validation="v$.machine.image"
               />
             </v-col>
           </v-row>
@@ -162,7 +162,7 @@ SPDX-License-Identifier: Apache-2.0
                 :machine-image-cri="machineImageCri"
                 :worker="worker"
                 :kubernetes-version="kubernetesVersion"
-                :field-name="`${workerGroupName} Container Runtime`"
+                :validation="v$.cri.name"
               />
             </v-col>
           </v-row>
@@ -191,12 +191,12 @@ SPDX-License-Identifier: Apache-2.0
                 v-model="innerMin"
                 min="0"
                 color="primary"
-                :error-messages="getErrorMessages(v$.worker.minimum)"
+                :error-messages="getErrorMessages(v$.minimum)"
                 type="number"
                 label="Autoscaler Min."
                 hint="Minimum nodes kept running at all times"
                 variant="underlined"
-                @input="v$.worker.minimum.$touch()"
+                @input="v$.minimum.$touch()"
                 @blur="ensureValidAutoscalerMin()"
               />
             </v-col>
@@ -212,8 +212,8 @@ SPDX-License-Identifier: Apache-2.0
                 label="Autoscaler Max."
                 hint="Maximum nodes the autoscaler can scale up to"
                 variant="underlined"
-                :error-messages="getErrorMessages(v$.worker.maximum)"
-                @input="v$.worker.maximum.$touch()"
+                :error-messages="getErrorMessages(v$.maximum)"
+                @input="v$.maximum.$touch()"
                 @blur="ensureValidAutoscalerMax()"
               />
             </v-col>
@@ -225,12 +225,12 @@ SPDX-License-Identifier: Apache-2.0
                 v-model="maxSurge"
                 min="0"
                 color="primary"
-                :error-messages="getErrorMessages(v$.worker.maxSurge)"
+                :error-messages="getErrorMessages(v$.maxSurge)"
                 label="Max. Surge"
                 hint="Number of extra nodes allowed during a rolling update"
                 variant="underlined"
-                @input="v$.worker.maxSurge.$touch()"
-                @blur="v$.worker.maxSurge.$touch()"
+                @input="v$.maxSurge.$touch()"
+                @blur="v$.maxSurge.$touch()"
               />
             </v-col>
           </v-row>
@@ -260,7 +260,8 @@ SPDX-License-Identifier: Apache-2.0
                 :volume-types="volumeTypes"
                 :worker="worker"
                 :cloud-profile-ref="cloudProfileRef"
-                :field-name="`${workerGroupName} Volume Type`"
+                :volume-type-validation="v$.volume.type"
+                :iops-validation="v$.providerConfig.volume.iops"
               />
             </v-col>
             <v-col
@@ -274,10 +275,10 @@ SPDX-License-Identifier: Apache-2.0
                 :default-storage-size="defaultStorageSize"
                 :has-volume-types="volumeInCloudProfile"
                 color="primary"
-                :error-messages="getErrorMessages(v$.volumeSize)"
+                :error-messages="getErrorMessages(v$.volume.size)"
                 @update:custom-storage="onInputVolumeSize"
                 @update:model-value="onInputVolumeSize"
-                @blur="v$.volumeSize.$touch()"
+                @blur="v$.volume.size.$touch()"
               />
             </v-col>
           </v-row>
@@ -292,13 +293,6 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue'
-import {
-  required,
-  maxLength,
-  minValue,
-  requiredIf,
-} from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
 
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
@@ -310,20 +304,12 @@ import { useShootContext } from '@/composables/useShootContext'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
-import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
+import {
+  getWorkerMinimumVolumeSizeGi,
+  useVolumeTypes,
+} from '@/composables/useCloudProfile/useVolumeTypes.js'
 
-import {
-  withFieldName,
-  lowerCaseAlphaNumHyphen,
-  noStartEndHyphen,
-  numberOrPercentage,
-  withMessage,
-  withParams,
-} from '@/utils/validators'
-import {
-  getErrorMessages,
-  convertToGi,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
@@ -353,6 +339,10 @@ export default {
       type: Object,
       required: true,
     },
+    validation: {
+      type: Object,
+      required: true,
+    },
   },
   setup (props) {
     const {
@@ -368,14 +358,14 @@ export default {
       isZonedCluster,
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
-      providerWorkers,
+      allMachineTypes,
       volumeTypes,
     } = useShootContext()
 
     const { visibleMachineImages: machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
-    const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
+    const { volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
       props.worker.machine.type = get(defaultMachineType.value, ['name'])
@@ -406,15 +396,14 @@ export default {
     const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture)
 
     const selectedMachineType = computed(() => find(machineTypes.value, ['name', props.worker.machine.type]))
-    const selectedVolumeType = computed(() => find(allVolumeTypes.value, ['name', props.worker.volume?.type]))
-
-    const minimumVolumeSize = useMinimumVolumeSize(
-      selectedMachineType,
-      selectedVolumeType,
-    )
+    const minVolumeSizeGi = computed(() => getWorkerMinimumVolumeSizeGi(
+      props.worker,
+      allMachineTypes.value,
+      allVolumeTypes.value,
+    ))
 
     return {
-      v$: useVuelidate(),
+      v$: computed(() => props.validation),
       isNewCluster,
       cloudProfileRef,
       kubernetesVersion,
@@ -427,13 +416,11 @@ export default {
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
-      providerWorkers,
       machineImages,
       machineArchitecture,
       machineTypes,
       selectedMachineType,
-      selectedVolumeType,
-      minimumVolumeSize,
+      minVolumeSizeGi,
       useFilteredMachineTypes,
     }
   },
@@ -442,70 +429,6 @@ export default {
       volumeSize: undefined,
       hasCustomStorageSize: false,
     }
-  },
-  validations () {
-    const rules = { worker: {} }
-
-    const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
-      { type: 'uniqueWorkerName' },
-      function unique (value) {
-        return this.providerWorkers.filter(item => item.name === value).length === 1
-      },
-    ))
-
-    const nameRules = {
-      required,
-      maxLength: maxLength(15),
-      lowerCaseAlphaNumHyphen,
-      noStartEndHyphen,
-      uniqueWorkerName,
-    }
-    rules.worker.name = withFieldName(() => `${this.workerGroupName} Name`, nameRules)
-
-    rules.worker.minimum = withFieldName(() => `${this.workerGroupName} Autoscaler Min.`, {
-      minValue: minValue(0),
-    })
-
-    const maximumRules = {
-      minValue: minValue(0),
-      systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
-        value => {
-          const hasSystemComponents = get(this.worker, ['systemComponents', 'allow'], true)
-          if (!hasSystemComponents) {
-            return true
-          }
-          const zones = get(this.worker, ['zones', 'length'], 0)
-          return value >= zones
-        }),
-    }
-    rules.worker.maximum = withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, maximumRules)
-
-    rules.worker.maxSurge = withFieldName(() => `${this.workerGroupName} Max. Surge`, {
-      numberOrPercentage,
-    })
-
-    rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
-      required: requiredIf(() => this.isZonedCluster),
-    })
-
-    const volumeSizeRules = {
-      minVolumeSize: withMessage(() => `Minimum size is ${this.minVolumeSizeGi}`, value => {
-        if (!this.hasVolumeSize) {
-          return true
-        }
-        if (!value) {
-          return false
-        }
-        return this.minVolumeSizeGi <= convertToGi(value)
-      }),
-    }
-    rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
-
-    rules.machineArchitecture = withFieldName(() => `${this.workerGroupName} Machine Architecture`, {
-      required,
-    })
-
-    return rules
   },
   computed: {
     immutableZones () {
@@ -518,18 +441,6 @@ export default {
     },
     filteredMachineImages () {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
-    },
-    minVolumeSizeGi () {
-      const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
-      let defaultSize = get(this.selectedMachineType, ['storage.size'])
-      if (defaultSize) {
-        defaultSize = convertToGi(defaultSize)
-      }
-      if (defaultSize > 0 && defaultSize < minimumVolumeSizeInGi) {
-        return defaultSize
-      }
-
-      return minimumVolumeSizeInGi
     },
     innerMin: {
       get () {
@@ -629,9 +540,6 @@ export default {
         this.onInputVolumeSize()
       },
     },
-    workerGroupName () {
-      return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
-    },
     hasVolumeSize () {
       return this.volumeInCloudProfile || this.hasCustomStorageSize
     },
@@ -644,7 +552,7 @@ export default {
       handler (volumeSize) {
         this.volumeSize = volumeSize
         this.hasCustomStorageSize = Boolean(volumeSize) && !this.volumeInCloudProfile
-        this.v$.volumeSize?.$touch()
+        this.v$.volume.size?.$touch()
       },
       immediate: true,
     },
@@ -657,21 +565,21 @@ export default {
         // default size, must not write to shoot spec
         delete this.worker.volume
       }
-      this.v$.volumeSize?.$touch()
+      this.v$.volume.size?.$touch()
     },
     onInputZones () {
-      this.v$.selectedZones.$touch()
-      this.v$.worker.maximum.$touch()
+      this.v$.zones.$touch()
+      this.v$.maximum.$touch()
     },
     ensureValidAutoscalerMin () {
-      this.v$.worker.minimum.$touch()
+      this.v$.minimum.$touch()
       // Ensure maximum is not less than minimum
       if (this.innerMax < this.worker.minimum) {
         this.worker.maximum = this.worker.minimum
       }
     },
     ensureValidAutoscalerMax () {
-      this.v$.worker.maximum.$touch()
+      this.v$.maximum.$touch()
       // Ensure minimum is not greater than maximum
       if (this.innerMin > this.worker.maximum) {
         this.worker.minimum = this.worker.maximum
