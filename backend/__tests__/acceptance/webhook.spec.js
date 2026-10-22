@@ -44,17 +44,16 @@ describe('github', function () {
   })
 
   describe('#loadIssues', () => {
-    it('should initialize the cache with all open and recently closed issues', async () => {
-      expect(octokit.paginate).toHaveBeenCalledTimes(2)
+    it('should initialize the cache with only open issues when closedIssuesLookbackDays is 0', async () => {
+      expect(octokit.paginate).toHaveBeenCalledTimes(1)
 
       const issues = cache.getIssues()
-      expect(issues).toHaveLength(4)
+      expect(issues).toHaveLength(3)
 
       const openIssues = issues.filter(issue => issue.metadata.state === 'open')
       const closedIssues = issues.filter(issue => issue.metadata.state === 'closed')
       expect(openIssues).toHaveLength(3)
-      expect(closedIssues).toHaveLength(1)
-      expect(closedIssues[0].metadata.number).toBe(4)
+      expect(closedIssues).toHaveLength(0)
     })
   })
 
