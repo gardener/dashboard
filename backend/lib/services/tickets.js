@@ -116,10 +116,11 @@ export async function getIssues ({ name, projectName } = {}) {
   if (name && projectName) {
     title = `[${projectName}/${name}]`
   }
-  const closedTicketSince = new Date(_.now() - ((config.gitHub.closedIssuesLookbackDays || 0) * 3600 * 24 * 1000))
+  const closedIssuesLookbackDays = config.gitHub.closedIssuesLookbackDays || 0
+  const closedTicketSince = new Date(_.now() - (closedTicketSinceDays * 3600 * 24 * 1000))
 
   const openIssues = await searchIssues({ state: 'open', title })
-  const closedIssues = await searchIssues({ state: 'closed', title, since: closedTicketSince.toISOString() })
+  const closedIssues = closedIssuesLookbackDays === 0 ? [] : await searchIssues({ state: 'closed', title, since: closedTicketSince.toISOString() })
   const issues = openIssues.concat(closedIssues)
   return Promise.all(_.map(issues, fromIssue))
 }
