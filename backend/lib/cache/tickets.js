@@ -167,10 +167,7 @@ function init () {
     if (cachedItem) {
       if (isCachedItemOlder(kind, cachedItem, item)) {
         const updatedItem = mapFn ? await mapFn(item) : item
-        // Re-read the current cached item after the async mapFn call. A concurrent
-        // update for the same identifier may have written a newer version while we
-        // were awaiting mapFn. Without this check the slower, older mapping could
-        // overwrite the already-committed newer update (stale data).
+        // Re-read the current cached item after the async mapFn call. A concurrent update for the same identifier may have written a newer version while we were awaiting mapFn.
         const currentCachedItem = cachedMap.get(identifier)
         if (currentCachedItem && currentCachedItem !== cachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
           return false
@@ -187,10 +184,7 @@ function init () {
     } else {
       logger.trace('adding new', kind, identifier)
       const updatedItem = mapFn ? await mapFn(item) : item
-      // Re-read after the async mapFn call — another concurrent call may have
-      // already inserted this identifier while we were mapping. If the existing
-      // entry is newer or equal, discard this result to preserve the strictly-newer
-      // timestamp rule.
+      // Re-read the current cached item after the async mapFn call. A concurrent update for the same identifier may have written a newer version while we were awaiting mapFn.
       const currentCachedItem = cachedMap.get(identifier)
       if (currentCachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
         logger.debug(`skipped adding ${kind} with id ${identifier} as a newer update was committed concurrently`)
