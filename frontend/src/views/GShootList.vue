@@ -604,3 +604,14 @@ export default {
   },
 }
 </script>
+<style>
+  .width-limited {
+    max-width: 200px;
+    overflow: hidden;
+  }
+
+  .width-limited-large {
+    max-width: 300px;
+    overflow: hidden;
+  }
+</style>
