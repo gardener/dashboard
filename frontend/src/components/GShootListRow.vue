@@ -481,16 +481,6 @@ const hasShootWorkerGroupWarning = computed(() => {
     pointer-events: none;
   }
 
-  .width-limited {
-    max-width: 200px;
-    overflow: hidden;
-  }
-
-  .width-limited-large {
-    max-width: 300px;
-    overflow: hidden;
-  }
-
   .v-theme--light .stale .stale-overlay {
     background-color: rgba(255,255,255,0.7)
   }
