@@ -110,7 +110,7 @@ const RAW_RUNTIME_STATE =
           ["@apidevtools/json-schema-ref-parser", "virtual:a7cba7ab8243d6df77c17317f6f14c336e1935d9f56a54d29c1f5ae5f68ca1ae55043bc56d99f29703f008cf6e636d7c6e9aed5c5f9875b4cf5a17731e6d6536#npm:16.0.3"],\
           ["@types/json-schema", "npm:7.0.15"],\
           ["js-yaml", "npm:5.4.2"],\
-          ["undici", "npm:8.11.2"]\
+          ["undici", "npm:8.12.3"]\
         ],\
         "packagePeers": [\
           "@types/json-schema"\
@@ -8074,7 +8074,7 @@ const RAW_RUNTIME_STATE =
           ["saxes", "npm:6.0.0"],\
           ["symbol-tree", "npm:3.2.4"],\
           ["tough-cookie", "npm:6.0.2"],\
-          ["undici", "npm:8.11.2"],\
+          ["undici", "npm:8.12.3"],\
           ["w3c-xmlserializer", "npm:5.0.0"],\
           ["webidl-conversions", "npm:8.0.1"],\
           ["whatwg-mimetype", "npm:5.0.0"],\
@@ -11294,13 +11294,6 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici", [\
-      ["npm:8.11.2", {\
-        "packageLocation": "./.yarn/cache/undici-npm-8.11.2-527c40428e-106f699117.zip/node_modules/undici/",\
-        "packageDependencies": [\
-          ["undici", "npm:8.11.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:8.12.3", {\
         "packageLocation": "./.yarn/cache/undici-npm-8.12.3-9951970495-714919e62b.zip/node_modules/undici/",\
         "packageDependencies": [\
