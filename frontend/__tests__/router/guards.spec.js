@@ -123,7 +123,7 @@ describe('router', () => {
       meta: { projectScoped: true },
       params: { projectName: 'pending' },
     })).resolves.toEqual({
-      name: 'Home',
+      name: 'ProjectList',
       replace: true,
     })
   })

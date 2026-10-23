@@ -630,7 +630,7 @@ async function onRemoveUser ({ username }) {
     if (project) {
       await router.push({ name: 'ShootList', params: { projectName: project.metadata.name } })
     } else {
-      await router.push({ name: 'Home', params: {} })
+      await router.push({ name: 'ProjectList' })
     }
   }
 }

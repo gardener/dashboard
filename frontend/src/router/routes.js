@@ -25,7 +25,7 @@ import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
 import {
-  homeBreadcrumbs,
+  projectListBreadcrumbs,
   newProjectBreadcrumbs,
   accountBreadcrumbs,
   settingsBreadcrumbs,
@@ -49,7 +49,7 @@ import {
 } from './tabs'
 
 const GMembers = () => import('@/views/GMembers.vue')
-const GHome = () => import('@/views/GHome.vue')
+const GProjectList = () => import('@/views/GProjectList.vue')
 const GCredentials = () => import('@/views/GCredentials.vue')
 const GAdministration = () => import('@/views/GAdministration.vue')
 
@@ -235,10 +235,6 @@ export function createRoutes () {
     return {
       path,
       name: 'Home',
-      component: GHome,
-      meta: {
-        breadcrumbs: homeBreadcrumbs,
-      },
       beforeEnter: redirectToShootList,
     }
   }
@@ -247,10 +243,15 @@ export function createRoutes () {
     return {
       path,
       name: 'NewProject',
-      component: GHome,
+      component: GProjectList,
       meta: {
         title: 'New Project',
         breadcrumbs: newProjectBreadcrumbs,
+      },
+      beforeEnter () {
+        if (!authzStore.canCreateProjectForNamespace(null)) {
+          return { name: 'ProjectList', replace: true }
+        }
       },
     }
   }
@@ -259,7 +260,11 @@ export function createRoutes () {
     return {
       path,
       name: 'ProjectList',
-      beforeEnter: redirectToShootList,
+      component: GProjectList,
+      meta: {
+        title: 'Projects',
+        breadcrumbs: projectListBreadcrumbs,
+      },
     }
   }
 
@@ -587,5 +592,6 @@ export function createRoutes () {
         replace: true,
       }
     }
+    return { name: 'ProjectList', replace: true }
   }
 }

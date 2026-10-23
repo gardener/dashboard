@@ -701,7 +701,7 @@ async function showDialog () {
       if (p1) {
         router.push({ name: 'ShootList', params: { projectName: p1.metadata.name } })
       } else {
-        router.push({ name: 'Home', params: {} })
+        router.push({ name: 'ProjectList' })
       }
     } catch (err) {
       const errorDetails = errorDetailsFromError(err)

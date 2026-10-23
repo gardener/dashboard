@@ -103,5 +103,26 @@ describe('components', () => {
 
       expect(wrapper.vm.sortedAndFilteredProjectItems).toHaveLength(1)
     })
+
+    it('requests route-backed Project actions', () => {
+      const wrapper = shallowMount(GMainProjectSelection, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+            createPinia(),
+          ],
+        },
+      })
+
+      wrapper.vm.projectMenu = true
+      wrapper.vm.navigate('ProjectList')
+      wrapper.vm.navigate('NewProject')
+
+      expect(wrapper.emitted('navigate')).toEqual([
+        ['ProjectList'],
+        ['NewProject'],
+      ])
+      expect(wrapper.vm.projectMenu).toBe(false)
+    })
   })
 })
