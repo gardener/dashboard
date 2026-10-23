@@ -173,6 +173,24 @@ describe('cache', function () {
         }])
         expect(cache.getIssue(1)).toBe(newerIssue)
       })
+
+      it('should not restore an issue removed while mapping an update', async function () {
+        const issue = createIssue({ number: 1, updatedAt: timestamp(+60) })
+        let resolveMapping
+        const mapFn = () => new Promise(resolve => {
+          resolveMapping = resolve
+        })
+
+        const update = cache.addOrUpdateIssue({ issue, mapFn })
+        cache.removeIssue({ issue: firstIssue })
+        resolveMapping(issue)
+
+        await expect(update).resolves.toBe(false)
+        expect(cache.getIssue(1)).toBeUndefined()
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toEqual([secondIssue])
+        expect(emitSpy).toHaveBeenCalledTimes(2)
+        expect(emitSpy.mock.calls).not.toContainEqual(['issue', expect.objectContaining({ type: 'MODIFIED' })])
+      })
     })
 
     describe('#removeIssue', function () {
