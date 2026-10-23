@@ -22,6 +22,8 @@ function timestamp (secondsFromNow = 0) {
 function createIssue ({ number, name = 'foo', projectName = 'test', updatedAt }) {
   updatedAt = updatedAt || timestamp()
   return {
+    number,
+    updated_at: updatedAt,
     metadata: {
       number,
       updated_at: updatedAt,
@@ -53,12 +55,15 @@ describe('cache', function () {
     let emitter
     let emitSpy
 
-    beforeEach(function () {
+    beforeEach(async function () {
       cache = createTicketCache()
       emitter = cache.emitter
       emitSpy = vi.spyOn(emitter, 'emit')
-      cache.addOrUpdateIssues({ issues: allIssues })
-      cache.addOrUpdateComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
+      for (const issue of allIssues) {
+        await cache.addOrUpdateIssue({ issue })
+      }
+
+      await cache.addOrUpdateComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
       assert.strictEqual(emitSpy.mock.calls.length, 4)
       emitSpy.mockClear()
     })
@@ -98,12 +103,14 @@ describe('cache', function () {
     })
 
     describe('#addOrUpdateIssue', function () {
-      it('should update the first issue', function () {
+      it('should update the first issue', async function () {
+        const newTimestamp = timestamp(+60)
         const issue = chain(firstIssue)
           .cloneDeep()
-          .set(['metadata', 'updated_at'], timestamp(+60))
+          .set(['metadata', 'updated_at'], newTimestamp)
+          .set(['updated_at'], newTimestamp)
           .value()
-        cache.addOrUpdateIssue({ issue })
+        await cache.addOrUpdateIssue({ issue })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['issue', {
           kind: 'issue',
@@ -112,13 +119,77 @@ describe('cache', function () {
         }])
       })
 
-      it('should not update the first issue', function () {
+      it('should not update the first issue', async function () {
+        const oldTimestamp = timestamp(-60)
         const issue = chain(firstIssue)
           .cloneDeep()
-          .set(['metadata', 'updated_at'], timestamp(-60))
+          .set(['metadata', 'updated_at'], oldTimestamp)
+          .set(['updated_at'], oldTimestamp)
           .value()
-        cache.addOrUpdateIssue({ issue })
+        await cache.addOrUpdateIssue({ issue })
         expect(emitSpy).not.toHaveBeenCalled()
+      })
+
+      it('should update and index an issue without metadata.updated_at', async function () {
+        const newTimestamp = timestamp(+120)
+        const issue = {
+          number: 1,
+          updated_at: newTimestamp,
+          metadata: {
+            number: 1,
+            name: 'foo',
+            projectName: 'test',
+          },
+        }
+        const mapFn = async (item) => ({
+          ...item,
+          metadata: {
+            ...item.metadata,
+            updated_at: item.updated_at,
+          },
+        })
+        await cache.addOrUpdateIssue({ issue, mapFn })
+        expect(emitSpy).toHaveBeenCalledTimes(1)
+        const mappedIssue = emitSpy.mock.calls[0][1].object
+        expect(emitSpy.mock.calls[0]).toEqual(['issue', {
+          kind: 'issue',
+          type: 'MODIFIED',
+          object: mappedIssue,
+        }])
+        expect(mappedIssue.metadata.updated_at).toBe(newTimestamp)
+        expect(cache.getIssue(1)).toBe(mappedIssue)
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toContain(mappedIssue)
+
+        // A subsequent newer update must still succeed
+        emitSpy.mockClear()
+        const newerTimestamp = timestamp(+180)
+        const newerIssue = createIssue({ number: 1, updatedAt: newerTimestamp })
+        await cache.addOrUpdateIssue({ issue: newerIssue })
+        expect(emitSpy).toHaveBeenCalledTimes(1)
+        expect(emitSpy.mock.calls[0]).toEqual(['issue', {
+          kind: 'issue',
+          type: 'MODIFIED',
+          object: newerIssue,
+        }])
+        expect(cache.getIssue(1)).toBe(newerIssue)
+      })
+
+      it('should not restore an issue removed while mapping an update', async function () {
+        const issue = createIssue({ number: 1, updatedAt: timestamp(+60) })
+        let resolveMapping
+        const mapFn = () => new Promise(resolve => {
+          resolveMapping = resolve
+        })
+
+        const update = cache.addOrUpdateIssue({ issue, mapFn })
+        cache.removeIssue({ issue: firstIssue })
+        resolveMapping(issue)
+
+        await expect(update).resolves.toBe(false)
+        expect(cache.getIssue(1)).toBeUndefined()
+        expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toEqual([secondIssue])
+        expect(emitSpy).toHaveBeenCalledTimes(2)
+        expect(emitSpy.mock.calls).not.toContainEqual(['issue', expect.objectContaining({ type: 'MODIFIED' })])
       })
     })
 
@@ -140,13 +211,13 @@ describe('cache', function () {
     })
 
     describe('#addOrUpdateComment', function () {
-      it('should update the first comment', function () {
+      it('should update the first comment', async function () {
         const comment = chain(firstComment)
           .cloneDeep()
           .set(['metadata', 'updated_at'], timestamp(+60))
           .value()
         const issueNumber = comment.metadata.number
-        cache.addOrUpdateComment({ issueNumber, comment })
+        await cache.addOrUpdateComment({ issueNumber, comment })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
@@ -155,20 +226,20 @@ describe('cache', function () {
         }])
       })
 
-      it('should not update the first comment', function () {
+      it('should not update the first comment', async function () {
         const comment = chain(firstComment)
           .cloneDeep()
           .set(['metadata', 'updated_at'], timestamp(-60))
           .value()
         const issueNumber = comment.metadata.number
-        cache.addOrUpdateComment({ issueNumber, comment })
+        await cache.addOrUpdateComment({ issueNumber, comment })
         expect(emitSpy).not.toHaveBeenCalled()
       })
     })
 
     describe('#removeComment', function () {
       it('should remove the first comment', function () {
-        cache.removeComment({ comment: firstComment })
+        cache.removeComment({ issueNumber: firstComment.metadata.number, comment: firstComment })
         expect(emitSpy).toHaveBeenCalledTimes(1)
         expect(emitSpy.mock.calls[0]).toEqual(['comment', {
           kind: 'comment',
@@ -204,16 +275,19 @@ describe('cache', function () {
         expect(result).toEqual([secondIssue])
       })
 
-      it('should update index when issue is updated with new shoot', function () {
+      it('should update index when issue is updated with new shoot', async function () {
+        const newTimestamp = new Date(Date.now() + 60000).toISOString()
         const updatedIssue = {
+          number: 1,
+          updated_at: newTimestamp,
           metadata: {
             number: 1,
-            updated_at: new Date(Date.now() + 60000).toISOString(),
+            updated_at: newTimestamp,
             name: 'bar',
             projectName: 'test',
           },
         }
-        cache.addOrUpdateIssue({ issue: updatedIssue })
+        await cache.addOrUpdateIssue({ issue: updatedIssue })
         expect(cache.getIssuesForShoot({ projectName: 'test', name: 'foo' })).toEqual([secondIssue])
         expect(cache.getIssuesForShoot({ projectName: 'test', name: 'bar' })).toEqual([thirdIssue, updatedIssue])
       })

@@ -82,28 +82,22 @@ function init () {
     return commentsForIssues.get(issueNumber)
   }
 
-  function addOrUpdateIssues ({ issues }) {
-    for (const issue of issues) {
-      addOrUpdateIssue({ issue })
-    }
-  }
-
-  function addOrUpdateIssue ({ issue }) {
-    const number = issue.metadata.number
+  async function addOrUpdateIssue ({ issue, mapFn }) {
+    const number = issue.number
     const oldIssue = issues.get(number)
+    const updated = await updateIfNewer('issue', issues, issue, mapFn)
     if (oldIssue) {
       removeFromShootIndex(oldIssue)
     }
-    const updated = updateIfNewer('issue', issues, issue)
     // Re-read from issues map — updateIfNewer may have kept the old item if it was newer
     addToShootIndex(issues.get(number))
 
     return updated
   }
 
-  function addOrUpdateComment ({ issueNumber, comment }) {
+  async function addOrUpdateComment ({ issueNumber, comment }) {
     const comments = getCommentsForIssueCache({ issueNumber })
-    updateIfNewer('comment', comments, comment)
+    await updateIfNewer('comment', comments, comment)
   }
 
   function removeIssue ({ issue }) {
@@ -164,34 +158,52 @@ function init () {
     }
   }
 
-  function updateIfNewer (kind, cachedMap, item) {
+  async function updateIfNewer (kind, cachedMap, item, mapFn) {
     let updated = false
     const identifier = kind === 'issue'
-      ? item.metadata.number
+      ? item.number
       : item.metadata.id
     const cachedItem = cachedMap.get(identifier)
     if (cachedItem) {
-      if (isCachedItemOlder(cachedItem, item)) {
-        if (!_.isEqual(cachedItem, item)) {
+      if (isCachedItemOlder(kind, cachedItem, item)) {
+        const updatedItem = mapFn ? await mapFn(item) : item
+        // Re-read the current cached item after the async mapFn call. A concurrent
+        // update may have written a newer version, or the item may have been
+        // removed, while we were awaiting mapFn.
+        const currentCachedItem = cachedMap.get(identifier)
+        if (currentCachedItem !== cachedItem && (!currentCachedItem || !isCachedItemOlder(kind, currentCachedItem, item))) {
+          return false
+        }
+        if (!_.isEqual(currentCachedItem, updatedItem)) {
           logger.trace('updating', kind, identifier)
-          cachedMap.set(identifier, item)
+          cachedMap.set(identifier, updatedItem)
           updated = true
-          emitModified(kind, item)
+          emitModified(kind, updatedItem)
         }
       } else {
-        logger.warn(`skipped updating ${kind} with id ${identifier} as it was older`)
+        logger.debug(`skipped updating ${kind} with id ${identifier} as updated_at has not changed`)
       }
     } else {
       logger.trace('adding new', kind, identifier)
-      cachedMap.set(identifier, item)
+      const updatedItem = mapFn ? await mapFn(item) : item
+      // Re-read the current cached item after the async mapFn call. A concurrent update for the same identifier may have written a newer version while we were awaiting mapFn.
+      const currentCachedItem = cachedMap.get(identifier)
+      if (currentCachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
+        logger.debug(`skipped adding ${kind} with id ${identifier} as a newer update was committed concurrently`)
+        return false
+      }
+      cachedMap.set(identifier, updatedItem)
       updated = true
-      emitAdded(kind, item)
+      emitAdded(kind, updatedItem)
     }
     return updated
   }
 
-  function isCachedItemOlder (cachedItem, item) {
-    return new Date(item.metadata.updated_at) >= new Date(cachedItem.metadata.updated_at)
+  function isCachedItemOlder (kind, cachedItem, item) {
+    const newItemDate = kind === 'issue'
+      ? item.updated_at
+      : item.metadata.updated_at
+    return new Date(newItemDate) > new Date(cachedItem.metadata.updated_at)
   }
 
   return {
@@ -203,7 +215,6 @@ function init () {
     getIssueNumbers,
     getIssueNumbersForNameAndProjectName,
     getIssuesForShoot,
-    addOrUpdateIssues,
     addOrUpdateIssue,
     addOrUpdateComment,
     removeIssue,
