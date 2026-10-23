@@ -329,7 +329,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
-          class: '.width-limited-large',
+          class: 'width-limited-large',
         },
         {
           title: 'CREATED AT',
