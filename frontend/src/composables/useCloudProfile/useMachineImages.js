@@ -18,14 +18,16 @@ import {
   findVendorHint,
 } from '@/composables/helper.js'
 import { useLogger } from '@/composables/useLogger.js'
+import {
+  useMachineCapabilities,
+  resolveArchitectures,
+} from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import { normalizeVersion } from '@/utils/index.js'
 
-import filter from 'lodash/filter'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
 
@@ -49,6 +51,7 @@ export function useMachineImages (cloudProfile) {
 
   const logger = useLogger()
   const configStore = useConfigStore()
+  const machineCapabilities = useMachineCapabilities(cloudProfile)
 
   /**
    * Flattens and processes machine images from cloud profile format.
@@ -100,10 +103,7 @@ export function useMachineImages (cloudProfile) {
       const vendorHint = findVendorHint(configStore.vendorHints, machineImage.vendor.name)
       const hidden = Boolean(machineImage.vendor.hidden)
 
-      return map(versions, ({ version, expirationDate, cri, classification, architectures }) => {
-        if (isEmpty(architectures)) {
-          architectures = ['amd64'] // default if not maintained
-        }
+      return map(versions, ({ version, expirationDate, cri, classification, architectures, capabilityFlavors }) => {
         const image = {
           key: name + '/' + version,
           name,
@@ -118,6 +118,7 @@ export function useMachineImages (cloudProfile) {
           vendorHint,
           hidden,
           architectures,
+          capabilityFlavors,
         }
         return addClassificationHelpers(image)
       })
@@ -133,37 +134,80 @@ export function useMachineImages (cloudProfile) {
   })
 
   /**
-   * Returns the machine images of vendors that are not hidden by vendor branding.
-   * Use for selection only, existing workers may still reference images of hidden vendors.
+   * Filters a machine image by a specific architecture.
+   * Checks capabilityFlavors first, falls back to the architectures array.
+   *
+   * @param {object} image - A machine image object
+   * @param {string} architecture - The architecture to match (e.g. 'amd64', 'arm64')
+   * @returns {boolean} Whether the image supports the given architecture
    */
-  const visibleMachineImages = computed(() => {
-    return filter(machineImages.value, ({ hidden }) => !hidden)
-  })
+  function matchesArchitecture (image, architecture) {
+    if (image.capabilityFlavors) {
+      return image.capabilityFlavors.some(flavor =>
+        flavor.architecture?.includes(architecture),
+      )
+    }
+    return includes(image.architectures, architecture)
+  }
+
+  function useFilteredMachineImages (machineType, architecture) {
+    function matchesMachineTypeCapabilities (machineImage, machineType) {
+      const capabilities = machineType?.capabilities
+      if (!machineImage.capabilityFlavors) {
+        // No capabilityFlavors: fall back to architecture check
+        const architectures = resolveArchitectures(machineType, machineCapabilities.value)
+        if (architectures.length) {
+          return architectures.some(arch => includes(machineImage.architectures, arch))
+        }
+        return true
+      }
+      return machineImage.capabilityFlavors.some(capabilityFlavor => {
+        return Object.entries(capabilityFlavor).every(([name, values]) => {
+          const capability = get(capabilities, [name])
+          const effectiveCapability = capability ?? get(machineCapabilities.value, [name]) // Fallback to default Machine capabilities if MachineType capabilities do not exist
+          if (!effectiveCapability) {
+            return true // No constraint from machine type or profile defaults — accept
+          }
+          return values?.some(value => effectiveCapability.includes(value))
+        })
+      })
+    }
+
+    let filtered = machineImages.value.filter(machineImage => {
+      return machineImage &&
+        !machineImage.isExpired &&
+        !machineImage.hidden &&
+        matchesMachineTypeCapabilities(machineImage, machineType)
+    })
+    if (architecture) {
+      filtered = filtered.filter(image => matchesArchitecture(image, architecture))
+    }
+    return filtered
+  }
 
   /**
-   * Returns the default machine image for a given machine type based on architecture.
+   * Returns the default machine image for a given machine type.
    * Selects the first matching version classification (typically latest supported version).
    *
-   * @param {Ref<object>} architecture - A Vue ref containing the architecture
+   * @param {Ref<object>} machineType - A Vue ref containing the machineType
+   * @param {Ref<string>} [architecture] - Optional Vue ref containing the selected architecture to constrain image selection
    * @returns {ComputedRef<object|undefined>} Computed ref with the default machine image or undefined
    * @throws {Error} If machineType is not a ref
    */
-  function useDefaultMachineImage (architecture) {
-    if (!isRef(architecture)) {
-      throw new Error('architecture must be a ref!')
+  function useDefaultMachineImage (machineType, architecture) {
+    if (!isRef(machineType)) {
+      throw new Error('machineType must be a ref!')
     }
 
     return computed(() => {
-      const machineImagesForArchitecture = filter(visibleMachineImages.value, ({ architectures }) =>
-        includes(architectures, architecture.value),
-      )
-      return firstItemMatchingVersionClassification(machineImagesForArchitecture)
+      const machineImagesMachineType = useFilteredMachineImages(machineType.value, architecture?.value)
+      return firstItemMatchingVersionClassification(machineImagesMachineType)
     })
   }
 
   return {
     machineImages,
-    visibleMachineImages,
     useDefaultMachineImage,
+    useFilteredMachineImages,
   }
 }

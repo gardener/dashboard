@@ -10,6 +10,10 @@ import {
 } from 'vue'
 
 import { getZones } from '@/composables/helper.js'
+import {
+  useMachineCapabilities,
+  resolveArchitectures,
+} from '@/composables/useCloudProfile/useMachineCapabilities.js'
 
 import filter from 'lodash/filter'
 import map from 'lodash/map'
@@ -39,6 +43,7 @@ export function useMachineTypes (cloudProfile) {
   }
 
   const machineTypes = computed(() => get(cloudProfile.value, ['spec', 'machineTypes'], []))
+  const machineCapabilities = useMachineCapabilities(cloudProfile)
 
   function filterMachineTypes (region, zones) {
     const machineAndVolumeTypePredicate = unavailableItems => {
@@ -54,12 +59,6 @@ export function useMachineTypes (cloudProfile) {
     }
 
     const items = machineTypes.value
-
-    items.forEach(item => {
-      if (!item.architecture) {
-        item.architecture = 'amd64' // default if not maintained
-      }
-    })
 
     if (!region) {
       return items
@@ -96,7 +95,9 @@ export function useMachineTypes (cloudProfile) {
       const types = filterMachineTypes(region.value, zones)
 
       if (architecture?.value) {
-        return filter(types, { architecture: architecture.value })
+        return filter(types, type => {
+          return includes(resolveArchitectures(type, machineCapabilities.value), architecture.value)
+        })
       }
 
       return types
@@ -120,7 +121,10 @@ export function useMachineTypes (cloudProfile) {
       const zones = getZones(cloudProfile.value, region.value)
       const types = filterMachineTypes(region.value, zones)
 
-      const architectures = uniq(map(types, 'architecture'))
+      const architectures = uniq(types.flatMap(type => {
+        return resolveArchitectures(type, machineCapabilities.value)
+      }))
+
       return architectures.sort()
     })
   }

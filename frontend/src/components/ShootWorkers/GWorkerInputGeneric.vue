@@ -167,6 +167,7 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
+import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities'
 
 import {
   withFieldName,
@@ -182,7 +183,6 @@ import {
 } from '@/utils'
 
 import isEmpty from 'lodash/isEmpty'
-import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
@@ -228,14 +228,20 @@ export default {
       volumeTypes,
     } = useShootContext()
 
-    const { visibleMachineImages: machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
+    const { machineImages, useDefaultMachineImage, useFilteredMachineImages } = useMachineImages(cloudProfile)
+    const machineCapabilities = useMachineCapabilities(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
 
-    function resetWorkerMachine () {
-      props.worker.machine.type = get(defaultMachineType.value, ['name'])
-      props.worker.machine.image = pick(defaultMachineImage.value, ['name', 'version'])
+    function resetMachineImageIfInvalid (machineType, defaultImage) {
+      const filteredImages = useFilteredMachineImages(machineType, props.worker.machine.architecture)
+      const currentImageStillValid = props.worker.machine.image && find(filteredImages, props.worker.machine.image)
+      if (!currentImageStillValid) {
+        props.worker.machine.image = defaultImage
+          ? pick(defaultImage, ['name', 'version'])
+          : null
+      }
     }
 
     const machineArchitecture = computed({
@@ -245,8 +251,13 @@ export default {
       set (architecture) {
         props.worker.machine.architecture = architecture
 
-        // Reset machine type and image to default as they won't be supported by new architecture
-        resetWorkerMachine()
+        const typeStillValid = props.worker.machine.type && find(machineTypes.value, ['name', props.worker.machine.type])
+        if (!typeStillValid) {
+          props.worker.machine.type = get(defaultMachineType.value, ['name'])
+        }
+
+        const effectiveType = find(machineTypes.value, ['name', props.worker.machine.type])
+        resetMachineImageIfInvalid(effectiveType, selectedDefaultMachineImage.value)
       },
     })
 
@@ -257,11 +268,8 @@ export default {
 
     const defaultMachineType = computed(() => head(machineTypes.value))
 
-    const defaultMachineTypeArchitecture = computed(() => get(defaultMachineType.value, ['architecture']))
-
-    const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture)
-
     const selectedMachineType = computed(() => find(machineTypes.value, ['name', props.worker.machine.type]))
+    const selectedDefaultMachineImage = useDefaultMachineImage(selectedMachineType, machineArchitecture)
     const selectedVolumeType = computed(() => find(allVolumeTypes.value, ['name', props.worker.volume?.type]))
 
     const minimumVolumeSize = useMinimumVolumeSize(
@@ -285,12 +293,16 @@ export default {
       volumeTypes,
       providerWorkers,
       machineImages,
+      useFilteredMachineImages,
+      machineCapabilities,
       machineArchitecture,
       machineTypes,
       selectedMachineType,
+      selectedDefaultMachineImage,
       selectedVolumeType,
       minimumVolumeSize,
       useFilteredMachineTypes,
+      resetMachineImageIfInvalid,
     }
   },
   data () {
@@ -373,7 +385,7 @@ export default {
       return !isEmpty(this.volumeTypes)
     },
     filteredMachineImages () {
-      return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
+      return this.useFilteredMachineImages(this.selectedMachineType, this.machineArchitecture)
     },
     minVolumeSizeGi () {
       const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
@@ -482,6 +494,8 @@ export default {
       },
       set (value) {
         this.worker.machine.type = value
+        const newMachineType = find(this.machineTypes, ['name', value])
+        this.resetMachineImageIfInvalid(newMachineType, this.selectedDefaultMachineImage)
         this.onInputVolumeSize()
       },
     },
