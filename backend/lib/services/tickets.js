@@ -116,7 +116,7 @@ export async function getOpenIssues ({ name, projectName } = {}) {
     title = `[${projectName}/${name}]`
   }
   const githubIssues = await searchIssues({ state: 'open', title })
-  return Promise.all(_.map(githubIssues || [], fromIssue))
+  return Promise.all(githubIssues || [])
 }
 
 export async function loadOpenIssues (...args) {
@@ -124,13 +124,13 @@ export async function loadOpenIssues (...args) {
   const ticketCache = cache.getTicketCache()
   const updatedTickets = []
   for (const issue of issues) {
-    const updated = ticketCache.addOrUpdateIssue({ issue })
+    const updated = await ticketCache.addOrUpdateIssue({ issue, mapFn: fromIssue })
     if (updated) {
-      updatedTickets.push(issue)
+      updatedTickets.push(ticketCache.getIssue(issue.number))
     }
   }
 
-  const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, 'metadata.number')
+  const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, (issue) => issue.metadata ? issue.metadata.number : issue.number)
   for (const issue of deletedIssues) {
     ticketCache.removeIssue({ issue })
   }
@@ -153,7 +153,7 @@ export async function loadIssueComments ({ number }) {
   const comments = await getIssueComments({ number })
   const ticketCache = cache.getTicketCache()
   for (const comment of comments) {
-    ticketCache.addOrUpdateComment({ issueNumber: number, comment })
+    await ticketCache.addOrUpdateComment({ issueNumber: number, comment })
   }
 
   const deletedComments = _.differenceBy(ticketCache.getCommentsForIssue({ issueNumber: number }), comments, 'metadata.id')
