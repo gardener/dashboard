@@ -167,9 +167,11 @@ function init () {
     if (cachedItem) {
       if (isCachedItemOlder(kind, cachedItem, item)) {
         const updatedItem = mapFn ? await mapFn(item) : item
-        // Re-read the current cached item after the async mapFn call. A concurrent update for the same identifier may have written a newer version while we were awaiting mapFn.
+        // Re-read the current cached item after the async mapFn call. A concurrent
+        // update may have written a newer version, or the item may have been
+        // removed, while we were awaiting mapFn.
         const currentCachedItem = cachedMap.get(identifier)
-        if (currentCachedItem && currentCachedItem !== cachedItem && !isCachedItemOlder(kind, currentCachedItem, item)) {
+        if (currentCachedItem !== cachedItem && (!currentCachedItem || !isCachedItemOlder(kind, currentCachedItem, item))) {
           return false
         }
         if (!_.isEqual(currentCachedItem, updatedItem)) {
