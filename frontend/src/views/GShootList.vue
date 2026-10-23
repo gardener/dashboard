@@ -285,6 +285,7 @@ export default {
           defaultSelected: true,
           hidden: !!this.projectScope,
           stalePointerEvents: true,
+          class: 'width-limited',
         },
         {
           title: 'NAME',
@@ -302,6 +303,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: false,
+          class: 'width-limited',
         },
         {
           title: 'TECHNICAL ID',
@@ -310,6 +312,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.canViewLandscape,
+          class: 'width-limited',
         },
         {
           title: 'WORKERS',
@@ -326,6 +329,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
+          class: 'width-limited-large',
         },
         {
           title: 'CREATED AT',
@@ -369,6 +373,7 @@ export default {
           defaultSelected: true,
           hidden: false,
           stalePointerEvents: true,
+          class: 'width-limited',
         },
         {
           title: 'SEED',
@@ -377,6 +382,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
+          class: 'width-limited',
         },
         {
           title: 'SEED READINESS',
@@ -386,6 +392,7 @@ export default {
           defaultSelected: true,
           hidden: !this.canViewLandscape,
           stalePointerEvents: true,
+          class: 'width-limited',
         },
         {
           title: 'ISSUE SINCE',
@@ -394,6 +401,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !this.issueSinceColumnVisible,
+          class: 'width-limited',
         },
         {
           title: 'HIGH AVAILABILITY',
@@ -402,6 +410,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: false,
+          class: 'width-limited',
         },
         {
           title: 'ACCESS RESTRICTIONS',
@@ -410,6 +419,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.accessRestrictionConfig || !this.canViewLandscape,
+          class: 'width-limited',
         },
         {
           title: 'TICKET',
@@ -418,6 +428,7 @@ export default {
           align: 'start',
           defaultSelected: false,
           hidden: !this.gitHubRepoUrl || !this.canViewLandscape,
+          class: 'width-limited',
         },
         {
           title: 'TICKET LABELS',
@@ -426,6 +437,7 @@ export default {
           align: 'start',
           defaultSelected: true,
           hidden: !this.gitHubRepoUrl || !this.canViewLandscape,
+          class: 'width-limited',
         },
         {
           title: 'ACTIONS',
@@ -438,7 +450,7 @@ export default {
       ]
       return map(headers, (header, index) => ({
         ...header,
-        class: 'nowrap',
+        class: [header.class, 'nowrap'].filter(Boolean).join(' '),
         weight: (index + 1) * 100,
         selected: get(this.selectedColumns, header.key, header.defaultSelected),
       }))
@@ -592,3 +604,14 @@ export default {
   },
 }
 </script>
+<style>
+  .width-limited {
+    max-width: 200px;
+    overflow: hidden;
+  }
+
+  .width-limited-large {
+    max-width: 300px;
+    overflow: hidden;
+  }
+</style>
