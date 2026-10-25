@@ -13,8 +13,10 @@ import {
 } from 'vitest'
 
 describe('logger', function () {
-  async function importLogger (config) {
-    vi.resetModules()
+  async function importLogger (config, resetModules = true) {
+    if (resetModules) {
+      vi.resetModules()
+    }
     vi.doMock('../lib/config/index.js', () => ({ default: config }))
     const { default: logger } = await import('../lib/logger/index.js')
     return logger
@@ -31,12 +33,12 @@ describe('logger', function () {
   })
 
   it('should keep the global logger instance when switching the format', async function () {
+    vi.resetModules()
     const { globalLogger } = await import('@gardener-dashboard/logger')
-    const logger = await importLogger({ logLevel: 'info', logFormat: 'json', logHttpRequestBody: false })
-    const { globalLogger: sameLogger } = await import('@gardener-dashboard/logger')
-    expect(logger).toBe(sameLogger)
-    expect(sameLogger.logFormat).toBe('json')
-    sameLogger.setLogFormat('text')
+    const logger = await importLogger({ logLevel: 'info', logFormat: 'json', logHttpRequestBody: false }, false)
+    expect(logger).toBe(globalLogger)
+    expect(globalLogger.logFormat).toBe('json')
+    logger.setLogFormat('text')
     expect(globalLogger.logFormat).toBe('text')
   })
 

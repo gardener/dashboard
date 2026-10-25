@@ -5,6 +5,7 @@
 //
 
 import { vi } from 'vitest'
+import util from 'util'
 import chalk from 'chalk'
 
 import { Logger } from '../lib/index.js'
@@ -259,6 +260,26 @@ describe('logger', () => {
       logger.trace(msg)
       expect(logger.console.error).toHaveBeenCalledTimes(1)
       expect(logger.console.log).toHaveBeenCalledTimes(1)
+    })
+
+    it('should write a fallback record if serializing or formatting throws a non-Error', () => {
+      const logger = createJsonLogger()
+      const field = { toJSON () { throw null } } // eslint-disable-line no-throw-literal
+      expect(() => logger.console.info(logger.serialize('info', 'msg', { field }))).not.toThrow()
+      expect(JSON.parse(logger.console.args[0]).msg).toBe('Failed to serialize log record: null')
+      logger.console.args.length = 0
+
+      const obj = {
+        [util.inspect.custom] () { throw undefined }, // eslint-disable-line no-throw-literal
+      }
+      expect(() => logger.info('%o', obj)).not.toThrow()
+      expect(lastRecord(logger).msg).toBe('Failed to format log message: undefined')
+      logger.console.args.length = 0
+
+      const thrown = { toString () { throw new TypeError('x') } }
+      const obj2 = { [util.inspect.custom] () { throw thrown } }
+      expect(() => logger.info('%o', obj2)).not.toThrow()
+      expect(lastRecord(logger).msg).toBe('Failed to format log message: unknown error')
     })
 
     it('should not throw for errors, circular structures and BigInt values', () => {

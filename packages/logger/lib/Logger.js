@@ -17,6 +17,16 @@ const LEVELS = {
 
 const FORMATS = ['json', 'text']
 
+// Converts any thrown value to a string without throwing, even for null,
+// undefined or objects whose own conversion throws.
+function errorMessage (err) {
+  try {
+    return String(err instanceof Error ? err.message : err)
+  } catch {
+    return 'unknown error'
+  }
+}
+
 // Serializes a log record without ever throwing. JSON.stringify turns an Error
 // into {} and throws on BigInt values and circular structures.
 function stringify (record) {
@@ -44,7 +54,7 @@ function stringify (record) {
   try {
     return JSON.stringify(record, replacer)
   } catch (err) {
-    return JSON.stringify({ level: record.level, ts: record.ts, msg: 'Failed to serialize log record: ' + err.message })
+    return JSON.stringify({ level: record.level, ts: record.ts, msg: 'Failed to serialize log record: ' + errorMessage(err) })
   }
 }
 
@@ -53,7 +63,7 @@ function format (msg, args) {
   try {
     return util.format(msg, ...args)
   } catch (err) {
-    return 'Failed to format log message: ' + err.message
+    return 'Failed to format log message: ' + errorMessage(err)
   }
 }
 

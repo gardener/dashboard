@@ -140,6 +140,17 @@ describe('config', function () {
         expect(gardener.loadConfig(undefined, { env: productionEnv }).logFormat).toBe('json')
       })
 
+      it('should fall back to the default logFormat for unsupported values', function () {
+        for (const [NODE_ENV, expected] of [['production', 'json'], ['development', 'text']]) {
+          for (const LOG_FORMAT of ['JSON', 'yaml']) {
+            const env = Object.assign({ NODE_ENV, LOG_FORMAT }, environmentVariables)
+            expect(gardener.loadConfig(undefined, { env }).logFormat).toBe(expected)
+          }
+        }
+        const env = Object.assign({ NODE_ENV: 'production', LOG_FORMAT: 'text' }, environmentVariables)
+        expect(gardener.loadConfig(undefined, { env }).logFormat).toBe('text')
+      })
+
       it('should use OIDC and GitHub file fallbacks when the providers are configured', function () {
         const env = {}
         const fileMap = {
