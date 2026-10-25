@@ -16,7 +16,7 @@ data:
     ---
     port: {{ .Values.global.dashboard.containerPort }}
     logLevel: {{ .Values.global.dashboard.logLevel }}
-    logFormat: text
+    logFormat: json
     apiServerUrl: {{ required ".Values.global.dashboard.apiServerUrl is required" .Values.global.dashboard.apiServerUrl }}
     {{- if .Values.global.dashboard.apiServerCaData }}
     apiServerCaData: {{ .Values.global.dashboard.apiServerCaData }}

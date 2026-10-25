@@ -45,6 +45,7 @@ describe('config', function () {
         expect(defaults).toEqual({
           isProd: false,
           logLevel: 'debug',
+          logFormat: 'text',
           port: 3030,
           metricsPort: 9050,
         })
@@ -127,6 +128,18 @@ describe('config', function () {
         expect(config.logLevel).toBe('warn')
       })
 
+      it('should set default logFormat to text in development and to json in production', function () {
+        const developmentEnv = Object.assign({
+          NODE_ENV: 'development',
+        }, environmentVariables)
+        expect(gardener.loadConfig(undefined, { env: developmentEnv }).logFormat).toBe('text')
+
+        const productionEnv = Object.assign({
+          NODE_ENV: 'production',
+        }, environmentVariables)
+        expect(gardener.loadConfig(undefined, { env: productionEnv }).logFormat).toBe('json')
+      })
+
       it('should use OIDC and GitHub file fallbacks when the providers are configured', function () {
         const env = {}
         const fileMap = {
@@ -203,6 +216,7 @@ describe('config', function () {
           BIND_HOST: '127.0.0.1',
           METRICS_BIND_HOST: '127.0.0.2',
           LOG_LEVEL: 'error',
+          LOG_FORMAT: 'text',
           OIDC_CLIENT_ID: 'client_id',
           OIDC_CLIENT_SECRET: 'client_secret',
           OIDC_CA: 'ca',
@@ -218,6 +232,7 @@ describe('config', function () {
         expect(config.host).toBe('127.0.0.1')
         expect(config.metricsHost).toBe('127.0.0.2')
         expect(config.logLevel).toBe('error')
+        expect(config.logFormat).toBe('text')
         expect(config.oidc.client_id).toBe('client_id')
         expect(config.oidc.client_secret).toBe('client_secret')
         expect(config.oidc.ca).toBe('ca')

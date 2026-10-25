@@ -111,6 +111,10 @@ const configMappings = [
     configPath: 'logLevel',
   },
   {
+    environmentVariableName: 'LOG_FORMAT',
+    configPath: 'logFormat',
+  },
+  {
     environmentVariableName: 'LOG_HTTP_REQUEST_BODY',
     configPath: 'logHttpRequestBody',
     type: 'Boolean',
@@ -299,6 +303,7 @@ export default {
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
+      logFormat: isProd ? 'json' : 'text',
       port: 3030,
       metricsPort: 9050,
     }

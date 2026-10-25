@@ -172,4 +172,204 @@ describe('logger', () => {
     const msg = `HTTP/2 ${statusCode} ${statusMessage} [${id}]\n${logger.inspect(body)}`
     expect(logger.console.args).toEqual([mockTimestamp + ' ' + chalk.black.bgBlue('res') + '  : ' + msg])
   })
+
+  describe('json format', () => {
+    const ANSI = /\u001b\[[0-9;]*m/ // eslint-disable-line no-control-regex
+
+    function createJsonLogger (logLevel = 'trace') {
+      const logger = createNoisyLogger(logLevel)
+      logger.setLogFormat('json')
+      return logger
+    }
+
+    function lastRecord (logger) {
+      expect(logger.console.args).toHaveLength(1)
+      const [line] = logger.console.args
+      expect(line).not.toMatch(/\n/)
+      expect(line).not.toMatch(ANSI)
+      return JSON.parse(line)
+    }
+
+    it('should default to text and ignore unknown formats', () => {
+      const logger = new Logger()
+      expect(logger.logFormat).toBe('text')
+      logger.setLogFormat('foo')
+      expect(logger.logFormat).toBe('text')
+      logger.setLogFormat('json')
+      expect(logger.logFormat).toBe('json')
+      expect(logger.isJson).toBe(true)
+      expect(new Logger({ logFormat: 'json' }).logFormat).toBe('json')
+    })
+
+    it('should read the format from the environment', () => {
+      process.env.LOG_FORMAT = 'json'
+      expect(new Logger().logFormat).toBe('json')
+    })
+
+    it.each([
+      ['trace', 'trace'],
+      ['debug', 'debug'],
+      ['info', 'info'],
+      ['warn', 'warn'],
+      ['error', 'error'],
+      ['log', 'warn'],
+      ['http', 'info'],
+    ])('should log a %s message as json record with level %s', (method, level) => {
+      const logger = createJsonLogger()
+      logger[method](msg, ...args)
+      expect(lastRecord(logger)).toEqual({
+        level,
+        ts: time,
+        msg: 'foo bar 1 true',
+      })
+    })
+
+    it('should format printf-style arguments like console does', () => {
+      const logger = createJsonLogger()
+      logger.warn('%s failed with %d: %j', 'job', 42, { a: 1 })
+      expect(lastRecord(logger).msg).toBe('job failed with 42: {"a":1}')
+    })
+
+    it('should write the record as a single line with escaped line breaks and control characters', () => {
+      const logger = createJsonLogger()
+      const value = 'a\nb\r\n{"level":"error","msg":"forged"}\u001b[31mred\u001b[0m\u0007'
+      logger.info('value: %s', value)
+      const [line] = logger.console.args
+      expect(line).not.toMatch(/[\u0000-\u001f]/) // eslint-disable-line no-control-regex
+      expect(JSON.parse(line)).toEqual({
+        level: 'info',
+        ts: time,
+        msg: 'value: ' + value,
+      })
+    })
+
+    it('should respect the log level', () => {
+      const logger = createJsonLogger('warn')
+      logger.info(msg)
+      logger.debug(msg)
+      expect(logger.console.args).toEqual([])
+      logger.warn(msg)
+      expect(lastRecord(logger).level).toBe('warn')
+    })
+
+    it('should use the same console methods as the text format', () => {
+      const logger = createJsonLogger()
+      logger.console = { error: vi.fn(), log: vi.fn() }
+      logger.error(msg)
+      logger.trace(msg)
+      expect(logger.console.error).toHaveBeenCalledTimes(1)
+      expect(logger.console.log).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not throw for errors, circular structures and BigInt values', () => {
+      const logger = createJsonLogger()
+      const circular = { name: 'circular' }
+      circular.self = circular
+      const err = new Error('boom')
+
+      expect(() => logger.error('failed: %s', err)).not.toThrow()
+      expect(lastRecord(logger).msg).toContain('Error: boom')
+      logger.console.args.length = 0
+
+      expect(() => logger.error('circular: %o', circular)).not.toThrow()
+      expect(lastRecord(logger).msg).toContain('[Circular')
+      logger.console.args.length = 0
+
+      expect(() => logger.error('big: %d %s', 10n, 20n)).not.toThrow()
+      expect(lastRecord(logger).msg).toBe('big: 10n 20n')
+      logger.console.args.length = 0
+
+      expect(() => logger.error(err)).not.toThrow()
+      expect(lastRecord(logger).msg).toContain('Error: boom')
+    })
+
+    it('should not throw if the message can not be formatted', () => {
+      const logger = createJsonLogger()
+      const bad = { toString () { throw new Error('nope') } }
+      expect(() => logger.error('%s', bad)).not.toThrow()
+      expect(lastRecord(logger).msg).toMatch(/^Failed to format log message: /)
+    })
+
+    it('should serialize errors, circular structures and BigInt values in fields', () => {
+      const logger = createJsonLogger()
+      const circular = { name: 'circular', list: [] }
+      circular.list.push(circular)
+      const shared = { a: 1 }
+      const err = new Error('boom')
+      const line = logger.serialize('error', msg, { err, circular, big: 1n, one: shared, two: shared })
+      const record = JSON.parse(line)
+      expect(record.err).toEqual({ name: 'Error', message: 'boom', stack: err.stack })
+      expect(record.circular).toEqual({ name: 'circular', list: ['[Circular]'] })
+      expect(record.big).toBe('1')
+      expect(record.one).toEqual(shared)
+      expect(record.two).toEqual(shared)
+    })
+
+    it('should fall back to a minimal record if serializing fails', () => {
+      const logger = createJsonLogger()
+      const bad = { toJSON () { throw new Error('nope') } }
+      const record = JSON.parse(logger.serialize('error', msg, { bad }))
+      expect(record).toEqual({
+        level: 'error',
+        ts: time,
+        msg: 'Failed to serialize log record: nope',
+      })
+    })
+
+    it('should not use colors when inspecting', () => {
+      const logger = createJsonLogger()
+      expect(logger.inspect({ a: 'b', c: 1 })).not.toMatch(ANSI)
+      logger.setLogFormat('text')
+      expect(logger.inspect({ a: 'b', c: 1 })).toMatch(ANSI)
+    })
+
+    it('should log request and response records without color codes', () => {
+      const logger = createJsonLogger()
+      logger.request(requestArgs)
+      expect(lastRecord(logger)).toEqual({
+        level: 'debug',
+        ts: time,
+        msg: `${method} ${url.pathname} HTTP/2 [${id}] ${user.type}=${user.id} ${url.host} ${body}`,
+      })
+      logger.console.args.length = 0
+      logger.response({ ...responseArgs, body: { message: 'Not found' } })
+      expect(lastRecord(logger)).toEqual({
+        level: 'debug',
+        ts: time,
+        msg: `HTTP/2 ${statusCode} ${statusMessage} [${id}]\n{ message: 'Not found' }`,
+      })
+    })
+
+    it('should log an access record without escaping the values twice', () => {
+      const logger = createJsonLogger()
+      logger.access({
+        remoteAddr: '10.0.0.1',
+        remoteUser: undefined,
+        method: 'GET',
+        url: '/foo?bar="baz"\nqux',
+        httpVersion: '1.1',
+        status: 200,
+        contentLength: 12,
+      })
+      const [line] = logger.console.args
+      expect(line).not.toContain('\\\\')
+      expect(JSON.parse(line)).toEqual({
+        level: 'info',
+        ts: time,
+        msg: 'GET /foo?bar="baz"\nqux HTTP/1.1 200',
+        remoteAddr: '10.0.0.1',
+        method: 'GET',
+        url: '/foo?bar="baz"\nqux',
+        httpVersion: '1.1',
+        status: 200,
+        contentLength: 12,
+      })
+    })
+
+    it('should not log an access record if info is disabled', () => {
+      const logger = createJsonLogger('warn')
+      logger.access({ method: 'GET', url: '/', httpVersion: '1.1', status: 200 })
+      expect(logger.console.args).toEqual([])
+    })
+  })
 })

@@ -15,6 +15,48 @@ const LEVELS = {
   error: 5,
 }
 
+const FORMATS = ['json', 'text']
+
+// Serializes a log record without ever throwing. JSON.stringify turns an Error
+// into {} and throws on BigInt values and circular structures.
+function stringify (record) {
+  const ancestors = []
+  const replacer = function (key, value) {
+    if (typeof value === 'bigint') {
+      return value.toString()
+    }
+    if (value instanceof Error) {
+      value = { name: value.name, message: value.message, stack: value.stack }
+    }
+    if (typeof value !== 'object' || value === null) {
+      return value
+    }
+    // `this` is the object that holds the current key
+    while (ancestors.length > 0 && ancestors.at(-1) !== this) {
+      ancestors.pop()
+    }
+    if (ancestors.includes(value)) {
+      return '[Circular]'
+    }
+    ancestors.push(value)
+    return value
+  }
+  try {
+    return JSON.stringify(record, replacer)
+  } catch (err) {
+    return JSON.stringify({ level: record.level, ts: record.ts, msg: 'Failed to serialize log record: ' + err.message })
+  }
+}
+
+// Formats the arguments like console.log does. Never throws.
+function format (msg, args) {
+  try {
+    return util.format(msg, ...args)
+  } catch (err) {
+    return 'Failed to format log message: ' + err.message
+  }
+}
+
 class Stream {
   constructor (logger) {
     this.logger = logger
@@ -26,9 +68,15 @@ class Stream {
 }
 
 class Logger {
-  constructor ({ logLevel = process.env.LOG_LEVEL, logHttpRequestBody = process.env.LOG_HTTP_REQUEST_BODY } = {}) {
+  constructor ({
+    logLevel = process.env.LOG_LEVEL,
+    logFormat = process.env.LOG_FORMAT,
+    logHttpRequestBody = process.env.LOG_HTTP_REQUEST_BODY,
+  } = {}) {
     this.logLevel = 2
     this.setLogLevel(logLevel)
+    this.logFormat = 'text'
+    this.setLogFormat(logFormat)
     this.logHttpRequestBody = false
     this.setLogHttpRequestBody(logHttpRequestBody)
     this.silent = /^test/.test(process.env.NODE_ENV)
@@ -42,12 +90,22 @@ class Logger {
     }
   }
 
+  setLogFormat (value) {
+    if (FORMATS.includes(value)) {
+      this.logFormat = value
+    }
+  }
+
   setLogHttpRequestBody (value) {
     this.logHttpRequestBody = /^true$/i.test(value)
   }
 
+  get isJson () {
+    return this.logFormat === 'json'
+  }
+
   inspect (obj) {
-    return util.inspect(obj, { depth: Infinity, colors: true })
+    return util.inspect(obj, { depth: Infinity, colors: !this.isJson })
   }
 
   isDisabled (level) {
@@ -57,6 +115,35 @@ class Logger {
   get ts () {
     const ts = new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
     return chalk.whiteBright(ts)
+  }
+
+  write (method, level, label, msg, args) {
+    if (this.isJson) {
+      this.console[method](this.serialize(level, format(msg, args))) // eslint-disable-line security/detect-object-injection
+    } else {
+      this.console[method](this.ts + ' ' + label + msg, ...args) // eslint-disable-line security/detect-object-injection
+    }
+  }
+
+  serialize (level, msg, fields) {
+    return stringify({ level, ts: new Date().toISOString(), msg, ...fields })
+  }
+
+  // Writes a structured access log record. Unlike http(), the values are
+  // not formatted into msg, so they are JSON-encoded only once.
+  access ({ remoteAddr, remoteUser, method, url, httpVersion, status, contentLength }) {
+    if (!this.isDisabled(LEVELS.info)) {
+      const msg = `${method} ${url} HTTP/${httpVersion} ${status}`
+      this.console.info(this.serialize('info', msg, {
+        remoteAddr,
+        remoteUser,
+        method,
+        url,
+        httpVersion,
+        status,
+        contentLength,
+      }))
+    }
   }
 
   request ({ id, url, method, httpVersion = '2', user, headers, body }) {
@@ -69,7 +156,7 @@ class Logger {
       if (this.logHttpRequestBody && body) {
         msg += ' ' + body.toString('utf8')
       }
-      this.console.log(this.ts + ' ' + chalk.black.bgGreen('req') + '  : ' + msg)
+      this.write('log', 'debug', chalk.black.bgGreen('req') + '  : ', msg, [])
     }
   }
 
@@ -85,49 +172,49 @@ class Logger {
       if (body && statusCode >= 300 && !this.isDisabled(LEVELS.trace)) {
         msg += '\n' + this.inspect(body)
       }
-      this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)
+      this.write('log', 'debug', chalk.black.bgBlue('res') + '  : ', msg, [])
     }
   }
 
   http (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      this.console.log(this.ts + ' ' + chalk.magenta('http') + ' : ' + msg, ...args)
+      this.write('log', 'info', chalk.magenta('http') + ' : ', msg, args)
     }
   }
 
   log (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      this.console.log(this.ts + ' ' + chalk.whiteBright('log') + '  : ' + msg, ...args)
+      this.write('log', 'warn', chalk.whiteBright('log') + '  : ', msg, args)
     }
   }
 
   trace (msg, ...args) {
     if (!this.isDisabled(LEVELS.trace)) {
-      this.console.log(this.ts + ' ' + chalk.cyan('trace') + ': ' + msg, ...args)
+      this.write('log', 'trace', chalk.cyan('trace') + ': ', msg, args)
     }
   }
 
   debug (msg, ...args) {
     if (!this.isDisabled(LEVELS.debug)) {
-      this.console.debug(this.ts + ' ' + chalk.blue('debug') + ': ' + msg, ...args)
+      this.write('debug', 'debug', chalk.blue('debug') + ': ', msg, args)
     }
   }
 
   info (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      this.console.info(this.ts + ' ' + chalk.green('info') + ' : ' + msg, ...args)
+      this.write('info', 'info', chalk.green('info') + ' : ', msg, args)
     }
   }
 
   warn (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      this.console.warn(this.ts + ' ' + chalk.yellow('warn') + ' : ' + msg, ...args)
+      this.write('warn', 'warn', chalk.yellow('warn') + ' : ', msg, args)
     }
   }
 
   error (msg, ...args) {
     if (!this.isDisabled(LEVELS.error)) {
-      this.console.error(this.ts + ' ' + chalk.red('error') + ': ' + msg, ...args)
+      this.write('error', 'error', chalk.red('error') + ': ', msg, args)
     }
   }
 

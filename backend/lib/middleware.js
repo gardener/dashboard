@@ -38,7 +38,25 @@ morgan.token('url', (req, res) => {
   }
 })
 
-const requestLogger = morgan('common', logger)
+const formatCommon = morgan.compile(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]')
+
+const requestLogger = morgan((tokens, req, res) => {
+  if (!logger.isJson) {
+    return formatCommon(tokens, req, res)
+  }
+  // build the record from the request and response, to avoid escaping a formatted line twice
+  const status = Number(tokens.status(req, res))
+  const contentLength = Number(tokens.res(req, res, 'content-length'))
+  logger.access({
+    remoteAddr: tokens['remote-addr'](req, res),
+    remoteUser: tokens['remote-user'](req, res),
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    httpVersion: tokens['http-version'](req, res),
+    status: Number.isNaN(status) ? undefined : status,
+    contentLength: Number.isNaN(contentLength) ? undefined : contentLength,
+  })
+}, logger)
 
 function historyFallback (filename) {
   return (req, res, next) => {
