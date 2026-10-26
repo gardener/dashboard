@@ -27,6 +27,8 @@ SPDX-License-Identifier: Apache-2.0
                   class="ml-1"
                   icon="mdi-atom"
                   size="small"
+                  role="img"
+                  aria-hidden="false"
                   aria-label="Self-hosted shoot cluster"
                 />
               </template>
