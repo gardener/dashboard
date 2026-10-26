@@ -46,6 +46,18 @@ function init () {
     return Array.from(issues.values())
   }
 
+  function getIssueCount () {
+    return issues.size
+  }
+
+  function getCommentCount () {
+    let count = 0
+    for (const comments of commentsForIssues.values()) {
+      count += comments.size
+    }
+    return count
+  }
+
   function getCommentsForIssue ({ issueNumber }) {
     const comments = getCommentsForIssueCache({ issueNumber })
     return Array.from(comments.values())
@@ -199,6 +211,8 @@ function init () {
     on,
     getIssue,
     getIssues,
+    getIssueCount,
+    getCommentCount,
     getCommentsForIssue,
     getIssueNumbers,
     getIssueNumbersForNameAndProjectName,
