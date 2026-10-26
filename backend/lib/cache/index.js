@@ -24,6 +24,7 @@ class Cache extends Map {
   #namespaceToProject = new Map()
   #namespaceToShoots = new Map()
   #seedNameToShoots = new Map()
+  #shootNamespaceIndexInitialized = false
 
   constructor () {
     super()
@@ -100,10 +101,11 @@ class Cache extends Map {
   }
 
   indexShootsByNamespace (informer) {
+    this.#shootNamespaceIndexInitialized = true
     const add = shoot => {
       const namespace = shoot?.metadata?.namespace
-      const uid = shoot?.metadata?.uid
-      if (!namespace || !uid) {
+      const name = shoot?.metadata?.name
+      if (!namespace || !name) {
         return
       }
       let shoots = this.#namespaceToShoots.get(namespace)
@@ -111,17 +113,17 @@ class Cache extends Map {
         shoots = new Map()
         this.#namespaceToShoots.set(namespace, shoots)
       }
-      shoots.set(uid, shoot)
+      shoots.set(name, shoot)
     }
     const del = shoot => {
       const namespace = shoot?.metadata?.namespace
-      const uid = shoot?.metadata?.uid
-      if (!namespace || !uid) {
+      const name = shoot?.metadata?.name
+      if (!namespace || !name) {
         return
       }
       const shoots = this.#namespaceToShoots.get(namespace)
       if (shoots) {
-        shoots.delete(uid)
+        shoots.delete(name)
         if (shoots.size === 0) {
           this.#namespaceToShoots.delete(namespace)
         }
@@ -136,7 +138,7 @@ class Cache extends Map {
   }
 
   getShoot (namespace, name) {
-    return this.#namespaceToShoots.get(namespace)?.values().find(shoot => shoot.metadata.name === name)
+    return this.#namespaceToShoots.get(namespace)?.get(name)
   }
 
   getCloudProfiles () {
@@ -155,7 +157,13 @@ class Cache extends Map {
     return this.get('projects').list()
   }
 
-  getShoots () {
+  getShoots (namespace) {
+    if (namespace && namespace !== '_all') {
+      if (this.#shootNamespaceIndexInitialized) {
+        return Array.from(this.#namespaceToShoots.get(namespace)?.values() ?? [])
+      }
+      return this.get('shoots').list().filter(item => item.metadata.namespace === namespace)
+    }
     return this.get('shoots').list()
   }
 
@@ -235,10 +243,7 @@ export default {
     if (!namespace) {
       throw new TypeError('Namespace is required')
     }
-    let items = cache.getShoots()
-    if (namespace !== '_all') {
-      items = items.filter(item => item.metadata.namespace === namespace)
-    }
+    let items = cache.getShoots(namespace)
     const selectors = parseSelectors(query.labelSelector?.split(',') ?? [])
     if (selectors.length) {
       items = items.filter(filterBySelectors(selectors))
