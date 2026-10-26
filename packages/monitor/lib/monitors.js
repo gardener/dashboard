@@ -11,6 +11,7 @@ const {
   connectionsCount,
   connectionsTotal,
   responseTime,
+  registerCacheCollector,
 } = metrics
 
 function monitorResponseTimes (additionalLabels = {}) {
@@ -51,8 +52,13 @@ function monitorHttpServer (server) {
   })
 }
 
+function monitorCache (name, getCount) {
+  registerCacheCollector(name, getCount)
+}
+
 export default {
   monitorResponseTimes,
   monitorSocketIO,
   monitorHttpServer,
+  monitorCache,
 }
