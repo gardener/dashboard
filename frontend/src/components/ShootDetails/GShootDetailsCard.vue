@@ -112,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0
               :key="workerGroup.name"
               :model-value="workerGroup.controlPlane != null"
               icon="mdi-atom"
+              label="Control plane worker pool"
               color="primary"
               class="ma-1"
             >

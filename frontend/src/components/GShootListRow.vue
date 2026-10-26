@@ -100,6 +100,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-badge
                 :model-value="item.controlPlane != null"
                 icon="mdi-atom"
+                label="Control plane worker pool"
                 color="primary"
                 class="ma-1"
               >
