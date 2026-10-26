@@ -5,5 +5,7 @@ exports[`metrics > should create and export the application defined metrics 1`] 
   "connectionsCount",
   "connectionsTotal",
   "responseTime",
+  "cachedItemsCount",
+  "registerCacheCollector",
 ]
 `;

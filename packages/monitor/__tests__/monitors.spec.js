@@ -58,6 +58,7 @@ vi.mock('../lib/metrics.js', () => {
       responseTime: {
         observe: vi.fn(),
       },
+      registerCacheCollector: vi.fn(),
     },
   }
 })
@@ -69,6 +70,7 @@ const {
     monitorSocketIO,
     monitorHttpServer,
     monitorResponseTimes,
+    monitorCache,
   },
 } = await import('../lib/monitors.js')
 
@@ -193,6 +195,16 @@ describe('monitors', () => {
         route: metricsRoute,
         status_code: statusCode,
       }, requestDuration / 1000)
+    })
+  })
+
+  describe('cache monitor', () => {
+    it('should register a cache collector', () => {
+      const getCount = vi.fn()
+
+      monitorCache('shoots', getCount)
+
+      expect(metrics.registerCacheCollector).toHaveBeenCalledWith('shoots', getCount)
     })
   })
 })
