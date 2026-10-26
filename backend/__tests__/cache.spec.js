@@ -198,13 +198,17 @@ describe('cache', function () {
 
       handlers.get('add')(oldShoot)
       expect(cache.getShoot('garden-foo', 'shoot-1')).toBe(oldShoot)
+      expect(cache.getShoots('garden-foo')).toEqual([oldShoot])
 
       handlers.get('update')(newShoot, oldShoot)
       expect(cache.getShoot('garden-foo', 'shoot-1')).toBeUndefined()
       expect(cache.getShoot('garden-bar', 'shoot-1')).toBe(newShoot)
+      expect(cache.getShoots('garden-foo')).toEqual([])
+      expect(cache.getShoots('garden-bar')).toEqual([newShoot])
 
       handlers.get('delete')(newShoot)
       expect(cache.getShoot('garden-bar', 'shoot-1')).toBeUndefined()
+      expect(cache.getShoots('garden-bar')).toEqual([])
     })
   })
 })
