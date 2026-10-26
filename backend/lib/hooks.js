@@ -11,11 +11,12 @@ import config from './config/index.js'
 import * as watches from './watches/index.js'
 import io from './io/index.js'
 const { createDashboardClient, abortWatcher } = kubeClientModule
-const { monitorCache, monitorHttpServer, monitorSocketIO } = monitorModule
+const { monitorCache, monitorHttpServer, monitorInformer, monitorSocketIO } = monitorModule
 
 function monitorCaches (informers) {
   for (const [name, informer] of Object.entries(informers)) {
     monitorCache(name, () => informer.store.listKeys().length)
+    monitorInformer(name, informer)
   }
   const ticketCache = cache.getTicketCache()
   monitorCache('github_issues', () => ticketCache.getIssueCount())

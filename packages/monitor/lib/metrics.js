@@ -18,6 +18,11 @@ const connectionsTotal = new promClient.Counter({
   help: 'Total number of opened TCP connections',
   labelNames: ['type'],
 })
+const informerEventsTotal = new promClient.Counter({
+  name: 'kube_informer_events_total',
+  help: 'Total number of events processed by Kubernetes informers',
+  labelNames: ['informer', 'type'],
+})
 const responseTime = new promClient.Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
@@ -47,6 +52,7 @@ function registerCacheCollector (cache, getCount) {
 export default {
   connectionsCount,
   connectionsTotal,
+  informerEventsTotal,
   responseTime,
   cachedItemsCount,
   registerCacheCollector,
