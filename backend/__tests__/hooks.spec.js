@@ -239,6 +239,11 @@ describe('hooks', () => {
         expect(monitorModule.monitorCache).toHaveBeenCalledWith('github_issues', expect.any(Function))
         expect(monitorModule.monitorCache).toHaveBeenCalledWith('github_comments', expect.any(Function))
 
+        expect(monitorModule.monitorInformer).toHaveBeenCalledTimes(keys.length)
+        for (const key of keys) {
+          expect(monitorModule.monitorInformer).toHaveBeenCalledWith(key, informers[key])
+        }
+
         expect(cache.indexProjectsByNamespace).toHaveBeenCalledTimes(1)
         expect(cache.indexProjectsByNamespace.mock.calls[0]).toEqual([informers.projects])
 

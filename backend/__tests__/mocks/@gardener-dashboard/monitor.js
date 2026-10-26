@@ -15,6 +15,7 @@ const monitorResponseTimes = vi.fn().mockImplementation(() => {
 const monitorHttpServer = vi.fn()
 const monitorSocketIO = vi.fn()
 const monitorCache = vi.fn()
+const monitorInformer = vi.fn()
 
 const destroy = vi.fn()
 
@@ -24,6 +25,7 @@ const mockModule = {
   monitorHttpServer,
   monitorSocketIO,
   monitorCache,
+  monitorInformer,
   destroy,
 }
 
@@ -33,5 +35,6 @@ export {
   monitorHttpServer,
   monitorSocketIO,
   monitorCache,
+  monitorInformer,
   destroy,
 }
