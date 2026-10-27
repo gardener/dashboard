@@ -95,8 +95,8 @@ SPDX-License-Identifier: Apache-2.0
                   <template v-if="worker.zones?.length">
                     <span class="mx-2 text-medium-emphasis">/</span>
                     <v-chip
-                      v-for="zone in worker.zones.slice(0, 3)"
-                      :key="zone"
+                      v-for="(zone, zoneIndex) in worker.zones.slice(0, 3)"
+                      :key="`${zone}-${zoneIndex}`"
                       size="x-small"
                       class="mr-1"
                     >
@@ -136,6 +136,7 @@ SPDX-License-Identifier: Apache-2.0
                       />
                     </span>
                     <span
+                      v-if="providerWorkers.length > 1"
                       data-test="remove-worker-action"
                       class="d-inline-flex mr-2"
                       @click.stop
@@ -330,20 +331,6 @@ function getWorkerValidationMessage (validation) {
   return messageFromErrors(localErrors)
 }
 
-function scrollToWorker (uid) {
-  if (findWorkerIndex(uid) < 0) {
-    return
-  }
-  nextTick(() => {
-    const element = workerList.getElement(uid)
-    if (element) {
-      element.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
-      return
-    }
-    workerList.scrollToKey(uid, { behavior: 'smooth' })
-  })
-}
-
 async function revealNewWorker (uid, { revealThroughAddAction = false } = {}) {
   if (!uid) {
     return
@@ -436,10 +423,6 @@ function setWorkerExpanded (uid, isExpanded) {
     nextExpandedWorkerUids.delete(uid)
   }
   expandedWorkerUids.value = nextExpandedWorkerUids
-
-  if (!isExpanded) {
-    scrollToWorker(uid)
-  }
 }
 
 function toggleCollapseAll () {
