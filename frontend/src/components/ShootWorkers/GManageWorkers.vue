@@ -331,7 +331,7 @@ function getWorkerValidationMessage (validation) {
   return messageFromErrors(localErrors)
 }
 
-async function revealNewWorker (uid, { revealThroughAddAction = false } = {}) {
+async function revealNewWorker (uid, { revealUntil } = {}) {
   if (!uid) {
     return
   }
@@ -345,11 +345,7 @@ async function revealNewWorker (uid, { revealThroughAddAction = false } = {}) {
     if (!workerList.getElement(uid)) {
       workerList.scrollToKey(uid)
     }
-    await workerTransitions.enter(uid, {
-      revealUntil: revealThroughAddAction
-        ? addWorkerAction.value
-        : undefined,
-    })
+    await workerTransitions.enter(uid, { revealUntil })
   } finally {
     workerList.unpin(uid)
   }
@@ -368,7 +364,9 @@ function highlightWorker (uid) {
 function addWorker () {
   workerTransitions.finishActive()
   addProviderWorker()
-  revealNewWorker(providerWorkers.value.at(-1)?._uid, { revealThroughAddAction: true })
+  revealNewWorker(providerWorkers.value.at(-1)?._uid, {
+    revealUntil: addWorkerAction.value,
+  })
 }
 
 function duplicateWorker (uid) {
