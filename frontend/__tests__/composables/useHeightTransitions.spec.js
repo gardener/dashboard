@@ -11,7 +11,7 @@ import {
   useHeightTransitions,
 } from '@/composables/useHeightTransitions'
 
-import { getRevealScrollTop } from '@/utils/scroll'
+import { getScrollTopToReveal } from '@/utils/scroll'
 
 function mockReducedMotion (matches) {
   vi.mocked(window.matchMedia).mockImplementation(query => ({
@@ -31,7 +31,7 @@ describe('useHeightTransitions', () => {
     vi.useRealTimers()
   })
 
-  describe('getRevealScrollTop', () => {
+  describe('getScrollTopToReveal', () => {
     it.each([
       {
         description: 'keeps an already visible element in place',
@@ -64,7 +64,7 @@ describe('useHeightTransitions', () => {
         expected: 0,
       },
     ])('$description', ({ input, expected }) => {
-      expect(getRevealScrollTop(input)).toBe(expected)
+      expect(getScrollTopToReveal(input)).toBe(expected)
     })
   })
 

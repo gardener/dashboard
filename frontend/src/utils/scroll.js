@@ -34,7 +34,12 @@ export function getOffsetWithin (container, element) {
   return elementRect.top - containerRect.top - container.clientTop + container.scrollTop
 }
 
-export function getRevealScrollTop ({
+/**
+ * Return the scroll offset needed to reveal an item with the requested margin.
+ * Keep the current offset when the item is already fully visible and align the
+ * item start when the complete item cannot fit in the viewport.
+ */
+export function getScrollTopToReveal ({
   scrollTop,
   viewportHeight,
   top,

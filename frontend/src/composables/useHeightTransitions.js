@@ -16,7 +16,7 @@ import {
 
 import {
   getOffsetWithin,
-  getRevealScrollTop,
+  getScrollTopToReveal,
   getScrollTop,
   getViewportHeight,
   setScrollTop,
@@ -166,7 +166,7 @@ export function useHeightTransitions ({
       return progress => {
         const expandedHeight = element.scrollHeight
         element.style.height = `${expandedHeight * progress}px`
-        const finalScrollTop = getRevealScrollTop({
+        const finalScrollTop = getScrollTopToReveal({
           scrollTop: initialScrollTop,
           viewportHeight: getViewportHeight(container),
           top: getOffsetWithin(container, element),
