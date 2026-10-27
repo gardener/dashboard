@@ -337,6 +337,17 @@ describe('logger', () => {
       })
     })
 
+    it('should fall back to a minimal record if a field getter throws', () => {
+      const logger = createJsonLogger()
+      const fields = { get bad () { throw new Error('getter') } }
+      const record = JSON.parse(logger.serialize('error', msg, fields))
+      expect(record).toEqual({
+        level: 'error',
+        ts: time,
+        msg: 'Failed to serialize log record: getter',
+      })
+    })
+
     it('should not use colors when inspecting', () => {
       const logger = createJsonLogger()
       expect(logger.inspect({ a: 'b', c: 1 })).not.toMatch(ANSI)

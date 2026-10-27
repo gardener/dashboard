@@ -136,7 +136,13 @@ class Logger {
   }
 
   serialize (level, msg, fields) {
-    return stringify({ level, ts: new Date().toISOString(), msg, ...fields })
+    const ts = new Date().toISOString()
+    try {
+      return stringify({ level, ts, msg, ...fields })
+    } catch (err) {
+      // spreading fields can throw, e.g. when an enumerable getter throws
+      return stringify({ level, ts, msg: 'Failed to serialize log record: ' + errorMessage(err) })
+    }
   }
 
   // Writes a structured access log record. Unlike http(), the values are
