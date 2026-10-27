@@ -21,13 +21,13 @@ import {
   lowerCaseAlphaNumHyphen,
   noStartEndHyphen,
   numberOrPercentage,
-  withFieldName,
+  withFieldMetadata,
   withMessage,
   withParams,
 } from '@/utils/validators'
 
-function workerGroupName (worker) {
-  return worker.name ? `[Worker Group ${worker.name}]` : '[Worker Group]'
+function workerGroupContext (worker) {
+  return worker.name ? `Worker Group ${worker.name}` : 'Worker Group'
 }
 
 export function useWorkersValidation () {
@@ -65,57 +65,61 @@ export function useWorkersValidation () {
   }
 
   function createWorkerValidationRules (worker) {
-    const fieldName = workerGroupName(worker)
+    const fieldContext = computed(() => workerGroupContext(worker))
+    const withWorkerFieldMetadata = (fieldName, validators) => withFieldMetadata({
+      fieldName,
+      fieldContext,
+    }, validators)
     const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
       { type: 'uniqueWorkerName' },
       value => providerWorkers.value.filter(item => item.name === value).length === 1,
     ))
 
     return {
-      name: withFieldName(`${fieldName} Name`, {
+      name: withWorkerFieldMetadata('Name', {
         required,
         maxLength: maxLength(15),
         lowerCaseAlphaNumHyphen,
         noStartEndHyphen,
         uniqueWorkerName,
       }),
-      minimum: withFieldName(`${fieldName} Autoscaler Min.`, {
+      minimum: withWorkerFieldMetadata('Autoscaler Min.', {
         minValue: minValue(0),
       }),
-      maximum: withFieldName(`${fieldName} Autoscaler Max.`, {
+      maximum: withWorkerFieldMetadata('Autoscaler Max.', {
         minValue: minValue(0),
         systemComponents: withMessage(
           'Value must be greater or equal to the number of zones configured for this pool',
           value => worker.systemComponents?.allow === false || value >= (worker.zones?.length ?? 0),
         ),
       }),
-      maxSurge: withFieldName(`${fieldName} Max. Surge`, {
+      maxSurge: withWorkerFieldMetadata('Max. Surge', {
         numberOrPercentage,
       }),
-      zones: withFieldName(`${fieldName} Zones`, {
+      zones: withWorkerFieldMetadata('Zones', {
         required: requiredIf(isZonedClusterRequired),
       }),
       machine: {
-        architecture: withFieldName(`${fieldName} Machine Architecture`, {
+        architecture: withWorkerFieldMetadata('Machine Architecture', {
           required,
         }),
-        type: withFieldName(`${fieldName} Machine Type`, {
+        type: withWorkerFieldMetadata('Machine Type', {
           required,
         }),
-        image: withFieldName(`${fieldName} Machine Image`, {
+        image: withWorkerFieldMetadata('Machine Image', {
           required,
         }),
       },
       cri: {
-        name: withFieldName(`${fieldName} Container Runtime`, {
+        name: withWorkerFieldMetadata('Container Runtime', {
           required,
         }),
       },
       volume: {
-        type: withFieldName(`${fieldName} Volume Type`, {
+        type: withWorkerFieldMetadata('Volume Type', {
           required: requiredIf(hasVolumeTypes),
         }),
-        size: withFieldName(`${fieldName} Volume Size`, {
+        size: withWorkerFieldMetadata('Volume Size', {
           minVolumeSize: withMessage(
             () => `Minimum size is ${getMinimumVolumeSizeGi(worker)}`,
             value => {
@@ -129,7 +133,7 @@ export function useWorkersValidation () {
       },
       providerConfig: {
         volume: {
-          iops: withFieldName(`${fieldName} Volume Type IOPS`, {
+          iops: withWorkerFieldMetadata('Volume Type IOPS', {
             required: requiredIf(getIsWorkerIopsRequired(worker)),
             minValue: minValue(100),
           }),

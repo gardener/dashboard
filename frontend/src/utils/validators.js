@@ -81,22 +81,31 @@ const includesIfAvailable = (key, reference) => withMessage(`Value of property '
     },
   ))
 
-const withFieldName = (fieldName, validators) => {
+const withFieldMetadata = (metadata, validators) => {
+  const resolvedMetadata = Object.fromEntries(
+    Object.entries(metadata).map(([key, value]) => [
+      key,
+      typeof value === 'function' ? value() : value,
+    ]),
+  )
   for (const [key, validator] of Object.entries(validators)) {
-    if (typeof fieldName === 'function') {
-      fieldName = fieldName.call(this)
-    }
-    set(validators, [key], withParams({ fieldName }, validator))
+    set(validators, [key], withParams(resolvedMetadata, validator))
   }
   return validators
 }
 
-const messageFromErrors = errors => {
+const withFieldName = (fieldName, validators) => withFieldMetadata({ fieldName }, validators)
+
+const messageFromErrors = (errors, { includeFieldContext = true } = {}) => {
   const errorMessages = []
   if (errors) {
     errors.forEach(error => {
+      const fieldName = error.$params.fieldName || error.$propertyPath
+      const fieldContext = includeFieldContext
+        ? error.$params.fieldContext
+        : undefined
       errorMessages.push({
-        fieldName: error.$params.fieldName ? error.$params.fieldName : error.$propertyPath,
+        fieldName: fieldContext ? `[${fieldContext}] ${fieldName}` : fieldName,
         message: error.$message,
       })
     })
@@ -108,6 +117,7 @@ const messageFromErrors = errors => {
 export {
   withParams,
   withMessage,
+  withFieldMetadata,
   withFieldName,
   messageFromErrors,
   regex,

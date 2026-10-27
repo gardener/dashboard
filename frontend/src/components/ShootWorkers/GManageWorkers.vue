@@ -293,20 +293,7 @@ function isWorkerExpanded (uid) {
 }
 
 function getWorkerValidationMessage (validation) {
-  const localErrors = (validation?.$errors ?? []).map(error => {
-    const fieldName = error.$params.fieldName
-    const prefixEnd = fieldName?.startsWith('[Worker Group')
-      ? fieldName.indexOf('] ')
-      : -1
-    return {
-      ...error,
-      $params: {
-        ...error.$params,
-        fieldName: prefixEnd >= 0 ? fieldName.slice(prefixEnd + 2) : fieldName,
-      },
-    }
-  })
-  return messageFromErrors(localErrors)
+  return messageFromErrors(validation?.$errors, { includeFieldContext: false })
 }
 
 async function revealNewWorker (uid, { revealUntil } = {}) {
