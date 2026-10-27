@@ -35,11 +35,23 @@ data:
     clusterIdentity: {{ .Values.global.dashboard.clusterIdentity }}
     {{- end }}
     maxRequestBodySize: {{ .Values.global.dashboard.maxRequestBodySize | default "100kb" }}
-    {{- with .Values.global.dashboard.kubeClient.reflector.resources }}
+    {{- $kubeClient := .Values.global.dashboard.kubeClient }}
+    {{- if or (ne $kubeClient.initialWindowSize nil) (ne $kubeClient.connectionWindowSize nil) (ne $kubeClient.maxSessionMemory nil) $kubeClient.reflector.resources }}
     kubeClient:
+      {{- if ne $kubeClient.initialWindowSize nil }}
+      initialWindowSize: {{ $kubeClient.initialWindowSize }}
+      {{- end }}
+      {{- if ne $kubeClient.connectionWindowSize nil }}
+      connectionWindowSize: {{ $kubeClient.connectionWindowSize }}
+      {{- end }}
+      {{- if ne $kubeClient.maxSessionMemory nil }}
+      maxSessionMemory: {{ $kubeClient.maxSessionMemory }}
+      {{- end }}
+      {{- with $kubeClient.reflector.resources }}
       reflector:
         resources:
 {{ toYaml . | trim | nindent 10 }}
+      {{- end }}
     {{- end }}
     readinessProbe:
       periodSeconds: {{ .Values.global.dashboard.readinessProbe.periodSeconds }}

@@ -141,6 +141,21 @@ const configMappings = [
     configPath: 'websocketAllowedOrigins',
     type: 'Array',
   },
+  {
+    environmentVariableName: 'KUBE_CLIENT_INITIAL_WINDOW_SIZE',
+    configPath: 'kubeClient.initialWindowSize',
+    type: 'Integer',
+  },
+  {
+    environmentVariableName: 'KUBE_CLIENT_CONNECTION_WINDOW_SIZE',
+    configPath: 'kubeClient.connectionWindowSize',
+    type: 'Integer',
+  },
+  {
+    environmentVariableName: 'KUBE_CLIENT_MAX_SESSION_MEMORY',
+    configPath: 'kubeClient.maxSessionMemory',
+    type: 'Integer',
+  },
 ]
 
 const MOST_RECENT_PAGINATED = 'mostRecentPaginated'
@@ -167,7 +182,36 @@ function validateReflectorConfig (config) {
   if (!_.isPlainObject(kubeClient)) {
     assert.fail("Configuration value 'kubeClient' must be an object")
   }
-  const { reflector } = kubeClient
+  const { initialWindowSize, connectionWindowSize, maxSessionMemory, reflector } = kubeClient
+  const integerOptions = [
+    {
+      name: 'initialWindowSize',
+      value: initialWindowSize,
+      min: 0,
+      max: 2 ** 32 - 1,
+      message: 'must be an integer between 0 and 4294967295',
+    },
+    {
+      name: 'connectionWindowSize',
+      value: connectionWindowSize,
+      min: 0,
+      max: 2 ** 32 - 1,
+      message: 'must be an integer between 0 and 4294967295',
+    },
+    {
+      name: 'maxSessionMemory',
+      value: maxSessionMemory,
+      min: 1,
+      max: Number.MAX_SAFE_INTEGER,
+      message: 'must be a positive safe integer',
+    },
+  ]
+  for (const { name, value, min, max, message } of integerOptions) {
+    if (value !== undefined &&
+      (!Number.isSafeInteger(value) || value < min || value > max)) {
+      assert.fail(`Configuration value 'kubeClient.${name}' ${message}`)
+    }
+  }
   if (reflector === undefined) {
     return
   }

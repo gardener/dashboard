@@ -30,6 +30,16 @@ global:
       audience: ''
 
     kubeClient:
+      # Optional HTTP/2 receive window in bytes for each Kubernetes API stream.
+      # Defaults to Node.js' 65535 bytes when unset. KUBE_CLIENT_INITIAL_WINDOW_SIZE
+      # overrides the value configured in config.yaml.
+      initialWindowSize: ~
+      # Optional HTTP/2 receive window in bytes shared by all Kubernetes API streams.
+      # KUBE_CLIENT_CONNECTION_WINDOW_SIZE overrides the value in config.yaml.
+      connectionWindowSize: ~
+      # Optional maximum HTTP/2 session memory in MiB. Defaults to 20 when unset.
+      # KUBE_CLIENT_MAX_SESSION_MEMORY overrides the value in config.yaml.
+      maxSessionMemory: ~
       # Optional HTTP/2 read-idle timeout in milliseconds.
       # Defaults to 30000 when unset. Set to 0 to disable PING health checks.
       readIdleTimeout: ~

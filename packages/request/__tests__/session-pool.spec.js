@@ -83,6 +83,7 @@ class MockHttp2Session extends MockEmitter {
     this.request = vi.fn()
       .mockImplementation((...args) => new MockHttp2Stream(...args))
     this.setTimeout = vi.fn()
+    this.setLocalWindowSize = vi.fn()
   }
 }
 
@@ -456,6 +457,25 @@ describe('SessionPool', () => {
   })
 
   describe('#createSession', () => {
+    it('should apply the configured connection window size and session memory limit', () => {
+      options.connectionWindowSize = 16 * 1024 * 1024
+      options.maxSessionMemory = 64
+
+      const session = pool.createSession()
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        maxSessionMemory: 64,
+        settings: expect.objectContaining({
+          initialWindowSize: 65535,
+        }),
+      }))
+      expect(mockHttp2Connect.mock.calls[0][1]).not.toHaveProperty('connectionWindowSize')
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).toHaveBeenCalledWith(options.connectionWindowSize)
+    })
+
     it('should create and close a session', () => {
       const session = pool.createSession()
 

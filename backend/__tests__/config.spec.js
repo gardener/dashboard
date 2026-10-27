@@ -107,6 +107,50 @@ describe('config', function () {
         return loadKubeClientConfig({ reflector }, env)
       }
 
+      it('should configure the kube client initial window size', function () {
+        const config = loadKubeClientConfig({ initialWindowSize: 1048576 })
+
+        expect(config.kubeClient.initialWindowSize).toBe(1048576)
+      })
+
+      it('should override the kube client initial window size with an environment variable', function () {
+        const config = loadKubeClientConfig(
+          { initialWindowSize: 1048576 },
+          { NODE_ENV: 'test', KUBE_CLIENT_INITIAL_WINDOW_SIZE: '2097152' },
+        )
+
+        expect(config.kubeClient.initialWindowSize).toBe(2097152)
+      })
+
+      it('should configure connection window size and session memory from environment variables', function () {
+        const config = loadKubeClientConfig(
+          { connectionWindowSize: 1048576, maxSessionMemory: 20 },
+          {
+            NODE_ENV: 'test',
+            KUBE_CLIENT_CONNECTION_WINDOW_SIZE: '16777216',
+            KUBE_CLIENT_MAX_SESSION_MEMORY: '64',
+          },
+        )
+
+        expect(config.kubeClient).toMatchObject({
+          connectionWindowSize: 16777216,
+          maxSessionMemory: 64,
+        })
+      })
+
+      it.each([-1, 1.5, 2 ** 32])('should reject invalid kube client initial window size %s', function (initialWindowSize) {
+        expect(() => loadKubeClientConfig({ initialWindowSize })).toThrow(
+          "Configuration value 'kubeClient.initialWindowSize' must be an integer between 0 and 4294967295",
+        )
+      })
+
+      it.each([
+        ['connectionWindowSize', -1, "Configuration value 'kubeClient.connectionWindowSize' must be an integer between 0 and 4294967295"],
+        ['maxSessionMemory', 0, "Configuration value 'kubeClient.maxSessionMemory' must be a positive safe integer"],
+      ])('should reject invalid kube client option %s', function (name, value, message) {
+        expect(() => loadKubeClientConfig({ [name]: value })).toThrow(message)
+      })
+
       it('should return the config in test environment without config file', function () {
         const env = Object.assign({
           NODE_ENV: 'test',
