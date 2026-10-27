@@ -8,13 +8,13 @@ import createError from 'http-errors'
 import logger from '../logger/index.js'
 import helper from './helper.js'
 import * as seedstats from '../services/seedstats.js'
+import { ALL_UNHEALTHY_FILTER_FLAGS } from '../services/shootClassification.js'
 
 const { getUserFromSocket } = helper
 
 const group = 'dashboard.gardener.cloud'
 const kind = 'SeedStat'
-const unhealthyFilterMasks = Array.from({ length: 8 }, (_, mask) => mask)
-const seedStatsRoomRegExp = /^seedstats;(?:uf=[0-7]|seed=[^;]+;uf=[0-7])$/
+const unhealthyFilterMasks = Array.from({ length: ALL_UNHEALTHY_FILTER_FLAGS + 1 }, (_, mask) => mask)
 
 function notFound (uid) {
   return {
@@ -63,8 +63,8 @@ function getJoinedRooms (nsp, { seedName }) {
   const rooms = []
   for (const unhealthyFilterMask of unhealthyFilterMasks) {
     for (const room of [
-      `seedstats;uf=${unhealthyFilterMask}`,
-      `seedstats;seed=${seedName};uf=${unhealthyFilterMask}`,
+      getListRoomName(unhealthyFilterMask),
+      getSeedRoomName(seedName, unhealthyFilterMask),
     ]) {
       if (adapterRooms.has(room)) {
         rooms.push({ room, unhealthyFilterMask })
@@ -96,7 +96,7 @@ async function subscribe (socket, options = {}) {
 
 function unsubscribe (socket) {
   const promises = Array.from(socket.rooms)
-    .filter(room => seedStatsRoomRegExp.test(room))
+    .filter(room => room.startsWith('seedstats;'))
     .map(room => socket.leave(room))
   return Promise.all(promises)
 }
