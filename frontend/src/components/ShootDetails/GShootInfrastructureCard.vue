@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0
       </g-list-item>
       <v-divider inset />
       <template v-if="showSeedInfo">
-        <g-list-item>
+        <g-list-item v-if="!isSelfHostedShoot">
           <template #prepend>
             <v-icon color="primary">
               mdi-sprout
@@ -84,15 +84,23 @@ SPDX-License-Identifier: Apache-2.0
             />
           </template>
         </g-list-item>
-        <g-list-item>
-          <g-list-item-content label="Technical Id">
-            {{ shootTechnicalId }}
-          </g-list-item-content>
-          <template #append>
-            <g-copy-btn :clipboard-text="shootTechnicalId" />
-          </template>
-        </g-list-item>
       </template>
+      <g-list-item v-if="shootTechnicalId">
+        <template #prepend>
+          <v-icon
+            v-if="isSelfHostedShoot"
+            color="primary"
+          >
+            mdi-sprout
+          </v-icon>
+        </template>
+        <g-list-item-content label="Technical Id">
+          {{ shootTechnicalId }}
+        </g-list-item-content>
+        <template #append>
+          <g-copy-btn :clipboard-text="shootTechnicalId" />
+        </template>
+      </g-list-item>
       <g-list-item>
         <template #prepend>
           <v-icon
@@ -338,6 +346,7 @@ export default {
       shootDnsServiceExtensionProviders,
       shootDnsPrimaryProvider,
       shootSecretBindingName,
+      isSelfHostedShoot,
     } = useShootItem()
 
     const { getResourceRef } = useShootResources(shootItem)
@@ -380,6 +389,7 @@ export default {
       availableFloatingPools,
       shootSecretBindingName,
       credentialStore,
+      isSelfHostedShoot,
     }
   },
   computed: {

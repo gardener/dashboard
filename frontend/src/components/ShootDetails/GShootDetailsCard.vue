@@ -15,7 +15,25 @@ SPDX-License-Identifier: Apache-2.0
           </v-icon>
         </template>
         <g-list-item-content label="Name">
-          {{ shootName }}
+          <div class="d-flex align-center">
+            {{ shootName }}
+            <v-tooltip
+              v-if="isSelfHostedShoot"
+              text="Self-hosted shoot cluster"
+            >
+              <template #activator="{ props }">
+                <v-icon
+                  v-bind="props"
+                  class="ml-1"
+                  icon="mdi-atom"
+                  size="small"
+                  role="img"
+                  aria-hidden="false"
+                  aria-label="Self-hosted shoot cluster"
+                />
+              </template>
+            </v-tooltip>
+          </div>
         </g-list-item-content>
         <template #append>
           <g-copy-btn :clipboard-text="shootName" />
@@ -89,12 +107,17 @@ SPDX-License-Identifier: Apache-2.0
             v-if="hasShootWorkerGroups"
             class="d-flex align-center flex-wrap"
           >
-            <g-worker-group
+            <v-badge
               v-for="workerGroup in shootWorkerGroups"
               :key="workerGroup.name"
-              :worker-group="workerGroup"
+              :model-value="workerGroup.controlPlane != null"
+              icon="mdi-atom"
+              label="Control plane worker pool"
+              color="primary"
               class="ma-1"
-            />
+            >
+              <g-worker-group :worker-group="workerGroup" />
+            </v-badge>
           </div>
           <g-workerless-chip v-else />
         </g-list-item-content>
@@ -283,6 +306,7 @@ const {
   hasShootWorkerGroups,
   shootWorkerGroups,
   shootAccessRestrictions,
+  isSelfHostedShoot,
 } = useShootItem()
 
 const configStore = useConfigStore()

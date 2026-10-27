@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0
       density="comfortable"
       @click.capture="actionMenu = false"
     >
-      <v-list-item>
+      <v-list-item v-if="!isSelfHostedShoot">
         <g-shoot-action-change-hibernation
           text
         />
@@ -71,8 +71,8 @@ SPDX-License-Identifier: Apache-2.0
           text
         />
       </v-list-item>
-      <v-divider />
-      <v-list-item>
+      <v-divider v-if="!isSelfHostedShoot" />
+      <v-list-item v-if="!isSelfHostedShoot">
         <g-shoot-action-delete-cluster
           v-if="!canForceDeleteShoot"
           text
@@ -112,6 +112,7 @@ const {
   shootName,
   shootUid,
   canForceDeleteShoot,
+  isSelfHostedShoot,
 } = useProvideShootItem(shootActionItem)
 
 const accessDialog = createShootActionFlag('access')
