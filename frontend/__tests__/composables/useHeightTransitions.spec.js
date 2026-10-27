@@ -69,7 +69,7 @@ describe('useHeightTransitions', () => {
   })
 
   it('runs monotonic animation frames and completes once', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
     const frames = []
     const onDone = vi.fn()
 
@@ -92,7 +92,7 @@ describe('useHeightTransitions', () => {
   })
 
   it('finishes an animation immediately', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
     const frames = []
     const onDone = vi.fn()
     const transition = tween({
@@ -110,7 +110,7 @@ describe('useHeightTransitions', () => {
   })
 
   it('cancels without completing', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
     const onDone = vi.fn()
     const transition = tween({
       duration: 100,
@@ -140,7 +140,7 @@ describe('useHeightTransitions', () => {
   })
 
   it('keeps the animated element top visible when the full reveal range does not fit', async () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+    vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
     const container = document.createElement('div')
     const element = document.createElement('div')
     const content = document.createElement('div')

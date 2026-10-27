@@ -273,7 +273,7 @@ describe('components', () => {
 
     it('finds the scroll container when switching from workerless mode', async () => {
       wrapper.unmount()
-      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
       const scrollParent = document.createElement('div')
       scrollParent.style.overflowY = 'auto'
       Object.defineProperty(scrollParent, 'clientHeight', { configurable: true, value: 200 })
@@ -424,7 +424,7 @@ describe('components', () => {
 
     it('removes a worker only after its collapse transition finishes', async () => {
       await expandWorker('worker-one')
-      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
 
       await findWorkerGroup('worker-one').findAll('button').find(button => button.text() === 'Remove').trigger('click')
 
@@ -452,7 +452,7 @@ describe('components', () => {
       })
       await expandWorker('worker-one')
       await expandWorker('worker-three')
-      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
 
       await findWorkerGroup('worker-one').findAll('button').find(button => button.text() === 'Remove').trigger('click')
       await findWorkerGroup('worker-three').findAll('button').find(button => button.text() === 'Duplicate').trigger('click')
@@ -469,7 +469,7 @@ describe('components', () => {
     it('disables removal while another removal would leave no worker', async () => {
       await expandWorker('worker-one')
       await expandWorker('worker-two')
-      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance'] })
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
 
       await findWorkerGroup('worker-one').findAll('button').find(button => button.text() === 'Remove').trigger('click')
       await nextTick()

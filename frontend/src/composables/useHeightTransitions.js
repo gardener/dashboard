@@ -4,7 +4,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { onScopeDispose } from 'vue'
+import {
+  onScopeDispose,
+  shallowRef,
+  watch,
+} from 'vue'
+import {
+  transition,
+  TransitionPresets,
+} from '@vueuse/core'
 
 import {
   getOffsetWithin,
@@ -14,68 +22,59 @@ import {
   setScrollTop,
 } from '@/utils/scroll'
 
-export const easeInOutCubic = t => t < 0.5
-  ? 4 * t ** 3
-  : 1 - (-2 * t + 2) ** 3 / 2
-
 export function prefersReducedMotion () {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
 export function tween ({
   duration,
-  easing = easeInOutCubic,
+  easing = TransitionPresets.easeInOutCubic,
   onFrame,
   onDone,
 }) {
-  let animationFrame
-  let finished = false
-  const start = performance.now()
+  let stopped = false
+  const progress = shallowRef()
 
   function done () {
-    if (finished) {
+    if (stopped) {
       return
     }
-    finished = true
+    stopped = true
+    stopWatching()
     onDone?.()
   }
 
-  function frame (timestamp) {
-    if (finished) {
-      return
-    }
-    const progress = Math.min(1, Math.max(0, (timestamp - start) / duration))
-    onFrame(easing(progress))
-    if (progress === 1) {
+  const stopWatching = watch(progress, value => {
+    const nextProgress = Math.min(1, Math.max(0, value))
+    onFrame(nextProgress)
+    if (nextProgress === 1) {
       done()
-    } else {
-      animationFrame = window.requestAnimationFrame(frame)
     }
-  }
+  }, { flush: 'sync' })
 
-  onFrame(0)
   if (duration <= 0 || prefersReducedMotion()) {
-    onFrame(1)
-    done()
+    progress.value = 0
+    progress.value = 1
   } else {
-    animationFrame = window.requestAnimationFrame(frame)
+    transition(progress, 0, 1, {
+      duration,
+      easing,
+      abort: () => stopped,
+    })
   }
 
   return {
     finish () {
-      if (finished) {
-        return
+      if (!stopped) {
+        progress.value = 1
       }
-      window.cancelAnimationFrame(animationFrame)
-      onFrame(1)
-      done()
     },
     cancel () {
-      if (finished) {
+      if (stopped) {
         return
       }
-      window.cancelAnimationFrame(animationFrame)
-      finished = true
+      stopped = true
+      stopWatching()
     },
   }
 }
