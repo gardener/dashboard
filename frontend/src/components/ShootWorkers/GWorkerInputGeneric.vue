@@ -33,14 +33,14 @@ SPDX-License-Identifier: Apache-2.0
                 v-model="worker.name"
                 v-messages-color="{ color: 'warning' }"
                 color="primary"
-                :error-messages="getErrorMessages(v$.name)"
+                :error-messages="getErrorMessages(validation.name)"
                 counter="15"
                 label="Group Name"
                 variant="underlined"
                 :hint="worker.controlPlane != null ? 'Control Plane Worker Pool' : undefined"
                 :persistent-hint="worker.controlPlane != null"
-                @input="v$.name.$touch()"
-                @blur="v$.name.$touch()"
+                @input="validation.name.$touch()"
+                @blur="validation.name.$touch()"
               />
             </v-col>
             <v-col
@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
                 item-color="primary"
                 label="Zones"
                 :items="zoneItems"
-                :error-messages="getErrorMessages(v$.zones)"
+                :error-messages="getErrorMessages(validation.zones)"
                 multiple
                 chips
                 closable-chips
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
                 item-title="text"
                 variant="underlined"
                 @update:model-value="onInputZones"
-                @blur="v$.zones.$touch()"
+                @blur="validation.zones.$touch()"
               />
             </v-col>
           </v-row>
@@ -93,10 +93,10 @@ SPDX-License-Identifier: Apache-2.0
                 color="primary"
                 item-color="primary"
                 :items="machineArchitectures"
-                :error-messages="getErrorMessages(v$.machine.architecture)"
+                :error-messages="getErrorMessages(validation.machine.architecture)"
                 label="Architecture"
                 variant="underlined"
-                @blur="v$.machine.architecture.$touch()"
+                @blur="validation.machine.architecture.$touch()"
               />
             </v-col>
             <v-col
@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-machine-type
                 v-model="machineTypeValue"
                 :machine-types="machineTypes"
-                :validation="v$.machine.type"
+                :validation="validation.machine.type"
               />
             </v-col>
           </v-row>
@@ -136,7 +136,7 @@ SPDX-License-Identifier: Apache-2.0
                 :worker="worker"
                 :machine-type="selectedMachineType"
                 :auto-update="maintenanceAutoUpdateMachineImageVersion"
-                :validation="v$.machine.image"
+                :validation="validation.machine.image"
               />
             </v-col>
           </v-row>
@@ -165,7 +165,7 @@ SPDX-License-Identifier: Apache-2.0
                 :machine-image-cri="machineImageCri"
                 :worker="worker"
                 :kubernetes-version="kubernetesVersion"
-                :validation="v$.cri.name"
+                :validation="validation.cri.name"
               />
             </v-col>
           </v-row>
@@ -194,12 +194,12 @@ SPDX-License-Identifier: Apache-2.0
                 v-model="innerMin"
                 min="0"
                 color="primary"
-                :error-messages="getErrorMessages(v$.minimum)"
+                :error-messages="getErrorMessages(validation.minimum)"
                 type="number"
                 label="Autoscaler Min."
                 hint="Minimum nodes kept running at all times"
                 variant="underlined"
-                @input="v$.minimum.$touch()"
+                @input="validation.minimum.$touch()"
                 @blur="ensureValidAutoscalerMin()"
               />
             </v-col>
@@ -215,8 +215,8 @@ SPDX-License-Identifier: Apache-2.0
                 label="Autoscaler Max."
                 hint="Maximum nodes the autoscaler can scale up to"
                 variant="underlined"
-                :error-messages="getErrorMessages(v$.maximum)"
-                @input="v$.maximum.$touch()"
+                :error-messages="getErrorMessages(validation.maximum)"
+                @input="validation.maximum.$touch()"
                 @blur="ensureValidAutoscalerMax()"
               />
             </v-col>
@@ -228,12 +228,12 @@ SPDX-License-Identifier: Apache-2.0
                 v-model="maxSurge"
                 min="0"
                 color="primary"
-                :error-messages="getErrorMessages(v$.maxSurge)"
+                :error-messages="getErrorMessages(validation.maxSurge)"
                 label="Max. Surge"
                 hint="Number of extra nodes allowed during a rolling update"
                 variant="underlined"
-                @input="v$.maxSurge.$touch()"
-                @blur="v$.maxSurge.$touch()"
+                @input="validation.maxSurge.$touch()"
+                @blur="validation.maxSurge.$touch()"
               />
             </v-col>
           </v-row>
@@ -263,8 +263,8 @@ SPDX-License-Identifier: Apache-2.0
                 :volume-types="volumeTypes"
                 :worker="worker"
                 :cloud-profile-ref="cloudProfileRef"
-                :volume-type-validation="v$.volume.type"
-                :iops-validation="v$.providerConfig.volume.iops"
+                :volume-type-validation="validation.volume.type"
+                :iops-validation="validation.providerConfig.volume.iops"
               />
             </v-col>
             <v-col
@@ -278,10 +278,10 @@ SPDX-License-Identifier: Apache-2.0
                 :default-storage-size="defaultStorageSize"
                 :has-volume-types="volumeInCloudProfile"
                 color="primary"
-                :error-messages="getErrorMessages(v$.volume.size)"
+                :error-messages="getErrorMessages(validation.volume.size)"
                 @update:custom-storage="onInputVolumeSize"
                 @update:model-value="onInputVolumeSize"
-                @blur="v$.volume.size.$touch()"
+                @blur="validation.volume.size.$touch()"
               />
             </v-col>
           </v-row>
@@ -406,7 +406,6 @@ export default {
     ))
 
     return {
-      v$: computed(() => props.validation),
       isNewCluster,
       cloudProfileRef,
       kubernetesVersion,
@@ -555,7 +554,7 @@ export default {
       handler (volumeSize) {
         this.volumeSize = volumeSize
         this.hasCustomStorageSize = Boolean(volumeSize) && !this.volumeInCloudProfile
-        this.v$.volume.size?.$touch()
+        this.validation.volume.size?.$touch()
       },
       immediate: true,
     },
@@ -568,21 +567,21 @@ export default {
         // default size, must not write to shoot spec
         delete this.worker.volume
       }
-      this.v$.volume.size?.$touch()
+      this.validation.volume.size?.$touch()
     },
     onInputZones () {
-      this.v$.zones.$touch()
-      this.v$.maximum.$touch()
+      this.validation.zones.$touch()
+      this.validation.maximum.$touch()
     },
     ensureValidAutoscalerMin () {
-      this.v$.minimum.$touch()
+      this.validation.minimum.$touch()
       // Ensure maximum is not less than minimum
       if (this.innerMax < this.worker.minimum) {
         this.worker.maximum = this.worker.minimum
       }
     },
     ensureValidAutoscalerMax () {
-      this.v$.maximum.$touch()
+      this.validation.maximum.$touch()
       // Ensure minimum is not greater than maximum
       if (this.innerMin > this.worker.maximum) {
         this.worker.minimum = this.worker.maximum
