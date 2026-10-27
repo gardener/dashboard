@@ -13,6 +13,8 @@ import { mount } from '@vue/test-utils'
 
 import { useWorkersValidation } from '@/composables/useWorkersValidation'
 
+import { messageFromErrors } from '@/utils/validators'
+
 function createWorker (uid, name = uid) {
   return {
     _uid: uid,
@@ -140,6 +142,30 @@ describe('composables', () => {
       await nextTick()
       expect(validation['worker-1'].name.$invalid).toBe(false)
       expect(validation['worker-2'].name.$invalid).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('keeps worker context separate from the local field name', async () => {
+      const worker = createWorker('worker-1')
+      worker.machine.type = ''
+      const { providerWorkers, validation, wrapper } = await mountValidation([worker])
+
+      await validation.$validate()
+
+      const error = validation['worker-1'].machine.type.$errors[0]
+      expect(error.$params).toMatchObject({
+        fieldName: 'Machine Type',
+        fieldContext: 'Worker Group worker-1',
+      })
+      expect(messageFromErrors(validation['worker-1'].$errors)).toBe(
+        '[Worker Group worker-1] Machine Type: Value is required',
+      )
+
+      providerWorkers.value[0].name = 'renamed'
+      await nextTick()
+      expect(messageFromErrors(validation['worker-1'].$errors)).toBe(
+        '[Worker Group renamed] Machine Type: Value is required',
+      )
       wrapper.unmount()
     })
   })

@@ -5,8 +5,10 @@
 //
 
 import {
-  unique,
   base64,
+  messageFromErrors,
+  unique,
+  withFieldMetadata,
 } from '@/utils/validators'
 
 describe('utils', () => {
@@ -37,6 +39,42 @@ describe('utils', () => {
         'invalid%',
       ])('rejects %j', value => {
         expect(base64.$validator(value)).toBe(false)
+      })
+    })
+    describe('#withFieldMetadata', () => {
+      it('adds structured display metadata to every validator', () => {
+        const validators = withFieldMetadata({
+          fieldName: 'Machine Type',
+          fieldContext: 'Worker Group worker-one',
+        }, {
+          required: value => Boolean(value),
+        })
+
+        expect(validators.required.$params).toEqual({
+          fieldName: 'Machine Type',
+          fieldContext: 'Worker Group worker-one',
+        })
+      })
+    })
+    describe('#messageFromErrors', () => {
+      const errors = [{
+        $params: {
+          fieldName: 'Machine Type',
+          fieldContext: 'Worker Group worker-one',
+        },
+        $message: 'Value is required',
+      }]
+
+      it('includes field context by default', () => {
+        expect(messageFromErrors(errors)).toBe(
+          '[Worker Group worker-one] Machine Type: Value is required',
+        )
+      })
+
+      it('can omit field context for local messages', () => {
+        expect(messageFromErrors(errors, { includeFieldContext: false })).toBe(
+          'Machine Type: Value is required',
+        )
       })
     })
   })
