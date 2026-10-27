@@ -304,7 +304,7 @@ describe('components', () => {
       expect(wrapper.find('.font-weight-medium').text()).not.toBe('worker-0')
     })
 
-    it('keeps a lone worker collapsed and explains disabled worker actions', async () => {
+    it('keeps a lone worker collapsed, hides removal, and explains unavailable actions', async () => {
       wrapper.unmount()
       mountComponent({
         workers: [createWorker('worker-1', 'worker-one', 'm5.large')],
@@ -323,10 +323,10 @@ describe('components', () => {
       const removeButton = wrapper.findAll('button').find(button => button.text() === 'Remove')
       const addButton = wrapper.findAll('button').find(button => button.text() === 'Add Worker Group')
       expect(duplicateButton.attributes('disabled')).toBeDefined()
-      expect(removeButton.attributes('disabled')).toBeDefined()
+      expect(removeButton).toBeUndefined()
       expect(addButton.attributes('disabled')).toBeDefined()
       expect(wrapper.get('[data-test="duplicate-worker-action"]').attributes('aria-describedby')).toMatch(/^v-tooltip-/)
-      expect(wrapper.get('[data-test="remove-worker-action"]').attributes('aria-describedby')).toMatch(/^v-tooltip-/)
+      expect(wrapper.find('[data-test="remove-worker-action"]').exists()).toBe(false)
       expect(wrapper.get('[data-test="add-worker-action"]').attributes('aria-describedby')).toMatch(/^v-tooltip-/)
 
       const enabledTooltipTexts = wrapper
@@ -335,7 +335,6 @@ describe('components', () => {
         .map(tooltip => tooltip.props('text'))
       expect(enabledTooltipTexts).toEqual([
         'No machine types are available in the selected cloud profile',
-        'The last worker group cannot be removed',
         'No machine types are available in the selected cloud profile',
       ])
 
