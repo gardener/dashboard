@@ -466,7 +466,7 @@ describe('SessionPool', () => {
       expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
         maxSessionMemory: 64,
         settings: expect.objectContaining({
-          initialWindowSize: 65535,
+          initialWindowSize: 1024 * 1024,
         }),
       }))
       expect(mockHttp2Connect.mock.calls[0][1]).not.toHaveProperty('connectionWindowSize')
