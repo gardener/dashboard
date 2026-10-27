@@ -187,16 +187,16 @@ function validateReflectorConfig (config) {
     {
       name: 'initialWindowSize',
       value: initialWindowSize,
-      min: 0,
-      max: 2 ** 32 - 1,
-      message: 'must be an integer between 0 and 4294967295',
+      min: 1,
+      max: 2 ** 31 - 1,
+      message: 'must be an integer between 0 and 2147483647',
     },
     {
       name: 'connectionWindowSize',
       value: connectionWindowSize,
-      min: 0,
-      max: 2 ** 32 - 1,
-      message: 'must be an integer between 0 and 4294967295',
+      min: 1,
+      max: 2 ** 31 - 1,
+      message: 'must be an integer between 0 and 2147483647',
     },
     {
       name: 'maxSessionMemory',
