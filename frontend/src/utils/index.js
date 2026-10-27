@@ -577,6 +577,17 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
+export function renderTemplate (template, data) {
+  const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/g
+
+  return template.replace(PLACEHOLDER_PATTERN, (_, key) => {
+    const property = Object.getOwnPropertyDescriptor(data, key)
+    if (!property) {
+      return ''
+    }
+    return String(property.value)
+  })
+}
 const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
 const maintenanceHourRegex = /^(?:[01]\d|2[0-3])$/
 
