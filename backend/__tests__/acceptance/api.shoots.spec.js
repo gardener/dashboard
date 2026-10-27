@@ -19,6 +19,7 @@ import { load as yamlLoad } from 'js-yaml'
 import request from '@gardener-dashboard/request'
 import logger from '../../lib/logger/index.js'
 import cache from '../../lib/cache/index.js'
+import { seedShootNamespaceIndex } from '../helpers/cache.js'
 
 const { mockRequest } = request
 
@@ -34,23 +35,25 @@ describe('api', function () {
   beforeAll(async () => {
     agent = await createAgent()
 
+    const shoots = fixtures.shoots.list().map(item => {
+      const status = item.metadata.uid !== 3
+        ? 'healthy'
+        : 'unhealthy'
+      item.metadata.labels = {
+        ...item.metadata.labels,
+        'shoot.gardener.cloud/status': status,
+      }
+      return item
+    })
     cache.initialize({
       projects: {
         store: createStore(fixtures.projects.list()),
       },
       shoots: {
-        store: createStore(fixtures.shoots.list().map(item => {
-          const status = item.metadata.uid !== 3
-            ? 'healthy'
-            : 'unhealthy'
-          item.metadata.labels = {
-            ...item.metadata.labels,
-            'shoot.gardener.cloud/status': status,
-          }
-          return item
-        })),
+        store: createStore(shoots),
       },
     })
+    seedShootNamespaceIndex(shoots)
   })
 
   afterAll(() => {
