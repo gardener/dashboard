@@ -314,7 +314,7 @@ describe('components', () => {
       expect(wrapper.find('.font-weight-medium').text()).not.toBe('worker-0')
     })
 
-    it('keeps a lone worker collapsed, hides removal, and explains unavailable actions', async () => {
+    it('keeps a lone worker collapsed and hides removal', async () => {
       wrapper.unmount()
       mountComponent({
         workers: [createWorker('worker-1', 'worker-one', 'm5.large')],
@@ -332,27 +332,10 @@ describe('components', () => {
       const duplicateButton = wrapper.findAll('button').find(button => button.text() === 'Duplicate')
       const removeButton = wrapper.findAll('button').find(button => button.text() === 'Remove')
       const addButton = wrapper.findAll('button').find(button => button.text() === 'Add Worker Group')
-      expect(duplicateButton.attributes('disabled')).toBeDefined()
+      expect(duplicateButton.attributes('disabled')).toBeUndefined()
       expect(removeButton).toBeUndefined()
-      expect(addButton.attributes('disabled')).toBeDefined()
-      expect(wrapper.get('[data-test="duplicate-worker-action"]').attributes('aria-describedby')).toMatch(/^v-tooltip-/)
+      expect(addButton.attributes('disabled')).toBeUndefined()
       expect(wrapper.find('[data-test="remove-worker-action"]').exists()).toBe(false)
-      expect(wrapper.get('[data-test="add-worker-action"]').attributes('aria-describedby')).toMatch(/^v-tooltip-/)
-
-      const enabledTooltipTexts = wrapper
-        .findAllComponents({ name: 'VTooltip' })
-        .filter(tooltip => !tooltip.props('disabled'))
-        .map(tooltip => tooltip.props('text'))
-      expect(enabledTooltipTexts).toEqual([
-        'No machine types are available in the selected cloud profile',
-        'No machine types are available in the selected cloud profile',
-      ])
-
-      await wrapper.get('[data-test="add-worker-action"]').trigger('mouseenter')
-      await new Promise(resolve => setTimeout(resolve))
-      await nextTick()
-      const activeTooltip = document.body.querySelector('.v-tooltip.v-overlay--active')
-      expect(activeTooltip?.textContent).toContain('No machine types are available in the selected cloud profile')
     })
 
     it('resets virtualized measurements to the expanded estimate for mass toggles', async () => {
@@ -475,7 +458,7 @@ describe('components', () => {
       ])
     })
 
-    it('disables removal while another removal would leave no worker', async () => {
+    it('hides removal while another removal would leave no worker', async () => {
       await expandWorker('worker-one')
       await expandWorker('worker-two')
       vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'performance', 'Date'] })
@@ -483,10 +466,7 @@ describe('components', () => {
       await findWorkerGroup('worker-one').findAll('button').find(button => button.text() === 'Remove').trigger('click')
       await nextTick()
 
-      const remainingRemoveButton = findWorkerGroup('worker-two')
-        .findAll('button')
-        .find(button => button.text() === 'Remove')
-      expect(remainingRemoveButton.attributes('disabled')).toBeDefined()
+      expect(wrapper.find('[data-test="remove-worker-action"]').exists()).toBe(false)
     })
 
     it('finishes add and remove transitions immediately with reduced motion', async () => {

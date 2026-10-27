@@ -125,20 +125,13 @@ SPDX-License-Identifier: Apache-2.0
                     variant="tonal"
                     color="tonal-info"
                     prepend-icon="mdi-content-copy"
-                    :disabled="!allMachineTypes.length"
                     @click.stop="duplicateWorker(key)"
                   >
                     Duplicate
                   </v-btn>
-                  <v-tooltip
-                    activator="parent"
-                    location="top"
-                    text="No machine types are available in the selected cloud profile"
-                    :disabled="!!allMachineTypes.length"
-                  />
                 </span>
                 <span
-                  v-if="providerWorkers.length > 1"
+                  v-if="remainingWorkerCount > 1 && pendingRemovalUid !== key"
                   data-test="remove-worker-action"
                   class="d-inline-flex mr-2"
                   @click.stop
@@ -148,17 +141,10 @@ SPDX-License-Identifier: Apache-2.0
                     variant="tonal"
                     color="tonal-error"
                     prepend-icon="mdi-delete-outline"
-                    :disabled="isRemoveDisabled(key)"
                     @click.stop="removeWorker(key)"
                   >
                     Remove
                   </v-btn>
-                  <v-tooltip
-                    activator="parent"
-                    location="top"
-                    text="The last worker group cannot be removed"
-                    :disabled="!isRemoveDisabled(key)"
-                  />
                 </span>
               </span>
               <v-expansion-panel-text>
@@ -180,7 +166,6 @@ SPDX-License-Identifier: Apache-2.0
           class="d-inline-flex"
         >
           <v-btn
-            :disabled="!allMachineTypes.length"
             variant="text"
             color="primary"
             @click="addWorker"
@@ -190,12 +175,6 @@ SPDX-License-Identifier: Apache-2.0
             </v-icon>
             Add Worker Group
           </v-btn>
-          <v-tooltip
-            activator="parent"
-            location="top"
-            text="No machine types are available in the selected cloud profile"
-            :disabled="!!allMachineTypes.length"
-          />
         </span>
       </v-col>
     </v-row>
@@ -231,7 +210,6 @@ const props = defineProps({
 const {
   providerWorkers,
   workerless,
-  allMachineTypes,
   machineImages,
   addProviderWorker,
   duplicateProviderWorker,
@@ -407,10 +385,6 @@ function removeWorker (uid) {
   workerTransitions.leave(uid, {
     onComplete: () => completeWorkerRemoval(uid),
   })
-}
-
-function isRemoveDisabled (uid) {
-  return remainingWorkerCount.value <= 1 || pendingRemovalUid.value === uid
 }
 
 function setWorkerExpanded (uid, isExpanded) {
