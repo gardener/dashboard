@@ -8,13 +8,13 @@ import createError from 'http-errors'
 import logger from '../logger/index.js'
 import helper from './helper.js'
 import * as seedstats from '../services/seedstats.js'
+import { ALL_UNHEALTHY_FILTER_FLAGS } from '../services/shootClassification.js'
 
 const { getUserFromSocket } = helper
 
 const group = 'dashboard.gardener.cloud'
 const kind = 'SeedStat'
-const listRoomRegExp = /^seedstats;uf=(?<mask>[0-7])$/
-const seedRoomRegExp = /^seedstats;seed=(?<seedName>[^;]+);uf=(?<mask>[0-7])$/
+const unhealthyFilterMasks = Array.from({ length: ALL_UNHEALTHY_FILTER_FLAGS + 1 }, (_, mask) => mask)
 
 function notFound (uid) {
   return {
@@ -49,33 +49,6 @@ function getRoomName ({ seedName, unhealthyFilterMask }) {
   return getListRoomName(unhealthyFilterMask)
 }
 
-function isSeedStatsRoom (room) {
-  return listRoomRegExp.test(room) || seedRoomRegExp.test(room)
-}
-
-function parseRoomName (room) {
-  const listMatch = listRoomRegExp.exec(room)
-  if (listMatch) {
-    const { mask } = listMatch.groups
-    return {
-      room,
-      unhealthyFilterMask: Number(mask),
-    }
-  }
-
-  const seedMatch = seedRoomRegExp.exec(room)
-  if (seedMatch) {
-    const { seedName, mask } = seedMatch.groups
-    return {
-      room,
-      seedName,
-      unhealthyFilterMask: Number(mask),
-    }
-  }
-
-  throw new TypeError(`Invalid seedstats room: ${room}`)
-}
-
 function getJoinedRooms (nsp, { seedName }) {
   if (!seedName) {
     logger.warn('getJoinedRooms called without seedName')
@@ -87,11 +60,18 @@ function getJoinedRooms (nsp, { seedName }) {
     return []
   }
 
-  const appliesToSeed = ({ seedName: roomSeedName }) => !roomSeedName || roomSeedName === seedName
-  return Array.from(adapterRooms.keys())
-    .filter(isSeedStatsRoom)
-    .map(parseRoomName)
-    .filter(appliesToSeed)
+  const rooms = []
+  for (const unhealthyFilterMask of unhealthyFilterMasks) {
+    for (const room of [
+      getListRoomName(unhealthyFilterMask),
+      getSeedRoomName(seedName, unhealthyFilterMask),
+    ]) {
+      if (adapterRooms.has(room)) {
+        rooms.push({ room, unhealthyFilterMask })
+      }
+    }
+  }
+  return rooms
 }
 
 function hasSeedStatsAccess (user) {
@@ -116,7 +96,7 @@ async function subscribe (socket, options = {}) {
 
 function unsubscribe (socket) {
   const promises = Array.from(socket.rooms)
-    .filter(room => isSeedStatsRoom(room))
+    .filter(room => room.startsWith('seedstats;'))
     .map(room => socket.leave(room))
   return Promise.all(promises)
 }
