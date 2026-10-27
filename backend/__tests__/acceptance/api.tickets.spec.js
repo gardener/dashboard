@@ -31,13 +31,18 @@ describe('api', function () {
   let agent
 
   beforeAll(async () => {
+    // The tickets route keeps a reference to the cache when the app is loaded.
+    // Reset it before creating the agent so tickets.loadIssues populates that
+    // same cache, independent of other acceptance tests.
+    cache.cache.resetTicketCache()
     agent = await createAgent()
     vi.spyOn(cache, 'getProjects').mockReturnValue(fixtures.projects.list())
     seedProjectNamespaceIndex()
   })
 
-  afterAll(() => {
-    return agent.close()
+  afterAll(async () => {
+    await agent.close()
+    cache.cache.resetTicketCache()
   })
 
   beforeEach(async () => {
