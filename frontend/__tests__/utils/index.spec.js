@@ -27,12 +27,41 @@ import {
   encodeBase64,
   encodeBase64Url,
   decodeBase64,
+  renderTemplate,
 } from '@/utils'
 
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 
 describe('utils', () => {
+  describe('renderTemplate', () => {
+    it('replaces placeholders with data values', () => {
+      const template = '{{ productName }} has {{clusterCount}} clusters and is {{ active }}'
+      const data = {
+        productName: 'Gardener',
+        clusterCount: 3,
+        active: true,
+      }
+
+      expect(renderTemplate(template, data)).toBe('Gardener has 3 clusters and is true')
+    })
+
+    it('replaces missing and inherited properties with an empty string', () => {
+      const data = Object.create({ inherited: 'inherited value' })
+      data.own = 'own value'
+
+      expect(renderTemplate('{{ own }} {{ inherited }} {{ missing }}', data)).toBe('own value  ')
+    })
+
+    it('does not execute template expressions or evaluation blocks', () => {
+      const execute = vi.fn()
+      const template = '{{ execute() }} <% execute() %>'
+
+      expect(renderTemplate(template, { execute })).toBe(template)
+      expect(execute).not.toHaveBeenCalled()
+    })
+  })
+
   describe('base64', () => {
     it('encodes and decodes UTF-8 strings', () => {
       const value = 'a Ā 𐀀 文 🦄'
