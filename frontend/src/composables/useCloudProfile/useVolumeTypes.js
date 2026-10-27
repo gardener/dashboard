@@ -21,17 +21,23 @@ import map from 'lodash/map'
 import intersection from 'lodash/intersection'
 
 export function getWorkerMinimumVolumeSizeGi (worker, machineTypes, volumeTypes) {
-  const machineType = find(machineTypes, machineType => {
-    return machineType.name === worker.machine?.type &&
-      machineType.architecture === worker.machine?.architecture
-  }) ?? find(machineTypes, ['name', worker.machine?.type])
-  const volumeType = find(volumeTypes, ['name', worker.volume?.type])
+  const machineTypeName = worker.machine?.type
+  const machineTypeArchitecture = worker.machine?.architecture
+  const exactMachineType = find(machineTypes, machineType => {
+    return machineType.name === machineTypeName &&
+      machineType.architecture === machineTypeArchitecture
+  })
+  const machineType = exactMachineType ?? find(machineTypes, ['name', machineTypeName])
+
+  const volumeTypeName = worker.volume?.type
+  const volumeType = find(volumeTypes, ['name', volumeTypeName])
   const minimumVolumeSize = volumeType?.name
     ? volumeType.minSize ?? '0Gi'
     : machineType?.storage?.minSize ?? '0Gi'
   const minimumVolumeSizeGi = convertToGi(minimumVolumeSize)
-  const defaultVolumeSizeGi = machineType?.storage?.size
-    ? convertToGi(machineType.storage.size)
+  const defaultVolumeSize = machineType?.storage?.size
+  const defaultVolumeSizeGi = defaultVolumeSize
+    ? convertToGi(defaultVolumeSize)
     : undefined
 
   if (defaultVolumeSizeGi > 0 && defaultVolumeSizeGi < minimumVolumeSizeGi) {

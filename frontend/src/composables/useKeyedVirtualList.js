@@ -20,7 +20,7 @@ import {
 
 import {
   getOffsetWithin,
-  getRevealScrollTop,
+  getScrollTopToReveal,
   getScrollTop,
   getViewportHeight,
   isDocumentScroller,
@@ -28,15 +28,23 @@ import {
 } from '@/utils/scroll'
 
 function getScrollParent (element) {
-  for (let parent = element?.parentElement; parent; parent = parent.parentElement) {
+  let parent = element?.parentElement
+
+  while (parent) {
     const { overflowY } = getComputedStyle(parent)
     if (overflowY === 'auto' || overflowY === 'scroll') {
       return parent
     }
+    parent = parent.parentElement
   }
+
   return document.scrollingElement ?? document.documentElement
 }
 
+/**
+ * Return the index of the first sorted offset greater than or equal to the
+ * target value, or the array length when no such offset exists.
+ */
 function lowerBound (values, value, start = 0) {
   let low = start
   let high = values.length
@@ -238,7 +246,7 @@ export function useKeyedVirtualList ({
 
     const top = listOffsetTop.value + offsets.value.at(index)
     const bottom = listOffsetTop.value + offsets.value.at(index + 1)
-    const target = getRevealScrollTop({
+    const target = getScrollTopToReveal({
       scrollTop: getScrollTop(container),
       viewportHeight: getViewportHeight(container) || window.innerHeight,
       top,
