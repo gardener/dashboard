@@ -274,6 +274,7 @@ describe('views GProjectList', () => {
       createProject('charlie', { title: 'Bravo team' }),
       createProject('delta'),
       createProject('echo', { title: 'yankee team', description: 'Billing' }),
+      createProject('foxtrot', { title: '   ' }),
     ]
 
     function renderedNames (wrapper) {
@@ -282,10 +283,10 @@ describe('views GProjectList', () => {
 
     it('sorts by title without falling back to the name', async () => {
       const { wrapper } = await mountProjects({ projects, renderTable: true })
-      expect(renderedNames(wrapper)).toEqual(['charlie', 'echo', 'alpha', 'bravo', 'delta'])
+      expect(renderedNames(wrapper)).toEqual(['charlie', 'echo', 'alpha', 'bravo', 'delta', 'foxtrot'])
 
       await wrapper.findAll('th').find(th => th.text() === 'TITLE').trigger('click')
-      expect(renderedNames(wrapper)).toEqual(['bravo', 'delta', 'alpha', 'echo', 'charlie'])
+      expect(renderedNames(wrapper)).toEqual(['bravo', 'delta', 'foxtrot', 'alpha', 'echo', 'charlie'])
     })
 
     it('sorts missing values last in ascending order', async () => {
@@ -294,7 +295,7 @@ describe('views GProjectList', () => {
       await flushPromises()
 
       await wrapper.findAll('th').find(th => th.text() === 'DESCRIPTION').trigger('click')
-      expect(renderedNames(wrapper)).toEqual(['echo', 'alpha', 'bravo', 'charlie', 'delta'])
+      expect(renderedNames(wrapper)).toEqual(['echo', 'alpha', 'bravo', 'charlie', 'delta', 'foxtrot'])
     })
   })
 

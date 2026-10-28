@@ -206,7 +206,7 @@ const allHeaders = computed(() => [
     align: 'start',
     defaultSelected: true,
     hidden: false,
-    value: item => getProjectTitle(item),
+    value: item => getProjectTitle(item) || undefined,
   },
   {
     title: 'DESCRIPTION',
