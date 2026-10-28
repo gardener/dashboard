@@ -31,15 +31,13 @@ global:
 
     kubeClient:
       # Optional HTTP/2 receive window in bytes for each Kubernetes API stream.
-      # Defaults to 1 MiB when unset. KUBE_CLIENT_INITIAL_WINDOW_SIZE
-      # overrides the value configured in config.yaml.
+      # Defaults to 1 MiB when unset. Applied to all Kubernetes API clients.
       initialWindowSize: ~
       # Optional HTTP/2 receive window in bytes shared by all Kubernetes API streams.
-      # Defaults to 16 MiB when unset. KUBE_CLIENT_CONNECTION_WINDOW_SIZE
-      # overrides the value configured in config.yaml.
+      # Defaults to 16 MiB when unset. Applied to all Kubernetes API clients.
       connectionWindowSize: ~
       # Optional maximum HTTP/2 session memory in MB. Defaults to 32 when unset.
-      # KUBE_CLIENT_MAX_SESSION_MEMORY overrides the value in config.yaml.
+      # Applied to all Kubernetes API clients.
       maxSessionMemory: ~
       # Optional HTTP/2 read-idle timeout in milliseconds.
       # Defaults to 30000 when unset. Set to 0 to disable PING health checks.

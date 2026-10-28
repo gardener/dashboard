@@ -774,32 +774,6 @@ describe('gardener-dashboard', function () {
       })
     })
 
-    describe('kube client', function () {
-      it('should render the initial window size', async function () {
-        const values = {
-          global: {
-            dashboard: {
-              kubeClient: {
-                initialWindowSize: 1048576,
-                connectionWindowSize: 16777216,
-                maxSessionMemory: 64,
-              },
-            },
-          },
-        }
-
-        const documents = await renderTemplates(templates, values)
-        const [configMap] = documents
-        const config = yamlLoad(configMap.data['config.yaml'])
-
-        expect(config.kubeClient).toEqual({
-          initialWindowSize: 1048576,
-          connectionWindowSize: 16777216,
-          maxSessionMemory: 64,
-        })
-      })
-    })
-
     describe('maxRequestBodySize', function () {
       it('should render the template', async function () {
         const limit = '1mb'

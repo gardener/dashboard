@@ -177,6 +177,33 @@ describe('gardener-dashboard', function () {
       }))
     })
 
+    it('should render the kube client HTTP/2 environment variables', async function () {
+      const values = {
+        global: {
+          dashboard: {
+            kubeClient: {
+              initialWindowSize: 1048576,
+              connectionWindowSize: 16777216,
+              maxSessionMemory: 64,
+            },
+          },
+        },
+      }
+      const documents = await renderTemplates(templates, values)
+      const [deployment] = documents
+      const dashboardContainer = deployment.spec.template.spec.containers[0]
+      expect(dashboardContainer.env).toEqual(expect.arrayContaining([{
+        name: 'KUBE_CLIENT_INITIAL_WINDOW_SIZE',
+        value: '1048576',
+      }, {
+        name: 'KUBE_CLIENT_CONNECTION_WINDOW_SIZE',
+        value: '16777216',
+      }, {
+        name: 'KUBE_CLIENT_MAX_SESSION_MEMORY',
+        value: '64',
+      }]))
+    })
+
     it('should render the template with node options', async function () {
       const values = {
         global: {

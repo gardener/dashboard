@@ -194,20 +194,32 @@ spec:
           - name: KUBECONFIG
             value: {{ required ".Values.global.dashboard.projectedKubeconfig.baseMountPath is required" .Values.global.dashboard.projectedKubeconfig.baseMountPath }}/kubeconfig
           {{- end }}
-          {{- with .Values.global.dashboard.kubeClient }}
-          {{- if ne .readIdleTimeout nil }}
-          - name: KUBE_CLIENT_READ_IDLE_TIMEOUT
-            value: {{ quote .readIdleTimeout }}
-          {{- end }}
-          {{- if ne .pingTimeout nil }}
-          - name: KUBE_CLIENT_PING_TIMEOUT
-            value: {{ quote .pingTimeout }}
-          {{- end }}
-          {{- if ne .requestTimeout nil }}
-          - name: KUBE_CLIENT_REQUEST_TIMEOUT
-            value: {{ quote .requestTimeout }}
-          {{- end }}
-          {{- end }}
+           {{- with .Values.global.dashboard.kubeClient }}
+           {{- if ne .readIdleTimeout nil }}
+           - name: KUBE_CLIENT_READ_IDLE_TIMEOUT
+             value: {{ quote .readIdleTimeout }}
+           {{- end }}
+           {{- if ne .pingTimeout nil }}
+           - name: KUBE_CLIENT_PING_TIMEOUT
+             value: {{ quote .pingTimeout }}
+           {{- end }}
+           {{- if ne .requestTimeout nil }}
+           - name: KUBE_CLIENT_REQUEST_TIMEOUT
+             value: {{ quote .requestTimeout }}
+           {{- end }}
+           {{- if ne .initialWindowSize nil }}
+           - name: KUBE_CLIENT_INITIAL_WINDOW_SIZE
+             value: {{ quote .initialWindowSize }}
+           {{- end }}
+           {{- if ne .connectionWindowSize nil }}
+           - name: KUBE_CLIENT_CONNECTION_WINDOW_SIZE
+             value: {{ quote .connectionWindowSize }}
+           {{- end }}
+           {{- if ne .maxSessionMemory nil }}
+           - name: KUBE_CLIENT_MAX_SESSION_MEMORY
+             value: {{ quote .maxSessionMemory }}
+           {{- end }}
+           {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}
           - name: POD_NAME

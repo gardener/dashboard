@@ -109,20 +109,7 @@ class LifecycleHooks {
 }
 
 export default () => {
-  const { initialWindowSize, connectionWindowSize, maxSessionMemory } = config.kubeClient ?? {}
-  const options = {
-    id: 'watch',
-  }
-  if (initialWindowSize) {
-    options.settings = { initialWindowSize }
-  }
-  if (connectionWindowSize) {
-    options.connectionWindowSize = connectionWindowSize
-  }
-  if (maxSessionMemory) {
-    options.maxSessionMemory = maxSessionMemory
-  }
-  const client = createDashboardClient(options)
+  const client = createDashboardClient({ id: 'watch' })
   return new LifecycleHooks(client)
 }
 export { LifecycleHooks }
