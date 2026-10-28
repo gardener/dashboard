@@ -22,7 +22,7 @@ const router = express.Router()
 // under a different path or before other (auth) middlewares and handlers.
 const middlewares = [
   requestLogger,
-  monitorResponseTimes(),
+  monitorResponseTimes({ route: 'github/webhook' }),
   ensureJsonContentType,
   bodyParser.raw({ type: '*/*' }),
 ]

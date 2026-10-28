@@ -95,6 +95,18 @@ describe('cache', function () {
       })
     })
 
+    describe('#getIssueCount', function () {
+      it('should return the number of cached issues', function () {
+        expect(cache.getIssueCount()).toBe(3)
+      })
+    })
+
+    describe('#getCommentCount', function () {
+      it('should return the number of cached comments', function () {
+        expect(cache.getCommentCount()).toBe(1)
+      })
+    })
+
     describe('#getIssue', function () {
       it('should return the first issue', function () {
         expect(cache.getIssue(1)).toBe(firstIssue)

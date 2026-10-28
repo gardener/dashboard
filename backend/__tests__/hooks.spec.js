@@ -12,6 +12,7 @@ import {
   beforeEach,
 } from 'vitest'
 import { createDashboardClient } from '@gardener-dashboard/kube-client'
+import monitorModule from '@gardener-dashboard/monitor'
 
 import cache from '../lib/cache/index.js'
 import config from '../lib/config/index.js'
@@ -230,6 +231,18 @@ describe('hooks', () => {
         expect(cache.initialize).toHaveBeenCalledTimes(1)
         expect(cache.initialize.mock.calls[0]).toHaveLength(1)
         expect(cache.initialize.mock.calls[0][0]).toBe(informers)
+
+        expect(monitorModule.monitorCache).toHaveBeenCalledTimes(keys.length + 2)
+        for (const key of keys) {
+          expect(monitorModule.monitorCache).toHaveBeenCalledWith(key, expect.any(Function))
+        }
+        expect(monitorModule.monitorCache).toHaveBeenCalledWith('github_issues', expect.any(Function))
+        expect(monitorModule.monitorCache).toHaveBeenCalledWith('github_comments', expect.any(Function))
+
+        expect(monitorModule.monitorInformer).toHaveBeenCalledTimes(keys.length)
+        for (const key of keys) {
+          expect(monitorModule.monitorInformer).toHaveBeenCalledWith(key, informers[key])
+        }
 
         expect(cache.indexProjectsByNamespace).toHaveBeenCalledTimes(1)
         expect(cache.indexProjectsByNamespace.mock.calls[0]).toEqual([informers.projects])
