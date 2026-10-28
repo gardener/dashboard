@@ -14,6 +14,7 @@ import {
 } from 'vitest'
 import { Store } from '@gardener-dashboard/kube-client'
 import cacheModule from '../lib/cache/index.js'
+import { seedShootNamespaceIndex } from './helpers/cache.js'
 
 const cache = cacheModule
 const { cache: internalCache } = cacheModule
@@ -65,12 +66,13 @@ describe('cache', function () {
 
   it('should dispatch "getShoots" to internal cache', function () {
     const list = [
-      { metadata: { uid: 1, namespace: 'foo' } },
-      { metadata: { uid: 2, namespace: 'bar' } },
+      { metadata: { name: 'shoot-1', uid: 1, namespace: 'foo' } },
+      { metadata: { name: 'shoot-2', uid: 2, namespace: 'bar' } },
     ]
     const store = new Store()
     store.replace(list)
     internalCache.set('shoots', store)
+    seedShootNamespaceIndex(list)
     expect(cache.getShoots('_all')).toEqual(list)
     expect(cache.getShoots('foo')).toEqual(list.slice(0, 1))
     expect(cache.getShoots('bar')).toEqual(list.slice(1, 2))
@@ -198,13 +200,17 @@ describe('cache', function () {
 
       handlers.get('add')(oldShoot)
       expect(cache.getShoot('garden-foo', 'shoot-1')).toBe(oldShoot)
+      expect(Array.from(cache.getShootsByNamespace('garden-foo'))).toEqual([oldShoot])
 
       handlers.get('update')(newShoot, oldShoot)
       expect(cache.getShoot('garden-foo', 'shoot-1')).toBeUndefined()
       expect(cache.getShoot('garden-bar', 'shoot-1')).toBe(newShoot)
+      expect(Array.from(cache.getShootsByNamespace('garden-foo'))).toEqual([])
+      expect(Array.from(cache.getShootsByNamespace('garden-bar'))).toEqual([newShoot])
 
       handlers.get('delete')(newShoot)
       expect(cache.getShoot('garden-bar', 'shoot-1')).toBeUndefined()
+      expect(Array.from(cache.getShootsByNamespace('garden-bar'))).toEqual([])
     })
   })
 })
