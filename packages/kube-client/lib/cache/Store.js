@@ -118,6 +118,10 @@ class Store {
       this.#resolve = undefined
     }
   }
+
+  get size () {
+    return this.#map.size
+  }
 }
 
 export default Store
