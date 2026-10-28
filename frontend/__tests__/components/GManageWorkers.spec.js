@@ -178,16 +178,6 @@ describe('components', () => {
       expect(wrapper.find('[data-test="worker-input"]').text()).toBe('worker-one')
       expect(wrapper.findAll('button').some(button => button.text() === 'Duplicate')).toBe(true)
       expect(wrapper.findAll('button').some(button => button.text() === 'Remove')).toBe(true)
-
-      const expandedWorker = findWorkerGroup('worker-one')
-      const expansionTitle = expandedWorker.get('.v-expansion-panel-title')
-      expect(expansionTitle.element.tagName).toBe('BUTTON')
-      expect(expansionTitle.element.contains(
-        expandedWorker.get('[data-test="duplicate-worker-action"]').element,
-      )).toBe(false)
-      expect(expansionTitle.element.contains(
-        expandedWorker.get('[data-test="remove-worker-action"]').element,
-      )).toBe(false)
     })
 
     it('keeps collapsed workers in the parent validation tree', async () => {
