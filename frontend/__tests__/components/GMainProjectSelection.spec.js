@@ -7,6 +7,7 @@
 import { shallowMount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
@@ -123,6 +124,25 @@ describe('components', () => {
         ['NewProject'],
       ])
       expect(wrapper.vm.projectMenu).toBe(false)
+    })
+
+    it('limits the project list height by the teaser height', () => {
+      const pinia = createPinia()
+      const configStore = useConfigStore(pinia)
+      const wrapper = shallowMount(GMainProjectSelection, {
+        global: {
+          plugins: [
+            createVuetifyPlugin(),
+            pinia,
+          ],
+        },
+      })
+
+      expect(wrapper.vm.projectListMaxHeight).toBe('calc(100vh - 480px)')
+
+      configStore.setConfiguration({ branding: { teaserHeight: 300 } })
+
+      expect(wrapper.vm.projectListMaxHeight).toBe('calc(100vh - 580px)')
     })
   })
 })

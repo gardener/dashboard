@@ -111,6 +111,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-virtual-scroll
           ref="refProjectVirtualScroll"
           class="project-list"
+          :max-height="projectListMaxHeight"
           :items="sortedAndFilteredProjectItems"
           :item-key="item => item.metadata.uid"
           item-height="62"
@@ -202,6 +203,7 @@ import {
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
@@ -252,6 +254,7 @@ const allProjectsItem = {
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
+const configStore = useConfigStore()
 
 const projectFilter = ref('')
 const projectMenu = ref(false)
@@ -272,6 +275,13 @@ const projectMenuIcon = computed(() => {
 const selectedProjectName = computed(() => {
   const project = selectedProject.value
   return project ? project.metadata.name : ''
+})
+
+// The menu must fit below the selector, otherwise Vuetify shifts it up over the selector.
+// 280px covers the selector above the menu, its search field and actions, and the viewport margin.
+const projectListMaxHeight = computed(() => {
+  const teaserHeight = configStore.branding.teaserHeight ?? 200
+  return `calc(100vh - ${teaserHeight + 280}px)`
 })
 
 const selectedProjectTitle = computed(() => {
@@ -518,7 +528,6 @@ async function scrollToActiveProject () {
 
     .project-list {
       min-height: 62px;
-      max-height: calc(100vh - 420px);
       max-width: 255px;
 
       .project-name {
