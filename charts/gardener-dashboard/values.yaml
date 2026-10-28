@@ -35,9 +35,10 @@ global:
       # overrides the value configured in config.yaml.
       initialWindowSize: ~
       # Optional HTTP/2 receive window in bytes shared by all Kubernetes API streams.
-      # KUBE_CLIENT_CONNECTION_WINDOW_SIZE overrides the value in config.yaml.
+      # Defaults to 16 MiB when unset. KUBE_CLIENT_CONNECTION_WINDOW_SIZE
+      # overrides the value configured in config.yaml.
       connectionWindowSize: ~
-      # Optional maximum HTTP/2 session memory in MiB. Defaults to 32 when unset.
+      # Optional maximum HTTP/2 session memory in MB. Defaults to 32 when unset.
       # KUBE_CLIENT_MAX_SESSION_MEMORY overrides the value in config.yaml.
       maxSessionMemory: ~
       # Optional HTTP/2 read-idle timeout in milliseconds.
