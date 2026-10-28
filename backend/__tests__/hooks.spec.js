@@ -44,7 +44,6 @@ describe('hooks', () => {
     })
 
     it('should configure the watch client initial stream window size', function () {
-      delete config.kubeClient
       config.kubeClient = {
         initialWindowSize: 1048576,
         connectionWindowSize: 16777216,
