@@ -503,27 +503,23 @@ const hasShootWorkerGroupWarning = computed(() => {
     pointer-events: none;
   }
 
-<<<<<<< HEAD
   .width-limited {
     max-width: 200px;
     overflow: hidden;
   }
 
-<<<<<<< HEAD
   .name-cell {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
     height: 100%;
-=======
+  }
+
   .width-limited-large {
     max-width: 300px;
->>>>>>> 532e85ce (Adjust column width for shoot list)
     overflow: hidden;
   }
 
-=======
->>>>>>> 824421b5 (Moved css classes for table out out scoped row style block)
   .v-theme--light .stale .stale-overlay {
     background-color: rgba(255,255,255,0.7)
   }
