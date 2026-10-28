@@ -27,8 +27,8 @@ const kSemaphore = Symbol('semaphore')
 const kTimeoutId = Symbol('timeoutId')
 const kHeartbeatCleanup = Symbol('heartbeatCleanup')
 const kGoaway = Symbol('goaway')
-const DEFAULT_INITIAL_WINDOW_SIZE = 1024 * 1024 // 1MB in bytes
-const DEFAULT_CONNECTION_WINDOW_SIZE = 16 * 1024 * 1024 // 16 MB in bytes
+const DEFAULT_INITIAL_WINDOW_SIZE = 1024 * 1024 // 1 MiB in bytes
+const DEFAULT_CONNECTION_WINDOW_SIZE = 16 * 1024 * 1024 // 16 MiB in bytes
 const DEFAULT_MAX_SESSION_MEMORY = 32 // in MB
 
 function setSemaphore (session, value) {
