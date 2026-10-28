@@ -46,12 +46,10 @@ SPDX-License-Identifier: Apache-2.0
             @update:model-value="openPanels => setWorkerExpanded(key, !!openPanels.length)"
           >
             <v-expansion-panel
-              class="worker-group-panel"
               :value="key"
             >
               <v-expansion-panel-title
                 :class="{ 'worker-group-title--error': workersValidation[key]?.$errors.length }"
-                hide-actions
               >
                 <v-icon
                   size="small"
@@ -110,43 +108,45 @@ SPDX-License-Identifier: Apache-2.0
                     >+{{ worker.zones.length - 3 }} more</span>
                   </template>
                 </template>
+                <template #actions>
+                  <span
+                    v-if="isWorkerExpanded(key)"
+                    class="worker-actions d-inline-flex"
+                  >
+                    <span
+                      data-test="duplicate-worker-action"
+                      class="d-inline-flex mr-2"
+                      @click.stop
+                    >
+                      <v-btn
+                        size="small"
+                        variant="tonal"
+                        color="tonal-info"
+                        prepend-icon="mdi-content-copy"
+                        @click.stop="duplicateWorker(key)"
+                      >
+                        Duplicate
+                      </v-btn>
+                    </span>
+                    <span
+                      v-if="remainingWorkerCount > 1 && pendingRemovalUid !== key"
+                      data-test="remove-worker-action"
+                      class="d-inline-flex mr-2"
+                      @click.stop
+                    >
+                      <v-btn
+                        size="small"
+                        variant="tonal"
+                        color="tonal-error"
+                        prepend-icon="mdi-delete-outline"
+                        @click.stop="removeWorker(key)"
+                      >
+                        Remove
+                      </v-btn>
+                    </span>
+                  </span>
+                </template>
               </v-expansion-panel-title>
-              <span
-                v-if="isWorkerExpanded(key)"
-                class="worker-actions"
-              >
-                <span
-                  data-test="duplicate-worker-action"
-                  class="d-inline-flex mr-2"
-                  @click.stop
-                >
-                  <v-btn
-                    size="small"
-                    variant="tonal"
-                    color="tonal-info"
-                    prepend-icon="mdi-content-copy"
-                    @click.stop="duplicateWorker(key)"
-                  >
-                    Duplicate
-                  </v-btn>
-                </span>
-                <span
-                  v-if="remainingWorkerCount > 1 && pendingRemovalUid !== key"
-                  data-test="remove-worker-action"
-                  class="d-inline-flex mr-2"
-                  @click.stop
-                >
-                  <v-btn
-                    size="small"
-                    variant="tonal"
-                    color="tonal-error"
-                    prepend-icon="mdi-delete-outline"
-                    @click.stop="removeWorker(key)"
-                  >
-                    Remove
-                  </v-btn>
-                </span>
-              </span>
               <v-expansion-panel-text>
                 <g-worker-input-generic
                   :worker="worker"
@@ -402,24 +402,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.worker-group-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+.worker-group-wrapper :deep(.v-expansion-panel) {
   transition: background-color 0.5s ease;
 }
 
-.worker-group-panel > :deep(.v-expansion-panel-title) {
-  grid-column: 1;
-  justify-content: flex-start;
-  min-width: 0;
-  width: auto;
-}
-
-.worker-group-panel > :deep(.v-expansion-panel-text) {
-  grid-column: 1 / -1;
-}
-
-.worker-group--highlighted .worker-group-panel {
+.worker-group--highlighted :deep(.v-expansion-panel) {
   background-color: rgb(var(--v-theme-accent));
 }
 
@@ -428,12 +415,6 @@ onBeforeUnmount(() => {
 }
 
 .worker-actions {
-  align-items: center;
-  align-self: center;
-  display: flex;
-  grid-column: 2;
-  grid-row: 1;
-  padding-inline-start: 8px;
   position: relative;
   z-index: 1;
 }
