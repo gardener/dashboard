@@ -34,7 +34,7 @@ const responseTime = new promClient.Histogram({
   ],
 })
 const cachedItemsCount = new promClient.Gauge({
-  name: 'cache_item_count',
+  name: 'cache_items',
   help: 'Number of items in cache',
   labelNames: ['cache'],
   collect () {
