@@ -460,9 +460,11 @@ describe('SessionPool', () => {
   })
 
   describe('#createSession', () => {
-    it('should apply the configured connection window size and session memory limit', () => {
-      options.connectionWindowSize = 16 * 1024 * 1024
+    it('should apply default window sizes, preserve settings, and set the session memory limit', () => {
       options.maxSessionMemory = 64
+      options.settings = {
+        enablePush: false,
+      }
 
       const session = pool.createSession()
 
@@ -470,13 +472,14 @@ describe('SessionPool', () => {
         maxSessionMemory: 64,
         settings: expect.objectContaining({
           initialWindowSize: 1024 * 1024,
+          enablePush: false,
         }),
       }))
       expect(mockHttp2Connect.mock.calls[0][1]).not.toHaveProperty('connectionWindowSize')
 
       session.emit('connect')
 
-      expect(session.setLocalWindowSize).toHaveBeenCalledWith(options.connectionWindowSize)
+      expect(session.setLocalWindowSize).toHaveBeenCalledWith(16 * 1024 * 1024)
     })
 
     it('should not lower Node.js default window sizes', () => {
