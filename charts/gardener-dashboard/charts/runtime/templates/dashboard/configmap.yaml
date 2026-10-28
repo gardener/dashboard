@@ -39,13 +39,13 @@ data:
     {{- if or (ne $kubeClient.initialWindowSize nil) (ne $kubeClient.connectionWindowSize nil) (ne $kubeClient.maxSessionMemory nil) $kubeClient.reflector.resources }}
     kubeClient:
       {{- if ne $kubeClient.initialWindowSize nil }}
-      initialWindowSize: {{ $kubeClient.initialWindowSize }}
+      initialWindowSize: {{ $kubeClient.initialWindowSize | int64 }}
       {{- end }}
       {{- if ne $kubeClient.connectionWindowSize nil }}
-      connectionWindowSize: {{ $kubeClient.connectionWindowSize }}
+      connectionWindowSize: {{ $kubeClient.connectionWindowSize | int64 }}
       {{- end }}
       {{- if ne $kubeClient.maxSessionMemory nil }}
-      maxSessionMemory: {{ $kubeClient.maxSessionMemory }}
+      maxSessionMemory: {{ $kubeClient.maxSessionMemory | int64 }}
       {{- end }}
       {{- with $kubeClient.reflector.resources }}
       reflector:
