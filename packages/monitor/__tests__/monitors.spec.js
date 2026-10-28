@@ -59,12 +59,15 @@ vi.mock('../lib/metrics.js', () => {
       responseTime: {
         observe: vi.fn(),
       },
-      registerCacheCollector: vi.fn(),
     },
+    registerCacheCollector: vi.fn(),
   }
 })
 
-const { default: metrics } = await import('../lib/metrics.js')
+const {
+  default: metrics,
+  registerCacheCollector,
+} = await import('../lib/metrics.js')
 
 const {
   default: {
@@ -206,7 +209,7 @@ describe('monitors', () => {
 
       monitorCache('shoots', getCount)
 
-      expect(metrics.registerCacheCollector).toHaveBeenCalledWith('shoots', getCount)
+      expect(registerCacheCollector).toHaveBeenCalledWith('shoots', getCount)
     })
   })
 

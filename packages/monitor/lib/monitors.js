@@ -5,14 +5,13 @@
 //
 
 import createResponseTimeMiddleware from 'response-time'
-import metrics from './metrics.js'
+import metrics, { registerCacheCollector } from './metrics.js'
 
 const {
   connectionsCount,
   connectionsTotal,
   informerEventsTotal,
   responseTime,
-  registerCacheCollector,
 } = metrics
 
 function monitorResponseTimes (additionalLabels = {}) {

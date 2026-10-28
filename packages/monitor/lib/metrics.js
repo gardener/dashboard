@@ -45,7 +45,7 @@ const cachedItemsCount = new promClient.Gauge({
   },
 })
 
-function registerCacheCollector (cache, getCount) {
+export function registerCacheCollector (cache, getCount) {
   cacheCollectors.set(cache, getCount)
 }
 
@@ -55,5 +55,4 @@ export default {
   informerEventsTotal,
   responseTime,
   cachedItemsCount,
-  registerCacheCollector,
 }
