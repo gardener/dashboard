@@ -61,7 +61,7 @@ export default {
         }
       }
       return {
-        name: 'Home',
+        name: 'ProjectList',
       }
     },
   },

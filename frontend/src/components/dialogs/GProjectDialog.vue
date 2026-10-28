@@ -230,8 +230,7 @@ async function submit () {
     loading.value = true
     const project = await projectStore.createProject(projectManifest.value)
     loading.value = false
-    hide()
-    router.push({
+    await router.push({
       name: 'Credentials',
       params: {
         projectName: project.metadata.name,

@@ -111,6 +111,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-virtual-scroll
           ref="refProjectVirtualScroll"
           class="project-list"
+          :max-height="projectListMaxHeight"
           :items="sortedAndFilteredProjectItems"
           :item-key="item => item.metadata.uid"
           item-height="62"
@@ -159,7 +160,16 @@ SPDX-License-Identifier: Apache-2.0
           </template>
         </v-virtual-scroll>
       </v-list>
-      <v-card-actions>
+      <v-card-actions class="flex-column align-stretch">
+        <v-btn
+          variant="text"
+          block
+          class="project-add text-left text-primary"
+          prepend-icon="mdi-view-grid-outline"
+          @click.stop="navigate('ProjectList')"
+        >
+          View all Projects
+        </v-btn>
         <div
           v-tooltip:top="{
             text: 'You are not authorized to create projects',
@@ -172,7 +182,7 @@ SPDX-License-Identifier: Apache-2.0
             block
             class="project-add text-left text-primary"
             :disabled="!canCreateProject"
-            @click.stop="openProjectDialog"
+            @click.stop="navigate('NewProject')"
           >
             <v-icon>mdi-plus</v-icon>
             <span class="ml-2">Create Project</span>
@@ -193,6 +203,7 @@ import {
 } from 'vue'
 
 import { useAuthzStore } from '@/store/authz'
+import { useConfigStore } from '@/store/config'
 import { useProjectStore } from '@/store/project'
 
 import GStaleProjectWarning from '@/components/GStaleProjectWarning.vue'
@@ -220,7 +231,7 @@ import map from 'lodash/map'
 
 const emit = defineEmits([
   'projectSelect',
-  'openProjectDialog',
+  'navigate',
 ])
 const componentProps = defineProps({
   selectedProject: {
@@ -243,6 +254,7 @@ const allProjectsItem = {
 
 const projectStore = useProjectStore()
 const authzStore = useAuthzStore()
+const configStore = useConfigStore()
 
 const projectFilter = ref('')
 const projectMenu = ref(false)
@@ -263,6 +275,13 @@ const projectMenuIcon = computed(() => {
 const selectedProjectName = computed(() => {
   const project = selectedProject.value
   return project ? project.metadata.name : ''
+})
+
+// The menu must fit below the selector, otherwise Vuetify shifts it up over the selector.
+// 280px covers the selector above the menu, its search field and actions, and the viewport margin.
+const projectListMaxHeight = computed(() => {
+  const teaserHeight = configStore.branding.teaserHeight ?? 200
+  return `calc(100vh - ${teaserHeight + 280}px)`
 })
 
 const selectedProjectTitle = computed(() => {
@@ -362,9 +381,9 @@ function selectProject (project) {
   }
 }
 
-function openProjectDialog () {
+function navigate (name) {
   projectMenu.value = false
-  emit('openProjectDialog')
+  emit('navigate', name)
 }
 
 function onInputProjectFilter () {
@@ -509,7 +528,6 @@ async function scrollToActiveProject () {
 
     .project-list {
       min-height: 62px;
-      max-height: calc(100vh - 420px);
       max-width: 255px;
 
       .project-name {

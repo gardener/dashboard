@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
       <g-main-project-selection
         :selected-project="selectedProject"
         @project-select="onSelectProject"
-        @open-project-dialog="projectDialog = true"
+        @navigate="navigate"
       />
     </template>
 
@@ -33,19 +33,19 @@ SPDX-License-Identifier: Apache-2.0
       <v-list-item
         v-if="hasNoProjects"
         exact
-        :to="{ name: 'Home' }"
+        :to="{ name: 'ProjectList' }"
         class="bg-main-background"
       >
         <template #append>
           <v-icon
             size="x-small"
             color="main-navigation-title"
-            icon="mdi-home-outline"
+            icon="mdi-view-grid-outline"
           />
         </template>
         <template #title>
           <div class="text-body-large text-main-navigation-title">
-            Home
+            Projects
           </div>
         </template>
       </v-list-item>
@@ -91,14 +91,11 @@ SPDX-License-Identifier: Apache-2.0
         </v-list-item>
       </template>
     </v-list>
-
-    <g-project-dialog v-model="projectDialog" />
   </v-navigation-drawer>
 </template>
 
 <script setup>
 import {
-  ref,
   computed,
   toRef,
   onMounted,
@@ -115,7 +112,6 @@ import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
 import GMainProjectSelection from '@/components/GMainProjectSelection.vue'
-import GProjectDialog from '@/components/dialogs/GProjectDialog.vue'
 import GTeaser from '@/components/GTeaser.vue'
 
 import { isProjectPending } from '@/composables/useProjectItem'
@@ -139,8 +135,6 @@ const appStore = useAppStore()
 const router = useRouter()
 const currentRoute = useRoute()
 const { mdAndDown } = useDisplay()
-
-const projectDialog = ref(false)
 
 const projectList = toRef(projectStore, 'projectList')
 const sidebar = toRef(appStore, 'sidebar')
@@ -210,6 +204,11 @@ const visibleProjectItems = computed(() => projectItems.value.filter(item => !it
 
 const globalItems = computed(() => [
   {
+    name: 'ProjectList',
+    title: 'Projects',
+    icon: 'mdi-view-grid-outline',
+  },
+  {
     name: 'SeedList',
     title: 'Seeds',
     icon: 'mdi-sprout',
@@ -228,6 +227,10 @@ function projectMenuRoute (name, project) {
     name,
     params: { projectName: project.metadata.name },
   }
+}
+
+function navigate (name) {
+  router.push({ name })
 }
 
 function projectSwitchTarget (project) {

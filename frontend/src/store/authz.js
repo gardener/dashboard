@@ -142,6 +142,10 @@ export const useAuthzStore = defineStore('authz', () => {
     return canI(status.value, 'create', 'core.gardener.cloud', 'projects')
   })
 
+  function canCreateProjectForNamespace (namespace) {
+    return canI(statusForNamespace(namespace), 'create', 'core.gardener.cloud', 'projects')
+  }
+
   const canPatchProject = computed(() => {
     return canI(status.value, 'patch', 'core.gardener.cloud', 'projects', projectStore.projectName)
   })
@@ -320,6 +324,7 @@ export const useAuthzStore = defineStore('authz', () => {
     canPatchServiceAccounts,
     canDeleteServiceAccounts,
     canCreateProject,
+    canCreateProjectForNamespace,
     canPatchProject,
     canDeleteProject,
     canManageMembers,
