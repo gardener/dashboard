@@ -332,13 +332,17 @@ class SessionPool {
 
   createSession () {
     const { origin, hostname } = this.id
-    const connectionWindowSize = this.connectionWindowSize ?? DEFAULT_CONNECTION_WINDOW_SIZE
+    const configuredConnectionWindowSize = this.connectionWindowSize
+    const connectionWindowSize = configuredConnectionWindowSize ?? DEFAULT_CONNECTION_WINDOW_SIZE
     const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'readIdleTimeout', 'pingTimeout', 'connectionWindowSize'])
     Object.assign(options, {
       maxSessionMemory: options.maxSessionMemory ?? DEFAULT_MAX_SESSION_MEMORY,
       settings: {
         ...options.settings,
-        initialWindowSize: options.settings?.initialWindowSize ?? DEFAULT_INITIAL_WINDOW_SIZE,
+        initialWindowSize: options.settings?.initialWindowSize ?? Math.max(
+          DEFAULT_INITIAL_WINDOW_SIZE,
+          http2.getDefaultSettings().initialWindowSize,
+        ),
       },
       servername: !net.isIP(hostname) ? hostname : '',
       session: this.tlsSession,
@@ -384,7 +388,9 @@ class SessionPool {
       logger.debug('Session %s - connected after %d ms', this.id, timer.duration())
       clearTimeout(timeoutId)
       session.removeAllListeners('error')
-      session.setLocalWindowSize(connectionWindowSize)
+      if (configuredConnectionWindowSize !== undefined || connectionWindowSize > session.state.effectiveLocalWindowSize) {
+        session.setLocalWindowSize(connectionWindowSize)
+      }
       session.on('error', err => {
         logger.error('Session %s - unexpected error: %s', this.id, err.message)
         this.tlsSession = undefined

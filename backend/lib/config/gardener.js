@@ -187,16 +187,16 @@ function validateReflectorConfig (config) {
     {
       name: 'initialWindowSize',
       value: initialWindowSize,
-      min: 1,
+      min: 65535,
       max: 2 ** 31 - 1,
-      message: 'must be an integer between 1 and 2147483647',
+      message: 'must be an integer between 65535 and 2147483647',
     },
     {
       name: 'connectionWindowSize',
       value: connectionWindowSize,
-      min: 1,
+      min: 65535,
       max: 2 ** 31 - 1,
-      message: 'must be an integer between 1 and 2147483647',
+      message: 'must be an integer between 65535 and 2147483647',
     },
     {
       name: 'maxSessionMemory',
@@ -282,7 +282,7 @@ function assignReflectorResourcesFromEnvironment (config, env) {
   }
 }
 
-function parseConfigValue (value, type) {
+function parseConfigValue (value, type, name) {
   const parseArray = value => {
     if (value == null || typeof value !== 'string' || value.length === 0) {
       return undefined
@@ -292,8 +292,13 @@ function parseConfigValue (value, type) {
   }
   switch (type) {
     case 'Integer':
-      value = parseInt(value, 10)
-      return Number.isInteger(value) ? value : undefined
+      if (value === undefined || value === '') {
+        return undefined
+      }
+      if (typeof value !== 'string' || !/^\d+$/.test(value) || !Number.isInteger(Number(value))) {
+        throw TypeError(`${name} must be an integer`)
+      }
+      return Number(value)
     case 'Boolean':
       return value === 'true'
     case 'Array':
@@ -303,8 +308,8 @@ function parseConfigValue (value, type) {
   }
 }
 
-function assignConfigValue (config, { configPath, type = 'String' }, rawValue) {
-  const value = parseConfigValue(rawValue, type)
+function assignConfigValue (config, { configPath, type = 'String', environmentVariableName }, rawValue) {
+  const value = parseConfigValue(rawValue, type, `Environment variable '${environmentVariableName}'`)
   if (value !== undefined) {
     _.set(config, configPath, value)
   }

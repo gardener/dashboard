@@ -138,17 +138,28 @@ describe('config', function () {
         })
       })
 
-      it.each([-1, 1.5, 2 ** 31])('should reject invalid kube client initial window size %s', function (initialWindowSize) {
+      it.each([-1, 1.5, 65534, 2 ** 31])('should reject invalid kube client initial window size %s', function (initialWindowSize) {
         expect(() => loadKubeClientConfig({ initialWindowSize })).toThrow(
-          "Configuration value 'kubeClient.initialWindowSize' must be an integer between 1 and 2147483647",
+          "Configuration value 'kubeClient.initialWindowSize' must be an integer between 65535 and 2147483647",
         )
       })
 
       it.each([
-        ['connectionWindowSize', -1, "Configuration value 'kubeClient.connectionWindowSize' must be an integer between 1 and 2147483647"],
+        ['connectionWindowSize', -1, "Configuration value 'kubeClient.connectionWindowSize' must be an integer between 65535 and 2147483647"],
+        ['connectionWindowSize', 65534, "Configuration value 'kubeClient.connectionWindowSize' must be an integer between 65535 and 2147483647"],
         ['maxSessionMemory', 0, "Configuration value 'kubeClient.maxSessionMemory' must be a positive safe integer"],
       ])('should reject invalid kube client option %s', function (name, value, message) {
         expect(() => loadKubeClientConfig({ [name]: value })).toThrow(message)
+      })
+
+      it.each([
+        ['KUBE_CLIENT_INITIAL_WINDOW_SIZE', '1Mi'],
+        ['KUBE_CLIENT_CONNECTION_WINDOW_SIZE', 'abc'],
+      ])('should reject malformed kube client window size environment variable %s=%s', function (name, value) {
+        expect(() => loadKubeClientConfig(
+          { initialWindowSize: 1048576 },
+          { NODE_ENV: 'test', [name]: value },
+        )).toThrow(`Environment variable '${name}' must be an integer`)
       })
 
       it('should return the config in test environment without config file', function () {

@@ -56,6 +56,9 @@ class MockHttp2Session extends MockEmitter {
     this.remoteSettings = {
       maxConcurrentStreams: peerMaxConcurrentStreams,
     }
+    this.state = {
+      effectiveLocalWindowSize: 65535,
+    }
     this.socket = new MockTLSSocket()
     this.destroyed = false
     this.destroy = vi.fn().mockImplementation(() => {
@@ -474,6 +477,48 @@ describe('SessionPool', () => {
       session.emit('connect')
 
       expect(session.setLocalWindowSize).toHaveBeenCalledWith(options.connectionWindowSize)
+    })
+
+    it('should not lower Node.js default window sizes', () => {
+      const getDefaultSettingsSpy = vi.spyOn(http2, 'getDefaultSettings').mockReturnValue({
+        initialWindowSize: 4 * 1024 * 1024,
+      })
+      const session = pool.createSession()
+      session.state.effectiveLocalWindowSize = 32 * 1024 * 1024
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        settings: expect.objectContaining({
+          initialWindowSize: 4 * 1024 * 1024,
+        }),
+      }))
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).not.toHaveBeenCalled()
+      getDefaultSettingsSpy.mockRestore()
+    })
+
+    it('should apply configured window sizes even when smaller than Node.js defaults', () => {
+      options.connectionWindowSize = 16 * 1024 * 1024
+      options.settings = {
+        initialWindowSize: 1024 * 1024,
+      }
+      const getDefaultSettingsSpy = vi.spyOn(http2, 'getDefaultSettings').mockReturnValue({
+        initialWindowSize: 4 * 1024 * 1024,
+      })
+      const session = pool.createSession()
+      session.state.effectiveLocalWindowSize = 32 * 1024 * 1024
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        settings: expect.objectContaining({
+          initialWindowSize: options.settings.initialWindowSize,
+        }),
+      }))
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).toHaveBeenCalledWith(options.connectionWindowSize)
+      getDefaultSettingsSpy.mockRestore()
     })
 
     it('should create and close a session', () => {
