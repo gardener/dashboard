@@ -7,6 +7,5 @@ exports[`metrics > should create and export the application defined metrics 1`] 
   "informerEventsTotal",
   "responseTime",
   "cachedItemsCount",
-  "registerCacheCollector",
 ]
 `;
