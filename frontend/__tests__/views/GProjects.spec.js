@@ -6,6 +6,7 @@
 
 import {
   flushPromises,
+  mount,
   shallowMount,
 } from '@vue/test-utils'
 import { createPinia } from 'pinia'
@@ -29,6 +30,15 @@ vi.mock('@vueuse/core', async importOriginal => {
   return {
     ...actual,
     createSharedComposable: fn => fn,
+  }
+})
+
+// The table only renders rows while the socket is connected
+vi.mock('@/store/socket', async () => {
+  const { ref } = await import('vue')
+  const { defineStore } = await import('pinia')
+  return {
+    useSocketStore: defineStore('socket', () => ({ connected: ref(true) })),
   }
 })
 
@@ -72,6 +82,7 @@ async function mountProjects ({
   canCreate = false,
   history = createMemoryHistory(),
   locations = [{ name: 'ProjectList' }],
+  renderTable = false,
 } = {}) {
   const pinia = createPinia()
   const projectStore = useProjectStore(pinia)
@@ -104,7 +115,7 @@ async function mountProjects ({
     await router.push(location)
   }
 
-  const wrapper = shallowMount(GProjectList, {
+  const wrapper = (renderTable ? mount : shallowMount)(GProjectList, {
     global: {
       plugins: [
         createVuetifyPlugin(),
@@ -112,13 +123,18 @@ async function mountProjects ({
         router,
       ],
       stubs: {
+        GDataTableFooter: true,
         GProjectDialog: true,
         GProjectListRow: true,
+        GTableColumnSelection: true,
+        GTableSearch: true,
         GToolbar: { template: '<div><slot name="append" /></div>' },
         VCard: { template: '<div><slot /></div>' },
         VCardText: { template: '<div><slot /></div>' },
         VContainer: { template: '<div><slot /></div>' },
-        VDataTableVirtual: { template: '<table><slot name="loading" /><slot name="no-data" /><slot name="bottom" /></table>' },
+        ...!renderTable && {
+          VDataTableVirtual: { template: '<table><slot name="loading" /><slot name="no-data" /><slot name="bottom" /></table>' },
+        },
       },
     },
   })
@@ -251,7 +267,38 @@ describe('views GProjectList', () => {
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('ShootList'))
   })
 
-  it('sorts by title and searches technical name, title, description, and owner', async () => {
+  describe('sorting', () => {
+    const projects = [
+      createProject('alpha', { title: 'Zulu team', description: 'Platform' }),
+      createProject('bravo'),
+      createProject('charlie', { title: 'Bravo team' }),
+      createProject('delta'),
+      createProject('echo', { title: 'yankee team', description: 'Billing' }),
+    ]
+
+    function renderedNames (wrapper) {
+      return wrapper.findAllComponents({ name: 'GProjectListRow' }).map(row => row.props('project').metadata.name)
+    }
+
+    it('sorts by title without falling back to the name', async () => {
+      const { wrapper } = await mountProjects({ projects, renderTable: true })
+      expect(renderedNames(wrapper)).toEqual(['charlie', 'echo', 'alpha', 'bravo', 'delta'])
+
+      await wrapper.findAll('th').find(th => th.text() === 'TITLE').trigger('click')
+      expect(renderedNames(wrapper)).toEqual(['bravo', 'delta', 'alpha', 'echo', 'charlie'])
+    })
+
+    it('sorts missing values last in ascending order', async () => {
+      const { localStorageStore, wrapper } = await mountProjects({ projects, renderTable: true })
+      localStorageStore.projectSelectedColumns = { description: true }
+      await flushPromises()
+
+      await wrapper.findAll('th').find(th => th.text() === 'DESCRIPTION').trigger('click')
+      expect(renderedNames(wrapper)).toEqual(['echo', 'alpha', 'bravo', 'charlie', 'delta'])
+    })
+  })
+
+  it('searches technical name, title, description, and owner', async () => {
     const { wrapper } = await mountProjects({
       projects: [
         createProject('zeta', {
@@ -262,8 +309,6 @@ describe('views GProjectList', () => {
         createProject('beta', { owner: 'bob@example.org' }),
       ],
     })
-
-    expect(wrapper.vm.filteredProjects.map(project => project.metadata.name)).toEqual(['zeta', 'beta'])
 
     wrapper.vm.search = 'bob@'
     expect(wrapper.vm.filteredProjects.map(project => project.metadata.name)).toEqual(['beta'])

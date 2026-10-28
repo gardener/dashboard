@@ -206,7 +206,7 @@ const allHeaders = computed(() => [
     align: 'start',
     defaultSelected: true,
     hidden: false,
-    value: item => getProjectTitle(item) || get(item, ['metadata', 'name'], ''),
+    value: item => getProjectTitle(item),
   },
   {
     title: 'DESCRIPTION',
@@ -215,7 +215,7 @@ const allHeaders = computed(() => [
     align: 'start',
     defaultSelected: false,
     hidden: false,
-    value: item => get(item, ['spec', 'description'], ''),
+    value: item => get(item, ['spec', 'description']),
   },
   {
     title: 'PURPOSE',
@@ -224,7 +224,7 @@ const allHeaders = computed(() => [
     align: 'start',
     defaultSelected: false,
     hidden: false,
-    value: item => get(item, ['spec', 'purpose'], ''),
+    value: item => get(item, ['spec', 'purpose']),
   },
   {
     title: 'OWNER',
@@ -233,7 +233,7 @@ const allHeaders = computed(() => [
     align: 'start',
     defaultSelected: false,
     hidden: false,
-    value: item => get(item, ['spec', 'owner', 'name'], ''),
+    value: item => get(item, ['spec', 'owner', 'name']),
   },
   {
     title: 'STATUS',
