@@ -15,7 +15,7 @@ const { monitorCache, monitorHttpServer, monitorInformer, monitorSocketIO } = mo
 
 function monitorCaches (informers) {
   for (const [name, informer] of Object.entries(informers)) {
-    monitorCache(name, () => informer.store.listKeys().length)
+    monitorCache(name, () => informer.store.size)
     monitorInformer(name, informer)
   }
   const ticketCache = cache.getTicketCache()
