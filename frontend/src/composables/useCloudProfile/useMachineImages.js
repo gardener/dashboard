@@ -144,7 +144,10 @@ export function useMachineImages (cloudProfile) {
   function matchesArchitecture (image, architecture) {
     if (image.capabilityFlavors) {
       return image.capabilityFlavors.some(flavor =>
-        flavor.architecture?.includes(architecture),
+        flavor.architecture?.includes(architecture) ||
+        (!flavor.architecture &&
+          machineCapabilities.value.architecture?.length === 1 &&
+          machineCapabilities.value.architecture.includes(architecture)),
       )
     }
     return includes(image.architectures, architecture)

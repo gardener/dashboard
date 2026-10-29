@@ -359,6 +359,37 @@ describe('composables', () => {
     })
 
     describe('#useDefaultMachineImage', () => {
+      it('should inherit the sole profile architecture for capability flavors without architecture', () => {
+        cloudProfile.value = {
+          ...cloudProfile.value,
+          spec: {
+            machineImages: [
+              {
+                name: 'gardenlinux',
+                versions: [
+                  {
+                    version: '1.0.0',
+                    classification: 'supported',
+                    capabilityFlavors: [{ storageAccess: ['NVMe'] }],
+                  },
+                ],
+              },
+            ],
+            machineCapabilities: [
+              { name: 'architecture', values: ['amd64'] },
+              { name: 'storageAccess', values: ['NVMe'] },
+            ],
+          },
+        }
+
+        const { useDefaultMachineImage, useFilteredMachineImages } = useMachineImages(cloudProfile)
+        const machineType = ref({})
+        const architecture = ref('amd64')
+
+        expect(useFilteredMachineImages(machineType.value, architecture.value)).toHaveLength(1)
+        expect(useDefaultMachineImage(machineType, architecture).value).toMatchObject({ name: 'gardenlinux' })
+      })
+
       it('should return image with capabilityFlavors architecture when legacy architectures field is omitted', () => {
         cloudProfile.value = {
           ...cloudProfile.value,
