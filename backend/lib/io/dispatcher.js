@@ -10,6 +10,11 @@ import {
   synchronize as synchronizeShoots,
 } from './shoots.js'
 import { synchronize as synchronizeProjects } from './projects.js'
+import {
+  subscribe as subscribeProjectStats,
+  unsubscribe as unsubscribeProjectStats,
+  synchronize as synchronizeProjectStats,
+} from './projectstats.js'
 import { synchronize as synchronizeSeeds } from './seeds.js'
 import {
   subscribe as subscribeSeedStats,
@@ -31,6 +36,8 @@ async function subscribe (socket, key, options = {}) {
     case 'seedstats':
       await unsubscribeSeedStats(socket)
       return subscribeSeedStats(socket, options)
+    case 'projectstats':
+      return subscribeProjectStats(socket)
     case 'issues':
       await unsubscribeTickets(socket)
       return subscribeTickets(socket, options)
@@ -45,6 +52,8 @@ async function unsubscribe (socket, key) {
       return unsubscribeShoots(socket)
     case 'seedstats':
       return unsubscribeSeedStats(socket)
+    case 'projectstats':
+      return unsubscribeProjectStats(socket)
     case 'issues':
       return unsubscribeTickets(socket)
     default:
@@ -63,6 +72,11 @@ function synchronize (socket, key, ...args) {
       const [uids] = args
       assertArray(uids)
       return synchronizeProjects(socket, uids)
+    }
+    case 'projectstats': {
+      const [uids] = args
+      assertArray(uids)
+      return synchronizeProjectStats(socket, uids)
     }
     case 'seeds': {
       const [uids] = args

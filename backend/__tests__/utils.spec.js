@@ -29,6 +29,7 @@ import {
   simplifyObjectMetadata,
   simplifyProject,
   parseRooms,
+  toDerivedResource,
 } from '../lib/utils/index.js'
 
 const { AssertionError } = assert.strict
@@ -57,6 +58,27 @@ describe('utils', function () {
 
       user.groups = []
       expect(user.groups).toEqual([])
+    })
+
+    it('should mirror the parent identity in a derived resource', function () {
+      const project = {
+        metadata: { name: 'foo', uid: 'foo-uid', labels: { a: 'b' } },
+      }
+      const shoot = {
+        metadata: { name: 'bar', namespace: 'garden-foo', uid: 'bar-uid', resourceVersion: '1' },
+      }
+
+      expect(toDerivedResource('ProjectStat', project, { counts: {} })).toEqual({
+        apiVersion: 'dashboard.gardener.cloud/v1alpha1',
+        kind: 'ProjectStat',
+        metadata: { name: 'foo', uid: 'foo-uid' },
+        counts: {},
+      })
+      expect(toDerivedResource('ShootStat', shoot, {}).metadata).toEqual({
+        name: 'bar',
+        namespace: 'garden-foo',
+        uid: 'bar-uid',
+      })
     })
 
     it('should return some config values with defaults', function () {

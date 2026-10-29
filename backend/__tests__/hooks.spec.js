@@ -190,7 +190,7 @@ describe('hooks', () => {
       const server = {}
       const ticketCache = {}
       const ioInstance = {}
-      const keys = ['leases', 'shoots', 'projects', 'seeds', 'managedseeds']
+      const keys = ['leases', 'shoots', 'projects', 'seeds', 'managedseeds', 'resourcequotas']
       let informers
       let mockCreateInformers
 
@@ -211,6 +211,7 @@ describe('hooks', () => {
         cache.indexProjectsByNamespace = vi.fn()
         cache.indexShootsBySeedName = vi.fn()
         cache.indexShootsByNamespace = vi.fn()
+        cache.indexResourceQuotasByNamespace = vi.fn()
         cache.getTicketCache = vi.fn(() => ticketCache)
         io.mockReturnValue(ioInstance)
       })
@@ -252,6 +253,9 @@ describe('hooks', () => {
 
         expect(cache.indexShootsByNamespace).toHaveBeenCalledTimes(1)
         expect(cache.indexShootsByNamespace.mock.calls[0]).toEqual([informers.shoots])
+
+        expect(cache.indexResourceQuotasByNamespace).toHaveBeenCalledTimes(1)
+        expect(cache.indexResourceQuotasByNamespace.mock.calls[0]).toEqual([informers.resourcequotas])
 
         expect(io).toHaveBeenCalledTimes(1)
         expect(io.mock.calls[0]).toEqual([server, expect.anything()])
