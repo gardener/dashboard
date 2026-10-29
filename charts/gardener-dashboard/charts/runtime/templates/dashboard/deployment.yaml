@@ -194,19 +194,29 @@ spec:
           - name: KUBECONFIG
             value: {{ required ".Values.global.dashboard.projectedKubeconfig.baseMountPath is required" .Values.global.dashboard.projectedKubeconfig.baseMountPath }}/kubeconfig
           {{- end }}
-          {{- with .Values.global.dashboard.kubeClient }}
-          {{- if ne .readIdleTimeout nil }}
+          {{- if ne .Values.global.dashboard.kubeClient.readIdleTimeout nil }}
           - name: KUBE_CLIENT_READ_IDLE_TIMEOUT
-            value: {{ quote .readIdleTimeout }}
+            value: {{ quote .Values.global.dashboard.kubeClient.readIdleTimeout }}
           {{- end }}
-          {{- if ne .pingTimeout nil }}
+          {{- if ne .Values.global.dashboard.kubeClient.pingTimeout nil }}
           - name: KUBE_CLIENT_PING_TIMEOUT
-            value: {{ quote .pingTimeout }}
+            value: {{ quote .Values.global.dashboard.kubeClient.pingTimeout }}
           {{- end }}
-          {{- if ne .requestTimeout nil }}
+          {{- if ne .Values.global.dashboard.kubeClient.requestTimeout nil }}
           - name: KUBE_CLIENT_REQUEST_TIMEOUT
-            value: {{ quote .requestTimeout }}
+            value: {{ quote .Values.global.dashboard.kubeClient.requestTimeout }}
           {{- end }}
+          {{- if ne .Values.global.dashboard.kubeClient.initialWindowSize nil }}
+          - name: KUBE_CLIENT_INITIAL_WINDOW_SIZE
+            value: {{ quote .Values.global.dashboard.kubeClient.initialWindowSize }}
+          {{- end }}
+          {{- if ne .Values.global.dashboard.kubeClient.connectionWindowSize nil }}
+          - name: KUBE_CLIENT_CONNECTION_WINDOW_SIZE
+            value: {{ quote .Values.global.dashboard.kubeClient.connectionWindowSize }}
+          {{- end }}
+          {{- if ne .Values.global.dashboard.kubeClient.maxSessionMemory nil }}
+          - name: KUBE_CLIENT_MAX_SESSION_MEMORY
+            value: {{ quote .Values.global.dashboard.kubeClient.maxSessionMemory }}
           {{- end }}
           - name: METRICS_PORT
             value: {{ quote .Values.global.dashboard.metricsContainerPort }}

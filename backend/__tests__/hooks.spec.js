@@ -43,6 +43,16 @@ describe('hooks', () => {
       expect(hooks.io).toBeUndefined()
     })
 
+    it('should configure the watch client id', function () {
+      createDashboardClient.mockClear()
+
+      createHooks()
+
+      expect(createDashboardClient).toHaveBeenCalledWith({
+        id: 'watch',
+      })
+    })
+
     describe('#createInformers', function () {
       const leaseQuery = { fieldSelector: 'metadata.name=gardener-dashboard-github-webhook' }
       const resources = [

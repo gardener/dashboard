@@ -132,8 +132,8 @@ describe('config', function () {
         const fileMap = {
           '/etc/gardener-dashboard/secrets/oidc/client_id': 'client_id_from_file',
           '/etc/gardener-dashboard/secrets/oidc/client_secret': 'client_secret_from_file',
-          '/etc/gardener-dashboard/secrets/github/authentication.appId': '12345',
-          '/etc/gardener-dashboard/secrets/github/authentication.installationId': '67890',
+          '/etc/gardener-dashboard/secrets/github/authentication.appId': '12345\n',
+          '/etc/gardener-dashboard/secrets/github/authentication.installationId': '67890\n',
         }
 
         readFileSyncSpy.mockImplementation(filePath => {
