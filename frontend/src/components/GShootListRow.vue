@@ -87,10 +87,10 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'technicalId'">
         <g-auto-hide right>
           <template #activator>
-              <span
-                v-tooltip:top="shootTechnicalId"
-                class="text-ellipsis"
-              >{{ shootTechnicalId }}</span>
+            <span
+              v-tooltip:top="shootTechnicalId"
+              class="text-ellipsis"
+            >{{ shootTechnicalId }}</span>
           </template>
           <g-copy-btn :clipboard-text="shootTechnicalId" />
         </g-auto-hide>
@@ -222,15 +222,15 @@ SPDX-License-Identifier: Apache-2.0
       </template>
       <template v-if="cell.header.customField">
         <span
-            v-if="cell.header.tooltip"
-            v-tooltip:top="cell.header.tooltip"
-            :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
-          >{{ cell.displayValue }}</span>
-          <span
-            v-else-if="cell.displayValue"
-            v-tooltip:top="cell.displayValue"
-            :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
-          >
+          v-if="cell.header.tooltip"
+          v-tooltip:top="cell.header.tooltip"
+          :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
+        >{{ cell.displayValue }}</span>
+        <span
+          v-else-if="cell.displayValue"
+          v-tooltip:top="cell.displayValue"
+          :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
+        >
           {{ cell.displayValue }}
         </span>
       </template>
