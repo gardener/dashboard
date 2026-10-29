@@ -182,9 +182,9 @@ describe('gardener-dashboard', function () {
         global: {
           dashboard: {
             kubeClient: {
-              initialWindowSize: 1048576,
-              connectionWindowSize: 16777216,
-              maxSessionMemory: 64,
+              initialWindowSize: '1048576',
+              connectionWindowSize: '16777216',
+              maxSessionMemory: '64',
             },
           },
         },
