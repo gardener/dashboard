@@ -17,6 +17,7 @@ const KUBE_CLIENT_DEFAULT_PING_TIMEOUT = 15_000
 const KUBE_CLIENT_DEFAULT_REQUEST_TIMEOUT = 5 * 60 * 1_000
 const MIN_WINDOW_SIZE = 65_535
 const MAX_WINDOW_SIZE = 2 ** 31 - 1
+const MAX_SESSION_MEMORY = 2 ** 32 - 1
 
 function parseTimeoutValue (value, name) {
   const timeout = typeof value === 'string' && /^\d+$/.test(value)
@@ -49,8 +50,8 @@ function parseMaxSessionMemory (value, name) {
   const maxSessionMemory = typeof value === 'string' && /^\d+$/.test(value)
     ? Number(value)
     : value
-  if (!Number.isSafeInteger(maxSessionMemory) || maxSessionMemory < 1) {
-    throw TypeError(`${name} must be a positive safe integer`)
+  if (!Number.isSafeInteger(maxSessionMemory) || maxSessionMemory < 1 || maxSessionMemory > MAX_SESSION_MEMORY) {
+    throw TypeError(`${name} must be an integer between 1 and ${MAX_SESSION_MEMORY}`)
   }
   return maxSessionMemory
 }

@@ -198,6 +198,31 @@ describe('kube-client package defaults', () => {
     })
   })
 
+  it('should accept the maximum HTTP/2 maxSessionMemory value', async () => {
+    expect.hasAssertions()
+    const maxSessionMemory = 2 ** 32 - 1
+    const { kubeClient, request } = await importKubeClientWithEnv({
+      maxSessionMemory: String(maxSessionMemory),
+    })
+
+    expectAllClientsToUseTransportOptions(request, {
+      readIdleTimeout: 30_000,
+      pingTimeout: 15_000,
+      requestTimeout: 5 * 60 * 1_000,
+      maxSessionMemory,
+    })
+
+    request.extend.mockClear()
+    kubeClient.createDashboardClient({ maxSessionMemory })
+
+    expectAllClientsToUseTransportOptions(request, {
+      readIdleTimeout: 30_000,
+      pingTimeout: 15_000,
+      requestTimeout: 5 * 60 * 1_000,
+      maxSessionMemory,
+    })
+  })
+
   it('should allow per-client option 0 to override kube client environment variables', async () => {
     expect.hasAssertions()
     const { kubeClient, request } = await importKubeClientWithEnv({
@@ -271,7 +296,7 @@ describe('kube-client package defaults', () => {
   it.each([
     ['initialWindowSize', [1, 65534, 1.5, 2 ** 31, '1Mi'], 'must be an integer between 65535 and 2147483647'],
     ['connectionWindowSize', [1, 65534, 1.5, 2 ** 31, '1Mi'], 'must be an integer between 65535 and 2147483647'],
-    ['maxSessionMemory', [0, 1.5, '1Mi'], 'must be a positive safe integer'],
+    ['maxSessionMemory', [0, 1.5, 2 ** 32, '1Mi'], 'must be an integer between 1 and 4294967295'],
   ])('should fail fast for invalid per-client %s option', async (optionName, values, message) => {
     expect.hasAssertions()
     const { kubeClient } = await importKubeClientWithEnv()
@@ -321,10 +346,10 @@ describe('kube-client package defaults', () => {
     if (isTimeout) {
       message = 'must be a non-negative integer <= 2147483647'
     } else if (envName === 'KUBE_CLIENT_MAX_SESSION_MEMORY') {
-      message = 'must be a positive safe integer'
+      message = 'must be an integer between 1 and 4294967295'
     }
     const values = envName === 'KUBE_CLIENT_MAX_SESSION_MEMORY'
-      ? ['foo', '-1', '1.5', '9007199254740992']
+      ? ['foo', '-1', '1.5', '4294967296', '9007199254740992']
       : ['foo', '-1', '1.5', '2147483648']
     for (const value of values) {
       vi.resetModules()
