@@ -607,6 +607,19 @@ describe('api', function () {
         expect(items).toMatchSnapshot()
       })
 
+      it('should synchronize a Pending project', async function () {
+        const items = await synchronize(socket, 'projects', [5])
+        expect(items).toEqual([
+          expect.objectContaining({
+            metadata: expect.objectContaining({
+              name: 'pending',
+              uid: 5,
+            }),
+            status: { phase: 'Pending' },
+          }),
+        ])
+      })
+
       it('should synchronize seed stats', async function () {
         const items = await synchronize(socket, 'seedstats', ['seed--infra1-seed'], { unhealthyFilterMask: 0 })
         expect(items).toEqual([

@@ -24,7 +24,7 @@ const {
   decodeBase64,
   encodeBase64,
   getSeedNameFromShoot,
-  projectFilter,
+  nonPendingProjectFilter,
 } = utils
 export async function list ({ user, namespace, labelSelector }) {
   const query = {}
@@ -45,7 +45,7 @@ export async function list ({ user, namespace, labelSelector }) {
       await authentication.ensureUserGroups(user)
       const namespaces = _
         .chain(cache.getProjects())
-        .filter(projectFilter(user, false))
+        .filter(nonPendingProjectFilter(user, false))
         .map('spec.namespace')
         .value()
 

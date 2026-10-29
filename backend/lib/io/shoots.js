@@ -8,7 +8,7 @@ import createError from 'http-errors'
 import logger from '../logger/index.js'
 import cache from '../cache/index.js'
 import {
-  projectFilter,
+  nonPendingProjectFilter,
   parseRooms,
 } from '../utils/index.js'
 import services from '../services/index.js'
@@ -29,7 +29,7 @@ async function canListAllShoots (user, namespaces) {
 
 function getAllNamespaces (user) {
   return cache.getProjects()
-    .filter(projectFilter(user, false))
+    .filter(nonPendingProjectFilter(user, false))
     .map(project => project.spec.namespace)
 }
 

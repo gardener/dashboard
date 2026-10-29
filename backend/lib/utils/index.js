@@ -72,18 +72,18 @@ function isMemberOf (project, user) {
     .value()
 }
 
-// user.groups must be hydrated when canListProjects is false.
-function projectFilter (user, canListProjects = false) {
-  const isPending = project => {
-    return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
-  }
+function isProjectPending (project) {
+  return _.get(project, ['status', 'phase'], 'Pending') === 'Pending'
+}
 
-  return project => {
-    if (isPending(project)) {
-      return false
-    }
-    return canListProjects || isMemberOf(project, user)
-  }
+// user.groups must be hydrated when canListProjects is false.
+function projectVisibilityFilter (user, canListProjects = false) {
+  return project => canListProjects || !!isMemberOf(project, user)
+}
+
+function nonPendingProjectFilter (user, canListProjects = false) {
+  const isVisible = projectVisibilityFilter(user, canListProjects)
+  return project => !isProjectPending(project) && isVisible(project)
 }
 
 function parseRooms (rooms) {
@@ -301,7 +301,9 @@ export {
   encodeBase64,
   guardUserGroups,
   isMemberOf,
-  projectFilter,
+  isProjectPending,
+  projectVisibilityFilter,
+  nonPendingProjectFilter,
   parseRooms,
   simplifyObjectMetadata,
   simplifyProject,
