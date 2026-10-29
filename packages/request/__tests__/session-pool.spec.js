@@ -56,6 +56,9 @@ class MockHttp2Session extends MockEmitter {
     this.remoteSettings = {
       maxConcurrentStreams: peerMaxConcurrentStreams,
     }
+    this.state = {
+      effectiveLocalWindowSize: 65535,
+    }
     this.socket = new MockTLSSocket()
     this.destroyed = false
     this.destroy = vi.fn().mockImplementation(() => {
@@ -83,6 +86,7 @@ class MockHttp2Session extends MockEmitter {
     this.request = vi.fn()
       .mockImplementation((...args) => new MockHttp2Stream(...args))
     this.setTimeout = vi.fn()
+    this.setLocalWindowSize = vi.fn()
   }
 }
 
@@ -456,6 +460,70 @@ describe('SessionPool', () => {
   })
 
   describe('#createSession', () => {
+    it('should apply default window sizes, preserve settings, and set the session memory limit', () => {
+      options.maxSessionMemory = 64
+      options.settings = {
+        enablePush: false,
+      }
+
+      const session = pool.createSession()
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        maxSessionMemory: 64,
+        settings: expect.objectContaining({
+          initialWindowSize: 1024 * 1024,
+          enablePush: false,
+        }),
+      }))
+      expect(mockHttp2Connect.mock.calls[0][1]).not.toHaveProperty('connectionWindowSize')
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).toHaveBeenCalledWith(16 * 1024 * 1024)
+    })
+
+    it('should not lower Node.js default window sizes', () => {
+      const getDefaultSettingsSpy = vi.spyOn(http2, 'getDefaultSettings').mockReturnValue({
+        initialWindowSize: 4 * 1024 * 1024,
+      })
+      const session = pool.createSession()
+      session.state.effectiveLocalWindowSize = 32 * 1024 * 1024
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        settings: expect.objectContaining({
+          initialWindowSize: 4 * 1024 * 1024,
+        }),
+      }))
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).not.toHaveBeenCalled()
+      getDefaultSettingsSpy.mockRestore()
+    })
+
+    it('should apply configured window sizes even when smaller than Node.js defaults', () => {
+      options.connectionWindowSize = 16 * 1024 * 1024
+      options.settings = {
+        initialWindowSize: 1024 * 1024,
+      }
+      const getDefaultSettingsSpy = vi.spyOn(http2, 'getDefaultSettings').mockReturnValue({
+        initialWindowSize: 4 * 1024 * 1024,
+      })
+      const session = pool.createSession()
+      session.state.effectiveLocalWindowSize = 32 * 1024 * 1024
+
+      expect(mockHttp2Connect).toHaveBeenCalledWith(sid.origin, expect.objectContaining({
+        settings: expect.objectContaining({
+          initialWindowSize: options.settings.initialWindowSize,
+        }),
+      }))
+
+      session.emit('connect')
+
+      expect(session.setLocalWindowSize).toHaveBeenCalledWith(options.connectionWindowSize)
+      getDefaultSettingsSpy.mockRestore()
+    })
+
     it('should create and close a session', () => {
       const session = pool.createSession()
 

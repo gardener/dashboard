@@ -27,6 +27,9 @@ const kSemaphore = Symbol('semaphore')
 const kTimeoutId = Symbol('timeoutId')
 const kHeartbeatCleanup = Symbol('heartbeatCleanup')
 const kGoaway = Symbol('goaway')
+const DEFAULT_INITIAL_WINDOW_SIZE = 1024 * 1024 // 1 MiB in bytes
+const DEFAULT_CONNECTION_WINDOW_SIZE = 16 * 1024 * 1024 // 16 MiB in bytes
+const DEFAULT_MAX_SESSION_MEMORY = 32 // in MB
 
 function setSemaphore (session, value) {
   session[kSemaphore] = value // eslint-disable-line security/detect-object-injection
@@ -87,6 +90,10 @@ class SessionPool {
 
   get peerMaxConcurrentStreams () {
     return this.options.peerMaxConcurrentStreams
+  }
+
+  get connectionWindowSize () {
+    return this.options.connectionWindowSize
   }
 
   get value () {
@@ -325,9 +332,18 @@ class SessionPool {
 
   createSession () {
     const { origin, hostname } = this.id
-    const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'readIdleTimeout', 'pingTimeout'])
+    const configuredConnectionWindowSize = this.connectionWindowSize
+    const connectionWindowSize = configuredConnectionWindowSize ?? DEFAULT_CONNECTION_WINDOW_SIZE
+    const options = omit(this.options, ['connectTimeout', 'keepAliveTimeout', 'readIdleTimeout', 'pingTimeout', 'connectionWindowSize'])
     Object.assign(options, {
-      maxSessionMemory: 20,
+      maxSessionMemory: options.maxSessionMemory ?? DEFAULT_MAX_SESSION_MEMORY,
+      settings: {
+        ...options.settings,
+        initialWindowSize: options.settings?.initialWindowSize ?? Math.max(
+          DEFAULT_INITIAL_WINDOW_SIZE,
+          http2.getDefaultSettings().initialWindowSize,
+        ),
+      },
       servername: !net.isIP(hostname) ? hostname : '',
       session: this.tlsSession,
     })
@@ -372,6 +388,9 @@ class SessionPool {
       logger.debug('Session %s - connected after %d ms', this.id, timer.duration())
       clearTimeout(timeoutId)
       session.removeAllListeners('error')
+      if (configuredConnectionWindowSize !== undefined || connectionWindowSize > session.state.effectiveLocalWindowSize) {
+        session.setLocalWindowSize(connectionWindowSize)
+      }
       session.on('error', err => {
         logger.error('Session %s - unexpected error: %s', this.id, err.message)
         this.tlsSession = undefined

@@ -238,7 +238,7 @@ function assignReflectorResourcesFromEnvironment (config, env) {
   }
 }
 
-function parseConfigValue (value, type) {
+function parseConfigValue (value, type, name) {
   const parseArray = value => {
     if (value == null || typeof value !== 'string' || value.length === 0) {
       return undefined
@@ -248,8 +248,13 @@ function parseConfigValue (value, type) {
   }
   switch (type) {
     case 'Integer':
-      value = parseInt(value, 10)
-      return Number.isInteger(value) ? value : undefined
+      if (value === undefined || value === '') {
+        return undefined
+      }
+      if (typeof value !== 'string' || !/^\d+$/.test(value) || !Number.isInteger(Number(value))) {
+        throw TypeError(`${name} must be an integer`)
+      }
+      return Number(value)
     case 'Boolean':
       return value === 'true'
     case 'Array':
@@ -259,8 +264,8 @@ function parseConfigValue (value, type) {
   }
 }
 
-function assignConfigValue (config, { configPath, type = 'String' }, rawValue) {
-  const value = parseConfigValue(rawValue, type)
+function assignConfigValue (config, { configPath, type = 'String', environmentVariableName }, rawValue) {
+  const value = parseConfigValue(rawValue, type, `Environment variable '${environmentVariableName}'`)
   if (value !== undefined) {
     _.set(config, configPath, value)
   }
@@ -290,6 +295,9 @@ export default {
         rawValue = fs.readFileSync(filePath, 'utf8') // eslint-disable-line security/detect-non-literal-fs-filename
       } catch (err) {
         continue
+      }
+      if (configMapping.type === 'Integer') {
+        rawValue = rawValue.trim()
       }
       assignConfigValue(config, configMapping, rawValue)
     }

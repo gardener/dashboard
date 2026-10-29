@@ -120,9 +120,7 @@ class LifecycleHooks {
 }
 
 export default () => {
-  const client = createDashboardClient({
-    id: 'watch',
-  })
+  const client = createDashboardClient({ id: 'watch' })
   return new LifecycleHooks(client)
 }
 export { LifecycleHooks }

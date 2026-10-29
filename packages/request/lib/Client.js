@@ -204,6 +204,7 @@ class Client {
       'pingTimeout',
       'maxOutstandingPings',
       'maxSessionMemory',
+      'connectionWindowSize',
       'maxHeaderListPairs',
       'maxReservedRemoteStreams',
       'peerMaxConcurrentStreams',
