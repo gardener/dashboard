@@ -296,6 +296,9 @@ export default {
       } catch (err) {
         continue
       }
+      if (configMapping.type === 'Integer') {
+        rawValue = rawValue.trim()
+      }
       assignConfigValue(config, configMapping, rawValue)
     }
   },
