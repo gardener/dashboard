@@ -41,7 +41,7 @@
     "eslint": "^10.0.0",
     "eslint-plugin-lodash": "^8.0.0",
     "eslint-plugin-security": "^4.0.0",
-    "neostandard": "0.14.0",
+    "neostandard": "0.14.1",
     "vite": "^7.0.0",
     "vitest": "^5.0.0"
   },
