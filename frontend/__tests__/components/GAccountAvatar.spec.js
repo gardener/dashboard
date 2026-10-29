@@ -10,12 +10,15 @@ import GAccountAvatar from '@/components/GAccountAvatar.vue'
 import GAutoHide from '@/components/GAutoHide.vue'
 import GCopyBtn from '@/components/GCopyBtn.vue'
 
+const { createVuetifyPlugin } = global.fixtures.helper
+
 describe('components', () => {
   describe('g-account-avatar', () => {
     function mountComponent (props = {}) {
       return shallowMount(GAccountAvatar, {
         props,
         global: {
+          plugins: [createVuetifyPlugin()],
           stubs: {
             GAutoHide: {
               template: '<div class="auto-hide"><slot name="activator" /><slot /></div>',
@@ -53,6 +56,16 @@ describe('components', () => {
       expect(wrapper.findComponent(GAutoHide).exists()).toBe(false)
       expect(wrapper.findComponent(GCopyBtn).exists()).toBe(false)
       expect(wrapper.text()).toContain('technical-user')
+    })
+
+    it('should truncate the account name when requested', () => {
+      const wrapper = mountComponent({
+        accountName: 'technical-user',
+        truncate: true,
+      })
+
+      expect(wrapper.classes()).toContain('account-avatar--truncate')
+      expect(wrapper.get('.account-name--truncate').text()).toBe('technical-user')
     })
   })
 })

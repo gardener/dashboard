@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap align-center">
+  <div
+    class="d-flex flex-nowrap align-center"
+    :class="{ 'account-avatar--truncate': truncate }"
+  >
     <g-avatar
       :account-name="accountName"
       :size="size"
@@ -15,10 +18,19 @@ SPDX-License-Identifier: Apache-2.0
     <g-auto-hide
       v-if="accountName && copyable && isAccountNameEmail"
       right
-      class="account-name-copy"
+      :class="['account-name-copy', { 'account-name-copy--truncate': truncate }]"
     >
       <template #activator>
-        <span>{{ accountName }}</span>
+        <span
+          v-tooltip:top="{
+            text: accountName,
+            disabled: !truncate,
+          }"
+          :class="{
+            'text-truncate': truncate,
+            'account-name--truncate': truncate,
+          }"
+        >{{ accountName }}</span>
       </template>
       <g-copy-btn
         :clipboard-text="accountName"
@@ -27,7 +39,17 @@ SPDX-License-Identifier: Apache-2.0
         tooltip-text="Copy email address to clipboard"
       />
     </g-auto-hide>
-    <span v-else-if="accountName">{{ accountName }}</span>
+    <span
+      v-else-if="accountName"
+      v-tooltip:top="{
+        text: accountName,
+        disabled: !truncate,
+      }"
+      :class="{
+        'text-truncate': truncate,
+        'account-name--truncate': truncate,
+      }"
+    >{{ accountName }}</span>
     <span
       v-else
       class="font-weight-light text-disabled"
@@ -60,6 +82,10 @@ const props = defineProps({
     type: Number,
     default: 24,
   },
+  truncate: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const { accountName } = toRefs(props)
@@ -70,6 +96,16 @@ const isAccountNameEmail = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+.account-avatar--truncate {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.account-name-copy--truncate,
+.account-name--truncate {
+  min-width: 0;
+}
+
 .account-name-copy :deep(.copy-button) {
   height: 0;
 }

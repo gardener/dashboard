@@ -6,8 +6,23 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <template v-if="!managedSeedStore.isInitial">
+    <g-auto-hide
+      v-if="managedSeedShootItemLink && copyable"
+      right
+    >
+      <template #activator>
+        <g-text-router-link
+          :to="managedSeedShootItemLink"
+          :text="managedSeedShootName"
+        />
+      </template>
+      <g-copy-btn
+        :clipboard-text="managedSeedShootName"
+        tooltip-text="Copy shoot name to clipboard"
+      />
+    </g-auto-hide>
     <g-text-router-link
-      v-if="managedSeedShootItemLink"
+      v-else-if="managedSeedShootItemLink"
       :to="managedSeedShootItemLink"
       :text="managedSeedShootName"
     />
@@ -27,6 +42,8 @@ import { computed } from 'vue'
 
 import { useManagedSeedStore } from '@/store/managedSeed'
 
+import GAutoHide from '@/components/GAutoHide.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GTextRouterLink from '@/components/GTextRouterLink'
 
 const managedSeedStore = useManagedSeedStore()
@@ -37,6 +54,10 @@ const props = defineProps({
     default: undefined,
   },
   hideUnmanagedChip: {
+    type: Boolean,
+    default: false,
+  },
+  copyable: {
     type: Boolean,
     default: false,
   },

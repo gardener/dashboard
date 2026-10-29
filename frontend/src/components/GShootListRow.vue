@@ -32,12 +32,22 @@ SPDX-License-Identifier: Apache-2.0
           >
             <g-auto-hide right>
               <template #activator>
-                <g-text-router-link
-                  v-tooltip:top="shootName"
-                  class="text-ellipsis"
-                  :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
+                <v-tooltip
                   :text="shootName"
-                />
+                  location="top"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <span
+                      v-bind="tooltipProps"
+                      class="text-ellipsis"
+                    >
+                      <g-text-router-link
+                        :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
+                        :text="shootName"
+                      />
+                    </span>
+                  </template>
+                </v-tooltip>
                 <v-tooltip
                   v-if="isSelfHostedShoot"
                   text="Self-hosted shoot cluster"
@@ -76,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'seed'">
         <g-auto-hide right>
           <template #activator>
-            <g-shoot-seed-name />
+            <g-shoot-seed-name truncate />
           </template>
           <g-copy-btn
             v-if="shootSeedName"
@@ -118,7 +128,10 @@ SPDX-License-Identifier: Apache-2.0
         </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
-        <g-account-avatar :account-name="shootCreatedBy" />
+        <g-account-avatar
+          :account-name="shootCreatedBy"
+          truncate
+        />
       </template>
       <template v-if="cell.header.key === 'createdAt'">
         <g-time-string

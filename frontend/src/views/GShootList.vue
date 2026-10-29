@@ -473,7 +473,7 @@ export default {
         return {
           customField: true,
           title: upperCase(name),
-          class: 'nowrap',
+          class: 'width-limited nowrap',
           key,
           sortable: isSortable(sortable),
           align,
