@@ -167,7 +167,6 @@ import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
-import { useMachineCapabilities } from '@/composables/useCloudProfile/useMachineCapabilities'
 
 import {
   withFieldName,
@@ -228,8 +227,7 @@ export default {
       volumeTypes,
     } = useShootContext()
 
-    const { machineImages, useDefaultMachineImage, useFilteredMachineImages } = useMachineImages(cloudProfile)
-    const machineCapabilities = useMachineCapabilities(cloudProfile)
+    const { useDefaultMachineImage, useFilteredMachineImages } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
     const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
@@ -292,9 +290,7 @@ export default {
       machineArchitectures,
       volumeTypes,
       providerWorkers,
-      machineImages,
       useFilteredMachineImages,
-      machineCapabilities,
       machineArchitecture,
       machineTypes,
       selectedMachineType,
