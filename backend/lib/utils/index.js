@@ -261,6 +261,19 @@ function filterBySelectors (selectors) {
   }
 }
 
+// A derived resource is computed by the dashboard and mirrors the identity of its parent resource.
+function toDerivedResource (kind, parent, content) {
+  const { name, namespace, uid } = parent.metadata
+  return {
+    apiVersion: 'dashboard.gardener.cloud/v1alpha1',
+    kind,
+    metadata: namespace
+      ? { name, namespace, uid }
+      : { name, uid },
+    ...content,
+  }
+}
+
 function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
   if (arguments.length === 1 && typeof value === 'undefined') {
@@ -311,6 +324,7 @@ export {
   parseSelector,
   parseSelectors,
   filterBySelectors,
+  toDerivedResource,
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,

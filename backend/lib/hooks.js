@@ -55,6 +55,7 @@ class LifecycleHooks {
     cache.indexProjectsByNamespace(informers.projects)
     cache.indexShootsBySeedName(informers.shoots)
     cache.indexShootsByNamespace(informers.shoots)
+    cache.indexResourceQuotasByNamespace(informers.resourcequotas)
     // run informers
     const untilHasSyncedList = []
     for (const informer of Object.values(informers)) {

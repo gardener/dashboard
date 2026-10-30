@@ -57,6 +57,22 @@ function synchronizeFactory (kind, options = {}) {
   }
 }
 
+// A derived resource has the uid of its parent. The access resolver returns the socket's committed
+// scope, and getByUids returns undefined for parents that are missing or outside that scope.
+function derivedResourceSynchronizeFactory (kind, { accessResolver, getByUids }) {
+  const uidNotFound = uidNotFoundFactory('dashboard.gardener.cloud', kind)
+
+  return (socket, uids = []) => {
+    const uniqueUids = Array.from(new Set(uids))
+    const access = accessResolver(socket)
+    if (!access) {
+      return uniqueUids.map(uid => uidNotFound(uid))
+    }
+    return getByUids(uniqueUids, access)
+      .map((object, index) => object ?? uidNotFound(uniqueUids[index])) // eslint-disable-line security/detect-object-injection -- index is the map index
+  }
+}
+
 function expiresIn (socket) {
   const user = helper.getUserFromSocket(socket)
   const refreshAt = user?.refresh_at ?? 0
@@ -204,6 +220,8 @@ const helper = {
   sha256,
   joinPrivateRoom,
   synchronizeFactory,
+  derivedResourceSynchronizeFactory,
+  uidNotFoundFactory,
 }
 
 export default helper
