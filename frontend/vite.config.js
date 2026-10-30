@@ -116,9 +116,13 @@ export default defineConfig(({ command, mode }) => {
       }),
       vuetify({
         autoImport: true,
-        styles: {
-          configFile: 'src/sass/settings.scss',
-        },
+        // Vitest fails with the virtual Sass modules because they are not stored in the cache
+        // so we use real CSS imports in tests.
+        styles: mode === 'test'
+          ? true
+          : {
+              configFile: 'src/sass/settings.scss',
+            },
       }),
       Unfonts({
         fontsource: {
