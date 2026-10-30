@@ -37,50 +37,12 @@ SPDX-License-Identifier: Apache-2.0
             class="g-table-search-field mr-3"
             @keyup.esc="infraCredentialFilter = ''"
           />
-          <v-btn
-            v-if="canCreateCredentials && sortedInfraProviderTypeList.length === 1"
-            v-tooltip:top="'Create Infrastructure Secret'"
-            data-test="create-infra-credential-button"
-            icon="mdi-plus"
-            @click="onAddInfraBinding(sortedInfraProviderTypeList[0])"
+          <g-create-credential-button
+            v-if="canCreateCredentials"
+            vendor-type="infra"
+            :provider-types="sortedInfraProviderTypeList"
+            @select="onAddInfraBinding"
           />
-          <v-menu
-            v-else-if="canCreateCredentials"
-            v-model="createInfraCredentialMenu"
-            data-test="create-infra-credential-menu"
-            location="left"
-            absolute
-          >
-            <template #activator="{ props: menuProps }">
-              <v-btn
-                v-tooltip:top="'Create Infrastructure Secret'"
-                v-bind="menuProps"
-                data-test="create-infra-credential-button"
-                icon="mdi-plus"
-              />
-            </template>
-            <v-list>
-              <v-list-subheader>
-                Create Infrastructure Secret
-              </v-list-subheader>
-              <v-list-item
-                v-for="infrastructure in sortedInfraProviderTypeList"
-                :key="infrastructure"
-                @click="onAddInfraBinding(infrastructure)"
-              >
-                <template #prepend>
-                  <g-vendor-icon
-                    :name="infrastructure"
-                    vendor-type="infra"
-                    :size="24"
-                  />
-                </template>
-                <v-list-item-title>
-                  {{ vendorDisplayName({ type: 'infra', name: infrastructure }) }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
           <g-table-column-selection
             :headers="infraCredentialTableHeaders"
             @set-selected-header="setSelectedInfraHeader"
@@ -172,50 +134,12 @@ SPDX-License-Identifier: Apache-2.0
             class="g-table-search-field mr-3"
             @keyup.esc="dnsCredentialFilter = ''"
           />
-          <v-btn
-            v-if="canCreateCredentials && dnsProviderTypes.length === 1"
-            v-tooltip:top="'Create DNS Credential'"
-            data-test="create-dns-credential-button"
-            icon="mdi-plus"
-            @click="onAddDnsCredential(dnsProviderTypes[0])"
+          <g-create-credential-button
+            v-if="canCreateCredentials"
+            vendor-type="dns"
+            :provider-types="dnsProviderTypes"
+            @select="onAddDnsCredential"
           />
-          <v-menu
-            v-else-if="canCreateCredentials"
-            v-model="createDnsCredentialMenu"
-            data-test="create-dns-credential-menu"
-            location="left"
-            absolute
-          >
-            <template #activator="{ props: menuProps }">
-              <v-btn
-                v-tooltip:top="'Create DNS Credential'"
-                v-bind="menuProps"
-                data-test="create-dns-credential-button"
-                icon="mdi-plus"
-              />
-            </template>
-            <v-list density="compact">
-              <v-list-subheader>
-                Create DNS Credential
-              </v-list-subheader>
-              <v-list-item
-                v-for="dnsProvider in dnsProviderTypes"
-                :key="dnsProvider"
-                @click="onAddDnsCredential(dnsProvider)"
-              >
-                <template #prepend>
-                  <g-vendor-icon
-                    :name="dnsProvider"
-                    vendor-type="dns"
-                    :size="24"
-                  />
-                </template>
-                <v-list-item-title>
-                  {{ vendorDisplayName({ type: 'dns', name: dnsProvider }) }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
           <g-table-column-selection
             :headers="dnsCredentialTableHeaders"
             @set-selected-header="setSelectedDnsHeader"
@@ -267,11 +191,8 @@ SPDX-License-Identifier: Apache-2.0
       </v-data-table-virtual>
     </v-card>
 
-    <g-secret-dialog-wrapper
-      :visible-dialog="visibleCredentialDialog"
-      :visible-dialog-vendor-type="visibleCredentialVendorType"
-      :selected-dns-credential="selectedDnsCredential"
-      :selected-infra-binding="selectedInfraBinding"
+    <g-credential-dialog-wrapper
+      :dialog-state="dialogState"
       @dialog-closed="onDialogClosed"
     />
   </v-container>
@@ -281,7 +202,6 @@ SPDX-License-Identifier: Apache-2.0
 import {
   mapState,
   mapWritableState,
-  mapActions,
   storeToRefs,
 } from 'pinia'
 import { useUrlSearchParams } from '@vueuse/core'
@@ -299,13 +219,12 @@ import { useCredentialStore } from '@/store/credential'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
 import { useLocalStorageStore } from '@/store/localStorage'
-import { useConfigStore } from '@/store/config'
 
-import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
+import GCredentialDialogWrapper from '@/components/Credentials/GCredentialDialogWrapper'
+import GCreateCredentialButton from '@/components/Credentials/GCreateCredentialButton.vue'
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GBindingRowInfra from '@/components/Credentials/GBindingRowInfra.vue'
 import GCredentialRowDns from '@/components/Credentials/GCredentialRowDns.vue'
-import GVendorIcon from '@/components/GVendorIcon'
 import GToolbar from '@/components/GToolbar'
 import GDataTableFooter from '@/components/GDataTableFooter.vue'
 
@@ -333,11 +252,11 @@ import toLower from 'lodash/toLower'
 
 export default {
   components: {
-    GSecretDialogWrapper,
+    GCredentialDialogWrapper,
+    GCreateCredentialButton,
     GTableColumnSelection,
     GBindingRowInfra,
     GCredentialRowDns,
-    GVendorIcon,
     GToolbar,
     GDataTableFooter,
   },
@@ -394,14 +313,9 @@ export default {
   },
   data () {
     return {
-      selectedInfraBinding: {},
-      selectedDnsCredential: {},
       infraCredentialFilter: '',
-      createInfraCredentialMenu: false,
       dnsCredentialFilter: '',
-      createDnsCredentialMenu: false,
-      visibleCredentialDialog: undefined,
-      visibleCredentialVendorType: undefined,
+      dialogState: undefined,
     }
   },
   computed: {
@@ -563,7 +477,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useConfigStore, ['vendorDisplayName']),
     computeItem (resource) {
       const refResource = toRef(resource)
       let composable
@@ -595,49 +508,41 @@ export default {
         providerType: unref(providerType),
       }
     },
+    openCredentialDialog ({ operation, vendorType, providerType, credential, binding }) {
+      this.dialogState = {
+        operation,
+        credentialKind: 'Secret',
+        vendorType,
+        providerType,
+        credential,
+        binding,
+      }
+    },
     onAddInfraBinding (providerType) {
-      this.selectedInfraBinding = undefined
-      this.selectedDnsCredential = undefined
-      this.visibleCredentialDialog = providerType
-      this.visibleCredentialVendorType = 'infra'
+      this.openCredentialDialog({ operation: 'create', vendorType: 'infra', providerType })
     },
     onAddDnsCredential (providerType) {
-      this.selectedInfraBinding = undefined
-      this.selectedDnsCredential = undefined
-      this.visibleCredentialDialog = providerType
-      this.visibleCredentialVendorType = 'dns'
+      this.openCredentialDialog({ operation: 'create', vendorType: 'dns', providerType })
     },
     onUpdateInfraBinding (binding) {
       const providerType = bindingProviderType(binding)
-      this.selectedInfraBinding = binding
-      this.selectedDnsCredential = undefined
-      this.visibleCredentialDialog = providerType
-      this.visibleCredentialVendorType = 'infra'
+      this.openCredentialDialog({ operation: 'edit', vendorType: 'infra', providerType, binding })
     },
     onDeleteInfraBinding (binding) {
-      this.selectedInfraBinding = binding
-      this.selectedDnsCredential = undefined
-      this.visibleCredentialDialog = 'delete'
-      this.visibleCredentialVendorType = 'infra'
+      const providerType = bindingProviderType(binding)
+      this.openCredentialDialog({ operation: 'delete', vendorType: 'infra', providerType, binding })
     },
     onMigrateSecretBinding (binding) {
-      this.selectedInfraBinding = binding
-      this.selectedDnsCredential = undefined
-      this.visibleCredentialDialog = 'migrate-secret-binding'
-      this.visibleCredentialVendorType = 'infra'
+      const providerType = bindingProviderType(binding)
+      this.openCredentialDialog({ operation: 'migrate-secret-binding', vendorType: 'infra', providerType, binding })
     },
     onUpdateDnsCredential (credential) {
       const providerType = credentialProviderType(credential)
-      this.selectedDnsCredential = credential
-      this.selectedInfraBinding = undefined
-      this.visibleCredentialDialog = providerType
-      this.visibleCredentialVendorType = 'dns'
+      this.openCredentialDialog({ operation: 'edit', vendorType: 'dns', providerType, credential })
     },
     onDeleteDnsCredential (credential) {
-      this.selectedDnsCredential = credential
-      this.selectedInfraBinding = undefined
-      this.visibleCredentialDialog = 'delete'
-      this.visibleCredentialVendorType = 'dns'
+      const providerType = credentialProviderType(credential)
+      this.openCredentialDialog({ operation: 'delete', vendorType: 'dns', providerType, credential })
     },
     setSelectedInfraHeader (header) {
       this.infraCredentialSelectedColumns[header.key] = !header.selected
@@ -659,8 +564,7 @@ export default {
     },
     onDialogClosed () {
       // This forces re-rendering of credential dialogs when re-opened so we don't need to reset them manually
-      this.visibleCredentialDialog = undefined
-      this.visibleCredentialVendorType = undefined
+      this.dialogState = undefined
     },
     sortItems (items, sortByArr, secondSortCriteria) {
       const sortByObj = head(sortByArr)

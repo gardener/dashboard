@@ -7,9 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <component
     :is="resolvedComponent"
-    v-if="visibleDialog"
+    v-if="dialogState"
     v-model="visibleDialogState"
-    v-bind="{ credential: selectedDnsCredential, binding: selectedInfraBinding, providerType: visibleDialog, vendorType: visibleDialogVendorType }"
+    :credential="dialogState.credential"
+    :binding="dialogState.binding"
+    :provider-type="dialogState.providerType"
+    :vendor-type="dialogState.vendorType"
   >
     <template
       v-if="resolvedHelpComponent"
@@ -17,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0
     >
       <component
         :is="resolvedHelpComponent"
-        :provider-type="visibleDialog"
+        :provider-type="dialogState.providerType"
       />
     </template>
   </component>
@@ -36,10 +39,7 @@ const AwsHelp = defineAsyncComponent(() => import('@/components/Credentials/GSec
 
 export default {
   props: {
-    selectedDnsCredential: { type: Object, required: false },
-    selectedInfraBinding: { type: Object, required: false },
-    visibleDialog: { type: String, required: false },
-    visibleDialogVendorType: { type: String, required: false },
+    dialogState: { type: Object, required: false },
   },
   emits: ['dialog-closed'],
   data () {
@@ -47,21 +47,32 @@ export default {
   },
   computed: {
     resolvedComponent () {
-      switch (this.visibleDialog) {
+      const { operation, providerType } = this.dialogState ?? {}
+
+      if (operation === 'delete') {
+        return DeleteDialog
+      }
+      if (operation === 'migrate-secret-binding') {
+        return MigrationDialog
+      }
+
+      switch (providerType) {
         // Custom Dialogs for specific provider types
         case 'openstack': return OpenstackDialog
         case 'openstack-designate': return OpenstackDialog
         case 'gdch-dns': return GdchDnsDialog
 
         // Generic Dialogs
-        case 'delete': return DeleteDialog
-        case 'migrate-secret-binding': return MigrationDialog
-
         default: return GenericDialog
       }
     },
     resolvedHelpComponent () {
-      switch (this.visibleDialog) {
+      const { operation, credentialKind, providerType } = this.dialogState ?? {}
+      if (credentialKind !== 'Secret' || !['create', 'edit'].includes(operation)) {
+        return undefined
+      }
+
+      switch (providerType) {
         case 'alicloud':
           return AlicloudHelp
         case 'aws':
@@ -73,10 +84,11 @@ export default {
     },
   },
   watch: {
-    visibleDialog (visibleDialog) {
-      if (visibleDialog) {
-        this.visibleDialogState = true
-      }
+    dialogState: {
+      handler (dialogState) {
+        this.visibleDialogState = Boolean(dialogState)
+      },
+      immediate: true,
     },
     visibleDialogState (visibleDialogState) {
       if (!visibleDialogState) {

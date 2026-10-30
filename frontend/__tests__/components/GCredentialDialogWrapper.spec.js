@@ -4,18 +4,36 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
+import { shallowMount } from '@vue/test-utils'
+
+import GCredentialDialogWrapper from '@/components/Credentials/GCredentialDialogWrapper'
+import GSecretDialogDelete from '@/components/Credentials/GSecretDialogDelete'
 import GSecretDialogGeneric from '@/components/Credentials/GSecretDialogGeneric'
 import GSecretDialogHelpAlicloud from '@/components/Credentials/GSecretDialogHelpAlicloud'
 import GSecretDialogHelpAws from '@/components/Credentials/GSecretDialogHelpAws'
+import GSecretDialogMigration from '@/components/Credentials/GSecretDialogMigration'
 
-describe('GSecretDialogWrapper', () => {
-  function resolveDialog (visibleDialog) {
-    return GSecretDialogWrapper.computed.resolvedComponent.call({ visibleDialog })
+describe('GCredentialDialogWrapper', () => {
+  function createDialogState (providerType, overrides = {}) {
+    return {
+      operation: 'create',
+      credentialKind: 'Secret',
+      vendorType: 'infra',
+      providerType,
+      credential: undefined,
+      binding: undefined,
+      ...overrides,
+    }
   }
 
-  function resolveHelp (visibleDialog) {
-    return GSecretDialogWrapper.computed.resolvedHelpComponent.call({ visibleDialog })
+  function resolveDialog (providerType, overrides) {
+    const dialogState = createDialogState(providerType, overrides)
+    return GCredentialDialogWrapper.computed.resolvedComponent.call({ dialogState })
+  }
+
+  function resolveHelp (providerType, overrides) {
+    const dialogState = createDialogState(providerType, overrides)
+    return GCredentialDialogWrapper.computed.resolvedHelpComponent.call({ dialogState })
   }
 
   it('uses the generic dialog for Netlify DNS', async () => {
@@ -60,6 +78,14 @@ describe('GSecretDialogWrapper', () => {
     expect(resolveDialog(providerType)).toBe(resolveDialog('unknown-provider'))
   })
 
+  it('routes delete and migration operations to the existing Secret dialogs', async () => {
+    const deleteDialog = resolveDialog('aws', { operation: 'delete' })
+    const migrationDialog = resolveDialog('aws', { operation: 'migrate-secret-binding' })
+
+    expect(await deleteDialog.__asyncLoader()).toBe(GSecretDialogDelete)
+    expect(await migrationDialog.__asyncLoader()).toBe(GSecretDialogMigration)
+  })
+
   it('uses dedicated help only for Alibaba Cloud infrastructure', async () => {
     const alicloudHelp = resolveHelp('alicloud')
 
@@ -76,5 +102,24 @@ describe('GSecretDialogWrapper', () => {
     expect(resolveHelp('aws-route53')).toBe(awsHelp)
     expect(resolveHelp('unknown-provider')).toBeUndefined()
     expect(await awsHelp.__asyncLoader()).toBe(GSecretDialogHelpAws)
+  })
+
+  it('does not add Secret help to non-form operations', () => {
+    expect(resolveHelp('aws', { operation: 'delete' })).toBeUndefined()
+    expect(resolveHelp('aws', { operation: 'migrate-secret-binding' })).toBeUndefined()
+  })
+
+  it('opens from dialog state and emits when the dialog closes', async () => {
+    const wrapper = shallowMount(GCredentialDialogWrapper, {
+      props: {
+        dialogState: createDialogState('aws'),
+      },
+    })
+
+    expect(wrapper.vm.visibleDialogState).toBe(true)
+
+    await wrapper.setData({ visibleDialogState: false })
+
+    expect(wrapper.emitted('dialog-closed')).toHaveLength(1)
   })
 })
