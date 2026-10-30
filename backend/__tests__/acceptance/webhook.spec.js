@@ -16,7 +16,7 @@ import {
 } from 'vitest'
 import request from '@gardener-dashboard/request'
 import cacheModule from '../../lib/cache/index.js'
-import { loadOpenIssues } from '../../lib/services/tickets.js'
+import { loadIssues } from '../../lib/services/tickets.js'
 import { octokit } from '../../lib/github/index.js'
 
 const { mockRequest } = request
@@ -40,15 +40,20 @@ describe('github', function () {
 
   beforeEach(async () => {
     cache = internalCache.resetTicketCache()
-    await loadOpenIssues()
+    await loadIssues()
   })
 
-  describe('#loadOpenIssues', () => {
-    it('should initialize the cache with all open issues', async () => {
+  describe('#loadIssues', () => {
+    it('should initialize the cache with only open issues when closedIssuesLookbackDays is 0', async () => {
       expect(octokit.paginate).toHaveBeenCalledTimes(1)
 
       const issues = cache.getIssues()
       expect(issues).toHaveLength(3)
+
+      const openIssues = issues.filter(issue => issue.metadata.state === 'open')
+      const closedIssues = issues.filter(issue => issue.metadata.state === 'closed')
+      expect(openIssues).toHaveLength(3)
+      expect(closedIssues).toHaveLength(0)
     })
   })
 
@@ -62,7 +67,7 @@ describe('github', function () {
     })
 
     afterEach(() => {
-      vi.resetAllMocks()
+      vi.clearAllMocks()
     })
 
     describe('handle valid github webhook', () => {
