@@ -585,7 +585,7 @@ export function renderTemplate (template, data) {
     if (!property) {
       return ''
     }
-    return String(property.value)
+    return String(property.value ?? '')
   })
 }
 const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
