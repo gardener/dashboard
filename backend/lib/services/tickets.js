@@ -122,7 +122,7 @@ export async function getIssues ({ name, projectName } = {}) {
   const openIssues = await searchIssues({ state: 'open', title })
   const closedIssues = closedIssuesLookbackDays === 0 ? [] : await searchIssues({ state: 'closed', title, since: closedTicketSince.toISOString() })
   const issues = openIssues.concat(closedIssues)
-  return Promise.all(_.map(issues, fromIssue))
+  return Promise.all(issues)
 }
 
 export async function loadIssues (...args) {
