@@ -20,11 +20,11 @@ It is possible to change the branding of the Gardener Dashboard when using the [
 | `productSlogan` | Slogan that is displayed under the product title and on the login page| `Universal Kubernetes at Scale` |
 | `productLogoUrl` | URL for the product logo. You can also use [data:](https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls) scheme for development. For production it is recommended to provide static assets | `/static/assets/logo.svg` |
 | `teaserHeight` | Height of the teaser in the [GMainNavigation](../../frontend/src/components/GMainNavigation.vue) component | `200` |
-| `teaserTemplate` | Custom HTML template to replace to teaser content | refer to [GTeaser](../../frontend/src/components/GTeaser.vue) |
+| `teaserTemplate` | Custom HTML template to replace to teaser content. Supports simple `{{ key }}` placeholders but does not evaluate JavaScript expressions or Lodash `<% %>` blocks. | refer to [GTeaser](../../frontend/src/components/GTeaser.vue) |
 | `loginTeaserHeight` | Height of the login teaser in the [GLogin](../../frontend/src/layouts/GLogin.vue) component | `260` |
-| `loginTeaserTemplate` | Custom HTML template to replace to login teaser content | refer to [GLoginTeaser](../../frontend/src/components/GLoginTeaser.vue) |
+| `loginTeaserTemplate` | Custom HTML template to replace to login teaser content. Supports simple `{{ key }}` placeholders but does not evaluate JavaScript expressions or Lodash `<% %>` blocks. | refer to [GLoginTeaser](../../frontend/src/components/GLoginTeaser.vue) |
 | `loginFooterHeight` | Height of the login footer in the [GLogin](../../frontend/src/layouts/GLogin.vue) component | `24` |
-| `loginFooterTemplate` | Custom HTML template to replace to login footer content | refer to [GLoginFooter](../../frontend/src/components/GLoginFooter.vue) |
+| `loginFooterTemplate` | Custom HTML template to replace to login footer content. Supports simple `{{ key }}` placeholders but does not evaluate JavaScript expressions or Lodash `<% %>` blocks. | refer to [GLoginFooter](../../frontend/src/components/GLoginFooter.vue) |
 | `loginHints` | Links [`{ title: string; href: string; }`](https://vuetifyjs.com/en/api/v-breadcrumbs/#props-items) to product related sites shown below the login button  | `undefined` |
 | `oidcLoginTitle` | Title of tabstrip for loginType OIDC | `OIDC` |
 | `oidcLoginText` | Text show above the login button on the OIDC tabstrip | `Press Login to be redirected to`<br> `configured OpenID Connect Provider.` |
