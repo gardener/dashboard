@@ -127,6 +127,34 @@ SPDX-License-Identifier: Apache-2.0
           <g-worker-configuration />
         </template>
       </g-list-item>
+      <g-list-item>
+        <g-list-item-content label="Max Worker Nodes">
+          <template v-if="hasIpv4 && (podsCidr?.length || podsCidrSpec) && defaultNodeCIDRMaskSize">
+            <span v-if="maxNodeCount > 65536">2<sup>{{ Math.log2(maxNodeCount) }}</sup></span>
+            <span v-else>{{ maxNodeCount }}</span>
+          </template>
+          <template v-else>
+            Incalculable
+          </template>
+        </g-list-item-content>
+        <template #append>
+          <g-max-node-count-info />
+        </template>
+      </g-list-item>
+      <g-list-item>
+        <g-list-item-content label="Max Pods per Worker Node">
+          <template v-if="hasIpv4 && defaultNodeCIDRMaskSize">
+            <span v-if="maxPodsPerNodeCount > 65536">2<sup>{{ Math.log2(maxPodsPerNodeCount) }}</sup></span>
+            <span v-else>{{ maxPodsPerNodeCount }}</span>
+          </template>
+          <template v-else>
+            Incalculable
+          </template>
+        </g-list-item-content>
+        <template #append>
+          <g-max-pods-per-node-count-info />
+        </template>
+      </g-list-item>
       <v-divider inset />
       <g-list-item>
         <template #prepend>
@@ -263,6 +291,7 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { Netmask } from 'netmask'
 
 import { useConfigStore } from '@/store/config'
 import { useAuthzStore } from '@/store/authz'
@@ -280,6 +309,8 @@ import GShootVersionChip from '@/components/ShootVersion/GShootVersionChip'
 import GShootMessages from '@/components/ShootMessages/GShootMessages'
 import GAddonConfiguration from '@/components/ShootAddons/GAddonConfiguration'
 import GCopyBtn from '@/components/GCopyBtn'
+import GMaxNodeCountInfo from '@/components/GMaxNodeCountInfo.vue'
+import GMaxPodsPerNodeCountInfo from '@/components/GMaxPodsPerNodeCountInfo.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -289,6 +320,7 @@ import {
   shootAddonList,
   transformHtml,
   isEmail,
+  isIpv4Cidr,
 } from '@/utils'
 
 import map from 'lodash/map'
@@ -307,6 +339,10 @@ const {
   shootWorkerGroups,
   shootAccessRestrictions,
   isSelfHostedShoot,
+  podsCidr,
+  podsCidrSpec,
+  hasIpv4,
+  nodeCIDRMaskSize,
 } = useShootItem()
 
 const configStore = useConfigStore()
@@ -347,6 +383,20 @@ const slaDescriptionHtml = computed(() => {
 const slaTitle = computed(() => {
   return sla.value.title
 })
+
+const defaultNodeCIDRMaskSize = nodeCIDRMaskSize.value
+
+const maxNodeCount = computed(() => {
+  const cidr = podsCidr.value?.find(isIpv4Cidr) || podsCidr.value?.[0] || podsCidrSpec.value
+  const netmask = new Netmask(cidr)
+  return Math.pow(2, nodeCIDRMaskSize.value - netmask.bitmask)
+})
+
+const maxPodsPerNodeCount = computed(() => {
+  const bitLength = hasIpv4.value ? 32 : 128
+  return Math.pow(2, bitLength - nodeCIDRMaskSize.value)
+})
+
 </script>
 
 <style lang="scss" scoped>

@@ -6,6 +6,8 @@
 
 import { Netmask } from 'netmask'
 
+import { isIpv4Cidr } from '@/utils'
+
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
@@ -241,7 +243,7 @@ export function getKubernetesTemplate (providerType) {
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
-  if (numberOfNetworks < 1) {
+  if (numberOfNetworks < 1 || !cidrToSplitStr || !isIpv4Cidr(cidrToSplitStr)) {
     return []
   }
   const cidrToSplit = new Netmask(cidrToSplitStr)
