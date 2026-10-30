@@ -300,17 +300,23 @@ SPDX-License-Identifier: Apache-2.0
                         </legend>
                         <span class="text-body-medium">{{ workerGroup.minimum }}</span>
                       </v-col>
-                      <v-col cols="6">
+                      <v-col v-if="!isManualInPlaceUpdate" cols="6">
                         <legend class="text-body-small text-medium-emphasis">
                           Max. Surge
                         </legend>
                         <span class="text-body-medium">{{ workerGroup.maxSurge }}</span>
                       </v-col>
-                      <v-col cols="6">
+                      <v-col v-if="!isManualInPlaceUpdate" cols="6">
                         <legend class="text-body-small text-medium-emphasis">
                           Max. Unavailable
                         </legend>
                         <span class="text-body-medium">{{ workerGroup.maxUnavailable }}</span>
+                      </v-col>
+                      <v-col cols="12">
+                        <legend class="text-body-small text-medium-emphasis">
+                          Update Strategy
+                        </legend>
+                        <span class="text-body-medium">{{ updateStrategy }}</span>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -493,6 +499,12 @@ export default {
     },
     machineCri () {
       return this.workerGroup.cri ?? {}
+    },
+    updateStrategy () {
+      return this.workerGroup.updateStrategy ?? 'AutoRollingUpdate'
+    },
+    isManualInPlaceUpdate () {
+      return this.updateStrategy === 'ManualInPlaceUpdate'
     },
     classificationColor () {
       if (this.machineImage.isDeprecated) {
