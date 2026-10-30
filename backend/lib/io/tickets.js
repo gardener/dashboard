@@ -8,7 +8,7 @@ import createError from 'http-errors'
 import cache from '../cache/index.js'
 import * as authorization from '../services/authorization.js'
 import helper from './helper.js'
-import { projectFilter } from '../utils/index.js'
+import { nonPendingProjectFilter } from '../utils/index.js'
 
 function joinRoom (socket, namespace, shootName) {
   if (shootName) {
@@ -20,7 +20,7 @@ function joinRoom (socket, namespace, shootName) {
 export async function subscribe (socket, { namespace, shootName } = {}) {
   const user = helper.getUserFromSocket(socket)
   const canListProjects = await authorization.canListProjects(user)
-  const allowedProjects = cache.getProjects().filter(projectFilter(user, canListProjects))
+  const allowedProjects = cache.getProjects().filter(nonPendingProjectFilter(user, canListProjects))
 
   if (namespace === '_all') {
     await Promise.all(allowedProjects.map(project => joinRoom(socket, project.spec.namespace)))

@@ -12,7 +12,7 @@ import * as tickets from '../services/tickets.js'
 import { metricsRoute } from '../middleware.js'
 import * as authorization from '../services/authorization.js'
 import * as authentication from '../services/authentication.js'
-import { projectFilter } from '../utils/index.js'
+import { nonPendingProjectFilter } from '../utils/index.js'
 
 const router = express.Router({
   mergeParams: true,
@@ -24,11 +24,11 @@ const metricsMiddleware = metricsRoute('tickets')
 async function getIssues (namespace, user) {
   const canListProjects = await authorization.canListProjects(user)
   if (!canListProjects) {
-    // Without cluster-wide project access, projectFilter evaluates user and group membership.
+    // Without cluster-wide project access, the filter evaluates user and group membership.
     await authentication.ensureUserGroups(user)
   }
   let allowedProjects = cache.getProjects()
-    .filter(projectFilter(user, canListProjects))
+    .filter(nonPendingProjectFilter(user, canListProjects))
 
   if (namespace !== '_all') {
     const project = allowedProjects.find(project => project.spec.namespace === namespace)

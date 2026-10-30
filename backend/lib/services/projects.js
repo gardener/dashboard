@@ -10,7 +10,7 @@ import httpErrors from 'http-errors'
 import * as shoots from './shoots.js'
 import * as authorization from './authorization.js'
 import {
-  projectFilter,
+  projectVisibilityFilter,
   simplifyProject,
 } from '../utils/index.js'
 import cache from '../cache/index.js'
@@ -34,12 +34,12 @@ async function validateDeletePreconditions ({ user, name }) {
 export async function list ({ user }) {
   const canListProjects = await authorization.canListProjects(user)
   if (!canListProjects) {
-    // Without cluster-wide project access, projectFilter evaluates user and group membership.
+    // Without cluster-wide project access, project visibility evaluates user and group membership.
     await authentication.ensureUserGroups(user)
   }
   return _
     .chain(cache.getProjects())
-    .filter(projectFilter(user, canListProjects))
+    .filter(projectVisibilityFilter(user, canListProjects))
     .map(_.cloneDeep)
     .map(simplifyProject)
     .value()

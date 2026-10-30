@@ -15,12 +15,44 @@ import {
 import {
   getDashboardUrlPath,
   getGardenClusterIdentity,
+  list,
 } from '../lib/services/shoots.js'
 import config from '../lib/config/index.js'
 import { mockRequest } from '@gardener-dashboard/request'
+import cache from '../lib/cache/index.js'
+import * as authorization from '../lib/services/authorization.js'
+import * as authentication from '../lib/services/authentication.js'
 
 describe('services', function () {
   describe('shoots', function () {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    describe('#list', function () {
+      it('should exclude Pending member project namespaces from the _all fallback', async function () {
+        const user = { id: 'member@example.org', groups: [] }
+        const pendingProject = {
+          metadata: { name: 'pending' },
+          spec: {
+            namespace: 'garden-pending',
+            members: [{ kind: 'User', name: user.id }],
+          },
+          status: { phase: 'Pending' },
+        }
+        vi.spyOn(authorization, 'canListShoots').mockResolvedValue(false)
+        vi.spyOn(authentication, 'ensureUserGroups').mockResolvedValue()
+        vi.spyOn(cache, 'getProjects').mockReturnValue([pendingProject])
+        vi.spyOn(cache, 'getShoots').mockReturnValue([])
+
+        const result = await list({ user, namespace: '_all' })
+
+        expect(result.items).toEqual([])
+        expect(authorization.canListShoots).toHaveBeenCalledExactlyOnceWith(user)
+        expect(cache.getShoots).not.toHaveBeenCalled()
+      })
+    })
+
     describe('#getDashboardUrlPath', function () {
       it('should return dashboard URL path for kubernetes version < 1.16.0', function () {
         expect(getDashboardUrlPath('1.14.0')).toBe(
