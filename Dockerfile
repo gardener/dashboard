@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ############# builder #############
-FROM node:24.22.2-alpine3.23 AS builder
+FROM node:26.13.0-alpine3.23 AS builder
 
 WORKDIR /volume
 
