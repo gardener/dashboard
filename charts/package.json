@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@gardener-dashboard/test-utils": "workspace:^",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.5",
     "@vitest/eslint-plugin": "^1.6.15",
     "eslint": "^10.0.0",
     "eslint-plugin-import-x": "^4.17.1",
@@ -36,7 +36,7 @@
     "lodash-es": "^4.17.21",
     "neostandard": "0.14.1",
     "vite": "^7.0.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.5"
   },
   "packageManager": "yarn@4.17.1",
   "engines": {
