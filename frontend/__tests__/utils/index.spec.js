@@ -53,6 +53,15 @@ describe('utils', () => {
       expect(renderTemplate('{{ own }} {{ inherited }} {{ missing }}', data)).toBe('own value  ')
     })
 
+    it('replaces nullish values with an empty string', () => {
+      const data = {
+        nullValue: null,
+        undefinedValue: undefined,
+      }
+
+      expect(renderTemplate('{{ nullValue }} {{ undefinedValue }}', data)).toBe(' ')
+    })
+
     it('does not execute template expressions or evaluation blocks', () => {
       const execute = vi.fn()
       const template = '{{ execute() }} <% execute() %>'
