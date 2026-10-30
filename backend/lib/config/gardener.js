@@ -11,6 +11,8 @@ import fs from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 
+const LOG_FORMATS = ['json', 'text']
+
 /*
 configMappings defines mappings between config values, their sources (environment variables or files),
 and destinations in the config object. Properties:
@@ -109,6 +111,10 @@ const configMappings = [
   {
     environmentVariableName: 'LOG_LEVEL',
     configPath: 'logLevel',
+  },
+  {
+    environmentVariableName: 'LOG_FORMAT',
+    configPath: 'logFormat',
   },
   {
     environmentVariableName: 'LOG_HTTP_REQUEST_BODY',
@@ -307,6 +313,7 @@ export default {
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
+      logFormat: isProd ? 'json' : 'text',
       port: 3030,
       metricsPort: 9050,
     }
@@ -329,6 +336,10 @@ export default {
     }
     this.assignConfigFromEnvironmentAndFileSystem(config, env)
     assignReflectorResourcesFromEnvironment(config, env)
+    // Like the logger does for logLevel, accept only the exact lowercase values
+    if (!LOG_FORMATS.includes(config.logFormat)) {
+      config.logFormat = this.getDefaults({ env }).logFormat
+    }
     if (!_.has(config, ['metricsHost']) && _.has(config, ['host'])) {
       config.metricsHost = config.host
     }
