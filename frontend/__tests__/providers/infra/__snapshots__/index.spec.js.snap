@@ -1,0 +1,246 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`infrastructure provider registry > default Shoot specs > preserves the defaults for every current infrastructure provider 1`] = `
+{
+  "alicloud": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "alicloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.250.0.0/16",
+          },
+        },
+      },
+      "type": "alicloud",
+    },
+  },
+  "aws": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "aws.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vpc": {
+            "cidr": "10.250.0.0/16",
+          },
+        },
+      },
+      "type": "aws",
+    },
+  },
+  "azure": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "azure.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "azure.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "vnet": {
+            "cidr": "10.250.0.0/16",
+          },
+          "workers": "10.250.0.0/16",
+        },
+        "zoned": true,
+      },
+      "type": "azure",
+    },
+  },
+  "gcp": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "gcp.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.250.0.0/16",
+        },
+      },
+      "type": "gcp",
+    },
+  },
+  "gdch": {
+    "networking": {
+      "ipFamilies": [
+        "IPv4",
+      ],
+      "providerConfig": {
+        "apiVersion": "calico.networking.extensions.gardener.cloud/v1alpha1",
+        "kind": "NetworkConfig",
+        "overlay": {
+          "enabled": true,
+        },
+        "vxlan": {
+          "enabled": true,
+        },
+      },
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "gdch.provider.extensions.gardener.gdc.goog/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "gdch.provider.extensions.gardener.gdc.goog/v1alpha1",
+        "enableEgress": true,
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "parentReference": {
+            "name": "",
+            "type": "SingleSubnet",
+          },
+        },
+      },
+      "type": "gdch",
+    },
+  },
+  "hcloud": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "hcloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "hcloud.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.250.0.0/16",
+        },
+      },
+      "type": "hcloud",
+    },
+  },
+  "ironcore": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "type": "ironcore",
+    },
+  },
+  "ironcore-metal": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "type": "ironcore-metal",
+    },
+  },
+  "local": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "type": "local",
+    },
+  },
+  "metal": {
+    "kubernetes": {
+      "kubeControllerManager": {
+        "nodeCIDRMaskSize": 23,
+      },
+      "kubelet": {
+        "maxPods": 510,
+      },
+    },
+    "networking": {
+      "pods": "10.244.128.0/18",
+      "providerConfig": {
+        "apiVersion": "calico.networking.extensions.gardener.cloud/v1alpha1",
+        "backend": "vxlan",
+        "ipv4": {
+          "autoDetectionMethod": "interface=lo",
+          "mode": "Always",
+          "pool": "vxlan",
+        },
+        "kind": "NetworkConfig",
+        "typha": {
+          "enabled": true,
+        },
+      },
+      "services": "10.244.192.0/18",
+      "type": "calico",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "metal.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "metal.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+      },
+      "type": "metal",
+    },
+  },
+  "openstack": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "openstack.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "openstack.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.250.0.0/16",
+        },
+      },
+      "type": "openstack",
+    },
+  },
+  "stackit": {
+    "networking": {
+      "nodes": "10.250.0.0/16",
+    },
+    "provider": {
+      "controlPlaneConfig": {
+        "apiVersion": "stackit.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "ControlPlaneConfig",
+      },
+      "infrastructureConfig": {
+        "apiVersion": "stackit.provider.extensions.gardener.cloud/v1alpha1",
+        "kind": "InfrastructureConfig",
+        "networks": {
+          "workers": "10.250.0.0/16",
+        },
+      },
+      "type": "stackit",
+    },
+  },
+}
+`;
