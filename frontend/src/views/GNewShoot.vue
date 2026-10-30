@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     class="d-flex flex-column justify-space-between fill-height"
   >
     <v-container
-      class="overflow-auto card-container"
+      class="card-container overflow-auto"
       fluid
     >
       <v-card v-if="sortedInfraProviderTypeList.length > 1">
@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0
           title="Worker"
         />
         <v-card-text>
-          <g-manage-workers />
+          <g-manage-workers expand-by-default />
         </v-card-text>
       </v-card>
       <v-card

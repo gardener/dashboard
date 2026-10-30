@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0
       v-model="storageKind"
       :color="color"
       label="Volume"
+      persistent-placeholder
       variant="underlined"
       :items="storageKindItems"
       class="mr-1"
@@ -27,6 +28,7 @@ SPDX-License-Identifier: Apache-2.0
       label="Volume Size"
       type="number"
       :error-messages="errorMessages"
+      persistent-placeholder
       variant="underlined"
       style="maxWidth: 80px"
       @blur="emitBlur"

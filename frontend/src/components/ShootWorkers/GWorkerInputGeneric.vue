@@ -5,159 +5,297 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex flex-nowrap align-center ga-4">
-    <div class="d-flex flex-wrap">
-      <div class="regular-input name-input">
-        <v-text-field
-          v-model="worker.name"
-          v-messages-color="{ color: 'warning' }"
-          color="primary"
-          :error-messages="getErrorMessages(v$.worker.name)"
-          counter="15"
-          label="Group Name"
-          variant="underlined"
-          :hint="worker.controlPlane != null ? 'Control Plane Worker Pool' : undefined"
-          :persistent-hint="worker.controlPlane != null"
-          @input="v$.worker.name.$touch()"
-          @blur="v$.worker.name.$touch()"
-        />
-      </div>
-      <div class="small-input">
-        <v-select
-          v-model="machineArchitecture"
-          color="primary"
-          item-color="primary"
-          :items="machineArchitectures"
-          :error-messages="getErrorMessages(v$.machineArchitecture)"
-          label="Architecture"
-          variant="underlined"
-          @blur="v$.machineArchitecture.$touch()"
-        />
-      </div>
-      <div class="regular-input">
-        <g-machine-type
-          v-model="machineTypeValue"
-          :machine-types="machineTypes"
-          :field-name="`${workerGroupName} Machine Type`"
-        />
-      </div>
-      <div class="regular-input">
-        <g-machine-image
-          :machine-images="filteredMachineImages"
-          :worker="worker"
-          :machine-type="selectedMachineType"
-          :auto-update="maintenanceAutoUpdateMachineImageVersion"
-          :field-name="`${workerGroupName} Machine Image`"
-        />
-      </div>
-      <g-container-runtime
-        :machine-image-cri="machineImageCri"
-        :worker="worker"
-        :kubernetes-version="kubernetesVersion"
-        :field-name="`${workerGroupName} Container Runtime`"
-      />
-      <div
-        v-if="volumeInCloudProfile"
-        class="regular-input"
-      >
-        <g-volume-type
-          :volume-types="volumeTypes"
-          :worker="worker"
-          :cloud-profile-ref="cloudProfileRef"
-          :field-name="`${workerGroupName} Volume Type`"
-        />
-      </div>
-      <div :class="volumeInCloudProfile ? 'small-input' : 'regular-input'">
-        <g-volume-size-input
-          v-model="volumeSize"
-          v-model:has-custom-storage-size="hasCustomStorageSize"
-          :min="minVolumeSizeGi"
-          :default-storage-size="defaultStorageSize"
-          :has-volume-types="volumeInCloudProfile"
-          color="primary"
-          :error-messages="getErrorMessages(v$.volumeSize)"
-          @update:custom-storage="onInputVolumeSize"
-          @update:model-value="onInputVolumeSize"
-          @blur="v$.volumeSize.$touch()"
-        />
-      </div>
-      <div class="small-input">
-        <v-text-field
-          v-model="innerMin"
-          min="0"
-          color="primary"
-          :error-messages="getErrorMessages(v$.worker.minimum)"
-          type="number"
-          label="Autoscaler Min."
-          variant="underlined"
-          @input="v$.worker.minimum.$touch()"
-          @blur="ensureValidAutoscalerMin()"
-        />
-      </div>
-      <div class="small-input">
-        <v-text-field
-          v-model="innerMax"
-          min="0"
-          color="primary"
-          type="number"
-          label="Autoscaler Max."
-          variant="underlined"
-          :error-messages="getErrorMessages(v$.worker.maximum)"
-          @input="v$.worker.maximum.$touch()"
-          @blur="ensureValidAutoscalerMax()"
-        />
-      </div>
-      <div class="small-input">
-        <v-text-field
-          v-model="maxSurge"
-          min="0"
-          color="primary"
-          :error-messages="getErrorMessages(v$.worker.maxSurge)"
-          label="Max. Surge"
-          variant="underlined"
-          @input="v$.worker.maxSurge.$touch()"
-          @blur="v$.worker.maxSurge.$touch()"
-        />
-      </div>
-
-      <div
-        v-if="isZonedCluster"
-        class="regular-input"
-      >
-        <v-select
-          v-model="selectedZones"
-          color="primary"
-          item-color="primary"
-          label="Zones"
-          :items="zoneItems"
-          :error-messages="getErrorMessages(v$.selectedZones)"
-          multiple
-          chips
-          closable-chips
-          :hint="zoneHint"
-          persistent-hint
-          item-title="text"
-          variant="underlined"
-          @update:model-value="onInputZones"
-          @blur="v$.selectedZones.$touch()"
-        />
-      </div>
+  <v-container
+    fluid
+    class="pa-0"
+  >
+    <div class="worker-cards">
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-label-outline"
+              size="x-small"
+            />
+            <span class="text-body-medium">Worker Group</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <v-text-field
+                v-model="worker.name"
+                v-messages-color="{ color: 'warning' }"
+                color="primary"
+                :error-messages="getErrorMessages(validation.name)"
+                counter="15"
+                label="Group Name"
+                variant="underlined"
+                :hint="worker.controlPlane != null ? 'Control Plane Worker Pool' : undefined"
+                :persistent-hint="worker.controlPlane != null"
+                @input="validation.name.$touch()"
+                @blur="validation.name.$touch()"
+              />
+            </v-col>
+            <v-col
+              v-if="isZonedCluster"
+              cols="12"
+              class="py-0"
+            >
+              <v-select
+                v-model="selectedZones"
+                color="primary"
+                item-color="primary"
+                label="Zones"
+                :items="zoneItems"
+                :error-messages="getErrorMessages(validation.zones)"
+                multiple
+                chips
+                closable-chips
+                :hint="zoneHint"
+                persistent-hint
+                item-title="text"
+                variant="underlined"
+                @update:model-value="onInputZones"
+                @blur="validation.zones.$touch()"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-server"
+              size="x-small"
+            />
+            <span class="text-body-medium">Machine</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-select
+                v-model="machineArchitecture"
+                color="primary"
+                item-color="primary"
+                :items="machineArchitectures"
+                :error-messages="getErrorMessages(validation.machine.architecture)"
+                label="Architecture"
+                variant="underlined"
+                @blur="validation.machine.architecture.$touch()"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <g-machine-type
+                v-model="machineTypeValue"
+                :machine-types="machineTypes"
+                :validation="validation.machine.type"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-disc"
+              size="x-small"
+            />
+            <span class="text-body-medium">Image</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <g-machine-image
+                :machine-images="filteredMachineImages"
+                :worker="worker"
+                :machine-type="selectedMachineType"
+                :auto-update="maintenanceAutoUpdateMachineImageVersion"
+                :validation="validation.machine.image"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-oci"
+              size="x-small"
+            />
+            <span class="text-body-medium">Container Runtime</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <g-container-runtime
+                :machine-image-cri="machineImageCri"
+                :worker="worker"
+                :kubernetes-version="kubernetesVersion"
+                :validation="validation.cri.name"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-chart-line-variant"
+              size="x-small"
+            />
+            <span class="text-body-medium">Autoscaler</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-text-field
+                v-model="innerMin"
+                min="0"
+                color="primary"
+                :error-messages="getErrorMessages(validation.minimum)"
+                type="number"
+                label="Autoscaler Min."
+                hint="Minimum nodes kept running at all times"
+                variant="underlined"
+                @input="validation.minimum.$touch()"
+                @blur="ensureValidAutoscalerMin()"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-text-field
+                v-model="innerMax"
+                min="0"
+                color="primary"
+                type="number"
+                label="Autoscaler Max."
+                hint="Maximum nodes the autoscaler can scale up to"
+                variant="underlined"
+                :error-messages="getErrorMessages(validation.maximum)"
+                @input="validation.maximum.$touch()"
+                @blur="ensureValidAutoscalerMax()"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-text-field
+                v-model="maxSurge"
+                min="0"
+                color="primary"
+                :error-messages="getErrorMessages(validation.maxSurge)"
+                label="Max. Surge"
+                hint="Number of extra nodes allowed during a rolling update"
+                variant="underlined"
+                @input="validation.maxSurge.$touch()"
+                @blur="validation.maxSurge.$touch()"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card class="worker-section-card">
+        <v-toolbar
+          height="28"
+          class="text-medium-emphasis toolbar-tonal-primary"
+        >
+          <div class="d-flex align-center ga-2 px-3">
+            <v-icon
+              icon="mdi-harddisk"
+              size="x-small"
+            />
+            <span class="text-body-medium">Volume</span>
+          </div>
+        </v-toolbar>
+        <v-card-text class="pa-3">
+          <v-row density="compact">
+            <v-col
+              v-if="volumeInCloudProfile"
+              cols="12"
+              class="py-0"
+            >
+              <g-volume-type
+                :volume-types="volumeTypes"
+                :worker="worker"
+                :cloud-profile-ref="cloudProfileRef"
+                :volume-type-validation="validation.volume.type"
+                :iops-validation="validation.providerConfig.volume.iops"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <g-volume-size-input
+                v-model="volumeSize"
+                v-model:has-custom-storage-size="hasCustomStorageSize"
+                :min="minVolumeSizeGi"
+                :default-storage-size="defaultStorageSize"
+                :has-volume-types="volumeInCloudProfile"
+                color="primary"
+                :error-messages="getErrorMessages(validation.volume.size)"
+                @update:custom-storage="onInputVolumeSize"
+                @update:model-value="onInputVolumeSize"
+                @blur="validation.volume.size.$touch()"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
     </div>
-    <div>
+    <div class="mt-2">
       <slot name="action" />
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
 import { computed } from 'vue'
-import {
-  required,
-  maxLength,
-  minValue,
-  requiredIf,
-} from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
 
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
@@ -169,20 +307,12 @@ import { useShootContext } from '@/composables/useShootContext'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
-import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
+import {
+  getWorkerMinimumVolumeSizeGi,
+  useVolumeTypes,
+} from '@/composables/useCloudProfile/useVolumeTypes.js'
 
-import {
-  withFieldName,
-  lowerCaseAlphaNumHyphen,
-  noStartEndHyphen,
-  numberOrPercentage,
-  withMessage,
-  withParams,
-} from '@/utils/validators'
-import {
-  getErrorMessages,
-  convertToGi,
-} from '@/utils'
+import { getErrorMessages } from '@/utils'
 
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
@@ -212,6 +342,10 @@ export default {
       type: Object,
       required: true,
     },
+    validation: {
+      type: Object,
+      required: true,
+    },
   },
   setup (props) {
     const {
@@ -227,14 +361,14 @@ export default {
       isZonedCluster,
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
-      providerWorkers,
+      allMachineTypes,
       volumeTypes,
     } = useShootContext()
 
     const { visibleMachineImages: machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
     const { useFilteredMachineTypes } = useMachineTypes(cloudProfile, useZones)
-    const { useMinimumVolumeSize, volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
+    const { volumeTypes: allVolumeTypes } = useVolumeTypes(cloudProfile)
 
     function resetWorkerMachine () {
       props.worker.machine.type = get(defaultMachineType.value, ['name'])
@@ -265,15 +399,13 @@ export default {
     const defaultMachineImage = useDefaultMachineImage(defaultMachineTypeArchitecture)
 
     const selectedMachineType = computed(() => find(machineTypes.value, ['name', props.worker.machine.type]))
-    const selectedVolumeType = computed(() => find(allVolumeTypes.value, ['name', props.worker.volume?.type]))
-
-    const minimumVolumeSize = useMinimumVolumeSize(
-      selectedMachineType,
-      selectedVolumeType,
-    )
+    const minVolumeSizeGi = computed(() => getWorkerMinimumVolumeSizeGi(
+      props.worker,
+      allMachineTypes.value,
+      allVolumeTypes.value,
+    ))
 
     return {
-      v$: useVuelidate(),
       isNewCluster,
       cloudProfileRef,
       kubernetesVersion,
@@ -286,13 +418,11 @@ export default {
       maintenanceAutoUpdateMachineImageVersion,
       machineArchitectures,
       volumeTypes,
-      providerWorkers,
       machineImages,
       machineArchitecture,
       machineTypes,
       selectedMachineType,
-      selectedVolumeType,
-      minimumVolumeSize,
+      minVolumeSizeGi,
       useFilteredMachineTypes,
     }
   },
@@ -301,70 +431,6 @@ export default {
       volumeSize: undefined,
       hasCustomStorageSize: false,
     }
-  },
-  validations () {
-    const rules = { worker: {} }
-
-    const uniqueWorkerName = withMessage('Worker name must be unique', withParams(
-      { type: 'uniqueWorkerName' },
-      function unique (value) {
-        return this.providerWorkers.filter(item => item.name === value).length === 1
-      },
-    ))
-
-    const nameRules = {
-      required,
-      maxLength: maxLength(15),
-      lowerCaseAlphaNumHyphen,
-      noStartEndHyphen,
-      uniqueWorkerName,
-    }
-    rules.worker.name = withFieldName(() => `${this.workerGroupName} Name`, nameRules)
-
-    rules.worker.minimum = withFieldName(() => `${this.workerGroupName} Autoscaler Min.`, {
-      minValue: minValue(0),
-    })
-
-    const maximumRules = {
-      minValue: minValue(0),
-      systemComponents: withMessage('Value must be greater or equal to the number of zones configured for this pool',
-        value => {
-          const hasSystemComponents = get(this.worker, ['systemComponents', 'allow'], true)
-          if (!hasSystemComponents) {
-            return true
-          }
-          const zones = get(this.worker, ['zones', 'length'], 0)
-          return value >= zones
-        }),
-    }
-    rules.worker.maximum = withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, maximumRules)
-
-    rules.worker.maxSurge = withFieldName(() => `${this.workerGroupName} Max. Surge`, {
-      numberOrPercentage,
-    })
-
-    rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
-      required: requiredIf(() => this.isZonedCluster),
-    })
-
-    const volumeSizeRules = {
-      minVolumeSize: withMessage(() => `Minimum size is ${this.minVolumeSizeGi}`, value => {
-        if (!this.hasVolumeSize) {
-          return true
-        }
-        if (!value) {
-          return false
-        }
-        return this.minVolumeSizeGi <= convertToGi(value)
-      }),
-    }
-    rules.volumeSize = withFieldName(() => `${this.workerGroupName} Volume Size`, volumeSizeRules)
-
-    rules.machineArchitecture = withFieldName(() => `${this.workerGroupName} Machine Architecture`, {
-      required,
-    })
-
-    return rules
   },
   computed: {
     immutableZones () {
@@ -377,18 +443,6 @@ export default {
     },
     filteredMachineImages () {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
-    },
-    minVolumeSizeGi () {
-      const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
-      let defaultSize = get(this.selectedMachineType, ['storage.size'])
-      if (defaultSize) {
-        defaultSize = convertToGi(defaultSize)
-      }
-      if (defaultSize > 0 && defaultSize < minimumVolumeSizeInGi) {
-        return defaultSize
-      }
-
-      return minimumVolumeSizeInGi
     },
     innerMin: {
       get () {
@@ -488,9 +542,6 @@ export default {
         this.onInputVolumeSize()
       },
     },
-    workerGroupName () {
-      return this.worker.name ? `[Worker Group ${this.worker.name}]` : '[Worker Group]'
-    },
     hasVolumeSize () {
       return this.volumeInCloudProfile || this.hasCustomStorageSize
     },
@@ -503,7 +554,7 @@ export default {
       handler (volumeSize) {
         this.volumeSize = volumeSize
         this.hasCustomStorageSize = Boolean(volumeSize) && !this.volumeInCloudProfile
-        this.v$.volumeSize?.$touch()
+        this.validation.volume.size?.$touch()
       },
       immediate: true,
     },
@@ -516,21 +567,21 @@ export default {
         // default size, must not write to shoot spec
         delete this.worker.volume
       }
-      this.v$.volumeSize?.$touch()
+      this.validation.volume.size?.$touch()
     },
     onInputZones () {
-      this.v$.selectedZones.$touch()
-      this.v$.worker.maximum.$touch()
+      this.validation.zones.$touch()
+      this.validation.maximum.$touch()
     },
     ensureValidAutoscalerMin () {
-      this.v$.worker.minimum.$touch()
+      this.validation.minimum.$touch()
       // Ensure maximum is not less than minimum
       if (this.innerMax < this.worker.minimum) {
         this.worker.maximum = this.worker.minimum
       }
     },
     ensureValidAutoscalerMax () {
-      this.v$.worker.maximum.$touch()
+      this.validation.maximum.$touch()
       // Ensure minimum is not greater than maximum
       if (this.innerMin > this.worker.maximum) {
         this.worker.minimum = this.worker.maximum
@@ -541,13 +592,22 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-  :deep(.v-chip--disabled) {
-    opacity: 1;
-  }
+<style scoped>
+.worker-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 300px));
+  gap: 8px;
+  align-items: start;
+}
 
-  // Pin the name field to its min-width so the control plane hint wraps instead of widening the input.
-  .name-input {
-    max-width: 180px;
+:deep(.v-chip--disabled) {
+  opacity: 1;
+}
+
+.worker-section-card {
+  min-height: 200px;
+  .toolbar-tonal-primary {
+    background-color: rgba(var(--v-theme-primary), var(--v-activated-opacity, 0.2));
   }
+}
 </style>
