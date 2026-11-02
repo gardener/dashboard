@@ -1045,7 +1045,7 @@ const RAW_RUNTIME_STATE =
           ["fnv-plus", "npm:1.3.1"],\
           ["helmet", "npm:8.3.0"],\
           ["http-errors", "npm:2.0.1"],\
-          ["jose", "npm:6.2.13"],\
+          ["jose", "npm:6.2.14"],\
           ["js-yaml", "npm:5.5.0"],\
           ["jsonwebtoken", "npm:9.0.3"],\
           ["lodash", "npm:4.18.1"],\
@@ -8007,10 +8007,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jose", [\
-      ["npm:6.2.13", {\
-        "packageLocation": "./.yarn/cache/jose-npm-6.2.13-401e7cef3d-a7a175057f.zip/node_modules/jose/",\
+      ["npm:6.2.14", {\
+        "packageLocation": "./.yarn/cache/jose-npm-6.2.14-7c72df1bbb-3db1212207.zip/node_modules/jose/",\
         "packageDependencies": [\
-          ["jose", "npm:6.2.13"]\
+          ["jose", "npm:6.2.14"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9616,7 +9616,7 @@ const RAW_RUNTIME_STATE =
       ["npm:6.8.8", {\
         "packageLocation": "./.yarn/cache/openid-client-npm-6.8.8-5129be0d2e-b1d60ca456.zip/node_modules/openid-client/",\
         "packageDependencies": [\
-          ["jose", "npm:6.2.13"],\
+          ["jose", "npm:6.2.14"],\
           ["oauth4webapi", "npm:3.8.8"],\
           ["openid-client", "npm:6.8.8"]\
         ],\
