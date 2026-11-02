@@ -143,9 +143,12 @@ export function createShootContextComposable (options = {}) {
     return normalizeManifest(object)
   })
 
+  const initialProviderWorkers = computed(() => {
+    return get(initialManifest.value, ['spec', 'provider', 'workers'], [])
+  })
+
   const initialZones = computed(() => {
-    const workers = get(initialManifest.value, ['spec', 'provider', 'workers'])
-    return uniq(flatMap(workers, 'zones'))
+    return uniq(flatMap(initialProviderWorkers.value, 'zones'))
   })
 
   const initialProviderInfrastructureConfigNetworksZones = computed(() => {
@@ -1217,6 +1220,7 @@ export function createShootContextComposable (options = {}) {
     isFailureToleranceTypeZoneSupported,
     allZones,
     initialZones,
+    initialProviderWorkers,
     maxAdditionalZones,
     defaultNodesCIDR,
     infrastructureBindings,

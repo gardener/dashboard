@@ -344,6 +344,14 @@ export const useConfigStore = defineStore('config', () => {
     return shootDefaults.value.maxSurge ?? 1
   })
 
+  const defaultInPlaceMaxSurge = computed(() => {
+    return shootDefaults.value.inPlaceMaxSurge ?? 0
+  })
+
+  const defaultInPlaceMaxUnavailable = computed(() => {
+    return shootDefaults.value.inPlaceMaxUnavailable ?? 1
+  })
+
   const defaultZonesSelectAll = computed(() => {
     return shootDefaults.value.zonesSelectAll ?? false
   })
@@ -628,6 +636,8 @@ export const useConfigStore = defineStore('config', () => {
     defaultMaintenanceHours,
     defaultMaintenanceWindowSizeMinutes,
     defaultMaxSurge,
+    defaultInPlaceMaxSurge,
+    defaultInPlaceMaxUnavailable,
     defaultNetworkingType,
     defaultNodesCIDR,
     defaultPurposes,

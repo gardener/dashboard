@@ -37,6 +37,10 @@ describe('composables', () => {
             version: '1.1.4',
             expirationDate: '2024-04-05T01:02:03Z', // not expired
             classification: 'supported',
+            inPlaceUpdates: {
+              supported: true,
+              minVersionForUpdate: '1.1.3',
+            },
           },
           {
             version: '1.1.3',
@@ -132,11 +136,13 @@ describe('composables', () => {
         expect(imageWithExpirationDate.isDeprecated).toBe(false)
         expect(imageWithExpirationDate.isPreview).toBe(false)
         expect(imageWithExpirationDate.isExpirationWarning).toBe(false)
+        expect(imageWithExpirationDate.inPlaceUpdates).toEqual({ supported: true, minVersionForUpdate: '1.1.3' })
         expect(imageWithExpirationDate).toBe(decoratedAndSortedMachineImages.value[5]) // check sorting
 
         const imageWithNoExpirationDate = find(decoratedAndSortedMachineImages.value, { name: 'gardenlinux', version: '1.1.5' })
         expect(imageWithNoExpirationDate.isExpirationWarning).toBe(false)
         expect(imageWithNoExpirationDate.isExpired).toBe(false)
+        expect(imageWithNoExpirationDate.inPlaceUpdates).toBeUndefined()
 
         const previewImage = find(decoratedAndSortedMachineImages.value, { name: 'gardenlinux', version: '1.2.0' })
         expect(previewImage.isSupported).toBe(false)
