@@ -17,7 +17,10 @@ import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
 import compact from 'lodash/compact'
-import omit from 'lodash/omit'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import keys from 'lodash/keys'
+import without from 'lodash/without'
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   if (numberOfNetworks < 1 || !cidrToSplitStr || !isIpv4Cidr(cidrToSplitStr)) {
@@ -121,7 +124,10 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   }
 
   const shootCIDR = new Netmask(newShootWorkerCIDR)
-  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact(Object.values(omit(zone, ['name']))))
+  // createZoneNetworks defines which zone properties contain CIDRs. Read their
+  // values from the existing configuration so user changes are preserved.
+  const zoneCIDRKeys = without(keys(head(defaultZonesNetworkConfiguration)), 'name')
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact(map(zoneCIDRKeys, key => get(zone, key))))
   const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => !shootCIDR.contains(cidr))
   return zoneConfigurationContainsInvalidCIDR
     ? defaultZonesNetworkConfiguration

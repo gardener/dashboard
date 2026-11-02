@@ -315,6 +315,24 @@ describe('infrastructure zone networking', () => {
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
       })
 
+      it('should preserve non-CIDR fields in the zone network config', () => {
+        const zonesNetworkConfigurationWithElasticIPs = customZonesNetworkConfiguration.map((zone, index) => ({
+          ...zone,
+          elasticIPAllocationID: `eipalloc-${index}`,
+        }))
+
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(
+          zonesNetworkConfigurationWithElasticIPs,
+          workers,
+          3,
+          undefined,
+          nodeCIDR,
+          createAwsZoneNetworks,
+        )
+
+        expect(zonesNetworkConfiguration).toEqual(zonesNetworkConfigurationWithElasticIPs)
+      })
+
       it('should update network config if one of the zone CIDRs is not in the provided nodeCIDR range', () => {
         const newNodeCIDR = '10.180.0.0/20'
 
