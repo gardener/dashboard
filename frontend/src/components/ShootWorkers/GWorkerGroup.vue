@@ -300,13 +300,19 @@ SPDX-License-Identifier: Apache-2.0
                         </legend>
                         <span class="text-body-medium">{{ workerGroup.minimum }}</span>
                       </v-col>
-                      <v-col v-if="!isManualInPlaceUpdate" cols="6">
+                      <v-col
+                        v-if="!isManualInPlaceUpdate"
+                        cols="6"
+                      >
                         <legend class="text-body-small text-medium-emphasis">
                           Max. Surge
                         </legend>
                         <span class="text-body-medium">{{ workerGroup.maxSurge }}</span>
                       </v-col>
-                      <v-col v-if="!isManualInPlaceUpdate" cols="6">
+                      <v-col
+                        v-if="workerGroup.maxUnavailable != null"
+                        cols="6"
+                      >
                         <legend class="text-body-small text-medium-emphasis">
                           Max. Unavailable
                         </legend>
