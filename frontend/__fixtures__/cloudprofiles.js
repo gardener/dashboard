@@ -178,6 +178,7 @@ export default [
           name: 'ecs.c1.small',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -186,6 +187,7 @@ export default [
           name: 'ecs.c2.medium',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -194,6 +196,7 @@ export default [
           name: 'ecs.c2.large',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -202,6 +205,7 @@ export default [
           name: 'ecs.c2.xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '2',
@@ -210,6 +214,7 @@ export default [
           name: 'ecs.c6.large',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -218,6 +223,7 @@ export default [
           name: 'ecs.c6.xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
@@ -305,6 +311,7 @@ export default [
           name: 'm4.large',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -313,6 +320,7 @@ export default [
           name: 'm4.xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -321,6 +329,7 @@ export default [
           name: 'm4.2xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '2',
@@ -329,6 +338,7 @@ export default [
           name: 'a1.large',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '4',
@@ -337,6 +347,7 @@ export default [
           name: 'a1.xlarge',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '8',
@@ -345,6 +356,7 @@ export default [
           name: 'a1.2xlarge',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '2',
@@ -353,6 +365,7 @@ export default [
           name: 'g5.large',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -361,6 +374,7 @@ export default [
           name: 'g5.xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -369,6 +383,7 @@ export default [
           name: 'g5.2xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
@@ -493,6 +508,7 @@ export default [
           name: 'Standard_A4_v2',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -501,6 +517,7 @@ export default [
           name: 'Basic_A3',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -509,6 +526,7 @@ export default [
           name: 'Basic_A4',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
@@ -609,6 +627,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -622,6 +641,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -635,6 +655,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -648,6 +669,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '32',
@@ -661,6 +683,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '32',
@@ -674,6 +697,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
@@ -768,6 +792,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -781,6 +806,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -794,6 +820,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -807,6 +834,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '32',
@@ -820,6 +848,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '32',
@@ -833,6 +862,7 @@ export default [
           },
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
@@ -946,6 +976,7 @@ export default [
           name: 'n1-standard-2',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '4',
@@ -954,6 +985,7 @@ export default [
           name: 'n1-standard-4',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '8',
@@ -962,6 +994,7 @@ export default [
           name: 'n1-standard-8',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '16',
@@ -970,6 +1003,7 @@ export default [
           name: 'n1-standard-16',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
         {
           cpu: '2',
@@ -978,6 +1012,7 @@ export default [
           name: 't2a-standard-2',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '4',
@@ -986,6 +1021,7 @@ export default [
           name: 't2a-standard-4',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '8',
@@ -994,6 +1030,7 @@ export default [
           name: 't2a-standard-8',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
         {
           cpu: '16',
@@ -1002,6 +1039,7 @@ export default [
           name: 't2a-standard-16',
           usable: true,
           architecture: 'arm64',
+          capabilities: { architecture: ['arm64'] },
         },
       ],
       providerConfig: {
@@ -1125,6 +1163,7 @@ export default [
           name: 'x3-xlarge',
           usable: true,
           architecture: 'amd64',
+          capabilities: { architecture: ['amd64'] },
         },
       ],
       providerConfig: {
