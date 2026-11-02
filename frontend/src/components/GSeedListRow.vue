@@ -13,10 +13,18 @@ SPDX-License-Identifier: Apache-2.0
       :align="header.align"
     >
       <template v-if="header.key === 'name'">
-        <g-text-router-link
-          :to="seedItemLink"
-          :text="seedName"
-        />
+        <g-auto-hide right>
+          <template #activator>
+            <g-text-router-link
+              :to="seedItemLink"
+              :text="seedName"
+            />
+          </template>
+          <g-copy-btn
+            :clipboard-text="seedName"
+            tooltip-text="Copy seed name to clipboard"
+          />
+        </g-auto-hide>
       </template>
       <template v-else-if="header.key === 'infrastructure'">
         <g-vendor
@@ -30,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-managed-seed-shoot-link
           :managed-seed-shoot-name="managedSeedShootName"
           hide-unmanaged-chip
+          copyable
         />
       </template>
       <template v-else-if="header.key === 'shootCount'">
@@ -117,6 +126,8 @@ import {
 } from 'vue'
 
 import GManagedSeedShootLink from '@/components/GManagedSeedShootLink.vue'
+import GAutoHide from '@/components/GAutoHide.vue'
+import GCopyBtn from '@/components/GCopyBtn.vue'
 import GSeedCapacityIndicator from '@/components/Seeds/GSeedCapacityIndicator.vue'
 import GShootHealthDonut from '@/components/GShootHealthDonut.vue'
 import GTextRouterLink from '@/components/GTextRouterLink.vue'

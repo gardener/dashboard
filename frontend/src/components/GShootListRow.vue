@@ -10,15 +10,17 @@ SPDX-License-Identifier: Apache-2.0
       v-for="cell in cells"
       :key="cell.header.key"
       :class="cell.header.class"
-      class="position-relative project-cell"
+      class="position-relative"
     >
       <template v-if="cell.header.key === 'project'">
         <g-project-tooltip :project="project">
-          <g-text-router-link
-            :to="{ name: 'ShootList', params: { projectName: shootProjectName } }"
-            :text="shootProjectName"
-          />
-          <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
+          <span class="text-ellipsis">
+            <g-text-router-link
+              :to="{ name: 'ShootList', params: { projectName: shootProjectName } }"
+              :text="shootProjectName"
+            />
+            <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
+          </span>
         </g-project-tooltip>
       </template>
       <template v-if="cell.header.key === 'name'">
@@ -26,14 +28,26 @@ SPDX-License-Identifier: Apache-2.0
           class="pa-0 ma-0 fill-height flex-nowrap align-center"
         >
           <v-col
-            class="flex-grow-1 flex-shrink-0 pa-0 ma-0"
+            class="flex-grow-1 flex-shrink-1 pa-0 ma-0 name-container"
           >
             <g-auto-hide right>
               <template #activator>
-                <g-text-router-link
-                  :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
+                <v-tooltip
                   :text="shootName"
-                />
+                  location="top"
+                >
+                  <template #activator="{ props: tooltipProps }">
+                    <span
+                      v-bind="tooltipProps"
+                      class="text-ellipsis"
+                    >
+                      <g-text-router-link
+                        :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
+                        :text="shootName"
+                      />
+                    </span>
+                  </template>
+                </v-tooltip>
                 <v-tooltip
                   v-if="isSelfHostedShoot"
                   text="Self-hosted shoot cluster"
@@ -72,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'seed'">
         <g-auto-hide right>
           <template #activator>
-            <g-shoot-seed-name />
+            <g-shoot-seed-name truncate />
           </template>
           <g-copy-btn
             v-if="shootSeedName"
@@ -83,7 +97,10 @@ SPDX-License-Identifier: Apache-2.0
       <template v-if="cell.header.key === 'technicalId'">
         <g-auto-hide right>
           <template #activator>
-            <span>{{ shootTechnicalId }}</span>
+            <span
+              v-tooltip:top="shootTechnicalId"
+              class="text-ellipsis"
+            >{{ shootTechnicalId }}</span>
           </template>
           <g-copy-btn :clipboard-text="shootTechnicalId" />
         </g-auto-hide>
@@ -111,7 +128,10 @@ SPDX-License-Identifier: Apache-2.0
         </g-scroll-container>
       </template>
       <template v-if="cell.header.key === 'createdBy'">
-        <g-account-avatar :account-name="shootCreatedBy" />
+        <g-account-avatar
+          :account-name="shootCreatedBy"
+          truncate
+        />
       </template>
       <template v-if="cell.header.key === 'createdAt'">
         <g-time-string
@@ -217,11 +237,12 @@ SPDX-License-Identifier: Apache-2.0
         <span
           v-if="cell.header.tooltip"
           v-tooltip:top="cell.header.tooltip"
-          :class="{'text-disabled' : !cell.value}"
+          :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
         >{{ cell.displayValue }}</span>
         <span
           v-else-if="cell.displayValue"
-          :class="{'text-disabled' : !cell.value}"
+          v-tooltip:top="cell.displayValue"
+          :class="['text-ellipsis', {'text-disabled' : !cell.value}]"
         >
           {{ cell.displayValue }}
         </span>
@@ -503,7 +524,8 @@ const hasShootWorkerGroupWarning = computed(() => {
     pointer-events: none;
   }
 
-  .project-cell {
+  .width-limited {
+    width: 200px;
     max-width: 200px;
     overflow: hidden;
   }
@@ -513,7 +535,28 @@ const hasShootWorkerGroupWarning = computed(() => {
     grid-template-columns: 1fr auto;
     align-items: center;
     height: 100%;
+  }
+
+  .width-limited-large {
+    width: 300px;
+    max-width: 300px;
     overflow: hidden;
+  }
+
+  .text-ellipsis {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .name-container {
+    min-width: 0;
+
+    :deep(.auto-hide-wrapper) {
+      min-width: 0;
+    }
   }
 
   .v-theme--light .stale .stale-overlay {

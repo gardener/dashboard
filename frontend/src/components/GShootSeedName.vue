@@ -8,9 +8,12 @@ SPDX-License-Identifier: Apache-2.0
   <div
     v-if="shootSeedName"
     v-tooltip:top="{
-      text: shootLastOperationTypeControlPlaneMigrationMessage,
-      disabled: !isShootLastOperationTypeControlPlaneMigrating
+      text: isShootLastOperationTypeControlPlaneMigrating
+        ? shootLastOperationTypeControlPlaneMigrationMessage
+        : shootSeedName,
+      disabled: !isShootLastOperationTypeControlPlaneMigrating && !truncate,
     }"
+    :class="{ 'seed-name--truncate': truncate }"
   >
     <v-progress-circular
       v-if="isShootLastOperationTypeControlPlaneMigrating"
@@ -44,6 +47,13 @@ const {
   shootLastOperationTypeControlPlaneMigrationMessage,
 } = useShootItem()
 
+defineProps({
+  truncate: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const authzStore = useAuthzStore()
 const { canViewLandscape } = storeToRefs(authzStore)
 
@@ -54,3 +64,13 @@ const seedItemLink = computed(() => ({
   },
 }))
 </script>
+
+<style scoped>
+.seed-name--truncate {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
