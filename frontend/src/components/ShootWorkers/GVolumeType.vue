@@ -57,9 +57,9 @@ import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
+import { createWorkerConfig } from '@/providers/infra/aws/shoot'
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
-import { getInfrastructureProviderExtension } from '@/providers/infra'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -159,7 +159,7 @@ export default {
       const iopsValue = parseInt(value)
       if (value && iopsValue > 0) {
         if (!this.worker.providerConfig) {
-          this.worker.providerConfig = getInfrastructureProviderExtension('aws').createWorkerConfig()
+          this.worker.providerConfig = createWorkerConfig()
         }
         set(this.worker.providerConfig, ['volume', 'iops'], iopsValue)
       } else {

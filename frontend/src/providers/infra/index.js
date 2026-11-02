@@ -16,6 +16,21 @@ import * as metal from './metal/shoot'
 import * as openstack from './openstack/shoot'
 import * as stackit from './stackit/shoot'
 
+/**
+ * Hooks that customize Shoot behavior for an infrastructure provider.
+ *
+ * @typedef {Object} InfrastructureProviderExtension
+ * @property {Function} createShootSpec - Creates the provider-owned parts of a new Shoot spec.
+ * @property {Function} isZoned - Determines whether the Shoot supports zoned worker groups.
+ * @property {Function} resolveZoneNetworkWorkerCIDR - Resolves the parent CIDR used for zone networks.
+ * @property {Function} isRegionSupported - Determines whether a CloudProfile region can be selected.
+ * @property {Function} [createZoneNetworks] - Creates provider-specific network configuration for each zone.
+ * @property {Function} [resolveControlPlaneZone] - Resolves a provider-specific control-plane zone.
+ * @property {Function} [createWorkerConfig] - Creates provider-specific worker configuration.
+ */
+
+// Provider shoot modules define extension hooks. Keep implementation helpers
+// private because every named export becomes part of the extension object.
 const registry = new Map([
   ['alicloud', alicloud],
   ['aws', aws],
@@ -29,6 +44,12 @@ const registry = new Map([
   ['stackit', stackit],
 ])
 
+/**
+ * Returns the provider extension merged with the default Shoot behavior.
+ *
+ * @param {string} providerType - Infrastructure provider type.
+ * @returns {InfrastructureProviderExtension} Provider-specific and default hooks.
+ */
 export function getInfrastructureProviderExtension (providerType) {
   return {
     ...defaultExtension,
