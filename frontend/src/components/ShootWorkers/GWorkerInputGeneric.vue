@@ -22,6 +22,18 @@ SPDX-License-Identifier: Apache-2.0
           @blur="v$.worker.name.$touch()"
         />
       </div>
+      <div class="regular-input">
+        <v-select
+          v-model="updateStrategy"
+          color="primary"
+          item-color="primary"
+          :items="workerUpdateStrategies"
+          label="Update Strategy"
+          variant="underlined"
+          :hint="updateStrategyHint"
+          persistent-hint
+        />
+      </div>
       <div class="small-input">
         <v-select
           v-model="machineArchitecture"
@@ -107,7 +119,10 @@ SPDX-License-Identifier: Apache-2.0
           @blur="ensureValidAutoscalerMax()"
         />
       </div>
-      <div class="small-input">
+      <div
+        v-if="!isManualInPlaceUpdate"
+        class="small-input"
+      >
         <v-text-field
           v-model="maxSurge"
           min="0"
@@ -117,6 +132,21 @@ SPDX-License-Identifier: Apache-2.0
           variant="underlined"
           @input="v$.worker.maxSurge.$touch()"
           @blur="v$.worker.maxSurge.$touch()"
+        />
+      </div>
+      <div
+        v-if="isAutoInPlaceUpdate"
+        class="small-input"
+      >
+        <v-text-field
+          v-model="maxUnavailable"
+          min="0"
+          color="primary"
+          :error-messages="getErrorMessages(v$.worker.maxUnavailable)"
+          label="Max. Unavailable"
+          variant="underlined"
+          @input="v$.worker.maxUnavailable.$touch()"
+          @blur="v$.worker.maxUnavailable.$touch()"
         />
       </div>
 
@@ -151,6 +181,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <script>
 import { computed } from 'vue'
+import semver from 'semver'
 import {
   required,
   maxLength,
@@ -159,6 +190,8 @@ import {
 } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 
+import { useConfigStore } from '@/store/config'
+
 import GVolumeSizeInput from '@/components/ShootWorkers/GVolumeSizeInput'
 import GMachineType from '@/components/ShootWorkers/GMachineType'
 import GVolumeType from '@/components/ShootWorkers/GVolumeType'
@@ -166,6 +199,7 @@ import GMachineImage from '@/components/ShootWorkers/GMachineImage'
 import GContainerRuntime from '@/components/ShootWorkers/GContainerRuntime'
 
 import { useShootContext } from '@/composables/useShootContext'
+import { firstItemMatchingVersionClassification } from '@/composables/helper.js'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
@@ -199,6 +233,12 @@ import head from 'lodash/head'
 import pick from 'lodash/pick'
 import every from 'lodash/every'
 
+const workerUpdateStrategies = [
+  'AutoRollingUpdate',
+  'AutoInPlaceUpdate',
+  'ManualInPlaceUpdate',
+]
+
 export default {
   components: {
     GVolumeSizeInput,
@@ -223,6 +263,7 @@ export default {
       allZones,
       availableZones,
       initialZones,
+      initialProviderWorkers,
       maxAdditionalZones,
       isZonedCluster,
       maintenanceAutoUpdateMachineImageVersion,
@@ -230,6 +271,8 @@ export default {
       providerWorkers,
       volumeTypes,
     } = useShootContext()
+
+    const configStore = useConfigStore()
 
     const { visibleMachineImages: machineImages, useDefaultMachineImage } = useMachineImages(cloudProfile)
     const { useZones } = useRegions(cloudProfile)
@@ -281,6 +324,7 @@ export default {
       allZones,
       availableZones,
       initialZones,
+      initialProviderWorkers,
       maxAdditionalZones,
       isZonedCluster,
       maintenanceAutoUpdateMachineImageVersion,
@@ -294,6 +338,8 @@ export default {
       selectedVolumeType,
       minimumVolumeSize,
       useFilteredMachineTypes,
+      configStore,
+      workerUpdateStrategies,
     }
   },
   data () {
@@ -343,6 +389,10 @@ export default {
       numberOrPercentage,
     })
 
+    rules.worker.maxUnavailable = withFieldName(() => `${this.workerGroupName} Max. Unavailable`, {
+      numberOrPercentage,
+    })
+
     rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
       required: requiredIf(() => this.isZonedCluster),
     })
@@ -375,8 +425,44 @@ export default {
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
     },
-    filteredMachineImages () {
+    availableMachineImages () {
+      // All machine image versions usable by this worker: not expired and matching the architecture.
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
+    },
+    inPlaceEligibleMachineImages () {
+      // Subset of availableMachineImages that can be used with an in-place update strategy.
+      const committedImage = this.committedImage
+      const committedVersion = this.committedImageVersion
+      return filter(this.availableMachineImages, image => {
+        const { inPlaceUpdates, name, version } = image
+
+        if (this.isNewCluster || this.worker.isNew) {
+          // New worker pool: any image version that supports in-place updates is eligible.
+          return Boolean(inPlaceUpdates?.supported)
+        }
+
+        // Existing worker pool: always keep the currently installed (committed) version so the user
+        // can inspect the options without being forced to update, and can revert their selection to it.
+        if (committedImage && name === committedImage.name && version === committedImage.version) {
+          return true
+        }
+        // Otherwise only versions reachable from the committed version (minVersionForUpdate <= committed).
+        if (!inPlaceUpdates?.supported) {
+          return false
+        }
+        const { minVersionForUpdate } = inPlaceUpdates
+        if (!semver.valid(minVersionForUpdate) || !semver.valid(committedVersion)) {
+          return false
+        }
+        return semver.lte(minVersionForUpdate, committedVersion) && semver.gte(version, committedVersion)
+      })
+    },
+    filteredMachineImages () {
+      // Rolling updates may use any available image; in-place strategies are restricted to eligible ones.
+      return this.isInPlaceUpdate ? this.inPlaceEligibleMachineImages : this.availableMachineImages
+    },
+    inPlaceUpdatePossible () {
+      return !isEmpty(this.inPlaceEligibleMachineImages)
     },
     minVolumeSizeGi () {
       const minimumVolumeSizeInGi = convertToGi(this.minimumVolumeSize)
@@ -417,6 +503,68 @@ export default {
           this.worker.maxSurge = maxSurge
         }
       },
+    },
+    maxUnavailable: {
+      get: function () {
+        return this.worker.maxUnavailable
+      },
+      set: function (maxUnavailable) {
+        if (maxUnavailable === '' || maxUnavailable === null || maxUnavailable === undefined) {
+          delete this.worker.maxUnavailable
+        } else if (/^[\d]+$/.test(maxUnavailable)) {
+          this.worker.maxUnavailable = parseInt(maxUnavailable)
+        } else {
+          this.worker.maxUnavailable = maxUnavailable
+        }
+      },
+    },
+    updateStrategy: {
+      get () {
+        return this.worker.updateStrategy ?? 'AutoRollingUpdate'
+      },
+      set (value) {
+        if (value === 'AutoInPlaceUpdate') {
+          this.worker.updateStrategy = value
+          this.worker.maxSurge = this.configStore.defaultInPlaceMaxSurge
+          this.worker.maxUnavailable = this.configStore.defaultInPlaceMaxUnavailable
+        } else if (value === 'ManualInPlaceUpdate') {
+          this.worker.updateStrategy = value
+          // maxSurge and maxUnavailable must not be set for manual in-place updates.
+          delete this.worker.maxSurge
+          delete this.worker.maxUnavailable
+        } else {
+          delete this.worker.updateStrategy
+          this.worker.maxSurge = this.configStore.defaultMaxSurge
+          delete this.worker.maxUnavailable
+        }
+        // The eligible image list depends on the strategy; keep the selection consistent with it.
+        this.ensureCompatibleMachineImage()
+      },
+    },
+    isInPlaceUpdate () {
+      return this.updateStrategy === 'AutoInPlaceUpdate' || this.updateStrategy === 'ManualInPlaceUpdate'
+    },
+    isAutoInPlaceUpdate () {
+      return this.updateStrategy === 'AutoInPlaceUpdate'
+    },
+    isManualInPlaceUpdate () {
+      return this.updateStrategy === 'ManualInPlaceUpdate'
+    },
+    committedImage () {
+      // The machine image the worker was created/last saved with (undefined for a new worker).
+      const initialWorker = find(this.initialProviderWorkers, ['name', this.worker.name])
+      return get(initialWorker, ['machine', 'image'])
+    },
+    committedImageVersion () {
+      return this.committedImage?.version
+    },
+    updateStrategyHint () {
+      // The strategy is always selectable. When an in-place strategy is chosen but no eligible image
+      // exists, the image list is empty - surface a hint explaining why.
+      if (this.isInPlaceUpdate && !this.inPlaceUpdatePossible) {
+        return 'No machine image version supports in-place updates for the selected architecture'
+      }
+      return undefined
     },
     selectedZones: {
       get () {
@@ -507,8 +655,24 @@ export default {
       },
       immediate: true,
     },
+    'worker.machine.architecture' () {
+      // Changing the architecture resets the machine image to that architecture's default, which may
+      // not be compatible with an in-place update strategy. Re-select a compatible image.
+      this.ensureCompatibleMachineImage()
+    },
   },
   methods: {
+    ensureCompatibleMachineImage () {
+      // Keep the selected machine image within the list eligible for the current update strategy. If
+      // the current selection is not eligible, switch to the default eligible image version.
+      if (find(this.filteredMachineImages, this.worker.machine.image)) {
+        return
+      }
+      const fallback = firstItemMatchingVersionClassification(this.filteredMachineImages)
+      if (fallback) {
+        this.worker.machine.image = pick(fallback, ['name', 'version'])
+      }
+    },
     onInputVolumeSize () {
       if (this.hasVolumeSize) {
         set(this.worker, ['volume', 'size'], this.volumeSize)
