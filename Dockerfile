@@ -33,6 +33,8 @@ WORKDIR /app
 COPY . .
 
 # Fetch and verify dependencies before disabling network for the rest of the build.
+RUN npm i -g corepack
+RUN corepack enable
 RUN YARN_ENABLE_SCRIPTS=0 YARN_ENABLE_HARDENED_MODE=1 yarn install --immutable --check-cache --refresh-lockfile
 RUN yarn config set enableNetwork false
 RUN YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache
