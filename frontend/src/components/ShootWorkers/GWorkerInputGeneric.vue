@@ -346,6 +346,7 @@ export default {
     return {
       volumeSize: undefined,
       hasCustomStorageSize: false,
+      initialWorkerName: this.worker.name,
     }
   },
   validations () {
@@ -386,11 +387,21 @@ export default {
     rules.worker.maximum = withFieldName(() => `${this.workerGroupName} Autoscaler Max.`, maximumRules)
 
     rules.worker.maxSurge = withFieldName(() => `${this.workerGroupName} Max. Surge`, {
-      numberOrPercentage,
+      numberOrPercentage: withMessage('Must be a number or percentage', value => {
+        if (this.isManualInPlaceUpdate && (value == null || value === '')) {
+          return true
+        }
+        return numberOrPercentage.$validator(value)
+      }),
     })
 
     rules.worker.maxUnavailable = withFieldName(() => `${this.workerGroupName} Max. Unavailable`, {
-      numberOrPercentage,
+      numberOrPercentage: withMessage('Must be a number or percentage', value => {
+        if (!this.isAutoInPlaceUpdate && (value == null || value === '')) {
+          return true
+        }
+        return numberOrPercentage.$validator(value)
+      }),
     })
 
     rules.selectedZones = withFieldName(() => `${this.workerGroupName} Zones`, {
@@ -430,15 +441,20 @@ export default {
       return filter(this.machineImages, ({ isExpired, architectures }) => !isExpired && includes(architectures, this.machineArchitecture))
     },
     inPlaceEligibleMachineImages () {
-      // Subset of availableMachineImages that can be used with an in-place update strategy.
+      // Subset of machineImages that can be used with an in-place update strategy.
+      // Iterates machineImages (not availableMachineImages) so that an expired committed
+      // image is still returned and not silently replaced by ensureCompatibleMachineImage.
       const committedImage = this.committedImage
       const committedVersion = this.committedImageVersion
-      return filter(this.availableMachineImages, image => {
-        const { inPlaceUpdates, name, version } = image
+      return filter(this.machineImages, image => {
+        const { architectures, inPlaceUpdates, isExpired, name, version } = image
+        if (!includes(architectures, this.machineArchitecture)) {
+          return false
+        }
 
         if (this.isNewCluster || this.worker.isNew) {
-          // New worker pool: any image version that supports in-place updates is eligible.
-          return Boolean(inPlaceUpdates?.supported)
+          // New worker pool: any non-expired image version that supports in-place updates is eligible.
+          return !isExpired && Boolean(inPlaceUpdates?.supported)
         }
 
         // Existing worker pool: always keep the currently installed (committed) version so the user
@@ -446,8 +462,8 @@ export default {
         if (committedImage && name === committedImage.name && version === committedImage.version) {
           return true
         }
-        // Otherwise only versions reachable from the committed version (minVersionForUpdate <= committed).
-        if (!inPlaceUpdates?.supported) {
+        // Otherwise only non-expired versions reachable from the committed version (minVersionForUpdate <= committed).
+        if (isExpired || !inPlaceUpdates?.supported) {
           return false
         }
         const { minVersionForUpdate } = inPlaceUpdates
@@ -552,7 +568,8 @@ export default {
     },
     committedImage () {
       // The machine image the worker was created/last saved with (undefined for a new worker).
-      const initialWorker = find(this.initialProviderWorkers, ['name', this.worker.name])
+      // Use initialWorkerName (captured at mount) so renames don't break the lookup.
+      const initialWorker = find(this.initialProviderWorkers, ['name', this.initialWorkerName])
       return get(initialWorker, ['machine', 'image'])
     },
     committedImageVersion () {
