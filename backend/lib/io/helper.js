@@ -69,7 +69,7 @@ function derivedResourceSynchronizeFactory (kind, { accessResolver, getByUids })
       return uniqueUids.map(uid => uidNotFound(uid))
     }
     return getByUids(uniqueUids, access)
-      .map((object, index) => object ?? uidNotFound(uniqueUids[index])) // eslint-disable-line security/detect-object-injection -- index is the map index
+      .map((object, index) => object ?? uidNotFound(uniqueUids.at(index)))
   }
 }
 
