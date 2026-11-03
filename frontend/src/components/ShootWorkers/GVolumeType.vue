@@ -14,13 +14,14 @@ SPDX-License-Identifier: Apache-2.0
       :items="volumeTypeItems"
       item-title="name"
       item-value="name"
-      :error-messages="getErrorMessages(v$.worker.volume.type)"
+      :error-messages="getErrorMessages(volumeTypeValidation)"
       label="Volume Type"
       :hint="hint"
       persistent-hint
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputVolumeType"
-      @blur="v$.worker.volume.type.$touch()"
+      @blur="volumeTypeValidation.$touch()"
     >
       <template #item="{ item, props }">
         <v-list-item v-bind="props">
@@ -33,33 +34,29 @@ SPDX-License-Identifier: Apache-2.0
     <v-text-field
       v-if="isAWS && worker.volume.type !== 'gp2'"
       v-model.number="workerIops"
-      class="ml-1"
+      class="ml-4"
+      style="width: 80px;"
       color="primary"
-      :error-messages="getErrorMessages(v$.workerIops)"
+      :error-messages="getErrorMessages(iopsValidation)"
       type="number"
       min="100"
       label="IOPS"
+      hint="I/O operations per second"
+      persistent-placeholder
       variant="underlined"
       @update:model-value="onInputIops"
-      @blur="v$.workerIops.$touch()"
+      @blur="iopsValidation.$touch()"
     />
   </div>
 </template>
 
 <script>
 import { mapActions } from 'pinia'
-import {
-  required,
-  requiredIf,
-  minValue,
-} from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
 
 import { useCloudProfileStore } from '@/store/cloudProfile'
 
 import { getErrorMessages } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/shoot'
-import { withFieldName } from '@/utils/validators'
 
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -79,38 +76,21 @@ export default {
     cloudProfileRef: {
       type: Object,
     },
-    fieldName: {
-      type: String,
+    volumeTypeValidation: {
+      type: Object,
+      required: true,
+    },
+    iopsValidation: {
+      type: Object,
+      required: true,
     },
   },
   emits: [
     'updateVolumeType',
   ],
-  setup () {
-    return {
-      v$: useVuelidate(),
-    }
-  },
   data () {
     return {
       workerIops: undefined,
-    }
-  },
-  validations () {
-    return {
-      worker: {
-        volume: {
-          type: withFieldName(() => this.fieldName, {
-            required,
-          }),
-        },
-      },
-      workerIops: withFieldName(() => `${this.fieldName} IOPS`, {
-        required: requiredIf(() => {
-          return this.isAWS && (this.worker.volume.type === 'io1' || this.worker.volume.type === 'io2')
-        }),
-        minValue: minValue(100),
-      }),
     }
   },
   computed: {
@@ -142,7 +122,7 @@ export default {
     'worker.providerConfig.volume.iops': {
       handler (iops) {
         this.workerIops = iops
-        this.v$.workerIops?.$touch()
+        this.iopsValidation.$touch()
       },
       immediate: true,
     },
@@ -152,7 +132,7 @@ export default {
       'cloudProfileByRef',
     ]),
     onInputVolumeType () {
-      this.v$.worker.volume.type.$touch()
+      this.volumeTypeValidation.$touch()
       this.$emit('updateVolumeType')
     },
     onInputIops (value) {
@@ -165,7 +145,7 @@ export default {
       } else {
         unset(this.worker.providerConfig, ['volume', 'iops'])
       }
-      this.v$.workerIops.$touch()
+      this.iopsValidation.$touch()
       this.$emit('updateVolumeType')
     },
     getErrorMessages,

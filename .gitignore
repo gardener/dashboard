@@ -66,3 +66,6 @@ kubeconfig*
 
 # Local Dashboard session secret (never commit)
 hack/local-dashboard/.local-dashboard-session-secret.local
+
+# Playwright MCP output (console logs, page snapshots)
+.playwright-mcp/
