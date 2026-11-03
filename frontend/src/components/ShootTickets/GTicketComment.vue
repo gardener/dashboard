@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <div class="d-flex my-2 mx-4">
+  <div class="d-flex my-2">
     <div class="mr-2">
       <g-ticket-avatar
         :login="login"
@@ -256,7 +256,7 @@ export default {
   .timeline {
     height: 20px;
     border-left: solid 2px #bbb;
-    margin-left: 85px;
+    margin-left: 69px;
     overflow: hidden;
     margin-top: -20px;
     margin-bottom: -10px;

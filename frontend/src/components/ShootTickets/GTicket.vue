@@ -140,10 +140,10 @@ export default {
     margin-top: 0px;
   }
   .ticket-status-chip {
-    margin-left:64px;
+    margin-left:48px;
     margin-bottom: 10px;
   }
   .ticket-closed-chip {
-    margin-left: 65px
+    margin-left: 49px
   }
 </style>

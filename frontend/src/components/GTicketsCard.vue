@@ -24,14 +24,14 @@ SPDX-License-Identifier: Apache-2.0
       </g-toolbar>
       <div
         v-if="openTickets.length"
-        class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+        class="text-medium-emphasis mb-2 mt-2 ml-6 pt-1"
       >
         Open
       </div>
       <g-ticket-list :tickets="openTickets" />
       <div
         v-if="closedTickets.length"
-        class="text-medium-emphasis mb-2 mt-2 ml-2 pt-1"
+        class="text-medium-emphasis mb-2 mt-2 ml-6 pt-1"
       >
         Closed
       </div>

@@ -17,12 +17,16 @@ SPDX-License-Identifier: Apache-2.0
         >
           #{{ ticket.metadata.number }}
         </g-external-link>
-        {{ ticket.data.ticketTitle }}
-        <g-ticket-label
-          v-for="label in ticket.data?.labels"
-          :key="label.id"
-          :label="label"
-        />
+        <div class="mr-2">
+          {{ ticket.data.ticketTitle }}
+        </div>
+        <div>
+          <g-ticket-label
+            v-for="label in ticket.data?.labels"
+            :key="label.id"
+            :label="label"
+          />
+        </div>
       </v-expansion-panel-title>
       <v-expansion-panel-text>
         <g-ticket :ticket="ticket" />
