@@ -142,10 +142,11 @@ describe('services/projects', () => {
       const user = createUser('projects-viewer@bar.com')
 
       const result = await projects.list({ user })
-      expect(result).toHaveLength(3)
+      expect(result).toHaveLength(4)
       expect(result).toEqual(expect.arrayContaining([
         expect.objectContaining({ metadata: { name: 'foo' } }),
         expect.objectContaining({ metadata: { name: 'bar' } }),
+        expect.objectContaining({ metadata: { name: 'pending' } }),
         expect.objectContaining({ metadata: { name: 'terminating' } }),
       ]))
     })
@@ -190,6 +191,15 @@ describe('services/projects', () => {
       const result = await projects.list({ user })
       expect(result).toHaveLength(1)
       expect(result[0].metadata.name).toBe('foo')
+    })
+
+    it('should return a Pending project for a member', async () => {
+      authorization.canListProjects.mockResolvedValue(false)
+      const user = createUser('bar@bar.com')
+
+      const result = await projects.list({ user })
+
+      expect(result.map(project => project.metadata.name)).toEqual(['bar', 'pending'])
     })
   })
 

@@ -19,6 +19,9 @@ import {
   decodeBase64,
   guardUserGroups,
   isMemberOf,
+  isProjectPending,
+  projectVisibilityFilter,
+  nonPendingProjectFilter,
   getConfigValue,
   isTruthyValue,
   shootHasIssue,
@@ -57,6 +60,39 @@ describe('utils', function () {
 
       user.groups = []
       expect(user.groups).toEqual([])
+    })
+
+    it('should separate Project visibility from non-Pending resource access', () => {
+      const user = { id: 'member@example.org', groups: [] }
+      const createProject = ({ phase, members = [{ kind: 'User', name: user.id }] } = {}) => ({
+        spec: { members },
+        ...phase && { status: { phase } },
+      })
+      const pendingProject = createProject({ phase: 'Pending' })
+      const missingPhaseProject = createProject()
+      const readyProject = createProject({ phase: 'Ready' })
+      const terminatingProject = createProject({ phase: 'Terminating' })
+      const nonMemberProject = createProject({
+        phase: 'Ready',
+        members: [{ kind: 'User', name: 'other@example.org' }],
+      })
+      const visibleToMember = projectVisibilityFilter(user)
+      const nonPendingVisibleToMember = nonPendingProjectFilter(user)
+      const visibleToGlobalUser = projectVisibilityFilter(user, true)
+      const nonPendingVisibleToGlobalUser = nonPendingProjectFilter(user, true)
+
+      expect(isProjectPending(pendingProject)).toBe(true)
+      expect(isProjectPending(missingPhaseProject)).toBe(true)
+      expect(visibleToMember(readyProject)).toBe(true)
+      expect(visibleToMember(terminatingProject)).toBe(true)
+      expect(nonPendingVisibleToMember(readyProject)).toBe(true)
+      expect(nonPendingVisibleToMember(terminatingProject)).toBe(true)
+      expect(visibleToMember(nonMemberProject)).toBe(false)
+      expect(nonPendingVisibleToMember(nonMemberProject)).toBe(false)
+      expect(visibleToGlobalUser(pendingProject)).toBe(true)
+      expect(visibleToGlobalUser(missingPhaseProject)).toBe(true)
+      expect(nonPendingVisibleToGlobalUser(pendingProject)).toBe(false)
+      expect(nonPendingVisibleToGlobalUser(missingPhaseProject)).toBe(false)
     })
 
     it('should return some config values with defaults', function () {
