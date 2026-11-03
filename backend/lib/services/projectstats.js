@@ -9,7 +9,7 @@ import pLimit from 'p-limit'
 import cache from '../cache/index.js'
 import logger from '../logger/index.js'
 import {
-  projectFilter,
+  nonPendingProjectFilter,
   shootHasIssue,
   toDerivedResource,
 } from '../utils/index.js'
@@ -22,7 +22,7 @@ import {
 const kind = 'ProjectStat'
 const SHOOT_QUOTA_KEY = 'count/shoots.core.gardener.cloud'
 const ACCESS_REVIEW_CONCURRENCY = 10
-const isNonPendingProject = projectFilter(undefined, true)
+const isNonPendingProject = nonPendingProjectFilter(undefined, true)
 
 const magnitudeFactors = new Map([
   ['m', 1e-3],
@@ -45,7 +45,7 @@ const quantityCharacters = new Set('0123456789+-.eE')
 // user.groups is hydrated when the socket user is created.
 async function resolveProjectStatScope (user) {
   const canListAllProjectStats = await hasGlobalProjectStatAccess(user)
-  const candidateProjects = cache.getProjects().filter(projectFilter(user, canListAllProjectStats))
+  const candidateProjects = cache.getProjects().filter(nonPendingProjectFilter(user, canListAllProjectStats))
 
   if (canListAllProjectStats) {
     return {
