@@ -57,7 +57,12 @@ export function getDefaultZonesNetworkConfiguration (zones, maxNumberOfZones, wo
   })
 }
 
-export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, maxNumberOfZones, createZoneNetworks) {
+export function findFreeNetworks ({
+  existingZonesNetworkConfiguration,
+  workerCIDR,
+  maxNumberOfZones,
+  createZoneNetworks,
+}) {
   if (!existingZonesNetworkConfiguration) {
     return createZoneNetworks?.({
       workerCIDR,
@@ -83,7 +88,14 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
   return []
 }
 
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, workers, maxNumberOfZones, existingShootWorkerCIDR, newShootWorkerCIDR, createZoneNetworks) {
+export function getZonesNetworkConfiguration ({
+  oldZonesNetworkConfiguration,
+  workers,
+  maxNumberOfZones,
+  existingShootWorkerCIDR,
+  newShootWorkerCIDR,
+  createZoneNetworks,
+}) {
   if (isEmpty(workers) || !maxNumberOfZones || !createZoneNetworks) {
     return
   }
@@ -99,7 +111,12 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, work
   const existingZonesNetworkConfiguration = filter(oldZonesNetworkConfiguration, ({ name }) => includes(usedZones, name))
 
   if (existingShootWorkerCIDR) {
-    const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, maxNumberOfZones, createZoneNetworks)
+    const freeZoneNetworks = findFreeNetworks({
+      existingZonesNetworkConfiguration,
+      workerCIDR: existingShootWorkerCIDR,
+      maxNumberOfZones,
+      createZoneNetworks,
+    })
     const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
     if (availableNetworksLength < usedZones.length) {
       return

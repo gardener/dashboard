@@ -659,16 +659,14 @@ export function createShootContextComposable (options = {}) {
   const providerInfrastructureConfigNetworksZones = computed({
     get () {
       const value = get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
-      const args = shootCreationTimestamp.value
-        ? [networkingNodes.value, undefined]
-        : [undefined, networkingNodes.value]
-      return getZonesNetworkConfiguration(
-        value,
-        providerWorkers.value,
-        size(allZones.value),
-        ...args,
-        infrastructureProviderExtension.value.createZoneNetworks,
-      )
+      return getZonesNetworkConfiguration({
+        oldZonesNetworkConfiguration: value,
+        workers: providerWorkers.value,
+        maxNumberOfZones: size(allZones.value),
+        existingShootWorkerCIDR: shootCreationTimestamp.value ? networkingNodes.value : undefined,
+        newShootWorkerCIDR: shootCreationTimestamp.value ? undefined : networkingNodes.value,
+        createZoneNetworks: infrastructureProviderExtension.value.createZoneNetworks,
+      })
     },
     set (value) {
       set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'], value)
@@ -720,12 +718,12 @@ export function createShootContextComposable (options = {}) {
       nodesCIDR: networkingNodes.value,
       defaultNodesCIDR: defaultNodesCIDR.value,
     })
-    return findFreeNetworks(
-      providerInfrastructureConfigNetworksZones.value,
+    return findFreeNetworks({
+      existingZonesNetworkConfiguration: providerInfrastructureConfigNetworksZones.value,
       workerCIDR,
-      size(allZones.value),
-      infrastructureProviderExtension.value.createZoneNetworks,
-    )
+      maxNumberOfZones: size(allZones.value),
+      createZoneNetworks: infrastructureProviderExtension.value.createZoneNetworks,
+    })
   })
 
   const maxAdditionalZones = computed(() => {

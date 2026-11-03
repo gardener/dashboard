@@ -83,7 +83,12 @@ describe('infrastructure zone networking', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, createAwsZoneNetworks)
+        const freeNetworks = findFreeNetworks({
+          existingZonesNetworkConfiguration,
+          workerCIDR,
+          maxNumberOfZones: 4,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(2)
       })
@@ -117,7 +122,12 @@ describe('infrastructure zone networking', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, createAwsZoneNetworks)
+        const freeNetworks = findFreeNetworks({
+          existingZonesNetworkConfiguration,
+          workerCIDR,
+          maxNumberOfZones: 4,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(0)
       })
@@ -133,7 +143,12 @@ describe('infrastructure zone networking', () => {
         ]
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(existingZonesNetworkConfiguration, workerCIDR, 4, createAwsZoneNetworks)
+        const freeNetworks = findFreeNetworks({
+          existingZonesNetworkConfiguration,
+          workerCIDR,
+          maxNumberOfZones: 4,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(0)
       })
@@ -141,7 +156,12 @@ describe('infrastructure zone networking', () => {
       it('should return networks for all zones if existingZonesNetworkConfiguration is undefined', () => {
         const workerCIDR = '10.251.0.0/16'
 
-        const freeNetworks = findFreeNetworks(undefined, workerCIDR, 4, createAwsZoneNetworks)
+        const freeNetworks = findFreeNetworks({
+          existingZonesNetworkConfiguration: undefined,
+          workerCIDR,
+          maxNumberOfZones: 4,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(freeNetworks).toBeInstanceOf(Array)
         expect(freeNetworks).toHaveLength(4)
       })
@@ -184,14 +204,14 @@ describe('infrastructure zone networking', () => {
           { name: 'barZone', CIDR: '10.250.128.0/17' },
         ]
 
-        expect(getZonesNetworkConfiguration(
+        expect(getZonesNetworkConfiguration({
           oldZonesNetworkConfiguration,
           workers,
-          2,
-          undefined,
-          '10.180.0.0/16',
-          createGdchZoneNetworks,
-        )).toEqual([
+          maxNumberOfZones: 2,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: '10.180.0.0/16',
+          createZoneNetworks: createGdchZoneNetworks,
+        })).toEqual([
           { name: 'fooZone', CIDR: '10.180.0.0/17' },
           { name: 'barZone', CIDR: '10.180.128.0/17' },
         ])
@@ -273,14 +293,14 @@ describe('infrastructure zone networking', () => {
           return splitCIDR(workerCIDR, zoneCount).map(network => ({ custom: network }))
         })
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(
-          undefined,
-          [{ zones: ['fooZone'] }],
-          2,
-          undefined,
-          nodeCIDR,
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: undefined,
+          workers: [{ zones: ['fooZone'] }],
+          maxNumberOfZones: 2,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
           createZoneNetworks,
-        )
+        })
 
         expect(createZoneNetworks).toHaveBeenCalledWith({
           workerCIDR: nodeCIDR,
@@ -293,23 +313,49 @@ describe('infrastructure zone networking', () => {
       })
 
       it('should return undefined for infrastructures that do not require network config for zones (new cluster)', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, undefined, nodeCIDR)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: undefined,
+          workers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
+        })
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
 
       it('should return undefined for infrastructures that do not require network config for zones (existing cluster)', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, nodeCIDR, undefined)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: undefined,
+          workers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: nodeCIDR,
+          newShootWorkerCIDR: undefined,
+        })
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
 
       it('should return initial network config', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(undefined, workers, 3, undefined, nodeCIDR, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: undefined,
+          workers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
       })
 
       it('should keep network config if zones are the same', () => {
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 3, undefined, nodeCIDR, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: customZonesNetworkConfiguration,
+          workers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -321,14 +367,14 @@ describe('infrastructure zone networking', () => {
           elasticIPAllocationID: `eipalloc-${index}`,
         }))
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(
-          zonesNetworkConfigurationWithElasticIPs,
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: zonesNetworkConfigurationWithElasticIPs,
           workers,
-          3,
-          undefined,
-          nodeCIDR,
-          createAwsZoneNetworks,
-        )
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
 
         expect(zonesNetworkConfiguration).toEqual(zonesNetworkConfigurationWithElasticIPs)
       })
@@ -351,7 +397,14 @@ describe('infrastructure zone networking', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 3, undefined, newNodeCIDR, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: customZonesNetworkConfiguration,
+          workers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: newNodeCIDR,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(newCustomZonesNetworkConfiguration)
@@ -371,7 +424,14 @@ describe('infrastructure zone networking', () => {
             ],
           },
         ]
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 3, undefined, nodeCIDR, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: customZonesNetworkConfiguration,
+          workers: workersWithDifferentZones,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: undefined,
+          newShootWorkerCIDR: nodeCIDR,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).not.toEqual(customZonesNetworkConfiguration)
@@ -386,7 +446,14 @@ describe('infrastructure zone networking', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 3, nodeCIDR, undefined, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: customZonesNetworkConfiguration,
+          workers: oneZoneWorkers,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: nodeCIDR,
+          newShootWorkerCIDR: undefined,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(2)
         expect(zonesNetworkConfiguration).toEqual(customZonesNetworkConfiguration)
@@ -424,7 +491,14 @@ describe('infrastructure zone networking', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(existingZonesNetworkConfiguration, workersWithDifferentZones, 3, nodeCIDR, undefined, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: existingZonesNetworkConfiguration,
+          workers: workersWithDifferentZones,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: nodeCIDR,
+          newShootWorkerCIDR: undefined,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeInstanceOf(Array)
         expect(zonesNetworkConfiguration).toHaveLength(3)
         expect(zonesNetworkConfiguration).toEqual(newZonesNetworkConfiguration)
@@ -446,7 +520,14 @@ describe('infrastructure zone networking', () => {
           },
         ]
 
-        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workersWithDifferentZones, 3, nodeCIDR, undefined, createAwsZoneNetworks)
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration({
+          oldZonesNetworkConfiguration: customZonesNetworkConfiguration,
+          workers: workersWithDifferentZones,
+          maxNumberOfZones: 3,
+          existingShootWorkerCIDR: nodeCIDR,
+          newShootWorkerCIDR: undefined,
+          createZoneNetworks: createAwsZoneNetworks,
+        })
         expect(zonesNetworkConfiguration).toBeUndefined()
       })
     })
