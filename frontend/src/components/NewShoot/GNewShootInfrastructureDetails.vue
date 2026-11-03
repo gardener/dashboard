@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
         <v-col cols="3">
           <g-wildcard-select
             v-model="floatingPoolName"
-            :wildcard-select-items="allFloatingPoolNames"
+            :wildcard-select-items="openStackFloatingPoolNames"
             wildcard-select-label="Floating Pool"
           />
         </v-col>
@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Load Balancer Provider"
-            :items="allLoadBalancerProviderNames"
+            :items="openStackLoadBalancerProviderNames"
             :error-messages="getErrorMessages(v$.loadBalancerProviderName)"
             persistent-hint
             variant="underlined"
@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Partition ID"
-            :items="partitionIDs"
+            :items="metalPartitionIDs"
             :error-messages="getErrorMessages(v$.partitionID)"
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
@@ -122,7 +122,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Firewall Image"
-            :items="firewallImages"
+            :items="metalFirewallImages"
             :error-messages="getErrorMessages(v$.firewallImage)"
             variant="underlined"
             @blur="v$.firewallImage.$touch()"
@@ -134,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Firewall Size"
-            :items="firewallSizes"
+            :items="metalFirewallSizes"
             :error-messages="getErrorMessages(v$.firewallSize)"
             variant="underlined"
             @blur="v$.firewallSize.$touch()"
@@ -146,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0
             color="primary"
             item-color="primary"
             label="Firewall Networks"
-            :items="allFirewallNetworks"
+            :items="metalFirewallNetworks"
             :error-messages="getErrorMessages(v$.firewallNetworks)"
             chips
             closable-chips
@@ -276,12 +276,12 @@ export default {
       regionsWithoutSeed,
       showAllRegions,
       networkingTypes,
-      allLoadBalancerProviderNames,
-      partitionIDs,
-      firewallImages,
-      firewallSizes,
-      allFirewallNetworks,
-      allFloatingPoolNames,
+      openStackLoadBalancerProviderNames,
+      metalPartitionIDs,
+      metalFirewallImages,
+      metalFirewallSizes,
+      metalFirewallNetworks,
+      openStackFloatingPoolNames,
       workerless,
     } = useShootContext()
 
@@ -311,12 +311,12 @@ export default {
       regionsWithoutSeed,
       showAllRegions,
       networkingTypes,
-      allLoadBalancerProviderNames,
-      partitionIDs,
-      firewallImages,
-      firewallSizes,
-      allFirewallNetworks,
-      allFloatingPoolNames,
+      openStackLoadBalancerProviderNames,
+      metalPartitionIDs,
+      metalFirewallImages,
+      metalFirewallSizes,
+      metalFirewallNetworks,
+      openStackFloatingPoolNames,
       workerless,
     }
   },

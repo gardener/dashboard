@@ -1,0 +1,152 @@
+//
+// SPDX-FileCopyrightText: Contributors to the Gardener project
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+import { Netmask } from 'netmask'
+
+import { isIpv4Cidr } from '@/utils'
+
+import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import uniq from 'lodash/uniq'
+import difference from 'lodash/difference'
+import some from 'lodash/some'
+import includes from 'lodash/includes'
+import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
+import compact from 'lodash/compact'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import keys from 'lodash/keys'
+import without from 'lodash/without'
+
+export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
+  if (numberOfNetworks < 1 || !cidrToSplitStr || !isIpv4Cidr(cidrToSplitStr)) {
+    return []
+  }
+  const cidrToSplit = new Netmask(cidrToSplitStr)
+  const numberOfSplits = Math.ceil(Math.log(numberOfNetworks) / Math.log(2))
+  const newBitmask = cidrToSplit.bitmask + numberOfSplits
+  if (newBitmask > 32) {
+    throw new Error(`Could not split CIDR into ${numberOfNetworks} networks: Not enough bits available`)
+  }
+  const newCidrBlock = new Netmask(`${cidrToSplit.base}/${newBitmask}`)
+  const cidrArray = []
+  for (let i = 0; i < numberOfNetworks; i++) {
+    cidrArray.push(newCidrBlock.next(i).toString())
+  }
+  return cidrArray
+}
+
+export function getDefaultZonesNetworkConfiguration (zones, maxNumberOfZones, workerCIDR, createZoneNetworks) {
+  const zoneConfigurations = createZoneNetworks?.({
+    workerCIDR,
+    zoneCount: maxNumberOfZones,
+  })
+  if (!zoneConfigurations) {
+    return undefined
+  }
+  return map(zones, (zone, index) => {
+    const zoneConfiguration = zoneConfigurations[index] // eslint-disable-line security/detect-object-injection
+    return {
+      name: zone,
+      ...zoneConfiguration,
+    }
+  })
+}
+
+export function findFreeNetworks ({
+  existingZonesNetworkConfiguration,
+  workerCIDR,
+  maxNumberOfZones,
+  createZoneNetworks,
+}) {
+  if (!existingZonesNetworkConfiguration) {
+    return createZoneNetworks?.({
+      workerCIDR,
+      zoneCount: maxNumberOfZones,
+    })
+  }
+  for (let numberOfZones = maxNumberOfZones; numberOfZones >= existingZonesNetworkConfiguration.length; numberOfZones--) {
+    const newZonesNetworkConfiguration = createZoneNetworks?.({
+      workerCIDR,
+      zoneCount: numberOfZones,
+    })
+    if (!newZonesNetworkConfiguration) {
+      continue
+    }
+    const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
+      return !some(existingZonesNetworkConfiguration, networkConfiguration)
+    })
+    const matchesExistingZoneNetworkSize = newZonesNetworkConfiguration.length - freeZoneNetworks.length === existingZonesNetworkConfiguration.length
+    if (matchesExistingZoneNetworkSize) {
+      return freeZoneNetworks
+    }
+  }
+  return []
+}
+
+export function getZonesNetworkConfiguration ({
+  oldZonesNetworkConfiguration,
+  workers,
+  maxNumberOfZones,
+  existingShootWorkerCIDR,
+  newShootWorkerCIDR,
+  createZoneNetworks,
+}) {
+  if (isEmpty(workers) || !maxNumberOfZones || !createZoneNetworks) {
+    return
+  }
+
+  const usedZones = uniq(flatMap(workers, 'zones'))
+
+  const workerCIDR = existingShootWorkerCIDR || newShootWorkerCIDR
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(usedZones, maxNumberOfZones, workerCIDR, createZoneNetworks)
+  if (!defaultZonesNetworkConfiguration) {
+    return
+  }
+
+  const existingZonesNetworkConfiguration = filter(oldZonesNetworkConfiguration, ({ name }) => includes(usedZones, name))
+
+  if (existingShootWorkerCIDR) {
+    const freeZoneNetworks = findFreeNetworks({
+      existingZonesNetworkConfiguration,
+      workerCIDR: existingShootWorkerCIDR,
+      maxNumberOfZones,
+      createZoneNetworks,
+    })
+    const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
+    if (availableNetworksLength < usedZones.length) {
+      return
+    }
+    const existingZones = map(existingZonesNetworkConfiguration, 'name')
+    const newZones = difference(usedZones, existingZones)
+    const newZonesNetworkConfiguration = map(newZones, name => {
+      return {
+        name,
+        ...freeZoneNetworks.shift(),
+      }
+    })
+    // order is important => keep oldZonesNetworkConfiguration order
+    return [
+      ...oldZonesNetworkConfiguration,
+      ...newZonesNetworkConfiguration,
+    ]
+  }
+
+  if (existingZonesNetworkConfiguration.length !== usedZones.length) {
+    return defaultZonesNetworkConfiguration
+  }
+
+  const shootCIDR = new Netmask(newShootWorkerCIDR)
+  // createZoneNetworks defines which zone properties contain CIDRs. Read their
+  // values from the existing configuration so user changes are preserved.
+  const zoneCIDRKeys = without(keys(head(defaultZonesNetworkConfiguration)), 'name')
+  const usedCIDRS = flatMap(existingZonesNetworkConfiguration, zone => compact(map(zoneCIDRKeys, key => get(zone, key))))
+  const zoneConfigurationContainsInvalidCIDR = some(usedCIDRS, cidr => !shootCIDR.contains(cidr))
+  return zoneConfigurationContainsInvalidCIDR
+    ? defaultZonesNetworkConfiguration
+    : existingZonesNetworkConfiguration
+}

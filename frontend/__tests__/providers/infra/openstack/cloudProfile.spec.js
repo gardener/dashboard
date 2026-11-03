@@ -6,9 +6,10 @@
 
 import { ref } from 'vue'
 
-import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
+import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
+import { encodeBase64 } from '@/utils'
 
-describe('composables', () => {
+describe('OpenStack CloudProfile constraints', () => {
   describe('useOpenStackConstraints', () => {
     const floatingPools = [
       {
@@ -86,75 +87,75 @@ describe('composables', () => {
       })
     })
 
-    describe('#useFloatingPoolNames', () => {
+    describe('#useOpenStackFloatingPoolNames', () => {
       it('should return floating pool names by region and domain from cloud profile', () => {
-        const { useFloatingPoolNames } = useOpenStackConstraints(cloudProfile)
+        const { useOpenStackFloatingPoolNames } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
-        const secretDomain = ref('fooDomain')
-        let dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        const credential = ref({ data: { domainName: encodeBase64('fooDomain') } })
+        let dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(1)
         expect(dashboardFloatingPools.value[0]).toBe('global FP')
 
         region.value = 'region1'
-        secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('fooDomain') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(1)
         expect(dashboardFloatingPools.value[0]).toBe('regional FP')
 
         region.value = 'region2'
-        secretDomain.value = 'fooDomain'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('fooDomain') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(2)
         expect(dashboardFloatingPools.value[0]).toBe('global FP')
         expect(dashboardFloatingPools.value[1]).toBe('regional non constraining FP')
 
         region.value = 'fooRegion'
-        secretDomain.value = 'domain1'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('domain1') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(1)
         expect(dashboardFloatingPools.value[0]).toBe('domain specific FP')
 
         region.value = 'fooRegion'
-        secretDomain.value = 'domain2'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('domain2') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(2)
         expect(dashboardFloatingPools.value[0]).toBe('global FP')
         expect(dashboardFloatingPools.value[1]).toBe('domain specific non constraining FP')
 
         region.value = 'region3'
-        secretDomain.value = 'domain3'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('domain3') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(2)
         expect(dashboardFloatingPools.value[0]).toBe('domain specific, regional FP')
         expect(dashboardFloatingPools.value[1]).toBe('additional domain specific, regional FP')
 
         region.value = 'region4'
-        secretDomain.value = 'domain4'
-        dashboardFloatingPools = useFloatingPoolNames(region, secretDomain)
+        credential.value = { data: { domainName: encodeBase64('domain4') } }
+        dashboardFloatingPools = useOpenStackFloatingPoolNames(region, credential)
         expect(dashboardFloatingPools.value).toHaveLength(2)
         expect(dashboardFloatingPools.value[0]).toBe('global FP')
         expect(dashboardFloatingPools.value[1]).toBe('domain specific, regional non constraining FP')
       })
     })
 
-    describe('#useLoadBalancerProviderNames', () => {
+    describe('#useOpenStackLoadBalancerProviderNames', () => {
       it('should return load balancer provider names by region from cloud profile', () => {
-        const { useLoadBalancerProviderNames } = useOpenStackConstraints(cloudProfile)
+        const { useOpenStackLoadBalancerProviderNames } = useOpenStackConstraints(cloudProfile)
 
         const region = ref('fooRegion')
-        let dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        let dashboardLoadBalancerProviderNames = useOpenStackLoadBalancerProviderNames(region)
         expect(dashboardLoadBalancerProviderNames.value).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames.value[0]).toBe('global LB')
 
         region.value = 'region1'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        dashboardLoadBalancerProviderNames = useOpenStackLoadBalancerProviderNames(region)
         expect(dashboardLoadBalancerProviderNames.value).toHaveLength(2)
         expect(dashboardLoadBalancerProviderNames.value[0]).toBe('regional LB')
         expect(dashboardLoadBalancerProviderNames.value[1]).toBe('additional regional LB')
 
         region.value = 'region2'
-        dashboardLoadBalancerProviderNames = useLoadBalancerProviderNames(region)
+        dashboardLoadBalancerProviderNames = useOpenStackLoadBalancerProviderNames(region)
         expect(dashboardLoadBalancerProviderNames.value).toHaveLength(1)
         expect(dashboardLoadBalancerProviderNames.value[0]).toBe('other regional LB')
       })

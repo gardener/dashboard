@@ -17,12 +17,11 @@ import map from 'lodash/map'
 import toPairs from 'lodash/toPairs'
 
 /**
- * Composable for managing Metal-specific constraints from a cloud profile.
+ * Provider-owned composable for managing Metal-specific constraints from a cloud profile.
  * Provides functions for working with partition IDs, firewall sizes, firewall images,
  * and firewall networks specific to Metal infrastructure.
  *
  * @param {Ref<object>} cloudProfile - A Vue ref containing the cloud profile object
- * @param {Function} useZones - Function to get zones by cloud profile and region
  * @throws {Error} If cloudProfile is not a ref
  */
 export function useMetalConstraints (cloudProfile) {
@@ -42,7 +41,7 @@ export function useMetalConstraints (cloudProfile) {
    * @returns {ComputedRef<Array<string>|undefined>} Computed ref with partition IDs, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function usePartitionIDs (region) {
+  function useMetalPartitionIDs (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -63,7 +62,7 @@ export function useMetalConstraints (cloudProfile) {
    * @returns {ComputedRef<Array|undefined>} Computed ref with firewall sizes, or undefined if not Metal infrastructure
    * @throws {Error} If region is not a ref
    */
-  function useFirewallSizes (region) {
+  function useMetalFirewallSizes (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -77,7 +76,10 @@ export function useMetalConstraints (cloudProfile) {
     })
   }
 
-  const firewallImages = computed(() => {
+  const metalFirewallImages = computed(() => {
+    if (!isMetal.value) {
+      return undefined
+    }
     return get(cloudProfile.value, ['spec', 'providerConfig', 'firewallImages'])
   })
 
@@ -85,15 +87,18 @@ export function useMetalConstraints (cloudProfile) {
    * Returns firewall networks for a given partition ID.
    *
    * @param {Ref<string>} partitionID - A Vue ref containing the partition ID
-   * @returns {ComputedRef<Array>} Computed ref with firewall networks formatted as objects with key, value, and text properties
+   * @returns {ComputedRef<Array|undefined>} Computed ref with firewall networks formatted as objects with key, value, and text properties, or undefined if not Metal infrastructure
    * @throws {Error} If partitionID is not a ref
    */
-  function useFirewallNetworks (partitionID) {
+  function useMetalFirewallNetworks (partitionID) {
     if (!isRef(partitionID)) {
       throw new Error('partitionID must be a ref!')
     }
 
     return computed(() => {
+      if (!isMetal.value) {
+        return undefined
+      }
       const networks = get(cloudProfile.value, ['spec', 'providerConfig', 'firewallNetworks', partitionID.value])
       return map(toPairs(networks), ([key, value]) => {
         return {
@@ -106,9 +111,9 @@ export function useMetalConstraints (cloudProfile) {
   }
 
   return {
-    usePartitionIDs,
-    useFirewallSizes,
-    firewallImages,
-    useFirewallNetworks,
+    useMetalPartitionIDs,
+    useMetalFirewallSizes,
+    metalFirewallImages,
+    useMetalFirewallNetworks,
   }
 }

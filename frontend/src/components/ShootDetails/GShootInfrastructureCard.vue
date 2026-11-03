@@ -309,12 +309,12 @@ import GCredentialConfiguration from '@/components/Credentials/GShootCredentialC
 import { useShootResources } from '@/composables/useShootResources'
 import { useShootItem } from '@/composables/useShootItem'
 import { useCloudProviderBinding } from '@/composables/credential/useCloudProviderBinding'
-import { useOpenStackConstraints } from '@/composables/useCloudProfile/useOpenStackConstraints'
 import {
   getDnsPrimaryProviderCredentialsRef,
   dnsExtensionProviderResourceName,
 } from '@/composables/credential/helper'
 
+import { useOpenStackConstraints } from '@/providers/infra/openstack/cloudProfile'
 import {
   wildcardObjectsFromStrings,
   bestMatchForString,
@@ -372,16 +372,16 @@ export default {
 
     const { getResourceRef } = useShootResources(shootItem)
 
+    const cloudProviderBindingContext = useCloudProviderBinding(shootCloudProviderBinding)
     const {
       credential,
       isSharedBinding,
-      openStackDomainName,
-    } = useCloudProviderBinding(shootCloudProviderBinding)
+    } = cloudProviderBindingContext
 
     const cloudProfile = computed(() => cloudProfileStore.cloudProfileByRef(shootCloudProfileRef.value))
-    const { useFloatingPools } = useOpenStackConstraints(cloudProfile)
+    const { useOpenStackFloatingPools } = useOpenStackConstraints(cloudProfile)
 
-    const availableFloatingPools = useFloatingPools(shootRegion, openStackDomainName)
+    const openStackFloatingPools = useOpenStackFloatingPools(shootRegion, credential)
 
     return {
       shootItem,
@@ -410,7 +410,7 @@ export default {
       dnsExtensionProviderResourceName,
       credential,
       isSharedBinding,
-      availableFloatingPools,
+      openStackFloatingPools,
       shootSecretBindingName,
       credentialStore,
       isSelfHostedShoot,
@@ -441,7 +441,7 @@ export default {
         return shootLBClasses
       }
 
-      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(this.availableFloatingPools, 'name'))
+      const floatingPoolWildCardObjects = wildcardObjectsFromStrings(map(this.openStackFloatingPools, 'name'))
 
       const shootFloatingPoolName = get(this.shootItem, ['spec', 'provider', 'infrastructureConfig', 'floatingPoolName'])
       const floatingPoolWildcardName = bestMatchForString(floatingPoolWildCardObjects, shootFloatingPoolName)
@@ -450,7 +450,7 @@ export default {
         return
       }
 
-      const shootFloatingPool = find(this.availableFloatingPools, ['name', floatingPoolWildcardName.originalValue])
+      const shootFloatingPool = find(this.openStackFloatingPools, ['name', floatingPoolWildcardName.originalValue])
       return get(shootFloatingPool, ['loadBalancerClasses'])
     },
     defaultLoadbalancerClass () {

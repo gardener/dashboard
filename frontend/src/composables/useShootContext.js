@@ -32,20 +32,18 @@ import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrict
 import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
-import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
-import { useMetalConstraints } from '@/composables/useCloudProfile/useMetalConstraints.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
+import { getInfrastructureProviderExtension } from '@/providers/infra'
+import {
+  findFreeNetworks,
+  getZonesNetworkConfiguration,
+} from '@/providers/infra/common/zoneNetworking'
+import { useMetalConstraints } from '@/providers/infra/metal/cloudProfile.js'
 import {
   scheduleEventsFromCrontabBlocks,
   crontabBlocksFromScheduleEvents,
 } from '@/utils/hibernationSchedule'
-import {
-  findFreeNetworks,
-  getControlPlaneZone,
-  getSpecTemplate,
-  getZonesNetworkConfiguration,
-} from '@/utils/shoot'
 import { v4 as uuidv4 } from '@/utils/uuid'
 import {
   shortRandomString,
@@ -388,17 +386,24 @@ export function createShootContextComposable (options = {}) {
     },
     set (value) {
       set(manifest.value, ['spec', 'provider', 'type'], value)
-      applySpecTemplate(defaultCloudProfileRef.value)
+      applySpecTemplate()
       cloudProfileRef.value = defaultCloudProfileRef.value
     },
   })
 
-  function applySpecTemplate (cloudProfileRef) {
+  const infrastructureProviderExtension = computed(() => {
+    return getInfrastructureProviderExtension(providerType.value)
+  })
+
+  function applySpecTemplate () {
     const {
       kubernetes,
       networking,
       provider,
-    } = getSpecTemplate(providerType.value, defaultNodesCIDR.value)
+    } = infrastructureProviderExtension.value.createShootSpec({
+      providerType: providerType.value,
+      nodesCIDR: defaultNodesCIDR.value,
+    })
     set(manifest.value, ['spec', 'provider', 'infrastructureConfig'], provider.infrastructureConfig)
     set(manifest.value, ['spec', 'provider', 'controlPlaneConfig'], provider.controlPlaneConfig)
     set(manifest.value, ['spec', 'networking'], networking)
@@ -408,18 +413,16 @@ export function createShootContextComposable (options = {}) {
   const providerControlPlaneConfigZone = computed({
     get () {
       const value = get(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'])
-      return getControlPlaneZone(
-        providerWorkers.value,
-        providerType.value,
-        value,
-      )
+      return infrastructureProviderExtension.value.resolveControlPlaneZone?.({
+        workers: providerWorkers.value,
+        currentZone: value,
+      })
     },
     set (value) {
-      value = getControlPlaneZone(
-        providerWorkers.value,
-        providerType.value,
-        value,
-      )
+      value = infrastructureProviderExtension.value.resolveControlPlaneZone?.({
+        workers: providerWorkers.value,
+        currentZone: value,
+      })
       if (value) {
         set(manifest.value, ['spec', 'provider', 'controlPlaneConfig', 'zone'], value)
       } else {
@@ -439,9 +442,9 @@ export function createShootContextComposable (options = {}) {
 
   function resetProviderControlPlaneConfigLoadBalancerProviderName () {
     const configuredDefault = configStore.defaultLoadBalancerProvider
-    providerControlPlaneConfigLoadBalancerProviderName.value = includes(allLoadBalancerProviderNames.value, configuredDefault)
+    providerControlPlaneConfigLoadBalancerProviderName.value = includes(openStackLoadBalancerProviderNames.value, configuredDefault)
       ? configuredDefault
-      : head(allLoadBalancerProviderNames.value)
+      : head(openStackLoadBalancerProviderNames.value)
   }
 
   const providerInfrastructureConfigPartitionID = computed({
@@ -456,7 +459,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigPartitionID () {
-    providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
+    providerInfrastructureConfigPartitionID.value = head(metalPartitionIDs.value)
   }
 
   const providerInfrastructureConfigProjectID = computed({
@@ -483,11 +486,11 @@ export function createShootContextComposable (options = {}) {
 
   function resetProviderInfrastructureConfigFloatingPoolName () {
     const configuredDefault = configStore.defaultFloatingPool
-    const floatingPoolPatterns = wildcardObjectsFromStrings(allFloatingPoolNames.value)
+    const floatingPoolPatterns = wildcardObjectsFromStrings(openStackFloatingPoolNames.value)
     const configuredDefaultMatches = configuredDefault && bestMatchForString(floatingPoolPatterns, configuredDefault)
     providerInfrastructureConfigFloatingPoolName.value = configuredDefaultMatches
       ? configuredDefault
-      : head(allFloatingPoolNames.value)
+      : head(openStackFloatingPoolNames.value)
   }
 
   const providerInfrastructureConfigFirewallImage = computed({
@@ -500,7 +503,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallImage () {
-    providerInfrastructureConfigFirewallImage.value = head(firewallImages.value)
+    providerInfrastructureConfigFirewallImage.value = head(metalFirewallImages.value)
   }
 
   const providerInfrastructureConfigFirewallSize = computed({
@@ -513,7 +516,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallSize () {
-    providerInfrastructureConfigFirewallSize.value = head(firewallSizes.value)
+    providerInfrastructureConfigFirewallSize.value = head(metalFirewallSizes.value)
   }
 
   const providerInfrastructureConfigFirewallNetworks = computed({
@@ -526,7 +529,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallNetworks () {
-    const internetFirewallNetwork = find(allFirewallNetworks.value, ['key', 'internet'])
+    const internetFirewallNetwork = find(metalFirewallNetworks.value, ['key', 'internet'])
     providerInfrastructureConfigFirewallNetworks.value = internetFirewallNetwork
       ? [internetFirewallNetwork.value]
       : undefined
@@ -604,7 +607,7 @@ export function createShootContextComposable (options = {}) {
     }
     if (!networkingType.value || (!secretBindingName.value && !credentialsBindingName.value)) {
       // If worker required values missing (navigated to overview tab from yaml), reset to defaults
-      applySpecTemplate(cloudProfileRef.value)
+      applySpecTemplate()
       resetCloudProfileDependendValues()
     }
     if (isEmpty(providerWorkers.value)) {
@@ -655,16 +658,14 @@ export function createShootContextComposable (options = {}) {
   const providerInfrastructureConfigNetworksZones = computed({
     get () {
       const value = get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'])
-      const args = shootCreationTimestamp.value
-        ? [networkingNodes.value, undefined]
-        : [undefined, networkingNodes.value]
-      return getZonesNetworkConfiguration(
-        value,
-        providerWorkers.value,
-        providerType.value,
-        size(allZones.value),
-        ...args,
-      )
+      return getZonesNetworkConfiguration({
+        oldZonesNetworkConfiguration: value,
+        workers: providerWorkers.value,
+        maxNumberOfZones: size(allZones.value),
+        existingShootWorkerCIDR: shootCreationTimestamp.value ? networkingNodes.value : undefined,
+        newShootWorkerCIDR: shootCreationTimestamp.value ? undefined : networkingNodes.value,
+        createZoneNetworks: infrastructureProviderExtension.value.createZoneNetworks,
+      })
     },
     set (value) {
       set(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'networks', 'zones'], value)
@@ -684,19 +685,10 @@ export function createShootContextComposable (options = {}) {
   })
 
   const isZonedCluster = computed(() => {
-    switch (providerType.value) {
-      case 'azure':
-        if (isNewCluster.value) {
-          return true // new clusters are always created as zoned clusters by the dashboard
-        }
-        return get(manifest.value, ['spec', 'provider', 'infrastructureConfig', 'zoned'], false)
-      case 'metal':
-        return false // metal clusters do not support zones for worker groups
-      case 'local':
-        return false // local development provider does not support zones
-      default:
-        return true
-    }
+    return infrastructureProviderExtension.value.isZoned({
+      manifest: manifest.value,
+      isNewCluster: isNewCluster.value,
+    })
   })
 
   const availableZones = computed(() => {
@@ -721,15 +713,16 @@ export function createShootContextComposable (options = {}) {
   })
 
   const freeNetworks = computed(() => {
-    const workerCIDR = providerType.value === 'gdch'
-      ? networkingNodes.value
-      : networkingNodes.value ?? defaultNodesCIDR.value
-    return findFreeNetworks(
-      providerInfrastructureConfigNetworksZones.value,
+    const workerCIDR = infrastructureProviderExtension.value.resolveZoneNetworkWorkerCIDR({
+      nodesCIDR: networkingNodes.value,
+      defaultNodesCIDR: defaultNodesCIDR.value,
+    })
+    return findFreeNetworks({
+      existingZonesNetworkConfiguration: providerInfrastructureConfigNetworksZones.value,
       workerCIDR,
-      providerType.value,
-      size(allZones.value),
-    )
+      maxNumberOfZones: size(allZones.value),
+      createZoneNetworks: infrastructureProviderExtension.value.createZoneNetworks,
+    })
   })
 
   const maxAdditionalZones = computed(() => {
@@ -1005,11 +998,11 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFloatingPoolNames,
+    openStackLoadBalancerProviderNames,
+    metalPartitionIDs,
+    metalFirewallImages,
+    metalFirewallSizes,
+    openStackFloatingPoolNames,
     accessRestrictionDefinitions,
     accessRestrictionNoItemsText,
     allMachineTypes,
@@ -1030,10 +1023,9 @@ export function createShootContextComposable (options = {}) {
     defaultKubernetesVersion,
   } = useKubernetesVersions(cloudProfile)
 
-  const { useZones } = useRegions(cloudProfile)
-  const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
+  const { useMetalFirewallNetworks } = useMetalConstraints(cloudProfile)
 
-  const allFirewallNetworks = useFirewallNetworks(providerInfrastructureConfigPartitionID)
+  const metalFirewallNetworks = useMetalFirewallNetworks(providerInfrastructureConfigPartitionID)
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
@@ -1224,12 +1216,12 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFirewallNetworks,
-    allFloatingPoolNames,
+    openStackLoadBalancerProviderNames,
+    metalPartitionIDs,
+    metalFirewallImages,
+    metalFirewallSizes,
+    metalFirewallNetworks,
+    openStackFloatingPoolNames,
     allMachineTypes,
     machineArchitectures,
     volumeTypes,

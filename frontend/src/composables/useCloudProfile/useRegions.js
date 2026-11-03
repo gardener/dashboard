@@ -13,12 +13,13 @@ import { useSeedStore } from '@/store/seed'
 
 import { getZones } from '@/composables/helper'
 
+import { getInfrastructureProviderExtension } from '@/providers/infra'
+
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import difference from 'lodash/difference'
-import some from 'lodash/some'
 
 /**
  * Composable for cloud profile region and zone management
@@ -37,16 +38,11 @@ export function useRegions (cloudProfile) {
    */
   function isValidRegion (region) {
     const providerType = get(cloudProfile.value, ['spec', 'type'])
-
-    if (providerType === 'azure') {
-      // Azure regions may not be zoned, need to filter these out for the dashboard
-      const zones = getZones(cloudProfile.value, region)
-      return !!zones.length
-    }
-
-    // Filter regions that are not defined in cloud profile
-    const regions = get(cloudProfile.value, ['spec', 'regions'], [])
-    return some(regions, ['name', region])
+    const extension = getInfrastructureProviderExtension(providerType)
+    return extension.isRegionSupported({
+      cloudProfile: cloudProfile.value,
+      region,
+    })
   }
 
   /**
