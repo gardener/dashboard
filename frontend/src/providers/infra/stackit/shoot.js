@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// STACKIT Shoot defaults.
 export function createShootSpec ({ providerType, nodesCIDR }) {
   return {
     provider: {

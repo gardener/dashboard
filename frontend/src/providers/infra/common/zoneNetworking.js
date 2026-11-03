@@ -81,7 +81,7 @@ export function findFreeNetworks ({
       return !some(existingZonesNetworkConfiguration, networkConfiguration)
     })
     const matchesExistingZoneNetworkSize = newZonesNetworkConfiguration.length - freeZoneNetworks.length === existingZonesNetworkConfiguration.length
-    if (newZonesNetworkConfiguration && freeZoneNetworks && matchesExistingZoneNetworkSize) {
+    if (matchesExistingZoneNetworkSize) {
       return freeZoneNetworks
     }
   }

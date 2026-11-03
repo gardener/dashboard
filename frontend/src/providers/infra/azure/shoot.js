@@ -7,7 +7,7 @@
 import { getZones } from '@/composables/helper'
 
 import get from 'lodash/get'
-import some from 'lodash/some'
+import isEmpty from 'lodash/isEmpty'
 
 export function createShootSpec ({ providerType, nodesCIDR }) {
   return {
@@ -44,5 +44,5 @@ export function isZoned ({ manifest, isNewCluster }) {
 
 export function isRegionSupported ({ cloudProfile, region }) {
   // Azure regions may not be zoned, so the dashboard must not offer them for Shoots.
-  return some(getZones(cloudProfile, region))
+  return !isEmpty(getZones(cloudProfile, region))
 }

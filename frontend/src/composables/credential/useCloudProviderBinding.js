@@ -95,6 +95,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
       name: providerType.value,
     })
   })
+
   // Credential References
   const bindingCredentialRef = computed(() => {
     if (isSecretBinding.value || isCredentialsBinding.value) {
