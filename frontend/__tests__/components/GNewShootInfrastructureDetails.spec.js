@@ -47,12 +47,12 @@ describe('components', () => {
         regionsWithoutSeed: refList(),
         showAllRegions: ref(true),
         networkingTypes: ref(['calico', 'cilium']),
-        allLoadBalancerProviderNames: ref(['f5']),
-        partitionIDs: refList(),
-        firewallImages: refList(),
-        firewallSizes: refList(),
-        allFirewallNetworks: refList(),
-        allFloatingPoolNames: refList(),
+        openStackLoadBalancerProviderNames: ref(['f5']),
+        metalPartitionIDs: refList(),
+        metalFirewallImages: refList(),
+        metalFirewallSizes: refList(),
+        metalFirewallNetworks: refList(),
+        openStackFloatingPoolNames: refList(),
         workerless: ref(false),
       }
     }

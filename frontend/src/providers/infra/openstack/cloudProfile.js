@@ -11,6 +11,8 @@ import {
 
 import { matchesPropertyOrEmpty } from '@/composables/helper'
 
+import { getOpenStackCredentialDomainName } from '@/providers/infra/openstack/credentials'
+
 import get from 'lodash/get'
 import filter from 'lodash/filter'
 import find from 'lodash/find'
@@ -35,22 +37,23 @@ export function useOpenStackConstraints (cloudProfile) {
    * Handles regional and domain-specific constraints, including non-constraining pools.
    *
    * @param {Ref<string>} region - A Vue ref containing the region
-   * @param {Ref<string>} secretDomain - A Vue ref containing the secret domain
+   * @param {Ref<object>} credential - A Vue ref containing the OpenStack credential
    * @returns {ComputedRef<Array>} Computed ref with available floating pools
-   * @throws {Error} If region or secretDomain are not refs
+   * @throws {Error} If region or credential are not refs
    */
-  function useFloatingPools (region, secretDomain) {
+  function useOpenStackFloatingPools (region, credential) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
-    if (!isRef(secretDomain)) {
-      throw new Error('secretDomain must be a ref!')
+    if (!isRef(credential)) {
+      throw new Error('credential must be a ref!')
     }
 
     return computed(() => {
+      const secretDomain = getOpenStackCredentialDomainName(credential.value)
       const floatingPools = get(cloudProfile.value, ['spec', 'providerConfig', 'constraints', 'floatingPools'])
       let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region.value))
-      availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain.value))
+      availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain))
 
       const hasRegionSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.region && !fp.nonConstraining)
       if (hasRegionSpecificFloatingPool) {
@@ -58,7 +61,7 @@ export function useOpenStackConstraints (cloudProfile) {
       }
       const hasDomainSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.domain && !fp.nonConstraining)
       if (hasDomainSpecificFloatingPool) {
-        availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain.value })
+        availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
       }
 
       return availableFloatingPools
@@ -69,19 +72,19 @@ export function useOpenStackConstraints (cloudProfile) {
    * Returns floating pool names filtered by region and domain.
    *
    * @param {Ref<string>} region - A Vue ref containing the region
-   * @param {Ref<string>} secretDomain - A Vue ref containing the secret domain
+   * @param {Ref<object>} credential - A Vue ref containing the OpenStack credential
    * @returns {ComputedRef<Array<string>>} Computed ref with unique floating pool names
-   * @throws {Error} If region or secretDomain are not refs
+   * @throws {Error} If region or credential are not refs
    */
-  function useFloatingPoolNames (region, secretDomain) {
+  function useOpenStackFloatingPoolNames (region, credential) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
-    if (!isRef(secretDomain)) {
-      throw new Error('secretDomain must be a ref!')
+    if (!isRef(credential)) {
+      throw new Error('credential must be a ref!')
     }
 
-    const floatingPools = useFloatingPools(region, secretDomain)
+    const floatingPools = useOpenStackFloatingPools(region, credential)
 
     return computed(() => {
       return uniq(map(floatingPools.value, 'name'))
@@ -95,7 +98,7 @@ export function useOpenStackConstraints (cloudProfile) {
    * @returns {ComputedRef<Array<string>>} Computed ref with unique load balancer provider names
    * @throws {Error} If region is not a ref
    */
-  function useLoadBalancerProviderNames (region) {
+  function useOpenStackLoadBalancerProviderNames (region) {
     if (!isRef(region)) {
       throw new Error('region must be a ref!')
     }
@@ -112,8 +115,8 @@ export function useOpenStackConstraints (cloudProfile) {
   }
 
   return {
-    useFloatingPools,
-    useFloatingPoolNames,
-    useLoadBalancerProviderNames,
+    useOpenStackFloatingPools,
+    useOpenStackFloatingPoolNames,
+    useOpenStackLoadBalancerProviderNames,
   }
 }

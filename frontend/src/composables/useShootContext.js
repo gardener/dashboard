@@ -32,7 +32,6 @@ import { useShootAccessRestrictions } from '@/composables/useShootAccessRestrict
 import { useKubernetesVersions } from '@/composables/useCloudProfile/useKubernetesVersions.js'
 import { useMachineTypes } from '@/composables/useCloudProfile/useMachineTypes.js'
 import { useMachineImages } from '@/composables/useCloudProfile/useMachineImages.js'
-import { useRegions } from '@/composables/useCloudProfile/useRegions.js'
 import { useVolumeTypes } from '@/composables/useCloudProfile/useVolumeTypes.js'
 
 import { getInfrastructureProviderExtension } from '@/providers/infra'
@@ -443,9 +442,9 @@ export function createShootContextComposable (options = {}) {
 
   function resetProviderControlPlaneConfigLoadBalancerProviderName () {
     const configuredDefault = configStore.defaultLoadBalancerProvider
-    providerControlPlaneConfigLoadBalancerProviderName.value = includes(allLoadBalancerProviderNames.value, configuredDefault)
+    providerControlPlaneConfigLoadBalancerProviderName.value = includes(openStackLoadBalancerProviderNames.value, configuredDefault)
       ? configuredDefault
-      : head(allLoadBalancerProviderNames.value)
+      : head(openStackLoadBalancerProviderNames.value)
   }
 
   const providerInfrastructureConfigPartitionID = computed({
@@ -460,7 +459,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigPartitionID () {
-    providerInfrastructureConfigPartitionID.value = head(partitionIDs.value)
+    providerInfrastructureConfigPartitionID.value = head(metalPartitionIDs.value)
   }
 
   const providerInfrastructureConfigProjectID = computed({
@@ -487,11 +486,11 @@ export function createShootContextComposable (options = {}) {
 
   function resetProviderInfrastructureConfigFloatingPoolName () {
     const configuredDefault = configStore.defaultFloatingPool
-    const floatingPoolPatterns = wildcardObjectsFromStrings(allFloatingPoolNames.value)
+    const floatingPoolPatterns = wildcardObjectsFromStrings(openStackFloatingPoolNames.value)
     const configuredDefaultMatches = configuredDefault && bestMatchForString(floatingPoolPatterns, configuredDefault)
     providerInfrastructureConfigFloatingPoolName.value = configuredDefaultMatches
       ? configuredDefault
-      : head(allFloatingPoolNames.value)
+      : head(openStackFloatingPoolNames.value)
   }
 
   const providerInfrastructureConfigFirewallImage = computed({
@@ -504,7 +503,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallImage () {
-    providerInfrastructureConfigFirewallImage.value = head(firewallImages.value)
+    providerInfrastructureConfigFirewallImage.value = head(metalFirewallImages.value)
   }
 
   const providerInfrastructureConfigFirewallSize = computed({
@@ -517,7 +516,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallSize () {
-    providerInfrastructureConfigFirewallSize.value = head(firewallSizes.value)
+    providerInfrastructureConfigFirewallSize.value = head(metalFirewallSizes.value)
   }
 
   const providerInfrastructureConfigFirewallNetworks = computed({
@@ -530,7 +529,7 @@ export function createShootContextComposable (options = {}) {
   })
 
   function resetProviderInfrastructureConfigFirewallNetworks () {
-    const internetFirewallNetwork = find(allFirewallNetworks.value, ['key', 'internet'])
+    const internetFirewallNetwork = find(metalFirewallNetworks.value, ['key', 'internet'])
     providerInfrastructureConfigFirewallNetworks.value = internetFirewallNetwork
       ? [internetFirewallNetwork.value]
       : undefined
@@ -999,11 +998,11 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFloatingPoolNames,
+    openStackLoadBalancerProviderNames,
+    metalPartitionIDs,
+    metalFirewallImages,
+    metalFirewallSizes,
+    openStackFloatingPoolNames,
     accessRestrictionDefinitions,
     accessRestrictionNoItemsText,
     allMachineTypes,
@@ -1024,10 +1023,9 @@ export function createShootContextComposable (options = {}) {
     defaultKubernetesVersion,
   } = useKubernetesVersions(cloudProfile)
 
-  const { useZones } = useRegions(cloudProfile)
-  const { useFirewallNetworks } = useMetalConstraints(cloudProfile, useZones)
+  const { useMetalFirewallNetworks } = useMetalConstraints(cloudProfile)
 
-  const allFirewallNetworks = useFirewallNetworks(providerInfrastructureConfigPartitionID)
+  const metalFirewallNetworks = useMetalFirewallNetworks(providerInfrastructureConfigPartitionID)
 
   /* watches */
   watch(isFailureToleranceTypeZoneSupported, value => {
@@ -1218,12 +1216,12 @@ export function createShootContextComposable (options = {}) {
     allPurposes,
     regionsWithSeed,
     regionsWithoutSeed,
-    allLoadBalancerProviderNames,
-    partitionIDs,
-    firewallImages,
-    firewallSizes,
-    allFirewallNetworks,
-    allFloatingPoolNames,
+    openStackLoadBalancerProviderNames,
+    metalPartitionIDs,
+    metalFirewallImages,
+    metalFirewallSizes,
+    metalFirewallNetworks,
+    openStackFloatingPoolNames,
     allMachineTypes,
     machineArchitectures,
     volumeTypes,
