@@ -15,6 +15,7 @@ SPDX-License-Identifier: Apache-2.0
       v-else
       v-tooltip:top="statusText"
       color="success"
+      :size="size"
       class="status-icon-check"
     >
       mdi-check-circle-outline
@@ -40,7 +41,7 @@ const props = defineProps({
   },
   size: {
     type: String,
-    default: 'default',
+    default: '30',
   },
   showStatusText: {
     type: Boolean,
@@ -53,9 +54,3 @@ const inDeletion = computed(() => !!get(props.project, ['metadata', 'deletionTim
 const isReady = computed(() => projectPhase.value === 'Ready' && !inDeletion.value)
 const statusText = computed(() => inDeletion.value ? 'Deleting' : projectPhase.value || 'Unknown')
 </script>
-
-<style lang="scss" scoped>
-.status-icon-check {
-  font-size: 30px !important;
-}
-</style>

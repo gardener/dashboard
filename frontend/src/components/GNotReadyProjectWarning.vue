@@ -11,11 +11,10 @@ SPDX-License-Identifier: Apache-2.0
   >
     <template #activator="{ props: activatorProps }">
       <v-icon
-        v-bind="activatorProps"
+        v-bind="mergeProps(activatorProps, $attrs)"
         :size="size"
         :color="color"
         :icon="icon"
-        class="ml-1"
       />
     </template>
     <template v-if="projectPhase !== 'Ready'">
@@ -51,11 +50,16 @@ SPDX-License-Identifier: Apache-2.0
 <script setup>
 import {
   computed,
+  mergeProps,
   toRef,
 } from 'vue'
 
 import { useProjectPhase } from '@/composables/useProjectItem'
 import { useProjectMetadata } from '@/composables/useProjectMetadata'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = defineProps({
   project: {

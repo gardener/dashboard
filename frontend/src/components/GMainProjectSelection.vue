@@ -61,6 +61,7 @@ SPDX-License-Identifier: Apache-2.0
               <g-not-ready-project-warning
                 :project="selectedProject"
                 size="small"
+                class="ml-1"
               />
             </template>
           </div>
@@ -154,6 +155,7 @@ SPDX-License-Identifier: Apache-2.0
                 <g-not-ready-project-warning
                   :project="item"
                   size="small"
+                  class="ml-1"
                 />
               </template>
             </v-list-item>
