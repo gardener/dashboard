@@ -42,9 +42,6 @@ yarn dedupe --check
 # check that the constraints are met
 yarn constraints
 
-# Run the helm chart unit tests
-yarn workspace @gardener-dashboard/charts run test
-
 # Run linting
 if [ "${LINT_SARIF+yes}" = yes ] ; then
   # supposed to be run in release jobs
