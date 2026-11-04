@@ -31,11 +31,17 @@ SPDX-License-Identifier: Apache-2.0
       <g-ticket-list :tickets="openTickets" />
       <div
         v-if="closedTickets.length"
-        class="text-medium-emphasis mb-2 mt-2 ml-6 pt-1"
+        class="text-medium-emphasis mb-2 mt-6 ml-6 pt-1"
       >
+        <v-tooltip activator="parent">
+          {{ closedTicketsTitle }}
+        </v-tooltip>
         Closed
       </div>
-      <g-ticket-list :tickets="closedTickets" />
+      <g-ticket-list
+        :tickets="closedTickets"
+        faint="true"
+      />
       <div class="d-flex align-center justify-center create-ticket">
         <v-btn
           variant="tonal"
@@ -138,6 +144,14 @@ export default {
         name: this.shootName,
       }).filter(ticket => ticket.metadata.state === 'closed')
       return orderBy(tickets, ['metadata.state'], ['desc'])
+    },
+    closedTicketsTitle () {
+      const days = get(this.ticketConfig, ['closedIssuesLookbackDays'], 0)
+      if (days <= 0) {
+        return 'Closed'
+      }
+      const dayLabel = days === 1 ? 'day' : 'days'
+      return `Closed (last ${days} ${dayLabel})`
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])

@@ -10,7 +10,10 @@ SPDX-License-Identifier: Apache-2.0
       v-for="ticket in tickets"
       :key="ticket.metadata.id"
     >
-      <v-expansion-panel-title expand-icon="mdi-menu-down">
+      <v-expansion-panel-title
+        expand-icon="mdi-menu-down"
+        :class="{ faint: faint }"
+      >
         <g-external-link
           class="mr-2"
           :url="ticket.data.html_url"
@@ -49,6 +52,16 @@ export default {
       type: Array,
       required: true,
     },
+    faint: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
 }
 </script>
+<style scoped>
+.faint {
+  opacity: 0.6;
+}
+</style>
