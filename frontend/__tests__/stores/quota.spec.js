@@ -113,6 +113,36 @@ describe('stores', () => {
             },
           })
         })
+
+        it('should aggregate Kubernetes quantities', () => {
+          const aggregatedQuotaStatus = aggregateResourceQuotaStatus([
+            {
+              hard: {
+                'requests.storage': '100Gi',
+                'requests.cpu': '2',
+                'count/secrets': '1G',
+              },
+              used: {
+                'requests.storage': '50Gi',
+                'requests.cpu': '500m',
+                'count/secrets': '1k',
+              },
+            },
+          ])
+
+          expect(aggregatedQuotaStatus).toEqual({
+            hard: {
+              'requests.storage': '107374182400',
+              'requests.cpu': '2',
+              'count/secrets': '1000000000',
+            },
+            used: {
+              'requests.storage': '53687091200',
+              'requests.cpu': '0.5',
+              'count/secrets': '1000',
+            },
+          })
+        })
       })
     })
   })
