@@ -15,6 +15,21 @@ import { COOKIE_HEADER_PAYLOAD } from '@/store/authn/helper'
 
 import { useLogger } from '@/composables/useLogger'
 
+const { location } = vi.hoisted(() => ({
+  location: new URL('http://localhost:3000/'),
+}))
+
+vi.mock('@/store/authn/helper', async importOriginal => {
+  const original = await importOriginal()
+  return {
+    ...original,
+    useUserManager: options => original.useUserManager({
+      ...options,
+      location,
+    }),
+  }
+})
+
 function encodeJwt (payload) {
   const encode = value => btoa(JSON.stringify(value))
     .replace(/=+$/, '')
@@ -50,19 +65,18 @@ function dispatchCookieChange ({ changed = [], deleted = [] } = {}) {
 
 describe('stores', () => {
   describe('authn', () => {
-    const originalLocation = window.location
     let authnStore
     let pinia
 
     function createRedirectUrl (redirectPath) {
-      const origin = window.location.origin
+      const origin = location.origin
       const url = new URL('/auth', origin)
       url.searchParams.set('redirectUrl', new URL(redirectPath, origin))
       return url
     }
 
     function createLogoutUrl (redirectPath) {
-      const origin = window.location.origin
+      const origin = location.origin
       const url = new URL('/auth/logout', origin)
       if (redirectPath) {
         url.searchParams.set('redirectPath', redirectPath)
@@ -75,7 +89,7 @@ describe('stores', () => {
     }
 
     beforeEach(async () => {
-      window.location = new URL(originalLocation.href)
+      location.href = 'http://localhost:3000/'
       pinia = createPinia()
       setActivePinia(pinia)
       authnStore = useAuthnStore()
@@ -86,21 +100,17 @@ describe('stores', () => {
       authnStore.$dispose()
     })
 
-    afterAll(() => {
-      window.location = originalLocation
-    })
-
     describe('#signinWithOidc', () => {
       it('should redirect to the home view', () => {
         const redirectPath = '/'
         authnStore.signinWithOidc()
-        expect(window.location.href).toBe(createRedirectUrl(redirectPath).href)
+        expect(location.href).toBe(createRedirectUrl(redirectPath).href)
       })
 
       it('should redirect to the admin view', () => {
         const redirectPath = '/namespace/garden-foo/admin'
         authnStore.signinWithOidc(redirectPath)
-        expect(window.location.href).toBe(createRedirectUrl(redirectPath).href)
+        expect(location.href).toBe(createRedirectUrl(redirectPath).href)
       })
     })
 
@@ -155,26 +165,26 @@ describe('stores', () => {
       it('should delete exactly the readable session cookie before redirecting to logout', async () => {
         await setSessionCookie(createUserClaims())
         const deleteSpy = vi.spyOn(window.cookieStore, 'delete')
-        const redirectPath = window.location.pathname + window.location.search
+        const redirectPath = location.pathname + location.search
 
         await authnStore.signout()
 
         expect(deleteSpy).toHaveBeenCalledTimes(1)
         expect(deleteSpy).toHaveBeenCalledWith(COOKIE_HEADER_PAYLOAD)
         expect(await window.cookieStore.get(COOKIE_HEADER_PAYLOAD)).toBeNull()
-        expect(window.location.href).toBe(createLogoutUrl(redirectPath).href)
+        expect(location.href).toBe(createLogoutUrl(redirectPath).href)
       })
 
       it('should still redirect to logout when the client-side delete is rejected', async () => {
         const logger = useLogger()
         const errorSpy = vi.spyOn(logger, 'error')
         vi.spyOn(window.cookieStore, 'delete').mockRejectedValue(new Error('delete failed'))
-        const redirectPath = window.location.pathname + window.location.search
+        const redirectPath = location.pathname + location.search
 
         await authnStore.signout()
 
         expect(errorSpy).toHaveBeenCalledWith('delete failed')
-        expect(window.location.href).toBe(createLogoutUrl(redirectPath).href)
+        expect(location.href).toBe(createLogoutUrl(redirectPath).href)
       })
 
       it('should ignore the initiating tab\'s own deletion event', async () => {
@@ -184,26 +194,26 @@ describe('stores', () => {
         await authnStore.signout()
 
         expect(deleteSpy).toHaveBeenCalledTimes(1)
-        expect(window.location.pathname).toBe('/auth/logout')
+        expect(location.pathname).toBe('/auth/logout')
       })
     })
 
     describe('cookieStore change', () => {
       it('should sign out when the session cookie is deleted in another tab', async () => {
         await setSessionCookie(createUserClaims())
-        const redirectPath = window.location.pathname + window.location.search
+        const redirectPath = location.pathname + location.search
 
         dispatchCookieChange({
           deleted: [{ name: COOKIE_HEADER_PAYLOAD }],
         })
         await Promise.resolve()
 
-        expect(window.location.href).toBe(createLogoutUrl(redirectPath).href)
+        expect(location.href).toBe(createLogoutUrl(redirectPath).href)
       })
 
       it('should ignore unrelated deletions and changed-cookie events', async () => {
         await setSessionCookie(createUserClaims())
-        const href = window.location.href
+        const href = location.href
 
         dispatchCookieChange({
           deleted: [{ name: 'unrelated' }],
@@ -213,7 +223,7 @@ describe('stores', () => {
         })
         await Promise.resolve()
 
-        expect(window.location.href).toBe(href)
+        expect(location.href).toBe(href)
         expect(await window.cookieStore.get(COOKIE_HEADER_PAYLOAD)).not.toBeNull()
       })
 
