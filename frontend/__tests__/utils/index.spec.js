@@ -35,22 +35,23 @@ import find from 'lodash/find'
 
 describe('utils', () => {
   describe('renderTemplate', () => {
-    it('replaces placeholders with data values', () => {
-      const template = '{{ productName }} has {{clusterCount}} clusters and is {{ active }}'
+    it('replaces supported placeholders with data values', () => {
+      const template = '{{ productName }} has {{clusterCount}} clusters, is {{ active }}, and runs on ${providerType}' // eslint-disable-line no-template-curly-in-string
       const data = {
         productName: 'Gardener',
         clusterCount: 3,
         active: true,
+        providerType: 'aws',
       }
 
-      expect(renderTemplate(template, data)).toBe('Gardener has 3 clusters and is true')
+      expect(renderTemplate(template, data)).toBe('Gardener has 3 clusters, is true, and runs on aws')
     })
 
-    it('replaces missing and inherited properties with an empty string', () => {
+    it('only replaces own variables that were supplied', () => {
       const data = Object.create({ inherited: 'inherited value' })
       data.own = 'own value'
 
-      expect(renderTemplate('{{ own }} {{ inherited }} {{ missing }}', data)).toBe('own value  ')
+      expect(renderTemplate('{{ own }} {{ inherited }} {{ missing }}', data)).toBe('own value {{ inherited }} {{ missing }}')
     })
 
     it('replaces nullish values with an empty string', () => {
@@ -60,6 +61,20 @@ describe('utils', () => {
       }
 
       expect(renderTemplate('{{ nullValue }} {{ undefinedValue }}', data)).toBe(' ')
+    })
+
+    it('replaces every occurrence without interpreting replacement patterns', () => {
+      const data = {
+        value: '$& $$',
+      }
+
+      expect(renderTemplate('{{ value }} ${value} {{value}}', data)).toBe('$& $$ $& $$ $& $$') // eslint-disable-line no-template-curly-in-string
+    })
+
+    it('does not replace placeholders with mixed or mismatched delimiter styles', () => {
+      const template = '${ }} {{ } {{ ${} }} ${value}} ${value }} {{ value } {{ ${value} }}' // eslint-disable-line no-template-curly-in-string
+
+      expect(renderTemplate(template, { value: 'replacement' })).toBe(template)
     })
 
     it('does not execute template expressions or evaluation blocks', () => {
