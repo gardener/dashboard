@@ -25,6 +25,7 @@ RUN apk add --no-cache tini \
     && alpineArch="$(apk --print-arch)" \
     && cp -d /lib/ld-musl-$alpineArch.so.* ./lib \
     && cp -d /lib/libc.musl-$alpineArch.so.* ./lib \
+    && cp -d /usr/lib/libatomic.so.* ./usr/lib \
     && cp -d /usr/lib/libgcc_s.so.* ./usr/lib \
     && cp -d /usr/lib/libstdc++.so.* ./usr/lib
 
