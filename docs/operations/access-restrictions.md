@@ -116,4 +116,4 @@ data:
 
 ### No Access Restrictions Available
 
-If no access restrictions are available for the selected region and cloud profile, the text specified in `accessRestriction.noItemsText` is displayed. Placeholders `{region}` and `{cloudProfile}` can be used in the text.
+If no access restrictions are available for the selected region and cloud profile, the text specified in `accessRestriction.noItemsText` is displayed. The placeholders `${region}`, `${cloudProfileName}`, `${cloudProfileKind}`, and the deprecated `${cloudProfile}` can be used in the text.
