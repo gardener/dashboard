@@ -240,7 +240,7 @@ SPDX-License-Identifier: Apache-2.0
           icon="mdi-plus"
           color="toolbar-title"
           variant="text"
-          :to="{ name: 'NewShoot', params: { projectName } }"
+          :to="{ name: 'NewShoot', params: { namespace } }"
         />
         <g-table-column-selection
           activator-color="toolbar-title"
@@ -262,7 +262,6 @@ import {
 
 import { parseShootSearch } from '@/store/shoot/helper'
 import { buildSearchTerms } from '@/store/shoot/search'
-import { useProjectStore } from '@/store/project'
 
 import GTableColumnSelection from '@/components/GTableColumnSelection.vue'
 import GDetailTooltip from '@/components/GDetailTooltip.vue'
@@ -311,9 +310,6 @@ const props = defineProps({
     default: () => [],
   },
 })
-
-const projectStore = useProjectStore()
-const projectName = computed(() => projectStore.projectNameByNamespace(props.namespace))
 
 const emit = defineEmits([
   'update:modelValue',

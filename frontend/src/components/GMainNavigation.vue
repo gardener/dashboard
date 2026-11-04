@@ -144,7 +144,7 @@ const selectedProject = computed(() => {
     return allProjectsItem
   }
   if (currentRoute.meta.projectScoped) {
-    return projectStore.projectByName(currentRoute.params.projectName)
+    return projectStore.projectByRouteParams(currentRoute.params)
   }
   return projectStore.lastProject
 })
@@ -223,9 +223,12 @@ const hasNoProjects = computed(() => {
 })
 
 function projectMenuRoute (name, project) {
+  const params = ['Members', 'Administration'].includes(name)
+    ? { projectName: project.metadata.name }
+    : { namespace: project.spec.namespace }
   return {
     name,
-    params: { projectName: project.metadata.name },
+    params,
   }
 }
 

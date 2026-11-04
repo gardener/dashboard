@@ -53,6 +53,19 @@ describe('stores', () => {
       await nextTick()
     }
 
+    it.each([
+      [{ namespace: 'garden' }, 'core'],
+      [{ projectName: 'core' }, 'core'],
+      [{ namespace: 'garden-core' }, undefined],
+      [{ projectName: 'garden' }, undefined],
+      [{}, undefined],
+    ])('resolves the Project for route params %o', async (params, expectedName) => {
+      const projectStore = useProjectStore()
+      await loadProjects(projectStore)
+
+      expect(projectStore.projectByRouteParams(params)?.metadata.name).toBe(expectedName)
+    })
+
     it('restores the persisted canonical Project name after store reconstruction', async () => {
       const projectStore = useProjectStore()
       await loadProjects(projectStore)

@@ -22,6 +22,7 @@ const project = {
     },
   },
   spec: {
+    namespace: 'garden-core-platform',
     description: 'Platform services for internal product teams',
     purpose: 'Production platform',
     owner: { name: 'owner@example.org' },
@@ -119,7 +120,7 @@ describe('components GProjectListRow', () => {
       text: 'core',
       to: {
         name: 'ShootList',
-        params: { projectName: 'core' },
+        params: { namespace: 'garden-core-platform' },
       },
     })
   })

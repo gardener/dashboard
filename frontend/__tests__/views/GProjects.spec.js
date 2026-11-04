@@ -108,7 +108,7 @@ async function mountProjects ({
       { name: 'ProjectList', path: '/projects', component: {} },
       { name: 'NewProject', path: '/projects/+', component: {} },
       { name: 'Administration', path: '/projects/:projectName', component: {} },
-      { name: 'ShootList', path: '/projects/:projectName/clusters', component: {} },
+      { name: 'ShootList', path: '/namespace/:namespace/shoots', component: {} },
     ],
   })
   for (const location of locations) {
@@ -208,7 +208,7 @@ describe('views GProjectList', () => {
       canCreate: true,
       history: createWebHistory(),
       locations: [
-        { name: 'ShootList', params: { projectName: 'core' } },
+        { name: 'ShootList', params: { namespace: 'garden-core' } },
         { name: 'ProjectList' },
       ],
     })
@@ -248,7 +248,7 @@ describe('views GProjectList', () => {
       canCreate: true,
       history: createWebHistory(),
       locations: [
-        { name: 'ShootList', params: { projectName: 'core' } },
+        { name: 'ShootList', params: { namespace: 'garden-core' } },
         { name: 'NewProject' },
       ],
     })

@@ -73,7 +73,6 @@ const appStore = useAppStore()
 
 const {
   shootNamespace,
-  shootProjectName,
   shootManifest,
   setShootManifest,
   isShootDirty,
@@ -108,7 +107,7 @@ async function save () {
     router.push({
       name: 'ShootItem',
       params: {
-        projectName: shootProjectName.value,
+        namespace,
         name,
       },
     })

@@ -146,13 +146,16 @@ export function createGlobalResolveGuards () {
         if (to.name === 'AllClusters') {
           namespace = '_all'
         } else if (to.meta.projectScoped) {
-          const project = projectStore.projectByName(to.params.projectName)
+          const project = projectStore.projectByRouteParams(to.params)
           if (isProjectPending(project)) {
             return { name: 'ProjectList', replace: true }
           }
           namespace = project?.spec.namespace
           if (!namespace) {
-            const message = `User ${authnStore.username} has no authorization for Project ${to.params.projectName}`
+            const resource = to.params.namespace
+              ? `namespace ${to.params.namespace}`
+              : `Project ${to.params.projectName}`
+            const message = `User ${authnStore.username} has no authorization for ${resource}`
             logger.error(message)
             throw Object.assign(new Error(message), {
               status: 403,
@@ -261,7 +264,7 @@ export function createGlobalAfterHooks () {
             : projectStore.lastProject?.spec.namespace
           authzStore.activateRules(namespace, retainedNamespace)
           if (to.meta.projectScoped) {
-            projectStore.rememberProject(to.params.projectName)
+            projectStore.rememberProject(projectStore.projectNameByNamespace(namespace))
           }
 
           if (isShootListRoute(to)) {

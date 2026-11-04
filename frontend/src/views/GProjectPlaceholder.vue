@@ -42,7 +42,7 @@ export default {
     function load (route, { setError }) {
       fallbackRoute.value = null
       const routeName = route.name
-      const namespace = projectStore.namespaceByProjectName(route.params.projectName)
+      const namespace = projectStore.projectByRouteParams(route.params)?.spec.namespace
       if (!authzStore.hasRulesForNamespace(namespace)) {
         setError(new Error('An unexpected error occurred'))
         fallbackRoute.value = {
@@ -64,7 +64,7 @@ export default {
         fallbackRoute.value = {
           name: 'ShootList',
           params: {
-            projectName: route.params.projectName,
+            namespace,
           },
         }
       }

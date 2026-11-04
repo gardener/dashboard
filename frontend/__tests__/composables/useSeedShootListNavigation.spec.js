@@ -56,7 +56,7 @@ describe('composables', () => {
         history: createMemoryHistory(),
         routes: [{
           name: 'AllClusters',
-          path: '/clusters',
+          path: '/namespace/_all/shoots',
           component: {},
         }],
       })
@@ -70,7 +70,7 @@ describe('composables', () => {
       const href = router.resolve(route).href
       const searchParams = new URLSearchParams(href.split('?')[1])
 
-      expect(href).toBe('/clusters?q=seed:%22aws-ha%22+health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
+      expect(href).toBe('/namespace/_all/shoots?q=seed:%22aws-ha%22+health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
       expect(searchParams.get('q')).toBe('seed:"aws-ha" health:unhealthy progressing:false operatorAction:true allTicketsIgnored:false')
     })
   })
