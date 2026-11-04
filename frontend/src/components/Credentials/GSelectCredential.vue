@@ -62,9 +62,8 @@ SPDX-License-Identifier: Apache-2.0
         </v-btn>
       </template>
     </v-select>
-    <g-secret-dialog-wrapper
-      :visible-dialog="visibleSecretDialog"
-      :visible-dialog-vendor-type="vendorType"
+    <g-credential-dialog-wrapper
+      :dialog-state="credentialDialogState"
       @dialog-closed="onSecretDialogClosed"
     />
   </div>
@@ -81,7 +80,7 @@ import { required } from '@vuelidate/validators'
 import { useProjectStore } from '@/store/project'
 import { useCredentialStore } from '@/store/credential'
 
-import GSecretDialogWrapper from '@/components/Credentials/GSecretDialogWrapper'
+import GCredentialDialogWrapper from '@/components/Credentials/GCredentialDialogWrapper'
 import GCredentialName from '@/components/Credentials/GCredentialName'
 import GBindingName from '@/components/Credentials/GBindingName'
 
@@ -104,7 +103,7 @@ import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   components: {
-    GSecretDialogWrapper,
+    GCredentialDialogWrapper,
     GCredentialName,
     GBindingName,
   },
@@ -184,7 +183,7 @@ export default {
   data () {
     return {
       secretItemsBeforeAdd: undefined,
-      visibleSecretDialog: undefined,
+      credentialDialogState: undefined,
     }
   },
   validations () {
@@ -234,11 +233,18 @@ export default {
   },
   methods: {
     openSecretDialog () {
-      this.visibleSecretDialog = this.providerType
+      this.credentialDialogState = {
+        operation: 'create',
+        credentialKind: 'Secret',
+        vendorType: this.vendorType,
+        providerType: this.providerType,
+        credential: undefined,
+        binding: undefined,
+      }
       this.secretItemsBeforeAdd = cloneDeep(this.allowedCredentials)
     },
     onSecretDialogClosed () {
-      this.visibleSecretDialog = undefined
+      this.credentialDialogState = undefined
       const value = head(differenceWith(this.allowedCredentials, this.secretItemsBeforeAdd, isEqual))
       if (value) {
         this.internalValue = value
