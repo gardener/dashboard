@@ -31,6 +31,7 @@ import { createWorkerConfig } from '@/providers/infra/aws/shoot'
 import { getErrorMessages } from '@/utils'
 import { withFieldName } from '@/utils/validators'
 
+import isEmpty from 'lodash/isEmpty'
 import set from 'lodash/set'
 import unset from 'lodash/unset'
 
@@ -98,7 +99,13 @@ export default {
       this.$emit('updateVolumeType')
     },
     unsetWorkerConfig () {
-      unset(this.worker, ['providerConfig'])
+      unset(this.worker, ['providerConfig', 'volume', 'iops'])
+      if (isEmpty(this.worker.providerConfig?.volume)) {
+        unset(this.worker, ['providerConfig', 'volume'])
+      }
+      if (isEmpty(this.worker.providerConfig)) {
+        unset(this.worker, ['providerConfig'])
+      }
       this.workerIops = undefined
     },
     getErrorMessages,

@@ -57,7 +57,10 @@ describe('GAwsWorkerVolumeIops', () => {
     expect(wrapper.vm.v$.workerIops.minValue.$invalid).toBe(false)
 
     wrapper.vm.onInputIops('')
-    expect(worker).not.toHaveProperty('providerConfig')
+    expect(worker.providerConfig).toEqual({
+      apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'WorkerConfig',
+    })
 
     wrapper.unmount()
   })
@@ -84,9 +87,67 @@ describe('GAwsWorkerVolumeIops', () => {
 
     wrapper.vm.worker.volume.type = volumeType
     await nextTick()
-    expect(worker).not.toHaveProperty('providerConfig')
+    expect(worker.providerConfig).toEqual({
+      apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'WorkerConfig',
+    })
     expect(wrapper.vm.workerIops).toBeUndefined()
     expect(wrapper.find('[data-label="IOPS"]').exists()).toBe(iopsFieldVisible)
+
+    wrapper.unmount()
+  })
+
+  it('preserves unrelated worker provider configuration when removing IOPS', async () => {
+    const worker = {
+      volume: {
+        type: 'io2',
+      },
+      providerConfig: {
+        apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+        kind: 'WorkerConfig',
+        volume: {
+          iops: 500,
+          throughput: 125,
+        },
+        dataVolumes: [{ name: 'data' }],
+      },
+    }
+    const wrapper = mountComponent(worker)
+
+    wrapper.vm.worker.volume.type = 'gp3'
+    await nextTick()
+
+    expect(worker.providerConfig).toEqual({
+      apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+      kind: 'WorkerConfig',
+      volume: {
+        throughput: 125,
+      },
+      dataVolumes: [{ name: 'data' }],
+    })
+    expect(wrapper.vm.workerIops).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  it('removes an otherwise empty worker provider configuration after removing IOPS', async () => {
+    const worker = {
+      volume: {
+        type: 'io2',
+      },
+      providerConfig: {
+        volume: {
+          iops: 500,
+        },
+      },
+    }
+    const wrapper = mountComponent(worker)
+
+    wrapper.vm.worker.volume.type = 'gp2'
+    await nextTick()
+
+    expect(worker).not.toHaveProperty('providerConfig')
+    expect(wrapper.vm.workerIops).toBeUndefined()
 
     wrapper.unmount()
   })
