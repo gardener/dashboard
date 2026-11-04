@@ -24,6 +24,8 @@ import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
+import { isProjectPending } from '@/composables/useProjectItem'
+
 import {
   projectListBreadcrumbs,
   newProjectBreadcrumbs,
@@ -83,13 +85,23 @@ export function createRoutes () {
       projectsRoute('projects'),
       newProjectRoute('projects/+'),
       projectHierarchy('projects/:projectName'),
+      redirectRoute('projects/:projectName/shoots', 'ShootList'),
+      redirectRoute('projects/:projectName/shoots/+', 'NewShoot'),
+      redirectRoute('projects/:projectName/shoots/+/yaml', 'NewShootEditor'),
+      redirectRoute('projects/:projectName/shoots/:name', 'ShootItem'),
+      redirectRoute('projects/:projectName/shoots/:name/yaml', 'ShootItemEditor'),
+      redirectRoute('projects/:projectName/shoots/:name/hibernation', 'ShootItemHibernationSettings'),
+      redirectRoute('projects/:projectName/shoots/:name/term', 'ShootItemTerminal'),
+      redirectRoute('projects/:projectName/credentials', 'Credentials'),
+      redirectRoute('projects/:projectName/term/garden', 'GardenTerminal'),
+      { path: 'shoots', redirect: { name: 'AllClusters', params: {} } },
       { path: 'namespace', redirect: { name: 'Home' } },
       { path: 'namespace/+', redirect: { name: 'NewProject' } },
       shootListRoute('namespace/_all/shoots', 'AllClusters'),
       { path: 'namespace/_all/:pathMatch(.*)*', redirect: { name: 'AllClusters', params: {} } },
       namespaceHierarchy('namespace/:namespace'),
-      legacyProjectRoute('namespace/:namespace/administration', 'Administration'),
-      legacyProjectRoute('namespace/:namespace/members', 'Members'),
+      redirectRoute('namespace/:namespace/administration', 'Administration'),
+      redirectRoute('namespace/:namespace/members', 'Members'),
       {
         path: ':pathMatch(.*)*',
         component: GNotFound,
@@ -283,23 +295,31 @@ export function createRoutes () {
     }
   }
 
-  function legacyProjectRoute (path, name) {
+  function redirectRoute (path, name) {
     return {
       path,
-      name: `Legacy${name}`,
+      name: `Redirect${name}`,
       beforeEnter (to) {
-        const project = projectStore.projectByNamespace(to.params.namespace)
+        const { namespace, projectName, ...params } = to.params
+        const project = projectStore.projectByRouteParams(to.params)
         if (!project) {
-          const message = `The namespace ${to.params.namespace} is not associated with an accessible Project`
+          const message = namespace
+            ? `The namespace ${namespace} is not associated with an accessible Project`
+            : `The Project ${projectName} is not accessible`
           appStore.setRouterError(Object.assign(new Error(message), {
             status: 403,
             reason: 'Forbidden',
           }))
           return
         }
+        if (isProjectPending(project)) {
+          return { name: 'ProjectList', replace: true }
+        }
         return {
           name,
-          params: { projectName: project.metadata.name },
+          params: namespace
+            ? { ...params, projectName: project.metadata.name }
+            : { ...params, namespace: project.spec.namespace },
           query: to.query,
           hash: to.hash,
           replace: true,

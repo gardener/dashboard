@@ -159,10 +159,55 @@ describe('router routes', () => {
     ['/namespace/_all', '/namespace/_all/shoots'],
     ['/namespace/_all?q=seed:%22az-ha1%22', '/namespace/_all/shoots?q=seed:%22az-ha1%22'],
     ['/namespace/_all/shoots/cluster', '/namespace/_all/shoots'],
+    ['/projects/core/shoots', '/namespace/garden-core/shoots'],
+    ['/projects/core/shoots?q=seed:%22az-ha1%22', '/namespace/garden-core/shoots?q=seed:%22az-ha1%22'],
+    ['/projects/core/shoots/+', '/namespace/garden-core/shoots/+'],
+    ['/projects/core/shoots/+/yaml', '/namespace/garden-core/shoots/+/yaml'],
+    ['/projects/core/shoots/my-cluster', '/namespace/garden-core/shoots/my-cluster'],
+    ['/projects/core/shoots/my-cluster?q=abc#anchor', '/namespace/garden-core/shoots/my-cluster?q=abc#anchor'],
+    ['/projects/core/shoots/my-cluster/yaml', '/namespace/garden-core/shoots/my-cluster/yaml'],
+    ['/projects/core/shoots/my-cluster/hibernation', '/namespace/garden-core/shoots/my-cluster/hibernation'],
+    ['/projects/core/shoots/my-cluster/term', '/namespace/garden-core/shoots/my-cluster/term'],
+    ['/projects/core/credentials', '/namespace/garden-core/credentials'],
+    ['/projects/core/term/garden', '/namespace/garden-core/term/garden'],
+    ['/shoots', '/namespace/_all/shoots'],
+    ['/shoots?q=seed:%22az-ha1%22', '/namespace/_all/shoots?q=seed:%22az-ha1%22'],
   ])('redirects %s', async (path, expectedPath) => {
     const { router } = createTestRouter()
     await router.push(path)
     expect(router.currentRoute.value.fullPath).toBe(expectedPath)
+  })
+
+  it.each([
+    ['/projects/ops/shoots', '/namespace/garden-operations/shoots'],
+    ['/namespace/garden-operations/members', '/projects/ops/members'],
+  ])('redirects %s using the namespace of the Project', async (path, expectedPath) => {
+    const { projectStore, router } = createTestRouter()
+    projectStore.list.push({
+      metadata: { name: 'ops', uid: 'ops-uid' },
+      spec: { namespace: 'garden-operations' },
+      status: { phase: 'Ready' },
+    })
+
+    await router.push(path)
+
+    expect(router.currentRoute.value.fullPath).toBe(expectedPath)
+  })
+
+  it.each([
+    ['/projects/pending/shoots/+', {}],
+    ['/namespace/garden-pending/members', { namespace: 'garden-pending' }],
+  ])('opens Projects instead of redirecting %s of a Pending Project', async (path, spec) => {
+    const { projectStore, router } = createTestRouter()
+    projectStore.list.push({
+      metadata: { name: 'pending', uid: 'pending-uid' },
+      spec,
+      status: { phase: 'Pending' },
+    })
+
+    await router.push(path)
+
+    expect(router.currentRoute.value.fullPath).toBe('/projects')
   })
 
   it('supports namespace root and Project creation entry points', async () => {
@@ -186,8 +231,19 @@ describe('router routes', () => {
   })
 
   it.each([
+    '/clusters',
+    '/projects/core/clusters',
+    '/projects/core/garden-cluster',
+  ])('does not accept the unreleased %s', path => {
+    const { router } = createTestRouter()
+    expect(router.resolve(path).name).toBeUndefined()
+  })
+
+  it.each([
     '/namespace/garden-private/members',
     '/namespace/garden-private/administration',
+    '/projects/private/shoots',
+    '/projects/private/shoots/my-cluster',
   ])('retains the forbidden behavior for %s', async path => {
     const { router } = createTestRouter()
     await router.push(path)
