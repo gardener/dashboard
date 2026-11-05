@@ -1054,7 +1054,7 @@ const RAW_RUNTIME_STATE =
           ["neostandard", "virtual:f3f18773c1f2811e8d448670abfc3fed18cdffc11b444f7cbc3548ae5868e74f3c4ee449327c1fc9c24ce0732ee02505411a07539789bec8257188d17bbada1f#npm:0.14.1"],\
           ["object-hash", "npm:3.0.0"],\
           ["openapi-types", "npm:12.1.3"],\
-          ["openid-client", "npm:6.8.8"],\
+          ["openid-client", "npm:6.8.9"],\
           ["p-event", "npm:7.1.1"],\
           ["p-limit", "npm:7.3.3"],\
           ["p-retry", "npm:8.0.1"],\
@@ -9613,12 +9613,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["openid-client", [\
-      ["npm:6.8.8", {\
-        "packageLocation": "./.yarn/cache/openid-client-npm-6.8.8-5129be0d2e-b1d60ca456.zip/node_modules/openid-client/",\
+      ["npm:6.8.9", {\
+        "packageLocation": "./.yarn/cache/openid-client-npm-6.8.9-8f7e071450-6ec85b68a9.zip/node_modules/openid-client/",\
         "packageDependencies": [\
           ["jose", "npm:6.2.15"],\
           ["oauth4webapi", "npm:3.8.8"],\
-          ["openid-client", "npm:6.8.8"]\
+          ["openid-client", "npm:6.8.9"]\
         ],\
         "linkType": "HARD"\
       }]\
