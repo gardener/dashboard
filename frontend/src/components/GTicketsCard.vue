@@ -11,38 +11,53 @@ SPDX-License-Identifier: Apache-2.0
   >
     <v-card
       v-if="openTickets.length || closedTickets.length"
-      class="mb-4"
+      class="overflow-hidden mb-4"
     >
-      <g-toolbar>
-        <div class="d-flex">
-          <div
-            class="ticket-title d-flex align-center"
-          >
-            Tickets
+      <g-toolbar title="Tickets" />
+      <div class="d-flex flex-column ga-5 ga-sm-6 pa-4 pa-sm-6">
+        <section v-if="openTickets.length">
+          <div class="d-flex align-center ga-2 mb-2">
+            <v-icon
+              icon="mdi-record-circle-outline"
+              size="small"
+              color="primary"
+            />
+            <span class="text-body-large">Open</span>
+            <v-chip
+              size="small"
+              variant="tonal"
+              color="tonal-primary"
+            >
+              {{ openTickets.length }}
+            </v-chip>
           </div>
-        </div>
-      </g-toolbar>
-      <div
-        v-if="openTickets.length"
-        class="text-medium-emphasis mb-2 mt-2 ml-6 pt-1"
-      >
-        Open
+          <g-ticket-list :tickets="openTickets" />
+        </section>
+        <section v-if="closedTickets.length">
+          <div class="d-flex align-center ga-2 mb-2">
+            <v-icon
+              icon="mdi-check-circle-outline"
+              size="small"
+            />
+            <span class="text-body-large">Closed</span>
+            <v-chip
+              size="small"
+              variant="tonal"
+            >
+              {{ closedTickets.length }}
+            </v-chip>
+            <span
+              v-if="closedTicketsLookbackLabel"
+              class="ml-auto text-body-small"
+            >
+              {{ closedTicketsLookbackLabel }}
+            </span>
+          </div>
+          <g-ticket-list :tickets="closedTickets" />
+        </section>
       </div>
-      <g-ticket-list :tickets="openTickets" />
-      <div
-        v-if="closedTickets.length"
-        class="text-medium-emphasis mb-2 mt-6 ml-6 pt-1"
-      >
-        <v-tooltip activator="parent">
-          {{ closedTicketsTitle }}
-        </v-tooltip>
-        Closed
-      </div>
-      <g-ticket-list
-        :tickets="closedTickets"
-        faint="true"
-      />
-      <div class="d-flex align-center justify-center create-ticket">
+      <v-divider />
+      <div class="d-flex align-center justify-end py-3 px-4">
         <v-btn
           variant="tonal"
           color="tonal-primary"
@@ -58,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0
     </v-card>
     <v-card v-else>
       <g-toolbar title="Tickets" />
-      <div class="d-flex justify-center pa-4 create-ticket">
+      <div class="d-flex justify-center pa-4">
         <v-btn
           variant="tonal"
           color="tonal-primary"
@@ -145,13 +160,13 @@ export default {
       }).filter(ticket => ticket.metadata.state === 'closed')
       return orderBy(tickets, ['metadata.state'], ['desc'])
     },
-    closedTicketsTitle () {
+    closedTicketsLookbackLabel () {
       const days = get(this.ticketConfig, ['closedIssuesLookbackDays'], 0)
       if (days <= 0) {
-        return 'Closed'
+        return ''
       }
       const dayLabel = days === 1 ? 'day' : 'days'
-      return `Closed (last ${days} ${dayLabel})`
+      return `Last ${days} ${dayLabel}`
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
@@ -220,13 +235,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  .link-icon {
-    font-size: 1.2em;
-    text-decoration: none;
-  }
-  .create-ticket {
-    padding: 10px;
-  }
-</style>

@@ -5,16 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-chip
-    :color="ticket.metadata.closed_at ? 'secondary' : 'primary'"
-    variant="flat"
-    class="ticket-status-chip"
-  >
-    <v-icon>
-      {{ ticket.metadata.closed_at ? 'mdi-check-circle-outline' : 'mdi-record-circle-outline' }}
-    </v-icon>
-    {{ ticket.metadata.state === 'open' ? 'Open' : 'Closed' }}
-  </v-chip>
   <g-ticket-comment
     :comment="ticket"
     :timeline="commentsForTicket?.length"
@@ -28,19 +18,18 @@ SPDX-License-Identifier: Apache-2.0
   />
   <div v-if="ticket.metadata.closed_at">
     <v-chip
-      color="secondary"
-      variant="flat"
-      class="ticket-closed-chip"
+      color="tonal-secondary"
+      variant="tonal"
+      size="small"
+      prepend-icon="mdi-check-circle-outline"
+      class="ml-12"
     >
-      <v-icon>
-        mdi-check-circle-outline
-      </v-icon>
+      Closed<g-time-string
+        :date-time="ticket.metadata.closed_at"
+        mode="past"
+        content-class="ml-1"
+      />
     </v-chip>
-    closed<g-time-string
-      :date-time="ticket.metadata.closed_at"
-      mode="past"
-      content-class="ml-1"
-    />
   </div>
 
   <v-card-actions v-if="!!gitHubRepoUrl">
@@ -58,7 +47,6 @@ SPDX-License-Identifier: Apache-2.0
     </v-btn>
     <v-spacer />
   </v-card-actions>
-  <!-- </v-card> -->
 </template>
 
 <script>
@@ -91,18 +79,8 @@ export default {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',
     }),
-    ticketTitle () {
-      const title = get(this.ticket, ['data', 'ticketTitle'])
-      return title ? ` - ${title}` : ''
-    },
-    login () {
-      return get(this.ticket, ['data', 'user', 'login'])
-    },
     ticketHtmlUrl () {
       return get(this.ticket, ['data', 'html_url'])
-    },
-    labels () {
-      return get(this.ticket, ['data', 'labels'], [])
     },
     commentsForTicket () {
       const issueNumber = get(this.ticket, ['metadata', 'number'])
@@ -122,28 +100,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  .ticket-title {
-    line-height: 20px;
-  }
-  .ticket-labels {
-    overflow-y: auto;
-    max-height: 30px;
-  }
-
-  .link-icon {
-    font-size: 120%;
-    text-decoration: none;
-  }
-  .v-expansion-panel {
-    margin-top: 0px;
-  }
-  .ticket-status-chip {
-    margin-left:48px;
-    margin-bottom: 10px;
-  }
-  .ticket-closed-chip {
-    margin-left: 49px
-  }
-</style>

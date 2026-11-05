@@ -5,18 +5,21 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <template>
-  <v-expansion-panels>
+  <v-expansion-panels
+    flat
+    variant="accordion"
+    class="border rounded-lg overflow-hidden"
+  >
     <v-expansion-panel
       v-for="ticket in tickets"
       :key="ticket.metadata.id"
     >
-      <v-expansion-panel-title
-        expand-icon="mdi-menu-down"
-        :class="{ faint: faint }"
-      >
+      <v-expansion-panel-title class="py-3 px-4">
         <g-external-link
-          class="mr-2"
+          class="ticket-summary__link position-relative mr-2"
           :url="ticket.data.html_url"
+          @click.stop
+          @keydown.stop
         >
           #{{ ticket.metadata.number }}
         </g-external-link>
@@ -31,7 +34,7 @@ SPDX-License-Identifier: Apache-2.0
           />
         </div>
       </v-expansion-panel-title>
-      <v-expansion-panel-text>
+      <v-expansion-panel-text class="border-t-sm">
         <g-ticket :ticket="ticket" />
       </v-expansion-panel-text>
     </v-expansion-panel>
@@ -52,16 +55,11 @@ export default {
       type: Array,
       required: true,
     },
-    faint: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
 }
 </script>
 <style scoped>
-.faint {
-  opacity: 0.6;
+.ticket-summary__link {
+  z-index: 1;
 }
 </style>
