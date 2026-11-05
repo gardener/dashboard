@@ -14,6 +14,7 @@ export default defineConfig({
     pool: 'threads',
     restoreMocks: false,
     clearMocks: true,
+    globalSetup: ['./vitest.global-setup.js'],
     setupFiles: ['./vitest.setup.js'],
     testTimeout: 10000,
     coverage: {

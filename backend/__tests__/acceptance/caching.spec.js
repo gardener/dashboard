@@ -12,62 +12,19 @@ import {
   afterAll,
   beforeEach,
 } from 'vitest'
-import {
-  access,
-  mkdir,
-  rmdir,
-  unlink,
-  writeFile,
-} from 'fs/promises'
-import {
-  dirname,
-  join,
-  resolve,
-} from 'path'
-import { fileURLToPath } from 'url'
 import request from '@gardener-dashboard/request'
 
 const { mockRequest } = request
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const PUBLIC_FS_PATH = resolve(__dirname, '../../public')
-const INDEX_FILENAME = join(PUBLIC_FS_PATH, 'index.html')
-
-async function exists (filename) {
-  try {
-    await access(filename)
-    return true
-  } catch {
-    return false
-  }
-}
-
 describe('caching', function () {
   let agent
-  let createdPublicDir = false
-  let createdIndex = false
 
   beforeAll(async () => {
-    if (!await exists(PUBLIC_FS_PATH)) {
-      await mkdir(PUBLIC_FS_PATH, { recursive: true })
-      createdPublicDir = true
-    }
-    if (!await exists(INDEX_FILENAME)) {
-      await writeFile(INDEX_FILENAME, '<!doctype html><html><body>Gardener Dashboard</body></html>\n')
-      createdIndex = true
-    }
-
     agent = await createAgent()
   })
 
   afterAll(async () => {
     agent.close()
-    if (createdIndex) {
-      await unlink(INDEX_FILENAME).catch(() => undefined)
-    }
-    if (createdPublicDir) {
-      await rmdir(PUBLIC_FS_PATH).catch(() => undefined)
-    }
   })
 
   beforeEach(() => {
