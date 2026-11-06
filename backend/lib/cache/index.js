@@ -22,6 +22,7 @@ const { NotFound } = httpErrors
 
 class Cache extends Map {
   #namespaceToProject = new Map()
+  #namespaceToResourceQuotas = new Map()
   #namespaceToShoots = new Map()
   #seedNameToShoots = new Map()
 
@@ -137,6 +138,46 @@ class Cache extends Map {
 
   getShoot (namespace, name) {
     return this.#namespaceToShoots.get(namespace)?.get(name)
+  }
+
+  indexResourceQuotasByNamespace (informer) {
+    const add = resourceQuota => {
+      const namespace = resourceQuota?.metadata?.namespace
+      const name = resourceQuota?.metadata?.name
+      if (!namespace || !name) {
+        return
+      }
+      let resourceQuotas = this.#namespaceToResourceQuotas.get(namespace)
+      if (!resourceQuotas) {
+        resourceQuotas = new Map()
+        this.#namespaceToResourceQuotas.set(namespace, resourceQuotas)
+      }
+      resourceQuotas.set(name, resourceQuota)
+    }
+    const del = resourceQuota => {
+      const namespace = resourceQuota?.metadata?.namespace
+      const name = resourceQuota?.metadata?.name
+      if (!namespace || !name) {
+        return
+      }
+      const resourceQuotas = this.#namespaceToResourceQuotas.get(namespace)
+      if (resourceQuotas) {
+        resourceQuotas.delete(name)
+        if (resourceQuotas.size === 0) {
+          this.#namespaceToResourceQuotas.delete(namespace)
+        }
+      }
+    }
+    informer.on('add', add)
+    informer.on('update', (resourceQuota, oldResourceQuota) => {
+      del(oldResourceQuota)
+      add(resourceQuota)
+    })
+    informer.on('delete', del)
+  }
+
+  getResourceQuotasByNamespace (namespace) {
+    return this.#namespaceToResourceQuotas.get(namespace)?.values() ?? []
   }
 
   getCloudProfiles () {
@@ -260,6 +301,9 @@ export default {
   getResourceQuotas () {
     return cache.getResourceQuotas()
   },
+  getResourceQuotasByNamespace (namespace) {
+    return cache.getResourceQuotasByNamespace(namespace)
+  },
   findProjectByNamespace (namespace) {
     return cache.findProjectByNamespace(namespace)
   },
@@ -306,5 +350,8 @@ export default {
   },
   indexShootsByNamespace (informer) {
     cache.indexShootsByNamespace(informer)
+  },
+  indexResourceQuotasByNamespace (informer) {
+    cache.indexResourceQuotasByNamespace(informer)
   },
 }
