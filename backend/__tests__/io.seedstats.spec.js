@@ -47,21 +47,29 @@ describe('io/seedstats', () => {
     }
   }
 
-  it('should throw for invalid seedstats rooms while collecting joined rooms', () => {
-    let invocation = 0
-    const room = {
-      [Symbol.toPrimitive] () {
-        invocation += 1
-        return invocation === 1 ? 'seedstats;uf=0' : 'invalid-room'
-      },
-    }
+  it('should look up only the possible seedstats rooms', () => {
+    const rooms = new Map([
+      ['socket-id', new Set()],
+      ['shoots;garden', new Set()],
+      ['seedstats;uf=0', new Set()],
+      ['seedstats;seed=seed-1;uf=7', new Set()],
+      ['seedstats;seed=other-seed;uf=3', new Set()],
+    ])
+    const has = vi.spyOn(rooms, 'has')
     const nsp = {
       adapter: {
-        rooms: new Map([[room, new Set()]]),
+        rooms,
       },
     }
 
-    expect(() => getJoinedRooms(nsp, { seedName: 'seed-1' })).toThrow(new TypeError('Invalid seedstats room: invalid-room'))
+    expect(getJoinedRooms(nsp, { seedName: 'seed-1' })).toEqual([
+      { room: 'seedstats;uf=0', unhealthyFilterMask: 0 },
+      { room: 'seedstats;seed=seed-1;uf=7', unhealthyFilterMask: 7 },
+    ])
+    expect(has).toHaveBeenCalledTimes(16)
+    expect(has).not.toHaveBeenCalledWith('socket-id')
+    expect(has).not.toHaveBeenCalledWith('shoots;garden')
+    expect(has).not.toHaveBeenCalledWith('seedstats;seed=other-seed;uf=3')
   })
 
   it('should reject unauthorized seedstats subscriptions', async () => {
