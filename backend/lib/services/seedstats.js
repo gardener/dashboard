@@ -285,6 +285,7 @@ function invalidUnhealthyFilterMask () {
 }
 
 export {
+  ALL_UNHEALTHY_FILTER_FLAGS,
   FILTER_PROGRESSING,
   FILTER_NO_OPERATOR_ACTION,
   FILTER_HIDE_TICKETS,
