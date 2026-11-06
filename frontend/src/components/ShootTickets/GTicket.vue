@@ -7,22 +7,26 @@ SPDX-License-Identifier: Apache-2.0
 <template>
   <g-ticket-comment
     :comment="ticket"
-    :timeline="commentsForTicket?.length"
+    :timeline="commentsForTicket?.length > 0 || !!ticket.metadata.closed_at"
+    :timeline-end="!commentsForTicket?.length && !!ticket.metadata.closed_at"
     initial="true"
   />
   <g-ticket-comment
     v-for="(comment, index) in commentsForTicket"
     :key="comment.metadata.id"
     :comment="comment"
-    :timeline="index != commentsForTicket.length - 1 || ticket.metadata.state === 'closed' "
+    :timeline="index !== commentsForTicket.length - 1 || !!ticket.metadata.closed_at"
+    :timeline-end="index === commentsForTicket.length - 1 && !!ticket.metadata.closed_at"
   />
-  <div v-if="ticket.metadata.closed_at">
+  <div
+    v-if="ticket.metadata.closed_at"
+    class="my-2 ml-12"
+  >
     <v-chip
       color="tonal-secondary"
       variant="tonal"
       size="small"
       prepend-icon="mdi-check-circle-outline"
-      class="ml-12"
     >
       Closed<g-time-string
         :date-time="ticket.metadata.closed_at"
@@ -35,8 +39,8 @@ SPDX-License-Identifier: Apache-2.0
   <v-card-actions v-if="!!gitHubRepoUrl">
     <v-spacer />
     <v-btn
-      variant="text"
-      color="primary"
+      variant="tonal"
+      color="tonal-primary"
       :href="sanitizeUrl(addCommentLink)"
       target="_blank"
       rel="noopener"

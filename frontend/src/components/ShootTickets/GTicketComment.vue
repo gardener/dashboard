@@ -38,6 +38,7 @@ SPDX-License-Identifier: Apache-2.0
   <div
     v-if="timeline"
     class="timeline"
+    :class="{ 'timeline--end': timelineEnd }"
   />
 </template>
 
@@ -68,6 +69,10 @@ export default {
       required: true,
     },
     timeline: {
+      type: Boolean,
+      required: false,
+    },
+    timelineEnd: {
       type: Boolean,
       required: false,
     },
@@ -260,5 +265,10 @@ export default {
     overflow: hidden;
     margin-top: -20px;
     margin-bottom: -10px;
+  }
+
+  .timeline--end {
+    height: 18px;
+    margin-bottom: -8px;
   }
 </style>
