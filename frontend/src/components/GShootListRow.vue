@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0
         <g-project-tooltip :project="project">
           <span class="text-ellipsis">
             <g-text-router-link
-              :to="{ name: 'ShootList', params: { projectName: shootProjectName } }"
+              :to="{ name: 'ShootList', params: { namespace: shootNamespace } }"
               :text="shootProjectName"
             />
             <span v-if="projectTitle"> &mdash; {{ projectTitle }}</span>
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
                       class="text-ellipsis"
                     >
                       <g-text-router-link
-                        :to="{ name: 'ShootItem', params: { name: shootName, projectName: shootProjectName } }"
+                        :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }"
                         :text="shootName"
                       />
                     </span>

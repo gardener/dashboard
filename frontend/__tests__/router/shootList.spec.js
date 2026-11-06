@@ -28,12 +28,12 @@ function createTestRouter () {
     routes: [
       {
         name: 'AllClusters',
-        path: '/clusters',
+        path: '/namespace/_all/shoots',
         component: {},
       },
       {
         name: 'ShootList',
-        path: '/projects/:projectName/clusters',
+        path: '/namespace/:namespace/shoots',
         component: {},
       },
     ],
@@ -51,7 +51,7 @@ describe('router', () => {
       const target = normalizeShootListRoute(route, SHOOT_LIST_FILTERS)
       const normalizedRoute = router.resolve(target)
 
-      expect(normalizedRoute.href).toBe('/clusters?q=health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
+      expect(normalizedRoute.href).toBe('/namespace/_all/shoots?q=health:unhealthy+progressing:false+operatorAction:true+allTicketsIgnored:false')
       expect(getShootListContext(normalizedRoute)).toEqual({
         namespace: '_all',
         search: DEFAULT_SEARCH,
@@ -72,7 +72,7 @@ describe('router', () => {
       })
       const normalizedRoute = router.resolve(target)
 
-      expect(normalizedRoute.href).toBe('/clusters?q=')
+      expect(normalizedRoute.href).toBe('/namespace/_all/shoots?q=')
       expect(getShootListContext(normalizedRoute)).toEqual({
         namespace: '_all',
         search: '',
@@ -100,7 +100,7 @@ describe('router', () => {
       const route = router.resolve({
         name: 'ShootList',
         params: {
-          projectName: 'local',
+          namespace: 'garden-local',
         },
       })
       route.meta.namespace = 'garden-local'
@@ -122,7 +122,7 @@ describe('router', () => {
         },
       })
 
-      expect(route.href).toBe('/clusters?q=name:a%2Bb+foo%26bar=baz%23urgent')
+      expect(route.href).toBe('/namespace/_all/shoots?q=name:a%2Bb+foo%26bar=baz%23urgent')
       expect(router.resolve(route.href).query.q).toBe(search)
     })
   })

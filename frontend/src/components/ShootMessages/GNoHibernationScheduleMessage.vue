@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
     <template v-if="showNavigationLink">
       Please navigate to the cluster details page to
       <g-text-router-link
-        :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, projectName: projectNameByNamespace(shootNamespace) } }"
+        :to="{ name: 'ShootItemHibernationSettings', params: { name: shootName, namespace: shootNamespace } }"
         text="configure"
       />
       a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
@@ -19,10 +19,6 @@ SPDX-License-Identifier: Apache-2.0
 </template>
 
 <script>
-import { mapState } from 'pinia'
-
-import { useProjectStore } from '@/store/project'
-
 import GTextRouterLink from '@/components/GTextRouterLink.vue'
 
 export default {
@@ -46,9 +42,6 @@ export default {
       type: Boolean,
       required: true,
     },
-  },
-  computed: {
-    ...mapState(useProjectStore, ['projectNameByNamespace']),
   },
 }
 </script>

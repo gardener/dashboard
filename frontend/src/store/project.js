@@ -170,6 +170,12 @@ export const useProjectStore = defineStore('project', () => {
     return get(projectByNameMap.value, [name])
   }
 
+  function projectByRouteParams ({ namespace, projectName } = {}) {
+    return namespace
+      ? projectByNamespace(namespace)
+      : projectByName(projectName)
+  }
+
   const lastProject = computed(() => {
     if (list.value === null) {
       return
@@ -291,6 +297,7 @@ export const useProjectStore = defineStore('project', () => {
     projectNameByNamespace,
     projectByNamespace,
     projectByName,
+    projectByRouteParams,
     namespaceByProjectName,
     handleEvent: socketEventHandler.listener,
     $reset,

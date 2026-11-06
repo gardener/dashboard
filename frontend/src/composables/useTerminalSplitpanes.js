@@ -18,7 +18,6 @@ import {
 import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 import { useShootStore } from '@/store/shoot'
-import { useProjectStore } from '@/store/project'
 import { useLocalStorageStore } from '@/store/localStorage'
 
 import { useApi } from '@/composables/useApi'
@@ -51,7 +50,6 @@ export function createTerminalSplitpanesComposable () {
   const authzStore = useAuthzStore()
   const appStore = useAppStore()
   const shootStore = useShootStore()
-  const projectStore = useProjectStore()
   const localStorageStore = useLocalStorageStore()
   const terminalSplitpaneTree = localStorageStore.terminalSplitpaneTreeRef(route)
 
@@ -252,11 +250,10 @@ export function createTerminalSplitpanesComposable () {
 
   function leavePage () {
     const { name, namespace } = terminalCoordinates.value
-    const projectName = projectStore.projectNameByNamespace(namespace)
     if (name) {
-      return router.push({ name: 'ShootItem', params: { projectName, name } })
+      return router.push({ name: 'ShootItem', params: { namespace, name } })
     }
-    return router.push({ name: 'ShootList', params: { projectName } })
+    return router.push({ name: 'ShootList', params: { namespace } })
   }
 
   function isTreeEmpty () {

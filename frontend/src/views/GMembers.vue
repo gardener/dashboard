@@ -628,7 +628,7 @@ async function onRemoveUser ({ username }) {
   if (isCurrentUser(username) && !canViewLandscape.value) {
     const project = find(projectsNotMarkedForDeletion.value, item => !isProjectPending(item))
     if (project) {
-      await router.push({ name: 'ShootList', params: { projectName: project.metadata.name } })
+      await router.push({ name: 'ShootList', params: { namespace: project.spec.namespace } })
     } else {
       await router.push({ name: 'ProjectList' })
     }
