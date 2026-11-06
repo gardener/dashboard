@@ -9,13 +9,55 @@ SPDX-License-Identifier: Apache-2.0
     v-if="gitHubRepoUrl"
     class="mb-4"
   >
-    <template v-if="tickets.length">
-      <g-ticket
-        v-for="ticket in tickets"
-        :key="ticket.metadata.issueNumber"
-        :ticket="ticket"
-      />
-      <div class="d-flex align-center justify-center">
+    <v-card
+      v-if="openTickets.length || closedTickets.length"
+      class="overflow-hidden mb-4"
+    >
+      <g-toolbar title="Tickets" />
+      <div class="d-flex flex-column ga-5 ga-sm-6 pa-4 pa-sm-6">
+        <section v-if="openTickets.length">
+          <div class="d-flex align-center ga-2 mb-2">
+            <v-icon
+              icon="mdi-record-circle-outline"
+              size="small"
+              color="primary"
+            />
+            <span class="text-body-large">Open</span>
+            <v-chip
+              size="small"
+              variant="tonal"
+              color="tonal-primary"
+            >
+              {{ openTickets.length }}
+            </v-chip>
+          </div>
+          <g-ticket-list :tickets="openTickets" />
+        </section>
+        <section v-if="closedTickets.length">
+          <div class="d-flex align-center ga-2 mb-2">
+            <v-icon
+              icon="mdi-check-circle-outline"
+              size="small"
+            />
+            <span class="text-body-large">Closed</span>
+            <v-chip
+              size="small"
+              variant="tonal"
+            >
+              {{ closedTickets.length }}
+            </v-chip>
+            <span
+              v-if="closedTicketsLookbackLabel"
+              class="ml-auto text-body-small"
+            >
+              {{ closedTicketsLookbackLabel }}
+            </span>
+          </div>
+          <g-ticket-list :tickets="closedTickets" />
+        </section>
+      </div>
+      <v-divider />
+      <div class="d-flex align-center justify-end py-3 px-4">
         <v-btn
           variant="tonal"
           color="tonal-primary"
@@ -28,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
           Create Ticket
         </v-btn>
       </div>
-    </template>
+    </v-card>
     <v-card v-else>
       <g-toolbar title="Tickets" />
       <div class="d-flex justify-center pa-4">
@@ -57,7 +99,7 @@ import {
 import { useConfigStore } from '@/store/config'
 import { useTicketStore } from '@/store/ticket'
 
-import GTicket from '@/components/ShootTickets/GTicket'
+import GTicketList from '@/components/ShootTickets/GTicketList.vue'
 
 import { useShootItem } from '@/composables/useShootItem'
 
@@ -68,10 +110,11 @@ import map from 'lodash/map'
 import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 import cloneDeep from 'lodash/cloneDeep'
+import orderBy from 'lodash/orderBy'
 
 export default {
   components: {
-    GTicket,
+    GTicketList,
   },
   inject: ['sanitizeUrl'],
   setup () {
@@ -103,11 +146,27 @@ export default {
     ...mapState(useConfigStore, {
       ticketConfig: 'ticket',
     }),
-    tickets () {
-      return this.ticketsByProjectAndName({
+    openTickets () {
+      const tickets = this.ticketsByProjectAndName({
         projectName: this.shootProjectName,
         name: this.shootName,
-      })
+      }).filter(ticket => ticket.metadata.state === 'open')
+      return orderBy(tickets, ['metadata.state'], ['desc'])
+    },
+    closedTickets () {
+      const tickets = this.ticketsByProjectAndName({
+        projectName: this.shootProjectName,
+        name: this.shootName,
+      }).filter(ticket => ticket.metadata.state === 'closed')
+      return orderBy(tickets, ['metadata.state'], ['desc'])
+    },
+    closedTicketsLookbackLabel () {
+      const days = get(this.ticketConfig, ['closedIssuesLookbackDays'], 0)
+      if (days <= 0) {
+        return ''
+      }
+      const dayLabel = days === 1 ? 'day' : 'days'
+      return `Last ${days} ${dayLabel}`
     },
     gitHubRepoUrl () {
       return get(this.ticketConfig, ['gitHubRepoUrl'])
@@ -176,10 +235,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-  .link-icon {
-    font-size: 1.2em;
-    text-decoration: none;
-  }
-</style>

@@ -15,8 +15,8 @@ import SyncManager from '../github/SyncManager.js'
 
 // exported for testing
 export const test = {
-  loadOpenIssuesAndComments: async function (concurrency) {
-    const issues = await tickets.loadOpenIssues()
+  loadIssuesAndComments: async function (concurrency) {
+    const issues = await tickets.loadIssues()
 
     const limit = pLimit(concurrency)
     const input = issues.map((issue) => {
@@ -64,7 +64,7 @@ export default (io, informer, { signal }) => {
 
   const { pollIntervalSeconds, syncThrottleSeconds, syncConcurrency } = config.gitHub
   const syncManager = new SyncManager(() => {
-    return test.loadOpenIssuesAndComments(syncConcurrency || 10)
+    return test.loadIssuesAndComments(syncConcurrency || 10)
   }, {
     interval: pollIntervalSeconds * 1000 || 0,
     throttle: syncThrottleSeconds * 1000 || 0,

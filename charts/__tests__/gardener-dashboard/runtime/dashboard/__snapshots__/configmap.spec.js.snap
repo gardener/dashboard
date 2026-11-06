@@ -678,7 +678,9 @@ exports[`gardener-dashboard > configmap > tickets > github app authentication > 
   },
   "gitHub": {
     "apiUrl": "https://github.com/api/v3/",
+    "closedIssuesLookbackDays": 30,
     "org": "gardener",
+    "pageSize": 50,
     "pollIntervalSeconds": 60,
     "repository": "tickets",
     "syncConcurrency": 5,
@@ -718,7 +720,9 @@ exports[`gardener-dashboard > configmap > tickets > token authentication > shoul
   },
   "gitHub": {
     "apiUrl": "https://github.com/api/v3/",
+    "closedIssuesLookbackDays": 30,
     "org": "gardener",
+    "pageSize": 50,
     "pollIntervalSeconds": 60,
     "repository": "tickets",
     "syncConcurrency": 5,

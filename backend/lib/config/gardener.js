@@ -141,6 +141,16 @@ const configMappings = [
     configPath: 'websocketAllowedOrigins',
     type: 'Array',
   },
+  {
+    environmentVariableName: 'GITHUB_PAGESIZE',
+    configPath: 'gitHub.pageSize',
+    type: 'Integer',
+  },
+  {
+    environmentVariableName: 'CLOSED_ISSUES_LOOKBACK_DAYS',
+    configPath: 'gitHub.closedIssuesLookbackDays',
+    type: 'Integer',
+  },
 ]
 
 const MOST_RECENT_PAGINATED = 'mostRecentPaginated'
