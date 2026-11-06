@@ -5,11 +5,12 @@
 //
 
 import createResponseTimeMiddleware from 'response-time'
-import metrics from './metrics.js'
+import metrics, { registerCacheCollector } from './metrics.js'
 
 const {
   connectionsCount,
   connectionsTotal,
+  informerEventsTotal,
   responseTime,
 } = metrics
 
@@ -51,8 +52,22 @@ function monitorHttpServer (server) {
   })
 }
 
+function monitorCache (name, getCount) {
+  registerCacheCollector(name, getCount)
+}
+
+function monitorInformer (name, informer) {
+  for (const type of ['add', 'update', 'delete']) {
+    informer.on(type, () => {
+      informerEventsTotal.inc({ informer: name, type })
+    })
+  }
+}
+
 export default {
   monitorResponseTimes,
   monitorSocketIO,
   monitorHttpServer,
+  monitorCache,
+  monitorInformer,
 }

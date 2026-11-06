@@ -11,7 +11,17 @@ import config from './config/index.js'
 import * as watches from './watches/index.js'
 import io from './io/index.js'
 const { createDashboardClient, abortWatcher } = kubeClientModule
-const { monitorHttpServer, monitorSocketIO } = monitorModule
+const { monitorCache, monitorHttpServer, monitorInformer, monitorSocketIO } = monitorModule
+
+function monitorCaches (informers) {
+  for (const [name, informer] of Object.entries(informers)) {
+    monitorCache(name, () => informer.store.size)
+    monitorInformer(name, informer)
+  }
+  const ticketCache = cache.getTicketCache()
+  monitorCache('github_issues', () => ticketCache.getIssueCount())
+  monitorCache('github_comments', () => ticketCache.getCommentCount())
+}
 
 class LifecycleHooks {
   constructor (client) {
@@ -40,6 +50,7 @@ class LifecycleHooks {
     const informers = this.constructor.createInformers(this.client)
     // initialize cache
     cache.initialize(informers)
+    monitorCaches(informers)
     // build derived indexes
     cache.indexProjectsByNamespace(informers.projects)
     cache.indexShootsBySeedName(informers.shoots)

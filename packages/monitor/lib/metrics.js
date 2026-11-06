@@ -6,6 +6,8 @@
 
 import promClient from 'prom-client'
 
+const cacheCollectors = new Map()
+
 const connectionsCount = new promClient.Gauge({
   name: 'tcp_connections_count',
   help: 'Number of currently open TCP connections',
@@ -15,6 +17,11 @@ const connectionsTotal = new promClient.Counter({
   name: 'tcp_connections_total',
   help: 'Total number of opened TCP connections',
   labelNames: ['type'],
+})
+const informerEventsTotal = new promClient.Counter({
+  name: 'kube_informer_events_total',
+  help: 'Total number of events processed by Kubernetes informers',
+  labelNames: ['informer', 'type'],
 })
 const responseTime = new promClient.Histogram({
   name: 'http_request_duration_seconds',
@@ -26,9 +33,26 @@ const responseTime = new promClient.Histogram({
     1e+1, 2e+1,
   ],
 })
+const cachedItemsCount = new promClient.Gauge({
+  name: 'cache_items',
+  help: 'Number of items in cache',
+  labelNames: ['cache'],
+  collect () {
+    this.reset()
+    for (const [cache, getCount] of cacheCollectors) {
+      this.set({ cache }, getCount())
+    }
+  },
+})
+
+export function registerCacheCollector (cache, getCount) {
+  cacheCollectors.set(cache, getCount)
+}
 
 export default {
   connectionsCount,
   connectionsTotal,
+  informerEventsTotal,
   responseTime,
+  cachedItemsCount,
 }

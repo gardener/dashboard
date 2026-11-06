@@ -46,6 +46,7 @@ const { default: spy } = await spyOnHelper('../lib/metrics.js',
     'connectionsCount.inc',
     'connectionsTotal.inc',
     'connectionsCount.dec',
+    'informerEventsTotal.inc',
 
   ],
   import.meta.url,
@@ -59,16 +60,22 @@ vi.mock('../lib/metrics.js', () => {
         observe: vi.fn(),
       },
     },
+    registerCacheCollector: vi.fn(),
   }
 })
 
-const { default: metrics } = await import('../lib/metrics.js')
+const {
+  default: metrics,
+  registerCacheCollector,
+} = await import('../lib/metrics.js')
 
 const {
   default: {
     monitorSocketIO,
     monitorHttpServer,
     monitorResponseTimes,
+    monitorCache,
+    monitorInformer,
   },
 } = await import('../lib/monitors.js')
 
@@ -193,6 +200,32 @@ describe('monitors', () => {
         route: metricsRoute,
         status_code: statusCode,
       }, requestDuration / 1000)
+    })
+  })
+
+  describe('cache monitor', () => {
+    it('should register a cache collector', () => {
+      const getCount = vi.fn()
+
+      monitorCache('shoots', getCount)
+
+      expect(registerCacheCollector).toHaveBeenCalledWith('shoots', getCount)
+    })
+  })
+
+  describe('informer monitor', () => {
+    it('should count informer events by name and type', () => {
+      const informer = { on: vi.fn() }
+
+      monitorInformer('shoots', informer)
+
+      expect(informer.on).toHaveBeenCalledTimes(3)
+      for (const type of ['add', 'update', 'delete']) {
+        expect(informer.on).toHaveBeenCalledWith(type, expect.any(Function))
+        const handler = informer.on.mock.calls.find(([event]) => event === type)[1]
+        handler()
+        expect(metrics.informerEventsTotal.inc).toHaveBeenLastCalledWith({ informer: 'shoots', type })
+      }
     })
   })
 })
