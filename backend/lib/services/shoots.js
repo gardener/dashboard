@@ -128,6 +128,29 @@ export async function replaceVersion ({ user, namespace, name, body }) {
     path: '/spec/kubernetes/version',
     value: version,
   }]
+
+  if (semver.satisfies(version, '1.35.x')) {
+    const shoot = await client['core.gardener.cloud'].shoots.get(namespace, name)
+    const currentVersion = _.get(shoot, ['spec', 'kubernetes', 'version'])
+    const providers = _.get(shoot, ['spec', 'dns', 'providers'], [])
+    const secretNamePaths = []
+
+    for (const [index, provider] of providers.entries()) {
+      if (_.has(provider, ['secretName'])) {
+        secretNamePaths.push(`/spec/dns/providers/${index}/secretName`)
+      }
+    }
+
+    if (semver.valid(currentVersion) &&
+        semver.gt(version, currentVersion) &&
+        secretNamePaths.length) {
+      patchOperations.push(...secretNamePaths.map(path => ({
+        op: 'remove',
+        path,
+      })))
+    }
+  }
+
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
