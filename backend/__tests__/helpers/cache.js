@@ -19,6 +19,20 @@ function seedProjectNamespaceIndex (projects = fixtures.projects.list()) {
   }
 }
 
+function seedShootNamespaceIndex (shoots = fixtures.shoots.list()) {
+  const handlers = new Map()
+  cache.indexShootsByNamespace({
+    on (event, handler) {
+      handlers.set(event, handler)
+    },
+  })
+  const add = handlers.get('add')
+  for (const shoot of shoots) {
+    add(shoot)
+  }
+}
+
 export {
   seedProjectNamespaceIndex,
+  seedShootNamespaceIndex,
 }
