@@ -21,6 +21,17 @@
     {
       customType: 'regex',
       managerFilePatterns: [
+        '/^Dockerfile$/',
+      ],
+      matchStrings: [
+        'corepack@(?<currentValue>\\d+\\.\\d+\\.\\d+)',
+      ],
+      depNameTemplate: 'corepack',
+      datasourceTemplate: 'npm',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
         '/^.ci/pipeline_definitions$/',
       ],
       matchStrings: [

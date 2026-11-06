@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ############# builder #############
-FROM node:24.22.2-alpine3.23 AS builder
+FROM node:26.13.0-alpine3.23 AS builder
 
 WORKDIR /volume
 
@@ -25,6 +25,7 @@ RUN apk add --no-cache tini \
     && alpineArch="$(apk --print-arch)" \
     && cp -d /lib/ld-musl-$alpineArch.so.* ./lib \
     && cp -d /lib/libc.musl-$alpineArch.so.* ./lib \
+    && cp -d /usr/lib/libatomic.so.* ./usr/lib \
     && cp -d /usr/lib/libgcc_s.so.* ./usr/lib \
     && cp -d /usr/lib/libstdc++.so.* ./usr/lib
 
@@ -33,6 +34,8 @@ WORKDIR /app
 COPY . .
 
 # Fetch and verify dependencies before disabling network for the rest of the build.
+RUN npm install --global corepack@0.36.0 \
+    && corepack enable
 RUN YARN_ENABLE_SCRIPTS=0 YARN_ENABLE_HARDENED_MODE=1 yarn install --immutable --check-cache --refresh-lockfile
 RUN yarn config set enableNetwork false
 RUN YARN_ENABLE_SCRIPTS=0 yarn install --immutable --immutable-cache

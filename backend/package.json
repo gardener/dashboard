@@ -102,7 +102,7 @@
   },
   "packageManager": "yarn@4.17.1",
   "engines": {
-    "node": "24.22.2"
+    "node": "26.13.0"
   },
   "stableVersion": "1.86.0"
 }
