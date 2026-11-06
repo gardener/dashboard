@@ -59,6 +59,7 @@ function isExpired (user) {
 export function useUserManager (options) {
   const {
     logger = useLogger(),
+    location = window.location,
   } = options ?? {}
 
   let refreshTokenPromise
@@ -68,7 +69,7 @@ export function useUserManager (options) {
     signoutInProgress = true
   })
 
-  const origin = window.location.origin
+  const origin = location.origin
 
   async function decodeCookie () {
     try {
@@ -126,7 +127,7 @@ export function useUserManager (options) {
   }
 
   function redirect (url) {
-    window.location.href = url
+    location.href = url
   }
 
   async function signout (err, redirectPath) {
@@ -140,7 +141,7 @@ export function useUserManager (options) {
       logger.error(deleteError.message)
     }
     const url = new URL('/auth/logout', origin)
-    redirectPath ??= window.location.pathname + window.location.search
+    redirectPath ??= location.pathname + location.search
     if (redirectPath) {
       url.searchParams.set('redirectPath', redirectPath)
     }
@@ -159,7 +160,7 @@ export function useUserManager (options) {
 
   function signin (redirectPath) {
     const url = new URL('/login', origin)
-    redirectPath ??= window.location.pathname + window.location.search
+    redirectPath ??= location.pathname + location.search
     if (redirectPath) {
       url.searchParams.set('redirectPath', redirectPath)
     }

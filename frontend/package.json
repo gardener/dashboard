@@ -28,7 +28,7 @@
     "preview": "vite preview",
     "lint": "eslint . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
-    "test": "vitest run"
+    "test": "vitest run --pool=vmThreads --execArgv=--disable-warning=ExperimentalWarning"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.18.3",
