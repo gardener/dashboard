@@ -15,12 +15,152 @@ import {
 import {
   getDashboardUrlPath,
   getGardenClusterIdentity,
+  replaceVersion,
 } from '../lib/services/shoots.js'
 import config from '../lib/config/index.js'
 import { mockRequest } from '@gardener-dashboard/request'
 
 describe('services', function () {
   describe('shoots', function () {
+    describe('#replaceVersion', function () {
+      const namespace = 'garden-test'
+      const name = 'test'
+
+      function createUser (shoot) {
+        const get = vi.fn().mockResolvedValue(shoot)
+        const jsonPatch = vi.fn().mockResolvedValue(shoot)
+        const user = {
+          client: {
+            'core.gardener.cloud': {
+              shoots: {
+                get,
+                jsonPatch,
+              },
+            },
+          },
+        }
+        return { user, get, jsonPatch }
+      }
+
+      it('should atomically remove deprecated DNS provider secretNames when upgrading to Kubernetes 1.35', async function () {
+        const providers = [{
+          secretName: 'primary-dns-secret',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'primary-dns-secret',
+          },
+        }, {
+          credentialsRef: {
+            apiVersion: 'security.gardener.cloud/v1alpha1',
+            kind: 'WorkloadIdentity',
+            name: 'dns-workload-identity',
+          },
+        }, {
+          secretName: 'secondary-dns-secret',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'secondary-dns-secret',
+          },
+        }]
+        const shoot = {
+          spec: {
+            kubernetes: {
+              version: '1.34.3',
+            },
+            dns: {
+              providers,
+            },
+          },
+        }
+        const { user, get, jsonPatch } = createUser(shoot)
+
+        await replaceVersion({
+          user,
+          namespace,
+          name,
+          body: { version: '1.35.0' },
+        })
+
+        expect(get).toHaveBeenCalledExactlyOnceWith(namespace, name)
+        expect(jsonPatch).toHaveBeenCalledExactlyOnceWith(namespace, name, [{
+          op: 'replace',
+          path: '/spec/kubernetes/version',
+          value: '1.35.0',
+        }, {
+          op: 'remove',
+          path: '/spec/dns/providers/0/secretName',
+        }, {
+          op: 'remove',
+          path: '/spec/dns/providers/2/secretName',
+        }])
+      })
+
+      it.each([
+        {
+          description: 'the target version is below 1.35',
+          currentVersion: '1.34.2',
+          targetVersion: '1.34.3',
+          secretName: 'dns-secret',
+          expectGet: false,
+        },
+        {
+          description: 'the target version is above 1.35',
+          currentVersion: '1.35.2',
+          targetVersion: '1.36.0',
+          secretName: 'dns-secret',
+          expectGet: false,
+        },
+        {
+          description: 'the version change is not an upgrade',
+          currentVersion: '1.35.1',
+          targetVersion: '1.35.0',
+          secretName: 'dns-secret',
+          expectGet: true,
+        },
+        {
+          description: 'the deprecated field is absent',
+          currentVersion: '1.34.3',
+          targetVersion: '1.35.0',
+          secretName: undefined,
+          expectGet: true,
+        },
+      ])('should only replace the version when $description', async function ({
+        currentVersion,
+        targetVersion,
+        secretName,
+        expectGet,
+      }) {
+        const provider = secretName === undefined ? {} : { secretName }
+        const shoot = {
+          spec: {
+            kubernetes: {
+              version: currentVersion,
+            },
+            dns: {
+              providers: [provider],
+            },
+          },
+        }
+        const { user, get, jsonPatch } = createUser(shoot)
+
+        await replaceVersion({
+          user,
+          namespace,
+          name,
+          body: { version: targetVersion },
+        })
+
+        expect(get).toHaveBeenCalledTimes(expectGet ? 1 : 0)
+        expect(jsonPatch).toHaveBeenCalledExactlyOnceWith(namespace, name, [{
+          op: 'replace',
+          path: '/spec/kubernetes/version',
+          value: targetVersion,
+        }])
+      })
+    })
+
     describe('#getDashboardUrlPath', function () {
       it('should return dashboard URL path for kubernetes version < 1.16.0', function () {
         expect(getDashboardUrlPath('1.14.0')).toBe(
