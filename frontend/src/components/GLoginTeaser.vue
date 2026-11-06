@@ -28,45 +28,41 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import {
+  computed,
+  inject,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useLoginStore } from '@/store/login'
 
-import { omitKeysWithSuffix } from '@/utils'
+import {
+  omitKeysWithSuffix,
+  renderTemplate,
+} from '@/utils'
 
-import template from 'lodash/template'
+const props = defineProps({
+  minHeight: {
+    type: Number,
+    default: 280,
+  },
+})
+const {
+  landingPageUrl,
+  branding,
+} = storeToRefs(useLoginStore())
 
-export default {
-  inject: ['sanitizeUrl'],
-  props: {
-    minHeight: {
-      type: Number,
-      default: 280,
-    },
-  },
-  computed: {
-    ...mapState(useLoginStore, [
-      'landingPageUrl',
-      'branding',
-    ]),
-    teaserTemplate () {
-      return this.branding.loginTeaserTemplate
-    },
-    compiledTeaserTemplate () {
-      return template(this.teaserTemplate, {
-        interpolate: /{{([\s\S]+?)}}/g,
-      })
-    },
-    teaserHtml () {
-      const data = omitKeysWithSuffix(this.branding, 'Template')
-      data.minHeight = this.minHeight
-      data.landingPageUrl = this.landingPageUrl ? this.sanitizeUrl(this.landingPageUrl) : undefined
-      return this.compiledTeaserTemplate(data)
-    },
-    logoSize () {
-      return this.minHeight - 100
-    },
-  },
-}
+const sanitizeUrl = inject('sanitizeUrl')
+
+const teaserTemplate = computed(() => branding.value.loginTeaserTemplate)
+const teaserHtml = computed(() => {
+  const data = omitKeysWithSuffix(branding.value, 'Template')
+  data.minHeight = props.minHeight
+  data.landingPageUrl = landingPageUrl.value ? sanitizeUrl(landingPageUrl.value) : undefined
+  return renderTemplate(teaserTemplate.value, data)
+})
+
+const logoSize = computed(() => props.minHeight - 100)
+
 </script>

@@ -62,10 +62,11 @@ import GTicket from '@/components/ShootTickets/GTicket'
 import { useShootItem } from '@/composables/useShootItem'
 
 import moment from '@/utils/moment'
+import { renderTemplate } from '@/utils'
+import { formatAccessRestrictions } from '@/utils/tickets'
 
 import get from 'lodash/get'
 import map from 'lodash/map'
-import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -139,7 +140,7 @@ export default {
         projectName: this.shootProjectName,
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName,
-        accessRestrictions: this.shootAccessRestrictions,
+        accessRestrictions: formatAccessRestrictions(this.shootAccessRestrictions),
       }
 
       const baseUrl = new URL(this.gitHubRepoUrl)
@@ -149,11 +150,11 @@ export default {
       const url = new URL('issues/new', baseUrl)
       for (const [key, value] of Object.entries(newIssue)) {
         if (typeof value === 'string') {
-          const templatedValue = this.applyTemplate(value, options)
+          const templatedValue = renderTemplate(value, options)
           url.searchParams.append(key, templatedValue)
         } else if (Array.isArray(value)) {
           const templatedValues = value.map(v => {
-            return this.applyTemplate(v, options)
+            return renderTemplate(v, options)
           })
           url.searchParams.append(key, templatedValues)
         }
@@ -165,14 +166,6 @@ export default {
     ...mapActions(useTicketStore, {
       ticketsByProjectAndName: 'issues',
     }),
-    applyTemplate (value, options) {
-      if (!value) {
-        return ''
-      }
-
-      const compiled = template(value)
-      return compiled(options)
-    },
   },
 }
 </script>
