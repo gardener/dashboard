@@ -74,16 +74,35 @@ describe('services', function () {
         return { user, get, jsonPatch }
       }
 
-      it('should atomically remove the deprecated DNS provider secretName when upgrading to Kubernetes 1.35', async function () {
+      it('should atomically remove deprecated DNS provider secretNames when upgrading to Kubernetes 1.35', async function () {
+        const providers = [{
+          secretName: 'primary-dns-secret',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'primary-dns-secret',
+          },
+        }, {
+          credentialsRef: {
+            apiVersion: 'security.gardener.cloud/v1alpha1',
+            kind: 'WorkloadIdentity',
+            name: 'dns-workload-identity',
+          },
+        }, {
+          secretName: 'secondary-dns-secret',
+          credentialsRef: {
+            apiVersion: 'v1',
+            kind: 'Secret',
+            name: 'secondary-dns-secret',
+          },
+        }]
         const shoot = {
           spec: {
             kubernetes: {
               version: '1.34.3',
             },
             dns: {
-              providers: [{
-                secretName: 'dns-secret',
-              }],
+              providers,
             },
           },
         }
@@ -104,6 +123,9 @@ describe('services', function () {
         }, {
           op: 'remove',
           path: '/spec/dns/providers/0/secretName',
+        }, {
+          op: 'remove',
+          path: '/spec/dns/providers/2/secretName',
         }])
       })
 
