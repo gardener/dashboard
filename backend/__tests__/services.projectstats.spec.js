@@ -311,6 +311,18 @@ describe('services/projectstats', () => {
     expect(authorization.canListResourceQuotas).not.toHaveBeenCalled()
   })
 
+  it('aggregates the minimum hard and maximum used Shoot quota independently', () => {
+    cache.getResourceQuotasByNamespace.mockReturnValue([
+      createResourceQuota('garden-foo', { hard: '25', used: '10' }),
+      createResourceQuota('garden-foo', { hard: '30', used: '20' }),
+    ])
+
+    expect(projectstats.getByUids(['foo-uid'], globalScope)[0].shootQuota).toEqual({
+      hard: 25,
+      used: 20,
+    })
+  })
+
   it('omits invalid Shoot quotas and parses Kubernetes quantity suffixes', () => {
     cache.getResourceQuotasByNamespace
       .mockReturnValueOnce([{

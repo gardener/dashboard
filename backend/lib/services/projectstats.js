@@ -143,18 +143,16 @@ function getShootCounts (namespace) {
 }
 
 function getShootQuota (namespace) {
-  let shootQuota
+  let hard = Infinity
+  let used = 0
   for (const { status } of cache.getResourceQuotasByNamespace(namespace)) {
-    const hard = parseCountQuantity(get(status, ['hard', SHOOT_QUOTA_KEY]))
-    if (hard === undefined || (shootQuota && shootQuota.hard <= hard)) {
-      continue
-    }
-    shootQuota = {
-      used: parseCountQuantity(get(status, ['used', SHOOT_QUOTA_KEY])) ?? 0,
-      hard,
-    }
+    hard = Math.min(hard, parseCountQuantity(get(status, ['hard', SHOOT_QUOTA_KEY])) ?? Infinity)
+    used = Math.max(used, parseCountQuantity(get(status, ['used', SHOOT_QUOTA_KEY])) ?? 0)
   }
-  return shootQuota
+  if (hard === Infinity) {
+    return undefined
+  }
+  return { hard, used }
 }
 
 function parseCountQuantity (value) {
