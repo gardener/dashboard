@@ -212,5 +212,38 @@ describe('cache', function () {
       expect(cache.getShoot('garden-bar', 'shoot-1')).toBeUndefined()
       expect(Array.from(cache.getShootsByNamespace('garden-bar'))).toEqual([])
     })
+
+    it('should maintain the ResourceQuota namespace index by name', () => {
+      const handlers = new Map()
+      cache.indexResourceQuotasByNamespace({
+        on (event, handler) {
+          handlers.set(event, handler)
+        },
+      })
+      const oldResourceQuota = {
+        metadata: {
+          name: 'shoots',
+          namespace: 'garden-foo',
+          uid: 'quota-1',
+        },
+      }
+      const newResourceQuota = {
+        metadata: {
+          name: 'shoots',
+          namespace: 'garden-bar',
+          uid: 'quota-2',
+        },
+      }
+
+      handlers.get('add')(oldResourceQuota)
+      expect(Array.from(cache.getResourceQuotasByNamespace('garden-foo'))).toEqual([oldResourceQuota])
+
+      handlers.get('update')(newResourceQuota, oldResourceQuota)
+      expect(Array.from(cache.getResourceQuotasByNamespace('garden-foo'))).toEqual([])
+      expect(Array.from(cache.getResourceQuotasByNamespace('garden-bar'))).toEqual([newResourceQuota])
+
+      handlers.get('delete')(newResourceQuota)
+      expect(Array.from(cache.getResourceQuotasByNamespace('garden-bar'))).toEqual([])
+    })
   })
 })
