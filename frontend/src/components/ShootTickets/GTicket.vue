@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
     :comment="ticket"
     :timeline="commentsForTicket?.length > 0 || !!ticket.metadata.closed_at"
     :timeline-end="!commentsForTicket?.length && !!ticket.metadata.closed_at"
-    initial="true"
+    initial
   />
   <g-ticket-comment
     v-for="(comment, index) in commentsForTicket"
