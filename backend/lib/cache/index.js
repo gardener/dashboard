@@ -14,6 +14,42 @@ import {
 } from '../utils/index.js'
 const { NotFound } = httpErrors
 
+function indexByNamespace (informer, index) {
+  const add = obj => {
+    const namespace = obj?.metadata?.namespace
+    const name = obj?.metadata?.name
+    if (!namespace || !name) {
+      return
+    }
+    let objects = index.get(namespace)
+    if (!objects) {
+      objects = new Map()
+      index.set(namespace, objects)
+    }
+    objects.set(name, obj)
+  }
+  const del = obj => {
+    const namespace = obj?.metadata?.namespace
+    const name = obj?.metadata?.name
+    if (!namespace || !name) {
+      return
+    }
+    const objects = index.get(namespace)
+    if (objects) {
+      objects.delete(name)
+      if (objects.size === 0) {
+        index.delete(namespace)
+      }
+    }
+  }
+  informer.on('add', add)
+  informer.on('update', (obj, old) => {
+    del(old)
+    add(obj)
+  })
+  informer.on('delete', del)
+}
+
 /*
   In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
   Be careful when reading information from the cache that an authorization check is done
@@ -101,39 +137,7 @@ class Cache extends Map {
   }
 
   indexShootsByNamespace (informer) {
-    const add = shoot => {
-      const namespace = shoot?.metadata?.namespace
-      const name = shoot?.metadata?.name
-      if (!namespace || !name) {
-        return
-      }
-      let shoots = this.#namespaceToShoots.get(namespace)
-      if (!shoots) {
-        shoots = new Map()
-        this.#namespaceToShoots.set(namespace, shoots)
-      }
-      shoots.set(name, shoot)
-    }
-    const del = shoot => {
-      const namespace = shoot?.metadata?.namespace
-      const name = shoot?.metadata?.name
-      if (!namespace || !name) {
-        return
-      }
-      const shoots = this.#namespaceToShoots.get(namespace)
-      if (shoots) {
-        shoots.delete(name)
-        if (shoots.size === 0) {
-          this.#namespaceToShoots.delete(namespace)
-        }
-      }
-    }
-    informer.on('add', add)
-    informer.on('update', (shoot, oldShoot) => {
-      del(oldShoot)
-      add(shoot)
-    })
-    informer.on('delete', del)
+    indexByNamespace(informer, this.#namespaceToShoots)
   }
 
   getShoot (namespace, name) {
@@ -141,39 +145,7 @@ class Cache extends Map {
   }
 
   indexResourceQuotasByNamespace (informer) {
-    const add = resourceQuota => {
-      const namespace = resourceQuota?.metadata?.namespace
-      const name = resourceQuota?.metadata?.name
-      if (!namespace || !name) {
-        return
-      }
-      let resourceQuotas = this.#namespaceToResourceQuotas.get(namespace)
-      if (!resourceQuotas) {
-        resourceQuotas = new Map()
-        this.#namespaceToResourceQuotas.set(namespace, resourceQuotas)
-      }
-      resourceQuotas.set(name, resourceQuota)
-    }
-    const del = resourceQuota => {
-      const namespace = resourceQuota?.metadata?.namespace
-      const name = resourceQuota?.metadata?.name
-      if (!namespace || !name) {
-        return
-      }
-      const resourceQuotas = this.#namespaceToResourceQuotas.get(namespace)
-      if (resourceQuotas) {
-        resourceQuotas.delete(name)
-        if (resourceQuotas.size === 0) {
-          this.#namespaceToResourceQuotas.delete(namespace)
-        }
-      }
-    }
-    informer.on('add', add)
-    informer.on('update', (resourceQuota, oldResourceQuota) => {
-      del(oldResourceQuota)
-      add(resourceQuota)
-    })
-    informer.on('delete', del)
+    indexByNamespace(informer, this.#namespaceToResourceQuotas)
   }
 
   getResourceQuotasByNamespace (namespace) {

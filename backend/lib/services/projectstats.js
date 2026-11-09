@@ -44,16 +44,14 @@ const quantityCharacters = new Set('0123456789+-.eE')
 
 // user.groups is hydrated when the socket user is created.
 async function resolveProjectStatScope (user) {
-  const canListAllProjectStats = await hasGlobalProjectStatAccess(user)
-  const candidateProjects = cache.getProjects().filter(nonPendingProjectFilter(user, canListAllProjectStats))
-
-  if (canListAllProjectStats) {
+  if (await hasGlobalProjectStatAccess(user)) {
     return {
       canListAllProjectStats: true,
       projectStatNamespaces: new Set(),
     }
   }
 
+  const candidateProjects = cache.getProjects().filter(nonPendingProjectFilter(user))
   return {
     canListAllProjectStats: false,
     projectStatNamespaces: await getAuthorizedNamespaces(user, candidateProjects),
@@ -178,6 +176,5 @@ function parseCountQuantity (value) {
 
 export {
   getByUids,
-  hasProjectStatAccess,
   resolveProjectStatScope,
 }
