@@ -25,5 +25,6 @@
 
 * [Dashboard Architecture](development/architecture.md)
 * [Setting Up a Local Development Environment](development/local-setup.md)
+* [Profiling the Backend](development/profile.md)
 * [Testing](development/testing.md)
 * [Hotfixes](development/process.md)
