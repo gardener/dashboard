@@ -24,6 +24,7 @@
   "exports": "./lib/server.js",
   "scripts": {
     "serve": "cross-env NODE_ENV=development node server.js",
+    "serve:profile": "cross-env NODE_ENV=development node --inspect=0.0.0.0:9229 server.js",
     "lint": "eslint server.js . --max-warnings=0",
     "lint-sarif": "yarn lint --format=@microsoft/eslint-formatter-sarif",
     "test": "vitest run",
