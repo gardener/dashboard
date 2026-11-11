@@ -90,6 +90,8 @@ frontend:
       production: ~
 ```
 
+The `logFormat` setting accepts `json` (one JSON object per line, e.g. `{"level":"info","ts":"2026-01-01T12:00:00.000Z","msg":"..."}`) and `text` (human-readable, colored lines). It defaults to `json` if `NODE_ENV` is `production` and to `text` otherwise. Use `text` only for local development: it writes values such as HTTP request data as they are, so line breaks and terminal escape sequences in them can forge or corrupt log records, and multi-line content such as error stacks is split across several lines. The `json` format escapes line breaks and control characters and keeps multi-line content within a single record.
+
 The `websocketAllowedOrigins` list restricts which origins may establish socket.io connections. This setting is required; use `"*"` to allow all origins (not recommended for production).
 
 The Gardener Dashboard [`backend`](../../backend) server requires a kubeconfig for the Garden cluster. You can set it e.g. by using the `KUBECONFIG` environment variable. To run a Garden cluster locally, follow the [getting started locally](https://github.com/gardener/gardener/blob/master/docs/development/getting_started_locally.md) documentation. Gardener Dashboard supports the `local` infrastructure provider that comes with the local Gardener cluster setup.
