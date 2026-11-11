@@ -28,6 +28,9 @@ const activeNodeReleases = {
   24: {
     endOfLife: new Date('2028-04-30T23:59:59Z'),
   },
+  26: {
+    endOfLife: new Date('2029-04-30T23:59:59Z'),
+  },
 }
 
 async function getDashboardDockerfile () {
