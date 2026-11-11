@@ -846,9 +846,9 @@ describe('watches', function () {
       ])
     })
 
-    it('should call loadOpenIssuesAndComments with defaulted concurrency parameter', async () => {
-      vi.spyOn(tickets, 'loadOpenIssues')
-      tickets.loadOpenIssues.mockResolvedValue([])
+    it('should call loadIssuesAndComments with defaulted concurrency parameter', async () => {
+      vi.spyOn(tickets, 'loadIssues')
+      tickets.loadIssues.mockResolvedValue([])
 
       gitHubStub.mockReturnValue({})
       watches.leases(io, informer, { signal })
@@ -859,9 +859,9 @@ describe('watches', function () {
       expect(pLimit).toHaveBeenCalledWith(10)
     })
 
-    it('should call loadOpenIssuesAndComments with configured concurrency parameter', async () => {
-      vi.spyOn(tickets, 'loadOpenIssues')
-      tickets.loadOpenIssues.mockResolvedValue([])
+    it('should call loadIssuesAndComments with configured concurrency parameter', async () => {
+      vi.spyOn(tickets, 'loadIssues')
+      tickets.loadIssues.mockResolvedValue([])
 
       gitHubStub.mockReturnValue({ syncConcurrency: 42 })
       watches.leases(io, informer, { signal })
@@ -960,7 +960,7 @@ describe('watches', function () {
     })
 
     it('should should load issues and comments of all issues', async function () {
-      const { test: { loadOpenIssuesAndComments } } = await import('../lib/watches/leases.js')
+      const { test: { loadIssuesAndComments } } = await import('../lib/watches/leases.js')
 
       const issues = fixtures.github.issues.list()
       const issueNumbers = issues.map(i => i.number)
@@ -968,17 +968,17 @@ describe('watches', function () {
 
       const t = await Promise.all(issues.map(i => tickets.fromIssue(i)))
 
-      vi.spyOn(tickets, 'loadOpenIssues')
+      vi.spyOn(tickets, 'loadIssues')
       vi.spyOn(tickets, 'loadIssueComments')
 
-      tickets.loadOpenIssues.mockResolvedValue(t)
+      tickets.loadIssues.mockResolvedValue(t)
 
       const loadIssueCommentsMock = ({ number }) => comments.filter(comment => comment.number === number)
       tickets.loadIssueComments.mockImplementation(loadIssueCommentsMock)
 
-      await loadOpenIssuesAndComments(10)
+      await loadIssuesAndComments(10)
 
-      expect(tickets.loadOpenIssues).toHaveBeenCalledTimes(1)
+      expect(tickets.loadIssues).toHaveBeenCalledTimes(1)
       expect(tickets.loadIssueComments).toHaveBeenCalledTimes(t.length)
       for (const number of issueNumbers) {
         expect(tickets.loadIssueComments).toHaveBeenCalledWith({ number })

@@ -64,6 +64,12 @@ data:
       {{- end }}
       syncThrottleSeconds: {{ .Values.global.dashboard.gitHub.syncThrottleSeconds | default 20 }}
       syncConcurrency: {{ .Values.global.dashboard.gitHub.syncConcurrency | default 10 }}
+      {{- if ne .Values.global.dashboard.gitHub.pageSize nil }}
+      pageSize: {{ .Values.global.dashboard.gitHub.pageSize }}
+      {{- end }}
+      {{- if ne .Values.global.dashboard.gitHub.closedIssuesLookbackDays nil }}
+      closedIssuesLookbackDays: {{ .Values.global.dashboard.gitHub.closedIssuesLookbackDays }}
+      {{- end }}
     {{- end }}
     {{- if .Values.global.unreachableSeeds }}
     unreachableSeeds:

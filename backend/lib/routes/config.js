@@ -24,7 +24,8 @@ async function getFrontendConfig () {
   }
   cachedFrontendConfigPromise = (async () => {
     try {
-      return await sanitizeFrontendConfig(config.frontend)
+      const frontendConfig = await sanitizeFrontendConfig(config.frontend)
+      return addTicketLookbackDays(frontendConfig, config.gitHub?.closedIssuesLookbackDays)
     } catch (err) {
       cachedFrontendConfigPromise = undefined
       throw err
@@ -119,6 +120,13 @@ export async function sanitizeFrontendConfig (frontendConfig) {
 
   await Promise.all(tasks)
   return sanitizedFrontendConfig
+}
+
+export function addTicketLookbackDays (frontendConfig, closedIssuesLookbackDays) {
+  if (frontendConfig.ticket) {
+    frontendConfig.ticket.closedIssuesLookbackDays = closedIssuesLookbackDays ?? 0
+  }
+  return frontendConfig
 }
 
 export default router

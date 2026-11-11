@@ -495,6 +495,8 @@ global:
     #   pollIntervalSeconds: 900 # In which interval GitHub issues will be synced. Timer is resetted by receiving a webhook. Disabled if 0 or not defined.
     #   syncThrottleSeconds: 20 # Defines the time window in which only one sync is allowed to avoid issues with rate limiting. Default 20. Disabled if 0.
     #   syncConcurrency: 10 # Defines the maximum number of parallel requests towards GitHub per instance and sync. Default 10.
+    #   pageSize: 100 # Defines the number of issues requested per GitHub API page. Default 100.
+    #   closedIssuesLookbackDays: 0 # Includes issues closed within this number of days. Default 0 excludes closed issues.
 
 
     livenessProbe:
