@@ -74,22 +74,22 @@ function createTestRouter () {
       { name: 'Home', path: '/', component: {} },
       {
         name: 'ShootList',
-        path: '/projects/:projectName/clusters',
+        path: '/namespace/:namespace/shoots',
         component: {},
         meta: { projectScoped: true },
       },
       {
         name: 'ShootItem',
-        path: '/projects/:projectName/clusters/:name',
+        path: '/namespace/:namespace/shoots/:name',
         component: {},
         meta: { projectScoped: true },
       },
-      { name: 'Credentials', path: '/projects/:projectName/credentials', component: {}, meta: { projectScoped: true } },
+      { name: 'Credentials', path: '/namespace/:namespace/credentials', component: {}, meta: { projectScoped: true } },
       { name: 'Members', path: '/projects/:projectName/members', component: {}, meta: { projectScoped: true } },
       { name: 'Administration', path: '/projects/:projectName', component: {}, meta: { projectScoped: true } },
-      { name: 'GardenTerminal', path: '/projects/:projectName/garden-cluster', component: {}, meta: { projectScoped: true } },
+      { name: 'GardenTerminal', path: '/namespace/:namespace/term/garden', component: {}, meta: { projectScoped: true } },
       { name: 'ProjectList', path: '/projects', component: {} },
-      { name: 'AllClusters', path: '/clusters', component: {} },
+      { name: 'AllClusters', path: '/namespace/_all/shoots', component: {} },
       { name: 'SeedList', path: '/seeds', component: {} },
     ],
   })
@@ -129,15 +129,15 @@ async function setup () {
   const router = createTestRouter()
   router.afterEach((to, from, failure) => {
     if (!failure) {
-      const project = projectStore.projectByName(to.params.projectName)
+      const project = projectStore.projectByRouteParams(to.params)
       authzStore._setNamespace(project?.spec.namespace)
-      projectStore.rememberProject(to.params.projectName)
+      projectStore.rememberProject(project?.metadata.name)
     }
   })
   await router.push({
     name: 'ShootItem',
     params: {
-      projectName: sourceProject.metadata.name,
+      namespace: sourceProject.spec.namespace,
       name: 'source-shoot',
     },
   })
@@ -214,7 +214,7 @@ describe('components', () => {
 
       let continueTargetNavigation
       const removeGuard = router.beforeEach(to => {
-        if (to.params.projectName === targetProject.metadata.name) {
+        if (to.params.namespace === targetProject.spec.namespace) {
           return new Promise(resolve => {
             continueTargetNavigation = resolve
           })
@@ -227,7 +227,7 @@ describe('components', () => {
       const sourceNavigation = router.push({
         name: 'ShootList',
         params: {
-          projectName: sourceProject.metadata.name,
+          namespace: sourceProject.spec.namespace,
         },
       })
       continueTargetNavigation()
@@ -236,12 +236,12 @@ describe('components', () => {
       removeGuard()
 
       expect(isNavigationFailure(failure, NavigationFailureType.cancelled)).toBe(true)
-      expect(router.currentRoute.value.params.projectName).toBe(sourceProject.metadata.name)
+      expect(router.currentRoute.value.params.namespace).toBe(sourceProject.spec.namespace)
       expect(projectSelection(wrapper).props('selectedProject')).toBe(sourceProject)
       expect(sidebarTargets(wrapper)).toContainEqual({
         name: 'ShootList',
         params: {
-          projectName: sourceProject.metadata.name,
+          namespace: sourceProject.spec.namespace,
         },
       })
     })
@@ -256,14 +256,23 @@ describe('components', () => {
       projectSelection(wrapper).vm.$emit('projectSelect', targetProject)
       await flushPromises()
 
-      expect(router.currentRoute.value.params.projectName).toBe(targetProject.metadata.name)
+      expect(router.currentRoute.value.params.namespace).toBe(targetProject.spec.namespace)
       expect(projectSelection(wrapper).props('selectedProject')).toBe(targetProject)
-      expect(sidebarTargets(wrapper)).toContainEqual({
-        name: 'ShootList',
-        params: {
-          projectName: targetProject.metadata.name,
+      expect(sidebarTargets(wrapper)).toEqual([
+        {
+          name: 'ShootList',
+          params: { namespace: targetProject.spec.namespace },
         },
-      })
+        {
+          name: 'Members',
+          params: { projectName: targetProject.metadata.name },
+        },
+        {
+          name: 'Administration',
+          params: { projectName: targetProject.metadata.name },
+        },
+        { name: 'ProjectList' },
+      ])
     })
 
     it('keeps the Project page when switching Projects', async () => {
@@ -300,7 +309,7 @@ describe('components', () => {
       const latestProject = projectStore.list[2]
       await router.push({
         name: 'Credentials',
-        params: { projectName: sourceProject.metadata.name },
+        params: { namespace: sourceProject.spec.namespace },
       })
 
       let resolveTargetRules
@@ -322,7 +331,7 @@ describe('components', () => {
 
       expect(router.currentRoute.value).toMatchObject({
         name: 'Credentials',
-        params: { projectName: latestProject.metadata.name },
+        params: { namespace: latestProject.spec.namespace },
       })
     })
 
@@ -355,7 +364,7 @@ describe('components', () => {
       } = await setup()
       await router.push({
         name: 'ShootList',
-        params: { projectName: sourceProject.metadata.name },
+        params: { namespace: sourceProject.spec.namespace },
         query: { q: '' },
       })
 
@@ -363,7 +372,7 @@ describe('components', () => {
       await flushPromises()
 
       expect(router.currentRoute.value.name).toBe('ShootList')
-      expect(router.currentRoute.value.params.projectName).toBe(targetProject.metadata.name)
+      expect(router.currentRoute.value.params.namespace).toBe(targetProject.spec.namespace)
       expect(router.currentRoute.value.query).toEqual({ q: '' })
     })
 
@@ -423,7 +432,7 @@ describe('components', () => {
       expect(projectSelection(wrapper).props('selectedProject')).toBe(sourceProject)
       expect(sidebarTargets(wrapper)).toContainEqual({
         name: 'ShootList',
-        params: { projectName: sourceProject.metadata.name },
+        params: { namespace: sourceProject.spec.namespace },
       })
     })
 
@@ -476,11 +485,11 @@ describe('components', () => {
       expect(sidebarTargets(wrapper)).toEqual(expect.arrayContaining([
         {
           name: 'Credentials',
-          params: { projectName: sourceProject.metadata.name },
+          params: { namespace: sourceProject.spec.namespace },
         },
         {
           name: 'GardenTerminal',
-          params: { projectName: sourceProject.metadata.name },
+          params: { namespace: sourceProject.spec.namespace },
         },
       ]))
     })
@@ -511,7 +520,7 @@ describe('components', () => {
       expect(projectSelection(reconstructedWrapper).props('selectedProject')).toEqual(sourceProject)
       expect(sidebarTargets(reconstructedWrapper)).toContainEqual({
         name: 'ShootList',
-        params: { projectName: sourceProject.metadata.name },
+        params: { namespace: sourceProject.spec.namespace },
       })
     })
   })

@@ -233,7 +233,7 @@ async function submit () {
     await router.push({
       name: 'Credentials',
       params: {
-        projectName: project.metadata.name,
+        namespace: project.spec.namespace,
       },
     })
   } catch (err) {

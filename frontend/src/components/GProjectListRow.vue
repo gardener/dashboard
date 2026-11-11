@@ -149,7 +149,7 @@ const projectPending = computed(() => isProjectPending(props.project))
 const shootsRoute = computed(() => ({
   name: 'ShootList',
   params: {
-    projectName: projectName.value,
+    namespace: get(props.project, ['spec', 'namespace']),
   },
 }))
 </script>

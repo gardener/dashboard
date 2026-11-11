@@ -13,6 +13,7 @@ import {
   setActivePinia,
 } from 'pinia'
 
+import { useAppStore } from '@/store/app'
 import { useAuthzStore } from '@/store/authz'
 import { useProjectStore } from '@/store/project'
 
@@ -67,10 +68,10 @@ function createTestRouter () {
 }
 
 describe('router routes', () => {
-  it('uses the canonical Project route for the root entry point', async () => {
+  it('uses the Project Cluster list for the root entry point', async () => {
     const { router } = createTestRouter()
     await router.push('/')
-    expect(router.currentRoute.value.fullPath).toBe('/projects/core/clusters')
+    expect(router.currentRoute.value.fullPath).toBe('/namespace/garden-core/shoots')
   })
 
   it.each([
@@ -122,29 +123,91 @@ describe('router routes', () => {
   })
 
   it.each([
-    ['/namespace/garden-core', '/projects/core/clusters'],
-    ['/namespace/garden-core?q=seed:%22az-ha1%22', '/projects/core/clusters?q=seed:%22az-ha1%22'],
-    ['/namespace/garden-core/shoots', '/projects/core/clusters'],
-    ['/namespace/garden-core/shoots?q=', '/projects/core/clusters?q='],
-    ['/namespace/garden-core/shoots/+', '/projects/core/clusters/+'],
-    ['/namespace/garden-core/shoots/+/yaml', '/projects/core/clusters/+/yaml'],
-    ['/namespace/garden-core/shoots/my-cluster', '/projects/core/clusters/my-cluster'],
-    ['/namespace/garden-core/shoots/my-cluster/yaml', '/projects/core/clusters/my-cluster/yaml'],
-    ['/namespace/garden-core/shoots/my-cluster/hibernation', '/projects/core/clusters/my-cluster/hibernation'],
-    ['/namespace/garden-core/shoots/my-cluster/term', '/projects/core/clusters/my-cluster/terminal'],
-    ['/namespace/garden-core/credentials', '/projects/core/credentials'],
+    ['/namespace/garden-core/shoots', 'ShootList', { namespace: 'garden-core' }],
+    ['/namespace/garden-core/shoots?q=', 'ShootList', { namespace: 'garden-core' }],
+    ['/namespace/garden-core/shoots?q=seed:%22az-ha1%22', 'ShootList', { namespace: 'garden-core' }],
+    ['/namespace/_all/shoots', 'AllClusters', {}],
+    ['/namespace/_all/shoots?q=seed:%22az-ha1%22', 'AllClusters', {}],
+    ['/namespace/garden-core/shoots/+', 'NewShoot', { namespace: 'garden-core' }],
+    ['/namespace/garden-core/shoots/+/yaml', 'NewShootEditor', { namespace: 'garden-core' }],
+    ['/namespace/garden-core/shoots/my-cluster', 'ShootItem', { namespace: 'garden-core', name: 'my-cluster' }],
+    ['/namespace/garden-core/shoots/my-cluster/yaml', 'ShootItemEditor', { namespace: 'garden-core', name: 'my-cluster' }],
+    ['/namespace/garden-core/shoots/my-cluster/hibernation', 'ShootItemHibernationSettings', { namespace: 'garden-core', name: 'my-cluster' }],
+    ['/namespace/garden-core/shoots/my-cluster/term', 'ShootItemTerminal', { namespace: 'garden-core', name: 'my-cluster' }],
+    ['/namespace/garden-core/credentials', 'Credentials', { namespace: 'garden-core' }],
+    ['/namespace/garden-core/term/garden', 'GardenTerminal', { namespace: 'garden-core' }],
+    ['/projects/core', 'Administration', { projectName: 'core' }],
+    ['/projects/core/members', 'Members', { projectName: 'core' }],
+  ])('keeps %s', async (path, name, params) => {
+    const { router } = createTestRouter()
+    await router.push(path)
+    expect(router.currentRoute.value).toMatchObject({
+      fullPath: path,
+      name,
+      params,
+    })
+  })
+
+  it.each([
+    ['/namespace/garden-core', '/namespace/garden-core/shoots'],
+    ['/namespace/garden-core?q=seed:%22az-ha1%22', '/namespace/garden-core/shoots?q=seed:%22az-ha1%22'],
+    ['/namespace/garden-core/term', '/namespace/garden-core/term/garden'],
     ['/namespace/garden-core/members', '/projects/core/members'],
+    ['/namespace/garden-core/members?q=abc#anchor', '/projects/core/members?q=abc#anchor'],
     ['/namespace/garden-core/administration', '/projects/core'],
-    ['/namespace/garden-core/term', '/projects/core/garden-cluster'],
-    ['/namespace/garden-core/term/garden', '/projects/core/garden-cluster'],
-    ['/namespace/_all', '/clusters'],
-    ['/namespace/_all/shoots?q=seed:%22az-ha1%22', '/clusters?q=seed:%22az-ha1%22'],
-    ['/namespace/_all/shoots/?q=seed:%22az-ha1%22', '/clusters?q=seed:%22az-ha1%22'],
-    ['/namespace/_all/shoots/cluster', '/clusters'],
-  ])('supports %s', async (path, expectedPath) => {
+    ['/namespace/garden-core/administration?q=abc#anchor', '/projects/core?q=abc#anchor'],
+    ['/namespace/_all', '/namespace/_all/shoots'],
+    ['/namespace/_all?q=seed:%22az-ha1%22', '/namespace/_all/shoots?q=seed:%22az-ha1%22'],
+    ['/namespace/_all/shoots/cluster', '/namespace/_all/shoots'],
+    ['/projects/core/shoots', '/namespace/garden-core/shoots'],
+    ['/projects/core/shoots?q=seed:%22az-ha1%22', '/namespace/garden-core/shoots?q=seed:%22az-ha1%22'],
+    ['/projects/core/shoots/+', '/namespace/garden-core/shoots/+'],
+    ['/projects/core/shoots/+/yaml', '/namespace/garden-core/shoots/+/yaml'],
+    ['/projects/core/shoots/my-cluster', '/namespace/garden-core/shoots/my-cluster'],
+    ['/projects/core/shoots/my-cluster?q=abc#anchor', '/namespace/garden-core/shoots/my-cluster?q=abc#anchor'],
+    ['/projects/core/shoots/my-cluster/yaml', '/namespace/garden-core/shoots/my-cluster/yaml'],
+    ['/projects/core/shoots/my-cluster/hibernation', '/namespace/garden-core/shoots/my-cluster/hibernation'],
+    ['/projects/core/shoots/my-cluster/term', '/namespace/garden-core/shoots/my-cluster/term'],
+    ['/projects/core/credentials', '/namespace/garden-core/credentials'],
+    ['/projects/core/term/garden', '/namespace/garden-core/term/garden'],
+    ['/shoots', '/namespace/_all/shoots'],
+    ['/shoots?q=seed:%22az-ha1%22', '/namespace/_all/shoots?q=seed:%22az-ha1%22'],
+  ])('redirects %s', async (path, expectedPath) => {
     const { router } = createTestRouter()
     await router.push(path)
     expect(router.currentRoute.value.fullPath).toBe(expectedPath)
+  })
+
+  it.each([
+    ['/projects/ops/shoots', '/namespace/garden-operations/shoots'],
+    ['/namespace/garden-operations/members', '/projects/ops/members'],
+  ])('redirects %s using the namespace of the Project', async (path, expectedPath) => {
+    const { projectStore, router } = createTestRouter()
+    projectStore.list.push({
+      metadata: { name: 'ops', uid: 'ops-uid' },
+      spec: { namespace: 'garden-operations' },
+      status: { phase: 'Ready' },
+    })
+
+    await router.push(path)
+
+    expect(router.currentRoute.value.fullPath).toBe(expectedPath)
+  })
+
+  it.each([
+    ['/projects/pending/shoots/+', {}],
+    ['/namespace/garden-pending/members', { namespace: 'garden-pending' }],
+  ])('opens Projects instead of redirecting %s of a Pending Project', async (path, spec) => {
+    const { projectStore, router } = createTestRouter()
+    projectStore.list.push({
+      metadata: { name: 'pending', uid: 'pending-uid' },
+      spec,
+      status: { phase: 'Pending' },
+    })
+
+    await router.push(path)
+
+    expect(router.currentRoute.value.fullPath).toBe('/projects')
   })
 
   it('supports namespace root and Project creation entry points', async () => {
@@ -152,7 +215,7 @@ describe('router routes', () => {
     projectStore.rememberProject('core')
 
     await router.push('/namespace')
-    expect(router.currentRoute.value.fullPath).toBe('/projects/core/clusters')
+    expect(router.currentRoute.value.fullPath).toBe('/namespace/garden-core/shoots')
 
     await router.push('/namespace/+')
     expect(router.currentRoute.value.fullPath).toBe('/projects/+')
@@ -160,16 +223,32 @@ describe('router routes', () => {
 
   it.each([
     ['/projects/new', 'Administration', { projectName: 'new' }],
-    ['/projects/core/clusters/new', 'ShootItem', { projectName: 'core', name: 'new' }],
-    ['/projects/core/clusters/new/yaml', 'ShootItemEditor', { projectName: 'core', name: 'new' }],
+    ['/namespace/garden-core/shoots/new', 'ShootItem', { namespace: 'garden-core', name: 'new' }],
+    ['/namespace/garden-core/shoots/new/yaml', 'ShootItemEditor', { namespace: 'garden-core', name: 'new' }],
   ])('matches %s to the resource named "new"', (path, name, params) => {
     const { router } = createTestRouter()
     expect(router.resolve(path)).toMatchObject({ name, params })
   })
 
-  it('retains the forbidden behavior for inaccessible namespaces', async () => {
+  it.each([
+    '/clusters',
+    '/projects/core/clusters',
+    '/projects/core/garden-cluster',
+  ])('does not accept the unreleased %s', path => {
     const { router } = createTestRouter()
-    await expect(router.push('/namespace/garden-private/shoots')).rejects.toMatchObject({
+    expect(router.resolve(path).name).toBeUndefined()
+  })
+
+  it.each([
+    '/namespace/garden-private/members',
+    '/namespace/garden-private/administration',
+    '/projects/private/shoots',
+    '/projects/private/shoots/my-cluster',
+  ])('retains the forbidden behavior for %s', async path => {
+    const { router } = createTestRouter()
+    await router.push(path)
+    expect(router.currentRoute.value.fullPath).toBe(path)
+    expect(useAppStore().routerError).toMatchObject({
       status: 403,
       reason: 'Forbidden',
     })
@@ -187,6 +266,6 @@ describe('router routes', () => {
     await router.push('/projects')
     await router.push('/')
 
-    expect(router.currentRoute.value.fullPath).toBe('/projects/team/clusters')
+    expect(router.currentRoute.value.fullPath).toBe('/namespace/garden-team/shoots')
   })
 })

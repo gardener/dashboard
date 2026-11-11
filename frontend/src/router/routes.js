@@ -24,6 +24,8 @@ import GShootItemEditor from '@/views/GShootItemEditor.vue'
 import GAccount from '@/views/GAccount.vue'
 import GSettings from '@/views/GSettings.vue'
 
+import { isProjectPending } from '@/composables/useProjectItem'
+
 import {
   projectListBreadcrumbs,
   newProjectBreadcrumbs,
@@ -61,18 +63,6 @@ const GSeedItemEditor = () => import('@/views/GSeedItemEditor.vue')
 const GShootItem = () => import('@/views/GShootItem.vue')
 const GShootItemTerminal = () => import('@/views/GShootItemTerminal.vue')
 
-const shootNamespaceRouteNames = new Map([
-  ['yaml', 'ShootItemEditor'],
-  ['hibernation', 'ShootItemHibernationSettings'],
-  ['term', 'ShootItemTerminal'],
-])
-const namespaceRouteNames = new Map([
-  ['credentials', 'Credentials'],
-  ['members', 'Members'],
-  ['administration', 'Administration'],
-  ['term', 'GardenTerminal'],
-])
-
 export function createRoutes () {
   const appStore = useAppStore()
   const authzStore = useAuthzStore()
@@ -92,11 +82,26 @@ export function createRoutes () {
       settingsRoute('settings'),
       seedListRoute('seeds'),
       seedItemHierarchy('seeds/:name'),
-      shootListRoute('clusters', 'AllClusters'),
       projectsRoute('projects'),
       newProjectRoute('projects/+'),
       projectHierarchy('projects/:projectName'),
-      namespaceRoute('namespace/:pathMatch(.*)*'),
+      redirectRoute('projects/:projectName/shoots', 'ShootList'),
+      redirectRoute('projects/:projectName/shoots/+', 'NewShoot'),
+      redirectRoute('projects/:projectName/shoots/+/yaml', 'NewShootEditor'),
+      redirectRoute('projects/:projectName/shoots/:name', 'ShootItem'),
+      redirectRoute('projects/:projectName/shoots/:name/yaml', 'ShootItemEditor'),
+      redirectRoute('projects/:projectName/shoots/:name/hibernation', 'ShootItemHibernationSettings'),
+      redirectRoute('projects/:projectName/shoots/:name/term', 'ShootItemTerminal'),
+      redirectRoute('projects/:projectName/credentials', 'Credentials'),
+      redirectRoute('projects/:projectName/term/garden', 'GardenTerminal'),
+      { path: 'shoots', redirect: { name: 'AllClusters', params: {} } },
+      { path: 'namespace', redirect: { name: 'Home' } },
+      { path: 'namespace/+', redirect: { name: 'NewProject' } },
+      shootListRoute('namespace/_all/shoots', 'AllClusters'),
+      { path: 'namespace/_all/:pathMatch(.*)*', redirect: { name: 'AllClusters', params: {} } },
+      namespaceHierarchy('namespace/:namespace'),
+      redirectRoute('namespace/:namespace/administration', 'Administration'),
+      redirectRoute('namespace/:namespace/members', 'Members'),
       {
         path: ':pathMatch(.*)*',
         component: GNotFound,
@@ -122,12 +127,7 @@ export function createRoutes () {
       },
       children: [
         administrationRoute(''),
-        shootListRoute('clusters', 'ShootList'),
-        newShootHierarchy('clusters/+'),
-        shootItemHierarchy('clusters/:name'),
-        credentialListRoute('credentials'),
         membersRoute('members'),
-        gardenTerminalRoute('garden-cluster'),
         {
           path: ':pathMatch(.*)*',
           component: GNotFound,
@@ -139,7 +139,34 @@ export function createRoutes () {
     }
   }
 
-  /* New Shoot Hierachy "/projects/:projectName/clusters/+" */
+  /* Namespace Hierachy "/namespace/:namespace" */
+  function namespaceHierarchy (path) {
+    return {
+      path,
+      component: GProjectPlaceholder,
+      meta: {
+        projectScoped: true,
+      },
+      children: [
+        { path: '', redirect: { name: 'ShootList' } },
+        shootListRoute('shoots', 'ShootList'),
+        newShootHierarchy('shoots/+'),
+        shootItemHierarchy('shoots/:name'),
+        credentialListRoute('credentials'),
+        { path: 'term', redirect: { name: 'GardenTerminal' } },
+        gardenTerminalRoute('term/garden'),
+        {
+          path: ':pathMatch(.*)*',
+          component: GNotFound,
+          meta: {
+            breadcrumbs: notFoundBreadcrumbs,
+          },
+        },
+      ],
+    }
+  }
+
+  /* New Shoot Hierachy "/namespace/:namespace/shoots/+" */
   function newShootHierarchy (path) {
     return {
       path,
@@ -177,7 +204,7 @@ export function createRoutes () {
     }
   }
 
-  /* Shoot Item Hierachy "/projects/:projectName/clusters/:name" */
+  /* Shoot Item Hierachy "/namespace/:namespace/shoots/:name" */
   function shootItemHierarchy (path) {
     return {
       path,
@@ -186,7 +213,7 @@ export function createRoutes () {
         shootItemRoute(''),
         shootItemEditorRoute('yaml'),
         shootItemHibernationRoute('hibernation'),
-        shootItemTerminalRoute('terminal'),
+        shootItemTerminalRoute('term'),
         {
           path: ':pathMatch(.*)*',
           component: GNotFound,
@@ -202,7 +229,7 @@ export function createRoutes () {
      * Route Meta fields type definition
      * @typedef {Object} RouteMeta
      * @prop {boolean} [public]                   - Determines whether route needs authorization
-     * @prop {boolean} [projectScoped]            - Determines whether route belongs to a Project and has projectName in path
+     * @prop {boolean} [projectScoped]            - Determines whether route belongs to a Project and has namespace or projectName in path
      * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
      * @prop {string}  [title]                    - Document title
      * @prop {RouteFn} [breadcrumbText]           - Property or function that returns the breadcrumb title
@@ -268,11 +295,36 @@ export function createRoutes () {
     }
   }
 
-  function namespaceRoute (path) {
+  function redirectRoute (path, name) {
     return {
       path,
-      name: 'Namespace',
-      beforeEnter: namespaceTarget,
+      name: `Redirect${name}`,
+      beforeEnter (to) {
+        const { namespace, projectName, ...params } = to.params
+        const project = projectStore.projectByRouteParams(to.params)
+        if (!project) {
+          const message = namespace
+            ? `The namespace ${namespace} is not associated with an accessible Project`
+            : `The Project ${projectName} is not accessible`
+          appStore.setRouterError(Object.assign(new Error(message), {
+            status: 403,
+            reason: 'Forbidden',
+          }))
+          return
+        }
+        if (isProjectPending(project)) {
+          return { name: 'ProjectList', replace: true }
+        }
+        return {
+          name,
+          params: namespace
+            ? { ...params, projectName: project.metadata.name }
+            : { ...params, namespace: project.spec.namespace },
+          query: to.query,
+          hash: to.hash,
+          replace: true,
+        }
+      },
     }
   }
 
@@ -513,60 +565,6 @@ export function createRoutes () {
   }
 
   /* Helper functions */
-  function namespaceTarget (to) {
-    const path = to.path.replace(/^\/namespace\/?/, '')
-    if (!path) {
-      return redirectToShootList()
-    }
-    if (path === '+') {
-      return { name: 'NewProject', replace: true }
-    }
-
-    const [namespace, resource, name, subresource] = path.split('/')
-    if (namespace === '_all') {
-      return {
-        name: 'AllClusters',
-        query: !resource || (resource === 'shoots' && !name)
-          ? shootListQuery(to.query)
-          : undefined,
-        replace: true,
-      }
-    }
-
-    const project = projectStore.projectByNamespace(namespace)
-    if (!project) {
-      const message = `The namespace ${namespace} is not associated with an accessible Project`
-      throw Object.assign(new Error(message), {
-        status: 403,
-        reason: 'Forbidden',
-      })
-    }
-
-    const target = {
-      name: 'ShootList',
-      params: { projectName: project.metadata.name },
-      replace: true,
-    }
-    if (resource === 'shoots') {
-      target.query = shootListQuery(to.query)
-      if (name === '+') {
-        target.name = subresource === 'yaml' ? 'NewShootEditor' : 'NewShoot'
-      } else if (name) {
-        target.name = shootNamespaceRouteNames.get(subresource) ?? 'ShootItem'
-        target.params.name = name
-      }
-    } else if (resource) {
-      target.name = namespaceRouteNames.get(resource) ?? 'ShootList'
-    } else {
-      target.query = shootListQuery(to.query)
-    }
-    return target
-  }
-
-  function shootListQuery (query) {
-    return Object.hasOwn(query, 'q') ? { q: query.q } : undefined
-  }
-
   function getFallbackRedirectIfNoSeedAccess (to, from) {
     if (authzStore.canViewLandscapeForNamespace(null)) {
       return
@@ -588,7 +586,7 @@ export function createRoutes () {
     if (project) {
       return {
         name: 'ShootList',
-        params: { projectName: project.metadata.name },
+        params: { namespace: project.spec.namespace },
         replace: true,
       }
     }

@@ -20,9 +20,9 @@ import { useProvideShootContext } from '@/composables/useShootContext'
 const route = useRoute()
 const { createShootManifest } = useProvideShootContext()
 
-const projectName = computed(() => route.params?.projectName)
+const namespace = computed(() => route.params?.namespace)
 
 onBeforeMount(() => createShootManifest())
 
-watch(projectName, () => createShootManifest())
+watch(namespace, () => createShootManifest())
 </script>

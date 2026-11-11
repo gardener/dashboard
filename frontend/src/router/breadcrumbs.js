@@ -134,7 +134,7 @@ export function shootItemBreadcrumbs ({ params }) {
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['projectName']),
+          params: pick(params, ['namespace']),
         }
       },
     },
@@ -153,7 +153,7 @@ export function shootItemTerminalBreadcrumbs ({ params }) {
       get to () {
         return {
           name: 'ShootList',
-          params: pick(params, ['projectName']),
+          params: pick(params, ['namespace']),
         }
       },
     },

@@ -699,7 +699,7 @@ async function showDialog () {
       await projectStore.deleteProject(projectStore.project)
       const p1 = find(projectsNotMarkedForDeletion.value, item => !isProjectPending(item))
       if (p1) {
-        router.push({ name: 'ShootList', params: { projectName: p1.metadata.name } })
+        router.push({ name: 'ShootList', params: { namespace: p1.spec.namespace } })
       } else {
         router.push({ name: 'ProjectList' })
       }

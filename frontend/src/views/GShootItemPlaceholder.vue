@@ -60,17 +60,11 @@ export default {
 
     const activePopoverKey = ref('')
 
-    const shootItem = computed(() => shootStore.shootByNamespaceAndName({
-      namespace: projectStore.namespace,
-      name: route.params.name,
-    }))
+    const shootItem = computed(() => shootStore.shootByNamespaceAndName(route.params))
 
     async function load (to, { setError }) {
       const routeName = to.name
-      const routeParams = {
-        namespace: projectStore.namespaceByProjectName(to.params.projectName),
-        name: to.params.name,
-      }
+      const routeParams = to.params
       try {
         const promises = [
           shootStore.subscribe(routeParams),
