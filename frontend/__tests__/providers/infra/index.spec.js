@@ -5,10 +5,33 @@
 //
 
 import { getInfrastructureProviderExtension } from '@/providers/infra'
+import { getInfrastructureProviderUi } from '@/providers/infra/ui'
+import GAwsWorkerVolumeIops from '@/providers/infra/aws/GAwsWorkerVolumeIops.vue'
+import GGdchInfrastructureDetails from '@/providers/infra/gdch/GGdchInfrastructureDetails.vue'
+import GMetalInfrastructureDetails from '@/providers/infra/metal/GMetalInfrastructureDetails.vue'
+import GOpenstackInfrastructureDetails from '@/providers/infra/openstack/GOpenstackInfrastructureDetails.vue'
+import GOpenstackShootInfrastructure from '@/providers/infra/openstack/GOpenstackShootInfrastructure.vue'
 import infrastructureVendors from '@/data/vendors/infra'
 
 describe('infrastructure provider registry', () => {
   const nodesCIDR = '10.250.0.0/16'
+
+  it('provides only explicitly registered optional UI', () => {
+    expect(getInfrastructureProviderUi('openstack')).toEqual({
+      createInfrastructureDetailsComponent: GOpenstackInfrastructureDetails,
+      shootInfrastructureCardComponent: GOpenstackShootInfrastructure,
+    })
+    expect(getInfrastructureProviderUi('metal')).toEqual({
+      createInfrastructureDetailsComponent: GMetalInfrastructureDetails,
+    })
+    expect(getInfrastructureProviderUi('gdch')).toEqual({
+      createInfrastructureDetailsComponent: GGdchInfrastructureDetails,
+    })
+    expect(getInfrastructureProviderUi('aws')).toEqual({
+      workerVolumeComponent: GAwsWorkerVolumeIops,
+    })
+    expect(getInfrastructureProviderUi('unregistered')).toBeUndefined()
+  })
 
   describe('default Shoot specs', () => {
     it('preserves the defaults for every current infrastructure provider', () => {
