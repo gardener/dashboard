@@ -19,8 +19,7 @@ yarn serve:profile
 
 The backend starts as usual on the configured HTTP port (by default
 `http://localhost:3030`) and exposes the Node.js inspector on
-`127.0.0.1:9229`. The inspector is bound to the local machine only and does
-not pause the server at startup.
+`127.0.0.1:9229`.
 
 ## Connect Chrome DevTools
 
