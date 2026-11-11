@@ -35,9 +35,10 @@ import { storeToRefs } from 'pinia'
 
 import { useLoginStore } from '@/store/login'
 
-import { omitKeysWithSuffix } from '@/utils'
-
-import template from 'lodash/template'
+import {
+  omitKeysWithSuffix,
+  renderTemplate,
+} from '@/utils'
 
 const sanitizeUrl = inject('sanitizeUrl')
 
@@ -50,15 +51,9 @@ const hasFooter = computed(() => {
   return !!landingPageUrl.value && ![false, null, ''].includes(footerTemplate.value)
 })
 
-const compiledFooterTemplate = computed(() => {
-  return template(footerTemplate.value, {
-    interpolate: /{{([\s\S]+?)}}/g,
-  })
-})
-
 const footerHtml = computed(() => {
   const data = omitKeysWithSuffix(branding.value, 'Template')
   data.landingPageUrl = landingPageUrl.value ? sanitizeUrl(landingPageUrl.value) : undefined
-  return compiledFooterTemplate.value(data)
+  return renderTemplate(footerTemplate.value, data)
 })
 </script>

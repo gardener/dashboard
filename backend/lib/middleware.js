@@ -103,14 +103,23 @@ function metricsRoute (prefix) {
   }
 }
 
-const ErrorTemplate = _.template(`<!doctype html>
+function escapeHtml (value) {
+  return _.escape(String(value ?? ''))
+}
+
+function ErrorTemplate ({ reason, message, code, details }) {
+  const stack = details?.stack
+    ? `  <pre>${escapeHtml(details.stack)}</pre>\n`
+    : ''
+
+  return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'self'; connect-src 'self'; form-action 'self'; img-src data:; script-src 'self'; style-src 'unsafe-inline'">
   <meta content="origin" name="referrer">
-  <title><%= reason %> &middot; Gardener</title>
+  <title>${escapeHtml(reason)} &middot; Gardener</title>
   <style type="text/css" media="screen">
     body {
       padding: 50px;
@@ -123,11 +132,12 @@ const ErrorTemplate = _.template(`<!doctype html>
   </head>
 </head>
 <body>
-  <h1><%= message %></h1>
-  <h2><%= code %></h2>
-  <% if (details.stack) { %><pre><%= details.stack %></pre><% } %>
+  <h1>${escapeHtml(message)}</h1>
+  <h2>${escapeHtml(code)}</h2>
+${stack}
 </body>
-</html>`)
+</html>`
+}
 
 export {
   historyFallback,
