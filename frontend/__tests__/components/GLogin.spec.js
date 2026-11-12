@@ -5,7 +5,10 @@
 //
 
 import { nextTick } from 'vue'
-import { mount } from '@vue/test-utils'
+import {
+  mount,
+  flushPromises,
+} from '@vue/test-utils'
 import { setActivePinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 
@@ -16,6 +19,8 @@ import { useLocalStorageStore } from '@/store/localStorage'
 
 import GLogin from '@/layouts/GLogin.vue'
 
+import { useApi } from '@/composables/useApi'
+
 import {
   components as componentsPlugin,
   utils as utilsPlugin,
@@ -24,6 +29,11 @@ import {
 
 const { createVuetifyPlugin } = global.fixtures.helper
 
+vi.mock('@/composables/useApi', async importOriginal => ({
+  ...await importOriginal(),
+  useApi: vi.fn(),
+}))
+
 describe('components', () => {
   describe('g-login', () => {
     const noop = () => {}
@@ -31,9 +41,11 @@ describe('components', () => {
     let pinia
     let appStore
     let authnStore
-    let loginStore // eslint-disable-line no-unused-vars
+    let loginStore
     let localStorageStore
     let mockRoute
+    let mockRouter
+    let mockApi
 
     function mountLogin () {
       return mount(GLogin, {
@@ -47,6 +59,7 @@ describe('components', () => {
           ],
           mocks: {
             $route: mockRoute,
+            $router: mockRouter,
           },
         },
       })
@@ -70,6 +83,9 @@ describe('components', () => {
           redirectPath: '/namespace/garden/shoots',
         },
       }
+      mockRouter = { push: vi.fn().mockResolvedValue(undefined) }
+      mockApi = { createTokenReview: vi.fn().mockResolvedValue(undefined) }
+      vi.mocked(useApi).mockReturnValue(mockApi)
       pinia = createTestingPinia({
         stubActions: false,
         initialState: {
@@ -94,6 +110,122 @@ describe('components', () => {
       await nextTick()
 
       expect(wrapper.find('div.text-headline-small.text-primary').text()).toBe('Universal Kubernetes at Scale')
+    })
+
+    describe('token login', () => {
+      const token = 'test-token'
+
+      beforeEach(() => {
+        loginStore.loginTypes = ['oidc', 'token']
+        loginStore.loginType = 'token'
+      })
+
+      it('should retain the token until authentication and navigation finish', async () => {
+        const review = Promise.withResolvers()
+        const navigation = Promise.withResolvers()
+        mockApi.createTokenReview.mockReturnValue(review.promise)
+        mockRouter.push.mockReturnValue(navigation.promise)
+        const wrapper = mountLogin()
+        const input = wrapper.find('input')
+        await input.setValue(token)
+
+        const login = wrapper.vm.tokenLogin()
+        await nextTick()
+
+        expect(mockApi.createTokenReview).toBeCalledWith({ token })
+        expect(mockRouter.push).not.toBeCalled()
+        expect(input.element.value).toBe(token)
+
+        review.resolve()
+        await flushPromises()
+
+        expect(mockRouter.push).toBeCalledWith(mockRoute.query.redirectPath)
+        expect(input.element.value).toBe(token)
+
+        navigation.resolve()
+        await login
+        await nextTick()
+
+        expect(input.element.value).toBe('')
+        expect(appStore.setError).not.toBeCalled()
+      })
+
+      it('should ignore repeated submissions while authentication or navigation is pending', async () => {
+        const review = Promise.withResolvers()
+        const navigation = Promise.withResolvers()
+        mockApi.createTokenReview.mockReturnValue(review.promise)
+        mockRouter.push.mockReturnValue(navigation.promise)
+        const wrapper = mountLogin()
+        const input = wrapper.find('input')
+        await input.setValue(token)
+
+        wrapper.vm.$refs.loginButton.$emit('click')
+        wrapper.vm.handleLogin()
+        await input.trigger('keydown.enter')
+
+        expect(mockApi.createTokenReview).toBeCalledTimes(1)
+        expect(input.element.disabled).toBe(true)
+        expect(wrapper.vm.$refs.loginButton.loading).toBe(true)
+        expect(wrapper.vm.$refs.loginButton.disabled).toBe(true)
+        expect(wrapper.findAllComponents({ name: 'VTab' }).every(tab => tab.props('disabled'))).toBe(true)
+
+        review.resolve()
+        await flushPromises()
+        wrapper.vm.handleLogin()
+        await input.trigger('keydown.enter')
+
+        expect(mockApi.createTokenReview).toBeCalledTimes(1)
+        expect(mockRouter.push).toBeCalledTimes(1)
+        expect(wrapper.vm.$refs.loginButton.loading).toBe(true)
+
+        navigation.resolve()
+        await flushPromises()
+
+        expect(input.element.disabled).toBe(false)
+        expect(wrapper.vm.$refs.loginButton.loading).toBe(false)
+        expect(wrapper.vm.$refs.loginButton.disabled).toBe(false)
+        expect(wrapper.findAllComponents({ name: 'VTab' }).every(tab => !tab.props('disabled'))).toBe(true)
+      })
+
+      it.each(['authentication', 'navigation'])('should report %s errors and allow retrying', async stage => {
+        const error = new Error('login failed')
+        const failingAction = stage === 'authentication' ? mockApi.createTokenReview : mockRouter.push
+        failingAction.mockRejectedValueOnce(error)
+        const wrapper = mountLogin()
+        const input = wrapper.find('input')
+        await input.setValue(token)
+
+        await wrapper.vm.tokenLogin()
+        await nextTick()
+
+        expect(appStore.setError).toBeCalledWith({
+          title: 'Token Login Error',
+          text: error.message,
+        })
+        expect(input.element.value).toBe('')
+        expect(input.element.disabled).toBe(false)
+        expect(wrapper.vm.$refs.loginButton.loading).toBe(false)
+        expect(wrapper.vm.$refs.loginButton.disabled).toBe(false)
+        expect(mockRouter.push).toBeCalledTimes(stage === 'authentication' ? 0 : 1)
+
+        await input.setValue('replacement-token')
+        await wrapper.vm.tokenLogin()
+
+        expect(mockApi.createTokenReview).toBeCalledTimes(2)
+        expect(mockApi.createTokenReview).toHaveBeenLastCalledWith({ token: 'replacement-token' })
+        expect(mockRouter.push).toHaveBeenLastCalledWith(mockRoute.query.redirectPath)
+        expect(appStore.setError).toBeCalledTimes(1)
+      })
+
+      it('should use the default redirect when none is supplied', async () => {
+        mockRoute.query = {}
+        const wrapper = mountLogin()
+        await wrapper.find('input').setValue(token)
+
+        await wrapper.vm.tokenLogin()
+
+        expect(mockRouter.push).toBeCalledWith('/')
+      })
     })
 
     describe('#beforeRouteEnter', () => {
