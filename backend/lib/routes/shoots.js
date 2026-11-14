@@ -5,6 +5,7 @@
 //
 
 import express from 'express'
+import { cloneDeep } from 'lodash-es'
 import services from '../services/index.js'
 import { metricsRoute } from '../middleware.js'
 import { simplifyObjectMetadata } from '../utils/index.js'
@@ -25,9 +26,7 @@ router.route('/')
       const namespace = req.params.namespace
       const labelSelector = req.query.labelSelector
       const shootList = await shoots.list({ user, namespace, labelSelector })
-      for (const object of shootList.items) {
-        simplifyObjectMetadata(object)
-      }
+      shootList.items = shootList.items.map(object => simplifyObjectMetadata(cloneDeep(object)))
       res.send(shootList)
     } catch (err) {
       next(err)
