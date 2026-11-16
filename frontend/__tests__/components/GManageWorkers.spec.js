@@ -180,6 +180,28 @@ describe('components', () => {
       expect(wrapper.findAll('button').some(button => button.text() === 'Remove')).toBe(true)
     })
 
+    it.each([
+      { zones: ['a', 'b', 'c'], labels: ['Zone a', 'Zone b', 'Zone c'] },
+      { zones: ['1', '2', '3'], labels: ['Zone 1', 'Zone 2', 'Zone 3'] },
+      { zones: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'], labels: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'] },
+      { zones: ['a', 'ab', 'eu-west-1c'], labels: ['Zone a', 'ab', 'eu-west-1c'] },
+    ])('prefixes only single-character collapsed zone labels for $zones', async ({ zones, labels }) => {
+      providerWorkers.value[0].zones = zones
+      await nextTick()
+
+      expect(findWorkerGroup('worker-one').findAll('.v-chip').map(chip => chip.text())).toEqual(labels)
+      expect(providerWorkers.value[0].zones).toEqual(zones)
+    })
+
+    it('limits collapsed zone labels to three while preserving duplicates and overflow', async () => {
+      providerWorkers.value[0].zones = ['a', 'a', 'b', 'c']
+      await nextTick()
+
+      const workerGroup = findWorkerGroup('worker-one')
+      expect(workerGroup.findAll('.v-chip').map(chip => chip.text())).toEqual(['Zone a', 'Zone a', 'Zone b'])
+      expect(workerGroup.text()).toContain('+1 more')
+    })
+
     it('keeps collapsed workers in the parent validation tree', async () => {
       const ValidationHost = defineComponent({
         components: {

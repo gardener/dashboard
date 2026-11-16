@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0
                       size="x-small"
                       class="mr-1"
                     >
-                      {{ zone }}
+                      {{ zone.length === 1 ? `Zone ${zone}` : zone }}
                     </v-chip>
                     <span
                       v-if="worker.zones.length > 3"
