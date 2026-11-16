@@ -102,7 +102,6 @@ const shootListPaths = Object.freeze([
   'spec.purpose',
   'spec.seedName',
   'spec.provider.type',
-  'spec.provider.workers',
   'spec.kubernetes.version',
   'spec.hibernation',
   'spec.maintenance.autoUpdate',
@@ -150,6 +149,11 @@ export function simplifyShootForList (shoot) {
       _.set(result, path, _.get(shoot, path))
     }
   }
+  const workers = _.get(shoot, 'spec.provider.workers', [])
+  _.set(result, 'spec.provider.workers', workers.map(worker => ({
+    name: worker.name,
+    ...(_.has(worker, 'controlPlane') ? { controlPlane: {} } : {}),
+  })))
   return result
 }
 

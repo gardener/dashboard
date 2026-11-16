@@ -17,6 +17,7 @@ import {
   getGardenClusterIdentity,
   list,
   replaceVersion,
+  simplifyShootForList,
 } from '../lib/services/shoots.js'
 import config from '../lib/config/index.js'
 import { mockRequest } from '@gardener-dashboard/request'
@@ -189,6 +190,44 @@ describe('services', function () {
           op: 'replace',
           path: '/spec/kubernetes/version',
           value: targetVersion,
+        }])
+      })
+    })
+
+    describe('#simplifyShootForList', function () {
+      it('should only include worker names and an empty controlPlane object', function () {
+        vi.spyOn(cache, 'getProjects').mockReturnValue([])
+        const shoot = {
+          metadata: {
+            namespace: 'garden-test',
+          },
+          spec: {
+            provider: {
+              workers: [{
+                name: 'worker-with-control-plane',
+                controlPlane: {
+                  machine: {
+                    type: 'large',
+                  },
+                },
+                machine: {
+                  type: 'large',
+                },
+              }, {
+                name: 'worker-without-control-plane',
+                machine: {
+                  type: 'small',
+                },
+              }],
+            },
+          },
+        }
+
+        expect(simplifyShootForList(shoot).spec.provider.workers).toEqual([{
+          name: 'worker-with-control-plane',
+          controlPlane: {},
+        }, {
+          name: 'worker-without-control-plane',
         }])
       })
     })
