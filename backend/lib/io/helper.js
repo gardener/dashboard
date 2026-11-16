@@ -29,6 +29,7 @@ function synchronizeFactory (kind, options = {}) {
     group = 'core.gardener.cloud',
     accessResolver = () => helper.constants.OBJECT_SIMPLE,
     simplifyObject = simplifyObjectMetadata,
+    useSimplifiedObject = false,
   } = options
   const uidNotFound = uidNotFoundFactory(group, kind)
 
@@ -42,8 +43,8 @@ function synchronizeFactory (kind, options = {}) {
       switch (accessResolver(socket, object)) {
         case helper.constants.OBJECT_SIMPLE: {
           const clonedObject = cloneDeep(object)
-          simplifyObject(clonedObject)
-          return clonedObject
+          const simplifiedObject = simplifyObject(clonedObject)
+          return useSimplifiedObject ? simplifiedObject : clonedObject
         }
         case helper.constants.OBJECT_ORIGINAL: {
           return object
