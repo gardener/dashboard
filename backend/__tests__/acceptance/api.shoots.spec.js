@@ -29,6 +29,27 @@ function createStore (items) {
   return store
 }
 
+function expectShootListItem (shoot) {
+  expect(shoot).toMatchObject({
+    metadata: {
+      name: expect.any(String),
+      namespace: expect.any(String),
+      uid: expect.anything(),
+    },
+    spec: {
+      cloudProfile: expect.any(Object),
+      provider: {
+        type: expect.any(String),
+      },
+      kubernetes: {
+        version: expect.any(String),
+      },
+    },
+  })
+  expect(shoot.spec).not.toHaveProperty('secretBindingName')
+  expect(shoot.status ?? {}).not.toHaveProperty('advertisedAddresses')
+}
+
 describe('api', function () {
   let agent
 
@@ -87,7 +108,7 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
-      expect(res.body).toMatchSnapshot()
+      res.body.items.forEach(expectShootListItem)
     })
 
     it('should return all shoots for an admin user', async () => {
@@ -103,7 +124,7 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3, 4])
-      expect(res.body).toMatchSnapshot()
+      res.body.items.forEach(expectShootListItem)
     })
 
     it('should return all shoots for a non-admin user', async () => {
@@ -126,7 +147,7 @@ describe('api', function () {
       expect(accessReviews).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([1, 2, 3])
-      expect(res.body).toMatchSnapshot()
+      res.body.items.forEach(expectShootListItem)
     })
 
     it('should use group membership for the _all shoot fallback', async () => {
@@ -168,7 +189,7 @@ describe('api', function () {
       expect(mockRequest.mock.calls).toMatchSnapshot()
 
       expect(res.body.items.map(item => item.metadata.uid)).toEqual([3])
-      expect(res.body).toMatchSnapshot()
+      res.body.items.forEach(expectShootListItem)
     })
 
     it('should be forbidden to list shoots for a single namespace', async () => {

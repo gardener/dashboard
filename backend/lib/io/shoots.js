@@ -14,6 +14,7 @@ import {
 import services from '../services/index.js'
 import helper from './helper.js'
 const { authorization } = services
+const { simplifyShootForList } = services.shoots
 
 async function canListAllShoots (user, namespaces) {
   const canListShoots = async namespace => [namespace, await authorization.canListShoots(user, namespace)]
@@ -74,6 +75,7 @@ function unsubscribe (socket) {
 }
 
 const synchronize = helper.synchronizeFactory('Shoot', {
+  simplifyObject: simplifyShootForList,
   accessResolver (socket, object) {
     const rooms = Array.from(socket.rooms).filter(room => room !== socket.id)
     const [
