@@ -79,6 +79,10 @@ describe('views', () => {
               },
               template: '<div data-test="manage-workers" :data-expand-by-default="expandByDefault" />',
             },
+            // Default shallow stubs still load async components; avoid imports outliving the tests.
+            GManageHibernationSchedule: {
+              template: '<div />',
+            },
           },
         },
       })
