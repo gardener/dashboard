@@ -190,6 +190,40 @@ describe('useCloudProviderBinding composable', () => {
     expect(others).toMatchSnapshot()
   })
 
+  it('matches binding references by kind, effective namespace, and name', () => {
+    const current = {
+      apiVersion: 'security.gardener.cloud/v1alpha1',
+      kind: 'CredentialsBinding',
+      metadata: { name: 'current', namespace: 'garden-test', uid: 'current' },
+      provider: { type: 'aws' },
+      credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'shared' },
+    }
+    const same = {
+      ...current,
+      metadata: { name: 'same', namespace: 'garden-test', uid: 'same' },
+    }
+    const otherNamespace = {
+      ...current,
+      metadata: { name: 'other-namespace', namespace: 'garden-other', uid: 'other-namespace' },
+    }
+    const otherKind = {
+      ...current,
+      metadata: { name: 'other-kind', namespace: 'garden-test', uid: 'other-kind' },
+      credentialsRef: { apiVersion: 'security.gardener.cloud/v1alpha1', kind: 'WorkloadIdentity', name: 'shared' },
+    }
+    credentialStore._setCredentials({
+      secrets: [
+        { apiVersion: 'v1', kind: 'Secret', metadata: { name: 'shared', namespace: 'garden-test' } },
+      ],
+      credentialsBindings: [current, same, otherNamespace, otherKind],
+    })
+
+    const composable = useCloudProviderBinding(ref(current))
+
+    expect(composable.credentialNamespace.value).toBe('garden-test')
+    expect(composable.bindingsWithSameCredential.value).toEqual([same])
+  })
+
   it('lists applicable quotas and computes selfTerminationDays', () => {
     const secretBindingRef = findBindingRef('azure-secretbinding')
     const bindingComposable = useCloudProviderBinding(secretBindingRef)

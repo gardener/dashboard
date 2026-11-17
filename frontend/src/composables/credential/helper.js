@@ -285,7 +285,7 @@ export function isCredentialsBinding (binding) {
 }
 
 export function bindingProviderType (binding) {
-  return binding?.provider?.type
+  return typeof binding?.provider === 'string' ? binding.provider : binding?.provider?.type
 }
 
 export function bindingCredentialRef (binding) {
@@ -303,7 +303,7 @@ export function bindingCredentialName (binding) {
 }
 
 export function bindingCredentialNamespace (binding) {
-  return bindingCredentialRef(binding)?.namespace
+  return bindingCredentialRef(binding)?.namespace ?? binding?.metadata?.namespace
 }
 
 export function bindingCredentialKind (binding) {

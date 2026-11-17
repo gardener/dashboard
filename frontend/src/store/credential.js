@@ -130,15 +130,48 @@ export const useCredentialStore = defineStore('credential', () => {
   }
 
   async function deleteDnsCredential ({ credentialKind, credentialNamespace, credentialName }) {
-    await api.deleteDnsProviderCredential({ credentialKind, credentialNamespace, credentialName })
+    try {
+      await api.deleteDnsProviderCredential({ credentialKind, credentialNamespace, credentialName })
+    } catch (err) {
+      await fetchCredentials().catch(() => {})
+      throw err
+    }
     await fetchCredentials()
-    appStore.setSuccess(`DNS Provider credential ${credentialName} deleted`)
+    appStore.setSuccess(`DNS Provider Secret ${credentialName} deleted`)
   }
 
-  async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName }) {
-    await api.deleteInfraProviderCredential({ bindingKind, bindingNamespace, bindingName })
+  async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName, preserveCredential }) {
+    let data
+    try {
+      const response = await api.deleteInfraProviderCredential({
+        bindingKind,
+        bindingNamespace,
+        bindingName,
+        ...(preserveCredential ? { preserveCredential: true } : {}),
+      })
+      data = response?.data
+    } catch (err) {
+      await fetchCredentials().catch(() => {})
+      throw err
+    }
     await fetchCredentials()
-    appStore.setSuccess(`Infrastructure credential ${bindingName} deleted`)
+    const credentialKind = data?.credentialRef?.kind ?? 'Secret'
+    let message = `Infrastructure binding ${bindingName} deleted`
+    if (data?.credentialDeleted) {
+      message = `Infrastructure ${credentialKind} and binding ${bindingName} deleted`
+    } else if (data?.credentialMissing) {
+      message += `; ${credentialKind} was already missing`
+    } else if (data?.credentialPreserved) {
+      message += `; ${credentialKind} preserved`
+    } else if (data?.credentialDeletionUnconfirmed) {
+      appStore.setError({
+        title: message,
+        text: `${credentialKind} deletion could not be confirmed. Verify ${data.credentialRef?.namespace}/${data.credentialRef?.name} before retrying manually.${data.credentialDeletionError ? ` ${data.credentialDeletionError}` : ''}`,
+      })
+      return data
+    }
+    appStore.setSuccess(message)
+    return data
   }
 
   const infrastructureBindingList = computed(() => {

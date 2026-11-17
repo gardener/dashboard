@@ -32,7 +32,7 @@ import { defineAsyncComponent } from 'vue'
 const OpenstackDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogOpenstack'))
 const GdchDnsDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGdchDns'))
 const GenericDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogGeneric'))
-const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogDelete'))
+const DeleteDialog = defineAsyncComponent(() => import('@/components/Credentials/GCredentialDialogDelete'))
 const MigrationDialog = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogMigration'))
 const AlicloudHelp = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHelpAlicloud'))
 const AwsHelp = defineAsyncComponent(() => import('@/components/Credentials/GSecretDialogHelpAws'))

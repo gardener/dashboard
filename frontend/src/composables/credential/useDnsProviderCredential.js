@@ -34,8 +34,6 @@ export const useDnsProviderCredential = (credential, options = {}) => {
 
   const isSecret = computed(() => _isSecret(credential.value))
   const isWorkloadIdentity = computed(() => _isWorkloadIdentity(credential.value))
-  const hasOwnWorkloadIdentity = computed(() => isWorkloadIdentity.value && credential.value !== undefined)
-
   const credentialNamespace = computed(() => credential.value?.metadata?.namespace)
   const credentialName = computed(() => credential.value?.metadata?.name)
   const credentialKind = computed(() => credential.value?.kind)
@@ -64,14 +62,21 @@ export const useDnsProviderCredential = (credential, options = {}) => {
   const credentialUsageCount = computed(() => {
     const name = credentialName.value
     const kind = credentialKind.value
+    const namespace = credentialNamespace.value
     const isCredentialReferencedByDnsProvider = shoot => some(shoot.spec?.dns?.providers, provider => {
       if (provider?.credentialsRef) {
-        return provider.credentialsRef.name === name && provider.credentialsRef.kind === kind
+        return provider.credentialsRef.name === name &&
+          provider.credentialsRef.kind === kind &&
+          (provider.credentialsRef.namespace ?? shoot.metadata?.namespace ?? namespace) === namespace
       }
       // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
-      return kind === 'Secret' && provider?.secretName === name
+      return kind === 'Secret' && provider?.secretName === name && (shoot.metadata?.namespace ?? namespace) === namespace
     })
-    const isCredentialReferencedByResource = shoot => some(shoot.spec?.resources, { resourceRef: { kind, name } })
+    const isCredentialReferencedByResource = shoot => some(shoot.spec?.resources, ({ resourceRef }) => {
+      return resourceRef?.kind === kind &&
+        resourceRef?.name === name &&
+        (resourceRef?.namespace ?? shoot.metadata?.namespace ?? namespace) === namespace
+    })
 
     let count = 0
     for (const shoot of shootList.value) {
@@ -99,7 +104,7 @@ export const useDnsProviderCredential = (credential, options = {}) => {
     credentialDetails,
     credentialUsageCount,
     isMarkedForDeletion,
-    hasOwnWorkloadIdentity,
+    isWorkloadIdentity,
     providerType,
   }
 }

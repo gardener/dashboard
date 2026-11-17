@@ -116,4 +116,21 @@ describe('useDnsProviderCredential composable', () => {
     const composable = useDnsProviderCredential(dnsCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(3)
   })
+
+  it('does not match direct references from a different namespace', () => {
+    shootStore.state.shoots = {
+      other: {
+        metadata: { name: 'other', namespace: 'garden-other' },
+        spec: {
+          dns: {
+            providers: [{ credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'aws-route53-secret' } }],
+          },
+        },
+      },
+    }
+
+    const composable = useDnsProviderCredential(findDnsCredentialRef('aws-route53-secret'))
+
+    expect(composable.credentialUsageCount.value).toBe(0)
+  })
 })
