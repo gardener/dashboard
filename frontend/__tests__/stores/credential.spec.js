@@ -267,7 +267,7 @@ describe('stores', () => {
     it('sends binding-only deletion and reports a preserved Secret accurately', async () => {
       api.deleteInfraProviderCredential.mockResolvedValue({
         data: {
-          credentialDeleted: false,
+          credentialDeletionRequested: false,
           credentialMissing: false,
           credentialPreserved: true,
           credentialPreservedReason: 'Only binding deletion was requested',
@@ -287,13 +287,13 @@ describe('stores', () => {
         bindingName: awsCredentialsBindingName,
         preserveCredential: true,
       })
-      expect(appStore.setSuccess).toHaveBeenCalledWith(`Infrastructure binding ${awsCredentialsBindingName} deleted; Secret preserved`)
+      expect(appStore.setSuccess).toHaveBeenCalledWith(`Infrastructure binding ${awsCredentialsBindingName} deletion requested; Secret preserved`)
       expect(appStore.setSuccess).not.toHaveBeenCalledWith(expect.stringContaining('Secret and binding'))
     })
 
     it.each([
-      [{ credentialDeleted: true, credentialMissing: false, credentialPreserved: false }, 'Secret and binding'],
-      [{ credentialDeleted: false, credentialMissing: true, credentialPreserved: false }, 'already missing'],
+      [{ credentialDeletionRequested: true, credentialMissing: false, credentialPreserved: false }, 'Secret and binding'],
+      [{ credentialDeletionRequested: false, credentialMissing: true, credentialPreserved: false }, 'already missing'],
     ])('reports structured infrastructure deletion outcomes', async (data, message) => {
       api.deleteInfraProviderCredential.mockResolvedValue({ data })
 
@@ -306,7 +306,7 @@ describe('stores', () => {
       expect(appStore.setSuccess).toHaveBeenCalledWith(expect.stringContaining(message))
     })
 
-    it('reports an unconfirmed credential deletion as a recoverable partial result', async () => {
+    it('reports an unconfirmed credential deletion even when refreshing credentials fails', async () => {
       const data = {
         credentialRef: {
           apiVersion: 'v1',
@@ -314,13 +314,14 @@ describe('stores', () => {
           namespace: testNamespace,
           name: 'aws-secret',
         },
-        credentialDeleted: false,
+        credentialDeletionRequested: false,
         credentialMissing: false,
         credentialPreserved: false,
         credentialDeletionUnconfirmed: true,
         credentialDeletionError: 'apiserver unavailable',
       }
       api.deleteInfraProviderCredential.mockResolvedValue({ data })
+      api.getCloudProviderCredentials.mockRejectedValueOnce(new Error('refresh failed'))
 
       await expect(credentialStore.deleteInfraCredential({
         bindingKind: 'CredentialsBinding',
@@ -329,7 +330,7 @@ describe('stores', () => {
       })).resolves.toBe(data)
 
       expect(appStore.setError).toHaveBeenCalledWith({
-        title: `Infrastructure binding ${awsCredentialsBindingName} deleted`,
+        title: `Infrastructure binding ${awsCredentialsBindingName} deletion requested`,
         text: expect.stringContaining(`${testNamespace}/aws-secret`),
       })
       expect(appStore.setSuccess).not.toHaveBeenCalled()

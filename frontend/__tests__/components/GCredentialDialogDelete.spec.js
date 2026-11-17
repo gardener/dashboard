@@ -26,11 +26,24 @@ describe('GCredentialDialogDelete', () => {
       false,
     ],
     [
+      { binding: {}, preserveCredential: true },
+      false,
+    ],
+    [
       { binding: {} },
       true,
     ],
   ])('determines whether the credential is deleted with its binding', (context, expected) => {
     expect(deletesCredentialWithBinding(context)).toBe(expected)
+  })
+
+  it.each([
+    [{}, false],
+    [{ binding: {}, bindingsWithSameCredential: [] }, false],
+    [{ binding: {}, bindingsWithSameCredential: [{ metadata: { name: 'other' } }] }, true],
+  ])('preserves the credential only when another binding references it', (context, expected) => {
+    const preserveCredential = GCredentialDialogDelete.computed.preserveCredential
+    expect(preserveCredential.call(context)).toBe(expected)
   })
 
   it('prevents duplicate submissions while deletion is running', async () => {
@@ -54,6 +67,7 @@ describe('GCredentialDialogDelete', () => {
       resourceKind: 'CredentialsBinding',
       resourceNamespace: 'garden-test',
       resourceName: 'credential',
+      preserveCredential: false,
       visible: true,
       deleteInfraCredential: vi.fn(),
       logger: { error: vi.fn() },
@@ -70,6 +84,31 @@ describe('GCredentialDialogDelete', () => {
     expect(context.loading).toBe(false)
   })
 
+  it('requests binding-only deletion when another binding references the credential', async () => {
+    const context = {
+      loading: false,
+      credential: undefined,
+      binding: {},
+      resourceKind: 'SecretBinding',
+      resourceNamespace: 'garden-test',
+      resourceName: 'credential',
+      preserveCredential: true,
+      visible: true,
+      deleteInfraCredential: vi.fn(),
+      logger: { error: vi.fn() },
+    }
+
+    await GCredentialDialogDelete.methods.onDelete.call(context)
+
+    expect(context.deleteInfraCredential).toHaveBeenCalledWith({
+      bindingKind: 'SecretBinding',
+      bindingNamespace: 'garden-test',
+      bindingName: 'credential',
+      preserveCredential: true,
+    })
+    expect(context.visible).toBe(false)
+  })
+
   it('shows a concise error and leaves the dialog open after failure', async () => {
     const context = {
       loading: false,
@@ -78,6 +117,7 @@ describe('GCredentialDialogDelete', () => {
       resourceKind: 'SecretBinding',
       resourceNamespace: 'garden-test',
       resourceName: 'credential',
+      preserveCredential: false,
       visible: true,
       deleteInfraCredential: vi.fn().mockRejectedValue(new Error('forbidden')),
       logger: { error: vi.fn() },

@@ -154,11 +154,11 @@ export const useCredentialStore = defineStore('credential', () => {
       await fetchCredentials().catch(() => {})
       throw err
     }
-    await fetchCredentials()
+    await fetchCredentials().catch(() => {})
     const credentialKind = data?.credentialRef?.kind ?? 'Secret'
-    let message = `Infrastructure binding ${bindingName} deleted`
-    if (data?.credentialDeleted) {
-      message = `Infrastructure ${credentialKind} and binding ${bindingName} deleted`
+    let message = `Infrastructure binding ${bindingName} deletion requested`
+    if (data?.credentialDeletionRequested) {
+      message = `Infrastructure ${credentialKind} and binding ${bindingName} deletion requested`
     } else if (data?.credentialMissing) {
       message += `; ${credentialKind} was already missing`
     } else if (data?.credentialPreserved) {

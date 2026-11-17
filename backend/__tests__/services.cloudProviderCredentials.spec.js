@@ -214,6 +214,26 @@ describe('cloudProviderCredentials service', () => {
     expect(client.core.secrets.delete).toHaveBeenCalledWith(namespace, 'credential')
   })
 
+  it('retains a newly created Secret when the binding exists after an ambiguous create failure', async () => {
+    const client = createClient()
+    const originalError = createError(500, 'binding response lost')
+    client['security.gardener.cloud'].credentialsbindings.create.mockRejectedValue(originalError)
+    client['security.gardener.cloud'].credentialsbindings.get.mockResolvedValue(credentialsBinding())
+
+    await expect(createInfra({ user: { client }, params: { secret: secret(), binding: credentialsBinding() } })).rejects.toBe(originalError)
+    expect(client.core.secrets.delete).not.toHaveBeenCalled()
+  })
+
+  it('retains a newly created Secret when the binding creation result cannot be verified', async () => {
+    const client = createClient()
+    const originalError = createError(500, 'binding response lost')
+    client['security.gardener.cloud'].credentialsbindings.create.mockRejectedValue(originalError)
+    client['security.gardener.cloud'].credentialsbindings.get.mockRejectedValue(createError(500, 'lookup unavailable'))
+
+    await expect(createInfra({ user: { client }, params: { secret: secret(), binding: credentialsBinding() } })).rejects.toBe(originalError)
+    expect(client.core.secrets.delete).not.toHaveBeenCalled()
+  })
+
   it('preserves and augments the original binding error when rollback fails', async () => {
     const client = createClient()
     const originalError = createError(403, 'binding forbidden')
@@ -248,7 +268,7 @@ describe('cloudProviderCredentials service', () => {
     expect(client['core.gardener.cloud'].secretbindings.list).not.toHaveBeenCalled()
     expect(client['security.gardener.cloud'].credentialsbindings.list).not.toHaveBeenCalled()
     expect(result).toMatchObject({
-      credentialDeleted: true,
+      credentialDeletionRequested: true,
       credentialMissing: false,
       credentialPreserved: false,
     })
@@ -290,7 +310,7 @@ describe('cloudProviderCredentials service', () => {
     expect(client.core.secrets.delete).not.toHaveBeenCalled()
   })
 
-  it.each([403, 409])('reports the credential as preserved when Gardener rejects its deletion with %s', async statusCode => {
+  it.each([403, 409])('reports the credential as preserved when its deletion request fails with %s', async statusCode => {
     const client = createClient()
     client['security.gardener.cloud'].credentialsbindings.get.mockResolvedValue(credentialsBinding())
     client.core.secrets.delete.mockRejectedValue(createError(statusCode, 'credential is still in use'))
@@ -303,13 +323,13 @@ describe('cloudProviderCredentials service', () => {
     expect(client['core.gardener.cloud'].shoots.list).not.toHaveBeenCalled()
   })
 
-  it('relies on Gardener to reject deletion of a binding that is still used', async () => {
+  it('does not request credential deletion when binding deletion fails', async () => {
     const client = createClient()
     client['security.gardener.cloud'].credentialsbindings.get.mockResolvedValue(credentialsBinding())
-    const admissionError = createError(403, 'binding is still used by a Shoot')
-    client['security.gardener.cloud'].credentialsbindings.delete.mockRejectedValue(admissionError)
+    const deletionError = createError(403, 'binding deletion forbidden')
+    client['security.gardener.cloud'].credentialsbindings.delete.mockRejectedValue(deletionError)
 
-    await expect(deleteBinding(client)).rejects.toBe(admissionError)
+    await expect(deleteBinding(client)).rejects.toBe(deletionError)
     expect(client.core.secrets.delete).not.toHaveBeenCalled()
     expect(client['core.gardener.cloud'].shoots.list).not.toHaveBeenCalled()
   })
@@ -323,7 +343,7 @@ describe('cloudProviderCredentials service', () => {
     expect(client.core.secrets.delete).not.toHaveBeenCalled()
     expect(client.core.secrets.get).not.toHaveBeenCalled()
     expect(result).toMatchObject({
-      credentialDeleted: false,
+      credentialDeletionRequested: false,
       credentialMissing: false,
       credentialPreserved: true,
       credentialPreservedReason: 'Only binding deletion was requested',
@@ -338,7 +358,7 @@ describe('cloudProviderCredentials service', () => {
     const result = await deleteBinding(client)
 
     expect(result).toMatchObject({
-      credentialDeleted: false,
+      credentialDeletionRequested: false,
       credentialMissing: true,
       credentialPreserved: false,
     })
@@ -354,7 +374,7 @@ describe('cloudProviderCredentials service', () => {
 
     const result = await deleteBinding(client)
 
-    expect(result.credentialDeleted).toBe(true)
+    expect(result.credentialDeletionRequested).toBe(true)
     expect(client['security.gardener.cloud'].credentialsbindings.delete).toHaveBeenCalled()
     expect(client.core.secrets.delete).toHaveBeenCalled()
     expect(client['core.gardener.cloud'].shoots.list).not.toHaveBeenCalled()
@@ -378,7 +398,7 @@ describe('cloudProviderCredentials service', () => {
         namespace,
         name: 'credential',
       },
-      credentialDeleted: false,
+      credentialDeletionRequested: false,
       credentialMissing: false,
       credentialDeletionUnconfirmed: true,
       credentialDeletionError: 'apiserver unavailable',
@@ -403,15 +423,15 @@ describe('cloudProviderCredentials service', () => {
     expect(client['core.gardener.cloud'].shoots.list).not.toHaveBeenCalled()
   })
 
-  it('propagates Gardener admission errors for referenced DNS Secrets', async () => {
+  it('propagates DNS credential deletion errors', async () => {
     const client = createClient()
-    const admissionError = createError(403, 'Secret is still referenced')
-    client.core.secrets.delete.mockRejectedValue(admissionError)
+    const deletionError = createError(403, 'Secret deletion forbidden')
+    client.core.secrets.delete.mockRejectedValue(deletionError)
 
     await expect(removeDns({
       user: { client },
       params: { credentialKind: 'Secret', credentialNamespace: namespace, credentialName: 'credential' },
-    })).rejects.toBe(admissionError)
+    })).rejects.toBe(deletionError)
 
     expect(client.core.secrets.delete).toHaveBeenCalled()
     expect(client['core.gardener.cloud'].shoots.list).not.toHaveBeenCalled()

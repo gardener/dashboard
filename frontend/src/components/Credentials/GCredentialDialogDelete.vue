@@ -37,6 +37,29 @@ SPDX-License-Identifier: Apache-2.0
           color="error"
         />
       </v-card-text>
+      <v-alert
+        v-if="preserveCredential"
+        type="info"
+        variant="tonal"
+        class="mx-6 mb-4"
+      >
+        <p>
+          The Secret <code>{{ credentialName }}</code> is also referenced by
+        </p>
+        <v-chip
+          v-for="{ kind, metadata } in bindingsWithSameCredential"
+          :key="metadata.uid"
+          v-tooltip:top="kind"
+          class="mr-2"
+          size="small"
+          :prepend-icon="kind === 'SecretBinding' ? 'mdi-key' : 'mdi-key-outline'"
+        >
+          {{ metadata.name }}
+        </v-chip>
+        <p class="mt-2 mb-0">
+          Only this <code>{{ resourceKind }}</code> will be deleted. The Secret will be preserved.
+        </p>
+      </v-alert>
       <v-divider />
       <v-card-actions>
         <v-spacer />
@@ -94,6 +117,7 @@ export default {
       resourceKind: composable.resourceKind,
       resourceNamespace: composable.resourceNamespace,
       credentialName: composable.credentialName,
+      bindingsWithSameCredential: composable.bindingsWithSameCredential,
       isOrphanedBinding: composable.isOrphanedBinding,
     }
   },
@@ -113,8 +137,11 @@ export default {
         this.$emit('update:modelValue', value)
       },
     },
+    preserveCredential () {
+      return Boolean(this.binding && this.bindingsWithSameCredential?.length)
+    },
     deletesCredentialWithBinding () {
-      return Boolean(this.binding && !this.isOrphanedBinding)
+      return Boolean(this.binding && !this.isOrphanedBinding && !this.preserveCredential)
     },
   },
   watch: {
@@ -143,6 +170,7 @@ export default {
             bindingKind: this.resourceKind,
             bindingNamespace: this.resourceNamespace,
             bindingName: this.resourceName,
+            ...(this.preserveCredential ? { preserveCredential: true } : {}),
           })
         }
         this.visible = false

@@ -332,7 +332,7 @@ describe('api', function () {
       ['SecretBinding', 'foo-infra3-secret2-secretbinding', 'secret2', 'Secret'],
       ['CredentialsBinding', 'foo-infra3-secret3-credentialsbinding', 'secret3', 'Secret'],
       ['CredentialsBinding', 'foo-wlid1', 'wl-foo-infra1', 'WorkloadIdentity'],
-    ])('deletes an unused %s %s and its credential', async (kind, name, credentialName, credentialKind) => {
+    ])('requests deletion of an unused %s %s and its credential', async (kind, name, credentialName, credentialKind) => {
       const params = { bindingKind: kind, bindingNamespace: namespace, bindingName: name }
       const binding = kind === 'SecretBinding'
         ? fixtures.secretbindings.get(namespace, name)
@@ -365,7 +365,7 @@ describe('api', function () {
         { method: 'delete', path: credentialPath },
       ])
       expect(res.body).toMatchObject({
-        credentialDeleted: true,
+        credentialDeletionRequested: true,
         credentialMissing: false,
         credentialPreserved: false,
       })
@@ -378,7 +378,7 @@ describe('api', function () {
         credentialError: undefined,
         expectedTargets: 2,
         expected: {
-          credentialDeleted: false,
+          credentialDeletionRequested: false,
           credentialMissing: false,
           credentialPreserved: true,
           credentialDeletionUnconfirmed: false,
@@ -390,7 +390,7 @@ describe('api', function () {
         credentialError: createError(500, 'apiserver unavailable'),
         expectedTargets: 3,
         expected: {
-          credentialDeleted: false,
+          credentialDeletionRequested: false,
           credentialMissing: false,
           credentialPreserved: false,
           credentialDeletionUnconfirmed: true,

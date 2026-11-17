@@ -54,6 +54,7 @@ describe('GBindingRowActions', () => {
     const actions = wrapper.findAllComponents(GActionButton)
     expect(actions).toHaveLength(1)
     expect(actions[0].props('icon')).toBe('mdi-delete')
+    expect(actions[0].props('disabled')).toBe(false)
   })
 
   it('shows disabled credential actions for an existing WorkloadIdentity', () => {

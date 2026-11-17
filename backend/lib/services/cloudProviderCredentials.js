@@ -115,7 +115,7 @@ export async function createInfra ({ user, params }) {
   try {
     binding = await client['security.gardener.cloud'].credentialsbindings.create(bindingNamespace, binding)
   } catch (err) {
-    if (secret) {
+    if (secret && await credentialsBindingIsMissing(client, bindingNamespace, binding.metadata.name)) {
       logger.error('failed to create CredentialsBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
       try {
         await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
@@ -200,20 +200,33 @@ export async function removeInfra ({ user, params }) {
   }
 
   const descriptor = descriptorForCredentialReference(credentialRef)
-  // Delete the binding first. Gardener's admission webhooks are authoritative
-  // for whether it is still in use. This also ensures that a rejected binding
-  // deletion never leaves the binding without its credential.
+  // Delete the binding first so Gardener can release reference protection on
+  // the credential. Finalizers may keep referenced resources in Terminating
+  // until their remaining references are removed.
   binding = await bindingClient.delete(bindingNamespace, bindingName)
 
   const credentialDeletion = params.preserveCredential === true
     ? {
-        credentialDeleted: false,
+        credentialDeletionRequested: false,
         credentialMissing: false,
         credentialPreservedReason: 'Only binding deletion was requested',
       }
     : await requestCredentialDeletion({ client, descriptor, credentialRef })
 
   return removeInfraResponse(binding, credentialRef, credentialDeletion)
+}
+
+async function credentialsBindingIsMissing (client, namespace, name) {
+  try {
+    await client['security.gardener.cloud'].credentialsbindings.get(namespace, name)
+    return false
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return true
+    }
+    logger.error('failed to verify CredentialsBinding %s/%s after its creation failed; retaining the Secret: %s', namespace, name, err.message)
+    return false
+  }
 }
 
 function validateSecret (params) {
@@ -319,20 +332,20 @@ async function requestCredentialDeletion ({ client, descriptor, credentialRef })
   const { namespace, name } = credentialRef
   try {
     await descriptor.client(client).delete(namespace, name)
-    return { credentialDeleted: true, credentialMissing: false }
+    return { credentialDeletionRequested: true, credentialMissing: false }
   } catch (err) {
     if (isHttpError(err, 403) || isHttpError(err, 409)) {
       return {
-        credentialDeleted: false,
+        credentialDeletionRequested: false,
         credentialMissing: false,
         credentialPreservedReason: `Gardener did not allow credential deletion: ${err.message}`,
       }
     }
     if (isHttpError(err, 404)) {
-      return { credentialDeleted: false, credentialMissing: true }
+      return { credentialDeletionRequested: false, credentialMissing: true }
     }
     return {
-      credentialDeleted: false,
+      credentialDeletionRequested: false,
       credentialMissing: false,
       credentialDeletionUnconfirmed: true,
       credentialDeletionError: err.message,
@@ -342,7 +355,7 @@ async function requestCredentialDeletion ({ client, descriptor, credentialRef })
 
 function removeInfraResponse (binding, credentialRef, credentialDeletion) {
   const {
-    credentialDeleted,
+    credentialDeletionRequested,
     credentialMissing,
     credentialDeletionUnconfirmed = false,
     credentialDeletionError,
@@ -351,7 +364,7 @@ function removeInfraResponse (binding, credentialRef, credentialDeletion) {
   return {
     binding,
     credentialRef,
-    credentialDeleted,
+    credentialDeletionRequested,
     credentialMissing,
     credentialDeletionUnconfirmed,
     credentialDeletionError,
