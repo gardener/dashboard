@@ -56,9 +56,15 @@ import {
   transformHtml,
 } from '@/utils'
 
+import get from 'lodash/get'
 import pick from 'lodash/pick'
 
 const configKey = 'gdch-config'
+
+// Keys must match the GDC extension's `OrgClusterConfig` struct:
+// https://github.com/gardener/gardener-extension-provider-gdc/blob/b41b6ca52c91aaf908f6a7089e9e848c2c0d41fd/gdc/pkg/client/config.go
+const orgClusterUrlConfigKey = 'orgClusterURL'
+const caDataConfigKey = 'caData'
 
 const orgClusterUrlField = {
   key: 'url',
@@ -171,15 +177,15 @@ export default {
     },
     orgClusterUrl: {
       get () {
-        return this.gdchConfig.url ?? ''
+        return get(this.gdchConfig, orgClusterUrlConfigKey) ?? ''
       },
       set (value) {
-        this.updateConfig({ url: value })
+        this.updateConfig({ [orgClusterUrlConfigKey]: value })
       },
     },
     caBundle: {
       get () {
-        const value = this.gdchConfig.caBundle
+        const value = get(this.gdchConfig, caDataConfigKey)
         if (!value) {
           return ''
         }
@@ -191,7 +197,7 @@ export default {
         }
       },
       set (value) {
-        this.updateConfig({ caBundle: encodeBase64(value) })
+        this.updateConfig({ [caDataConfigKey]: encodeBase64(value) })
       },
     },
   },

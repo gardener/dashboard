@@ -105,6 +105,8 @@ describe('GSecretDialogGdchDns', () => {
       .find(component => component.props('field').label === label)
   }
 
+  // `gdch-config` keys must match the GDC extension's `OrgClusterConfig` struct:
+  // https://github.com/gardener/gardener-extension-provider-gdc/blob/b41b6ca52c91aaf908f6a7089e9e848c2c0d41fd/gdc/pkg/client/config.go
   it('serializes the DNS org fields into the gdch-config secret value', async () => {
     const wrapper = mountDialog()
     await nextTick()
@@ -118,8 +120,8 @@ describe('GSecretDialogGdchDns', () => {
     expect(secretContext.secretManifest.value.data).toEqual({
       'serviceaccount.json': encodeBase64('{"name":"dns-identity"}'),
       'gdch-config': encodeBase64(JSON.stringify({
-        url: 'https://org.example.org',
-        caBundle: encodeBase64('org-ca'),
+        orgClusterURL: 'https://org.example.org',
+        caData: encodeBase64('org-ca'),
       })),
     })
   })
@@ -148,14 +150,14 @@ describe('GSecretDialogGdchDns', () => {
 
     expect(fieldByLabel(wrapper, 'CA Bundle').find('textarea').element.value).toContain('BEGIN CERTIFICATE')
     expect(secretContext.secretManifest.value.data['gdch-config']).toBe(encodeBase64(JSON.stringify({
-      caBundle: encodeBase64('-----BEGIN CERTIFICATE-----\\ncertificate\\n-----END CERTIFICATE-----'),
+      caData: encodeBase64('-----BEGIN CERTIFICATE-----\\ncertificate\\n-----END CERTIFICATE-----'),
     })))
   })
 
   it('unpacks an existing DNS org config into separate fields', async () => {
     const config = {
-      url: 'https://org.example.org',
-      caBundle: encodeBase64('org-ca'),
+      orgClusterURL: 'https://org.example.org',
+      caData: encodeBase64('org-ca'),
     }
     const wrapper = mountDialog({
       credential: {
@@ -171,7 +173,7 @@ describe('GSecretDialogGdchDns', () => {
     })
     await nextTick()
 
-    expect(fieldByLabel(wrapper, 'Org Cluster URL').find('input').element.value).toBe(config.url)
+    expect(fieldByLabel(wrapper, 'Org Cluster URL').find('input').element.value).toBe(config.orgClusterURL)
     expect(fieldByLabel(wrapper, 'CA Bundle').find('textarea').element.value).toBe('org-ca')
   })
 })
