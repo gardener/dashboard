@@ -84,9 +84,14 @@ SPDX-License-Identifier: Apache-2.0
   </v-dialog>
 </template>
 
-<script>
-import { mapActions } from 'pinia'
-import { toRefs } from 'vue'
+<script setup>
+import {
+  computed,
+  inject,
+  ref,
+  toRef,
+  watch,
+} from 'vue'
 
 import { useCredentialStore } from '@/store/credential'
 
@@ -98,95 +103,84 @@ import { useDnsProviderCredential } from '@/composables/credential/useDnsProvide
 
 import { errorDetailsFromError } from '@/utils/error'
 
-export default {
-  components: { GMessage, GToolbar },
-  inject: ['logger'],
-  props: {
-    modelValue: { type: Boolean, required: true },
-    credential: Object,
-    binding: Object,
-  },
-  emits: ['update:modelValue'],
-  setup (props) {
-    const { credential, binding } = toRefs(props)
-    const composable = binding.value
-      ? useCloudProviderBinding(binding)
-      : useDnsProviderCredential(credential)
-    return {
-      resourceName: composable.resourceName,
-      resourceKind: composable.resourceKind,
-      resourceNamespace: composable.resourceNamespace,
-      credentialName: composable.credentialName,
-      bindingsWithSameCredential: composable.bindingsWithSameCredential,
-      isOrphanedBinding: composable.isOrphanedBinding,
+const props = defineProps({
+  credential: Object,
+  binding: Object,
+})
+
+const visible = defineModel({
+  type: Boolean,
+  required: true,
+})
+
+const logger = inject('logger')
+const credentialStore = useCredentialStore()
+const credential = toRef(props, 'credential')
+const binding = toRef(props, 'binding')
+const composable = binding.value
+  ? useCloudProviderBinding(binding)
+  : useDnsProviderCredential(credential)
+
+const {
+  bindingsWithSameCredential,
+  credentialName,
+  isOrphanedBinding,
+  resourceKind,
+  resourceName,
+  resourceNamespace,
+} = composable
+
+const detailedErrorMessage = ref()
+const errorMessage = ref()
+const loading = ref(false)
+
+const preserveCredential = computed(() => {
+  return Boolean(binding.value && bindingsWithSameCredential?.value?.length)
+})
+
+const deletesCredentialWithBinding = computed(() => {
+  return Boolean(binding.value && !isOrphanedBinding?.value && !preserveCredential.value)
+})
+
+watch(visible, value => {
+  if (value) {
+    reset()
+  }
+})
+
+async function onDelete () {
+  if (loading.value) {
+    return
+  }
+  loading.value = true
+  try {
+    if (credential.value) {
+      await credentialStore.deleteDnsCredential({
+        credentialKind: resourceKind.value,
+        credentialNamespace: resourceNamespace.value,
+        credentialName: resourceName.value,
+      })
+    } else {
+      await credentialStore.deleteInfraCredential({
+        bindingKind: resourceKind.value,
+        bindingNamespace: resourceNamespace.value,
+        bindingName: resourceName.value,
+        preserveCredential: preserveCredential.value,
+      })
     }
-  },
-  data () {
-    return {
-      detailedErrorMessage: undefined,
-      errorMessage: undefined,
-      loading: false,
-    }
-  },
-  computed: {
-    visible: {
-      get () {
-        return this.modelValue
-      },
-      set (value) {
-        this.$emit('update:modelValue', value)
-      },
-    },
-    preserveCredential () {
-      return Boolean(this.binding && this.bindingsWithSameCredential?.length)
-    },
-    deletesCredentialWithBinding () {
-      return Boolean(this.binding && !this.isOrphanedBinding && !this.preserveCredential)
-    },
-  },
-  watch: {
-    modelValue (value) {
-      if (value) {
-        this.reset()
-      }
-    },
-  },
-  methods: {
-    ...mapActions(useCredentialStore, ['deleteDnsCredential', 'deleteInfraCredential']),
-    async onDelete () {
-      if (this.loading) {
-        return
-      }
-      this.loading = true
-      try {
-        if (this.credential) {
-          await this.deleteDnsCredential({
-            credentialKind: this.resourceKind,
-            credentialNamespace: this.resourceNamespace,
-            credentialName: this.resourceName,
-          })
-        } else {
-          await this.deleteInfraCredential({
-            bindingKind: this.resourceKind,
-            bindingNamespace: this.resourceNamespace,
-            bindingName: this.resourceName,
-            ...(this.preserveCredential ? { preserveCredential: true } : {}),
-          })
-        }
-        this.visible = false
-      } catch (err) {
-        const details = errorDetailsFromError(err)
-        this.errorMessage = `Failed to delete ${this.binding ? 'credential binding' : 'Secret'}.`
-        this.detailedErrorMessage = details.detailedMessage
-        this.logger.error(this.errorMessage, details.errorCode, details.detailedMessage, err)
-      } finally {
-        this.loading = false
-      }
-    },
-    reset () {
-      this.errorMessage = undefined
-      this.detailedErrorMessage = undefined
-    },
-  },
+    visible.value = false
+  } catch (err) {
+    const details = errorDetailsFromError(err)
+    errorMessage.value = `Failed to delete ${binding.value ? 'credential binding' : 'Secret'}.`
+    detailedErrorMessage.value = details.detailedMessage
+    logger.error(errorMessage.value, details.errorCode, details.detailedMessage, err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function reset () {
+  errorMessage.value = undefined
+  detailedErrorMessage.value = undefined
 }
 </script>

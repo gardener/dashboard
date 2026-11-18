@@ -4,129 +4,224 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+import { setActivePinia } from 'pinia'
+import { createTestingPinia } from '@pinia/testing'
+import {
+  flushPromises,
+  shallowMount,
+} from '@vue/test-utils'
+import { ref } from 'vue'
+
+import { useCredentialStore } from '@/store/credential'
+
+import GMessage from '@/components/GMessage.vue'
 import GCredentialDialogDelete from '@/components/Credentials/GCredentialDialogDelete.vue'
 
-function deletesCredentialWithBinding (overrides = {}) {
-  return GCredentialDialogDelete.computed.deletesCredentialWithBinding.call({
-    binding: undefined,
-    isOrphanedBinding: false,
-    preserveCredential: false,
-    ...overrides,
+const composableMocks = vi.hoisted(() => ({
+  useCloudProviderBinding: vi.fn(),
+  useDnsProviderCredential: vi.fn(),
+}))
+
+vi.mock('@/composables/credential/useCloudProviderBinding', () => ({
+  useCloudProviderBinding: composableMocks.useCloudProviderBinding,
+}))
+
+vi.mock('@/composables/credential/useDnsProviderCredential', () => ({
+  useDnsProviderCredential: composableMocks.useDnsProviderCredential,
+}))
+
+const { createVuetifyPlugin } = global.fixtures.helper
+const slotStub = { template: '<div><slot /></div>' }
+const VBtnStub = {
+  name: 'VBtn',
+  props: {
+    disabled: Boolean,
+  },
+  emits: ['click'],
+  template: '<button @click="$emit(\'click\')"><slot /></button>',
+}
+
+function mountDialog ({
+  binding,
+  credential,
+  bindingsWithSameCredential = [],
+  isOrphanedBinding = false,
+  resourceKind = binding?.kind ?? credential?.kind,
+  resourceName = binding?.metadata.name ?? credential?.metadata.name,
+  resourceNamespace = binding?.metadata.namespace ?? credential?.metadata.namespace,
+  credentialName = binding?.credentialsRef?.name ?? binding?.secretRef?.name ?? credential?.metadata.name,
+} = {}) {
+  const composable = {
+    bindingsWithSameCredential: ref(bindingsWithSameCredential),
+    credentialName: ref(credentialName),
+    isOrphanedBinding: ref(isOrphanedBinding),
+    resourceKind: ref(resourceKind),
+    resourceName: ref(resourceName),
+    resourceNamespace: ref(resourceNamespace),
+  }
+  composableMocks.useCloudProviderBinding.mockReturnValue(composable)
+  composableMocks.useDnsProviderCredential.mockReturnValue(composable)
+
+  const pinia = createTestingPinia()
+  setActivePinia(pinia)
+  const logger = { error: vi.fn() }
+  const wrapper = shallowMount(GCredentialDialogDelete, {
+    props: {
+      modelValue: true,
+      binding,
+      credential,
+    },
+    global: {
+      plugins: [
+        pinia,
+        createVuetifyPlugin(),
+      ],
+      provide: { logger },
+      stubs: {
+        VAlert: slotStub,
+        VBtn: VBtnStub,
+        VCard: slotStub,
+        VCardActions: slotStub,
+        VCardText: slotStub,
+        VContainer: slotStub,
+        VDialog: slotStub,
+      },
+    },
   })
+
+  return {
+    credentialStore: useCredentialStore(),
+    logger,
+    wrapper,
+  }
+}
+
+function binding (kind = 'CredentialsBinding') {
+  const credentialRef = { name: 'test-secret' }
+  return {
+    kind,
+    metadata: {
+      name: 'test-binding',
+      namespace: 'garden-test',
+    },
+    ...(kind === 'SecretBinding'
+      ? { secretRef: credentialRef }
+      : { credentialsRef: credentialRef }),
+  }
+}
+
+function credential () {
+  return {
+    kind: 'Secret',
+    metadata: {
+      name: 'test-secret',
+      namespace: 'garden-test',
+    },
+  }
+}
+
+function deleteButton (wrapper) {
+  return wrapper.findAllComponents({ name: 'VBtn' })
+    .find(button => button.text() === 'Delete')
 }
 
 describe('GCredentialDialogDelete', () => {
   it.each([
     [
-      {},
-      false,
+      { binding: binding() },
+      'delete test-secret and its associated CredentialsBinding',
     ],
     [
-      { binding: {}, isOrphanedBinding: true },
-      false,
+      { binding: binding(), isOrphanedBinding: true },
+      'delete the CredentialsBinding test-binding',
     ],
     [
-      { binding: {}, preserveCredential: true },
-      false,
+      { binding: binding(), bindingsWithSameCredential: [binding('SecretBinding')] },
+      'Only this CredentialsBinding will be deleted. The Secret will be preserved.',
     ],
     [
-      { binding: {} },
-      true,
+      { credential: credential() },
+      'delete test-secret',
     ],
-  ])('determines whether the credential is deleted with its binding', (context, expected) => {
-    expect(deletesCredentialWithBinding(context)).toBe(expected)
-  })
+  ])('explains the deletion outcome', (options, message) => {
+    const { wrapper } = mountDialog(options)
 
-  it.each([
-    [{}, false],
-    [{ binding: {}, bindingsWithSameCredential: [] }, false],
-    [{ binding: {}, bindingsWithSameCredential: [{ metadata: { name: 'other' } }] }, true],
-  ])('preserves the credential only when another binding references it', (context, expected) => {
-    const preserveCredential = GCredentialDialogDelete.computed.preserveCredential
-    expect(preserveCredential.call(context)).toBe(expected)
+    expect(wrapper.text()).toContain(message)
   })
 
   it('prevents duplicate submissions while deletion is running', async () => {
-    const context = {
-      loading: true,
-      deleteDnsCredential: vi.fn(),
-      deleteInfraCredential: vi.fn(),
-    }
+    let resolveDeletion
+    const deletion = new Promise(resolve => {
+      resolveDeletion = resolve
+    })
+    const { credentialStore, wrapper } = mountDialog({ binding: binding() })
+    credentialStore.deleteInfraCredential.mockReturnValue(deletion)
+    const button = deleteButton(wrapper)
 
-    await GCredentialDialogDelete.methods.onDelete.call(context)
+    await button.trigger('click')
+    await button.trigger('click')
 
-    expect(context.deleteDnsCredential).not.toHaveBeenCalled()
-    expect(context.deleteInfraCredential).not.toHaveBeenCalled()
+    expect(credentialStore.deleteInfraCredential).toHaveBeenCalledOnce()
+    resolveDeletion()
+    await flushPromises()
   })
 
   it('deletes an infrastructure credential and closes only after success', async () => {
-    const context = {
-      loading: false,
-      credential: undefined,
-      binding: {},
-      resourceKind: 'CredentialsBinding',
-      resourceNamespace: 'garden-test',
-      resourceName: 'credential',
-      preserveCredential: false,
-      visible: true,
-      deleteInfraCredential: vi.fn(),
-      logger: { error: vi.fn() },
-    }
+    const { credentialStore, wrapper } = mountDialog({ binding: binding() })
 
-    await GCredentialDialogDelete.methods.onDelete.call(context)
+    await deleteButton(wrapper).trigger('click')
+    await flushPromises()
 
-    expect(context.deleteInfraCredential).toHaveBeenCalledWith({
+    expect(credentialStore.deleteInfraCredential).toHaveBeenCalledWith({
       bindingKind: 'CredentialsBinding',
       bindingNamespace: 'garden-test',
-      bindingName: 'credential',
+      bindingName: 'test-binding',
+      preserveCredential: false,
     })
-    expect(context.visible).toBe(false)
-    expect(context.loading).toBe(false)
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
   })
 
   it('requests binding-only deletion when another binding references the credential', async () => {
-    const context = {
-      loading: false,
-      credential: undefined,
-      binding: {},
-      resourceKind: 'SecretBinding',
-      resourceNamespace: 'garden-test',
-      resourceName: 'credential',
-      preserveCredential: true,
-      visible: true,
-      deleteInfraCredential: vi.fn(),
-      logger: { error: vi.fn() },
-    }
+    const { credentialStore, wrapper } = mountDialog({
+      binding: binding('SecretBinding'),
+      bindingsWithSameCredential: [binding()],
+    })
 
-    await GCredentialDialogDelete.methods.onDelete.call(context)
+    await deleteButton(wrapper).trigger('click')
+    await flushPromises()
 
-    expect(context.deleteInfraCredential).toHaveBeenCalledWith({
+    expect(credentialStore.deleteInfraCredential).toHaveBeenCalledWith({
       bindingKind: 'SecretBinding',
       bindingNamespace: 'garden-test',
-      bindingName: 'credential',
+      bindingName: 'test-binding',
       preserveCredential: true,
     })
-    expect(context.visible).toBe(false)
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
+  })
+
+  it('deletes a DNS credential', async () => {
+    const { credentialStore, wrapper } = mountDialog({ credential: credential() })
+
+    await deleteButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(credentialStore.deleteDnsCredential).toHaveBeenCalledWith({
+      credentialKind: 'Secret',
+      credentialNamespace: 'garden-test',
+      credentialName: 'test-secret',
+    })
+    expect(wrapper.emitted('update:modelValue')).toEqual([[false]])
   })
 
   it('shows a concise error and leaves the dialog open after failure', async () => {
-    const context = {
-      loading: false,
-      credential: undefined,
-      binding: {},
-      resourceKind: 'SecretBinding',
-      resourceNamespace: 'garden-test',
-      resourceName: 'credential',
-      preserveCredential: false,
-      visible: true,
-      deleteInfraCredential: vi.fn().mockRejectedValue(new Error('forbidden')),
-      logger: { error: vi.fn() },
-    }
+    const { credentialStore, logger, wrapper } = mountDialog({ binding: binding('SecretBinding') })
+    credentialStore.deleteInfraCredential.mockRejectedValue(new Error('forbidden'))
 
-    await GCredentialDialogDelete.methods.onDelete.call(context)
+    await deleteButton(wrapper).trigger('click')
+    await flushPromises()
 
-    expect(context.errorMessage).toBe('Failed to delete credential binding.')
-    expect(context.visible).toBe(true)
-    expect(context.loading).toBe(false)
+    expect(wrapper.findComponent(GMessage).props('message')).toBe('Failed to delete credential binding.')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    expect(logger.error).toHaveBeenCalledOnce()
   })
 })

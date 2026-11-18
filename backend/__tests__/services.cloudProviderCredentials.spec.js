@@ -175,7 +175,7 @@ describe('cloudProviderCredentials service', () => {
     expect(client.core.secrets.create).not.toHaveBeenCalled()
   })
 
-  it('allows only an exact same-name SecretBinding migration without a new Secret', async () => {
+  it('allows an exact same-name SecretBinding migration without a new Secret', async () => {
     const client = createClient()
     const binding = credentialsBinding()
     client['core.gardener.cloud'].secretbindings.get.mockResolvedValue(secretBinding())

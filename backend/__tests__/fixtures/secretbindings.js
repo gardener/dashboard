@@ -22,7 +22,7 @@ const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1-secret1-secretbinding',
-    provider: 'infra1',
+    provider: { type: 'infra1' },
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret1',
@@ -32,7 +32,7 @@ const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'foo-infra3-secret2-secretbinding',
-    provider: 'infra3',
+    provider: { type: 'infra3' },
     secretRef: {
       namespace: 'garden-foo',
       name: 'secret2',
@@ -42,7 +42,7 @@ const cloudProviderBindingList = [
   getSecretBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    provider: 'infra1',
+    provider: { type: 'infra1' },
     secretRef: {
       namespace: 'garden-trial',
       name: 'trial-secret',
