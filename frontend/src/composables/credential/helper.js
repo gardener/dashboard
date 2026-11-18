@@ -285,7 +285,7 @@ export function isCredentialsBinding (binding) {
 }
 
 export function bindingProviderType (binding) {
-  return typeof binding?.provider === 'string' ? binding.provider : binding?.provider?.type
+  return binding?.provider?.type
 }
 
 export function bindingCredentialRef (binding) {

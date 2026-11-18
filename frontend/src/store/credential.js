@@ -140,14 +140,14 @@ export const useCredentialStore = defineStore('credential', () => {
     appStore.setSuccess(`DNS Provider Secret ${credentialName} deleted`)
   }
 
-  async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName, preserveCredential }) {
+  async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName, preserveCredential = false }) {
     let data
     try {
       const response = await api.deleteInfraProviderCredential({
         bindingKind,
         bindingNamespace,
         bindingName,
-        ...(preserveCredential ? { preserveCredential: true } : {}),
+        preserveCredential,
       })
       data = response?.data
     } catch (err) {
@@ -156,17 +156,28 @@ export const useCredentialStore = defineStore('credential', () => {
     }
     await fetchCredentials().catch(() => {})
     const credentialKind = data?.credentialRef?.kind ?? 'Secret'
-    let message = `Infrastructure binding ${bindingName} deletion requested`
+    const credentialName = data?.credentialRef?.name
+    const credentialLabel = [credentialKind, credentialName].filter(Boolean).join(' ')
+    let message = `Deletion of ${bindingKind} ${bindingName} was requested`
     if (data?.credentialDeletionRequested) {
-      message = `Infrastructure ${credentialKind} and binding ${bindingName} deletion requested`
+      message = `Deletion of ${credentialLabel} and ${bindingKind} ${bindingName} was requested`
     } else if (data?.credentialMissing) {
-      message += `; ${credentialKind} was already missing`
+      message += `. ${credentialLabel} was already missing`
     } else if (data?.credentialPreserved) {
-      message += `; ${credentialKind} preserved`
+      message += `. ${credentialLabel} was preserved`
     } else if (data?.credentialDeletionUnconfirmed) {
+      const credentialPath = [data.credentialRef?.namespace, credentialName].filter(Boolean).join('/')
+      const details = data.credentialDeletionError
+        ? `Details: ${data.credentialDeletionError}`
+        : undefined
+      const text = [
+        `${credentialLabel} deletion could not be confirmed.`,
+        `Verify ${credentialPath} before retrying manually.`,
+        details,
+      ].filter(Boolean).join(' ')
       appStore.setError({
         title: message,
-        text: `${credentialKind} deletion could not be confirmed. Verify ${data.credentialRef?.namespace}/${data.credentialRef?.name} before retrying manually.${data.credentialDeletionError ? ` ${data.credentialDeletionError}` : ''}`,
+        text,
       })
       return data
     }

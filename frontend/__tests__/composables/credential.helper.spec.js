@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-import { secretDetails } from '@/composables/credential/helper'
+import {
+  bindingProviderType,
+  secretDetails,
+} from '@/composables/credential/helper'
 
 import { encodeBase64 as encode } from '@/utils'
 import infraProviders from '@/data/vendors/infra'
@@ -328,5 +331,14 @@ describe('secretDetails', () => {
     expect(projectIdValidator.pattern.test('abcde1')).toBe(true)
     expect(projectIdValidator.pattern.test(`a${'b'.repeat(29)}`)).toBe(true)
     expect(projectIdValidator.pattern.test(`a${'b'.repeat(30)}`)).toBe(false)
+  })
+})
+
+describe('bindingProviderType', () => {
+  it.each([
+    [{ provider: { type: 'aws' } }, 'aws'],
+    [{}, undefined],
+  ])('resolves the provider type from %#', (binding, expected) => {
+    expect(bindingProviderType(binding)).toBe(expected)
   })
 })

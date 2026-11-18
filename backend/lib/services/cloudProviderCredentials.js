@@ -289,9 +289,12 @@ async function validateSecretBindingMigration (client, binding) {
       source.metadata?.name !== binding.metadata.name) {
     throw createError(422, 'Credential-less creation is only supported when migrating an existing same-name SecretBinding')
   }
-  const sourceProviderType = typeof source.provider === 'string' ? source.provider : source.provider?.type
-  const targetProviderType = typeof binding.provider === 'string' ? binding.provider : binding.provider?.type
-  if (!sameCredentialReference(resolveBindingCredentialReference(source), resolveBindingCredentialReference(binding)) || sourceProviderType !== targetProviderType) {
+  const hasSameCredentialReference = sameCredentialReference(
+    resolveBindingCredentialReference(source),
+    resolveBindingCredentialReference(binding),
+  )
+  const hasSameProviderType = source.provider?.type === binding.provider?.type
+  if (!hasSameCredentialReference || !hasSameProviderType) {
     throw createError(422, 'CredentialsBinding must preserve the provider and Secret reference of the migrated SecretBinding')
   }
 }
@@ -393,7 +396,10 @@ function resolveBindingCredentialReference (binding) {
 }
 
 function sameCredentialReference (left, right) {
-  return left?.apiVersion === right?.apiVersion && left?.kind === right?.kind && left?.namespace === right?.namespace && left?.name === right?.name
+  return left?.apiVersion === right?.apiVersion &&
+    left?.kind === right?.kind &&
+    left?.namespace === right?.namespace &&
+    left?.name === right?.name
 }
 
 async function removeOldDnsBindingIfExists (client, namespace, secretName) {
