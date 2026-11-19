@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
   >
     <slot />
     <div
-      v-if="teaserTemplate"
+      v-if="branding?.teaserTemplate"
       v-safe-html="{ html: teaserHtml, allowStyleTags: true }"
     />
     <div
@@ -54,37 +54,29 @@ SPDX-License-Identifier: Apache-2.0
   </div>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { useConfigStore } from '@/store/config'
 
-import { omitKeysWithSuffix } from '@/utils'
+import {
+  omitKeysWithSuffix,
+  renderTemplate,
+} from '@/utils'
 
-import template from 'lodash/template'
+const configStore = useConfigStore()
+const { branding } = storeToRefs(configStore)
 
-export default {
-  computed: {
-    ...mapState(useConfigStore, [
-      'branding',
-    ]),
-    teaserTemplate () {
-      return this.branding.teaserTemplate
-    },
-    compiledTeaserTemplate () {
-      return template(this.teaserTemplate, {
-        interpolate: /{{([\s\S]+?)}}/g,
-      })
-    },
-    teaserHtml () {
-      const data = omitKeysWithSuffix(this.branding, 'Template')
-      return this.compiledTeaserTemplate(data)
-    },
-    teaserHeight () {
-      return this.branding.teaserHeight ?? 200
-    },
-  },
-}
+const teaserHtml = computed(() => {
+  const data = omitKeysWithSuffix(branding.value, 'Template')
+  return renderTemplate(branding.value.teaserTemplate, data)
+})
+
+const teaserHeight = computed(() => {
+  return branding.value.teaserHeight ?? 200
+})
+
 </script>
 
 <style lang="scss">

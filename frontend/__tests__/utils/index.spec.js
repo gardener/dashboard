@@ -27,12 +27,65 @@ import {
   encodeBase64,
   encodeBase64Url,
   decodeBase64,
+  renderTemplate,
 } from '@/utils'
 
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 
 describe('utils', () => {
+  describe('renderTemplate', () => {
+    it('replaces supported placeholders with data values', () => {
+      const template = '{{ productName }} has {{clusterCount}} clusters, is {{ active }}, and runs on ${providerType}' // eslint-disable-line no-template-curly-in-string
+      const data = {
+        productName: 'Gardener',
+        clusterCount: 3,
+        active: true,
+        providerType: 'aws',
+      }
+
+      expect(renderTemplate(template, data)).toBe('Gardener has 3 clusters, is true, and runs on aws')
+    })
+
+    it('only replaces own variables that were supplied', () => {
+      const data = Object.create({ inherited: 'inherited value' })
+      data.own = 'own value'
+
+      expect(renderTemplate('{{ own }} {{ inherited }} {{ missing }}', data)).toBe('own value {{ inherited }} {{ missing }}')
+    })
+
+    it('replaces nullish values with an empty string', () => {
+      const data = {
+        nullValue: null,
+        undefinedValue: undefined,
+      }
+
+      expect(renderTemplate('{{ nullValue }} {{ undefinedValue }}', data)).toBe(' ')
+    })
+
+    it('replaces every occurrence without interpreting replacement patterns', () => {
+      const data = {
+        value: '$& $$',
+      }
+
+      expect(renderTemplate('{{ value }} ${value} {{value}}', data)).toBe('$& $$ $& $$ $& $$') // eslint-disable-line no-template-curly-in-string
+    })
+
+    it('does not replace placeholders with mixed or mismatched delimiter styles', () => {
+      const template = '${ }} {{ } {{ ${} }} ${value}} ${value }} {{ value } {{ ${value} }}' // eslint-disable-line no-template-curly-in-string
+
+      expect(renderTemplate(template, { value: 'replacement' })).toBe(template)
+    })
+
+    it('does not execute template expressions or evaluation blocks', () => {
+      const execute = vi.fn()
+      const template = '{{ execute() }} <% execute() %>'
+
+      expect(renderTemplate(template, { execute })).toBe(template)
+      expect(execute).not.toHaveBeenCalled()
+    })
+  })
+
   describe('base64', () => {
     it('encodes and decodes UTF-8 strings', () => {
       const value = 'a Ā 𐀀 文 🦄'

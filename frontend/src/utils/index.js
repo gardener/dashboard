@@ -577,6 +577,51 @@ export function transformHtml (html, transformToExternalLinks = true) {
   return documentFragmentToHtml(documentFragment)
 }
 
+export function renderTemplate (template, data) {
+  const variables = new Map(Object.entries(data).map(([key, value]) => {
+    return [key, String(value ?? '')]
+  }))
+  const chunks = []
+  let cursor = 0
+
+  while (cursor < template.length) {
+    const mustacheStart = template.indexOf('{{', cursor)
+    const dollarStart = template.indexOf('${', cursor)
+    if (mustacheStart === -1 && dollarStart === -1) {
+      chunks.push(template.slice(cursor))
+      break
+    }
+
+    let placeholderStart = mustacheStart
+    if (mustacheStart === -1) {
+      placeholderStart = dollarStart
+    } else if (dollarStart !== -1) {
+      placeholderStart = Math.min(mustacheStart, dollarStart)
+    }
+    chunks.push(template.slice(cursor, placeholderStart))
+
+    const isMustache = placeholderStart === mustacheStart
+    const closingDelimiter = isMustache ? '}}' : '}'
+    const placeholderEnd = template.indexOf(closingDelimiter, placeholderStart + 2)
+    if (placeholderEnd === -1) {
+      chunks.push(template.slice(placeholderStart))
+      break
+    }
+
+    const end = placeholderEnd + closingDelimiter.length
+    const key = template.slice(placeholderStart + 2, placeholderEnd)
+    const normalizedKey = isMustache ? key.trim() : key
+    const hasMixedClosingDelimiter = !isMustache && template.charAt(end) === '}'
+    if (!hasMixedClosingDelimiter && variables.has(normalizedKey)) {
+      chunks.push(variables.get(normalizedKey))
+    } else {
+      chunks.push(template.slice(placeholderStart, end + Number(hasMixedClosingDelimiter)))
+    }
+    cursor = end + Number(hasMixedClosingDelimiter)
+  }
+
+  return chunks.join('')
+}
 const defaultMaintenanceHours = ['22', '23', '00', '01', '02', '03', '04', '05']
 const maintenanceHourRegex = /^(?:[01]\d|2[0-3])$/
 
