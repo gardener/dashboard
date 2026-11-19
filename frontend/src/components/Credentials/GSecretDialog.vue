@@ -45,6 +45,12 @@ SPDX-License-Identifier: Apache-2.0
                     @update:model-value="v$.name.$touch()"
                     @blur="v$.name.$touch()"
                   />
+                  <div
+                    v-if="!isDnsProvider"
+                    class="text-body-small text-medium-emphasis mb-4"
+                  >
+                    A <code>CredentialsBinding</code> referencing this Secret will be created automatically.
+                  </div>
                 </template>
                 <template v-else>
                   <div class="text-title-large pb-4">

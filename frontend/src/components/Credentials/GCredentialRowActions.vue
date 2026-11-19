@@ -9,24 +9,25 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canPatchCredentials"
       icon="mdi-pencil"
-      :disabled="hasOwnWorkloadIdentity"
+      :disabled="isWorkloadIdentity || isMarkedForDeletion"
       @click="onUpdate"
     >
       <template #tooltip>
-        <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
+        <span v-if="isWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
+        <span v-else-if="isMarkedForDeletion">The Secret is already marked for deletion</span>
         <span v-else>Edit Secret</span>
       </template>
     </g-action-button>
     <g-action-button
       v-if="canDeleteCredentials"
       icon="mdi-delete"
-      :disabled="credentialUsageCount > 0 || hasOwnWorkloadIdentity || isMarkedForDeletion"
+      :disabled="credentialUsageCount > 0 || isWorkloadIdentity || isMarkedForDeletion"
       @click="onDelete"
     >
       <template #tooltip>
-        <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
+        <span v-if="isWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
         <span v-else-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
-        <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
+        <span v-else-if="isMarkedForDeletion">The Secret is already marked for deletion</span>
         <span v-else>Delete Secret</span>
       </template>
     </g-action-button>
@@ -51,10 +52,13 @@ const credential = toRef(props, 'credential')
 const emit = defineEmits(['update', 'delete'])
 
 const authzStore = useAuthzStore()
-const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
+const {
+  canDeleteCredentials,
+  canPatchCredentials,
+} = storeToRefs(authzStore)
 
 const {
-  hasOwnWorkloadIdentity,
+  isWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
 } = useDnsProviderCredential(credential)

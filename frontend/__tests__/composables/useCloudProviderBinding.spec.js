@@ -29,13 +29,13 @@ describe('useCloudProviderBinding composable', () => {
     shootStore = useShootStore()
     shootStore.state.shoots = {
       'abc-123': {
-        metadata: { name: 'shoot-1', uid: 'abc-123' },
+        metadata: { name: 'shoot-1', namespace: 'garden-test', uid: 'abc-123' },
         spec: {
           credentialsBindingName: 'aws-credentialsbinding',
         },
       },
       'abc-124': {
-        metadata: { name: 'shoot-2', uid: 'abc-124' },
+        metadata: { name: 'shoot-2', namespace: 'garden-test', uid: 'abc-124' },
         spec: {
           secretBindingName: 'aws-secretbinding',
           dns: {
@@ -50,7 +50,7 @@ describe('useCloudProviderBinding composable', () => {
         },
       },
       'abc-125': {
-        metadata: { name: 'shoot-3', uid: 'abc-125' },
+        metadata: { name: 'shoot-3', namespace: 'garden-test', uid: 'abc-125' },
         spec: {
           resources: [
             {
@@ -182,12 +182,63 @@ describe('useCloudProviderBinding composable', () => {
     expect(bindingComposable.credentialUsageCount.value).toBe(1)
   })
 
+  it('ignores binding references from a different or missing namespace', () => {
+    shootStore.state.shoots = {
+      other: {
+        metadata: { name: 'other', namespace: 'garden-other' },
+        spec: { secretBindingName: 'aws-secretbinding' },
+      },
+      missing: {
+        metadata: { name: 'missing' },
+        spec: { secretBindingName: 'aws-secretbinding' },
+      },
+    }
+
+    const bindingComposable = useCloudProviderBinding(findBindingRef('aws-secretbinding'))
+
+    expect(bindingComposable.credentialUsageCount.value).toBe(0)
+  })
+
   it('finds other bindings with same secret', () => {
     const secretBindingRef = findBindingRef('aws-secretbinding')
     const bindingComposable = useCloudProviderBinding(secretBindingRef)
     const others = bindingComposable.bindingsWithSameCredential.value
     expect(others.length).toBeGreaterThanOrEqual(1)
     expect(others).toMatchSnapshot()
+  })
+
+  it('matches binding references by kind, effective namespace, and name', () => {
+    const current = {
+      apiVersion: 'security.gardener.cloud/v1alpha1',
+      kind: 'CredentialsBinding',
+      metadata: { name: 'current', namespace: 'garden-test', uid: 'current' },
+      provider: { type: 'aws' },
+      credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'shared' },
+    }
+    const same = {
+      ...current,
+      metadata: { name: 'same', namespace: 'garden-test', uid: 'same' },
+    }
+    const otherNamespace = {
+      ...current,
+      metadata: { name: 'other-namespace', namespace: 'garden-other', uid: 'other-namespace' },
+    }
+    const otherKind = {
+      ...current,
+      metadata: { name: 'other-kind', namespace: 'garden-test', uid: 'other-kind' },
+      credentialsRef: { apiVersion: 'security.gardener.cloud/v1alpha1', kind: 'WorkloadIdentity', name: 'shared' },
+    }
+    credentialStore._setCredentials({
+      secrets: [
+        { apiVersion: 'v1', kind: 'Secret', metadata: { name: 'shared', namespace: 'garden-test' } },
+      ],
+      credentialsBindings: [current, same, otherNamespace, otherKind],
+    })
+
+    const composable = useCloudProviderBinding(ref(current))
+
+    expect(composable.credentialNamespace.value).toBe('garden-test')
+    expect(composable.bindingsWithSameCredential.value).toEqual([same])
   })
 
   it('lists applicable quotas and computes selfTerminationDays', () => {

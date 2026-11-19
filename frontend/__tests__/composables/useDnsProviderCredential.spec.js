@@ -25,10 +25,10 @@ describe('useDnsProviderCredential composable', () => {
     shootStore = useShootStore()
     shootStore.state.shoots = {
       'abc-123': {
-        metadata: { name: 'shoot-1', uid: 'abc-123' },
+        metadata: { name: 'shoot-1', namespace: 'garden-test', uid: 'abc-123' },
       },
       'abc-124': {
-        metadata: { name: 'shoot-2', uid: 'abc-124' },
+        metadata: { name: 'shoot-2', namespace: 'garden-test', uid: 'abc-124' },
         spec: {
           dns: {
             providers: [
@@ -42,7 +42,7 @@ describe('useDnsProviderCredential composable', () => {
         },
       },
       'abc-125': {
-        metadata: { name: 'shoot-3', uid: 'abc-125' },
+        metadata: { name: 'shoot-3', namespace: 'garden-test', uid: 'abc-125' },
         spec: {
           resources: [
             {
@@ -102,7 +102,7 @@ describe('useDnsProviderCredential composable', () => {
 
   it('counts shoots referencing legacy dns provider secretName', () => {
     shootStore.state.shoots['abc-126'] = {
-      metadata: { name: 'shoot-4', uid: 'abc-126' },
+      metadata: { name: 'shoot-4', namespace: 'garden-test', uid: 'abc-126' },
       spec: {
         dns: {
           providers: [
@@ -115,5 +115,53 @@ describe('useDnsProviderCredential composable', () => {
     const dnsCredentialRef = findDnsCredentialRef('aws-route53-secret')
     const composable = useDnsProviderCredential(dnsCredentialRef)
     expect(composable.credentialUsageCount.value).toBe(3)
+  })
+
+  it('does not match direct references from a different namespace', () => {
+    shootStore.state.shoots = {
+      other: {
+        metadata: { name: 'other', namespace: 'garden-other' },
+        spec: {
+          dns: {
+            providers: [{ credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'aws-route53-secret' } }],
+          },
+        },
+      },
+    }
+
+    const composable = useDnsProviderCredential(findDnsCredentialRef('aws-route53-secret'))
+
+    expect(composable.credentialUsageCount.value).toBe(0)
+  })
+
+  it('does not infer the credential namespace when reference namespaces are missing', () => {
+    shootStore.state.shoots = {
+      direct: {
+        metadata: { name: 'direct' },
+        spec: {
+          dns: {
+            providers: [{ credentialsRef: { apiVersion: 'v1', kind: 'Secret', name: 'aws-route53-secret' } }],
+          },
+        },
+      },
+      legacy: {
+        metadata: { name: 'legacy' },
+        spec: {
+          dns: {
+            providers: [{ secretName: 'aws-route53-secret' }],
+          },
+        },
+      },
+      resource: {
+        metadata: { name: 'resource' },
+        spec: {
+          resources: [{ resourceRef: { apiVersion: 'v1', kind: 'Secret', name: 'aws-route53-secret' } }],
+        },
+      },
+    }
+
+    const composable = useDnsProviderCredential(findDnsCredentialRef('aws-route53-secret'))
+
+    expect(composable.credentialUsageCount.value).toBe(0)
   })
 })

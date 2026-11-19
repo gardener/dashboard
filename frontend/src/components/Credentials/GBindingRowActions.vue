@@ -24,12 +24,13 @@ SPDX-License-Identifier: Apache-2.0
     <g-action-button
       v-if="canPatchCredentials"
       icon="mdi-pencil"
-      :disabled="isSharedBinding || hasOwnWorkloadIdentity"
+      :disabled="isSharedBinding || hasOwnWorkloadIdentity || isMarkedForDeletion"
       @click="onUpdate"
     >
       <template #tooltip>
         <span v-if="isSharedBinding">You can only edit Secrets that are owned by you</span>
         <span v-else-if="hasOwnWorkloadIdentity">The dashboard doesn't support editing credentials of type WorkloadIdentity</span>
+        <span v-else-if="isMarkedForDeletion">The Secret is already marked for deletion</span>
         <span v-else>Edit Secret</span>
       </template>
     </g-action-button>
@@ -43,7 +44,8 @@ SPDX-License-Identifier: Apache-2.0
         <span v-if="hasOwnWorkloadIdentity">The dashboard doesn't support deleting credentials of type WorkloadIdentity</span>
         <span v-else-if="credentialUsageCount > 0">You can only delete Secrets that are currently unused</span>
         <span v-else-if="isSharedBinding">You can only delete Secrets that are owned by you</span>
-        <span v-else-if="isMarkedForDeletion">Secret is already marked for deletion</span>
+        <span v-else-if="isMarkedForDeletion">The Secret is already marked for deletion</span>
+        <span v-else-if="isOrphanedBinding">Delete orphaned {{ resourceKind }}</span>
         <span v-else>Delete Secret</span>
       </template>
     </g-action-button>
@@ -68,14 +70,19 @@ const binding = toRef(props, 'binding')
 const emit = defineEmits(['update', 'delete', 'migrateSecretBinding'])
 
 const authzStore = useAuthzStore()
-const { canPatchCredentials, canDeleteCredentials } = storeToRefs(authzStore)
+const {
+  canDeleteCredentials,
+  canPatchCredentials,
+} = storeToRefs(authzStore)
 
 const {
   hasOwnWorkloadIdentity,
   credentialUsageCount,
   isMarkedForDeletion,
   isSharedBinding,
+  isOrphanedBinding,
   isSecretBinding,
+  resourceKind,
 } = useCloudProviderBinding(binding)
 
 function onUpdate () {

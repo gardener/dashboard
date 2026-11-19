@@ -303,7 +303,7 @@ export function bindingCredentialName (binding) {
 }
 
 export function bindingCredentialNamespace (binding) {
-  return bindingCredentialRef(binding)?.namespace
+  return bindingCredentialRef(binding)?.namespace ?? binding?.metadata?.namespace
 }
 
 export function bindingCredentialKind (binding) {

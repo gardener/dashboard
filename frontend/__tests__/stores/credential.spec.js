@@ -90,6 +90,7 @@ describe('stores', () => {
       vi.spyOn(api, 'deleteInfraProviderCredential').mockReturnValue()
       appStore = useAppStore()
       vi.spyOn(appStore, 'setSuccess')
+      vi.spyOn(appStore, 'setError')
       authzStore = useAuthzStore()
       authzStore._setNamespace(testNamespace)
       cloudProfileStore = useCloudProfileStore()
@@ -102,6 +103,7 @@ describe('stores', () => {
 
     afterEach(() => {
       appStore.setSuccess.mockClear()
+      appStore.setError.mockClear()
       api.getCloudProviderCredentials.mockClear()
       api.createDnsProviderCredential.mockClear()
       api.createInfraProviderCredential.mockClear()
@@ -250,7 +252,7 @@ describe('stores', () => {
       await credentialStore.deleteInfraCredential({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
 
       expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName, preserveCredential: false })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
@@ -258,15 +260,118 @@ describe('stores', () => {
       await credentialStore.deleteInfraCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
 
       expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName })
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsCredentialsBindingName, preserveCredential: false })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
+    })
+
+    it('sends binding-only deletion and reports a preserved Secret accurately', async () => {
+      api.deleteInfraProviderCredential.mockResolvedValue({
+        data: {
+          credentialRef: { kind: 'Secret', name: 'aws-secret' },
+          credentialDeletionRequested: false,
+          credentialMissing: false,
+          credentialPreserved: true,
+          credentialPreservedReason: 'Only binding deletion was requested',
+        },
+      })
+
+      await credentialStore.deleteInfraCredential({
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: testNamespace,
+        bindingName: awsCredentialsBindingName,
+        preserveCredential: true,
+      })
+
+      expect(api.deleteInfraProviderCredential).toHaveBeenCalledWith({
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: testNamespace,
+        bindingName: awsCredentialsBindingName,
+        preserveCredential: true,
+      })
+      expect(appStore.setSuccess).toHaveBeenCalledWith(`Deletion of CredentialsBinding ${awsCredentialsBindingName} was requested. Secret aws-secret was preserved`)
+      expect(appStore.setSuccess).not.toHaveBeenCalledWith(expect.stringContaining('Secret and CredentialsBinding'))
+    })
+
+    it.each([
+      [
+        {
+          credentialRef: { kind: 'Secret', name: 'aws-secret' },
+          credentialDeletionRequested: true,
+          credentialMissing: false,
+          credentialPreserved: false,
+        },
+        `Deletion of Secret aws-secret and CredentialsBinding ${awsCredentialsBindingName} was requested`,
+      ],
+      [
+        {
+          credentialRef: { kind: 'Secret', name: 'aws-secret' },
+          credentialDeletionRequested: false,
+          credentialMissing: true,
+          credentialPreserved: false,
+        },
+        `Deletion of CredentialsBinding ${awsCredentialsBindingName} was requested. Secret aws-secret was already missing`,
+      ],
+    ])('reports structured infrastructure deletion outcomes', async (data, message) => {
+      api.deleteInfraProviderCredential.mockResolvedValue({ data })
+
+      await credentialStore.deleteInfraCredential({
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: testNamespace,
+        bindingName: awsCredentialsBindingName,
+      })
+
+      expect(appStore.setSuccess).toHaveBeenCalledWith(message)
+    })
+
+    it('reports an unconfirmed credential deletion even when refreshing credentials fails', async () => {
+      const data = {
+        credentialRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          namespace: testNamespace,
+          name: 'aws-secret',
+        },
+        credentialDeletionRequested: false,
+        credentialMissing: false,
+        credentialPreserved: false,
+        credentialDeletionUnconfirmed: true,
+        credentialDeletionError: 'apiserver unavailable',
+      }
+      api.deleteInfraProviderCredential.mockResolvedValue({ data })
+      api.getCloudProviderCredentials.mockRejectedValueOnce(new Error('refresh failed'))
+
+      await expect(credentialStore.deleteInfraCredential({
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: testNamespace,
+        bindingName: awsCredentialsBindingName,
+      })).resolves.toBe(data)
+
+      expect(appStore.setError).toHaveBeenCalledWith({
+        title: `Deletion of CredentialsBinding ${awsCredentialsBindingName} was requested`,
+        text: `Secret aws-secret deletion could not be confirmed. Verify ${testNamespace}/aws-secret before retrying manually. Details: apiserver unavailable`,
+      })
+      expect(appStore.setSuccess).not.toHaveBeenCalled()
+    })
+
+    it('refreshes after a failed deletion without hiding the original error', async () => {
+      const error = new Error('deletion failed')
+      api.deleteInfraProviderCredential.mockRejectedValue(error)
+
+      await expect(credentialStore.deleteInfraCredential({
+        bindingKind: 'CredentialsBinding',
+        bindingNamespace: testNamespace,
+        bindingName: awsCredentialsBindingName,
+      })).rejects.toBe(error)
+
+      expect(api.getCloudProviderCredentials).toHaveBeenCalledTimes(1)
+      expect(appStore.setSuccess).not.toHaveBeenCalled()
     })
 
     it('should delete credential (credentialsbinding/workloadidentity)', async () => {
       await credentialStore.deleteInfraCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsWlidCredentialsBindingName })
 
       expect(api.deleteInfraProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsWlidCredentialsBindingName })
+      expect(api.deleteInfraProviderCredential).toBeCalledWith({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: awsWlidCredentialsBindingName, preserveCredential: false })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 

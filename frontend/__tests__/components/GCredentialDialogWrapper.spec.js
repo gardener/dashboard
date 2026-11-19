@@ -7,7 +7,7 @@
 import { shallowMount } from '@vue/test-utils'
 
 import GCredentialDialogWrapper from '@/components/Credentials/GCredentialDialogWrapper'
-import GSecretDialogDelete from '@/components/Credentials/GSecretDialogDelete'
+import GCredentialDialogDelete from '@/components/Credentials/GCredentialDialogDelete'
 import GSecretDialogGeneric from '@/components/Credentials/GSecretDialogGeneric'
 import GSecretDialogHelpAlicloud from '@/components/Credentials/GSecretDialogHelpAlicloud'
 import GSecretDialogHelpAws from '@/components/Credentials/GSecretDialogHelpAws'
@@ -82,7 +82,7 @@ describe('GCredentialDialogWrapper', () => {
     const deleteDialog = resolveDialog('aws', { operation: 'delete' })
     const migrationDialog = resolveDialog('aws', { operation: 'migrate-secret-binding' })
 
-    expect(await deleteDialog.__asyncLoader()).toBe(GSecretDialogDelete)
+    expect(await deleteDialog.__asyncLoader()).toBe(GCredentialDialogDelete)
     expect(await migrationDialog.__asyncLoader()).toBe(GSecretDialogMigration)
   })
 

@@ -24,6 +24,13 @@ function createStore (items) {
   return store
 }
 
+function requestTargets () {
+  return mockRequest.mock.calls.map(([headers]) => ({
+    method: headers[':method'],
+    path: headers[':path'],
+  }))
+}
+
 describe('api', function () {
   let agent
 
@@ -171,20 +178,21 @@ describe('api', function () {
         apiVersion: 'security.gardener.cloud/v1alpha1',
         kind: 'CredentialsBinding',
         metadata: {
-          name: `new-${infraName}-credentialsbinding`,
+          name: 'foo-infra3-secret2-secretbinding',
           namespace,
         },
         provider: {
-          type: infraName,
+          type: 'infra3',
         },
         credentialsRef: {
           apiVersion: 'v1',
           kind: 'Secret',
           namespace,
-          name: `new-${infraName}-secret`,
+          name: 'secret2',
         },
       }
 
+      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
       mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.create())
 
       const params = {
@@ -198,11 +206,18 @@ describe('api', function () {
         .expect('content-type', /json/)
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body.binding.metadata.name).toBe(`new-${infraName}-credentialsbinding`)
-      expect(res.body).toMatchSnapshot()
+      expect(requestTargets()).toEqual([
+        {
+          method: 'get',
+          path: '/apis/core.gardener.cloud/v1beta1/namespaces/garden-foo/secretbindings/foo-infra3-secret2-secretbinding',
+        },
+        {
+          method: 'post',
+          path: '/apis/security.gardener.cloud/v1alpha1/namespaces/garden-foo/credentialsbindings',
+        },
+      ])
+      expect(res.body.binding.metadata.name).toBe('foo-infra3-secret2-secretbinding')
+      expect(res.body.secret).toBeUndefined()
     })
 
     it('should create a cloudProvider dns secret (no binding)', async function () {
@@ -243,7 +258,11 @@ describe('api', function () {
     })
 
     it('should patch an own dns secret', async function () {
-      const secret = find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
+      const secret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        ...find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } }),
+      }
       const params = {
         secret,
       }
@@ -264,7 +283,11 @@ describe('api', function () {
     })
 
     it('should re-create an own infra credential (secret) when patching an orphaned binding', async function () {
-      const secret = find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
+      const secret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        ...find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } }),
+      }
       secret.metadata.name = 'secret4' // not existing secret
       const params = {
         secret,
@@ -287,7 +310,11 @@ describe('api', function () {
     })
 
     it('should not re-create an infra credential when the update fails with a non-404 error', async function () {
-      const secret = find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } })
+      const secret = {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        ...find(fixtures.secrets.list(namespace), { metadata: { name: 'secret1', namespace } }),
+      }
       secret.metadata.resourceVersion = '42'
 
       mockRequest.mockImplementationOnce(fixtures.secrets.mocks.patch())
@@ -301,15 +328,30 @@ describe('api', function () {
       expect(mockRequest).toHaveBeenCalledTimes(1)
     })
 
-    it('should delete an own cloudProvider credential (secretbinding)', async function () {
-      const params = {
-        bindingKind: 'SecretBinding',
-        bindingNamespace: 'garden-foo',
-        bindingName: 'foo-infra3-secret2-secretbinding',
+    it.each([
+      ['SecretBinding', 'foo-infra3-secret2-secretbinding', 'secret2', 'Secret'],
+      ['CredentialsBinding', 'foo-infra3-secret3-credentialsbinding', 'secret3', 'Secret'],
+      ['CredentialsBinding', 'foo-wlid1', 'wl-foo-infra1', 'WorkloadIdentity'],
+    ])('requests deletion of an unused %s %s and its credential', async (kind, name, credentialName, credentialKind) => {
+      const params = { bindingKind: kind, bindingNamespace: namespace, bindingName: name }
+      const binding = kind === 'SecretBinding'
+        ? fixtures.secretbindings.get(namespace, name)
+        : fixtures.credentialsbindings.get(namespace, name)
+      if (kind === 'CredentialsBinding') {
+        binding.credentialsRef.apiVersion = credentialKind === 'Secret'
+          ? 'v1'
+          : 'security.gardener.cloud/v1alpha1'
       }
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
+      const credential = { kind: credentialKind, metadata: { namespace, name: credentialName } }
+      const bindingApi = kind === 'SecretBinding' ? 'core.gardener.cloud/v1beta1' : 'security.gardener.cloud/v1alpha1'
+      const bindingPath = `/apis/${bindingApi}/namespaces/${namespace}/${kind.toLowerCase()}s/${name}`
+      const credentialPath = credentialKind === 'Secret'
+        ? `/api/v1/namespaces/${namespace}/secrets/${credentialName}`
+        : `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/workloadidentities/${credentialName}`
+
+      mockRequest.mockResolvedValueOnce(binding)
+      mockRequest.mockResolvedValueOnce(binding)
+      mockRequest.mockResolvedValueOnce(credential)
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
@@ -317,138 +359,177 @@ describe('api', function () {
         .send({ method: 'removeInfra', params })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(requestTargets()).toEqual([
+        { method: 'get', path: bindingPath },
+        { method: 'delete', path: bindingPath },
+        { method: 'delete', path: credentialPath },
+      ])
+      expect(res.body).toMatchObject({
+        credentialDeletionRequested: true,
+        credentialMissing: false,
+        credentialPreserved: false,
+      })
     })
 
-    it('should delete an own cloudProvider credential (secret / credentialsbinding)', async function () {
-      const params = {
-        bindingKind: 'CredentialsBinding',
-        bindingNamespace: 'garden-foo',
-        bindingName: 'foo-infra3-secret3-credentialsbinding',
+    it.each([
+      {
+        name: 'preserves the credential when binding-only deletion is requested',
+        params: { preserveCredential: true },
+        credentialError: undefined,
+        expectedTargets: 2,
+        expected: {
+          credentialDeletionRequested: false,
+          credentialMissing: false,
+          credentialPreserved: true,
+          credentialDeletionUnconfirmed: false,
+        },
+      },
+      {
+        name: 'reports an unconfirmed credential deletion as a partial success',
+        params: {},
+        credentialError: createError(500, 'apiserver unavailable'),
+        expectedTargets: 3,
+        expected: {
+          credentialDeletionRequested: false,
+          credentialMissing: false,
+          credentialPreserved: false,
+          credentialDeletionUnconfirmed: true,
+          credentialDeletionError: 'apiserver unavailable',
+        },
+      },
+    ])('$name', async ({ params: overrides, credentialError, expectedTargets, expected }) => {
+      const bindingName = 'foo-infra3-secret3-credentialsbinding'
+      const credentialName = 'secret3'
+      const binding = fixtures.credentialsbindings.get(namespace, bindingName)
+      binding.credentialsRef.apiVersion = 'v1'
+      const bindingPath = `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/credentialsbindings/${bindingName}`
+      const credentialPath = `/api/v1/namespaces/${namespace}/secrets/${credentialName}`
+
+      mockRequest.mockResolvedValueOnce(binding)
+      mockRequest.mockResolvedValueOnce(binding)
+      if (credentialError) {
+        mockRequest.mockRejectedValueOnce(credentialError)
       }
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
 
       const res = await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
-        .send({ method: 'removeInfra', params })
+        .send({
+          method: 'removeInfra',
+          params: {
+            bindingKind: 'CredentialsBinding',
+            bindingNamespace: namespace,
+            bindingName,
+            ...overrides,
+          },
+        })
         .expect(200)
 
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(requestTargets()).toEqual([
+        { method: 'get', path: bindingPath },
+        { method: 'delete', path: bindingPath },
+        ...(expectedTargets === 3
+          ? [{ method: 'delete', path: credentialPath }]
+          : []),
+      ])
+      expect(res.body).toMatchObject({
+        credentialRef: {
+          apiVersion: 'v1',
+          kind: 'Secret',
+          namespace,
+          name: credentialName,
+        },
+        ...expected,
+      })
     })
 
-    it('should delete an own cloudProvider credential (workloadidentity / credentialsbinding)', async function () {
-      const params = {
-        bindingKind: 'CredentialsBinding',
-        bindingNamespace: 'garden-foo',
-        bindingName: 'foo-wlid1',
-      }
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.get())
-      mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'removeInfra', params })
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should delete a cloudProvider DNS credential (secret / no binding)', async function () {
-      const params = {
-        credentialKind: 'Secret',
-        credentialNamespace: namespace,
-        credentialName: 'dns-secret',
-      }
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'removeDns', params })
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should propagate errors when removing old DNS bindings fails', async function () {
-      const params = {
-        credentialKind: 'Secret',
-        credentialNamespace: namespace,
-        credentialName: 'dns-secret',
-      }
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockRejectedValueOnce(createError(403))
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
+    it('deletes a DNS Secret and checks for old DNS bindings', async () => {
+      const params = { credentialKind: 'Secret', credentialNamespace: namespace, credentialName: 'dns-credential' }
+      const credentialPath = `/api/v1/namespaces/${namespace}/secrets/dns-credential`
+      mockRequest.mockResolvedValueOnce({})
+      mockRequest.mockResolvedValueOnce({ items: [] })
+      mockRequest.mockResolvedValueOnce({ items: [] })
 
       await agent
         .post('/api/cloudprovidercredentials')
         .set('cookie', await user.cookie)
         .send({ method: 'removeDns', params })
+        .expect(200)
+
+      expect(requestTargets()).toEqual([
+        { method: 'delete', path: credentialPath },
+        { method: 'get', path: `/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings` },
+        { method: 'get', path: `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/credentialsbindings` },
+      ])
+    })
+
+    it('deletes legacy DNS bindings that reference the deleted Secret', async () => {
+      const credentialName = 'dns-credential'
+      const secretBindingName = 'legacy-dns-secretbinding'
+      const credentialsBindingName = 'legacy-dns-credentialsbinding'
+      const credentialPath = `/api/v1/namespaces/${namespace}/secrets/${credentialName}`
+      const secretBindingPath = `/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings/${secretBindingName}`
+      const credentialsBindingPath = `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/credentialsbindings/${credentialsBindingName}`
+      const secretBinding = {
+        kind: 'SecretBinding',
+        metadata: { namespace, name: secretBindingName },
+        secretRef: { namespace, name: credentialName },
+      }
+      const credentialsBinding = {
+        kind: 'CredentialsBinding',
+        metadata: { namespace, name: credentialsBindingName },
+        credentialsRef: { apiVersion: 'v1', kind: 'Secret', namespace, name: credentialName },
+      }
+
+      mockRequest.mockResolvedValueOnce({})
+      mockRequest.mockResolvedValueOnce({ items: [secretBinding] })
+      mockRequest.mockResolvedValueOnce({ items: [credentialsBinding] })
+      mockRequest.mockResolvedValueOnce({})
+      mockRequest.mockResolvedValueOnce({})
+
+      await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params: { credentialKind: 'Secret', credentialNamespace: namespace, credentialName } })
+        .expect(200)
+
+      expect(requestTargets()).toEqual([
+        { method: 'delete', path: credentialPath },
+        { method: 'get', path: `/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings` },
+        { method: 'get', path: `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/credentialsbindings` },
+        { method: 'delete', path: secretBindingPath },
+        { method: 'delete', path: credentialsBindingPath },
+      ])
+    })
+
+    it('deletes a pre-existing DNS WorkloadIdentity request without reference reads', async () => {
+      const credentialPath = `/apis/security.gardener.cloud/v1alpha1/namespaces/${namespace}/workloadidentities/dns-credential`
+      mockRequest.mockResolvedValueOnce({})
+
+      await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params: { credentialKind: 'WorkloadIdentity', credentialNamespace: namespace, credentialName: 'dns-credential' } })
+        .expect(200)
+
+      expect(requestTargets()).toEqual([
+        { method: 'delete', path: credentialPath },
+      ])
+    })
+
+    it('propagates Gardener admission errors when deleting a referenced DNS Secret', async () => {
+      const credentialPath = `/api/v1/namespaces/${namespace}/secrets/secret1`
+      mockRequest.mockRejectedValueOnce(createError(403, 'Secret is still referenced'))
+
+      await agent
+        .post('/api/cloudprovidercredentials')
+        .set('cookie', await user.cookie)
+        .send({ method: 'removeDns', params: { credentialKind: 'Secret', credentialNamespace: namespace, credentialName: 'secret1' } })
         .expect(403)
 
-      expect(mockRequest).toHaveBeenCalledTimes(3)
-    })
-
-    it('should delete a cloudProvider DNS credential (workloadidentity / no binding)', async function () {
-      const params = {
-        credentialKind: 'WorkloadIdentity',
-        credentialNamespace: namespace,
-        credentialName: 'dns-wlid',
-      }
-      mockRequest.mockImplementationOnce(fixtures.workloadidentities.mocks.delete())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'removeDns', params })
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(1)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
-    })
-
-    it('should delete a cloudProvider DNS credential (secret) and remove old DNS bindings', async function () {
-      const params = {
-        credentialKind: 'Secret',
-        credentialNamespace: namespace,
-        credentialName: 'secret1',
-      }
-      mockRequest.mockImplementationOnce(fixtures.secrets.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.list())
-      mockRequest.mockImplementationOnce(fixtures.secretbindings.mocks.delete())
-      mockRequest.mockImplementationOnce(fixtures.credentialsbindings.mocks.delete())
-
-      const res = await agent
-        .post('/api/cloudprovidercredentials')
-        .set('cookie', await user.cookie)
-        .send({ method: 'removeDns', params })
-        .expect(200)
-
-      expect(mockRequest).toHaveBeenCalledTimes(5)
-      expect(mockRequest.mock.calls).toMatchSnapshot()
-
-      expect(res.body).toMatchSnapshot()
+      expect(requestTargets()).toEqual([
+        { method: 'delete', path: credentialPath },
+      ])
     })
   })
 })

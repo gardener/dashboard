@@ -23,7 +23,7 @@ const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'foo-infra1-secret1-credentialsbinding',
-    provider: 'infra1',
+    provider: { type: 'infra1' },
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-foo',
@@ -34,7 +34,7 @@ const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'foo-infra3-secret3-credentialsbinding',
-    provider: 'infra3',
+    provider: { type: 'infra3' },
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-foo',
@@ -45,7 +45,7 @@ const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'trial-infra1',
-    provider: 'infra1',
+    provider: { type: 'infra1' },
     credentialsRef: {
       kind: 'Secret',
       namespace: 'garden-trial',
@@ -56,7 +56,7 @@ const cloudProviderBindingList = [
   getCredentialsBinding({
     namespace: 'garden-foo',
     name: 'foo-wlid1',
-    provider: 'infra1',
+    provider: { type: 'infra1' },
     credentialsRef: {
       kind: 'WorkloadIdentity',
       namespace: 'garden-foo',
