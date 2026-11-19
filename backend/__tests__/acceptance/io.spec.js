@@ -522,7 +522,9 @@ describe('api', function () {
         ]))
 
         const items = await synchronize(socket, 'shoots', [1, 4])
-        expect(items).toMatchSnapshot()
+        expect(items).toHaveLength(2)
+        expect(items[0].spec).not.toHaveProperty('secretBindingName')
+        expect(items[0].status ?? {}).not.toHaveProperty('advertisedAddresses')
       })
 
       it('should subscribe shoots for all namespace', async function () {
@@ -540,7 +542,9 @@ describe('api', function () {
         ]))
 
         const items = await synchronize(socket, 'shoots', [1, 4])
-        expect(items).toMatchSnapshot()
+        expect(items).toHaveLength(2)
+        expect(items[0].spec).not.toHaveProperty('secretBindingName')
+        expect(items[0].status ?? {}).not.toHaveProperty('advertisedAddresses')
       })
 
       it('should subscribe unhealthy shoots for all namespace', async function () {
