@@ -9,7 +9,10 @@ import {
   it,
   expect,
 } from 'vitest'
-import { sanitizeFrontendConfig } from '../lib/routes/config.js'
+import {
+  addTicketLookbackDays,
+  sanitizeFrontendConfig,
+} from '../lib/routes/config.js'
 
 describe('routes/config', () => {
   it('converts and sanitizes nested and legacy control plane HA help', async () => {
@@ -31,5 +34,25 @@ describe('routes/config', () => {
     expect(sanitizedConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text).toContain('<strong>nested</strong>')
     expect(sanitizedConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text).not.toContain('onerror')
     expect(frontendConfig.shootDefaults.controlPlaneHighAvailabilityHelp.text).toContain('onerror')
+  })
+
+  it('adds the closed issues lookback to the ticket configuration', () => {
+    const frontendConfig = {
+      ticket: {
+        gitHubRepoUrl: 'https://github.com/gardener/tickets',
+      },
+    }
+
+    const configuredFrontendConfig = addTicketLookbackDays(frontendConfig, 30)
+
+    expect(configuredFrontendConfig.ticket.closedIssuesLookbackDays).toBe(30)
+  })
+
+  it('defaults the closed issues lookback to zero', () => {
+    const frontendConfig = { ticket: {} }
+
+    const configuredFrontendConfig = addTicketLookbackDays(frontendConfig)
+
+    expect(configuredFrontendConfig.ticket.closedIssuesLookbackDays).toBe(0)
   })
 })

@@ -193,7 +193,7 @@ describe('api', function () {
       fixtures.github.createComment(1, 2),
       fixtures.github.createComment(2, 4),
     ])
-    await tickets.loadOpenIssues()
+    await tickets.loadIssues()
   })
 
   afterEach(function () {

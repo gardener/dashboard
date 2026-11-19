@@ -11,9 +11,10 @@ const octokit = initOctokit()
 const {
   org: owner,
   repository: repo,
+  pageSize,
 } = config.gitHub || {}
 
-function searchIssues ({ state, title } = {}) {
+function searchIssues ({ state, title, since } = {}) {
   const q = [
     `repo:${owner}/${repo}`,
     'is:issue',
@@ -24,9 +25,12 @@ function searchIssues ({ state, title } = {}) {
   if (title) {
     q.push(`${title} in:title`)
   }
+  if (since) {
+    q.push(`closed:>${since}`)
+  }
   const options = octokit.rest.search.issuesAndPullRequests.endpoint.merge({
     q: q.join(' '),
-    per_page: 100,
+    per_page: pageSize || 100,
   })
   return octokit.paginate(options)
 }

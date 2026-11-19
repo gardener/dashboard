@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
   <v-chip
     label
     size="x-small"
-    class="mr-1"
+    class="mr-1 mb-1"
     :style="labelStyle"
   >
     {{ label.name }}
