@@ -162,7 +162,7 @@ export const useCloudProviderBinding = (binding, options = {}) => {
 
     const shoots = filter(
       shootList.value,
-      ({ metadata, spec }) => (metadata?.namespace ?? resourceNamespace.value) === resourceNamespace.value && get(spec, [bindingNameKey]) === name,
+      ({ metadata, spec }) => metadata?.namespace === resourceNamespace.value && get(spec, [bindingNameKey]) === name,
     )
     return shoots
   })

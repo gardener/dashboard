@@ -67,15 +67,15 @@ export const useDnsProviderCredential = (credential, options = {}) => {
       if (provider?.credentialsRef) {
         return provider.credentialsRef.name === name &&
           provider.credentialsRef.kind === kind &&
-          (provider.credentialsRef.namespace ?? shoot.metadata?.namespace ?? namespace) === namespace
+          (provider.credentialsRef.namespace ?? shoot.metadata?.namespace) === namespace
       }
       // secretName is supported for backward compatibility, but credentialsRef is preferred if both are set
-      return kind === 'Secret' && provider?.secretName === name && (shoot.metadata?.namespace ?? namespace) === namespace
+      return kind === 'Secret' && provider?.secretName === name && shoot.metadata?.namespace === namespace
     })
     const isCredentialReferencedByResource = shoot => some(shoot.spec?.resources, ({ resourceRef }) => {
       return resourceRef?.kind === kind &&
         resourceRef?.name === name &&
-        (resourceRef?.namespace ?? shoot.metadata?.namespace ?? namespace) === namespace
+        (resourceRef?.namespace ?? shoot.metadata?.namespace) === namespace
     })
 
     let count = 0
