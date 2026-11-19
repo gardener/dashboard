@@ -171,6 +171,22 @@ describe('api', function () {
       expect(res.body).toMatchSnapshot()
     })
 
+    it('should not modify the cached shoots when listing shoots', async () => {
+      const cachedShoot = cache.getShoot(namespace, name)
+      cachedShoot.metadata.managedFields = [{ manager: 'kubectl' }]
+      mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess())
+
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/shoots`)
+        .set('cookie', await user.cookie)
+        .expect('content-type', /json/)
+        .expect(200)
+
+      const item = res.body.items.find(item => item.metadata.name === name)
+      expect(item.metadata.managedFields).toBeUndefined()
+      expect(cachedShoot.metadata.managedFields).toEqual([{ manager: 'kubectl' }])
+    })
+
     it('should be forbidden to list shoots for a single namespace', async () => {
       mockRequest.mockImplementationOnce(fixtures.auth.mocks.reviewSelfSubjectAccess({ allowed: false }))
 
