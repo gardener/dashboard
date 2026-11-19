@@ -177,7 +177,7 @@ export default {
     },
     orgClusterUrl: {
       get () {
-        return get(this.gdchConfig, orgClusterUrlConfigKey) ?? ''
+        return get(this.gdchConfig, orgClusterUrlConfigKey, '')
       },
       set (value) {
         this.updateConfig({ [orgClusterUrlConfigKey]: value })
