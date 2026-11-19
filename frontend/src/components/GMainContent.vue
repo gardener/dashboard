@@ -6,16 +6,22 @@ SPDX-License-Identifier: Apache-2.0
 
 <template>
   <v-main ref="mainRef">
-    <g-alert-banner
-      :message="alertBannerMessage"
-      :type="alertBannerType"
-      :identifier="alertBannerIdentifier"
-    />
     <div
-      ref="wrapRef"
-      class="g-main__wrap"
+      ref="contentRef"
+      class="g-main__content"
     >
-      <router-view />
+      <g-alert-banner
+        class="g-main__alert"
+        :message="alertBannerMessage"
+        :type="alertBannerType"
+        :identifier="alertBannerIdentifier"
+      />
+      <div
+        ref="wrapRef"
+        class="g-main__wrap"
+      >
+        <router-view />
+      </div>
     </div>
   </v-main>
 </template>
@@ -44,6 +50,7 @@ const {
 
 // refs
 const mainRef = ref(null)
+const contentRef = ref(null)
 const wrapRef = ref(null)
 
 function setElementOverflowY (element, value) {
@@ -66,9 +73,9 @@ onMounted(() => {
 
 watchEffect(() => {
   const toolbarHeight = mainRect.value?.top
-  const wrapElement = wrapRef.value
-  if (wrapElement && Number.isInteger(toolbarHeight)) {
-    wrapElement.style.height = `calc(100vh - ${toolbarHeight}px)`
+  const contentElement = contentRef.value
+  if (contentElement && Number.isInteger(toolbarHeight)) {
+    contentElement.style.height = `calc(100vh - ${toolbarHeight}px)`
   }
 })
 
@@ -80,8 +87,18 @@ provide('mainContainer', wrapRef)
 </script>
 
 <style lang="scss">
+.g-main__content {
+    display: flex;
+    flex-direction: column;
+}
+
+.g-main__content > .g-main__alert {
+    flex: 0 0 auto;
+}
+
 .g-main__wrap {
     flex: 1 1 auto;
+    min-height: 0;
     position: relative;
     margin: 0 !important;
     padding: 0 !important;
