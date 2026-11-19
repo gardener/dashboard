@@ -29,13 +29,13 @@ describe('useCloudProviderBinding composable', () => {
     shootStore = useShootStore()
     shootStore.state.shoots = {
       'abc-123': {
-        metadata: { name: 'shoot-1', uid: 'abc-123' },
+        metadata: { name: 'shoot-1', namespace: 'garden-test', uid: 'abc-123' },
         spec: {
           credentialsBindingName: 'aws-credentialsbinding',
         },
       },
       'abc-124': {
-        metadata: { name: 'shoot-2', uid: 'abc-124' },
+        metadata: { name: 'shoot-2', namespace: 'garden-test', uid: 'abc-124' },
         spec: {
           secretBindingName: 'aws-secretbinding',
           dns: {
@@ -50,7 +50,7 @@ describe('useCloudProviderBinding composable', () => {
         },
       },
       'abc-125': {
-        metadata: { name: 'shoot-3', uid: 'abc-125' },
+        metadata: { name: 'shoot-3', namespace: 'garden-test', uid: 'abc-125' },
         spec: {
           resources: [
             {
@@ -180,6 +180,23 @@ describe('useCloudProviderBinding composable', () => {
     const bindingComposable = useCloudProviderBinding(credentialsBindingRef)
     expect(bindingComposable.isInfrastructureBinding.value).toBe(true)
     expect(bindingComposable.credentialUsageCount.value).toBe(1)
+  })
+
+  it('ignores binding references from a different or missing namespace', () => {
+    shootStore.state.shoots = {
+      other: {
+        metadata: { name: 'other', namespace: 'garden-other' },
+        spec: { secretBindingName: 'aws-secretbinding' },
+      },
+      missing: {
+        metadata: { name: 'missing' },
+        spec: { secretBindingName: 'aws-secretbinding' },
+      },
+    }
+
+    const bindingComposable = useCloudProviderBinding(findBindingRef('aws-secretbinding'))
+
+    expect(bindingComposable.credentialUsageCount.value).toBe(0)
   })
 
   it('finds other bindings with same secret', () => {
