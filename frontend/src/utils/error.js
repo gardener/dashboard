@@ -21,7 +21,7 @@ export function isGatewayTimeout (error) {
 }
 
 function hasStatusCode (statusCode, err) {
-  return get(err, ['response', 'status']) === statusCode
+  return get(err, ['response', 'status'], get(err, ['status'])) === statusCode
 }
 
 export function errorDetailsFromError (err) {

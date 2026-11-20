@@ -19,7 +19,7 @@ const startEndHyphenPattern = /^-.*.|.*-$/
 const numberOrPercentagePattern = /^[\d]+[%]?$/
 const guidPattern = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/
 const rfc1123LabelNamePattern = /^(?!.*-$)(?!-)[a-z0-9-]{1,63}$/
-const dnsSubdomainNamePattern = /^(?!.*[-.]$)(?![-.])[a-z0-9-.]{1,253}$/
+const subdomainSegmentPattern = /^(?!-)[a-z0-9-]*[a-z0-9]$/
 const gardenNamePattern = /^(?!.*[-_]$)(?![-_])[a-zA-Z0-9-_]+$/
 export const timezonePattern = /^([+-])(\d{2}):(\d{2})$/
 
@@ -51,8 +51,12 @@ const isRfc1123LabelName = value => {
   return rfc1123LabelNamePattern.test(value)
 }
 const isDnsSubdomainName = value => {
-  return dnsSubdomainNamePattern.test(value)
+  if (typeof value !== 'string' || value.length > 253) {
+    return false
+  }
+  return value.split('.').every(segment => subdomainSegmentPattern.test(segment))
 }
+const dnsSubdomain = withMessage('Must be a valid DNS subdomain name', value => !value || isDnsSubdomainName(value))
 const isGardenName = value => {
   return gardenNamePattern.test(value)
 }
@@ -123,5 +127,6 @@ export {
   guid,
   isRfc1123LabelName,
   isDnsSubdomainName,
+  dnsSubdomain,
   isGardenName,
 }

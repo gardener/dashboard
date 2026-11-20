@@ -81,88 +81,61 @@ export async function list ({ user, params }) {
 
 export async function createDns ({ user, params }) {
   const client = user.client
-  let { secret } = validateSecret(params)
-  const secretNamespace = secret.metadata.namespace
+  const descriptor = resolveCredential(params)
+  const namespace = descriptor.resource.metadata.namespace
+  const credential = await descriptor.client(client).create(namespace, descriptor.resource)
 
-  secret = await client.core.secrets.create(secretNamespace, secret)
-
-  return {
-    secret,
-  }
+  return { [descriptor.key]: credential }
 }
 
 export async function createInfra ({ user, params }) {
   const client = user.client
-  let { binding } = params
+  const { binding } = params
   validateCredentialsBinding(binding)
 
-  const bindingNamespace = binding.metadata.namespace
-  const credentialsRef = binding.credentialsRef
-  const credentialNamespace = credentialsRef.namespace ?? bindingNamespace
-  let secret
-
-  if (params.secret === undefined) {
+  const { namespace } = binding.metadata
+  const bindings = client['security.gardener.cloud'].credentialsbindings
+  const descriptor = resolveCredential(params, { optional: true })
+  if (!descriptor) {
     await validateSecretBindingMigration(client, binding)
-  } else {
-    ({ secret } = validateSecret(params))
-    validateBindingSecret(binding, secret)
+    return { binding: await bindings.create(namespace, binding) }
   }
 
-  if (secret) {
-    secret = await client.core.secrets.create(credentialNamespace, secret)
-  }
-
+  validateBindingCredential(binding, descriptor)
+  const credentials = descriptor.client(client)
+  const credential = await credentials.create(namespace, descriptor.resource)
   try {
-    binding = await client['security.gardener.cloud'].credentialsbindings.create(bindingNamespace, binding)
+    const createdBinding = await bindings.create(namespace, binding)
+    return { binding: createdBinding, [descriptor.key]: credential }
   } catch (err) {
-    if (secret && await credentialsBindingIsMissing(client, bindingNamespace, binding.metadata.name)) {
-      logger.error('failed to create CredentialsBinding, cleaning up secret %s/%s', secret.metadata.namespace, secret.metadata.name)
-      try {
-        await client.core.secrets.delete(secret.metadata.namespace, secret.metadata.name)
-      } catch (cleanupError) {
-        logger.error('failed to clean up Secret %s/%s after CredentialsBinding creation failed: %s', secret.metadata.namespace, secret.metadata.name, cleanupError.message)
-        err.message += `. The newly created Secret ${secret.metadata.namespace}/${secret.metadata.name} could not be cleaned up. Review it before retrying: ${cleanupError.message}`
-      }
-    }
+    await rollbackCredentialCreation({ bindings, binding, credentials, credential, error: err })
     throw err
-  }
-
-  return {
-    binding,
-    secret,
   }
 }
 
 export async function patchDns ({ user, params }) {
   const client = user.client
-
-  let { secret } = validateSecret(params)
-  const secretNamespace = secret.metadata.namespace
-  const secretName = secret.metadata.name
-
-  secret = await client.core.secrets.update(secretNamespace, secretName, secret)
-  return {
-    secret,
-  }
+  const descriptor = resolveCredential(params)
+  const credential = await updateCredential(client, descriptor)
+  return { [descriptor.key]: credential }
 }
 
 export async function patchInfra ({ user, params }) {
   const client = user.client
-
-  let { secret } = validateSecret(params)
-  const secretNamespace = secret.metadata.namespace
-  const secretName = secret.metadata.name
+  const descriptor = resolveCredential(params)
+  const { namespace } = descriptor.resource.metadata
 
   try {
-    secret = await client.core.secrets.update(secretNamespace, secretName, secret)
+    const credential = await updateCredential(client, descriptor)
+    return { [descriptor.key]: credential }
   } catch (err) {
-    if (!isHttpError(err, 404)) {
+    if (descriptor.kind !== 'Secret' || !isHttpError(err, 404)) {
       throw err
     }
-    secret = await client.core.secrets.create(secretNamespace, secret)
-  }
-  return {
-    secret,
+    // Preserve the legacy orphaned Secret recovery flow. WorkloadIdentities are
+    // identity-bearing resources and must never be recreated on update.
+    const secret = await descriptor.client(client).create(namespace, descriptor.resource)
+    return { secret }
   }
 }
 
@@ -190,7 +163,7 @@ export async function removeInfra ({ user, params }) {
 
   let binding = await bindingClient.get(bindingNamespace, bindingName)
   const credentialRef = resolveBindingCredentialReference(binding)
-  if (!credentialRef?.apiVersion || !credentialRef.kind || !credentialRef.name || !credentialRef.namespace) {
+  if (!isCompleteCredentialReference(credentialRef)) {
     throw createError(422, `${bindingKind} does not contain a complete credential reference`)
   }
   const { namespace: credentialRefNamespace } = credentialRef
@@ -216,28 +189,45 @@ export async function removeInfra ({ user, params }) {
   return removeInfraResponse(binding, credentialRef, credentialDeletion)
 }
 
-async function credentialsBindingIsMissing (client, namespace, name) {
+async function bindingMayReferenceCredential (bindings, binding) {
+  const { namespace, name } = binding.metadata
   try {
-    await client['security.gardener.cloud'].credentialsbindings.get(namespace, name)
-    return false
-  } catch (err) {
-    if (isHttpError(err, 404)) {
+    const existing = await bindings.get(namespace, name)
+    const ref = resolveBindingCredentialReference(existing)
+    if (!isCompleteCredentialReference(ref)) {
       return true
     }
-    logger.error('failed to verify CredentialsBinding %s/%s after its creation failed; retaining the Secret: %s', namespace, name, err.message)
-    return false
+    return sameCredentialReference(ref, resolveBindingCredentialReference(binding))
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return false
+    }
+    logger.error('failed to verify CredentialsBinding %s/%s after its creation failed; retaining the credential: %s', namespace, name, err.message)
+    return true
   }
 }
 
-function validateSecret (params) {
-  const secret = params?.secret
-  if (!secret || secret.apiVersion !== 'v1' || secret.kind !== 'Secret') {
-    throw createError(422, 'secret must be v1, Kind=Secret')
+async function rollbackCredentialCreation ({ bindings, binding, credentials, credential, error }) {
+  if (await bindingMayReferenceCredential(bindings, binding)) {
+    return
   }
-  if (!secret.metadata?.namespace || !secret.metadata?.name) {
-    throw createError(422, 'Secret metadata.name and metadata.namespace are required')
+
+  const { namespace, name, uid } = credential.metadata
+  const description = `${credential.kind} ${namespace}/${name}`
+  if (!uid) {
+    error.message += `. Retained ${description} because the create response omitted its UID`
+    return
   }
-  return { secret }
+
+  try {
+    await credentials.delete(namespace, name, { preconditions: { uid } })
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return
+    }
+    logger.error('failed to clean up %s after CredentialsBinding creation failed: %s', description, err.message)
+    error.message += `. The newly created ${description} could not be cleaned up. Review it before retrying: ${err.message}`
+  }
 }
 
 function validateCredentialsBinding (binding) {
@@ -257,24 +247,25 @@ function validateCredentialsBinding (binding) {
   if (!ref?.apiVersion || !ref.kind || !ref.name) {
     throw createError(422, 'CredentialsBinding must contain a complete credentialsRef')
   }
-  if (ref.apiVersion !== 'v1' || ref.kind !== 'Secret') {
-    throw createError(422, 'CredentialsBinding credentialsRef must reference a v1 Secret')
-  }
+  descriptorForCredentialReference(ref)
   if ((ref.namespace ?? binding.metadata.namespace) !== binding.metadata.namespace) {
-    throw createError(422, 'Creation is only allowed when the Secret and CredentialsBinding are in the same namespace')
+    throw createError(422, 'Creation is only allowed when the credential and CredentialsBinding are in the same namespace')
   }
 }
 
-function validateBindingSecret (binding, secret) {
+function validateBindingCredential (binding, descriptor) {
   const ref = binding.credentialsRef
   const refNamespace = ref.namespace ?? binding.metadata.namespace
-  const { namespace, name } = secret.metadata
-  if (ref.apiVersion !== secret.apiVersion || ref.kind !== secret.kind || ref.name !== name || refNamespace !== namespace) {
-    throw createError(422, 'Secret and CredentialsBinding credentialsRef must have matching API version, kind, name and namespace')
+  const { namespace, name } = descriptor.resource.metadata
+  if (ref.apiVersion !== descriptor.apiVersion || ref.kind !== descriptor.kind || ref.name !== name || refNamespace !== namespace) {
+    throw createError(422, 'Credential and CredentialsBinding credentialsRef must have matching API version, kind, name and namespace')
   }
 }
 
 async function validateSecretBindingMigration (client, binding) {
+  if (binding.credentialsRef.kind !== 'Secret') {
+    throw createError(422, 'A credential resource is required for this CredentialsBinding')
+  }
   let source
   try {
     source = await client['core.gardener.cloud'].secretbindings.get(binding.metadata.namespace, binding.metadata.name)
@@ -310,25 +301,115 @@ function bindingClientFor (client, bindingKind) {
   }
 }
 
+const credentialDescriptors = {
+  secret: {
+    key: 'secret',
+    kind: 'Secret',
+    apiVersion: 'v1',
+    client: client => client.core.secrets,
+  },
+  workloadIdentity: {
+    key: 'workloadIdentity',
+    kind: 'WorkloadIdentity',
+    apiVersion: 'security.gardener.cloud/v1alpha1',
+    client: client => client['security.gardener.cloud'].workloadidentities,
+  },
+}
+
 function descriptorForKind (kind) {
-  switch (kind) {
-    case 'Secret':
-      return { kind, client: client => client.core.secrets }
-    case 'WorkloadIdentity':
-      return { kind, client: client => client['security.gardener.cloud'].workloadidentities }
-    default:
-      throw createError(422, `Unknown credentialKind ${kind}`)
+  const descriptor = Object.values(credentialDescriptors).find(item => item.kind === kind)
+  if (!descriptor) {
+    throw createError(422, `Unknown credentialKind ${kind}`)
   }
+  return descriptor
 }
 
 function descriptorForCredentialReference ({ apiVersion, kind }) {
-  if (apiVersion === 'v1' && kind === 'Secret') {
-    return { kind, client: client => client.core.secrets }
-  }
-  if (apiVersion === 'security.gardener.cloud/v1alpha1' && kind === 'WorkloadIdentity') {
-    return { kind, client: client => client['security.gardener.cloud'].workloadidentities }
+  const descriptor = descriptorForKind(kind)
+  if (descriptor.apiVersion === apiVersion) {
+    return descriptor
   }
   throw createError(422, `Unknown credential reference ${apiVersion}, Kind=${kind}`)
+}
+
+function resolveCredential (params, { optional = false } = {}) {
+  const resources = []
+  if (params?.secret !== undefined) {
+    resources.push([credentialDescriptors.secret, params.secret])
+  }
+  if (params?.workloadIdentity !== undefined) {
+    resources.push([credentialDescriptors.workloadIdentity, params.workloadIdentity])
+  }
+
+  if (resources.length > 1) {
+    throw createError(422, 'Provide exactly one credential resource')
+  }
+  if (resources.length === 0) {
+    if (optional) {
+      return undefined
+    }
+    throw createError(422, 'A credential resource is required')
+  }
+
+  const [descriptor, resource] = resources[0]
+  if (!resource || resource.kind !== descriptor.kind || resource.apiVersion !== descriptor.apiVersion) {
+    throw createError(422, `${descriptor.key} must be ${descriptor.apiVersion}, Kind=${descriptor.kind}`)
+  }
+  if (!resource.metadata?.namespace || !resource.metadata?.name) {
+    throw createError(422, `${descriptor.kind} metadata.name and metadata.namespace are required`)
+  }
+  return { ...descriptor, resource }
+}
+
+async function updateCredential (client, descriptor) {
+  const { namespace, name, resourceVersion } = descriptor.resource.metadata
+  if (descriptor.kind !== 'WorkloadIdentity') {
+    return descriptor.client(client).update(namespace, name, descriptor.resource)
+  }
+  if (!resourceVersion) {
+    throw createError(422, 'WorkloadIdentity metadata.resourceVersion is required for update')
+  }
+
+  const current = await descriptor.client(client).get(namespace, name)
+  if (current.metadata?.deletionTimestamp) {
+    throw createError(409, `WorkloadIdentity ${namespace}/${name} is already marked for deletion`)
+  }
+  validateWorkloadIdentityUpdate(current, descriptor.resource)
+  const resource = _.cloneDeep(descriptor.resource)
+  resource.metadata.uid = current.metadata?.uid
+  resource.status = current.status
+  return descriptor.client(client).update(namespace, name, resource)
+}
+
+function validateWorkloadIdentityUpdate (current, draft) {
+  const target = current.spec?.targetSystem
+  const updatedTarget = draft.spec?.targetSystem
+  if (target?.type !== updatedTarget?.type) {
+    throw createError(422, 'WorkloadIdentity target system type cannot be changed')
+  }
+  if (current.metadata?.uid && draft.metadata.uid !== current.metadata.uid) {
+    throw createError(422, 'WorkloadIdentity UID cannot be changed')
+  }
+  if (current.status?.sub && draft.status?.sub !== current.status.sub) {
+    throw createError(422, 'WorkloadIdentity subject cannot be changed')
+  }
+
+  for (const field of immutableProviderFields(target?.type)) {
+    const original = _.get(target?.providerConfig, field)
+    const updated = _.get(updatedTarget?.providerConfig, field)
+    if (!_.isEqual(original, updated)) {
+      throw createError(422, `WorkloadIdentity ${field} cannot be changed`)
+    }
+  }
+}
+
+// Provider-specific fields mirror immutableOnEdit in the frontend vendor definitions.
+function immutableProviderFields (type) {
+  switch (type) {
+    case 'azure': return ['apiVersion', 'kind', 'tenantID', 'subscriptionID']
+    case 'gcp': return ['apiVersion', 'kind', 'projectID']
+    default: return ['apiVersion', 'kind']
+  }
 }
 
 async function requestCredentialDeletion ({ client, descriptor, credentialRef }) {
@@ -400,6 +481,10 @@ function sameCredentialReference (left, right) {
     left?.kind === right?.kind &&
     left?.namespace === right?.namespace &&
     left?.name === right?.name
+}
+
+function isCompleteCredentialReference (ref) {
+  return Boolean(ref?.apiVersion && ref.kind && ref.name && ref.namespace)
 }
 
 async function removeOldDnsBindingIfExists (client, namespace, secretName) {

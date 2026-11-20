@@ -24,7 +24,7 @@ import {
   bindingCredentialNamespace as _credentialNamespace,
   bindingCredentialRef as _bindingCredentialRef,
   bindingCredentialKind as _credentialKind,
-  secretDetails as _secretDetails,
+  credentialDetails as _credentialDetails,
   bindingProviderType as _bindingProviderType,
 } from './helper'
 
@@ -127,9 +127,9 @@ export const useCloudProviderBinding = (binding, options = {}) => {
   })
 
   const credentialDetails = computed(() => {
-    if (hasSecret.value && credential.value) {
-      return _secretDetails({
-        secret: credential.value,
+    if (credential.value) {
+      return _credentialDetails({
+        credential: credential.value,
         providerConfig: providerConfig.value,
       })
     }

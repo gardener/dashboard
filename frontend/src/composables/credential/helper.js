@@ -15,13 +15,13 @@ import filter from 'lodash/filter'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
 
-function isSecretDetailValuePath (path) {
+function isDetailValuePath (path) {
   return Array.isArray(path) &&
     path.length > 0 &&
     path.every(segment => typeof segment === 'string' || typeof segment === 'number')
 }
 
-function normalizeSecretDetailValuePaths ({ key, keys }) {
+function normalizeDetailValuePaths ({ key, keys }) {
   const hasKey = key !== undefined
   const hasKeys = keys !== undefined
 
@@ -33,7 +33,7 @@ function normalizeSecretDetailValuePaths ({ key, keys }) {
   if (
     !Array.isArray(paths) ||
     paths.length === 0 ||
-    paths.some(path => !isSecretDetailValuePath(path))
+    paths.some(path => !isDetailValuePath(path))
   ) {
     return undefined
   }
@@ -41,7 +41,7 @@ function normalizeSecretDetailValuePaths ({ key, keys }) {
   return paths
 }
 
-function secretDetailValueFromPaths (value, paths) {
+function detailValueFromPaths (value, paths) {
   for (const path of paths) {
     const selectedValue = get(value, path)
     if (selectedValue) {
@@ -82,12 +82,12 @@ function resolveSecretDetailValue (secretData, valueFrom) {
     path,
   } = valueFrom
 
-  const paths = normalizeSecretDetailValuePaths({ key, keys })
+  const paths = normalizeDetailValuePaths({ key, keys })
   if (!paths) {
     return undefined
   }
 
-  let value = secretDetailValueFromPaths(secretData, paths)
+  let value = detailValueFromPaths(secretData, paths)
 
   if (value === undefined) {
     return undefined
@@ -100,7 +100,7 @@ function resolveSecretDetailValue (secretData, valueFrom) {
   value = parseSecretDetailValue(value, parse)
 
   if (path !== undefined) {
-    if (!isSecretDetailValuePath(path)) {
+    if (!isDetailValuePath(path)) {
       return undefined
     }
     return get(value, path)
@@ -135,6 +135,45 @@ function resolveSecretDetailsFromVendorConfig ({ secretData, providerConfig }) {
       value: resolveSecretDetailValue(secretData, valueFrom),
     }
   })
+}
+
+function readableDetailValue (value) {
+  if (Array.isArray(value)) {
+    return value.map(readableDetailValue).join(', ')
+  }
+  if (value && typeof value === 'object') {
+    return JSON.stringify(value)
+  }
+  return value
+}
+
+function resolvePlainDetailsFromVendorConfig ({ credential, providerConfig }) {
+  const detailDefinitions = get(providerConfig, ['workloadIdentity', 'details'])
+  if (!Array.isArray(detailDefinitions) || detailDefinitions.length === 0) {
+    return undefined
+  }
+
+  return detailDefinitions.map(({ label, hidden, valueFrom }) => {
+    if (hidden) {
+      return { label, hidden: true }
+    }
+    const paths = normalizeDetailValuePaths(valueFrom ?? {})
+    return {
+      label,
+      value: readableDetailValue(paths ? detailValueFromPaths(credential, paths) : undefined),
+    }
+  })
+}
+
+export function credentialKindSupported (vendor, kind) {
+  if (kind === 'Secret') {
+    // Existing vendors without a Secret schema retain the generic Secret form.
+    return vendor?.secret !== false
+  }
+  if (kind === 'WorkloadIdentity') {
+    return Boolean(vendor?.workloadIdentity && typeof vendor.workloadIdentity === 'object')
+  }
+  return false
 }
 
 // Credentials
@@ -355,4 +394,50 @@ export function secretDetails ({ secret, providerConfig }) {
     secretData,
     providerConfig,
   })
+}
+
+export function workloadIdentityDetails ({ workloadIdentity, providerConfig }) {
+  if (!workloadIdentity) {
+    return undefined
+  }
+  const details = resolvePlainDetailsFromVendorConfig({
+    credential: workloadIdentity,
+    providerConfig,
+  })
+  if (details) {
+    return details
+  }
+  return [{
+    label: 'Audience',
+    value: readableDetailValue(workloadIdentity.spec?.audiences),
+  }]
+}
+
+export function credentialDetails ({ credential, providerConfig }) {
+  if (isSecret(credential)) {
+    return secretDetails({ secret: credential, providerConfig })
+  }
+  if (isWorkloadIdentity(credential)) {
+    return workloadIdentityDetails({ workloadIdentity: credential, providerConfig })
+  }
+}
+
+export function workloadIdentitySearchValues (workloadIdentity, providerConfig) {
+  if (!isWorkloadIdentity(workloadIdentity)) {
+    return []
+  }
+  const values = [
+    workloadIdentity.status?.sub,
+  ]
+  for (const audience of workloadIdentity.spec?.audiences ?? []) {
+    values.push(String(audience))
+  }
+  const targetProviderConfig = workloadIdentity.spec?.targetSystem?.providerConfig
+  for (const field of get(providerConfig, ['workloadIdentity', 'fields'], [])) {
+    const value = get(targetProviderConfig, Array.isArray(field.path) ? field.path : [field.key])
+    if (value !== undefined && value !== null) {
+      values.push(typeof value === 'object' ? JSON.stringify(value) : String(value))
+    }
+  }
+  return values
 }

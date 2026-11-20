@@ -368,7 +368,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     return this[http.request](url, setPatchType({ method, searchParams, json: body, signal, onWarning }, PatchType.STRATEGIC_MERGE))
   }
 
-  delete (namespace, name, { searchParams, signal, ...options } = {}) {
+  delete (namespace, name, { preconditions, searchParams, signal, ...options } = {}) {
     assertNamespace(namespace)
     assertName(name)
     assertSearchParams(searchParams)
@@ -377,7 +377,13 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const method = 'delete'
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
     searchParams = normalizeSearchParams(method, searchParams, options)
-    return this[http.request](url, { method, searchParams, signal })
+    const request = { method, searchParams, signal }
+    if (preconditions) {
+      request.json = { apiVersion: 'v1', kind: 'DeleteOptions', preconditions }
+      // Node closes HTTP/2 DELETE streams at the headers by default.
+      request.endStream = false
+    }
+    return this[http.request](url, request)
   }
 
   deleteCollection (namespace, { searchParams, signal, ...options } = {}) {

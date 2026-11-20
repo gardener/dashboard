@@ -6,7 +6,10 @@
 
 import {
   bindingProviderType,
+  credentialDetails,
+  credentialKindSupported,
   secretDetails,
+  workloadIdentitySearchValues,
 } from '@/composables/credential/helper'
 
 import { encodeBase64 as encode } from '@/utils'
@@ -340,5 +343,63 @@ describe('bindingProviderType', () => {
     [{}, undefined],
   ])('resolves the provider type from %#', (binding, expected) => {
     expect(bindingProviderType(binding)).toBe(expected)
+  })
+})
+
+describe('WorkloadIdentity helpers', () => {
+  const workloadIdentity = {
+    apiVersion: 'security.gardener.cloud/v1alpha1',
+    kind: 'WorkloadIdentity',
+    metadata: { name: 'aws-wlid', namespace: 'garden-test' },
+    spec: {
+      audiences: ['audience-one', 'audience-two'],
+      targetSystem: {
+        type: 'aws',
+        providerConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'WorkloadIdentityConfig',
+          roleARN: 'arn:aws:iam::123456789012:role/gardener',
+        },
+      },
+    },
+    status: { sub: 'gardener.cloud:workloadidentity:garden-test:aws-wlid:uid' },
+  }
+
+  it('resolves plain nested detail values without decoding', () => {
+    expect(credentialDetails({
+      credential: workloadIdentity,
+      providerConfig: {
+        workloadIdentity: {
+          details: [{
+            label: 'Role ARN',
+            valueFrom: { key: ['spec', 'targetSystem', 'providerConfig', 'roleARN'] },
+          }],
+        },
+      },
+    })).toEqual([{
+      label: 'Role ARN',
+      value: 'arn:aws:iam::123456789012:role/gardener',
+    }])
+  })
+
+  it('includes subject and audiences without indexing provider metadata in search data', () => {
+    const values = workloadIdentitySearchValues(workloadIdentity, {
+      workloadIdentity: { fields: [{ key: 'roleARN' }] },
+    })
+    expect(values).toEqual(expect.arrayContaining([
+      'gardener.cloud:workloadidentity:garden-test:aws-wlid:uid',
+      'audience-one',
+      'audience-two',
+      'arn:aws:iam::123456789012:role/gardener',
+    ]))
+    expect(values).not.toContain('aws.provider.extensions.gardener.cloud/v1alpha1')
+    expect(values).not.toContain('WorkloadIdentityConfig')
+  })
+
+  it('resolves Secret fallback and explicit WorkloadIdentity capabilities', () => {
+    expect(credentialKindSupported({}, 'Secret')).toBe(true)
+    expect(credentialKindSupported({ secret: false }, 'Secret')).toBe(false)
+    expect(credentialKindSupported({ workloadIdentity: { fields: [] } }, 'WorkloadIdentity')).toBe(true)
+    expect(credentialKindSupported({}, 'WorkloadIdentity')).toBe(false)
   })
 })

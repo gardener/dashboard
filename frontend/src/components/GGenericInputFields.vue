@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
     <g-generic-input-field
       v-model="fieldData[field.key]"
       :field="field"
-      :input-props="inputProps"
+      :input-props="{ ...inputProps, ...field.inputProps }"
     />
   </component>
 </template>

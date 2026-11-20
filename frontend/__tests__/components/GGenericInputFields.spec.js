@@ -190,6 +190,24 @@ describe('GGenericInputFields', () => {
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
   })
 
+  it('merges shared and per-field input props', () => {
+    const wrapper = mountInputFields({
+      fields: [{
+        key: 'immutable',
+        label: 'Immutable',
+        type: 'text',
+        inputProps: { readonly: true },
+      }],
+      modelValue: { immutable: 'value' },
+      inputProps: { persistentHint: true, readonly: false },
+    })
+
+    expect(wrapper.findComponent(GGenericInputField).props('inputProps')).toEqual({
+      persistentHint: true,
+      readonly: true,
+    })
+  })
+
   it('updates field data when the model value changes', async () => {
     const wrapper = mountInputFields({
       fields: [
@@ -503,6 +521,13 @@ describe('GGenericInputField', () => {
         type: 'url',
       },
       value: 'invalid',
+    },
+    {
+      name: 'HTTPS URL',
+      validator: {
+        type: 'httpsUrl',
+      },
+      value: 'http://example.test/token',
     },
     {
       name: 'maximum length',

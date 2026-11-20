@@ -252,6 +252,17 @@ function compileValidator (validator) {
       return base64
     case 'url':
       return url
+    case 'httpsUrl':
+      return value => {
+        if (!value) {
+          return true
+        }
+        try {
+          return /^https:\/\//i.test(value) && new URL(value).protocol === 'https:'
+        } catch {
+          return false
+        }
+      }
     case 'maxLength':
       return maxLength(validator.length)
     case 'minLength':

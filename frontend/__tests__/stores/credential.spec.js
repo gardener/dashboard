@@ -36,6 +36,21 @@ const newSecret = {
     newSecret: 'dummy-data',
   },
 }
+const newWorkloadIdentity = {
+  apiVersion: 'security.gardener.cloud/v1alpha1',
+  kind: 'WorkloadIdentity',
+  metadata: {
+    name: 'my-new-workload-identity',
+    namespace: testNamespace,
+    uid: 'new-wlid-uid',
+    resourceVersion: '42',
+  },
+  spec: {
+    audiences: ['audience'],
+    targetSystem: { type: 'aws' },
+  },
+  status: { sub: 'gardener.cloud:workloadidentity:garden-test:my-new-workload-identity:new-wlid-uid' },
+}
 
 describe('stores', () => {
   describe('credential', () => {
@@ -57,35 +72,10 @@ describe('stores', () => {
           data: fixtures.credentials,
         }
       })
-      vi.spyOn(api, 'updateDnsProviderCredential').mockImplementation(({ secret }) => {
-        return {
-          data: {
-            secret,
-          },
-        }
-      })
-      vi.spyOn(api, 'updateInfraProviderCredential').mockImplementation(({ secret }) => {
-        return {
-          data: {
-            secret,
-          },
-        }
-      })
-      vi.spyOn(api, 'createDnsProviderCredential').mockImplementation(({ secret }) => {
-        return {
-          data: {
-            secret,
-          },
-        }
-      })
-      vi.spyOn(api, 'createInfraProviderCredential').mockImplementation(({ binding, secret }) => {
-        return {
-          data: {
-            binding,
-            secret,
-          },
-        }
-      })
+      vi.spyOn(api, 'updateDnsProviderCredential').mockImplementation(params => ({ data: params }))
+      vi.spyOn(api, 'updateInfraProviderCredential').mockImplementation(params => ({ data: params }))
+      vi.spyOn(api, 'createDnsProviderCredential').mockImplementation(params => ({ data: params }))
+      vi.spyOn(api, 'createInfraProviderCredential').mockImplementation(params => ({ data: params }))
       vi.spyOn(api, 'deleteDnsProviderCredential').mockReturnValue()
       vi.spyOn(api, 'deleteInfraProviderCredential').mockReturnValue()
       appStore = useAppStore()
@@ -248,6 +238,39 @@ describe('stores', () => {
       expect(newDnsCredential.metadata.labels['provider.shoot.gardener.cloud/aws-route53']).toBe('true')
     })
 
+    it('stores a returned WorkloadIdentity separately from same-name Secrets', async () => {
+      const workloadIdentity = {
+        ...newWorkloadIdentity,
+        metadata: {
+          ...newWorkloadIdentity.metadata,
+          labels: { 'dashboard.gardener.cloud/dnsProviderType': 'aws-route53' },
+        },
+      }
+      const sameNameSecret = {
+        ...newSecret,
+        metadata: { ...newSecret.metadata, name: workloadIdentity.metadata.name },
+      }
+      credentialStore._setCredentials({
+        ...fixtures.credentials,
+        secrets: [...fixtures.credentials.secrets, sameNameSecret],
+      })
+
+      const result = await credentialStore.createDnsCredential({ workloadIdentity })
+
+      expect(api.createDnsProviderCredential).toHaveBeenCalledWith({ workloadIdentity })
+      expect(result.status.sub).toContain('new-wlid-uid')
+      expect(credentialStore.getWorkloadIdentity(workloadIdentity.metadata)).toEqual(workloadIdentity)
+      expect(credentialStore.getSecret(sameNameSecret.metadata)).toEqual(sameNameSecret)
+    })
+
+    it('preserves the deletion error when refreshing credentials also fails', async () => {
+      const deletionError = new Error('credential deletion was requested but binding cleanup failed')
+      api.deleteInfraProviderCredential.mockRejectedValueOnce(deletionError)
+      api.getCloudProviderCredentials.mockRejectedValueOnce(new Error('refresh failed'))
+
+      await expect(credentialStore.deleteInfraCredential({ bindingKind: 'CredentialsBinding', bindingNamespace: testNamespace, bindingName: 'binding' })).rejects.toBe(deletionError)
+    })
+
     it('should delete credential (secretbinding)', async () => {
       await credentialStore.deleteInfraCredential({ bindingKind: 'SecretBinding', bindingNamespace: testNamespace, bindingName: awsSecretBindingName })
 
@@ -375,12 +398,16 @@ describe('stores', () => {
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
     })
 
-    it('should delete credential (dns secret)', async () => {
-      await credentialStore.deleteDnsCredential({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
+    it.each([
+      ['Secret', 'aws-route53-secret', 'DNS Provider Secret aws-route53-secret deleted'],
+      ['WorkloadIdentity', 'aws-route53-identity', 'DNS Provider Workload Identity aws-route53-identity deleted'],
+    ])('should delete DNS credential (%s)', async (credentialKind, credentialName, successMessage) => {
+      await credentialStore.deleteDnsCredential({ credentialKind, credentialNamespace: testNamespace, credentialName })
 
       expect(api.deleteDnsProviderCredential).toBeCalledTimes(1)
-      expect(api.deleteDnsProviderCredential).toBeCalledWith({ credentialKind: 'Secret', credentialNamespace: testNamespace, credentialName: 'aws-route53-secret' })
+      expect(api.deleteDnsProviderCredential).toBeCalledWith({ credentialKind, credentialNamespace: testNamespace, credentialName })
       expect(api.getCloudProviderCredentials).toBeCalledTimes(1)
+      expect(appStore.setSuccess).toHaveBeenCalledWith(successMessage)
     })
 
     it('store should be resetted in case of a fetch error', async () => {

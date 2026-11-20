@@ -33,6 +33,109 @@ export const serviceAccountField = {
   },
 }
 
+export const workloadIdentityProjectField = {
+  key: 'projectID',
+  path: ['projectID'],
+  label: 'Project ID',
+  hint: 'my-gcp-project',
+  type: 'text',
+  immutableOnEdit: true,
+  validators: {
+    required: { type: 'required' },
+    projectID: {
+      type: 'regex',
+      pattern: /^[a-z][a-z0-9-]{4,28}[a-z0-9]$/,
+      message: 'Enter a valid Google Cloud project ID',
+    },
+  },
+}
+
+const GCP_CREDENTIAL_KEYS = new Set([
+  'audience',
+  'subject_token_type',
+  'token_url',
+  'type',
+  'universe_domain',
+  'service_account_impersonation_url',
+])
+
+export function validateGcpProviderConfig (config) {
+  const credentialsConfig = config?.credentialsConfig
+  if (!credentialsConfig || typeof credentialsConfig !== 'object' || Array.isArray(credentialsConfig)) {
+    return ['GCP credentialsConfig must be an object']
+  }
+  const unknownKeys = Object.keys(credentialsConfig).filter(key => !GCP_CREDENTIAL_KEYS.has(key))
+  if (unknownKeys.length) {
+    return [`Remove unsupported GCP credentialsConfig keys: ${unknownKeys.join(', ')}. Gardener supplies credential_source itself.`]
+  }
+  const errors = []
+  if (credentialsConfig.type !== 'external_account') {
+    errors.push('GCP credentialsConfig.type must be external_account')
+  }
+  if (credentialsConfig.subject_token_type !== 'urn:ietf:params:oauth:token-type:jwt') {
+    errors.push('GCP credentialsConfig.subject_token_type must be urn:ietf:params:oauth:token-type:jwt')
+  }
+  for (const [key, value] of [
+    ['audience', credentialsConfig.audience],
+    ['universe_domain', credentialsConfig.universe_domain],
+    ['token_url', credentialsConfig.token_url],
+  ]) {
+    if (typeof value !== 'string' || !value.trim()) {
+      errors.push(`GCP credentialsConfig.${key} is required`)
+    }
+  }
+  return errors
+}
+
+export const gcpWorkloadIdentityFields = [
+  workloadIdentityProjectField,
+  {
+    key: 'credentialsAudience',
+    path: ['credentialsConfig', 'audience'],
+    label: 'Federation Provider Audience',
+    hint: '//iam.googleapis.com/projects/123456789012/locations/global/workloadIdentityPools/my-pool/providers/gardener',
+    type: 'text',
+    validators: { required: { type: 'required' } },
+  },
+  {
+    key: 'serviceAccountImpersonationURL',
+    path: ['credentialsConfig', 'service_account_impersonation_url'],
+    label: 'Service Account Impersonation URL (optional)',
+    hint: 'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/gardener@my-gcp-project.iam.gserviceaccount.com:generateAccessToken',
+    type: 'text',
+    omitWhenEmpty: true,
+    validators: {
+      httpsUrl: { type: 'httpsUrl', message: 'Enter a valid HTTPS URL' },
+    },
+  },
+]
+
+export const gcpWorkloadIdentity = {
+  targetSystemType: 'gcp',
+  validateProviderConfig: validateGcpProviderConfig,
+  providerConfigDefaults: {
+    apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+    kind: 'WorkloadIdentityConfig',
+    credentialsConfig: {
+      type: 'external_account',
+      subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+      universe_domain: 'googleapis.com',
+      token_url: 'https://sts.googleapis.com/v1/token',
+    },
+  },
+  fields: gcpWorkloadIdentityFields,
+  details: [{
+    label: 'Project ID',
+    valueFrom: { key: ['spec', 'targetSystem', 'providerConfig', 'projectID'] },
+  }],
+  help: `
+    <p>Configure a Google Cloud Workload Identity Pool and OIDC provider that trust the Gardener workload identity issuer. Enter the Project ID and copy the federation audience from the downloaded external-account configuration.</p>
+    <p>The JWT Audience above is independent of the federation provider audience. Gardener supplies the token source, so do not add <code>credential_source</code> or a private service-account key. After creation, copy the final Subject from Details to restrict trust.</p>
+    <p>Service-account impersonation is optional. If used, enter its URL and grant the federated principal permission to impersonate the service account. Grant the principal or service account the infrastructure permissions described in the provider guide.</p>
+    <p><a href="https://github.com/gardener/gardener-extension-provider-gcp/blob/master/docs/usage/usage.md#gcp-workload-identity-federation">GCP federation setup</a></p>
+  `,
+}
+
 export default {
   name: 'gcp',
   displayName: 'Google Cloud',
@@ -71,4 +174,5 @@ export default {
       </p>
     `,
   },
+  workloadIdentity: gcpWorkloadIdentity,
 }

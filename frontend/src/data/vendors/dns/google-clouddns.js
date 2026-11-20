@@ -1,6 +1,7 @@
 import {
   projectDetail,
   serviceAccountField,
+  gcpWorkloadIdentity,
 } from '../infra/gcp'
 
 export default {
@@ -30,6 +31,15 @@ export default {
         <a href="https://cloud.google.com/dns/docs/access-control">Access Control documentation</a>.
         A possible role is roles/dns.admin "DNS Administrator".
       </p>
+    `,
+  },
+  workloadIdentity: {
+    ...gcpWorkloadIdentity,
+    help: `
+      <p>Configure Google Cloud federation for the Gardener issuer and enter the project containing your DNS zones. Use a principal or service account with the required Cloud DNS permissions, such as DNS Administrator at the intended scope.</p>
+      <p>Copy the federation provider audience from the external-account configuration. The JWT Audience is separate from this value. Gardener supplies the token source.</p>
+      <p>Copy the final Subject from Details to restrict trust. Service-account impersonation is optional; if used, enter its URL and grant the principal permission to impersonate that account.</p>
+      <p><a href="https://github.com/gardener/gardener-extension-shoot-dns-service/blob/master/docs/usage/workloadidentity/gcp.md">DNS workload identity integration</a></p>
     `,
   },
 }

@@ -137,6 +137,16 @@ describe('useCloudProviderBinding composable', () => {
     expect(bindingComposable.credential.value).toMatchSnapshot()
   })
 
+  it('resolves an owned WorkloadIdentity from a CredentialsBinding', () => {
+    const bindingComposable = useCloudProviderBinding(findBindingRef('aws-wlid-credentialsbinding'))
+
+    expect(bindingComposable.hasWorkloadIdentity.value).toBe(true)
+    expect(bindingComposable.credential.value).toMatchObject({
+      kind: 'WorkloadIdentity',
+      metadata: { name: 'aws-wlid-workloadidentity', namespace: 'garden-test' },
+    })
+  })
+
   it('resolves secret details using the infra vendor configuration', () => {
     const secretBindingRef = findBindingRef('aws-secretbinding')
     const configStore = {
