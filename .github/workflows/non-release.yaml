@@ -10,17 +10,12 @@ on:
     - edited
     - reopened
     - synchronize
-  # zizmor: ignore[dangerous-triggers] -- intentional: triggers build only when ok-to-test label is added to external PRs, gated by label check in job condition
-  pull_request_target:
-    types:
-    - labeled
   merge_group:
 
 permissions: {}
 
 jobs:
   build:
-    if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == vars.DEFAULT_LABEL_OK_TO_TEST && vars.DEFAULT_LABEL_OK_TO_TEST != '') }}
     uses: $/.github/workflows/build.yaml
     with:
       mode: snapshot
@@ -32,7 +27,6 @@ jobs:
       id-token: write
 
   component-descriptor:
-    if: ${{ github.event_name != 'pull_request_target' || (github.event_name == 'pull_request_target' && github.event.label.name == vars.DEFAULT_LABEL_OK_TO_TEST && vars.DEFAULT_LABEL_OK_TO_TEST != '') }}
     uses: gardener/cc-utils/.github/workflows/post-build.yaml@v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     needs:
       - build
