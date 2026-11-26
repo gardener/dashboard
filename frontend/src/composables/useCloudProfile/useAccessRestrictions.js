@@ -11,11 +11,12 @@ import {
 
 import { useConfigStore } from '@/store/config'
 
+import { renderTemplate } from '@/utils'
+
 import get from 'lodash/get'
 import find from 'lodash/find'
 import filter from 'lodash/filter'
 import isEmpty from 'lodash/isEmpty'
-import template from 'lodash/template'
 
 /**
  * Composable for managing access restrictions from a cloud profile.
@@ -102,7 +103,7 @@ export function useAccessRestrictions (cloudProfile) {
       const defaultNoItemsText = 'No access restriction options available for region ${region}' // eslint-disable-line no-template-curly-in-string
       const noItemsText = get(configStore, ['accessRestriction', 'noItemsText'], defaultNoItemsText)
 
-      return template(noItemsText)({
+      return renderTemplate(noItemsText, {
         region: region.value,
         cloudProfileName: cloudProfile.value?.metadata?.name,
         cloudProfileKind: cloudProfile.value?.kind,
