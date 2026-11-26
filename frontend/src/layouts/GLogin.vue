@@ -40,6 +40,7 @@ SPDX-License-Identifier: Apache-2.0
             :key="key"
             :value="key"
             :text="getLoginTypeTitle(key)"
+            :disabled="tokenLoginPending"
           />
         </v-tabs>
         <v-window
@@ -69,6 +70,7 @@ SPDX-License-Identifier: Apache-2.0
               <v-text-field
                 ref="tokenField"
                 v-model="token"
+                :disabled="tokenLoginPending"
                 color="primary"
                 :append-inner-icon="showToken ? 'mdi-eye' : 'mdi-eye-off'"
                 :type="showToken ? 'text' : 'password'"
@@ -98,6 +100,8 @@ SPDX-License-Identifier: Apache-2.0
             ref="loginButton"
             variant="tonal"
             color="tonal-primary"
+            :loading="tokenLoginPending"
+            :disabled="tokenLoginPending"
             @click="handleLogin"
           >
             Login
@@ -178,6 +182,7 @@ export default {
     return {
       showToken: false,
       token: '',
+      tokenLoginPending: false,
     }
   },
   computed: {
@@ -285,6 +290,9 @@ export default {
       return this.teaserMinWidth + i * 60
     },
     handleLogin () {
+      if (this.tokenLoginPending) {
+        return
+      }
       switch (this.loginType) {
         case 'oidc':
           this.oidcLogin()
@@ -315,9 +323,9 @@ export default {
       }
     },
     async tokenLogin () {
+      this.tokenLoginPending = true
       try {
         const token = this.token
-        this.token = undefined
         await this.api.createTokenReview({ token })
         await this.$router.push(this.redirectPath)
       } catch (err) {
@@ -325,6 +333,9 @@ export default {
           title: `${this.getLoginTypeTitle('token')} Login Error`,
           text: err.message,
         })
+      } finally {
+        this.token = undefined
+        this.tokenLoginPending = false
       }
     },
   },
