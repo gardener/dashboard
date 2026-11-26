@@ -371,6 +371,8 @@ describe('gardener-dashboard', function () {
                 pollIntervalSeconds: 60,
                 syncThrottleSeconds: 10,
                 syncConcurrency: 5,
+                pageSize: 50,
+                closedIssuesLookbackDays: 30,
               },
             },
           },

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`api > tickets > should fetch only member project issues for all namespaces when user cannot list projects 1`] = `
+exports[`api > tickets > should fetch only member project issues (open) for all namespaces when user cannot list projects 1`] = `
 {
   "issues": [
     {
