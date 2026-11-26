@@ -14,9 +14,8 @@ import { useShootStore } from '@/store/shoot'
 import { useConfigStore } from '@/store/config'
 
 import {
-  isSecret as _isSecret,
   isWorkloadIdentity as _isWorkloadIdentity,
-  secretDetails as _secretDetails,
+  credentialDetails as _credentialDetails,
   credentialProviderType as _credentialProviderType,
 } from './helper'
 
@@ -32,7 +31,6 @@ export const useDnsProviderCredential = (credential, options = {}) => {
   } = options
   const { shootList } = storeToRefs(shootStore)
 
-  const isSecret = computed(() => _isSecret(credential.value))
   const isWorkloadIdentity = computed(() => _isWorkloadIdentity(credential.value))
   const credentialNamespace = computed(() => credential.value?.metadata?.namespace)
   const credentialName = computed(() => credential.value?.metadata?.name)
@@ -50,9 +48,9 @@ export const useDnsProviderCredential = (credential, options = {}) => {
   const resourceUid = computed(() => credential.value?.metadata?.uid)
 
   const credentialDetails = computed(() => {
-    if (isSecret.value) {
-      return _secretDetails({
-        secret: credential.value,
+    if (credential.value) {
+      return _credentialDetails({
+        credential: credential.value,
         providerConfig: providerConfig.value,
       })
     }

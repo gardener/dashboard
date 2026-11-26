@@ -42,6 +42,37 @@ function secret (overrides = {}) {
   }
 }
 
+function workloadIdentity (overrides = {}) {
+  const { metadata = {}, spec = {}, ...rest } = overrides
+  return {
+    apiVersion: 'security.gardener.cloud/v1alpha1',
+    kind: 'WorkloadIdentity',
+    metadata: {
+      name: 'credential',
+      namespace,
+      ...metadata,
+    },
+    spec: {
+      audiences: ['audience'],
+      targetSystem: { type: 'aws' },
+      ...spec,
+    },
+    ...rest,
+  }
+}
+
+function workloadIdentityBinding (overrides = {}) {
+  const { credentialsRef = {}, ...rest } = overrides
+  return credentialsBinding({
+    credentialsRef: {
+      apiVersion: 'security.gardener.cloud/v1alpha1',
+      kind: 'WorkloadIdentity',
+      ...credentialsRef,
+    },
+    ...rest,
+  })
+}
+
 function credentialsBinding (overrides = {}) {
   const { metadata = {}, credentialsRef = {}, ...rest } = overrides
   return {
@@ -86,7 +117,10 @@ function secretBinding (overrides = {}) {
 
 function createClient () {
   const secrets = {
-    create: vi.fn(async (_, value) => value),
+    create: vi.fn(async (_, value) => ({
+      ...value,
+      metadata: { ...value.metadata, uid: 'secret-uid' },
+    })),
     get: vi.fn(async () => secret()),
     update: vi.fn(async (_, __, value) => value),
     delete: vi.fn(),
@@ -107,6 +141,16 @@ function createClient () {
     list: vi.fn(async () => ({ items: [] })),
     delete: vi.fn(async (_, name) => ({ metadata: { name } })),
   }
+  const workloadidentities = {
+    create: vi.fn(async (_, value) => ({
+      ...value,
+      metadata: { ...value.metadata, uid: 'uid-1', resourceVersion: '42' },
+      status: { sub: 'gardener.cloud:workloadidentity:garden-test:credential:uid-1' },
+    })),
+    get: vi.fn(),
+    update: vi.fn(async (_, __, value) => value),
+    delete: vi.fn(),
+  }
   return {
     core: { secrets },
     'core.gardener.cloud': {
@@ -115,10 +159,7 @@ function createClient () {
     },
     'security.gardener.cloud': {
       credentialsbindings,
-      workloadidentities: {
-        get: vi.fn(),
-        delete: vi.fn(),
-      },
+      workloadidentities,
     },
   }
 }
@@ -155,7 +196,7 @@ describe('cloudProviderCredentials service', () => {
     [{ ...credentialsBinding(), kind: 'SecretBinding' }, 'Creating SecretBindings is no longer supported'],
     [{ ...credentialsBinding(), kind: 'OtherBinding' }, 'A CredentialsBinding is required'],
     [{ ...credentialsBinding(), credentialsRef: { kind: 'Secret', name: 'credential' } }, 'complete credentialsRef'],
-    [credentialsBinding({ credentialsRef: { kind: 'WorkloadIdentity' } }), 'must reference a v1 Secret'],
+    [credentialsBinding({ credentialsRef: { kind: 'WorkloadIdentity' } }), 'Unknown credential reference'],
   ])('rejects invalid infrastructure bindings before mutation', async (binding, message) => {
     const client = createClient()
 
@@ -211,7 +252,7 @@ describe('cloudProviderCredentials service', () => {
     client['security.gardener.cloud'].credentialsbindings.create.mockRejectedValue(originalError)
 
     await expect(createInfra({ user: { client }, params: { secret: secret(), binding: credentialsBinding() } })).rejects.toBe(originalError)
-    expect(client.core.secrets.delete).toHaveBeenCalledWith(namespace, 'credential')
+    expect(client.core.secrets.delete).toHaveBeenCalledWith(namespace, 'credential', { preconditions: { uid: 'secret-uid' } })
   })
 
   it('retains a newly created Secret when the binding exists after an ambiguous create failure', async () => {
@@ -234,15 +275,19 @@ describe('cloudProviderCredentials service', () => {
     expect(client.core.secrets.delete).not.toHaveBeenCalled()
   })
 
-  it('preserves and augments the original binding error when rollback fails', async () => {
+  it.each([
+    [403, 'cleanup forbidden'],
+    [409, 'UID precondition failed for replacement Secret'],
+  ])('reports rollback failure (%s) without retrying an unconditional delete', async (statusCode, message) => {
     const client = createClient()
     const originalError = createError(403, 'binding forbidden')
     client['security.gardener.cloud'].credentialsbindings.create.mockRejectedValue(originalError)
-    client.core.secrets.delete.mockRejectedValue(createError(403, 'cleanup forbidden'))
+    client.core.secrets.delete.mockRejectedValue(createError(statusCode, message))
 
     await expect(createInfra({ user: { client }, params: { secret: secret(), binding: credentialsBinding() } })).rejects.toBe(originalError)
     expect(originalError.message).toContain('could not be cleaned up')
-    expect(originalError.message).toContain('cleanup forbidden')
+    expect(originalError.message).toContain(message)
+    expect(client.core.secrets.delete).toHaveBeenCalledExactlyOnceWith(namespace, 'credential', { preconditions: { uid: 'secret-uid' } })
   })
 
   it('keeps the legacy update recovery that recreates a missing Secret', async () => {
@@ -252,6 +297,114 @@ describe('cloudProviderCredentials service', () => {
     await patchInfra({ user: { client }, params: { secret: secret() } })
 
     expect(client.core.secrets.create).toHaveBeenCalledWith(namespace, secret())
+  })
+
+  it('creates a WorkloadIdentity and matching CredentialsBinding', async () => {
+    const client = createClient()
+    const identity = workloadIdentity()
+    const binding = workloadIdentityBinding()
+
+    const result = await createInfra({ user: { client }, params: { binding, workloadIdentity: identity } })
+
+    expect(client['security.gardener.cloud'].workloadidentities.create).toHaveBeenCalledWith(namespace, identity)
+    expect(client['security.gardener.cloud'].credentialsbindings.create).toHaveBeenCalledWith(namespace, binding)
+    expect(result.workloadIdentity.status.sub).toContain('uid-1')
+    expect(result.binding).toBe(binding)
+  })
+
+  it('rejects ambiguous and mismatched typed credential resources', async () => {
+    const client = createClient()
+
+    await expect(createInfra({
+      user: { client },
+      params: { binding: workloadIdentityBinding(), secret: secret(), workloadIdentity: workloadIdentity() },
+    })).rejects.toThrow('exactly one')
+
+    await expect(createInfra({
+      user: { client },
+      params: { binding: credentialsBinding(), workloadIdentity: workloadIdentity() },
+    })).rejects.toThrow('matching API version, kind, name and namespace')
+  })
+
+  it('rolls back the new WorkloadIdentity when the existing binding references a same-name Secret', async () => {
+    const client = createClient()
+    const originalError = createError(409, 'binding already exists')
+    client['security.gardener.cloud'].credentialsbindings.create.mockRejectedValue(originalError)
+    client['security.gardener.cloud'].credentialsbindings.get.mockResolvedValue(credentialsBinding())
+
+    await expect(createInfra({
+      user: { client },
+      params: { binding: workloadIdentityBinding(), workloadIdentity: workloadIdentity() },
+    })).rejects.toBe(originalError)
+    expect(client['security.gardener.cloud'].workloadidentities.delete).toHaveBeenCalledWith(namespace, 'credential', { preconditions: { uid: 'uid-1' } })
+    expect(client.core.secrets.delete).not.toHaveBeenCalled()
+  })
+
+  it('updates a WorkloadIdentity with preserved status and never recreates it', async () => {
+    const client = createClient()
+    const current = workloadIdentity({
+      metadata: { uid: 'uid-1', resourceVersion: '42' },
+      status: { sub: 'subject-1', extra: 'keep' },
+    })
+    const draft = workloadIdentity({
+      metadata: { uid: 'uid-1', resourceVersion: '42' },
+      status: { sub: 'subject-1' },
+    })
+    client['security.gardener.cloud'].workloadidentities.get.mockResolvedValue(current)
+
+    const result = await patchInfra({ user: { client }, params: { workloadIdentity: draft } })
+
+    expect(client['security.gardener.cloud'].workloadidentities.update).toHaveBeenCalledWith(
+      namespace,
+      'credential',
+      expect.objectContaining({ status: current.status }),
+    )
+    expect(client['security.gardener.cloud'].workloadidentities.create).not.toHaveBeenCalled()
+    expect(result.workloadIdentity.status.extra).toBe('keep')
+  })
+
+  it('does not recreate a missing WorkloadIdentity during update', async () => {
+    const client = createClient()
+    const error = createError(404)
+    const draft = workloadIdentity({
+      metadata: { uid: 'uid-1', resourceVersion: '42' },
+      status: { sub: 'subject-1' },
+    })
+    client['security.gardener.cloud'].workloadidentities.get.mockRejectedValue(error)
+
+    await expect(patchInfra({ user: { client }, params: { workloadIdentity: draft } })).rejects.toBe(error)
+    expect(client['security.gardener.cloud'].workloadidentities.create).not.toHaveBeenCalled()
+  })
+
+  it('propagates a version conflict when updating from a stale draft', async () => {
+    const client = createClient()
+    const identities = client['security.gardener.cloud'].workloadidentities
+    const draft = workloadIdentity({ metadata: { uid: 'uid-1', resourceVersion: '41' } })
+    identities.get.mockResolvedValue(workloadIdentity({ metadata: { uid: 'uid-1', resourceVersion: '42' } }))
+    const conflict = createError(409)
+    identities.update.mockRejectedValue(conflict)
+
+    await expect(patchInfra({ user: { client }, params: { workloadIdentity: draft } })).rejects.toBe(conflict)
+    expect(identities.update).toHaveBeenCalledWith(namespace, 'credential', expect.objectContaining({ metadata: draft.metadata }))
+  })
+
+  it.each([
+    ['azure', 'tenantID'],
+    ['azure', 'subscriptionID'],
+    ['gcp', 'projectID'],
+  ])('rejects changes to the immutable %s field %s before updating', async (type, key) => {
+    const client = createClient()
+    const identities = client['security.gardener.cloud'].workloadidentities
+    const current = workloadIdentity({
+      metadata: { uid: 'uid-1', resourceVersion: '42' },
+      spec: { targetSystem: { type, providerConfig: { [key]: 'original' } } },
+    })
+    identities.get.mockResolvedValue(current)
+    const draft = structuredClone(current)
+    draft.spec.targetSystem.providerConfig[key] = 'changed'
+
+    await expect(patchInfra({ user: { client }, params: { workloadIdentity: draft } })).rejects.toThrow(`${key} cannot be changed`)
+    expect(identities.update).not.toHaveBeenCalled()
   })
 
   it('deletes the binding before the credential without preflight reference reads', async () => {

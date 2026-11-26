@@ -32,6 +32,13 @@ function namespaceNameKey ({ namespace, name }) {
   return `${namespace}/${name}`
 }
 
+function credentialParams ({ secret, workloadIdentity }) {
+  return {
+    ...(secret !== undefined ? { secret } : {}),
+    ...(workloadIdentity !== undefined ? { workloadIdentity } : {}),
+  }
+}
+
 export const useCredentialStore = defineStore('credential', () => {
   const api = useApi()
   const appStore = useAppStore()
@@ -101,32 +108,40 @@ export const useCredentialStore = defineStore('credential', () => {
     return Object.values(state.quotas)
   })
 
-  async function createDnsCredential ({ secret }) {
-    const { data } = await api.createDnsProviderCredential({ secret })
-    _updateDnsProviderCredential({ secret: data.secret })
-    const name = data.secret.metadata.name
+  async function createDnsCredential ({ secret, workloadIdentity }) {
+    const { data } = await api.createDnsProviderCredential(credentialParams({ secret, workloadIdentity }))
+    const credential = data.secret ?? data.workloadIdentity
+    _updateDnsProviderCredential({ credential })
+    const name = credential.metadata.name
     appStore.setSuccess(`DNS Provider credential ${name} created`)
+    return credential
   }
 
-  async function createInfraCredential ({ binding, secret }) {
-    const { data } = await api.createInfraProviderCredential({ binding, secret })
-    _updateInfraProviderCredential({ binding: data.binding, secret: data.secret })
+  async function createInfraCredential ({ binding, secret, workloadIdentity }) {
+    const { data } = await api.createInfraProviderCredential({ binding, ...credentialParams({ secret, workloadIdentity }) })
+    const credential = data.secret ?? data.workloadIdentity
+    _updateInfraProviderCredential({ binding: data.binding, credential })
     const name = data.binding.metadata.name
     appStore.setSuccess(`Infrastructure credential ${name} created`)
+    return credential
   }
 
-  async function updateDnsCredential ({ secret }) {
-    const { data } = await api.updateDnsProviderCredential({ secret })
-    _updateDnsProviderCredential({ secret: data.secret })
-    const name = secret.metadata.name
+  async function updateDnsCredential ({ secret, workloadIdentity }) {
+    const { data } = await api.updateDnsProviderCredential(credentialParams({ secret, workloadIdentity }))
+    const credential = data.secret ?? data.workloadIdentity
+    _updateDnsProviderCredential({ credential })
+    const name = credential.metadata.name
     appStore.setSuccess(`DNS Provider credential ${name} updated`)
+    return credential
   }
 
-  async function updateInfraCredential ({ secret, binding }) {
-    const { data } = await api.updateInfraProviderCredential({ secret })
-    _updateInfraProviderCredential({ binding, secret: data.secret })
+  async function updateInfraCredential ({ secret, workloadIdentity, binding }) {
+    const { data } = await api.updateInfraProviderCredential(credentialParams({ secret, workloadIdentity }))
+    const credential = data.secret ?? data.workloadIdentity
+    _updateInfraProviderCredential({ binding, credential })
     const name = binding.metadata?.name
     appStore.setSuccess(`Infrastructure Provider credential ${name} updated`)
+    return credential
   }
 
   async function deleteDnsCredential ({ credentialKind, credentialNamespace, credentialName }) {
@@ -137,7 +152,8 @@ export const useCredentialStore = defineStore('credential', () => {
       throw err
     }
     await fetchCredentials()
-    appStore.setSuccess(`DNS Provider Secret ${credentialName} deleted`)
+    const credentialLabel = credentialKind === 'WorkloadIdentity' ? 'Workload Identity' : 'Secret'
+    appStore.setSuccess(`DNS Provider ${credentialLabel} ${credentialName} deleted`)
   }
 
   async function deleteInfraCredential ({ bindingKind, bindingNamespace, bindingName, preserveCredential = false }) {
@@ -221,12 +237,23 @@ export const useCredentialStore = defineStore('credential', () => {
     return get(state.quotas, [namespaceNameKey({ namespace, name })])
   }
 
-  function _updateDnsProviderCredential ({ secret }) {
-    const key = namespaceNameKey(secret.metadata)
-    set(state.secrets, [key], secret)
+  function _updateCredential (credential) {
+    if (!credential) {
+      return
+    }
+    const key = namespaceNameKey(credential.metadata)
+    if (credential.kind === 'Secret') {
+      set(state.secrets, [key], credential)
+    } else if (credential.kind === 'WorkloadIdentity') {
+      set(state.workloadIdentities, [key], credential)
+    }
   }
 
-  function _updateInfraProviderCredential ({ binding, secret }) {
+  function _updateDnsProviderCredential ({ credential }) {
+    _updateCredential(credential)
+  }
+
+  function _updateInfraProviderCredential ({ binding, credential }) {
     const bindingKey = namespaceNameKey(binding.metadata)
     if (binding.kind === 'SecretBinding') {
       set(state.secretBindings, [bindingKey], binding)
@@ -234,10 +261,7 @@ export const useCredentialStore = defineStore('credential', () => {
       set(state.credentialsBindings, [bindingKey], binding)
     }
 
-    if (secret) {
-      const secretKey = namespaceNameKey(secret.metadata)
-      set(state.secrets, [secretKey], secret)
-    }
+    _updateCredential(credential)
   }
 
   return {

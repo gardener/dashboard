@@ -2,6 +2,7 @@ import {
   accessKeyIdDetail,
   accessKeyIdField,
   secretAccessKeyField,
+  awsWorkloadIdentity,
 } from '../infra/aws'
 
 export default {
@@ -25,5 +26,13 @@ export default {
         omitWhenEmpty: true,
       },
     ],
+  },
+  workloadIdentity: {
+    ...awsWorkloadIdentity,
+    help: `
+      <p>Configure AWS federation for your Gardener workload identity issuer and use an IAM role with permission to manage the intended Route53 hosted zones.</p>
+      <p>Enter its Role ARN and matching audience. The WorkloadIdentity targets AWS even though the DNS provider is Amazon Route53. After creation, copy the exact Subject from Details into the trust policy.</p>
+      <p><a href="https://github.com/gardener/gardener-extension-shoot-dns-service/blob/master/docs/usage/workloadidentity/aws.md">DNS workload identity integration</a></p>
+    `,
   },
 }

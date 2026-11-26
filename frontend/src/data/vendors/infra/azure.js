@@ -59,6 +59,48 @@ export const subscriptionIdField = {
   },
 }
 
+export const workloadIdentityClientIdField = {
+  ...clientIdField,
+  label: 'Client ID',
+  path: ['clientID'],
+}
+
+export const workloadIdentityTenantIdField = {
+  ...tenantIdField,
+  label: 'Tenant ID',
+  path: ['tenantID'],
+  immutableOnEdit: true,
+}
+
+export const workloadIdentitySubscriptionIdField = {
+  ...subscriptionIdField,
+  label: 'Subscription ID',
+  path: ['subscriptionID'],
+  immutableOnEdit: true,
+}
+
+export const azureWorkloadIdentity = {
+  targetSystemType: 'azure',
+  providerConfigDefaults: {
+    apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+    kind: 'WorkloadIdentityConfig',
+  },
+  fields: [
+    workloadIdentityClientIdField,
+    workloadIdentityTenantIdField,
+    workloadIdentitySubscriptionIdField,
+  ],
+  details: [
+    { label: 'Subscription ID', valueFrom: { key: ['spec', 'targetSystem', 'providerConfig', 'subscriptionID'] } },
+    { label: 'Client ID', valueFrom: { key: ['spec', 'targetSystem', 'providerConfig', 'clientID'] } },
+  ],
+  help: `
+    <p>Enter the application Client ID, Directory Tenant ID and Subscription ID that Gardener should use. Set Audience to the exact value in the application's federated identity credential.</p>
+    <p>After creation, copy the Subject from Details and configure Microsoft Entra ID to trust the Gardener issuer, subject and audience. Assign the service principal the permissions required by the Azure provider extension. Tenant and subscription cannot be changed after creation.</p>
+    <p><a href="https://github.com/gardener/gardener-extension-provider-azure/blob/master/docs/usage/usage.md#azure-workload-identity-federation">Azure federation setup</a></p>
+  `,
+}
+
 export default {
   name: 'azure',
   displayName: 'Azure',
@@ -93,4 +135,5 @@ export default {
       </p>
     `,
   },
+  workloadIdentity: azureWorkloadIdentity,
 }

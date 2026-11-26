@@ -531,6 +531,14 @@ describe('kube-client', () => {
           expect(searchParams.toString()).toBe('dryRun=true')
         })
 
+        it('sends delete preconditions in the HTTP/2 request body', () => {
+          const testObject = new TestObject()
+          const preconditions = { uid: 'original-uid' }
+          const [, request] = testObject.delete('namespace', 'name', { preconditions })
+          expect(request.json).toEqual({ apiVersion: 'v1', kind: 'DeleteOptions', preconditions })
+          expect(request.endStream).toBe(false)
+        })
+
         it('should delete multiple resources', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.deleteCollection('namespace', dryRunOptions)

@@ -166,6 +166,41 @@ describe('stores', () => {
       })
     })
 
+    it.each([
+      ['infra', 'aws', 'aws'],
+      ['infra', 'azure', 'azure'],
+      ['infra', 'gcp', 'gcp'],
+      ['infra', 'ironcore-metal', 'ironcore-metal'],
+      ['infra', 'local', 'local'],
+      ['dns', 'aws-route53', 'aws'],
+      ['dns', 'azure-dns', 'azure'],
+      ['dns', 'azure-private-dns', 'azure'],
+      ['dns', 'google-clouddns', 'gcp'],
+    ])('provides a static WorkloadIdentity schema for %s/%s', (type, name, targetSystemType) => {
+      const workloadIdentity = configStore.vendorDetails({ type, name }).workloadIdentity
+      expect(workloadIdentity.targetSystemType).toBe(targetSystemType)
+    })
+
+    it.each([
+      ['infra', 'aws'],
+      ['infra', 'azure'],
+      ['infra', 'gcp'],
+      ['dns', 'aws-route53'],
+      ['dns', 'azure-dns'],
+      ['dns', 'azure-private-dns'],
+      ['dns', 'google-clouddns'],
+    ])('provides guided WorkloadIdentity fields for %s/%s', (type, name) => {
+      const workloadIdentity = configStore.vendorDetails({ type, name }).workloadIdentity
+      expect(workloadIdentity.fields.length).toBeGreaterThan(0)
+      expect(workloadIdentity.omitProviderConfig).not.toBe(true)
+    })
+
+    it.each(['ironcore-metal', 'local'])('omits provider configuration for infra/%s', name => {
+      const workloadIdentity = configStore.vendorDetails({ type: 'infra', name }).workloadIdentity
+      expect(workloadIdentity.omitProviderConfig).toBe(true)
+      expect(workloadIdentity).not.toHaveProperty('fields')
+    })
+
     it('provides built-in shoot defaults', () => {
       expect(configStore.defaultNodesCIDR).toBe('10.250.0.0/16')
       expect(configStore.defaultPurposes).toEqual(['evaluation', 'development', 'testing', 'production'])
