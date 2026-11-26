@@ -1067,7 +1067,7 @@ const RAW_RUNTIME_STATE =
           ["remark-github", "npm:12.0.0"],\
           ["remark-parse", "npm:11.0.0"],\
           ["remark-rehype", "npm:11.1.2"],\
-          ["sanitize-html", "npm:2.18.1"],\
+          ["sanitize-html", "npm:2.18.2"],\
           ["semver", "npm:7.8.6"],\
           ["set-cookie-parser", "npm:3.2.2"],\
           ["socket.io", "npm:4.8.4"],\
@@ -10455,8 +10455,8 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["sanitize-html", [\
-      ["npm:2.18.1", {\
-        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.18.1-718523d455-a79474fbd6.zip/node_modules/sanitize-html/",\
+      ["npm:2.18.2", {\
+        "packageLocation": "./.yarn/cache/sanitize-html-npm-2.18.2-52f275eb16-3ee90656d1.zip/node_modules/sanitize-html/",\
         "packageDependencies": [\
           ["escape-string-regexp", "npm:4.0.0"],\
           ["htmlparser2", "npm:12.0.0"],\
@@ -10464,7 +10464,7 @@ const RAW_RUNTIME_STATE =
           ["launder", "npm:1.7.2"],\
           ["parse-srcset", "npm:1.0.2"],\
           ["postcss", "npm:8.5.32"],\
-          ["sanitize-html", "npm:2.18.1"]\
+          ["sanitize-html", "npm:2.18.2"]\
         ],\
         "linkType": "HARD"\
       }]\
