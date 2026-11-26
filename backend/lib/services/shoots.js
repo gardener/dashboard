@@ -81,6 +81,82 @@ export async function list ({ user, namespace, labelSelector }) {
   }
 }
 
+const shootListPaths = Object.freeze([
+  'metadata.name',
+  'metadata.namespace',
+  'metadata.uid',
+  'metadata.creationTimestamp',
+  'metadata.deletionTimestamp',
+  'metadata.generation',
+  'metadata.labels',
+  'metadata.annotations.gardener.cloud/created-by',
+  'metadata.annotations.shoot.gardener.cloud/ignore',
+  'metadata.annotations.dashboard.gardener.cloud/ignore-issues',
+  'metadata.annotations.confirmation.gardener.cloud/deletion',
+  'metadata.annotations.confirmation.gardener.cloud/force-deletion',
+  'metadata.annotations.gardener.cloud/operation',
+  'metadata.annotations.shoot.gardener.cloud/expiration-timestamp',
+  'metadata.annotations.shoot.garden.sapcloud.io/expirationTimestamp',
+  'spec.cloudProfile',
+  'spec.region',
+  'spec.purpose',
+  'spec.seedName',
+  'spec.provider.type',
+  'spec.kubernetes.version',
+  'spec.hibernation',
+  'spec.maintenance.autoUpdate',
+  'spec.controlPlane.highAvailability',
+  'spec.accessRestrictions',
+  'status.hibernated',
+  'status.technicalID',
+  'status.lastOperation',
+  'status.lastErrors',
+  'status.conditions',
+  'status.constraints',
+  'status.lastMaintenance',
+])
+
+function getCustomFieldPaths (namespace) {
+  const project = cache.getProjects().find(project => project.spec.namespace === namespace)
+  const customFields = project?.metadata.annotations?.['dashboard.gardener.cloud/shootCustomFields']
+  if (!customFields) {
+    return []
+  }
+
+  try {
+    const fields = JSON.parse(customFields)
+    return Object.values(fields)
+      .map(field => field?.path)
+      .filter(path => typeof path === 'string' && path && !_.toPath(path).some(segment =>
+        ['__proto__', 'constructor', 'prototype'].includes(segment),
+      ))
+  } catch {
+    return []
+  }
+}
+
+// List responses are intentionally a projection. Full Shoot resources are fetched only for
+// the detail view, while custom fields configured on the Project remain available in the list.
+export function simplifyShootForList (shoot) {
+  const result = {}
+  const paths = [
+    ...shootListPaths,
+    ...getCustomFieldPaths(shoot.metadata.namespace),
+  ]
+
+  for (const path of paths) {
+    if (_.has(shoot, path)) {
+      _.set(result, path, _.get(shoot, path))
+    }
+  }
+  const workers = _.get(shoot, ['spec', 'provider', 'workers'], [])
+  _.set(result, ['spec', 'provider', 'workers'], workers.map(worker => ({
+    name: worker.name,
+    ...(_.has(worker, ['controlPlane']) ? { controlPlane: {} } : {}),
+  })))
+  return result
+}
+
 export async function create ({ user, namespace, body, ...options }) {
   const client = user.client
   const username = user.id
