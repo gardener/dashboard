@@ -665,39 +665,66 @@ describe('utils', () => {
   describe('parseNumberWithMagnitudeSuffix', () => {
     it('should convert k to thousands', () => {
       expect(parseNumberWithMagnitudeSuffix('1k')).toBe(1000)
-      expect(parseNumberWithMagnitudeSuffix('1K')).toBe(1000)
     })
 
     it('should convert M to millions', () => {
       expect(parseNumberWithMagnitudeSuffix('1M')).toBe(1000000)
-      expect(parseNumberWithMagnitudeSuffix('1m')).toBe(1000000)
     })
 
-    it('should convert B to billions', () => {
-      expect(parseNumberWithMagnitudeSuffix('1B')).toBe(1000000000)
-      expect(parseNumberWithMagnitudeSuffix('1b')).toBe(1000000000)
+    it('should convert G to billions', () => {
+      expect(parseNumberWithMagnitudeSuffix('1G')).toBe(1000000000)
     })
 
-    it('should convert T to trillions', () => {
-      expect(parseNumberWithMagnitudeSuffix('1T')).toBe(1000000000000)
-      expect(parseNumberWithMagnitudeSuffix('1t')).toBe(1000000000000)
+    it('should convert T, P and E', () => {
+      expect(parseNumberWithMagnitudeSuffix('1T')).toBe(1e12)
+      expect(parseNumberWithMagnitudeSuffix('1P')).toBe(1e15)
+      expect(parseNumberWithMagnitudeSuffix('1E')).toBe(1e18)
+    })
+
+    it('should convert m, u and n to fractions', () => {
+      expect(parseNumberWithMagnitudeSuffix('500m')).toBe(0.5)
+      expect(parseNumberWithMagnitudeSuffix('1500u')).toBeCloseTo(0.0015)
+      expect(parseNumberWithMagnitudeSuffix('100n')).toBeCloseTo(1e-7)
+    })
+
+    it('should convert binary suffixes', () => {
+      expect(parseNumberWithMagnitudeSuffix('1Ki')).toBe(1024)
+      expect(parseNumberWithMagnitudeSuffix('5Mi')).toBe(5 * 1024 * 1024)
+      expect(parseNumberWithMagnitudeSuffix('100Gi')).toBe(100 * Math.pow(1024, 3))
+      expect(parseNumberWithMagnitudeSuffix('1Ti')).toBe(Math.pow(1024, 4))
+      expect(parseNumberWithMagnitudeSuffix('1Pi')).toBe(Math.pow(1024, 5))
+      expect(parseNumberWithMagnitudeSuffix('1Ei')).toBe(Math.pow(1024, 6))
+    })
+
+    it('should convert decimal exponents', () => {
+      expect(parseNumberWithMagnitudeSuffix('1e3')).toBe(1000)
+      expect(parseNumberWithMagnitudeSuffix('2E6')).toBe(2000000)
+      expect(parseNumberWithMagnitudeSuffix('5e-1')).toBe(0.5)
     })
 
     it('should handle decimal values correctly', () => {
       expect(parseNumberWithMagnitudeSuffix('1.5k')).toBe(1500)
       expect(parseNumberWithMagnitudeSuffix('2.5M')).toBe(2500000)
+      expect(parseNumberWithMagnitudeSuffix('.5Gi')).toBe(Math.pow(1024, 3) / 2)
     })
 
     it('should return the original number if no suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('500')).toBe(500)
+      expect(parseNumberWithMagnitudeSuffix(25)).toBe(25)
     })
 
     test('returns null for invalid input', () => {
       expect(parseNumberWithMagnitudeSuffix('x1')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('')).toBeNull()
     })
 
     test('returns null for invalid suffix', () => {
       expect(parseNumberWithMagnitudeSuffix('1x')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('1K')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('1b')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('1B')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('1t')).toBeNull()
+      expect(parseNumberWithMagnitudeSuffix('1gi')).toBeNull()
     })
   })
 

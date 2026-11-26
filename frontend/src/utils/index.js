@@ -800,22 +800,37 @@ export function omitKeysWithSuffix (obj, suffix) {
   return omit(obj, keys)
 }
 
-export function parseNumberWithMagnitudeSuffix (abbreviatedNumber) {
-  let number = abbreviatedNumber
-  let suffix = ''
-  if (/[kmbt]$/i.test(abbreviatedNumber)) {
-    suffix = abbreviatedNumber.slice(-1)
-    number = abbreviatedNumber.slice(0, -1)
+export function parseNumberWithMagnitudeSuffix (quantity) {
+  // Kubernetes quantity format, see k8s.io/apimachinery/pkg/api/resource/quantity.go
+  const [, number, suffix] = /^([+-]?(?:\d+\.?\d*|\.\d+))(.*)$/.exec(String(quantity).trim()) ?? []
+  const suffixFactors = {
+    '': 1,
+    n: 1e-9,
+    u: 1e-6,
+    m: 1e-3,
+    k: 1e3,
+    M: 1e6,
+    G: 1e9,
+    T: 1e12,
+    P: 1e15,
+    E: 1e18,
+    Ki: Math.pow(2, 10),
+    Mi: Math.pow(2, 20),
+    Gi: Math.pow(2, 30),
+    Ti: Math.pow(2, 40),
+    Pi: Math.pow(2, 50),
+    Ei: Math.pow(2, 60),
   }
-  number = Number(number)
-  if (isNaN(number)) {
-    logger.error(`Failed to parse ${abbreviatedNumber} because it doesn't follow the required format: a number optionally with a decimal, followed by an optional magnitude suffix ('k', 'm', 'b', 't').`)
+  let factor
+  if (Object.hasOwn(suffixFactors, suffix)) {
+    factor = suffixFactors[suffix] // eslint-disable-line security/detect-object-injection -- value of suffix is validated
+  } else if (/^[eE][+-]?\d+$/.test(suffix)) {
+    factor = Math.pow(10, Number(suffix.slice(1)))
+  } else {
+    logger.error(`Failed to parse ${quantity} because it is not a valid Kubernetes quantity: a number optionally with a decimal, followed by an optional binary suffix ('Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei'), decimal suffix ('n', 'u', 'm', 'k', 'M', 'G', 'T', 'P', 'E') or decimal exponent (e.g. 'e3').`)
     return null
   }
-
-  const suffixFactors = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }
-  const factor = suffixFactors[suffix?.toLowerCase()] ?? 1
-  return number * factor
+  return Number(number) * factor
 }
 
 export function normalizeVersion (version) {
