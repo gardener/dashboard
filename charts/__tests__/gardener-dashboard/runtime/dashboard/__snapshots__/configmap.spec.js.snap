@@ -472,7 +472,7 @@ exports[`gardener-dashboard > configmap > should render the template w/ defaults
       "nodesCIDR": "10.250.0.0/16",
     },
   },
-  "logFormat": "text",
+  "logFormat": "json",
   "logLevel": "debug",
   "maxRequestBodySize": "100kb",
   "oidc": {
