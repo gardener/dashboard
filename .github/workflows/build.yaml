@@ -20,7 +20,7 @@ permissions: {}
 
 jobs:
   prepare:
-    uses: gardener/cc-utils/.github/workflows/prepare.yaml@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
+    uses: gardener/cc-utils/.github/workflows/prepare.yaml@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     with:
       mode: ${{ inputs.mode }}
       version-commit-callback-action-path: .github/actions/prepare-release
@@ -38,7 +38,7 @@ jobs:
       id-token: write
     secrets:
       dockerhub-auth-token: ${{ secrets.dockerhub-auth-token }}
-    uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
+    uses: gardener/cc-utils/.github/workflows/oci-ocm.yaml@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org reusable workflow; intentionally allowed for now, planned to pin to a version in the future
     strategy:
       matrix:
         args:
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.3'
-      - uses: gardener/cc-utils/.github/actions/trusted-checkout@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
+      - uses: gardener/cc-utils/.github/actions/trusted-checkout@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
       - name: run-verify
         shell: bash
         run: |
@@ -96,7 +96,7 @@ jobs:
           .ci/verify |& tee /tmp/blobs.d/verify-log.txt
           tar czf /tmp/blobs.d/verify-log.tar.gz -C/tmp/blobs.d verify-log.txt
       - name: add-verify-results-to-component-descriptor
-        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         with:
           blobs-directory: /tmp/blobs.d
           ocm-resources: |
@@ -138,7 +138,7 @@ jobs:
             dashboard-frontend.sarif \
             dashboard-backend.sarif
       - name: add-sast-report-to-component-descriptor
-        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
+        uses: gardener/cc-utils/.github/actions/export-ocm-fragments@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         with:
           blobs-directory: /tmp/blobs.d
           ocm-resources: |

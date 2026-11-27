@@ -34,7 +34,7 @@ jobs:
       TAG: ${{ inputs.tag }}
     steps:
       - name: Create GitHub App token
-        uses: gardener/cc-utils/.github/actions/github-auth@bce63f62928717a11f610ec8022af9feb497d5df # v1 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
+        uses: gardener/cc-utils/.github/actions/github-auth@00522ef3e8504bc7be46394a239a390f112336f6 # 1.2883.0 # zizmor: ignore[unpinned-uses] -- same-org action; intentionally allowed for now, planned to pin to a version in the future
         id: app-token
         with:
           token-server: ${{ vars.FEDERATED_GITHUB_ACCESS_TOKEN_SERVER }}
